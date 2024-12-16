@@ -182,7 +182,7 @@ func buildTree(queue []iteratorQueue) error {
 			for it.Next() {
 				node.Type = StructNodeType
 				queue = append(queue, iteratorQueue{
-					fieldName: it.Label(),
+					fieldName: it.Selector().String(),
 					value:     it.Value(),
 					parent:    node,
 				})
@@ -259,7 +259,7 @@ func buildMapFromStructValue(v cue.Value) map[string]cue.Value {
 	result := make(map[string]cue.Value)
 	it, _ := v.Fields()
 	for it.Next() {
-		result[it.Label()] = it.Value()
+		result[it.Selector().String()] = it.Value()
 	}
 	return result
 }

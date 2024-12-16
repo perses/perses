@@ -11,33 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
+import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, useMemo, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 import { useUserList } from '../../model/user-client';
+import { FormEditorProps } from '../form-drawers';
 
-interface RoleBindingEditorFormProps {
-  initialRoleBinding: RoleBinding;
-  initialAction: Action;
+interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
   roleSuggestions: string[];
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: RoleBinding) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
 }
 
-export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
-  const { initialRoleBinding, initialAction, roleSuggestions, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function RoleBindingEditorForm({
+  initialValue,
+  action,
+  roleSuggestions,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleBindingEditorFormProps): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -45,7 +46,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   const form = useForm<RoleBinding>({
     resolver: zodResolver(roleBindingsEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialRoleBinding,
+    defaultValues: initialValue,
   });
 
   const processForm: SubmitHandler<RoleBinding> = (data: RoleBinding) => {
@@ -66,8 +67,8 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
-    if (JSON.stringify(initialRoleBinding) !== JSON.stringify(form.getValues())) {
+  function handleCancel(): void {
+    if (JSON.stringify(initialValue) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -85,46 +86,16 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} Role Binding</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">

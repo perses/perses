@@ -64,9 +64,15 @@ func TestDacBuildCMD(t *testing.T) {
 		},
 		{
 			Title:           "invalid CUE definition",
-			Args:            []string{"-f", "testdata/cue/invalid_dac.cue"},
+			Args:            []string{"-f", "testdata/invalid_cue/invalid_dac.cue"},
 			IsErrorExpected: true,
-			ExpectedMessage: strings.Replace("failed to build testdata/cue/invalid_dac.cue: success: reference \"fals\" not found:\n    .%stestdata%scue%sinvalid_dac.cue:16:10\n", "%s", separator, -1),
+			ExpectedMessage: strings.Replace("failed to build testdata/invalid_cue/invalid_dac.cue: success: reference \"fals\" not found:\n    .%stestdata%sinvalid_cue%sinvalid_dac.cue:16:10\n", "%s", separator, -1),
+		},
+		{
+			Title:           "invalid CUE definition in a folder",
+			Args:            []string{"-d", "testdata/invalid_cue"},
+			IsErrorExpected: true,
+			ExpectedMessage: `processing directory "testdata/invalid_cue" failed, see the message(s) above`,
 		},
 		{
 			Title:           "file not found",

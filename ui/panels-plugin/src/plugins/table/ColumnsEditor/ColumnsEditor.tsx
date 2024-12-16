@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Button, Stack } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
+import { handleMoveDown, handleMoveUp, useDragAndDropMonitor } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 import { ColumnEditorContainer } from './ColumnEditorContainer';
 
@@ -22,23 +23,19 @@ export interface ColumnsEditorProps {
   onChange: (columnOptions: ColumnSettings[]) => void;
 }
 
-export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) {
-  const [columns, setColumns] = useState<ColumnSettings[]>(columnSettings);
-
-  const [columnsCollapsed, setColumnsCollapsed] = useState(columns.map(() => true));
+export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps): ReactElement {
+  const [columnsCollapsed, setColumnsCollapsed] = useState(columnSettings.map(() => true));
 
   function handleColumnChange(index: number, column: ColumnSettings): void {
-    const updatedColumns = [...columns];
+    const updatedColumns = [...columnSettings];
     updatedColumns[index] = column;
-    setColumns(updatedColumns);
     onChange(updatedColumns);
   }
 
-  function handleAddColumnEditor(): void {
-    const columnName: string = `column_${Object.keys(columns).length}`;
-    const updatedColumns = [...columns];
+  function handleColumnAdd(): void {
+    const columnName: string = `column_${Object.keys(columnSettings).length}`;
+    const updatedColumns = [...columnSettings];
     updatedColumns.push({ name: columnName });
-    setColumns(updatedColumns);
     onChange(updatedColumns);
     setColumnsCollapsed((prev) => {
       prev.push(false);
@@ -47,9 +44,8 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
   }
 
   function handleColumnDelete(index: number): void {
-    const updatedColumns = [...columns];
+    const updatedColumns = [...columnSettings];
     updatedColumns.splice(index, 1);
-    setColumns(updatedColumns);
     onChange(updatedColumns);
     setColumnsCollapsed((prev) => {
       prev.splice(index, 1);
@@ -64,9 +60,15 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
     });
   }
 
+  useDragAndDropMonitor({
+    elements: columnSettings as unknown as Array<Record<string, unknown>>,
+    accessKey: 'name',
+    onChange: onChange as unknown as (elements: Array<Record<string, unknown>>) => void,
+  });
+
   return (
     <Stack spacing={1}>
-      {columns.map((column, i) => (
+      {columnSettings.map((column, i) => (
         <ColumnEditorContainer
           key={i}
           column={column}
@@ -74,10 +76,12 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
           onChange={(updatedColumn: ColumnSettings) => handleColumnChange(i, updatedColumn)}
           onDelete={() => handleColumnDelete(i)}
           onCollapse={(collapsed) => handleColumnCollapseExpand(i, collapsed)}
+          onMoveUp={() => onChange(handleMoveUp(column, columnSettings))}
+          onMoveDown={() => onChange(handleMoveDown(column, columnSettings))}
         />
       ))}
 
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddColumnEditor}>
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleColumnAdd}>
         Add Column Settings
       </Button>
     </Stack>

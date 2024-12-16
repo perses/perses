@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { ExploreToolbar } from '../ExploreToolbar';
 import { TracesExplorer } from './TracesExplorer';
 import { MetricsExplorer } from './MetricsExplorer';
@@ -22,7 +22,7 @@ export interface ExploreManagerProps {
   exploreTitleComponent?: ReactNode;
 }
 
-export function ExploreManager(props: ExploreManagerProps) {
+export function ExploreManager(props: ExploreManagerProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { explorer, setExplorer } = useExplorerManagerContext();
 

@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen, getAllByRole, within } from '@testing-library/react';
+import { render, screen, getAllByRole, within, RenderResult } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table } from './Table';
-import { TableColumnConfig, TableProps } from './model/table-model';
+import { TableCellConfigs, TableColumnConfig, TableProps } from './model/table-model';
 
 type MockTableData = {
   id: string;
@@ -34,6 +34,7 @@ type RenderTableOpts = Partial<
     | 'onRowSelectionChange'
     | 'rowSelection'
     | 'columns'
+    | 'cellConfigs'
     | 'rowSelectionVariant'
     | 'onSortingChange'
     | 'onRowMouseOver'
@@ -89,17 +90,19 @@ const renderTable = ({
   rowSelection = {},
   onRowSelectionChange = jest.fn(),
   columns = COLUMNS,
+  cellConfigs = {},
   rowSelectionVariant,
   sorting,
   onSortingChange = jest.fn(),
   onRowMouseOver = jest.fn(),
   onRowMouseOut = jest.fn(),
-}: RenderTableOpts = {}) => {
+}: RenderTableOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
       <Table
         data={data}
         columns={columns}
+        cellConfigs={cellConfigs}
         height={height}
         width={width}
         checkboxSelection={checkboxSelection}
@@ -119,7 +122,7 @@ const LARGE_TABLE_OVERALL_ROWS = 100;
 const LARGE_TABLE_VISIBLE_ROWS = 5;
 const LARGE_TABLE_DATA = generateMockTableData(LARGE_TABLE_OVERALL_ROWS);
 
-const renderLargeTable = () => {
+const renderLargeTable = (): void => {
   const height = LARGE_TABLE_VISIBLE_ROWS * MOCK_ITEM_HEIGHT;
 
   renderTable({ data: LARGE_TABLE_DATA, height });
@@ -129,7 +132,7 @@ const renderLargeTable = () => {
  * Helper for looking up table cells by the index of the row and column. Useful
  * for testing out keyboard navigations.
  */
-function getTableCellByIndex(row: number, column: number) {
+function getTableCellByIndex(row: number, column: number): HTMLElement {
   const rowEl = screen.getAllByRole('row')[row];
   if (!rowEl) {
     throw new Error(`Cannot find row at index: ${row}.`);
@@ -1135,4 +1138,29 @@ describe('table', () => {
 
   // See "keyboard interaction" story for tests for keyboard interactions,
   // which are difficult to test in a jsdom context with the virtualized table.
+
+  test('renders table cell based on `cellConfigs`', async () => {
+    const dataRows = 2;
+    const data = generateMockTableData(dataRows);
+    const cellConfigs: TableCellConfigs = {
+      '0_label': { text: 'test' },
+      '0_value': { backgroundColor: 'red' },
+      '0_color': { textColor: 'green' },
+    };
+    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, cellConfigs });
+
+    const cell1 = await screen.findByTestId('0_label');
+    expect(cell1).toHaveTextContent('test');
+
+    const cell2 = await screen.findByTestId('0_value');
+    expect(cell2.firstChild).toHaveStyle({ 'background-color': 'red' });
+
+    const cell3 = await screen.findByTestId('0_color');
+    expect(cell3.firstChild).toHaveStyle({ color: 'green' });
+
+    const cell4 = await screen.findByTestId('1_color');
+    expect(cell4).not.toHaveTextContent('test');
+    expect(cell4.firstChild).not.toHaveStyle({ 'background-color': 'red' });
+    expect(cell4.firstChild).not.toHaveStyle({ color: 'green' });
+  });
 });

@@ -23,19 +23,18 @@ import {
 } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
 import { sortedIndexBy } from 'lodash';
-import { TempoTraceQuerySpec } from '../../model/trace-query-model';
-import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/tempo-selectors';
+import { TempoTraceQuerySpec, TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model';
 import { TempoClient } from '../../model/tempo-client';
 import {
   SearchRequestParameters,
-  SearchTraceIDResponse,
-  SearchTraceQueryResponse,
+  QueryResponse,
+  SearchResponse,
   Resource as TempoResource,
   Span as TempoSpan,
   SpanEvent as TempoSpanEvent,
 } from '../../model/api-types';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
+export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
   return {
     start: Math.ceil(getUnixTime(start)),
@@ -58,24 +57,23 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     spec.datasource ?? defaultTempoDatasource
   );
 
-  const datasourceUrl = client?.options?.datasourceUrl;
-  if (datasourceUrl === undefined || datasourceUrl === null || datasourceUrl === '') {
-    console.error('TempoDatasource is undefined, null, or an empty string.');
-    return { searchResult: [] };
-  }
-
   const getQuery = (): SearchRequestParameters => {
-    // if time range not defined -- only return the query from the spec
-    if (context.absoluteTimeRange === undefined) {
-      return { q: spec.query };
-    }
-    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
-    const { start, end } = getUnixTimeRange(context?.absoluteTimeRange);
-    return {
+    const params: SearchRequestParameters = {
       q: spec.query,
-      start,
-      end,
     };
+
+    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
+    if (context.absoluteTimeRange) {
+      const { start, end } = getUnixTimeRange(context.absoluteTimeRange);
+      params.start = start;
+      params.end = end;
+    }
+
+    if (spec.limit) {
+      params.limit = spec.limit;
+    }
+
+    return params;
   };
 
   /**
@@ -84,7 +82,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    * otherwise, execute a TraceQL query
    */
   if (isValidTraceId(spec.query)) {
-    const response = await client.searchTraceID(spec.query, { datasourceUrl });
+    const response = await client.query({ traceId: spec.query });
     return {
       trace: parseTraceResponse(response),
       metadata: {
@@ -92,7 +90,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
       },
     };
   } else {
-    const response = await client.searchTraceQueryFallback(getQuery(), { datasourceUrl });
+    const response = await client.searchWithFallback(getQuery());
     return {
       searchResult: parseSearchResponse(response),
       metadata: {
@@ -129,7 +127,7 @@ function parseEvent(event: TempoSpanEvent): SpanEvent {
  * parseSpan parses the Span API type to the internal representation
  * i.e. convert strings to numbers etc.
  */
-function parseSpan(span: TempoSpan) {
+function parseSpan(span: TempoSpan): Omit<Span, 'resource' | 'scope' | 'childSpans'> {
   return {
     traceId: span.traceId,
     spanId: span.spanId,
@@ -148,7 +146,7 @@ function parseSpan(span: TempoSpan) {
  * parseTraceResponse builds a tree of spans from the Tempo API response
  * time complexity: O(2n)
  */
-function parseTraceResponse(response: SearchTraceIDResponse): Trace {
+function parseTraceResponse(response: QueryResponse): Trace {
   // first pass: build lookup table <spanId, Span>
   const lookup = new Map<string, Span>();
   for (const batch of response.batches) {
@@ -196,7 +194,7 @@ function parseTraceResponse(response: SearchTraceIDResponse): Trace {
   };
 }
 
-function parseSearchResponse(response: SearchTraceQueryResponse): TraceSearchResult[] {
+function parseSearchResponse(response: SearchResponse): TraceSearchResult[] {
   return response.traces.map((trace) => ({
     startTimeUnixMs: parseInt(trace.startTimeUnixNano) * 1e-6, // convert to millisecond for eChart time format,
     durationMs: trace.durationMs ?? 0, // Tempo API doesn't return 0 values

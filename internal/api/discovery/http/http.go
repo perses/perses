@@ -20,15 +20,16 @@ import (
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/discovery/service"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
-func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
-	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
+func NewDiscovery(Name string, refreshInterval common.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
+	client, err := clientConfig.NewRESTClient(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err
 	}

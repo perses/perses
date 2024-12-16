@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { RoleResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'roles';
 
-export function createRole(entity: RoleResource) {
+export function createRole(entity: RoleResource): Promise<RoleResource> {
   const project = entity.metadata.project;
   const url = buildURL({ resource, project });
   return fetchJson<RoleResource>(url, {
@@ -30,7 +30,7 @@ export function createRole(entity: RoleResource) {
   });
 }
 
-function getRole(name: string, project: string) {
+function getRole(name: string, project: string): Promise<RoleResource> {
   const url = buildURL({ resource, project, name });
   return fetchJson<RoleResource>(url, {
     method: HTTPMethodGET,
@@ -38,7 +38,7 @@ function getRole(name: string, project: string) {
   });
 }
 
-function getRoles(project?: string) {
+function getRoles(project?: string): Promise<RoleResource[]> {
   const url = buildURL({ resource, project });
   return fetchJson<RoleResource[]>(url, {
     method: HTTPMethodGET,
@@ -46,7 +46,7 @@ function getRoles(project?: string) {
   });
 }
 
-export function updateRole(entity: RoleResource) {
+export function updateRole(entity: RoleResource): Promise<RoleResource> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -57,7 +57,7 @@ export function updateRole(entity: RoleResource) {
   });
 }
 
-export function deleteRole(entity: RoleResource) {
+export function deleteRole(entity: RoleResource): Promise<Response> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -71,7 +71,7 @@ export function deleteRole(entity: RoleResource) {
  * Used to get a role from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRole(name: string, project: string) {
+export function useRole(name: string, project: string): UseQueryResult<RoleResource> {
   return useQuery<RoleResource, Error>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
@@ -84,7 +84,7 @@ export function useRole(name: string, project: string) {
  * Used to get roles from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleList(project?: string) {
+export function useRoleList(project?: string): UseQueryResult<RoleResource[]> {
   return useQuery<RoleResource[], Error>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
@@ -100,7 +100,7 @@ export function useRoleList(project?: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateRoleMutation(project: string) {
+export function useCreateRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
@@ -122,7 +122,7 @@ export function useCreateRoleMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateRoleMutation(project: string) {
+export function useUpdateRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
   return useMutation<RoleResource, Error, RoleResource>({
@@ -146,7 +146,7 @@ export function useUpdateRoleMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteRoleMutation(project: string) {
+export function useDeleteRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 

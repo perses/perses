@@ -18,7 +18,7 @@ import { StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
 
 describe('StatChartOptionsEditorSettings', () => {
-  const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()) => {
+  const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <StatChartOptionsEditorSettings value={value} onChange={onChange} />

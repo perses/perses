@@ -20,7 +20,7 @@ import {
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import {
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
@@ -40,7 +40,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
 /**
  * The View for displaying a Dashboard, along with the UI for selecting variable values.
  */
-export function ViewDashboard(props: ViewDashboardProps) {
+export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const {
     dashboardResource,
     datasourceApi,

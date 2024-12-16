@@ -18,11 +18,11 @@ import {
   EphemeralDashboardInfo,
   getResourceExtendedDisplayName,
 } from '@perses-dev/core';
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useSnackbar } from '@perses-dev/components';
@@ -50,7 +50,7 @@ export interface DashboardListProperties extends ListProperties {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DashboardList(props: DashboardListProperties) {
+export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
   const { dashboardList, hideToolbar, isLoading, initialState } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -220,32 +220,30 @@ export function DashboardList(props: DashboardListProperties) {
         hideToolbar={hideToolbar}
         isLoading={isLoading}
       />
-      <Box>
-        {targetedDashboard && (
-          <>
-            <RenameDashboardDialog
-              open={isRenameDashboardDialogStateOpened}
-              dashboard={targetedDashboard}
-              onClose={() => setRenameDashboardDialogStateOpened(false)}
-            />
-            <CreateDashboardDialog
-              open={isDuplicateDashboardDialogStateOpened}
-              projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
-              hideProjectSelect={true}
-              mode="duplicate"
-              name={getResourceDisplayName(targetedDashboard)}
-              onSuccess={handleDashboardDuplication}
-              onClose={() => setDuplicateDashboardDialogStateOpened(false)}
-            />
-            <DeleteResourceDialog
-              open={isDeleteDashboardDialogStateOpened}
-              resource={targetedDashboard}
-              onSubmit={(v) => handleDashboardDelete(v).then(() => setDeleteDashboardDialogStateOpened(false))}
-              onClose={() => setDeleteDashboardDialogStateOpened(false)}
-            />
-          </>
-        )}
-      </Box>
+      {targetedDashboard && (
+        <>
+          <RenameDashboardDialog
+            open={isRenameDashboardDialogStateOpened}
+            dashboard={targetedDashboard}
+            onClose={() => setRenameDashboardDialogStateOpened(false)}
+          />
+          <CreateDashboardDialog
+            open={isDuplicateDashboardDialogStateOpened}
+            projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
+            hideProjectSelect={true}
+            mode="duplicate"
+            name={getResourceDisplayName(targetedDashboard)}
+            onSuccess={handleDashboardDuplication}
+            onClose={() => setDuplicateDashboardDialogStateOpened(false)}
+          />
+          <DeleteResourceDialog
+            open={isDeleteDashboardDialogStateOpened}
+            resource={targetedDashboard}
+            onSubmit={(v) => handleDashboardDelete(v).then(() => setDeleteDashboardDialogStateOpened(false))}
+            onClose={() => setDeleteDashboardDialogStateOpened(false)}
+          />
+        </>
+      )}
     </Stack>
   );
 }

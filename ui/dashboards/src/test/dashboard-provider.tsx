@@ -30,11 +30,14 @@ export function getTestDashboard(): DashboardResource {
  * its state in tests. Be sure to render the DashboardProviderSpy component that's returned in the component test
  * underneath the DashboardProvider.
  */
-export function createDashboardProviderSpy() {
+export function createDashboardProviderSpy(): {
+  DashboardProviderSpy: () => null;
+  store: { value?: StoreApi<DashboardStoreState> };
+} {
   const store: { value?: StoreApi<DashboardStoreState> } = {};
 
   // Spy component just captures the store value so it can be inspected in tests
-  function DashboardProviderSpy() {
+  function DashboardProviderSpy(): null {
     const ctx = useContext(DashboardContext);
     store.value = ctx;
     return null;

@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/* TODO: @Gladorme check social button types */
+/* eslint @typescript-eslint/explicit-function-return-type: 0 */
+/* typescript-eslint/explicit-module-boundary-types: 0 */
+
 import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import {
   AmazonLoginButton,
   AppleLoginButton,
@@ -115,7 +119,7 @@ function computeSocialButtonFromURL(theme: Theme, url: string) {
   return SOCIAL_BUTTONS_MAPPING[''](theme);
 }
 
-export function SignWrapper(props: { children: ReactNode }) {
+export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const { isDarkModeEnabled } = useDarkMode();
   const isLaptopSize = useIsLaptopSize();
   const config = useConfigContext();

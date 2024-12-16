@@ -14,7 +14,7 @@
 import { TitleComponentOption } from 'echarts';
 import { StatChart, StatChartData, useChartsTheme, GraphSeries, LoadingOverlay } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
@@ -25,7 +25,7 @@ const SPACING = 2;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
-export function StatChartPanel(props: StatChartPanelProps) {
+export function StatChartPanel(props: StatChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, format, sparkline, thresholds, valueFontSize: valueFontSize },
     contentDimensions,

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
-import { useEffect, useRef } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
@@ -62,6 +62,8 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
    */
   focusState?: 'trigger-focus' | 'focus-next' | 'none';
   onFocusTrigger?: (e: React.MouseEvent<HTMLTableCellElement> | React.KeyboardEvent<HTMLTableCellElement>) => void;
+  color?: string;
+  backgroundColor?: string;
 }
 
 export function TableCell({
@@ -75,8 +77,10 @@ export function TableCell({
   isLastColumn,
   description,
   align,
+  color,
+  backgroundColor,
   ...otherProps
-}: TableCellProps) {
+}: TableCellProps): ReactElement {
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
@@ -121,15 +125,28 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
+      style={{ width: width }}
       sx={{
-        width: width,
-        borderBottom: isHeader
-          ? (theme) => `solid 1px ${theme.palette.grey[100]}`
-          : `solid 1px ${theme.palette.grey[50]}`,
+        position: 'relative',
+        borderBottom: isHeader ? `solid 1px ${theme.palette.grey[100]}` : `solid 1px ${theme.palette.grey[50]}`,
+        '&:hover #original-cell': {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          width: 'fit-content',
+          minWidth: '100%',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          backgroundColor: `${backgroundColor ?? theme.palette.background.default} !important`,
+          outline: `solid 1px ${theme.palette.info.main}`,
+          outlineOffset: '-1px',
+        },
       }}
       ref={elRef}
     >
       <Box
+        id="original-cell"
         sx={{
           ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
           position: 'relative',
@@ -144,6 +161,10 @@ export function TableCell({
           // that the `TableSortLabel` uses to determine the location of the icon
           // in headers.
           flexDirection: 'inherit',
+        }}
+        style={{
+          backgroundColor: backgroundColor ?? 'inherit',
+          color: color ?? 'inherit',
         }}
         title={description}
         aria-label={description}

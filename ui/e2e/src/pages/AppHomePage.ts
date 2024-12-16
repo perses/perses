@@ -25,7 +25,7 @@ export class AppHomePage {
     this.page = page;
   }
 
-  async goto() {
+  async goto(): Promise<void> {
     await this.page.goto('/');
   }
 
@@ -34,7 +34,7 @@ export class AppHomePage {
    * @param projectName - Name of the project.
    * @param dashboardName - Name of the dashboard.
    */
-  async navigateToDashboard(projectName: string, dashboardName: string) {
+  async navigateToDashboard(projectName: string, dashboardName: string): Promise<void> {
     await this.goto();
 
     await this.showDashboardList(projectName);
@@ -47,7 +47,7 @@ export class AppHomePage {
    * Navigates to the specified project using the home page UI.
    * @param projectName - Name of the project.
    */
-  async navigateToProject(projectName: string) {
+  async navigateToProject(projectName: string): Promise<void> {
     await this.goto();
 
     const navigationPromise = this.page.waitForNavigation();
@@ -55,7 +55,7 @@ export class AppHomePage {
     await navigationPromise;
   }
 
-  async showDashboardList(projectName: string) {
+  async showDashboardList(projectName: string): Promise<void> {
     const projectButton = this.page.getByRole('button', {
       expanded: false,
       name: projectName,
@@ -63,33 +63,33 @@ export class AppHomePage {
     await projectButton.click();
   }
 
-  async clickProjectLink(projectName: string) {
+  async clickProjectLink(projectName: string): Promise<void> {
     const projectLink = this.page.getByRole('button', { name: projectName }).getByRole('link', { name: projectName });
     await projectLink.click();
   }
 
-  async clickDashboardItem(projectName: string, dashboardName: string) {
+  async clickDashboardItem(projectName: string, dashboardName: string): Promise<void> {
     const dashboardButton = this.page
       .locator(`#${projectName}-dashboard-list`)
       .getByText(new RegExp(`^${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
-  async clickRecentDashboardItem(projectName: string, dashboardName: string) {
+  async clickRecentDashboardItem(projectName: string, dashboardName: string): Promise<void> {
     const dashboardButton = this.page
       .locator(`#${recentDashboardListId}`)
       .getByRole('row', { name: `${projectName} ${dashboardName}` });
     await dashboardButton.click();
   }
 
-  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
+  async clickImportantDashboardItem(projectName: string, dashboardName: string): Promise<void> {
     const dashboardButton = this.page
       .getByTestId('important-dashboards-mosaic')
       .getByTestId(new RegExp(`^dashboard-card-${projectName}-${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
-  async searchDashboardOrProject(search: string) {
+  async searchDashboardOrProject(search: string): Promise<void> {
     await this.page.getByLabel('Search a Project or a Dashboard').fill(search);
   }
 }

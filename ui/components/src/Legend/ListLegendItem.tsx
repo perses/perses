@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { forwardRef, useState } from 'react';
-import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
+import { forwardRef, memo, MouseEvent, MouseEventHandler, ReactElement, useState } from 'react';
+import { Box, ListItemText, ListItemProps, ListItemButton } from '@mui/material';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 import { LegendItem } from './legend-model';
@@ -40,10 +40,10 @@ export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick
    */
   isVisuallySelected?: boolean;
 
-  onClick: (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => void;
+  onClick: (e: MouseEvent<HTMLElement>, seriesId: string) => void;
 
-  onMouseOver?: (e: React.MouseEvent, opts: LegendItemEventOpts) => void;
-  onMouseOut?: (e: React.MouseEvent, opts: LegendItemEventOpts) => void;
+  onMouseOver?: (e: MouseEvent, opts: LegendItemEventOpts) => void;
+  onMouseOut?: (e: MouseEvent, opts: LegendItemEventOpts) => void;
 
   /**
    * When `true`, will keep labels to a single line with overflow ellipsized. The
@@ -57,30 +57,29 @@ export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
   { item, sx, truncateLabel, onClick, isVisuallySelected, onMouseOver, onMouseOut, index, ...others },
   ref
-) {
+): ReactElement {
   const [noWrap, setNoWrap] = useState(truncateLabel);
 
-  function handleTextMouseOver() {
+  function handleTextMouseOver(): void {
     if (truncateLabel) {
       setNoWrap(false);
     }
   }
 
-  function handleTextMouseOut() {
+  function handleTextMouseOut(): void {
     if (truncateLabel) {
       setNoWrap(true);
     }
   }
 
-  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e) => {
+  const handleClick: MouseEventHandler<HTMLDivElement> = (e) => {
     onClick(e, item.id);
     item.onClick?.(e);
   };
 
   return (
-    <ListItem
+    <ListItemButton
       {...others}
-      component="div"
       role="listitem"
       sx={combineSx(
         {
@@ -90,10 +89,9 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
         sx
       )}
       dense={true}
-      key={item.id}
       onClick={handleClick}
-      onMouseOver={(e: React.MouseEvent) => onMouseOver?.(e, { id: item.id, index })}
-      onMouseOut={(e: React.MouseEvent) => onMouseOut?.(e, { id: item.id, index })}
+      onMouseOver={(e: MouseEvent) => onMouseOver?.(e, { id: item.id, index })}
+      onMouseOut={(e: MouseEvent) => onMouseOut?.(e, { id: item.id, index })}
       selected={isVisuallySelected}
       ref={ref}
     >
@@ -106,8 +104,8 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
         onMouseOver={handleTextMouseOver}
         onMouseOut={handleTextMouseOut}
       ></ListItemText>
-    </ListItem>
+    </ListItemButton>
   );
 });
 
-export const ListLegendItem = React.memo(ListLegendItemBase);
+export const ListLegendItem = memo(ListLegendItemBase);

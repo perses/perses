@@ -14,10 +14,11 @@
 import { useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { LoadingOverlay, useChartsTheme } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { TimeSeriesTableProps } from './TimeSeriesTable';
 import DataTable from './DataTable';
 
-export function TimeSeriesTablePanel(props: TimeSeriesTableProps) {
+export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement {
   const { contentDimensions } = props;
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');

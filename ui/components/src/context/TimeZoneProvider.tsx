@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, ReactElement, useContext } from 'react';
 import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
 export const TimeZoneContext = createContext<string | undefined>(undefined);
@@ -21,20 +21,24 @@ export interface TimeZoneProviderProps {
   children?: React.ReactNode;
 }
 
-export function TimeZoneProvider(props: TimeZoneProviderProps) {
+export function TimeZoneProvider(props: TimeZoneProviderProps): ReactElement {
   const { children, timeZone } = props;
   return <TimeZoneContext.Provider value={timeZone}>{children}</TimeZoneContext.Provider>;
 }
 
-export function useTimeZone() {
+export function useTimeZone(): {
+  timeZone: string;
+  formatWithUserTimeZone: (date: Date, formatString: string) => string;
+  dateFormatOptionsWithUserTimeZone: (dateFormatOptions: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions;
+} {
   const timeZone = useContext(TimeZoneContext);
   return {
     // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
     timeZone: timeZone ?? 'local',
-    formatWithUserTimeZone(date: Date, formatString: string) {
+    formatWithUserTimeZone(date: Date, formatString: string): string {
       return formatWithTimeZone(date, formatString, timeZone);
     },
-    dateFormatOptionsWithUserTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions) {
+    dateFormatOptionsWithUserTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
       return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZone);
     },
   };

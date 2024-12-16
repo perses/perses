@@ -24,7 +24,7 @@ type MemoRef<T> = {
  * a dependency changes. Uses strict equality (===) for comparison. (React's
  * useMemo does not offer this guarantee, it's only a performance optimization).
  */
-export function useMemoized<T>(factory: () => T, deps: DependencyList) {
+export function useMemoized<T>(factory: () => T, deps: DependencyList): T {
   const ref = useRef<MemoRef<T>>();
 
   let areEqual = true;

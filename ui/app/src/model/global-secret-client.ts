@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { GlobalSecretResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 const resource = 'globalsecrets';
 
-export function createGlobalSecret(entity: GlobalSecretResource) {
+export function createGlobalSecret(entity: GlobalSecretResource): Promise<GlobalSecretResource> {
   const url = buildURL({ resource });
   return fetchJson<GlobalSecretResource>(url, {
     method: HTTPMethodPOST,
@@ -29,7 +29,7 @@ export function createGlobalSecret(entity: GlobalSecretResource) {
   });
 }
 
-function getGlobalSecret(name: string) {
+function getGlobalSecret(name: string): Promise<GlobalSecretResource> {
   const url = buildURL({ resource, name });
   return fetchJson<GlobalSecretResource>(url, {
     method: HTTPMethodGET,
@@ -37,7 +37,7 @@ function getGlobalSecret(name: string) {
   });
 }
 
-function getGlobalSecrets() {
+function getGlobalSecrets(): Promise<GlobalSecretResource[]> {
   const url = buildURL({ resource });
   return fetchJson<GlobalSecretResource[]>(url, {
     method: HTTPMethodGET,
@@ -45,7 +45,7 @@ function getGlobalSecrets() {
   });
 }
 
-export function updateGlobalSecret(entity: GlobalSecretResource) {
+export function updateGlobalSecret(entity: GlobalSecretResource): Promise<GlobalSecretResource> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetchJson<GlobalSecretResource>(url, {
@@ -55,7 +55,7 @@ export function updateGlobalSecret(entity: GlobalSecretResource) {
   });
 }
 
-export function deleteGlobalSecret(entity: GlobalSecretResource) {
+export function deleteGlobalSecret(entity: GlobalSecretResource): Promise<Response> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetch(url, {
@@ -68,7 +68,7 @@ export function deleteGlobalSecret(entity: GlobalSecretResource) {
  * Used to get a global secret from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalSecret(name: string) {
+export function useGlobalSecret(name: string): UseQueryResult<GlobalSecretResource> {
   return useQuery<GlobalSecretResource, Error>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
@@ -81,7 +81,7 @@ export function useGlobalSecret(name: string) {
  * Used to get global secrets from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalSecretList() {
+export function useGlobalSecretList(): UseQueryResult<GlobalSecretResource[]> {
   return useQuery<GlobalSecretResource[], Error>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
@@ -94,7 +94,7 @@ export function useGlobalSecretList() {
  * Returns a mutation that can be used to create a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateGlobalSecretMutation() {
+export function useCreateGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
@@ -113,7 +113,7 @@ export function useCreateGlobalSecretMutation() {
  * Returns a mutation that can be used to update a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateGlobalSecretMutation() {
+export function useUpdateGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
@@ -135,7 +135,7 @@ export function useUpdateGlobalSecretMutation() {
  * Returns a mutation that can be used to delete a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useDeleteGlobalSecretMutation() {
+export function useDeleteGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 

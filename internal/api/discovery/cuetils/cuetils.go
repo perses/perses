@@ -41,7 +41,7 @@ func NewFromSchema(v cue.Value) ([]*Node, error) {
 	}
 	for it.Next() {
 		queue = append(queue, iteratorQueue{
-			fieldName: it.Label(),
+			fieldName: it.Selector().String(),
 			value:     it.Value(),
 			parent:    root,
 		})

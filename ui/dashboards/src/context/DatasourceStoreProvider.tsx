@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -54,20 +54,16 @@ export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => 
  */
 export interface DatasourceApi {
   buildProxyUrl?: BuildDatasourceProxyUrlFunc;
-
   getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
-
   getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
-
   listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
-
   listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
 }
 
 /**
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
-export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
+export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): ReactElement {
   const { projectName, datasourceApi, onCreate, children } = props;
   const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
@@ -307,7 +303,13 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
   const groupIndices: Record<string, number> = {};
   let currentGroupIndex = 1; // 0 is the default group, always there as it contains at least the first item.
 
-  const addItem = ({ spec, selectorName, selectorGroup: group, editLink, saved }: AddDatasouceSelectItemParams) => {
+  const addItem = ({
+    spec,
+    selectorName,
+    selectorGroup: group,
+    editLink,
+    saved,
+  }: AddDatasouceSelectItemParams): void => {
     group = group ?? '';
 
     // Ensure the default group is always present as soon as an item is added.

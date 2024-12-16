@@ -13,22 +13,26 @@
 
 import { Virtuoso, ListRange } from 'react-virtuoso';
 import { Span } from '@perses-dev/core';
-import { useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { GanttTrace } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
 import { ResizableDivider } from './ResizableDivider';
 
 export interface GanttTableProps {
-  rootSpan: Span;
+  options: TracingGanttChartOptions;
+  trace: GanttTrace;
   viewport: Viewport;
+  selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
 }
 
-export function GanttTable(props: GanttTableProps) {
-  const { rootSpan, viewport, onSpanClick } = props;
+export function GanttTable(props: GanttTableProps): ReactElement {
+  const { options, trace, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -36,14 +40,14 @@ export function GanttTable(props: GanttTableProps) {
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
-    treeToRows(rows, rootSpan, collapsedSpans);
+    treeToRows(rows, trace.rootSpan, collapsedSpans);
     return rows;
-  }, [rootSpan, collapsedSpans]);
+  }, [trace.rootSpan, collapsedSpans]);
 
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
   // update currently visible spans
-  function handleRangeChange({ startIndex, endIndex }: ListRange) {
+  function handleRangeChange({ startIndex, endIndex }: ListRange): void {
     const visibleSpans: string[] = [];
     for (let i = startIndex; i <= endIndex; i++) {
       visibleSpans.push(rows[i]!.spanId);
@@ -62,13 +66,15 @@ export function GanttTable(props: GanttTableProps) {
         borderRadius: `${theme.shape.borderRadius}px`,
       }}
     >
-      <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
+      <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}
         itemContent={(_, span) => (
           <GanttTableRow
+            options={options}
             span={span}
             viewport={viewport}
+            selected={span === selectedSpan}
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}
@@ -84,7 +90,7 @@ export function GanttTable(props: GanttTableProps) {
  * treeToRows recursively transforms the span tree to a list of rows and
  * hides collapsed child spans.
  */
-function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
+function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]): void {
   rows.push(span);
   if (!collapsedSpans.includes(span.spanId)) {
     for (const child of span.childSpans) {

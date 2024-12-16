@@ -12,16 +12,36 @@
 // limitations under the License.
 
 import { useCallback, useMemo } from 'react';
-import { PanelGroupId } from '@perses-dev/core';
+import {
+  DashboardResource,
+  DurationString,
+  EphemeralDashboardResource,
+  PanelDefinition,
+  PanelGroupId,
+} from '@perses-dev/core';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupItemLayout } from './panel-group-slice';
+import { PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from './panel-group-slice';
+import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
+import { PanelGroupEditor } from './panel-group-editor-slice';
+import { PanelEditorState } from './panel-editor-slice';
+import { DeletePanelDialogState } from './delete-panel-slice';
+import { SaveChangesConfirmationDialogState } from './save-changes-dialog-slice';
+import { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
+import { EditJsonDialogState } from './edit-json-dialog-slice';
 
-const selectEditMode = ({ isEditMode, setEditMode }: DashboardStoreState) => ({ isEditMode, setEditMode });
-export function useEditMode() {
+const selectEditMode: ({ isEditMode, setEditMode }: DashboardStoreState) => {
+  setEditMode: (isEditMode: boolean) => void;
+  isEditMode: boolean;
+} = ({ isEditMode, setEditMode }: DashboardStoreState) => ({ isEditMode, setEditMode });
+export function useEditMode(): { setEditMode: (isEditMode: boolean) => void; isEditMode: boolean } {
   return useDashboardStore(selectEditMode);
 }
 
-const selectDashboardActions = ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => ({
+const selectDashboardActions: ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => {
+  openAddPanelGroup: () => void;
+  openAddPanel: (panelGroupId?: PanelGroupId) => void;
+  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+} = ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => ({
   setDashboard,
   openAddPanelGroup,
   openAddPanel,
@@ -29,7 +49,11 @@ const selectDashboardActions = ({ setDashboard, openAddPanelGroup, openAddPanel 
 /**
  * Returns actions that can be performed on the current dashboard.
  */
-export function useDashboardActions() {
+export function useDashboardActions(): {
+  openAddPanelGroup: () => void;
+  openAddPanel: () => void;
+  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+} {
   const { setDashboard, openAddPanelGroup, openAddPanel } = useDashboardStore(selectDashboardActions);
   return {
     setDashboard,
@@ -38,19 +62,21 @@ export function useDashboardActions() {
   };
 }
 
-const selectPanelGroupOrder = (state: DashboardStoreState) => state.panelGroupOrder;
+const selectPanelGroupOrder = (state: DashboardStoreState): number[] => state.panelGroupOrder;
 /**
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
  */
-export function usePanelGroupIds() {
+export function usePanelGroupIds(): number[] {
   return useDashboardStore(selectPanelGroupOrder);
 }
 
-const selectPanelGroups = (state: DashboardStoreState) => state.panelGroups;
+const selectPanelGroups: (state: DashboardStoreState) => Record<number, PanelGroupDefinition> = (
+  state: DashboardStoreState
+) => state.panelGroups;
 /**
  * Returns an array of PanelGroupDefinitions in the order they appear in the dashboard.
  */
-export function useListPanelGroups() {
+export function useListPanelGroups(): PanelGroupDefinition[] {
   const panelGroupIds = usePanelGroupIds();
   const panelGroups = useDashboardStore(selectPanelGroups);
   return useMemo(() => {
@@ -67,7 +93,7 @@ export function useListPanelGroups() {
 /**
  * Gets a specific panel group by its id. Throws if the panel group does not exist.
  */
-export function usePanelGroup(panelGroupId: PanelGroupId) {
+export function usePanelGroup(panelGroupId: PanelGroupId): PanelGroupDefinition {
   const panelGroup = useDashboardStore(useCallback((state) => state.panelGroups[panelGroupId], [panelGroupId]));
   if (panelGroup === undefined) {
     throw new Error(`Panel group with Id ${panelGroupId} was not found`);
@@ -75,12 +101,17 @@ export function usePanelGroup(panelGroupId: PanelGroupId) {
   return panelGroup;
 }
 
-const selectPanelGroupActions = ({
+const selectPanelGroupActions: ({
   openEditPanelGroup,
   deletePanelGroup,
   openAddPanel,
   updatePanelGroupLayouts,
-}: DashboardStoreState) => ({
+}: DashboardStoreState) => {
+  updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
+  openEditPanelGroup: (panelGroupId: PanelGroupId) => void;
+  openAddPanel: (panelGroupId?: PanelGroupId) => void;
+  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
+} = ({ openEditPanelGroup, deletePanelGroup, openAddPanel, updatePanelGroupLayouts }: DashboardStoreState) => ({
   openEditPanelGroup,
   deletePanelGroup,
   openAddPanel,
@@ -89,7 +120,14 @@ const selectPanelGroupActions = ({
 /**
  * Returns actions that can be performed on the given panel group.
  */
-export function usePanelGroupActions(panelGroupId: PanelGroupId) {
+export function usePanelGroupActions(panelGroupId: PanelGroupId): {
+  updatePanelGroupLayouts: (itemLayouts: PanelGroupItemLayout[]) => void;
+  openEditPanelGroup: () => void;
+  openAddPanel: () => void;
+  moveDown: (() => void) | undefined;
+  deletePanelGroup: () => void;
+  moveUp: (() => void) | undefined;
+} {
   const { moveUp, moveDown } = useMovePanelGroup(panelGroupId);
   const { openEditPanelGroup, deletePanelGroup, openAddPanel, updatePanelGroupLayouts } =
     useDashboardStore(selectPanelGroupActions);
@@ -105,13 +143,19 @@ export function usePanelGroupActions(panelGroupId: PanelGroupId) {
   };
 }
 
-const selectSwapPanelGroups = (state: DashboardStoreState) => state.swapPanelGroups;
-const selectPanelGroupsLength = (state: DashboardStoreState) => state.panelGroupOrder.length;
+const selectSwapPanelGroups: (state: DashboardStoreState) => (xIndex: number, yIndex: number) => void = (
+  state: DashboardStoreState
+) => state.swapPanelGroups;
+const selectPanelGroupsLength: (state: DashboardStoreState) => number = (state: DashboardStoreState) =>
+  state.panelGroupOrder.length;
 /**
  * Returns functions for moving a panel group up or down. A function will be undefined if the panel group can't be
  * moved in that direction.
  */
-function useMovePanelGroup(panelGroupId: PanelGroupId) {
+function useMovePanelGroup(panelGroupId: PanelGroupId): {
+  moveDown: (() => void) | undefined;
+  moveUp: (() => void) | undefined;
+} {
   const currentIndex = useDashboardStore(
     useCallback((store) => store.panelGroupOrder.findIndex((id) => id === panelGroupId), [panelGroupId])
   );
@@ -122,23 +166,35 @@ function useMovePanelGroup(panelGroupId: PanelGroupId) {
     throw new Error(`Could not find panel group with Id ${panelGroupId} in order array`);
   }
 
-  const moveUp = () => swapPanelGroups(currentIndex, currentIndex - 1);
-  const moveDown = () => swapPanelGroups(currentIndex, currentIndex + 1);
+  const moveUp: () => void = () => swapPanelGroups(currentIndex, currentIndex - 1);
+  const moveDown: () => void = () => swapPanelGroups(currentIndex, currentIndex + 1);
   return {
     moveUp: currentIndex > 0 ? moveUp : undefined,
     moveDown: currentIndex < panelGroupsLength - 1 ? moveDown : undefined,
   };
 }
 
-const selectPanelGroupEditor = (state: DashboardStoreState) => state.panelGroupEditor;
+const selectPanelGroupEditor: (state: DashboardStoreState) => PanelGroupEditor | undefined = (
+  state: DashboardStoreState
+) => state.panelGroupEditor;
 /**
  * Gets the Panel Group editor state.
  */
-export function usePanelGroupEditor() {
+export function usePanelGroupEditor(): PanelGroupEditor | undefined {
   return useDashboardStore(selectPanelGroupEditor);
 }
 
-const selectDeletePanelGroupDialog = ({
+const selectDeletePanelGroupDialog: ({
+  deletePanelGroupDialog,
+  openDeletePanelGroupDialog,
+  closeDeletePanelGroupDialog,
+  deletePanelGroup,
+}: DashboardStoreState) => {
+  deletePanelGroupDialog: DeletePanelGroupDialogState | undefined;
+  closeDeletePanelGroupDialog: () => void;
+  openDeletePanelGroupDialog: (panelGroupId: PanelGroupId) => void;
+  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
+} = ({
   deletePanelGroupDialog,
   openDeletePanelGroupDialog,
   closeDeletePanelGroupDialog,
@@ -152,7 +208,12 @@ const selectDeletePanelGroupDialog = ({
 /**
  * Gets the Delete Panel Group dialog state.
  */
-export function useDeletePanelGroupDialog() {
+export function useDeletePanelGroupDialog(): {
+  deletePanelGroupDialog: DeletePanelGroupDialogState | undefined;
+  closeDeletePanelGroupDialog: () => void;
+  openDeletePanelGroupDialog: (panelGroupId: PanelGroupId) => void;
+  deletePanelGroup: (panelGroupId: PanelGroupId) => void;
+} {
   const { deletePanelGroupDialog, openDeletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } =
     useDashboardStore(selectDeletePanelGroupDialog);
   return {
@@ -166,7 +227,7 @@ export function useDeletePanelGroupDialog() {
 /**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
-export function usePanel(panelGroupItemId: PanelGroupItemId) {
+export function usePanel(panelGroupItemId: PanelGroupItemId): PanelDefinition {
   const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
   const panel = useDashboardStore(
     useCallback(
@@ -185,12 +246,17 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
-const selectPanelActions = ({
+const selectPanelActions: ({
   openEditPanel,
   openDeletePanelDialog,
   duplicatePanel,
   setViewPanel,
-}: DashboardStoreState) => ({
+}: DashboardStoreState) => {
+  openDeletePanelDialog: (panelGroupItemId: PanelGroupItemId) => void;
+  duplicatePanel: (panelGroupItemId: PanelGroupItemId) => void;
+  openEditPanel: (panelGroupItemId: PanelGroupItemId) => void;
+  setViewPanel: (panelGroupItemId?: PanelGroupItemId) => void;
+} = ({ openEditPanel, openDeletePanelDialog, duplicatePanel, setViewPanel }: DashboardStoreState) => ({
   openEditPanel,
   openDeletePanelDialog,
   duplicatePanel,
@@ -200,7 +266,12 @@ const selectPanelActions = ({
 /**
  * Returns actions that can be performed on the given Panel.
  */
-export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
+export function usePanelActions(panelGroupItemId: PanelGroupItemId): {
+  openDeletePanelDialog: () => void;
+  duplicatePanel: () => void;
+  openEditPanel: () => void;
+  viewPanel: (panelGroupItemId?: PanelGroupItemId) => void;
+} {
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, setViewPanel } = useDashboardStore(selectPanelActions);
   return {
     openEditPanel: () => openEditPanel(panelGroupItemId),
@@ -210,15 +281,20 @@ export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
   };
 }
 
-const selectPanelEditor = (state: DashboardStoreState) => state.panelEditor;
+const selectPanelEditor: (state: DashboardStoreState) => PanelEditorState | undefined = (state: DashboardStoreState) =>
+  state.panelEditor;
 /**
  * Gets the state for the Panel Editor.
  */
-export function usePanelEditor() {
+export function usePanelEditor(): PanelEditorState | undefined {
   return useDashboardStore(selectPanelEditor);
 }
 
-const selectDeletePanelDialog = ({ deletePanelDialog, deletePanel, closeDeletePanelDialog }: DashboardStoreState) => ({
+const selectDeletePanelDialog: ({ deletePanelDialog, deletePanel, closeDeletePanelDialog }: DashboardStoreState) => {
+  deletePanelDialog: DeletePanelDialogState | undefined;
+  closeDeletePanelDialog: () => void;
+  deletePanel: (panelGroupItemId: PanelGroupItemId) => void;
+} = ({ deletePanelDialog, deletePanel, closeDeletePanelDialog }: DashboardStoreState) => ({
   deletePanelDialog,
   deletePanel,
   closeDeletePanelDialog,
@@ -227,25 +303,39 @@ const selectDeletePanelDialog = ({ deletePanelDialog, deletePanel, closeDeletePa
 /**
  * Gets the state for the Delete Panel dialog.
  */
-export function useDeletePanelDialog() {
+export function useDeletePanelDialog(): {
+  deletePanelDialog: DeletePanelDialogState | undefined;
+  closeDeletePanelDialog: () => void;
+  deletePanel: (panelGroupItemId: PanelGroupItemId) => void;
+} {
   // TODO: Refactor similar to other dialogs/editors so these are on the editor state itself
   return useDashboardStore(selectDeletePanelDialog);
 }
 
-const selectDashboardDuration = (state: DashboardStoreState) => state.duration;
-export function useDashboardDuration() {
+const selectDashboardDuration: (state: DashboardStoreState) => DurationString = (state: DashboardStoreState) =>
+  state.duration;
+export function useDashboardDuration(): DurationString {
   return useDashboardStore(selectDashboardDuration);
 }
 
-const selectViewPanel = (state: DashboardStoreState) => state.getViewPanel();
+const selectViewPanel: (state: DashboardStoreState) => PanelGroupItemId | undefined = (state: DashboardStoreState) =>
+  state.getViewPanel();
 /**
  * Gets the current panel viewed in max size ("full screen").
  */
-export function useViewPanel() {
+export function useViewPanel(): PanelGroupItemId | undefined {
   return useDashboardStore(selectViewPanel);
 }
 
-const selectSaveChangesConfirmationDialog = ({
+const selectSaveChangesConfirmationDialog: ({
+  saveChangesConfirmationDialog,
+  openSaveChangesConfirmationDialog,
+  closeSaveChangesConfirmationDialog,
+}: DashboardStoreState) => {
+  closeSaveChangesConfirmationDialog: () => void;
+  openSaveChangesConfirmationDialog: (saveChangesConfirmationDialog: SaveChangesConfirmationDialogState) => void;
+  saveChangesConfirmationDialog: SaveChangesConfirmationDialogState | undefined;
+} = ({
   saveChangesConfirmationDialog,
   openSaveChangesConfirmationDialog,
   closeSaveChangesConfirmationDialog,
@@ -254,11 +344,25 @@ const selectSaveChangesConfirmationDialog = ({
   openSaveChangesConfirmationDialog,
   closeSaveChangesConfirmationDialog,
 });
-export function useSaveChangesConfirmationDialog() {
+export function useSaveChangesConfirmationDialog(): {
+  closeSaveChangesConfirmationDialog: () => void;
+  openSaveChangesConfirmationDialog: (saveChangesConfirmationDialog: SaveChangesConfirmationDialogState) => void;
+  saveChangesConfirmationDialog: SaveChangesConfirmationDialogState | undefined;
+} {
   return useDashboardStore(selectSaveChangesConfirmationDialog);
 }
 
-const selectDiscardChangesConfirmationDialog = ({
+const selectDiscardChangesConfirmationDialog: ({
+  discardChangesConfirmationDialog,
+  openDiscardChangesConfirmationDialog,
+  closeDiscardChangesConfirmationDialog,
+}: DashboardStoreState) => {
+  discardChangesConfirmationDialog: DiscardChangesConfirmationDialogState | undefined;
+  closeDiscardChangesConfirmationDialog: () => void;
+  openDiscardChangesConfirmationDialog: (
+    discardChangesConfirmationDialog: DiscardChangesConfirmationDialogState
+  ) => void;
+} = ({
   discardChangesConfirmationDialog,
   openDiscardChangesConfirmationDialog,
   closeDiscardChangesConfirmationDialog,
@@ -267,11 +371,21 @@ const selectDiscardChangesConfirmationDialog = ({
   openDiscardChangesConfirmationDialog,
   closeDiscardChangesConfirmationDialog,
 });
-export function useDiscardChangesConfirmationDialog() {
+export function useDiscardChangesConfirmationDialog(): {
+  discardChangesConfirmationDialog: DiscardChangesConfirmationDialogState | undefined;
+  closeDiscardChangesConfirmationDialog: () => void;
+  openDiscardChangesConfirmationDialog: (
+    discardChangesConfirmationDialog: DiscardChangesConfirmationDialogState
+  ) => void;
+} {
   return useDashboardStore(selectDiscardChangesConfirmationDialog);
 }
 
-const selectEditJsonDialog = ({ editJsonDialog, openEditJsonDialog, closeEditJsonDialog }: DashboardStoreState) => ({
+const selectEditJsonDialog: ({ editJsonDialog, openEditJsonDialog, closeEditJsonDialog }: DashboardStoreState) => {
+  openEditJsonDialog: () => void;
+  closeEditJsonDialog: () => void;
+  editJsonDialog: EditJsonDialogState | undefined;
+} = ({ editJsonDialog, openEditJsonDialog, closeEditJsonDialog }: DashboardStoreState) => ({
   editJsonDialog,
   openEditJsonDialog,
   closeEditJsonDialog,
@@ -279,6 +393,10 @@ const selectEditJsonDialog = ({ editJsonDialog, openEditJsonDialog, closeEditJso
 /**
  * Gets the state for the edit JSON dialog.
  */
-export function useEditJsonDialog() {
+export function useEditJsonDialog(): {
+  openEditJsonDialog: () => void;
+  closeEditJsonDialog: () => void;
+  editJsonDialog: EditJsonDialogState | undefined;
+} {
   return useDashboardStore(selectEditJsonDialog);
 }

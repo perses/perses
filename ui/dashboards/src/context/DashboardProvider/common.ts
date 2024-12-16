@@ -28,7 +28,7 @@ declare global {
 /**
  * Helper function to generate unique IDs for things in the dashboard store that don't have a "natural" ID.
  */
-export function generateId() {
+export function generateId(): number {
   if (globalThis.dashboardStoreId === undefined) {
     globalThis.dashboardStoreId = 0;
   }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useReducer, Dispatch, useMemo } from 'react';
+import React, { createContext, useContext, useReducer, Dispatch, useMemo, ReactElement } from 'react';
 
 const PERSES_DASHBOARD_NAV_HISTORY_KEY = 'PERSES_DASHBOARD_NAV_HISTORY';
 
@@ -24,7 +24,7 @@ export interface DashboardNavHistoryItem {
 const NavHistoryContext = createContext<DashboardNavHistoryItem[] | undefined>(undefined);
 const NavHistoryDispatchContext = createContext<Dispatch<{ project: string; name: string }>>(() => undefined);
 
-export function NavHistoryProvider(props: { children: React.ReactNode }) {
+export function NavHistoryProvider(props: { children: React.ReactNode }): ReactElement {
   const initial = useMemo(() => JSON.parse(window.localStorage.getItem(PERSES_DASHBOARD_NAV_HISTORY_KEY) || '[]'), []);
   const [history, dispatch] = useReducer(historyReducer, initial);
 
@@ -35,7 +35,10 @@ export function NavHistoryProvider(props: { children: React.ReactNode }) {
   );
 }
 
-function historyReducer(history: DashboardNavHistoryItem[], resource: { project: string; name: string }) {
+function historyReducer(
+  history: DashboardNavHistoryItem[],
+  resource: { project: string; name: string }
+): DashboardNavHistoryItem[] {
   const index = history.findIndex((item) => item.project === resource.project && item.name === resource.name);
   if (index > -1) {
     // If the history already contains the dashboard, remove it

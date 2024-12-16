@@ -22,12 +22,14 @@ export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'Tr
 // Some scaffolding has been done to support formatting options.
 // This includes the interface below which still needs implementation.
 // Note: The interface attributes must match cue/schemas/panels/scatter/scatter.cue
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ScatterChartOptions {}
+export interface ScatterChartOptions {
+  /** range of the circles diameter */
+  sizeRange?: [number, number];
+}
 
 /**
  * Creates the initial/empty options for a ScatterChart panel.
  */
-export function createInitialScatterChartOptions() {
+export function createInitialScatterChartOptions(): Record<string, unknown> {
   return {};
 }

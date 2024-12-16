@@ -14,18 +14,63 @@
 import {
   DensitySelector,
   OptionsEditorColumn,
+  OptionsEditorControl,
   OptionsEditorGrid,
   OptionsEditorGroup,
   TableDensity,
+  DEFAULT_COLUMN_WIDTH,
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Switch, TextField } from '@mui/material';
+import { ChangeEvent, ReactElement } from 'react';
 import { TableOptions } from './table-model';
+
+function DefaultColumnsWidthControl({
+  value,
+  onChange,
+}: {
+  value?: 'auto' | number;
+  onChange: (defaultWidth: 'auto' | number) => void;
+}): ReactElement {
+  function handleAutoWidthChange(_: ChangeEvent, checked: boolean): void {
+    if (checked) {
+      return onChange('auto');
+    }
+    onChange(DEFAULT_COLUMN_WIDTH);
+  }
+
+  return (
+    <>
+      <OptionsEditorControl
+        label="Auto Columns Width"
+        control={<Switch checked={value === 'auto'} onChange={handleAutoWidthChange} />}
+      />
+      {value !== 'auto' && (
+        <OptionsEditorControl
+          label="Default Columns Width"
+          control={
+            <TextField
+              type="number"
+              value={value ?? DEFAULT_COLUMN_WIDTH}
+              InputProps={{ inputProps: { min: 1, step: 1 } }}
+              onChange={(e) => onChange(parseInt(e.target.value))}
+            />
+          }
+        />
+      )}
+    </>
+  );
+}
 
 export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
-export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps) {
+export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps): ReactElement {
   function handleDensityChange(density: TableDensity): void {
     onChange({ ...value, density: density });
+  }
+
+  function handleAutoWidthChange(newValue: 'auto' | number): void {
+    onChange({ ...value, defaultColumnWidth: newValue });
   }
 
   return (
@@ -33,6 +78,7 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Display">
           <DensitySelector value={value.density} onChange={handleDensityChange} />
+          <DefaultColumnsWidthControl value={value.defaultColumnWidth} onChange={handleAutoWidthChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>

@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { trace1_root, trace1_root_child1 } from '../../../../test';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { SpanEventList, SpanEventListProps } from './SpanEvents';
 
 describe('SpanEvents', () => {
-  const renderComponent = (props: SpanEventListProps) => {
+  const renderComponent = (props: SpanEventListProps): RenderResult => {
     return render(<SpanEventList {...props} />);
   };
 
   it('render', () => {
-    renderComponent({ rootSpan: trace1_root, span: trace1_root_child1 });
+    renderComponent({ trace: MOCK_GANTT_TRACE, span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]! });
 
     expect(screen.getByText('150ms')).toBeInTheDocument();
     expect(screen.getByText('event1_name')).toBeInTheDocument();

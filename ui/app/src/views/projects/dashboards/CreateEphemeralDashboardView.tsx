@@ -22,7 +22,7 @@ import {
   EphemeralDashboardSpec,
   DurationString,
 } from '@perses-dev/core';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -36,7 +36,7 @@ export interface CreateEphemeralDashboardState {
 /**
  * The View for creating a new EphemeralDashboard.
  */
-function CreateEphemeralDashboardView() {
+function CreateEphemeralDashboardView(): ReactElement | null {
   const { projectName } = useParams();
   const location = useLocation();
   const state: CreateEphemeralDashboardState = location.state;

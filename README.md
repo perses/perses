@@ -9,14 +9,14 @@
 [![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3AReact)
 [![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/perses/perses)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9410/badge)](https://www.bestpractices.dev/projects/9410)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/perses/perses/badge)](https://securityscorecards.dev/viewer/?uri=github.com/perses/perses)
 
 </div>
 
 ## Overview
 
-Perses is part of the [CoreDash community](https://github.com/coredashio/community). It belongs to the Linux Foundation.
-At a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
-part of the monitoring tools like Prometheus or Thanos.
+Perses, a [Cloud Native Computing Foundation](https://cncf.io) sandbox project, is a dashboard tool to visualize observability data from Prometheus/Thanos/Jaeger.
 
 | ![img.png](https://github.com/perses/perses/assets/5657041/3bd8ae57-da7b-4447-9478-cefe19d61a71) | ![img.png](https://github.com/perses/perses/assets/5657041/ba46beab-c8fb-4583-bc2f-71c9893f7906) |
 |:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
@@ -26,7 +26,7 @@ Perses aims to tackle multiple goals:
 1. Become a **standard** dashboard visualization tool for Prometheus and other datasources. It will focus on being
    GitOps-compatible and thus enabling a smooth Dashboard-as-Code workflow, via a new and well-defined dashboard
    definition model.
-2. Provide different npm packages, so that anyone that would like to embed charts and dashboards in their own UI could
+2. Provide different npm packages, so that anyone that would like to embed panels and dashboards in their own UI could
    benefit from the work achieved here. For example, these packages might be used in the future to improve the display
    of the data in the Prometheus UI.
 3. Offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual

@@ -15,6 +15,10 @@
       {
         "kind": "ListVariable",
         "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "argos-world",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -38,6 +42,7 @@
             "name": "Paas",
             "hidden": false
           },
+          "defaultValue": "prd1",
           "allowAllValue": false,
           "allowMultiple": true,
           "sort": "alphabetical-asc",

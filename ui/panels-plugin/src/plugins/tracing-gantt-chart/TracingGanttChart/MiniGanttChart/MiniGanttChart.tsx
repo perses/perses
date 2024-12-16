@@ -12,19 +12,22 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { Span } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { TicksHeader } from '../Ticks';
 import { Viewport, rowHeight } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { GanttTrace } from '../trace';
 import { Canvas } from './Canvas';
 
 interface MiniGanttChartProps {
-  rootSpan: Span;
+  options: TracingGanttChartOptions;
+  trace: GanttTrace;
   viewport: Viewport;
   setViewport: (v: Viewport) => void;
 }
 
-export function MiniGanttChart(props: MiniGanttChartProps) {
-  const { rootSpan, viewport, setViewport } = props;
+export function MiniGanttChart(props: MiniGanttChartProps): ReactElement {
+  const { options, trace, viewport, setViewport } = props;
   const theme = useTheme();
 
   return (
@@ -35,9 +38,12 @@ export function MiniGanttChart(props: MiniGanttChartProps) {
       }}
     >
       <Box sx={{ position: 'relative', height: rowHeight, borderBottom: `1px solid ${theme.palette.divider}` }}>
-        <TicksHeader rootSpan={rootSpan} viewport={rootSpan} />
+        <TicksHeader
+          trace={trace}
+          viewport={{ startTimeUnixMs: trace.startTimeUnixMs, endTimeUnixMs: trace.endTimeUnixMs }}
+        />
       </Box>
-      <Canvas rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
+      <Canvas options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
     </Box>
   );
 }

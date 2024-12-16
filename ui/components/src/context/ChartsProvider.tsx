@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, ReactElement, useContext, useMemo, useState } from 'react';
 import { PersesChartsTheme } from '../model';
 import { CursorCoordinates } from '../TimeSeriesTooltip';
 
@@ -28,7 +28,7 @@ export interface SharedChartsState {
   setLastTooltipPinnedCoords: (lastTooltipPinnedCoords: CursorCoordinates | null) => void;
 }
 
-export function ChartsProvider(props: ChartsProviderProps) {
+export function ChartsProvider(props: ChartsProviderProps): ReactElement {
   const { children, chartsTheme, enablePinning = false } = props;
 
   const [lastTooltipPinnedCoords, setLastTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);

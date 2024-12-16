@@ -25,6 +25,7 @@ import {
   ThresholdsEditor,
 } from '@perses-dev/components';
 import { ThresholdOptions } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import {
   GaugeChartOptions,
   DEFAULT_FORMAT,
@@ -33,7 +34,7 @@ import {
   GaugeChartOptionsEditorProps,
 } from './gauge-chart-model';
 
-export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps) {
+export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
@@ -63,7 +64,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
   }
 
-  const handleThresholdsChange = (thresholds: ThresholdOptions) => {
+  const handleThresholdsChange = (thresholds: ThresholdOptions): void => {
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
         draft.thresholds = thresholds;

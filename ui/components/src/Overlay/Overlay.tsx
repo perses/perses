@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Skeleton, SkeletonOwnProps, Stack, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface TextOverlayProps {
   message: string;
 }
 
-export function TextOverlay(props: TextOverlayProps) {
+export function TextOverlay(props: TextOverlayProps): ReactElement {
   const { message } = props;
 
   return (
@@ -31,7 +32,7 @@ interface NoDataOverlayProps {
   resource: string;
 }
 
-export function NoDataOverlay(props: NoDataOverlayProps) {
+export function NoDataOverlay(props: NoDataOverlayProps): ReactElement {
   const { resource } = props;
 
   return <TextOverlay message={`No ${resource}`} />;
@@ -41,7 +42,7 @@ interface LoadingOverlayProps {
   variant?: SkeletonOwnProps['variant'];
 }
 
-export function LoadingOverlay(props: LoadingOverlayProps) {
+export function LoadingOverlay(props: LoadingOverlayProps): ReactElement {
   const { variant = 'rounded' } = props;
 
   return (

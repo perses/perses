@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 
-import { createEnumParam, JsonParam, NumberParam, useQueryParams, withDefault } from 'use-query-params';
+import { createEnumParam, JsonParam, useQueryParams, withDefault } from 'use-query-params';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
 const exploreQueryConfig = {
   explorer: withDefault(createEnumParam(['metrics', 'traces']), 'metrics'),
-  tab: withDefault(NumberParam, 0),
-  queries: withDefault(JsonParam, []),
+  data: withDefault(JsonParam, {}),
 };
 
 interface ExplorerManagerProviderWithQueryParamsProps {
   children: ReactNode;
 }
 
-export function ExplorerManagerProviderWithQueryParams({ children }: ExplorerManagerProviderWithQueryParamsProps) {
+export function ExplorerManagerProviderWithQueryParams({
+  children,
+}: ExplorerManagerProviderWithQueryParamsProps): ReactElement {
   const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig);
 
   return <ExplorerManagerProvider store={[queryParams, setQueryParams]}>{children}</ExplorerManagerProvider>;

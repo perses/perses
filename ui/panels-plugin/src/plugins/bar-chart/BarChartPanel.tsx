@@ -13,7 +13,7 @@
 
 import { BarChart, BarChartData, LoadingOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { CalculationType, CalculationsMap } from '@perses-dev/core';
 import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
 import { BarChartOptions } from './bar-chart-model';
@@ -21,7 +21,7 @@ import { calculatePercentages, sortSeriesData } from './utils';
 
 export type BarChartPanelProps = PanelProps<BarChartOptions>;
 
-export function BarChartPanel(props: BarChartPanelProps) {
+export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, format, sort, mode },
     contentDimensions,

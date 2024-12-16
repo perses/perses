@@ -19,7 +19,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	modelAPI "github.com/perses/perses/pkg/model/api"
+	"golang.org/x/oauth2"
 )
 
 type roboticLogin struct {
@@ -31,7 +31,7 @@ type roboticLogin struct {
 	apiClient            api.ClientInterface
 }
 
-func (l *roboticLogin) Login() (*modelAPI.AuthResponse, error) {
+func (l *roboticLogin) Login() (*oauth2.Token, error) {
 	return l.apiClient.Auth().ClientCredentialsToken(string(l.externalAuthKind), l.externalAuthProvider, l.clientID, l.clientSecret)
 }
 

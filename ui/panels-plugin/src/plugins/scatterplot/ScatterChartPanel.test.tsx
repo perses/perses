@@ -21,10 +21,15 @@ import {
 } from '@perses-dev/plugin-system';
 import { UnknownSpec, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { screen, render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { MOCK_TRACE_DATA, MOCK_TRACE_QUERY_RESULT, MOCK_EMPTY_TRACE_QUERY_RESULT } from '../../test/';
-import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
+import {
+  MOCK_TRACE_SEARCH_RESULT,
+  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
+  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
+} from '../../test/';
+import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -35,7 +40,7 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 const FakeTraceQueryPlugin: TraceQueryPlugin<UnknownSpec> = {
   getTraceData: async () => {
-    return MOCK_TRACE_DATA;
+    return MOCK_TRACE_SEARCH_RESULT;
   },
   createInitialOptions: () => ({}),
 };
@@ -51,25 +56,13 @@ const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
     width: 500,
     height: 500,
   },
-  spec: {
-    query: {
-      kind: 'TraceQuery',
-      spec: {
-        plugin: {
-          kind: 'TempoTraceQuery',
-          spec: {
-            query: '{duration>500ms}',
-          },
-        },
-      },
-    },
-  },
+  spec: {},
 };
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-describe('ScatterChartPanel', () => {
-  const renderPanel = () => {
+describe('ScatterChartPanel', (): void => {
+  const renderPanel = (): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
       setRefreshInterval: () => ({}),
@@ -80,21 +73,23 @@ describe('ScatterChartPanel', () => {
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
     };
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <PluginRegistry {...mockPluginRegistry(MOCK_TRACE_QUERY_PLUGIN)}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <ScatterChartPanel {...TEST_SCATTER_PANEL} />
-            </TimeRangeContext.Provider>
-          </ChartsProvider>
-        </PluginRegistry>
-      </VirtuosoMockContext.Provider>
+      <MemoryRouter>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+          <PluginRegistry {...mockPluginRegistry(MOCK_TRACE_QUERY_PLUGIN)}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TimeRangeContext.Provider value={mockTimeRangeContext}>
+                <ScatterChartPanel {...TEST_SCATTER_PANEL} />
+              </TimeRangeContext.Provider>
+            </ChartsProvider>
+          </PluginRegistry>
+        </VirtuosoMockContext.Provider>
+      </MemoryRouter>
     );
   };
 
   it('should render a ScatterPlot', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
       isLoading: false,
       isFetching: false,
     });
@@ -104,12 +99,22 @@ describe('ScatterChartPanel', () => {
 
   it('should not render a ScatterPlot because trace results are empty', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_EMPTY_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
       isLoading: false,
       isFetching: false,
     });
     renderPanel();
     // expect it to return a Alert because the query produces no trace results
     expect(await screen.findByText('No traces')).toBeInTheDocument();
+  });
+
+  it('should scale the circles', () => {
+    // apply linear scale from range [1,5] to a value from range [10,20]
+    expect(getSymbolSize(1, [1, 5], [10, 20])).toEqual(10);
+    expect(getSymbolSize(3, [1, 5], [10, 20])).toEqual(15);
+    expect(getSymbolSize(5, [1, 5], [10, 20])).toEqual(20);
+
+    // use max size if all span counts are same
+    expect(getSymbolSize(5, [5, 5], [10, 20])).toEqual(20);
   });
 });

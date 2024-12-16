@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 import {
   DatasourceDefinition,
   PanelEditorValues,
@@ -52,22 +52,22 @@ interface ValidationProviderProps {
 /*
  * Provide validation schemas for forms handling plugins (datasources, variables, panels).
  */
-export function ValidationProvider({ children }: ValidationProviderProps) {
+export function ValidationProvider({ children }: ValidationProviderProps): ReactElement {
   const [datasourceEditorSchema, setDatasourceEditorSchema] =
     useState<z.Schema<DatasourceDefinition>>(datasourceDefinitionSchema);
   const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema);
   const [variableEditorSchema, setVariableEditorSchema] =
     useState<z.Schema<VariableDefinition>>(variableDefinitionSchema);
 
-  function setDatasourceEditorSchemaPlugin(pluginSchema: PluginSchema) {
+  function setDatasourceEditorSchemaPlugin(pluginSchema: PluginSchema): void {
     setDatasourceEditorSchema(buildDatasourceDefinitionSchema(pluginSchema));
   }
 
-  function setPanelEditorSchemaPlugin(pluginSchema: PluginSchema) {
+  function setPanelEditorSchemaPlugin(pluginSchema: PluginSchema): void {
     setPanelEditorSchema(buildPanelEditorSchema(pluginSchema));
   }
 
-  function setVariableEditorSchemaPlugin(pluginSchema: PluginSchema) {
+  function setVariableEditorSchemaPlugin(pluginSchema: PluginSchema): void {
     setVariableEditorSchema(buildVariableDefinitionSchema(pluginSchema));
   }
 

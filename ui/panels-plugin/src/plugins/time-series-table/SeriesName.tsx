@@ -27,20 +27,20 @@ interface SeriesNameProps {
  * Display a series with labels in bold and with a copy to clipboard feature if isFormatted is enabled
  * Else it will only display the series in plain text (mostly use for performance reasons)
  */
-export function SeriesName({ name, labels, formattedName, isFormatted }: SeriesNameProps) {
+export function SeriesName({ name, labels, formattedName, isFormatted }: SeriesNameProps): ReactElement {
   if (isFormatted && labels && Object.keys(labels).length > 0) {
     return <FormatedSeriesName labels={labels} />;
   }
   return <Typography>{formattedName ?? name}</Typography>;
 }
 
-function FormatedSeriesName({ labels }: { labels: Labels }) {
+function FormatedSeriesName({ labels }: { labels: Labels }): ReactElement {
   const { infoSnackbar } = useSnackbar();
 
   const labelNodes: ReactElement[] = [];
   let first = true;
 
-  function copyToClipboard(e: MouseEvent<HTMLSpanElement>) {
+  function copyToClipboard(e: MouseEvent<HTMLSpanElement>): void {
     const copyText = e.currentTarget.innerText || '';
     navigator.clipboard
       .writeText(copyText.trim())

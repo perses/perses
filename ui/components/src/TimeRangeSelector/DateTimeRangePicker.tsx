@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -40,7 +40,7 @@ type AbsoluteTimeRangeInputValue = {
  * @param onCancel event received when user click on cancel
  * @constructor
  */
-export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps) => {
+export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps): ReactElement => {
   const { formatWithUserTimeZone } = useTimeZone();
 
   // Time range values as dates that can be used as a time range.
@@ -55,7 +55,7 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
 
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
-  const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange) => {
+  const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange): void => {
     const isInputChange = typeof newTime === 'string';
     const newInputTime = isInputChange ? newTime : formatWithUserTimeZone(newTime, DATE_TIME_FORMAT);
 
@@ -80,15 +80,15 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
     }
   };
 
-  const onChangeStartTime = (newStartTime: string | Date) => {
+  const onChangeStartTime = (newStartTime: string | Date): void => {
     changeTimeRange(newStartTime, 'start');
   };
 
-  const onChangeEndTime = (newEndTime: string | Date) => {
+  const onChangeEndTime = (newEndTime: string | Date): void => {
     changeTimeRange(newEndTime, 'end');
   };
 
-  const updateDateRange = () => {
+  const updateDateRange = (): { start: Date; end: Date } | undefined => {
     const newDates = {
       start: new Date(timeRangeInputs.start),
       end: new Date(timeRangeInputs.end),
@@ -100,7 +100,7 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
     }
   };
 
-  const onApply = () => {
+  const onApply = (): void => {
     const newDates = updateDateRange();
     if (newDates) {
       onChange(newDates);
@@ -175,9 +175,8 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="Start Time"
-              // @ts-expect-error: because the value is a Date, but the component expects a string
               value={new Date(timeRangeInputs.start)}
-              onChange={(event: string | null) => {
+              onChange={(event: Date | null) => {
                 if (event) {
                   onChangeStartTime(event);
                 }
@@ -189,9 +188,8 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="End Time"
-              // @ts-expect-error: because the value is a Date, but the component expects a string
               value={new Date(timeRangeInputs.end)}
-              onChange={(event: string | null) => {
+              onChange={(event: Date | null) => {
                 if (event) {
                   onChangeEndTime(event);
                 }

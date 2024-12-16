@@ -75,6 +75,6 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
  * The function that's used to generate the display name of mocked plugins in mockPluginRegistry. Can be useful if you
  * need to interact with some UI component that's displaying it.
  */
-export function getMockPluginName(pluginType: PluginType, kind: string) {
+export function getMockPluginName(pluginType: PluginType, kind: string): string {
   return `${pluginType} Plugin for ${kind}`;
 }

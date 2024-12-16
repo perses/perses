@@ -23,7 +23,7 @@ export interface PrometheusTimeRange {
 /**
  * Converts an AbsoluteTimeRange to Prometheus time in Unix time (i.e. in seconds).
  */
-export function getPrometheusTimeRange(timeRange: AbsoluteTimeRange) {
+export function getPrometheusTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
   return {
     start: Math.ceil(getUnixTime(start)),
@@ -40,7 +40,12 @@ const MAX_PROM_DATA_POINTS = 10000;
  * width of a visualization where the data will be graphed), any minimum step/resolution set by the user, and a "safe"
  * step based on the max data points we want to allow returning from a Prom query.
  */
-export function getRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15, resolution = 1, suggestedStepMs = 0) {
+export function getRangeStep(
+  timeRange: PrometheusTimeRange,
+  minStepSeconds = 15,
+  resolution = 1,
+  suggestedStepMs = 0
+): number {
   const suggestedStepSeconds = suggestedStepMs / 1000;
   const queryRangeSeconds = timeRange.end - timeRange.start;
 
@@ -55,7 +60,7 @@ export function getRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15
 /**
  * Converts a DurationString to seconds, rounding down.
  */
-export function getDurationStringSeconds(durationString?: DurationString) {
+export function getDurationStringSeconds(durationString?: DurationString): number | undefined {
   if (!durationString) return undefined;
 
   const duration = parseDurationString(durationString);

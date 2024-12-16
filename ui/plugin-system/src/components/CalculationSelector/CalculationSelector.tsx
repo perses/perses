@@ -13,6 +13,7 @@
 
 import { OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
 import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '@perses-dev/core';
+import { ReactElement } from 'react';
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };
 const CALC_OPTIONS: AutocompleteCalculationOption[] = Object.entries(CALCULATIONS_CONFIG).map(([id, config]) => {
@@ -27,8 +28,8 @@ export interface CalculationSelectorProps {
   onChange: (unit: CalculationType) => void;
 }
 
-export function CalculationSelector({ value, onChange }: CalculationSelectorProps) {
-  const handleCalculationChange = (_: unknown, newValue: AutocompleteCalculationOption) => {
+export function CalculationSelector({ value, onChange }: CalculationSelectorProps): ReactElement {
+  const handleCalculationChange = (_: unknown, newValue: AutocompleteCalculationOption): void => {
     onChange(newValue.id);
   };
 
@@ -46,7 +47,7 @@ export function CalculationSelector({ value, onChange }: CalculationSelectorProp
           options={CALC_OPTIONS}
           onChange={handleCalculationChange}
           disableClearable
-        ></SettingsAutocomplete>
+        />
       }
     />
   );

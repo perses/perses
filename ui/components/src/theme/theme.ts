@@ -14,10 +14,14 @@
 import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
 import { MuiAlert } from './component-overrides/alert';
 import { MuiPaper } from './component-overrides/paper';
-import { getPaletteOptions } from './palette/palette-options';
+import { getPaletteOptions } from './palette';
 import { typography } from './typography';
 
-const getModalBackgroundStyle = ({ theme }: { theme: Omit<Theme, 'components'> }) => {
+const getModalBackgroundStyle = ({
+  theme,
+}: {
+  theme: Omit<Theme, 'components'>;
+}): { backgroundImage?: string; backgroundColor?: string } => {
   const backgroundStyle =
     theme.palette.mode === 'light'
       ? {}
@@ -40,14 +44,14 @@ const getModalBackgroundStyle = ({ theme }: { theme: Omit<Theme, 'components'> }
  * Need to reinstantiate the theme everytime to support switching between light and dark themes
  * https://github.com/mui-org/material-ui/issues/18831
  */
-export function getTheme(mode: PaletteMode) {
-  const theme = createTheme({
+export function getTheme(mode: PaletteMode, options: ThemeOptions = {}): Theme {
+  return createTheme({
     palette: getPaletteOptions(mode),
     typography,
     mixins: {},
     components,
+    ...options,
   });
-  return theme;
 }
 
 // Overrides for component default prop values and styles go here

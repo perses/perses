@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useTheme } from '@mui/material';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, ReactElement } from 'react';
 import { Decorator } from '@storybook/react';
 
 // Much of the code for this decorator is cribbed from the backgrounds addon. We cannot
@@ -22,7 +22,7 @@ import { Decorator } from '@storybook/react';
 // version bumps of storybook.
 // https://github.com/storybookjs/storybook/blob/main/addons/backgrounds/src/decorators/withBackground.ts
 
-export const addBackgroundStyle = (selector: string, css: string, storyId: string | null) => {
+export const addBackgroundStyle = (selector: string, css: string, storyId: string | null): void => {
   const existingStyle = document.getElementById(selector) as HTMLElement;
   if (existingStyle) {
     if (existingStyle.innerHTML !== css) {
@@ -46,7 +46,7 @@ export const addBackgroundStyle = (selector: string, css: string, storyId: strin
   }
 };
 
-export const WithBackground: Decorator = (Story, context) => {
+export const WithBackground: Decorator = (Story, context): ReactElement => {
   const theme = useTheme();
 
   const maybeGlobalBg = context.globals.bgColor;

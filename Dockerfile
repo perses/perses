@@ -3,7 +3,7 @@ RUN apk add --update --no-cache mailcap
 RUN mkdir /perses
 RUN mkdir /plugins
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian12
 
 LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 

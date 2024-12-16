@@ -13,6 +13,7 @@
 
 import { StoryFn, StoryContext } from '@storybook/react';
 import { DatasourceStoreProvider, DatasourceStoreProviderProps } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
 import { defaultDatasourceProps } from '../../test';
 
 declare module '@storybook/react' {
@@ -32,7 +33,7 @@ function isWithDatasourceStoreParameter(
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withDatasourceStore;
   const parameter = isWithDatasourceStoreParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;
