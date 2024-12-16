@@ -65,9 +65,9 @@ describe('ScatterChartPanel', (): void => {
   const renderPanel = (): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
+      setRefreshInterval: (): Record<string, unknown> => ({}),
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
+      setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
       refresh: jest.fn(),
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,

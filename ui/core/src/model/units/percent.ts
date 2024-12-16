@@ -15,8 +15,7 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
-const percentUnits = ['percent', 'percent-decimal', '%'] as const;
-type PercentUnit = (typeof percentUnits)[number];
+type PercentUnit = 'percent' | 'percent-decimal' | '%';
 export type PercentFormatOptions = {
   unit: PercentUnit;
   decimalPlaces?: number;

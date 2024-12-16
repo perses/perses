@@ -66,7 +66,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
   const [isDeleteDashboardDialogStateOpened, setDeleteDashboardDialogStateOpened] = useState<boolean>(false);
 
   const onRenameButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setRenameDashboardDialogStateOpened(true);
     },
@@ -92,7 +92,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
   );
 
   const onDeleteButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setDeleteDashboardDialogStateOpened(true);
     },
@@ -118,8 +118,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (_, row) => new Date(row.createdAt),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date => new Date(row.createdAt),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -131,8 +131,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (_, row) => new Date(row.updatedAt),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date => new Date(row.updatedAt),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -144,8 +144,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
         type: 'dateTime',
         flex: 1,
         minWidth: 150,
-        valueGetter: (_, row) => (row.viewedAt ? new Date(row.viewedAt) : undefined),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date | undefined => (row.viewedAt ? new Date(row.viewedAt) : undefined),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -157,7 +157,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
         type: 'actions',
         flex: 0.5,
         minWidth: 100,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}

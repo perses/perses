@@ -33,7 +33,7 @@ export const ColorPicker = ({ color, onChange, onClear, palette }: ColorPickerPr
 
   const handleColorChange = (color: string): void => {
     setValue(color);
-    onChange && onChange(color);
+    onChange?.(color);
   };
 
   // we should update this if https://github.com/omgovich/react-colorful/issues/157 is resolved
@@ -42,7 +42,7 @@ export const ColorPicker = ({ color, onChange, onClear, palette }: ColorPickerPr
     setValue(`#${inputValue}`); // always prefix input value with # to indicate hex format
     // only set color if input value is a valid hex color
     if (isValidHex(e.target.value)) {
-      onChange && onChange(e.target.value);
+      onChange?.(e.target.value);
     }
   };
 

@@ -122,7 +122,7 @@ export const useMousePosition = (): CursorData['coords'] => {
     };
     window.addEventListener('mousemove', setFromEvent);
 
-    return () => {
+    return (): void => {
       window.removeEventListener('mousemove', setFromEvent);
     };
   }, []);
