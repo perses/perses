@@ -13,8 +13,9 @@
 
 import { StoryFn } from '@storybook/react';
 import { SnackbarProvider } from '@perses-dev/components';
+import { ReactElement } from 'react';
 
-export const WithErrorSnackbar = (Story: StoryFn) => {
+export const WithErrorSnackbar = (Story: StoryFn): ReactElement => {
   return (
     <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
       <Story />

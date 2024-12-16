@@ -15,13 +15,13 @@ import { Box } from '@mui/material';
 import { ContentWithLegend, LoadingOverlay, StatusHistoryChart, useChartsTheme } from '@perses-dev/components';
 import { PanelProps, useDataQueries, validateLegendSpec } from '@perses-dev/plugin-system';
 import { merge } from 'lodash';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { useStatusHistoryDataModel } from './utils/data-transform';
 import { StatusHistoryChartOptions } from './status-history-model.js';
 
 export type StatusHistoryChartPanelProps = PanelProps<StatusHistoryChartOptions>;
 
-export function StatusHistoryPanel(props: StatusHistoryChartPanelProps) {
+export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactElement | null {
   const { spec, contentDimensions } = props;
 
   const legend = useMemo(() => {

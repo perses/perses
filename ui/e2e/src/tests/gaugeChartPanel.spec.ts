@@ -159,7 +159,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
   });
 });
 
-async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: number) {
+async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: number): Promise<void> {
   // Mock data response, so we can make assertions on consistent response data.
   await page.mockQueryRangeRequests({
     queries: [

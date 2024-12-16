@@ -23,8 +23,7 @@ import {
 } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
 import { sortedIndexBy } from 'lodash';
-import { TempoTraceQuerySpec } from '../../model/trace-query-model';
-import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/tempo-selectors';
+import { TempoTraceQuerySpec, TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model';
 import { TempoClient } from '../../model/tempo-client';
 import {
   SearchRequestParameters,
@@ -35,7 +34,7 @@ import {
   SpanEvent as TempoSpanEvent,
 } from '../../model/api-types';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
+export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
   return {
     start: Math.ceil(getUnixTime(start)),
@@ -128,7 +127,7 @@ function parseEvent(event: TempoSpanEvent): SpanEvent {
  * parseSpan parses the Span API type to the internal representation
  * i.e. convert strings to numbers etc.
  */
-function parseSpan(span: TempoSpan) {
+function parseSpan(span: TempoSpan): Omit<Span, 'resource' | 'scope' | 'childSpans'> {
   return {
     traceId: span.traceId,
     spanId: span.spanId,

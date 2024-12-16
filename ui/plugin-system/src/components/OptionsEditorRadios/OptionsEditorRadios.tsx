@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FormControl, FormControlLabel, Radio, RadioGroup, RadioGroupProps, Box } from '@mui/material';
-import { ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { OptionsEditorTabPanel } from '../OptionsEditorTabPanel';
 
 export type OptionsEditorRadio = {
@@ -30,7 +30,7 @@ export type OptionsEditorRadiosProps = {
   isReadonly?: boolean;
 };
 
-export const OptionsEditorRadios = (props: OptionsEditorRadiosProps) => {
+export const OptionsEditorRadios = (props: OptionsEditorRadiosProps): ReactElement => {
   const { tabs, defaultTab, onModeChange, isReadonly } = props;
   const [activeTab, setActiveTab] = useState(defaultTab);
 

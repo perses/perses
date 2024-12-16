@@ -14,6 +14,7 @@
 import { Box, Stack } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import AlertIcon from 'mdi-material-ui/AlertCircleOutline';
+import { ReactElement } from 'react';
 import { spanHasError } from '../utils';
 import { SpanIndents } from './SpanIndents';
 
@@ -25,7 +26,7 @@ export interface SpanNameProps {
 /**
  * SpanName renders the entire left column of a SpanRow, i.e. the hierarchy and the service and span name
  */
-export function SpanName(props: SpanNameProps) {
+export function SpanName(props: SpanNameProps): ReactElement {
   const { span, nameColumnWidth } = props;
 
   return (

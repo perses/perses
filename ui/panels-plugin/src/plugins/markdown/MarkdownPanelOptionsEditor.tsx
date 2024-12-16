@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent } from 'react';
+import { ChangeEvent, ReactElement } from 'react';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Link, Stack, TextField } from '@mui/material';
 import { MarkdownPanelOptions } from './markdown-panel-model';
@@ -21,13 +21,13 @@ export type MarkdownPanelOptionsEditorProps = OptionsEditorProps<MarkdownPanelOp
 const MARKDOWN_GUIDE_URL = 'https://commonmark.org/help/';
 const TEXT_INPUT_NUM_ROWS = 20;
 
-export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps) {
+export function MarkdownPanelOptionsEditor(props: MarkdownPanelOptionsEditorProps): ReactElement {
   const {
     onChange,
     value: { text },
   } = props;
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     onChange({ text: e.target.value });
   };
 

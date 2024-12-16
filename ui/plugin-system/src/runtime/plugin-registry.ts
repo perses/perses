@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext } from 'react';
-import { useQuery, useQueries, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useQueries, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
 
@@ -28,7 +28,7 @@ export const PluginRegistryContext = createContext<PluginRegistryContextType | u
  * Use the PluginRegistry context directly. This is meant as an escape hatch for custom async flows. You should probably
  * be using `usePlugin` or `useListPluginMetadata` instead.
  */
-export function usePluginRegistry() {
+export function usePluginRegistry(): PluginRegistryContextType {
   const ctx = useContext(PluginRegistryContext);
   if (ctx === undefined) {
     throw new Error('PluginRegistryContext not found. Did you forget a provider?');
@@ -49,7 +49,7 @@ export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
   options?: UsePluginOptions<T>
-) {
+): UseQueryResult<PluginImplementation<T>, Error> {
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
   options = {
     ...options,
@@ -66,7 +66,10 @@ export function usePlugin<T extends PluginType>(
 /**
  * Loads a list of plugins and returns the plugin implementation, along with loading/error state.
  */
-export function usePlugins<T extends PluginType>(pluginType: T, plugins: Array<{ kind: string }>) {
+export function usePlugins<T extends PluginType>(
+  pluginType: T,
+  plugins: Array<{ kind: string }>
+): Array<UseQueryResult<PluginImplementation<T>>> {
   const { getPlugin } = usePluginRegistry();
   return useQueries({
     queries: plugins.map((p) => {
@@ -87,7 +90,10 @@ type UseListPluginMetadataOptions = Omit<
 /**
  * Gets a list of plugin metadata for the specified plugin type and returns it, along with loading/error state.
  */
-export function useListPluginMetadata(pluginTypes: PluginType[], options?: UseListPluginMetadataOptions) {
+export function useListPluginMetadata(
+  pluginTypes: PluginType[],
+  options?: UseListPluginMetadataOptions
+): UseQueryResult<PluginMetadata[]> {
   const { listPluginMetadata } = usePluginRegistry();
   return useQuery({
     queryKey: ['listPluginMetadata', pluginTypes],
@@ -96,7 +102,7 @@ export function useListPluginMetadata(pluginTypes: PluginType[], options?: UseLi
   });
 }
 
-export function usePluginBuiltinVariableDefinitions() {
+export function usePluginBuiltinVariableDefinitions(): UseQueryResult<BuiltinVariableDefinition[]> {
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   return useQuery({

@@ -24,6 +24,7 @@ import {
 import { TableOptions, TimeSeriesTableProps } from '@perses-dev/panels-plugin';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { MOCK_TIME_SERIES_DATA_SINGLEVALUE, MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE } from '../../test';
 import { TablePanel } from './TablePanel';
 
@@ -36,10 +37,10 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin<UnknownSpec> {
   return {
-    getTimeSeriesData: async () => {
+    getTimeSeriesData: async (): Promise<TimeSeriesData> => {
       return data;
     },
-    OptionsEditorComponent: () => {
+    OptionsEditorComponent: (): ReactElement => {
       return <div>Edit options here</div>;
     },
     createInitialOptions: () => ({}),
@@ -66,12 +67,12 @@ const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
 
 describe('TablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (data: TimeSeriesData, options?: TableOptions) => {
+  const renderPanel = (data: TimeSeriesData, options?: TableOptions): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
+      setRefreshInterval: (): Record<string, unknown> => ({}),
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
+      setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
       refresh: jest.fn(),
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,

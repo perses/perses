@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface OptionsEditorTabPanelProps {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ interface OptionsEditorTabPanelProps {
   value: number;
 }
 
-export function OptionsEditorTabPanel(props: OptionsEditorTabPanelProps) {
+export function OptionsEditorTabPanel(props: OptionsEditorTabPanelProps): ReactElement {
   const { children, value, index, ...other } = props;
 
   const isActive = value === index;

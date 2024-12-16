@@ -32,17 +32,17 @@ export class SecretEditor {
     this.basicAuthPasswordInput = container.locator('input[name="spec.basicAuth.password"]');
   }
 
-  async setName(name: string) {
+  async setName(name: string): Promise<void> {
     await this.nameInput.clear();
     await this.nameInput.type(name);
   }
 
-  async setBasicAuthUsername(username: string) {
+  async setBasicAuthUsername(username: string): Promise<void> {
     await this.basicAuthUsernameInput.clear();
     await this.basicAuthUsernameInput.type(username);
   }
 
-  async setBasicAuthPassword(password: string) {
+  async setBasicAuthPassword(password: string): Promise<void> {
     await this.basicAuthPasswordInput.clear();
     await this.basicAuthPasswordInput.type(password);
   }

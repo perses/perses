@@ -16,7 +16,7 @@ import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirro
 import { EditorView } from '@codemirror/view';
 import { useTheme, CircularProgress, InputLabel, Stack, IconButton, Tooltip } from '@mui/material';
 import FileTreeIcon from 'mdi-material-ui/FileTree';
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
@@ -42,7 +42,7 @@ export type PromQLEditorProps = {
   datasource: PrometheusDatasourceSelector;
 } & Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
-export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps) {
+export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [isTreeViewVisible, setTreeViewVisible] = useState(false);
@@ -63,7 +63,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
   const errorMessage = useMemo(() => getErrMessage(error), [error]);
 
-  const handleShowTreeView = () => {
+  const handleShowTreeView = (): void => {
     setTreeViewVisible(!isTreeViewVisible);
   };
 

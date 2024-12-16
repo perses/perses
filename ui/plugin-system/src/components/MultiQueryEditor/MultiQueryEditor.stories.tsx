@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { WithQueryClient } from '@perses-dev/storybook';
 import { action } from '@storybook/addon-actions';
 import { WithPluginRegistry, WithPluginSystemDatasourceStore } from '../../stories/shared-utils';
 import { MultiQueryEditor, MultiQueryEditorProps } from './MultiQueryEditor';
 
-function MultiQueryEditorWrapper(props: MultiQueryEditorProps) {
+function MultiQueryEditorWrapper(props: MultiQueryEditorProps): ReactElement {
   const [queries, setQueries] = useState<MultiQueryEditorProps['queries']>([]);
 
   const handleChange: MultiQueryEditorProps['onChange'] = (newQueries) => {

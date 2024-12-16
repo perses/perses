@@ -12,17 +12,17 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { RenderResult, screen } from '@testing-library/react';
 import { renderWithContext } from '../../test';
 import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
 
 describe('PluginKindSelect', () => {
-  const renderComponent = (props: PluginKindSelectProps) => {
+  const renderComponent = (props: PluginKindSelectProps): RenderResult => {
     return renderWithContext(<PluginKindSelect {...props} />);
   };
 
   // Opens the select and waits for loading to finish (i.e. options to appear)
-  const openSelect = async () => {
+  const openSelect = async (): Promise<HTMLElement[]> => {
     const select = screen.getByRole('combobox');
     userEvent.click(select);
     const options = await screen.findAllByTestId('option');

@@ -14,6 +14,7 @@
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
 import { Span, SpanEvent } from '@perses-dev/core';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
+import { ReactElement } from 'react';
 import { formatDuration } from '../utils';
 import { GanttTrace } from '../trace';
 import { AttributeList } from './Attributes';
@@ -23,7 +24,7 @@ export interface SpanEventListProps {
   span: Span;
 }
 
-export function SpanEventList(props: SpanEventListProps) {
+export function SpanEventList(props: SpanEventListProps): ReactElement {
   const { trace, span } = props;
 
   return (
@@ -42,7 +43,7 @@ interface SpanEventItemProps {
   event: SpanEvent;
 }
 
-function SpanEventItem(props: SpanEventItemProps) {
+function SpanEventItem(props: SpanEventItemProps): ReactElement {
   const { trace, event } = props;
   const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 

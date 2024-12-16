@@ -17,7 +17,7 @@ import { CalculationType } from '@perses-dev/core';
 import { CalculationSelector } from './CalculationSelector';
 
 describe('CalculationSelector', () => {
-  const renderCalculationSelector = (value: CalculationType, onChange = jest.fn()) => {
+  const renderCalculationSelector = (value: CalculationType, onChange = jest.fn()): void => {
     render(
       <div>
         <CalculationSelector value={value} onChange={onChange} />
@@ -25,7 +25,7 @@ describe('CalculationSelector', () => {
     );
   };
 
-  const getCalculationSelector = () => {
+  const getCalculationSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Calculation' });
   };
 

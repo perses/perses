@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Decorator } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
 import { getTheme, ChartsProvider, generateChartsTheme } from '@perses-dev/components';
 
-export const WithThemes: Decorator = (Story) => {
+export const WithThemes: Decorator = (Story): ReactElement => {
   const isDarkModeEnabled = useDarkMode();
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);

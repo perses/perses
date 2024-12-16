@@ -22,7 +22,7 @@ import {
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Switch, TextField } from '@mui/material';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, ReactElement } from 'react';
 import { TableOptions } from './table-model';
 
 function DefaultColumnsWidthControl({
@@ -31,7 +31,7 @@ function DefaultColumnsWidthControl({
 }: {
   value?: 'auto' | number;
   onChange: (defaultWidth: 'auto' | number) => void;
-}) {
+}): ReactElement {
   function handleAutoWidthChange(_: ChangeEvent, checked: boolean): void {
     if (checked) {
       return onChange('auto');
@@ -64,7 +64,7 @@ function DefaultColumnsWidthControl({
 
 export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
-export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps) {
+export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProps): ReactElement {
   function handleDensityChange(density: TableDensity): void {
     onChange({ ...value, density: density });
   }

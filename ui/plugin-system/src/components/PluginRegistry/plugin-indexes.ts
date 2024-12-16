@@ -25,7 +25,9 @@ export interface PluginIndexes {
 /**
  * Returns an async callback for getting indexes of the installed plugin data.
  */
-export function usePluginIndexes(getInstalledPlugins: PluginLoader['getInstalledPlugins']) {
+export function usePluginIndexes(
+  getInstalledPlugins: PluginLoader['getInstalledPlugins']
+): () => Promise<PluginIndexes> {
   // Creates indexes from the installed plugins data (does useEvent because this accesses the getInstalledPlugins prop
   // and we want a stable reference for the callback below)
   const createPluginIndexes = useEvent(async (): Promise<PluginIndexes> => {
@@ -85,6 +87,6 @@ export function usePluginIndexes(getInstalledPlugins: PluginLoader['getInstalled
 /**
  * Gets a unique key for a plugin type/kind that can be used as a cache key.
  */
-export function getTypeAndKindKey(pluginType: PluginType, kind: string) {
+export function getTypeAndKindKey(pluginType: PluginType, kind: string): string {
   return `${pluginType}:${kind}`;
 }

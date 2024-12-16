@@ -13,6 +13,7 @@
 
 import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
 import fetch from 'node-fetch';
+import { DashboardResource } from '@perses-dev/core';
 import { AppHomePage, DashboardPage } from '../pages';
 
 type DashboardTestOptions = {
@@ -43,14 +44,14 @@ type DashboardTestFixtures = {
 
 const BACKEND_BASE_URL = 'http://localhost:8080';
 
-async function getDashboardJson(projectName: string, dashboardName: string) {
+async function getDashboardJson(projectName: string, dashboardName: string): Promise<DashboardResource> {
   const queryUrl = `${BACKEND_BASE_URL}/api/v1/projects/${projectName}/dashboards/${dashboardName}`;
   const results = await fetch(queryUrl);
   const dashboardJson = await results.json();
-  return dashboardJson;
+  return dashboardJson as unknown as DashboardResource;
 }
 
-async function createDashboard(content: unknown) {
+async function createDashboard(content: unknown): Promise<fetch.Response> {
   const queryUrl = `${BACKEND_BASE_URL}/api/v1/dashboards`;
   return fetch(queryUrl, {
     method: 'POST',
@@ -59,7 +60,7 @@ async function createDashboard(content: unknown) {
   });
 }
 
-async function duplicateDashboard(projectName: string, dashboardName: string, newDashboardName: string) {
+async function duplicateDashboard(projectName: string, dashboardName: string, newDashboardName: string): Promise<void> {
   const originalDashboardJson = await getDashboardJson(projectName, dashboardName);
   const newDashboardJson = {
     ...originalDashboardJson,
@@ -77,7 +78,7 @@ async function duplicateDashboard(projectName: string, dashboardName: string, ne
   }
 }
 
-async function deleteDashboard(projectName: string, dashboardName: string) {
+async function deleteDashboard(projectName: string, dashboardName: string): Promise<fetch.Response> {
   const queryUrl = `${BACKEND_BASE_URL}/api/v1/projects/${projectName}/dashboards/${dashboardName}`;
   const result = await fetch(queryUrl, {
     method: 'DELETE',
@@ -94,7 +95,7 @@ const IGNORE_CONSOLE_ERRORS = [
   'potentially unsafe when doing server-side rendering',
   'MUI X: useResizeContainer - The parent DOM element of the Data Grid has an empty height.',
 ];
-function shouldIgnoreConsoleError(message: ConsoleMessage) {
+function shouldIgnoreConsoleError(message: ConsoleMessage): boolean {
   const msgText = message.text();
   return IGNORE_CONSOLE_ERRORS.some((ignoreErr) => msgText.includes(ignoreErr));
 }
@@ -103,7 +104,7 @@ function shouldIgnoreConsoleError(message: ConsoleMessage) {
  * Generates a dashboard name to use when duplicating a dashboard for a given
  * test.
  */
-function generateDuplicateDashboardName(dashboardName: string, testTitle: string, retry: number) {
+function generateDuplicateDashboardName(dashboardName: string, testTitle: string, retry: number): string {
   // Replaces any characters that are not allowed in dashboard names with
   // underscores.
   const normalizedTitle = testTitle.replace(/[^a-zA-Z0-9_.-]+/g, '_');
@@ -111,7 +112,7 @@ function generateDuplicateDashboardName(dashboardName: string, testTitle: string
   return [dashboardName, normalizedTitle, retry].join('__');
 }
 
-function getMockDateScript(mockNow: number) {
+function getMockDateScript(mockNow: number): string {
   // From https://github.com/microsoft/playwright/issues/6347#issuecomment-1085850728
   return `{
     // Extend Date constructor to default to fakeNow

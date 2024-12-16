@@ -61,8 +61,8 @@ const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-describe('ScatterChartPanel', () => {
-  const renderPanel = () => {
+describe('ScatterChartPanel', (): void => {
+  const renderPanel = (): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
       setRefreshInterval: () => ({}),

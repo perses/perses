@@ -14,11 +14,12 @@
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { Transform } from '@perses-dev/core';
 import { TransformsEditor } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { TableOptions } from './table-model';
 
 export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
-export function TableTransformsEditor({ value, onChange }: TableSettingsEditorProps) {
+export function TableTransformsEditor({ value, onChange }: TableSettingsEditorProps): ReactElement {
   function handleTransformsChange(transforms: Transform[]): void {
     onChange({ ...value, transforms: transforms });
   }

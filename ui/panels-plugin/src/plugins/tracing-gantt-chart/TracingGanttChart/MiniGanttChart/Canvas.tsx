@@ -13,7 +13,7 @@
 
 import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
-import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback } from 'react';
+import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback, ReactElement } from 'react';
 import { Span, useEvent } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
@@ -36,7 +36,7 @@ type MouseState =
   | { type: 'resize'; fixedPoint: number }
   | { type: 'drag'; start: number; end: number };
 
-export function Canvas(props: CanvasProps) {
+export function Canvas(props: CanvasProps): ReactElement {
   const { options, trace, viewport, setViewport } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
@@ -65,14 +65,14 @@ export function Canvas(props: CanvasProps) {
     drawSpans(ctx, width, height, trace, spanColorGenerator);
   }, [width, height, trace, spanColorGenerator]);
 
-  const translateCursorToTime = (e: ReactMouseEvent | MouseEvent) => {
+  const translateCursorToTime = (e: ReactMouseEvent | MouseEvent): number => {
     if (!canvasRef.current || !width) return 0;
     // e.nativeEvent.offsetX doesn't work when sliding over a tick box
     const offsetX = e.clientX - canvasRef.current.getBoundingClientRect().left;
     return trace.startTimeUnixMs + (offsetX / width) * traceDuration;
   };
 
-  const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>): void => {
     e.preventDefault();
     if (!(e.target instanceof HTMLElement)) return;
 
@@ -160,13 +160,13 @@ export function Canvas(props: CanvasProps) {
 
   // capture mouseMove and mouseUp outside the element by attaching them to the window object
   useEffect(() => {
-    function startMouseAction() {
+    function startMouseAction(): void {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = mouseState.type === 'resize' ? 'col-resize' : 'move';
     }
 
-    function stopMouseAction() {
+    function stopMouseAction(): void {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'inherit';

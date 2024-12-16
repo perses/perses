@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react';
 import { MOCK_TIME_SERIES_DATA, MOCK_TRACE_DATA } from '../../test';
 import { useListPluginMetadata } from '../plugin-registry';
@@ -48,7 +48,7 @@ jest.mock('../plugin-registry', () => ({
   })),
 }));
 
-describe('useDataQueries', () => {
+describe('useDataQueries', (): void => {
   it('should return the correct data for TimeSeriesQuery', () => {
     const definitions = [
       {
@@ -59,7 +59,7 @@ describe('useDataQueries', () => {
       },
     ];
 
-    const wrapper = ({ children }: React.PropsWithChildren) => {
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => {
       return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
     };
 
@@ -79,7 +79,7 @@ describe('useDataQueries', () => {
       },
     ];
 
-    const wrapper = ({ children }: React.PropsWithChildren) => {
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => {
       return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
     };
 

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack, useTheme } from '@mui/material';
+import { ReactElement } from 'react';
 import { Viewport, rowHeight } from '../utils';
 import { TicksHeader } from '../Ticks';
 import { GanttTrace } from '../trace';
@@ -23,7 +24,7 @@ interface GanttTableHeaderProps {
   divider: React.ReactNode;
 }
 
-export function GanttTableHeader(props: GanttTableHeaderProps) {
+export function GanttTableHeader(props: GanttTableHeaderProps): ReactElement {
   const { trace, viewport, nameColumnWidth, divider } = props;
   const theme = useTheme();
 

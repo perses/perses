@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { fireEvent, screen } from '@testing-library/dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
@@ -20,7 +20,7 @@ import { GanttTableProvider } from './GanttTableProvider';
 import { GanttTable, GanttTableProps } from './GanttTable';
 
 describe('GanttTable', () => {
-  const renderComponent = (props: Omit<GanttTableProps, 'onSpanClick'>) => {
+  const renderComponent = (props: Omit<GanttTableProps, 'onSpanClick'>): RenderResult => {
     const onSpanClick = jest.fn();
     return render(
       <ChartsProvider chartsTheme={testChartsTheme}>

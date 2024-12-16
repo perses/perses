@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
+import { ReactElement } from 'react';
 import { BuiltinVariableContext, BuiltinVariableSrv } from '../../../runtime';
 
 declare module '@storybook/react' {
@@ -36,7 +37,7 @@ function isWithBuiltinVariableParameter(
 // dashboards.
 // This decorator includes "PluginSystem" in the name to differentiate it from
 // the datasource store decorator in the `dashboards` package.
-export const WithPluginSystemBuiltinVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithPluginSystemBuiltinVariables = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withPluginSystemBuiltinVariables;
   const defaultValue: BuiltinVariableSrv = {
     variables: [],

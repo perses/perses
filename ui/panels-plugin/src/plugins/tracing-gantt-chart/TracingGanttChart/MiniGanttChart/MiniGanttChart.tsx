@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
+import { ReactElement } from 'react';
 import { TicksHeader } from '../Ticks';
 import { Viewport, rowHeight } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
@@ -25,7 +26,7 @@ interface MiniGanttChartProps {
   setViewport: (v: Viewport) => void;
 }
 
-export function MiniGanttChart(props: MiniGanttChartProps) {
+export function MiniGanttChart(props: MiniGanttChartProps): ReactElement {
   const { options, trace, viewport, setViewport } = props;
   const theme = useTheme();
 

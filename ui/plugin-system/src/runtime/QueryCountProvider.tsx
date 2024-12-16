@@ -24,6 +24,6 @@ export const QueryCountProvider: React.FC<QueryCountProviderProps> = ({ queryCou
   return <QueryCountContext.Provider value={queryCount}>{children}</QueryCountContext.Provider>;
 };
 
-export const useQueryCountContext = () => {
+export const useQueryCountContext = (): number => {
   return useContext(QueryCountContext);
 };

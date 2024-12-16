@@ -25,7 +25,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -52,7 +52,7 @@ interface Row extends TraceSearchResult {
   traceLink?: string;
 }
 
-export function DataTable(props: DataTableProps) {
+export function DataTable(props: DataTableProps): ReactElement {
   const { options, result, traceLink } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
@@ -82,8 +82,8 @@ export function DataTable(props: DataTableProps) {
         type: 'string',
         flex: 4,
         display: 'flex',
-        valueGetter: (_, trace) => `${trace.rootServiceName}: ${trace.rootTraceName}`,
-        renderCell: ({ row }) => (
+        valueGetter: (_, trace): string => `${trace.rootServiceName}: ${trace.rootTraceName}`,
+        renderCell: ({ row }): ReactElement => (
           <Box sx={{ my: 1 }}>
             <TraceName row={row} />
             <br />
@@ -108,7 +108,7 @@ export function DataTable(props: DataTableProps) {
         minWidth: 145,
         display: 'flex',
         valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
-        renderCell: ({ row }) => {
+        renderCell: ({ row }): ReactElement => {
           let totalSpanCount = 0;
           let totalErrorCount = 0;
           for (const stats of Object.values(row.serviceStats)) {
@@ -186,7 +186,7 @@ interface TraceNameProps {
   row: Row;
 }
 
-function TraceName({ row: trace }: TraceNameProps) {
+function TraceName({ row: trace }: TraceNameProps): ReactElement {
   if (trace.traceLink) {
     return (
       <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={trace.traceLink}>
@@ -208,7 +208,7 @@ interface ServiceChipProps {
   serviceColor: string;
 }
 
-function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
+function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps): ReactElement {
   return (
     <Chip
       label={serviceName}

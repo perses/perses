@@ -23,6 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
+import { ReactElement } from 'react';
 import {
   DEFAULT_PROM,
   getPrometheusTimeRange,
@@ -41,7 +42,9 @@ import {
 } from './types';
 import { MatcherEditor } from './MatcherEditor';
 
-function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>) {
+function PrometheusLabelValuesVariableEditor(
+  props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>
+): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
@@ -95,7 +98,9 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
   );
 }
 
-function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>) {
+function PrometheusLabelNamesVariableEditor(
+  props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>
+): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
@@ -138,7 +143,7 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
   );
 }
 
-function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusPromQLVariableOptions>) {
+function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusPromQLVariableOptions>): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PROM;
