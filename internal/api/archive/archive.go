@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/mholt/archives"
 )
@@ -28,6 +29,17 @@ const (
 	TAR   Format = "tar"
 	ZIP   Format = "zip"
 )
+
+var supportedArchiveFormat = []Format{TARgz, TAR, ZIP}
+
+func IsArchiveFile(filename string) bool {
+	for _, format := range supportedArchiveFormat {
+		if strings.HasSuffix(filename, string(format)) {
+			return true
+		}
+	}
+	return false
+}
 
 func IsValidFormat(format Format) bool {
 	return format == TARgz ||

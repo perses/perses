@@ -19,35 +19,18 @@ import (
 	"io"
 	"os"
 	"path"
-	"strings"
 
-	"github.com/mholt/archiver/v4"
+	"github.com/mholt/archives"
+	"github.com/perses/perses/internal/api/archive"
 	"github.com/sirupsen/logrus"
 )
 
-var supportedArchiveFormat = []string{
-	".tar.gz",
-	".tar",
-	".zip",
-	".rar",
-	".7z",
-}
-
-func isArchiveFile(filename string) bool {
-	for _, format := range supportedArchiveFormat {
-		if strings.HasSuffix(filename, format) {
-			return true
-		}
-	}
-	return false
-}
-
-type archive struct {
+type arch struct {
 	folder       string
 	targetFolder string
 }
 
-func (a *archive) unzipAll() error {
+func (a *arch) unzipAll() error {
 	files, err := os.ReadDir(a.folder)
 	if err != nil {
 		return fmt.Errorf("unable to read directory %s: %w", a.folder, err)
@@ -65,8 +48,8 @@ func (a *archive) unzipAll() error {
 	return nil
 }
 
-func (a *archive) unzip(archiveFileName string) error {
-	if !isArchiveFile(archiveFileName) {
+func (a *arch) unzip(archiveFileName string) error {
+	if !archive.IsArchiveFile(archiveFileName) {
 		logrus.Debugf("skipping unarchive file %s", archiveFileName)
 		return nil
 	}
@@ -81,20 +64,20 @@ func (a *archive) unzip(archiveFileName string) error {
 	if archiveOpenErr != nil {
 		return fmt.Errorf("unable to open archive file %q", archiveFile)
 	}
-	format, newStream, identifyErr := archiver.Identify(archiveFile, stream)
+	format, newStream, identifyErr := archives.Identify(context.Background(), archiveFile, stream)
 	if identifyErr != nil {
 		logrus.WithError(identifyErr).Errorf("unable to identify the type of the archive %q. Skipping it.", archiveFile)
 		return nil
 	}
-	if ex, ok := format.(archiver.Extractor); ok {
-		if extractErr := ex.Extract(context.Background(), newStream, nil, a.extractArchiveFileHandler); extractErr != nil {
+	if ex, ok := format.(archives.Extractor); ok {
+		if extractErr := ex.Extract(context.Background(), newStream, a.extractArchiveFileHandler); extractErr != nil {
 			return fmt.Errorf("unable to extract the archive file")
 		}
 	}
 	return nil
 }
 
-func (a *archive) extractArchiveFileHandler(_ context.Context, f archiver.File) error {
+func (a *arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo) error {
 	if f.IsDir() {
 		return nil
 	}
