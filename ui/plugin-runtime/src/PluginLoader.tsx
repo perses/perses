@@ -22,11 +22,11 @@ interface PluginLoaderProps<P> {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-function PluginContainer<P>({ pluginFn, props }: { pluginFn: Function; props: P }) {
+function PluginContainer<P>({ pluginFn, props }: { pluginFn: Function; props: P }): JSX.Element {
   return pluginFn(props);
 }
 
-export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>) {
+export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.Element | null {
   const { load } = usePluginRuntime({ moduleName: plugin.moduleName, baseURL: plugin.baseURL });
   const [pluginModule, setPluginModule] = useState<PersesPluginModule | null>(null);
   const [error, setError] = useState<Error | null>(null);

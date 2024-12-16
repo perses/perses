@@ -41,11 +41,11 @@ class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { err
     this.state = { error: null };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): { error: Error } {
     return { error };
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.error !== null) {
       return this.state.error.message;
     }
@@ -65,7 +65,7 @@ describe('PluginLoader', () => {
     const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
 
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: () => Promise.resolve({ default: mockPluginModule }),
+      load: (): Promise<{ default: unknown }> => Promise.resolve({ default: mockPluginModule }),
       pluginRuntime: {} as FederationHost,
     }));
 
@@ -84,7 +84,7 @@ describe('PluginLoader', () => {
     const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
 
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: () => Promise.resolve({ mockPluginModule } as unknown as PersesPluginModule),
+      load: (): Promise<PersesPluginModule> => Promise.resolve({ mockPluginModule } as unknown as PersesPluginModule),
       pluginRuntime: {} as FederationHost,
     }));
 
@@ -103,7 +103,8 @@ describe('PluginLoader', () => {
 
   it('should throw an error if the plugin module default export is not a function', async () => {
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: () => Promise.resolve({ default: 'not a function' } as unknown as PersesPluginModule),
+      load: (): Promise<PersesPluginModule> =>
+        Promise.resolve({ default: 'not a function' } as unknown as PersesPluginModule),
       pluginRuntime: {} as FederationHost,
     }));
 
