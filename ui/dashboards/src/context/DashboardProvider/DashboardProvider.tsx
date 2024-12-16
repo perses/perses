@@ -99,7 +99,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
   useEffect(() => {
     if (plugin === undefined) return;
-    const defaultPanelSpec = plugin.createInitialOptions();
+    const defaultPanelSpec = plugin.createInitialOptions ? plugin.createInitialOptions() : {};
     // set default panel kind, spec, and queries for add panel editor
     store.setState({
       initialValues: {

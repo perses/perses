@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
-import { CircularProgress, Stack } from '@mui/material';
+import { remotePluginLoader } from '@perses-dev/plugin-runtime';
+import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { bundledPluginLoader } from '../../../model/bundled-plugins';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -71,7 +71,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <PluginRegistry pluginLoader={bundledPluginLoader}>
+      <PluginRegistry pluginLoader={remotePluginLoader()}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}

@@ -12,13 +12,9 @@
 // limitations under the License.
 
 export interface PersesPlugin {
-  name: string;
+  kind: string;
   moduleName: string;
   baseURL?: string;
 }
 
-export interface PersesPluginModule {
-  default: unknown;
-}
-
-export type PersesPluginType = 'panel';
+export type RemotePluginModule = Record<string, unknown>;

@@ -18,7 +18,7 @@ import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } 
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
-  listPluginMetadata(pluginTypes: PluginType[]): Promise<PluginMetadata[]>;
+  listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadata[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
 
@@ -83,7 +83,7 @@ export function usePlugins<T extends PluginType>(
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
 type UseListPluginMetadataOptions = Omit<
-  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, PluginType[]]>,
+  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, string[]]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -91,7 +91,7 @@ type UseListPluginMetadataOptions = Omit<
  * Gets a list of plugin metadata for the specified plugin type and returns it, along with loading/error state.
  */
 export function useListPluginMetadata(
-  pluginTypes: PluginType[],
+  pluginTypes: string[],
   options?: UseListPluginMetadataOptions
 ): UseQueryResult<PluginMetadata[]> {
   const { listPluginMetadata } = usePluginRegistry();
