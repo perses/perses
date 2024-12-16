@@ -39,7 +39,7 @@ type Plugin interface {
 func New(plugins config.Plugins) Plugin {
 	return &plugin{
 		path: plugins.Path,
-		archibal: &archive{
+		archibal: &arch{
 			folder:       plugins.ArchivePath,
 			targetFolder: plugins.Path,
 		},
@@ -48,7 +48,7 @@ func New(plugins config.Plugins) Plugin {
 
 type plugin struct {
 	path     string
-	archibal *archive
+	archibal *arch
 }
 
 func (p *plugin) List() ([]byte, error) {
