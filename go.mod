@@ -20,8 +20,8 @@ require (
 	github.com/huandu/go-sqlbuilder v1.33.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.13.0
-	github.com/mholt/archives v0.0.0-20241203232558-998c9622f6b8
+	github.com/labstack/echo/v4 v4.13.2
+	github.com/mholt/archives v0.0.0-20241216060121-23e0af8fe73d
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.26.0
@@ -36,7 +36,7 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	github.com/zitadel/oidc/v3 v3.33.1
 	golang.org/x/crypto v0.31.0
-	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
 	golang.org/x/mod v0.22.0
 	golang.org/x/oauth2 v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -196,7 +196,7 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/time v0.7.0 // indirect
+	golang.org/x/time v0.8.0 // indirect
 	google.golang.org/protobuf v1.35.2 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
