@@ -17,18 +17,39 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 )
 
-const pluginFileName = "plugin.json"
+const (
+	PluginModuleKind = "PluginModule"
+	pluginFileName   = "plugin-modules.json"
+)
 
-type Info struct {
+type PluginMetadata struct {
+	PluginType string `json:"pluginType"`
+	Kind       string `json:"kind"`
+	Display    struct {
+		Name        string `json:"name"`
+		Description string `json:"description,omitempty"`
+	} `json:"display"`
+}
+
+type PluginModuleSpec struct {
+	Plugins []PluginMetadata `json:"plugins"`
+}
+
+type PluginModuleMetadata struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-	Type    string `json:"type"`
+}
+
+type PluginModule struct {
+	Kind     string               `json:"kind"`
+	Metadata PluginModuleMetadata `json:"metadata"`
+	Spec     PluginModuleSpec     `json:"spec"`
 }
 
 type Plugin interface {
@@ -52,7 +73,7 @@ type plugin struct {
 }
 
 func (p *plugin) List() ([]byte, error) {
-	pluginFilePath := path.Join(p.path, pluginFileName)
+	pluginFilePath := filepath.Join(p.path, pluginFileName)
 	if _, osErr := os.Stat(pluginFilePath); errors.Is(osErr, os.ErrNotExist) {
 		if generateErr := p.generatePluginListFile(); generateErr != nil {
 			return nil, generateErr
@@ -72,40 +93,45 @@ func (p *plugin) generatePluginListFile() error {
 	if err != nil {
 		return err
 	}
-	var pluginList []Info
+	var pluginModuleList []PluginModule
 	for _, file := range files {
 		if !file.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
 			continue
 		}
 		// now we need to read the manifest file to extract the info we are interested
-		if _, osErr := os.Stat(path.Join(p.path, file.Name(), ManifestFileName)); errors.Is(osErr, os.ErrNotExist) {
+		if _, osErr := os.Stat(filepath.Join(p.path, file.Name(), ManifestFileName)); errors.Is(osErr, os.ErrNotExist) {
 			// The manifest doesn't exist, so we can ignore this folder, it's not a plugin, or the plugin is invalid.
 			logrus.Debugf("folder %q does not contain file mf-manifest.json, skipping it as it does not match the plugin architecture", file.Name())
 			continue
 		}
-		manifest, readErr := ReadManifest(path.Join(p.path, file.Name()))
+		manifest, readErr := ReadManifest(filepath.Join(p.path, file.Name()))
 		if readErr != nil {
 			logrus.WithError(readErr).Error("unable to read plugin manifest")
 			continue
 		}
-		npmPackageData, readErr := ReadPackage(path.Join(p.path, file.Name()))
+		npmPackageData, readErr := ReadPackage(filepath.Join(p.path, file.Name()))
 		if readErr != nil {
 			logrus.WithError(readErr).Error("unable to read plugin package.json")
 			continue
 		}
-		pluginList = append(pluginList, Info{
-			Name:    manifest.Name,
-			Version: manifest.Metadata.BuildInfo.Version,
-			Type:    npmPackageData.Perses.PluginType,
+		pluginModuleList = append(pluginModuleList, PluginModule{
+			Kind: PluginModuleKind,
+			Metadata: PluginModuleMetadata{
+				Name:    manifest.Name,
+				Version: manifest.Metadata.BuildInfo.Version,
+			},
+			Spec: PluginModuleSpec{
+				Plugins: npmPackageData.Perses.Plugins,
+			},
 		})
 	}
-	if len(pluginList) == 0 {
-		pluginList = make([]Info, 0)
+	if len(pluginModuleList) == 0 {
+		pluginModuleList = make([]PluginModule, 0)
 	}
-	marshalData, marshalErr := json.Marshal(pluginList)
+	marshalData, marshalErr := json.Marshal(pluginModuleList)
 	if marshalErr != nil {
 		return marshalErr
 	}
-	return os.WriteFile(path.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
+	return os.WriteFile(filepath.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
 }

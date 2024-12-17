@@ -12,18 +12,18 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
+import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { remotePluginLoader } from '@perses-dev/plugin-runtime';
+import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { bundledPluginLoader } from '../../../model/bundled-plugins';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { useVariableList } from '../../../model/variable-client';
-import { useGlobalVariableList } from '../../../model/global-variable-client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
+import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
+import { useVariableList } from '../../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -81,7 +81,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
-          pluginLoader={bundledPluginLoader}
+          pluginLoader={remotePluginLoader()}
           defaultPluginKinds={{
             Panel: 'TimeSeriesChart',
             TimeSeriesQuery: 'PrometheusTimeSeriesQuery',

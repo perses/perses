@@ -25,7 +25,7 @@ const (
 )
 
 type NPMPerses struct {
-	PluginType string `json:"pluginType"`
+	Plugins []PluginMetadata `json:"plugins"`
 }
 
 type NPMPackage struct {
@@ -39,14 +39,14 @@ type BuildInfo struct {
 	Name    string `json:"buildName"`
 }
 
-type Metadata struct {
+type ManifetsMetadata struct {
 	BuildInfo BuildInfo `json:"buildInfo"`
 }
 
 type NPMManifest struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Metadata Metadata `json:"metaData"`
+	ID       string           `json:"id"`
+	Name     string           `json:"name"`
+	Metadata ManifetsMetadata `json:"metaData"`
 }
 
 func ReadManifest(pluginPath string) (*NPMManifest, error) {

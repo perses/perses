@@ -19,7 +19,7 @@ export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
   pluginResourcesByTypeAndKind: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
-  pluginMetadataByType: Map<PluginType, PluginMetadata[]>;
+  pluginMetadataByType: Map<string, PluginMetadata[]>;
 }
 
 /**
