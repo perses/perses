@@ -56,13 +56,11 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
 
     if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
       const numericValue = Number(value);
-      if (
-        setting.condition.spec?.min !== undefined &&
-        setting.condition.spec?.max !== undefined &&
-        numericValue >= +setting.condition.spec?.min &&
-        numericValue <= +setting.condition.spec?.max
-      ) {
-        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      if (setting.condition.spec?.min !== undefined && setting.condition.spec?.max !== undefined) {
+        if (numericValue >= +setting.condition.spec?.min && numericValue <= +setting.condition.spec?.max) {
+          return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+        }
+        return undefined;
       }
 
       if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
