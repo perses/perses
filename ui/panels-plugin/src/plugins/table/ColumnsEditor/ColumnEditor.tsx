@@ -144,9 +144,9 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             type="number"
             value={width}
             fullWidth
-            // set visibility instead of wrapping in a if condition, in order to keep same layout
+            // set visibility instead of wrapping in an if condition, in order to keep same layout
             sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible', flex: 2 }}
-            InputProps={{ inputProps: { min: 1 } }}
+            slotProps={{ htmlInput: { min: 1 } }}
             onChange={(value) => {
               setWidth(+value);
               onChange({ ...column, width: +value });

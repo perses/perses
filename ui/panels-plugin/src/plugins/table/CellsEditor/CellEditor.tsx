@@ -17,13 +17,12 @@ import {
   MenuItem,
   Stack,
   StackProps,
-  TextField,
   Tooltip,
   Typography,
   Grid2 as Grid,
 } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { OptionsColorPicker } from '@perses-dev/components';
+import { OptionsColorPicker, TextField } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ReactElement } from 'react';
 import { CellSettings, Condition } from '../table-model';
@@ -41,7 +40,7 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="Value"
           placeholder="Exact value"
           value={condition.spec?.value ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          onChange={(value) => onChange({ ...condition, spec: { value: value } } as Condition)}
           fullWidth
         />
       </Stack>
@@ -53,14 +52,14 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="From"
           placeholder="Start of range"
           value={condition.spec?.min ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, min: +e.target.value } } as Condition)}
+          onChange={(value) => onChange({ ...condition, spec: { ...condition.spec, min: +value } } as Condition)}
           fullWidth
         />
         <TextField
           label="To"
           placeholder="End of range (inclusive)"
           value={condition.spec?.max ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, max: +e.target.value } } as Condition)}
+          onChange={(value) => onChange({ ...condition, spec: { ...condition.spec, max: +value } } as Condition)}
           fullWidth
         />
       </Stack>
@@ -72,7 +71,7 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="Regular Expression"
           placeholder="JavaScript regular expression"
           value={condition.spec?.expr ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { expr: e.target.value } } as Condition)}
+          onChange={(value) => onChange({ ...condition, spec: { expr: value } } as Condition)}
           fullWidth
         />
       </Stack>
@@ -84,7 +83,7 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           select
           label="Value"
           value={condition.spec?.value ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          onChange={(value) => onChange({ ...condition, spec: { value: value } } as Condition)}
           fullWidth
         >
           <MenuItem value="empty">
@@ -139,7 +138,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
             select
             label="Type"
             value={cell.condition.kind}
-            onChange={(e) => onChange({ ...cell, condition: { kind: e.target.value } } as CellSettings)}
+            onChange={(value) => onChange({ ...cell, condition: { kind: value } } as CellSettings)}
             required
             sx={{ width: '120px' }}
           >
@@ -187,7 +186,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
         <TextField
           label="Display text"
           value={cell.text}
-          onChange={(e) => onChange({ ...cell, text: e.target.value })}
+          onChange={(value) => onChange({ ...cell, text: value })}
           fullWidth
         />
       </Grid>
