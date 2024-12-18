@@ -52,14 +52,24 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="From"
           placeholder="Start of range"
           value={condition.spec?.min ?? ''}
-          onChange={(value) => onChange({ ...condition, spec: { ...condition.spec, min: +value } } as Condition)}
+          onChange={(value) =>
+            onChange({
+              ...condition,
+              spec: { ...condition.spec, min: value === '' ? undefined : +value },
+            } as Condition)
+          }
           fullWidth
         />
         <TextField
           label="To"
           placeholder="End of range (inclusive)"
           value={condition.spec?.max ?? ''}
-          onChange={(value) => onChange({ ...condition, spec: { ...condition.spec, max: +value } } as Condition)}
+          onChange={(value) =>
+            onChange({
+              ...condition,
+              spec: { ...condition.spec, max: value === '' ? undefined : +value },
+            } as Condition)
+          }
           fullWidth
         />
       </Stack>
