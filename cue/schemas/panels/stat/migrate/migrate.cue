@@ -34,6 +34,11 @@ spec: {
 		format: decimalPlaces: #decimal
 	}
 
+	#fontsize: *#panel.options.text.valueSize | null
+		if #fontsize != null {
+			valueFontSize: #fontsize
+		}
+
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
 	if #steps != null {
 		thresholds: {
