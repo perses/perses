@@ -23,7 +23,7 @@ export const TextField = forwardRef(function (
 ) {
   const [currentValue, setCurrentValue] = useState(value);
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     setCurrentValue(event.target.value);
     debounceFn(event.target.value);
   }
