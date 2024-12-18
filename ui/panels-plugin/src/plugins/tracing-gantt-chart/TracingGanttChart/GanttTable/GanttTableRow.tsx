@@ -33,7 +33,7 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
   const { options, span, viewport, selected, nameColumnWidth, divider, onClick } = props;
   const theme = useTheme();
 
-  const handleOnClick = () => {
+  const handleOnClick = (): void => {
     // ignore event if triggered by selecting text
     if (document.getSelection()?.type === 'Range') return;
 

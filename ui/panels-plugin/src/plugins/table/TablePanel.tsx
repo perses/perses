@@ -13,7 +13,7 @@
 
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
@@ -34,7 +34,7 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: column.cellDescription ? (_) => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
+        cellDescription: column.cellDescription ? (_): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
         align: column.align,
@@ -104,7 +104,7 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
 
 export type TableProps = PanelProps<TableOptions>;
 
-export function TablePanel({ contentDimensions, spec }: TableProps) {
+export function TablePanel({ contentDimensions, spec }: TableProps): ReactElement | null {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 

@@ -62,7 +62,7 @@ export class Panel {
     this.loader = this.container.locator('[aria-label*=Loading]');
   }
 
-  async isLoaded() {
+  async isLoaded(): Promise<void> {
     // Wait for the figure to have at least one visible child that is not the loader.
     await expect(async () => {
       await expect(this.loader).toHaveCount(0);
@@ -80,18 +80,18 @@ export class Panel {
     await this.figure.scrollIntoViewIfNeeded();
   }
 
-  async startEditing() {
+  async startEditing(): Promise<void> {
     await this.editButton.click();
   }
 
-  async delete() {
+  async delete(): Promise<void> {
     await this.deleteButton.click();
   }
 
   /**
    * Get information about the bounds of the panel.
    */
-  async getBounds() {
+  async getBounds(): Promise<{ x: number; y: number; width: number; height: number }> {
     const panelBounds = await this.container.boundingBox();
 
     // These values shouldn't be null in the cases we are using them, so thowing an error
@@ -107,7 +107,7 @@ export class Panel {
   /**
    * Resizes the specified panel to the provided dimensions.
    */
-  async resize({ width, height }: resizePanelOptions) {
+  async resize({ width, height }: resizePanelOptions): Promise<void> {
     const currentBounds = await this.getBounds();
 
     // Adjust positions based on current position and size of panel.

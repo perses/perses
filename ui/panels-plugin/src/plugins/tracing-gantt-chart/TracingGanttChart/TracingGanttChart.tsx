@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, Stack, useTheme } from '@mui/material';
 import { Span, Trace } from '@perses-dev/core';
 import { TracingGanttChartOptions } from '../gantt-chart-model';
@@ -36,7 +36,7 @@ export interface TracingGanttChartProps {
  * The UI/UX of this panel is based on Jaeger UI, licensed under Apache License, Version 2.0.
  * https://github.com/jaegertracing/jaeger-ui
  */
-export function TracingGanttChart(props: TracingGanttChartProps) {
+export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
   const { options, attributeLinks, trace: coreTrace } = props;
 
   const theme = useTheme();

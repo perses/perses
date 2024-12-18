@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MOCK_GANTT_TRACE } from '../../../test';
 import { TicksHeader, TicksHeaderProps } from './Ticks';
 
 describe('Ticks', () => {
-  const renderComponent = (props: TicksHeaderProps) => {
+  const renderComponent = (props: TicksHeaderProps): RenderResult => {
     return render(<TicksHeader {...props} />);
   };
 

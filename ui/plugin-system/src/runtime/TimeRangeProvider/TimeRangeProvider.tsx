@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AbsoluteTimeRange,
   DurationString,
@@ -43,7 +43,7 @@ export interface TimeRange {
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
 
-export function useTimeRangeContext() {
+export function useTimeRangeContext(): TimeRange {
   const ctx = useContext(TimeRangeContext);
   if (ctx === undefined) {
     throw new Error('No TimeRangeContext found. Did you forget a Provider?');
@@ -61,7 +61,7 @@ export function useTimeRange(): TimeRange {
 /**
  * Gets the suggested step for a graph query in ms for the currently selected time range.
  */
-export function useSuggestedStepMs(width?: number) {
+export function useSuggestedStepMs(width?: number): number {
   const { absoluteTimeRange } = useTimeRange();
   if (width === undefined) return 0;
   return getSuggestedStepMs(absoluteTimeRange, width);
@@ -70,7 +70,7 @@ export function useSuggestedStepMs(width?: number) {
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
-export function TimeRangeProvider(props: TimeRangeProviderProps) {
+export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
   const [localTimeRange, setLocalTimeRange] = useState<TimeRangeValue>(timeRange);
@@ -97,7 +97,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
         refresh();
       }, refreshIntervalInMs);
 
-      return () => clearInterval(interval);
+      return (): void => clearInterval(interval);
     }
   }, [refresh, refreshIntervalInMs]);
 

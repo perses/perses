@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { AlignSelector, SortSelectorButtons } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 
@@ -23,7 +23,7 @@ export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
   onChange: (column: ColumnSettings) => void;
 }
 
-export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps) {
+export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
     column.width === undefined || column.width === 'auto' ? 100 : column.width
   );

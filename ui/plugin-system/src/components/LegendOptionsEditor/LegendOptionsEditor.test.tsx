@@ -17,7 +17,7 @@ import { LegendSpecOptions } from '../../model';
 import { LegendOptionsEditor } from './LegendOptionsEditor';
 
 describe('LegendOptionsEditor', () => {
-  const renderLegendOptionsEditor = (value?: LegendSpecOptions, onChange = jest.fn()) => {
+  const renderLegendOptionsEditor = (value?: LegendSpecOptions, onChange = jest.fn()): void => {
     render(
       <div>
         <LegendOptionsEditor value={value} onChange={onChange} />
@@ -25,19 +25,19 @@ describe('LegendOptionsEditor', () => {
     );
   };
 
-  const getLegendShowSwitch = () => {
+  const getLegendShowSwitch = (): HTMLElement => {
     return screen.getByRole('checkbox', { name: 'Show' });
   };
 
-  const getLegendPositionSelector = () => {
+  const getLegendPositionSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Position' });
   };
 
-  const getLegendModeSelector = () => {
+  const getLegendModeSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Mode' });
   };
 
-  const getLegendValuesSelector = () => {
+  const getLegendValuesSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Values' });
   };
 

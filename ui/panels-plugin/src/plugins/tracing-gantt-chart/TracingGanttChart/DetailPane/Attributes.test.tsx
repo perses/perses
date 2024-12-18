@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MemoryRouter } from 'react-router-dom';
 import { TraceAttributeValue } from '@perses-dev/core';
 import { AttributeLinks, AttributeList, AttributeListProps } from './Attributes';
 
 describe('Attributes', () => {
-  const renderComponent = (props: AttributeListProps) => {
+  const renderComponent = (props: AttributeListProps): RenderResult => {
     return render(
       <MemoryRouter>
         <AttributeList {...props} />
@@ -54,7 +54,7 @@ describe('Attributes', () => {
   });
 
   it('render an attribute with a link', () => {
-    const stringValue = (val?: TraceAttributeValue) => (val && 'stringValue' in val ? val.stringValue : '');
+    const stringValue = (val?: TraceAttributeValue): string => (val && 'stringValue' in val ? val.stringValue : '');
     const attributeLinks: AttributeLinks = {
       'k8s.pod.name': (attrs) =>
         `/console/ns/${stringValue(attrs['k8s.namespace.name'])}/pod/${stringValue(attrs['k8s.pod.name'])}/detail`,

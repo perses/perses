@@ -14,7 +14,7 @@
 import { PanelPlugin, PanelProps } from '@perses-dev/plugin-system';
 import { TimeSeriesTablePanel } from './TimeSeriesTablePanel';
 
-interface TimeSeriesTableOptions {}
+type TimeSeriesTableOptions = Record<string, unknown>;
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.

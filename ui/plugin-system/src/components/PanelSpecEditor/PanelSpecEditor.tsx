@@ -14,6 +14,7 @@
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
+import { ReactElement } from 'react';
 import { QueryCountProvider, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
@@ -27,7 +28,7 @@ export interface PanelSpecEditorProps {
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
-export function PanelSpecEditor(props: PanelSpecEditorProps) {
+export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | null {
   const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);

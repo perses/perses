@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { EChart, OnEventsType, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
@@ -51,7 +51,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'medium',
 }).format;
 
-export function Scatterplot<T>(props: ScatterplotProps<T>) {
+export function Scatterplot<T>(props: ScatterplotProps<T>): ReactElement {
   const { width, height, options, onClick } = props;
   const chartsTheme = useChartsTheme();
 
@@ -110,7 +110,7 @@ export function Scatterplot<T>(props: ScatterplotProps<T>) {
   const handleEvents: OnEventsType<ScatterSeriesOption['data'] | unknown> = useMemo(() => {
     const handlers: OnEventsType<ScatterSeriesOption['data'] | unknown> = {};
     if (onClick) {
-      handlers.click = (params) => onClick(params.data as T);
+      handlers.click = (params): void => onClick(params.data as T);
     }
     return handlers;
   }, [onClick]);

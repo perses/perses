@@ -41,7 +41,8 @@
     "react-hook-form": "^7.46.1"
   },
   "peerDependencies": {
-    "react": "^17.0.2 || ^18.0.0"
+    "react": "^17.0.2 || ^18.0.0",
+    "@tanstack/react-query": "^4.7.1"
   },
   "files": [
     "dist",

@@ -56,7 +56,7 @@ export interface QueryOptions {
  * Calls the `/-/healthy` endpoint to check if the datasource is healthy.
  */
 export function healthCheck(queryOptions: QueryOptions) {
-  return async () => {
+  return async (): Promise<boolean> => {
     const url = `${queryOptions.datasourceUrl}/-/healthy`;
 
     try {
@@ -71,21 +71,30 @@ export function healthCheck(queryOptions: QueryOptions) {
 /**
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
-export function instantQuery(params: InstantQueryRequestParameters, queryOptions: QueryOptions) {
+export function instantQuery(
+  params: InstantQueryRequestParameters,
+  queryOptions: QueryOptions
+): Promise<InstantQueryResponse> {
   return fetchWithPost<InstantQueryRequestParameters, InstantQueryResponse>('/api/v1/query', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/query_range` endpoint to get metrics data.
  */
-export function rangeQuery(params: RangeQueryRequestParameters, queryOptions: QueryOptions) {
+export function rangeQuery(
+  params: RangeQueryRequestParameters,
+  queryOptions: QueryOptions
+): Promise<RangeQueryResponse> {
   return fetchWithPost<RangeQueryRequestParameters, RangeQueryResponse>('/api/v1/query_range', params, queryOptions);
 }
 
 /**
  * Calls the `/api/v1/labels` endpoint to get a list of label names.
  */
-export function labelNames(params: LabelNamesRequestParameters, queryOptions: QueryOptions) {
+export function labelNames(
+  params: LabelNamesRequestParameters,
+  queryOptions: QueryOptions
+): Promise<LabelNamesResponse> {
   return fetchWithPost<LabelNamesRequestParameters, LabelNamesResponse>('/api/v1/labels', params, queryOptions);
 }
 
@@ -140,7 +149,11 @@ export function parseQuery(
   return fetchWithPost<ParseQueryRequestParameters, ParseQueryResponse>(apiURI, params, queryOptions);
 }
 
-function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
+function fetchWithGet<T extends RequestParams<T>, TResponse>(
+  apiURI: string,
+  params: T,
+  queryOptions: QueryOptions
+): Promise<TResponse> {
   const { datasourceUrl, headers } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
@@ -151,7 +164,11 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
   return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
 
-function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
+function fetchWithPost<T extends RequestParams<T>, TResponse>(
+  apiURI: string,
+  params: T,
+  queryOptions: QueryOptions
+): Promise<TResponse> {
   const { datasourceUrl, headers } = queryOptions;
 
   const url = `${datasourceUrl}${apiURI}`;
@@ -178,7 +195,7 @@ type RequestParams<T> = {
 /**
  * Creates URLSearchParams from a request params object.
  */
-function createSearchParams<T extends RequestParams<T>>(params: T) {
+function createSearchParams<T extends RequestParams<T>>(params: T): URLSearchParams {
   const searchParams = new URLSearchParams();
   for (const key in params) {
     const value: ParamValue = params[key];
@@ -204,7 +221,7 @@ function createSearchParams<T extends RequestParams<T>>(params: T) {
 /**
  * Fetch JSON and parse warnings for query inspector
  */
-export async function fetchResults<T>(...args: Parameters<typeof global.fetch>) {
+export async function fetchResults<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
   const json: T = await response.json();
   return { ...json, rawResponse: response };

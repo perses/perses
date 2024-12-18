@@ -24,7 +24,7 @@ import {
   LegendItem,
 } from '@perses-dev/components';
 import { Box, useTheme } from '@mui/material';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, ReactElement } from 'react';
 import { CalculationType, CalculationsMap, DEFAULT_LEGEND } from '@perses-dev/core';
 import { validateLegendSpec, useDataQueries, PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
@@ -35,7 +35,7 @@ import { calculatePercentages, sortSeriesData } from './utils';
 
 export type PieChartPanelProps = PanelProps<PieChartOptions>;
 
-export function PieChartPanel(props: PieChartPanelProps) {
+export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, sort, mode, querySettings: querySettingsList },
     contentDimensions,
@@ -174,10 +174,10 @@ export function PieChartPanel(props: PieChartPanelProps) {
               sorting: legendSorting,
               onSortingChange: setLegendSorting,
             },
-            onItemMouseOver: (e, { id }) => {
+            onItemMouseOver: (e, { id }): void => {
               chartRef.current?.highlightSeries({ name: id });
             },
-            onItemMouseOut: () => {
+            onItemMouseOut: (): void => {
               chartRef.current?.clearHighlightedSeries();
             },
           }

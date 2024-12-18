@@ -27,7 +27,7 @@ export interface Viewport {
 /** minimum span width, i.e. increase width if the calculated width is too small to be visible */
 export const minSpanWidthPx = 2;
 export const rowHeight = '2rem';
-export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
+export const spanHasError = (span: Span): boolean => span.status?.code === SpanStatusError;
 
 export function getServiceColor(
   muiTheme: Theme,
@@ -35,7 +35,7 @@ export function getServiceColor(
   paletteMode: 'auto' | 'categorical' | undefined,
   serviceName: string,
   error = false
-) {
+): string {
   switch (paletteMode) {
     case 'categorical': {
       // ECharts type for color is not always an array but it is always an array in ChartsProvider
@@ -54,11 +54,11 @@ export function getSpanColor(
   chartsTheme: PersesChartsTheme,
   paletteMode: 'auto' | 'categorical' | undefined,
   span: Span
-) {
+): string {
   return getServiceColor(muiTheme, chartsTheme, paletteMode, span.resource.serviceName, spanHasError(span));
 }
 
-export function formatDuration(timeMs: number) {
+export function formatDuration(timeMs: number): string {
   if (timeMs < 1) {
     return `${Math.round(timeMs * 1000)}μs`;
   }

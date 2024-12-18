@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
@@ -76,7 +76,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 // TODO: simplify this if we switch the list-based legend UI to use checkboxes,
 // where we *would* want to visually select all items in this case.
 
-export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
+export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement | null {
   const {
     spec: { thresholds, yAxis, tooltip, querySettings: querySettingsList },
     contentDimensions,
@@ -370,7 +370,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     bottom: 0,
   };
 
-  const handleDataZoom = (event: ZoomEventData) => {
+  const handleDataZoom = (event: ZoomEventData): void => {
     // TODO: add ECharts transition animation on zoom
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
@@ -410,10 +410,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               sorting: legendSorting,
               onSortingChange: setLegendSorting,
             },
-            onItemMouseOver: (e, { id }) => {
+            onItemMouseOver: (e, { id }): void => {
               chartRef.current?.highlightSeries({ name: id });
             },
-            onItemMouseOut: () => {
+            onItemMouseOut: (): void => {
               chartRef.current?.clearHighlightedSeries();
             },
           }

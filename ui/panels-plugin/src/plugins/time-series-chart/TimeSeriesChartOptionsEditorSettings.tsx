@@ -21,6 +21,7 @@ import {
   ThresholdsEditorProps,
 } from '@perses-dev/components';
 import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import {
   TimeSeriesChartOptions,
   DEFAULT_VISUAL,
@@ -31,7 +32,7 @@ import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEd
 import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
 import { QuerySettingsEditor, QuerySettingsEditorProps } from './QuerySettingsEditor';
 
-export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps) {
+export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
   const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {

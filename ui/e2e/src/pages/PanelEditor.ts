@@ -35,58 +35,58 @@ export class PanelEditor {
     this.cancelButton = container.getByRole('button', { name: 'Cancel', exact: true });
   }
 
-  async isVisible() {
+  async isVisible(): Promise<void> {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates in.
     await waitForAnimations(this.container);
     await this.container.isVisible();
   }
 
-  async isClosed() {
+  async isClosed(): Promise<void> {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates out.
     await waitForAnimations(this.container);
     await expect(this.container).toHaveCount(0);
   }
 
-  async selectType(typeName: string) {
+  async selectType(typeName: string): Promise<void> {
     // Use a regex for this selector to avoid also selecting "Group type"
     await selectMenuItem(this.container, /^Type/, typeName);
   }
 
-  async selectGroup(groupName: string) {
+  async selectGroup(groupName: string): Promise<void> {
     await selectMenuItem(this.container, 'Group', groupName);
 
     await expect(this.container.getByLabel('Group', { exact: false })).toHaveText(groupName);
   }
 
-  async selectTab(tabName: string) {
+  async selectTab(tabName: string): Promise<void> {
     await this.container.getByRole('tab', { name: tabName }).click();
   }
 
   /**
    * THRESHOLDS EDITOR HELPERS
    */
-  async addThreshold() {
+  async addThreshold(): Promise<void> {
     await this.container.getByRole('button', { name: 'add threshold' }).click();
   }
 
-  async deleteThreshold(label: string) {
+  async deleteThreshold(label: string): Promise<void> {
     await this.container.getByRole('button', { name: `delete threshold ${label}` }).click();
   }
 
-  async editThreshold(label: string, value: string) {
+  async editThreshold(label: string, value: string): Promise<void> {
     const input = this.container.getByLabel(label, { exact: true });
     await input.clear();
     await input.type(value);
   }
 
-  async openThresholdColorPicker(label: string) {
+  async openThresholdColorPicker(label: string): Promise<void> {
     const openColorPickerButton = this.container.getByRole('button', { name: `change ${label} color` });
     await openColorPickerButton.click();
   }
 
-  async toggleThresholdModes(mode: 'absolute' | 'percent') {
+  async toggleThresholdModes(mode: 'absolute' | 'percent'): Promise<void> {
     await this.container.getByRole('button', { name: mode === 'percent' ? 'Percent' : 'Absolute' }).click();
   }
 }

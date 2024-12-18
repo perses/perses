@@ -249,7 +249,7 @@ export function convertPercentThreshold(
   data: LegacyTimeSeries[] | TimeSeries[],
   max?: number,
   min?: number
-) {
+): number {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);
   const adjustedMin = min ?? 0;
@@ -257,7 +257,7 @@ export function convertPercentThreshold(
   return percentDecimal * total + adjustedMin;
 }
 
-function findMax(data: LegacyTimeSeries[] | TimeSeries[]) {
+function findMax(data: LegacyTimeSeries[] | TimeSeries[]): number {
   let max = 0;
   if (data.length && data[0] !== undefined && (data as TimeSeries[])[0]?.values) {
     (data as TimeSeries[]).forEach((series) => {
@@ -299,7 +299,7 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
   // Set the y-axis minimum relative to the data
   if (inputAxis?.min === undefined) {
     // https://echarts.apache.org/en/option.html#yAxis.min
-    yAxis.min = (value) => {
+    yAxis.min = (value): number => {
       if (value.min >= 0 && value.min <= 1) {
         // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
@@ -326,7 +326,7 @@ export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): 
  * 2. 0.567 --> 0.5
  * 3. -12 --> -20
  */
-export function roundDown(num: number) {
+export function roundDown(num: number): number {
   const magnitude = Math.floor(Math.log10(Math.abs(num)));
   const firstDigit = Math.floor(num / Math.pow(10, magnitude));
   return firstDigit * Math.pow(10, magnitude);

@@ -25,6 +25,7 @@ import {
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { OptionsColorPicker } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
 import { CellSettings, Condition } from '../table-model';
 
 interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
@@ -32,7 +33,7 @@ interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
   onChange: (condition: Condition) => void;
 }
 
-function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps) {
+function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps): ReactElement | null {
   if (condition.kind === 'Value') {
     return (
       <Stack gap={1} direction="row" {...props}>
@@ -129,7 +130,7 @@ export interface CellEditorProps extends Omit<GridProps, 'onChange'> {
   onDelete: () => void;
 }
 
-export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorProps) {
+export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorProps): ReactElement {
   return (
     <Grid container spacing={2} {...props}>
       <Grid size={{ xs: 5 }}>
