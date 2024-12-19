@@ -29,10 +29,15 @@ spec: {
 		format: unit: #unit
 	}
 
-	#decimal: *#panel.fieldConfig.defaults.decimal | null
+	#decimal: *#panel.fieldConfig.defaults.decimal | *#panel.fieldConfig.defaults.decimals | null
 	if #decimal != null {
 		format: decimalPlaces: #decimal
 	}
+
+	#fontsize: *#panel.options.text.valueSize | null
+		if #fontsize != null {
+			valueFontSize: #fontsize
+		}
 
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
 	if #steps != null {
