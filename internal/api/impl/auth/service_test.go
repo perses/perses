@@ -40,7 +40,7 @@ func TestSaveProviderInfo(t *testing.T) {
 	initialSpec := v1.UserSpec{
 		FirstName:      "",
 		LastName:       "",
-		NativeProvider: v1.NativeProvider{},
+		NativeProvider: nil,
 		OauthProviders: nil,
 	}
 
