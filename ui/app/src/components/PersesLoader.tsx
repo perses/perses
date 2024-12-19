@@ -26,7 +26,7 @@ export function PersesLoader(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      <svg width="15%" height="auto" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="15%" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M71.625 23H29.375C25.8542 23 23 25.8542 23 29.375C23 32.8958 25.8542 35.75 29.375 35.75H71.625C75.1458 35.75 78 32.8958 78 29.375C78 25.8542 75.1458 23 71.625 23Z"
           fill="#DE005D"
