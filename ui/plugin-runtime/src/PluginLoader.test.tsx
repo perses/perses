@@ -14,7 +14,7 @@
 import { FederationHost } from '@module-federation/enhanced/runtime';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { PersesPluginModule } from './PersesPlugin.types';
+import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 import { PluginLoader } from './PluginLoader';
 import * as PluginRuntime from './PluginRuntime';
 
@@ -55,7 +55,7 @@ class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { err
 }
 
 describe('PluginLoader', () => {
-  const mockPlugin = {
+  const mockPlugin: PersesPlugin = {
     name: 'test-plugin',
     moduleName: 'test-module',
     baseURL: 'https://example.com',
@@ -65,7 +65,8 @@ describe('PluginLoader', () => {
     const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
 
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: (): Promise<{ default: unknown }> => Promise.resolve({ default: mockPluginModule }),
+      loadPlugin: (): Promise<{ 'test-plugin': () => React.ReactNode }> =>
+        Promise.resolve({ 'test-plugin': mockPluginModule }),
       pluginRuntime: {} as FederationHost,
     }));
 
@@ -80,11 +81,11 @@ describe('PluginLoader', () => {
     expect(screen.getByText('Mock Plugin Component')).toBeInTheDocument();
   });
 
-  it('should throw an error if the plugin module does not have a default export', async () => {
+  it('should throw an error if the plugin module does not have a named export', async () => {
     const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
 
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: (): Promise<PersesPluginModule> => Promise.resolve({ mockPluginModule } as unknown as PersesPluginModule),
+      loadPlugin: (): Promise<RemotePluginModule> => Promise.resolve({ mockPluginModule } as RemotePluginModule),
       pluginRuntime: {} as FederationHost,
     }));
 
@@ -97,14 +98,14 @@ describe('PluginLoader', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('PluginLoader: Plugin module does not have a default export')).toBeInTheDocument();
+      expect(screen.getByText('PluginLoader: Plugin module does not have a test-plugin export')).toBeInTheDocument();
     });
   });
 
-  it('should throw an error if the plugin module default export is not a function', async () => {
+  it('should throw an error if the plugin module named export is not a function', async () => {
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
-      load: (): Promise<PersesPluginModule> =>
-        Promise.resolve({ default: 'not a function' } as unknown as PersesPluginModule),
+      loadPlugin: (): Promise<RemotePluginModule> =>
+        Promise.resolve({ 'test-plugin': 'not a function' } as unknown as RemotePluginModule),
       pluginRuntime: {} as FederationHost,
     }));
 
@@ -117,7 +118,7 @@ describe('PluginLoader', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('PluginLoader: Plugin module default export is not a function')).toBeInTheDocument();
+      expect(screen.getByText('PluginLoader: Plugin test-plugin export is not a function')).toBeInTheDocument();
     });
   });
 });

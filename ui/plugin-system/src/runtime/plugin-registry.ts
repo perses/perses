@@ -17,8 +17,8 @@ import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
-  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
-  listPluginMetadata(pluginTypes: PluginType[]): Promise<PluginMetadata[]>;
+  getPlugin<T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>>;
+  listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadata[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
 
@@ -83,7 +83,7 @@ export function usePlugins<T extends PluginType>(
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
 type UseListPluginMetadataOptions = Omit<
-  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, PluginType[]]>,
+  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, string[]]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -91,7 +91,7 @@ type UseListPluginMetadataOptions = Omit<
  * Gets a list of plugin metadata for the specified plugin type and returns it, along with loading/error state.
  */
 export function useListPluginMetadata(
-  pluginTypes: PluginType[],
+  pluginTypes: string[],
   options?: UseListPluginMetadataOptions
 ): UseQueryResult<PluginMetadata[]> {
   const { listPluginMetadata } = usePluginRegistry();
@@ -109,10 +109,10 @@ export function usePluginBuiltinVariableDefinitions(): UseQueryResult<BuiltinVar
     queryKey: ['usePluginBuiltinVariableDefinitions'],
     queryFn: async () => {
       const datasources = await listPluginMetadata(['Datasource']);
-      const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
+      const datasourceNames = new Set(datasources.map((datasource) => datasource.spec.name));
       const result: BuiltinVariableDefinition[] = [];
-      for (const kind of datasourceKinds) {
-        const plugin = await getPlugin('Datasource', kind);
+      for (const name of datasourceNames) {
+        const plugin = await getPlugin('Datasource', name);
         if (plugin.getBuiltinVariableDefinitions) {
           plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
         }

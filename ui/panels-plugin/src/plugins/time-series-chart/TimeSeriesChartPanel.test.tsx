@@ -45,8 +45,8 @@ const FakeTimeSeriesQuery: TimeSeriesQueryPlugin<UnknownSpec> = {
 };
 
 const MOCK_PROM_QUERY_PLUGIN: MockPlugin = {
-  pluginType: 'TimeSeriesQuery',
-  kind: 'PrometheusTimeSeriesQuery',
+  kind: 'TimeSeriesQuery',
+  spec: { name: 'PrometheusTimeSeriesQuery' },
   plugin: FakeTimeSeriesQuery,
 };
 

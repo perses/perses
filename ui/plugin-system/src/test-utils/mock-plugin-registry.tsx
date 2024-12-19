@@ -17,8 +17,8 @@ import { PluginModuleResource, Plugin, PluginLoader, PluginImplementation, Plugi
 
 export type MockPlugin = {
   [T in PluginType]: {
-    pluginType: T;
-    kind: string;
+    kind: T;
+    spec: { name: string };
     plugin: PluginImplementation<T>;
   };
 }[PluginType];
@@ -32,17 +32,17 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
     kind: 'PluginModule',
     metadata: {
       name: 'Fake Plugin Module for Tests',
-      createdAt: '',
-      updatedAt: '',
-      version: 0,
+      version: '0',
     },
     spec: {
       // Add metadata for all mock plugins
-      plugins: mockPlugins.map(({ pluginType, kind }) => ({
-        pluginType,
+      plugins: mockPlugins.map(({ kind, spec: { name } }) => ({
         kind,
-        display: {
-          name: getMockPluginName(pluginType, kind),
+        spec: {
+          name,
+          display: {
+            name: getMockPluginName(kind, name),
+          },
         },
       })),
     },
@@ -51,7 +51,7 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
   const mockPluginModule: Record<string, Plugin<UnknownSpec>> = {};
   for (const mockPlugin of mockPlugins) {
     // "Export" on the module under the same name as the kind the plugin handles
-    mockPluginModule[mockPlugin.kind] = mockPlugin.plugin;
+    mockPluginModule[mockPlugin.spec.name] = mockPlugin.plugin;
   }
 
   const pluginLoader: PluginLoader = {
@@ -75,6 +75,6 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
  * The function that's used to generate the display name of mocked plugins in mockPluginRegistry. Can be useful if you
  * need to interact with some UI component that's displaying it.
  */
-export function getMockPluginName(pluginType: PluginType, kind: string): string {
-  return `${pluginType} Plugin for ${kind}`;
+export function getMockPluginName(kind: PluginType, name: string): string {
+  return `${kind} Plugin for ${name}`;
 }

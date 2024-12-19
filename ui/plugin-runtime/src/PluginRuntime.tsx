@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import { FederationHost, init, loadRemote } from '@module-federation/enhanced/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { PersesPluginModule } from './PersesPlugin.types';
+import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
 export const pluginRuntime = init({
   name: '@perses/perses-ui-host',
@@ -25,7 +25,7 @@ export const pluginRuntime = init({
       lib: () => React,
       shareConfig: {
         singleton: true,
-        requiredVersion: '18.2.0',
+        requiredVersion: '^18.2.0',
       },
     },
     'react-dom': {
@@ -33,7 +33,7 @@ export const pluginRuntime = init({
       lib: () => ReactDOM,
       shareConfig: {
         singleton: true,
-        requiredVersion: '18.2.0',
+        requiredVersion: '^18.2.0',
       },
     },
     echarts: {
@@ -45,19 +45,19 @@ export const pluginRuntime = init({
       },
     },
     '@perses-dev/components': {
-      version: '0.46.0',
+      version: '0.49.0',
       lib: () => require('@perses-dev/components'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.46.0',
+        requiredVersion: '^0.49.0',
       },
     },
     '@perses-dev/plugin-system': {
-      version: '0.46.0',
+      version: '0.49.0',
       lib: () => require('@perses-dev/plugin-system'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.46.0',
+        requiredVersion: '^0.49.0',
       },
     },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK
@@ -70,11 +70,11 @@ export const pluginRuntime = init({
       },
     },
     'date-fns-tz': {
-      version: '1.3.7',
+      version: '1.3.8',
       lib: () => require('date-fns-tz'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^1.3.7',
+        requiredVersion: '^1.3.8',
       },
     },
     lodash: {
@@ -101,7 +101,6 @@ export const pluginRuntime = init({
         requiredVersion: '^11.11.0',
       },
     },
-
     '@hookform/resolvers/zod': {
       version: '3.3.4',
       lib: () => require('@hookform/resolvers/zod'),
@@ -110,35 +109,55 @@ export const pluginRuntime = init({
         requiredVersion: '^3.3.4',
       },
     },
+    'use-resize-observer': {
+      version: '9.1.0',
+      lib: () => require('use-resize-observer'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^9.1.0',
+      },
+    },
+    'mdi-material-ui': {
+      version: '7.4.0',
+      lib: () => require('mdi-material-ui'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^7.4.0',
+      },
+    },
   },
 });
 
-export function usePluginRuntime({ moduleName, baseURL }: { moduleName: string; baseURL?: string }): {
-  pluginRuntime: typeof pluginRuntime;
-  load: (name: string) => Promise<PersesPluginModule | null>;
+const registerRemote = (name: string, baseURL?: string): void => {
+  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
+  if (!existingRemote) {
+    const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
+    pluginRuntime.registerRemotes([
+      {
+        name,
+        entry: remoteEntryURL,
+        alias: name,
+      },
+    ]);
+  }
+};
+
+export const loadPlugin = async (
+  moduleName: string,
+  pluginName: string,
+  baseURL?: string
+): Promise<RemotePluginModule | null> => {
+  registerRemote(moduleName, baseURL);
+
+  return loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
+};
+
+export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
+  pluginRuntime: FederationHost;
+  loadPlugin: () => Promise<RemotePluginModule | null>;
 } {
-  const registerRemote = (name: string): void => {
-    const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
-    if (!existingRemote) {
-      const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
-      pluginRuntime.registerRemotes([
-        {
-          name,
-          entry: remoteEntryURL,
-          alias: name,
-        },
-      ]);
-    }
-  };
-
-  const load = async (name: string): Promise<PersesPluginModule | null> => {
-    registerRemote(name);
-
-    return loadRemote<PersesPluginModule>(`${name}/${moduleName}`);
-  };
-
   return {
     pluginRuntime,
-    load,
+    loadPlugin: () => loadPlugin(plugin.moduleName, plugin.name, plugin.baseURL),
   };
 }

@@ -47,8 +47,8 @@ function buildFakeTraceQuery(): TraceQueryPlugin {
 
 function buildMockQueryPlugin(): MockPlugin {
   return {
-    pluginType: 'TraceQuery',
-    kind: 'TempoTraceQuery',
+    kind: 'TraceQuery',
+    spec: { name: 'TempoTraceQuery' },
     plugin: buildFakeTraceQuery(),
   };
 }

@@ -56,8 +56,8 @@ function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin {
 
 function buildMockQueryPlugin(data: TimeSeriesData): MockPlugin {
   return {
-    pluginType: 'TimeSeriesQuery',
-    kind: 'PrometheusTimeSeriesQuery',
+    kind: 'TimeSeriesQuery',
+    spec: { name: 'PrometheusTimeSeriesQuery' },
     plugin: buildFakeTimeSeriesQuery(data),
   };
 }

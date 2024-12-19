@@ -11,24 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, UnknownSpec } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin } from './time-series-queries';
-import { PanelPlugin } from './panels';
-import { VariablePlugin } from './variables';
+import { UnknownSpec } from '@perses-dev/core';
 import { DatasourcePlugin } from './datasource';
+import { PanelPlugin } from './panels';
 import { Plugin } from './plugin-base';
+import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { TraceQueryPlugin } from './trace-queries';
+import { VariablePlugin } from './variables';
 
-/**
- * Information about a module/package that contains plugins.
- */
-export interface PluginModuleResource {
-  kind: 'PluginModule';
-  metadata: Metadata;
-  spec: PluginSpec;
-}
-
-export interface PluginSpec {
+export interface PluginModuleSpec {
   plugins: PluginMetadata[];
 }
 
@@ -36,12 +27,31 @@ export interface PluginSpec {
  * Metadata about an individual plugin that's part of a PluginModule.
  */
 export interface PluginMetadata {
-  pluginType: PluginType;
-  kind: string;
-  display: {
+  kind: PluginType;
+  spec: {
     name: string;
-    description?: string;
+    display: {
+      name: string;
+      description?: string;
+    };
   };
+}
+
+/**
+ * Metadata about a module/package that contains plugins.
+ */
+export interface PluginModuleMetadata {
+  name: string;
+  version: string;
+}
+
+/**
+ * Information about a module/package that contains plugins.
+ */
+export interface PluginModuleResource {
+  kind: 'PluginModule';
+  metadata: PluginModuleMetadata;
+  spec: PluginModuleSpec;
 }
 
 /**

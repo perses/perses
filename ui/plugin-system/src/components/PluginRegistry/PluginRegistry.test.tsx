@@ -98,11 +98,11 @@ const MetadataConsumer = (props: { pluginType: PluginType }): ReactElement | nul
     <table>
       <tbody>
         {pluginMetadata.map((item) => (
-          <tr key={item.kind}>
-            <td>{item.pluginType}</td>
+          <tr key={item.spec.name}>
             <td>{item.kind}</td>
-            <td>{item.display.name}</td>
-            <td>{item.display.description}</td>
+            <td>{item.spec.name}</td>
+            <td>{item.spec.display.name}</td>
+            <td>{item.spec.display.description}</td>
           </tr>
         ))}
       </tbody>

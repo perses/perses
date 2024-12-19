@@ -13,3 +13,4 @@
 
 export * from './PluginLoader';
 export * from './PluginRuntime';
+export * from './remotePluginLoader';

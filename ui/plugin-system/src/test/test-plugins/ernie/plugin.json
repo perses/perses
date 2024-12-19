@@ -4,27 +4,33 @@
   "spec": {
     "plugins": [
       {
-        "pluginType": "Variable",
-        "kind": "ErnieVariable1",
-        "display": {
-          "name": "Ernie Variable 1",
-          "description": "A variable plugin that exists in the plugin module"
+        "kind": "Variable",
+        "spec": {
+          "name": "ErnieVariable1",
+          "display": {
+            "name": "Ernie Variable 1",
+            "description": "A variable plugin that exists in the plugin module"
+          }
         }
       },
       {
-        "pluginType": "Variable",
-        "kind": "ErnieVariable2",
-        "display": {
-          "name": "Ernie Variable 2",
-          "description": "A variable plugin that exists in the plugin module"
+        "kind": "Variable",
+        "spec": {
+          "name": "ErnieVariable2",
+          "display": {
+            "name": "Ernie Variable 2",
+            "description": "A variable plugin that exists in the plugin module"
+          }
         }
       },
       {
-        "pluginType": "Variable",
-        "kind": "MissingErnieVariable",
-        "display": {
-          "name": "Ernie Variable",
-          "description": "A variable plugin that exists here in the metadata, but is not in the plugin module"
+        "kind": "Variable",
+        "spec": {
+          "name": "MissingErnieVariable",
+          "display": {
+            "name": "Ernie Variable",
+            "description": "A variable plugin that exists here in the metadata, but is not in the plugin module"
+          }
         }
       }
     ]

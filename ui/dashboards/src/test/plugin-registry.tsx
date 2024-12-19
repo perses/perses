@@ -33,8 +33,8 @@ const FakeTimeSeriesPlugin: PanelPlugin<UnknownSpec> = {
 };
 
 const MOCK_TIME_SERIES_PANEL: MockPlugin = {
-  pluginType: 'Panel',
-  kind: 'TimeSeriesChart',
+  kind: 'Panel',
+  spec: { name: 'TimeSeriesChart' },
   plugin: FakeTimeSeriesPlugin,
 };
 

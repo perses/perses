@@ -19,6 +19,7 @@ import { PluginLoader, PluginModuleResource, dynamicImportPluginLoader } from '@
 /**
  * A PluginLoader that includes all the "built-in" plugins that are bundled with Perses by default.
  */
+// TODO: this can be removed when all plugins are loaded dynamically
 export const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: prometheusResource as PluginModuleResource,

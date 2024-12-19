@@ -6,19 +6,23 @@
   "spec": {
     "plugins": [
       {
-        "pluginType": "TraceQuery",
-        "kind": "TempoTraceQuery",
-        "display": {
-          "name": "Tempo Trace Query",
-          "description": ""
+        "kind": "TraceQuery",
+        "spec": {
+          "name": "TempoTraceQuery",
+          "display": {
+            "name": "Tempo Trace Query",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Datasource",
-        "kind": "TempoDatasource",
-        "display": {
-          "name": "Tempo Datasource",
-          "description": ""
+        "kind": "Datasource",
+        "spec": {
+          "name": "TempoDatasource",
+          "display": {
+            "name": "Tempo Datasource",
+            "description": ""
+          }
         }
       }
     ]

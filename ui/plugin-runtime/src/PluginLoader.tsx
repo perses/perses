@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useEffect, useRef, useState } from 'react';
-import { PersesPlugin, PersesPluginModule } from './PersesPlugin.types';
+import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 import { usePluginRuntime } from './PluginRuntime';
 
 interface PluginLoaderProps<P> {
@@ -27,25 +27,25 @@ function PluginContainer<P>({ pluginFn, props }: { pluginFn: Function; props: P 
 }
 
 export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.Element | null {
-  const { load } = usePluginRuntime({ moduleName: plugin.moduleName, baseURL: plugin.baseURL });
-  const [pluginModule, setPluginModule] = useState<PersesPluginModule | null>(null);
+  const { loadPlugin } = usePluginRuntime({ plugin });
+  const [pluginModule, setPluginModule] = useState<RemotePluginModule | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const name = `${plugin.name}-${plugin.moduleName}`;
+  const name = `${plugin.moduleName}-${plugin.name}`;
   const previousPluginName = useRef<string>(name);
 
   useEffect(() => {
     previousPluginName.current = name;
     setError(null);
 
-    load(plugin.name)
+    loadPlugin()
       .then((module) => {
         setPluginModule(module);
       })
       .catch((error) => {
         setPluginModule(null);
-        console.error(`PluginLoader: Error loading plugin ${plugin.name}:`, error);
-        setError(new Error(`PluginLoader: Error loading plugin ${plugin.name}`));
+        console.error(`PluginLoader: Error loading plugin ${plugin.name} from module ${plugin.moduleName}:`, error);
+        setError(new Error(`PluginLoader: Error loading plugin ${plugin.name} from module ${plugin.moduleName}`));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
@@ -58,12 +58,14 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
     return null;
   }
 
-  if (!pluginModule.default) {
-    throw new Error('PluginLoader: Plugin module does not have a default export');
+  const pluginFunction = pluginModule[plugin.name];
+
+  if (!pluginFunction) {
+    throw new Error(`PluginLoader: Plugin module does not have a ${plugin.name} export`);
   }
 
-  if (typeof pluginModule.default !== 'function') {
-    throw new Error('PluginLoader: Plugin module default export is not a function');
+  if (typeof pluginFunction !== 'function') {
+    throw new Error(`PluginLoader: Plugin ${plugin.name} export is not a function`);
   }
 
   // make sure to re mount the plugin when changes, to avoid mismatch in hooks ordering when re rendering
@@ -71,5 +73,5 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
     return null;
   }
 
-  return <PluginContainer key={name} pluginFn={pluginModule.default} props={props} />;
+  return <PluginContainer key={name} pluginFn={pluginFunction} props={props} />;
 }

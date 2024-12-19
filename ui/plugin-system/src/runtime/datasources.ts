@@ -27,7 +27,7 @@ export interface DatasourceStore {
   /**
    * Gets a list of datasource selection items for a plugin kind.
    */
-  listDatasourceSelectItems(datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]>;
+  listDatasourceSelectItems(datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]>;
 
   /**
    * Gets the list of datasources defined in the dashboard
@@ -90,13 +90,13 @@ export function useDatasourceStore(): DatasourceStore {
  * Returns a list, with all information that can be used in a datasource selection context (group, name, selector, kind, ...)
  */
 export function useListDatasourceSelectItems(
-  datasourcePluginKind: string,
+  datasourcePluginName: string,
   project?: string
 ): UseQueryResult<DatasourceSelectItemGroup[]> {
   const { listDatasourceSelectItems } = useDatasourceStore();
   return useQuery<DatasourceSelectItemGroup[]>({
-    queryKey: ['listDatasourceSelectItems', datasourcePluginKind, project],
-    queryFn: () => listDatasourceSelectItems(datasourcePluginKind),
+    queryKey: ['listDatasourceSelectItems', datasourcePluginName, project],
+    queryFn: () => listDatasourceSelectItems(datasourcePluginName),
   });
 }
 

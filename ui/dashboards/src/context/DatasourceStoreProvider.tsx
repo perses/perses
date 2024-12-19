@@ -144,27 +144,27 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   );
 
   const listDatasourceSelectItems = useEvent(
-    async (datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]> => {
+    async (datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]> => {
       const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
         listPluginMetadata(['Datasource']),
-        project ? datasourceApi.listDatasources(project, datasourcePluginKind) : [],
-        datasourceApi.listGlobalDatasources(datasourcePluginKind),
+        project ? datasourceApi.listDatasources(project, datasourcePluginName) : [],
+        datasourceApi.listGlobalDatasources(datasourcePluginName),
       ]);
 
       // Find the metadata for the plugin type they asked for, so we can use it for the name of the default datasource
-      const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.kind === datasourcePluginKind);
+      const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.spec.name === datasourcePluginName);
       if (datasourcePluginMetadata === undefined) {
-        throw new Error(`Could not find a Datasource plugin with kind '${datasourcePluginKind}'`);
+        throw new Error(`Could not find a Datasource plugin with kind '${datasourcePluginName}'`);
       }
 
       // Get helper for computing results properly
-      const { results, addItem } = buildDatasourceSelectItemGroups(datasourcePluginMetadata.display.name);
+      const { results, addItem } = buildDatasourceSelectItemGroups(datasourcePluginMetadata.spec.display.name);
 
       // Start with dashboard datasources with the highest precedence
       if (dashboardResource?.spec.datasources) {
         for (const selectorName in dashboardResource.spec.datasources) {
           const spec = dashboardResource.spec.datasources[selectorName];
-          if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
+          if (spec === undefined || spec.plugin.kind !== datasourcePluginName) continue;
 
           const saved = selectorName in savedDatasources;
           addItem({ spec, selectorName, selectorGroup: 'dashboard', saved });

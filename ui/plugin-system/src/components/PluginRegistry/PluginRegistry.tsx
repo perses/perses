@@ -61,25 +61,25 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   });
 
   const getPlugin = useCallback(
-    async <T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>> => {
+    async <T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>> => {
       // Get the indexes of the installed plugins
       const pluginIndexes = await getPluginIndexes();
 
       // Figure out what module the plugin is in by looking in the index
-      const typeAndKindKey = getTypeAndKindKey(pluginType, kind);
-      const resource = pluginIndexes.pluginResourcesByTypeAndKind.get(typeAndKindKey);
+      const typeAndKindKey = getTypeAndKindKey(kind, name);
+      const resource = pluginIndexes.pluginResourcesByNameAndKind.get(typeAndKindKey);
       if (resource === undefined) {
-        throw new Error(`A ${pluginType} plugin for kind '${kind}' is not installed`);
+        throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
       }
 
       // Treat the plugin module as a bunch of named exports that have plugins
       const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
 
       // We currently assume that plugin modules will have named exports that match the kinds they handle
-      const plugin = pluginModule[kind];
+      const plugin = pluginModule[name];
       if (plugin === undefined) {
         throw new Error(
-          `The ${pluginType} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
+          `The ${name} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
         );
       }
 
@@ -89,9 +89,9 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   );
 
   const listPluginMetadata = useCallback(
-    async (pluginTypes: PluginType[]) => {
+    async (pluginTypes: string[]) => {
       const pluginIndexes = await getPluginIndexes();
-      return pluginTypes.flatMap((type) => pluginIndexes.pluginMetadataByType.get(type) ?? []);
+      return pluginTypes.flatMap((type) => pluginIndexes.pluginMetadataByKind.get(type) ?? []);
     },
     [getPluginIndexes]
   );
