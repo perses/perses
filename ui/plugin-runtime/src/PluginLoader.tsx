@@ -31,7 +31,7 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
   const [pluginModule, setPluginModule] = useState<RemotePluginModule | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
-  const name = `${plugin.moduleName}-${plugin.kind}`;
+  const name = `${plugin.moduleName}-${plugin.name}`;
   const previousPluginName = useRef<string>(name);
 
   useEffect(() => {
@@ -44,8 +44,8 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
       })
       .catch((error) => {
         setPluginModule(null);
-        console.error(`PluginLoader: Error loading plugin ${plugin.kind} from module ${plugin.moduleName}:`, error);
-        setError(new Error(`PluginLoader: Error loading plugin ${plugin.kind} from module ${plugin.moduleName}`));
+        console.error(`PluginLoader: Error loading plugin ${plugin.name} from module ${plugin.moduleName}:`, error);
+        setError(new Error(`PluginLoader: Error loading plugin ${plugin.name} from module ${plugin.moduleName}`));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
@@ -58,14 +58,14 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
     return null;
   }
 
-  const pluginFunction = pluginModule[plugin.kind];
+  const pluginFunction = pluginModule[plugin.name];
 
   if (!pluginFunction) {
-    throw new Error(`PluginLoader: Plugin module does not have a ${plugin.kind} export`);
+    throw new Error(`PluginLoader: Plugin module does not have a ${plugin.name} export`);
   }
 
   if (typeof pluginFunction !== 'function') {
-    throw new Error(`PluginLoader: Plugin ${plugin.kind} export is not a function`);
+    throw new Error(`PluginLoader: Plugin ${plugin.name} export is not a function`);
   }
 
   // make sure to re mount the plugin when changes, to avoid mismatch in hooks ordering when re rendering

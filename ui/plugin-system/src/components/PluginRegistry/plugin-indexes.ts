@@ -17,9 +17,9 @@ import { PluginLoader, PluginMetadata, PluginModuleResource, PluginType } from '
 
 export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
-  pluginResourcesByTypeAndKind: Map<string, PluginModuleResource>;
+  pluginResourcesByNameAndKind: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
-  pluginMetadataByType: Map<string, PluginMetadata[]>;
+  pluginMetadataByKind: Map<string, PluginMetadata[]>;
 }
 
 /**
@@ -34,33 +34,36 @@ export function usePluginIndexes(
     const installedPlugins = await getInstalledPlugins();
 
     // Create the two indexes from the installed plugins
-    const pluginResourcesByTypeAndKind = new Map<string, PluginModuleResource>();
-    const pluginMetadataByType = new Map<PluginType, PluginMetadata[]>();
+    const pluginResourcesByNameAndKind = new Map<string, PluginModuleResource>();
+    const pluginMetadataByKind = new Map<string, PluginMetadata[]>();
 
     for (const resource of installedPlugins) {
       for (const pluginMetadata of resource.spec.plugins) {
-        const { pluginType, kind } = pluginMetadata;
+        const {
+          kind,
+          spec: { name },
+        } = pluginMetadata;
 
         // Index the plugin by type and kind to point at the module that contains it
-        const key = getTypeAndKindKey(pluginType, kind);
-        if (pluginResourcesByTypeAndKind.has(key)) {
-          console.warn(`Got more than one ${pluginType} plugin for kind ${kind}`);
+        const key = getTypeAndKindKey(kind, name);
+        if (pluginResourcesByNameAndKind.has(key)) {
+          console.warn(`Got more than one ${kind} plugin for kind ${name}`);
         }
-        pluginResourcesByTypeAndKind.set(key, resource);
+        pluginResourcesByNameAndKind.set(key, resource);
 
         // Index the metadata by plugin type
-        let list = pluginMetadataByType.get(pluginType);
+        let list = pluginMetadataByKind.get(kind);
         if (list === undefined) {
           list = [];
-          pluginMetadataByType.set(pluginType, list);
+          pluginMetadataByKind.set(kind, list);
         }
         list.push(pluginMetadata);
       }
     }
 
     return {
-      pluginResourcesByTypeAndKind,
-      pluginMetadataByType,
+      pluginResourcesByNameAndKind,
+      pluginMetadataByKind,
     };
   });
 
@@ -84,6 +87,6 @@ export function usePluginIndexes(
 /**
  * Gets a unique key for a plugin type/kind that can be used as a cache key.
  */
-export function getTypeAndKindKey(pluginType: PluginType, kind: string): string {
-  return `${pluginType}:${kind}`;
+export function getTypeAndKindKey(kind: PluginType, name: string): string {
+  return `${kind}:${name}`;
 }

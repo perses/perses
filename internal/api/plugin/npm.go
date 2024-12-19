@@ -17,6 +17,8 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 const (
@@ -24,14 +26,10 @@ const (
 	PackageJSONFile  = "package.json"
 )
 
-type NPMPerses struct {
-	Plugins []PluginMetadata `json:"plugins"`
-}
-
 type NPMPackage struct {
-	Author  string    `json:"author"`
-	Version string    `json:"version"`
-	Perses  NPMPerses `json:"perses"`
+	Author  string              `json:"author"`
+	Version string              `json:"version"`
+	Perses  v1.PluginModuleSpec `json:"perses"`
 }
 
 type BuildInfo struct {

@@ -143,13 +143,13 @@ const registerRemote = (name: string, baseURL?: string): void => {
 };
 
 export const loadPlugin = async (
-  pluginName: string,
   moduleName: string,
+  pluginName: string,
   baseURL?: string
 ): Promise<RemotePluginModule | null> => {
-  registerRemote(pluginName, baseURL);
+  registerRemote(moduleName, baseURL);
 
-  return loadRemote<RemotePluginModule>(`${pluginName}/${moduleName}`);
+  return loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
 };
 
 export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
@@ -158,6 +158,6 @@ export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
 } {
   return {
     pluginRuntime,
-    loadPlugin: () => loadPlugin(plugin.moduleName, plugin.kind, plugin.baseURL),
+    loadPlugin: () => loadPlugin(plugin.moduleName, plugin.name, plugin.baseURL),
   };
 }

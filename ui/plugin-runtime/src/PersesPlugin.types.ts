@@ -12,7 +12,7 @@
 // limitations under the License.
 
 export interface PersesPlugin {
-  kind: string;
+  name: string;
   moduleName: string;
   baseURL?: string;
 }

@@ -73,8 +73,8 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
       }
       throw new Error(`WithDatasourceStore is not configured to support kind: ${selector.kind}`);
     },
-    listDatasourceSelectItems: async (datasourcePluginKind): Promise<DatasourceSelectItemGroup[]> => {
-      if (datasourcePluginKind === 'PrometheusDatasource') {
+    listDatasourceSelectItems: async (datasourcePluginName): Promise<DatasourceSelectItemGroup[]> => {
+      if (datasourcePluginName === 'PrometheusDatasource') {
         return Promise.resolve([
           {
             items: [
@@ -86,7 +86,7 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
           },
         ]);
       }
-      throw new Error(`WithDatasourceStore is not configured to support kind: ${datasourcePluginKind}`);
+      throw new Error(`WithDatasourceStore is not configured to support kind: ${datasourcePluginName}`);
     },
     getSavedDatasources: (): Record<string, DatasourceSpec> => {
       return {};

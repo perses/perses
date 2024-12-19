@@ -30,18 +30,22 @@ jest.mock('../plugin-registry', () => ({
   useListPluginMetadata: jest.fn().mockImplementation(() => ({
     data: [
       {
-        display: {
-          name: 'Prometheus Query',
+        spec: {
+          display: {
+            name: 'Prometheus Query',
+          },
+          name: 'PrometheusTimeSeriesQuery',
         },
-        kind: 'PrometheusTimeSeriesQuery',
-        pluginType: 'TimeSeriesQuery',
+        kind: 'TimeSeriesQuery',
       },
       {
-        display: {
-          name: 'Tempo Query',
+        spec: {
+          display: {
+            name: 'Tempo Query',
+          },
+          name: 'TempoTraceQuery',
         },
-        kind: 'TempoTraceQuery',
-        pluginType: 'TraceQuery',
+        kind: 'TraceQuery',
       },
     ],
     isLoading: false,

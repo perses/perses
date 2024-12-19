@@ -29,7 +29,7 @@ export function DynamicPanelContent({ definition, contentDimensions }: DynamicPa
       plugin={{
         // Panel plugins are always loaded from its own module
         // TODO: adjust the plugin spec to include the module name
-        kind: definition.spec.plugin.kind,
+        name: definition.spec.plugin.kind,
         moduleName: definition.spec.plugin.kind,
       }}
       props={{ definition, contentDimensions }}

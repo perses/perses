@@ -19,12 +19,11 @@ const isPluginMetadata = (plugin: unknown): plugin is PluginMetadata => {
   return (
     typeof plugin === 'object' &&
     plugin !== null &&
-    'pluginType' in plugin &&
     'kind' in plugin &&
-    'display' in plugin &&
-    typeof plugin.display === 'object' &&
-    plugin.display !== null &&
-    'name' in plugin.display
+    'spec' in plugin &&
+    typeof plugin.spec === 'object' &&
+    plugin.spec !== null &&
+    'name' in plugin.spec
   );
 };
 
@@ -69,13 +68,13 @@ export const remotePluginLoader = (baseURL?: string): PluginLoader => {
       const pluginModule: RemotePluginModule = {};
 
       for (const plugin of resource.spec.plugins) {
-        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.kind);
+        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name);
 
-        const remotePlugin = remotePluginModule?.[plugin.kind];
+        const remotePlugin = remotePluginModule?.[plugin.spec.name];
         if (remotePlugin) {
-          pluginModule[plugin.kind] = remotePlugin;
+          pluginModule[plugin.spec.name] = remotePlugin;
         } else {
-          console.error(`RemotePluginLoader: Error loading plugin ${plugin.kind}`);
+          console.error(`RemotePluginLoader: Error loading plugin ${plugin.spec.name}`);
         }
       }
 

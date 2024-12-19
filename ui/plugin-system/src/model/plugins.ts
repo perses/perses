@@ -19,7 +19,7 @@ import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { TraceQueryPlugin } from './trace-queries';
 import { VariablePlugin } from './variables';
 
-export interface PluginSpec {
+export interface PluginModuleSpec {
   plugins: PluginMetadata[];
 }
 
@@ -27,11 +27,13 @@ export interface PluginSpec {
  * Metadata about an individual plugin that's part of a PluginModule.
  */
 export interface PluginMetadata {
-  pluginType: PluginType;
-  kind: string;
-  display: {
+  kind: PluginType;
+  spec: {
     name: string;
-    description?: string;
+    display: {
+      name: string;
+      description?: string;
+    };
   };
 }
 
@@ -49,7 +51,7 @@ export interface PluginModuleMetadata {
 export interface PluginModuleResource {
   kind: 'PluginModule';
   metadata: PluginModuleMetadata;
-  spec: PluginSpec;
+  spec: PluginModuleSpec;
 }
 
 /**

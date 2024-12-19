@@ -73,13 +73,13 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
     if (timeSeriesQueryPlugins) {
       timeSeriesQueryPlugins.forEach((plugin) => {
-        map[plugin.pluginType]?.push(plugin.kind);
+        map[plugin.kind]?.push(plugin.spec.name);
       });
     }
 
     if (traceQueryPlugins) {
       traceQueryPlugins.forEach((plugin) => {
-        map[plugin.pluginType]?.push(plugin.kind);
+        map[plugin.kind]?.push(plugin.spec.name);
       });
     }
     return map;

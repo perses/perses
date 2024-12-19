@@ -17,7 +17,7 @@ import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
-  getPlugin<T extends PluginType>(pluginType: T, kind: string): Promise<PluginImplementation<T>>;
+  getPlugin<T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>>;
   listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadata[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
@@ -109,10 +109,10 @@ export function usePluginBuiltinVariableDefinitions(): UseQueryResult<BuiltinVar
     queryKey: ['usePluginBuiltinVariableDefinitions'],
     queryFn: async () => {
       const datasources = await listPluginMetadata(['Datasource']);
-      const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
+      const datasourceNames = new Set(datasources.map((datasource) => datasource.spec.name));
       const result: BuiltinVariableDefinition[] = [];
-      for (const kind of datasourceKinds) {
-        const plugin = await getPlugin('Datasource', kind);
+      for (const name of datasourceNames) {
+        const plugin = await getPlugin('Datasource', name);
         if (plugin.getBuiltinVariableDefinitions) {
           plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
         }

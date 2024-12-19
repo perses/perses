@@ -56,7 +56,7 @@ class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { err
 
 describe('PluginLoader', () => {
   const mockPlugin: PersesPlugin = {
-    kind: 'test-plugin',
+    name: 'test-plugin',
     moduleName: 'test-module',
     baseURL: 'https://example.com',
   };

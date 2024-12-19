@@ -20,37 +20,11 @@ import (
 	"path/filepath"
 
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	PluginModuleKind = "PluginModule"
-	pluginFileName   = "plugin-modules.json"
-)
-
-type PluginMetadata struct {
-	PluginType string `json:"pluginType"`
-	Kind       string `json:"kind"`
-	Display    struct {
-		Name        string `json:"name"`
-		Description string `json:"description,omitempty"`
-	} `json:"display"`
-}
-
-type PluginModuleSpec struct {
-	Plugins []PluginMetadata `json:"plugins"`
-}
-
-type PluginModuleMetadata struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-}
-
-type PluginModule struct {
-	Kind     string               `json:"kind"`
-	Metadata PluginModuleMetadata `json:"metadata"`
-	Spec     PluginModuleSpec     `json:"spec"`
-}
+const pluginFileName = "plugin-modules.json"
 
 type Plugin interface {
 	List() ([]byte, error)
@@ -58,7 +32,7 @@ type Plugin interface {
 }
 
 func New(plugins config.Plugins) Plugin {
-	return &plugin{
+	return &pluginFile{
 		path: plugins.Path,
 		archibal: &arch{
 			folder:       plugins.ArchivePath,
@@ -67,12 +41,12 @@ func New(plugins config.Plugins) Plugin {
 	}
 }
 
-type plugin struct {
+type pluginFile struct {
 	path     string
 	archibal *arch
 }
 
-func (p *plugin) List() ([]byte, error) {
+func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
 	if _, osErr := os.Stat(pluginFilePath); errors.Is(osErr, os.ErrNotExist) {
 		if generateErr := p.generatePluginListFile(); generateErr != nil {
@@ -82,18 +56,18 @@ func (p *plugin) List() ([]byte, error) {
 	return os.ReadFile(pluginFilePath)
 }
 
-func (p *plugin) UnzipArchives() {
+func (p *pluginFile) UnzipArchives() {
 	if err := p.archibal.unzipAll(); err != nil {
 		logrus.WithError(err).Error("unable to unzip archives")
 	}
 }
 
-func (p *plugin) generatePluginListFile() error {
+func (p *pluginFile) generatePluginListFile() error {
 	files, err := os.ReadDir(p.path)
 	if err != nil {
 		return err
 	}
-	var pluginModuleList []PluginModule
+	var pluginModuleList []v1.PluginModule
 	for _, file := range files {
 		if !file.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
@@ -115,19 +89,19 @@ func (p *plugin) generatePluginListFile() error {
 			logrus.WithError(readErr).Error("unable to read plugin package.json")
 			continue
 		}
-		pluginModuleList = append(pluginModuleList, PluginModule{
-			Kind: PluginModuleKind,
-			Metadata: PluginModuleMetadata{
+		pluginModuleList = append(pluginModuleList, v1.PluginModule{
+			Kind: v1.PluginModuleKind,
+			Metadata: v1.PluginModuleMetadata{
 				Name:    manifest.Name,
 				Version: manifest.Metadata.BuildInfo.Version,
 			},
-			Spec: PluginModuleSpec{
+			Spec: v1.PluginModuleSpec{
 				Plugins: npmPackageData.Perses.Plugins,
 			},
 		})
 	}
 	if len(pluginModuleList) == 0 {
-		pluginModuleList = make([]PluginModule, 0)
+		pluginModuleList = make([]v1.PluginModule, 0)
 	}
 	marshalData, marshalErr := json.Marshal(pluginModuleList)
 	if marshalErr != nil {
