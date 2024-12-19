@@ -301,11 +301,11 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last-number",
-              "sparkline": {},
               "format": {
-                "unit": "bytes/sec",
-                "decimalPlaces": 2
+                "decimalPlaces": 2,
+                "unit": "bytes/sec"
               },
+              "sparkline": {},
               "thresholds": {
                 "steps": [
                   {
@@ -351,8 +351,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "hours",
-                "decimalPlaces": 1
+                "decimalPlaces": 1,
+                "unit": "hours"
               },
               "thresholds": {
                 "steps": [
@@ -411,16 +411,17 @@
                   "sum"
                 ]
               },
-              "yAxis": {
-                "format": {
-                  "decimalPlaces": 3
-                }
-              },
               "visual": {
                 "areaOpacity": 0,
                 "connectNulls": true,
                 "display": "line",
                 "lineWidth": 1
+              },
+              "yAxis": {
+                "format": {
+                  "decimalPlaces": 3,
+                  "unit": "decimal"
+                }
               }
             }
           },
@@ -455,8 +456,8 @@
               "columnSettings": [
                 {
                   "header": "",
-                  "name": "timestamp",
-                  "hide": true
+                  "hide": true,
+                  "name": "timestamp"
                 },
                 {
                   "hide": true,
@@ -516,6 +517,11 @@
                 "connectNulls": false,
                 "display": "line",
                 "lineWidth": 1
+              },
+              "yAxis": {
+                "format": {
+                  "unit": "decimal"
+                }
               }
             }
           },
