@@ -56,8 +56,8 @@ spec: {
 	}
 
 	// yAxis
-	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
-	if #unit != null {
+	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | "decimal"
+	{
 		yAxis: format: unit: #unit
 	}
 
