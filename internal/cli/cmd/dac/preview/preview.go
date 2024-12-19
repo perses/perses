@@ -102,7 +102,7 @@ func (o *option) Execute() error {
 		project := resource.GetProject(dashboard.GetMetadata(), o.Project)
 		name := o.computeEphemeralDashboardName(dashboard.Metadata.Name)
 		if dashboard.Spec.Display != nil && len(o.prefix) > 0 {
-			dashboard.Spec.Display.Name = fmt.Sprintf("%s-", dashboard.Spec.Display.Name)
+			dashboard.Spec.Display.Name = fmt.Sprintf("%s-%s", o.prefix, dashboard.Spec.Display.Name)
 		}
 		ephemeralDashboard := newEphemeralDashboard(project, name, o.ttl, dashboard)
 		svc, svcErr := service.New(modelV1.KindEphemeralDashboard, project, o.apiClient)
