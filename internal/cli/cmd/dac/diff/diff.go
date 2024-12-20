@@ -15,6 +15,7 @@ package diff
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -28,9 +29,22 @@ import (
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+const statusNew = "NEW"
+const statusUpdated = "UPDATED"
+const statusError = "ERROR"
+
+type diffResult struct {
+	Project   string `json:"project" yaml:"project"`
+	Dashboard string `json:"dashboard" yaml:"dashboard"`
+	Status    string `json:"status" yaml:"status"`
+	Diff      string `json:"diff,omitempty" yaml:"diff,omitempty"`
+}
 
 func marshalIndent(dashboard *modelV1.Dashboard) ([]byte, error) {
 	return json.MarshalIndent(dashboard.Spec, "", "  ")
@@ -53,6 +67,7 @@ type option struct {
 	opt.ProjectOption
 	opt.FileOption
 	opt.DirectoryOption
+	opt.OutputOption
 	writer     io.Writer
 	errWriter  io.Writer
 	apiClient  api.ClientInterface
@@ -82,34 +97,56 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	for _, preview := range o.dashboards {
-		project := resource.GetProject(preview.GetMetadata(), o.Project)
-		dashboard, err := o.apiClient.V1().Dashboard(project).Get(preview.Metadata.Name)
-		if err != nil {
-			return err
-		}
+	// Create the output folder (+ any parent folder if applicable) where to store the diff files
+	err := os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating the output folder: %v", err)
+	}
 
-		d, err := dashboardDiff(dashboard, preview)
-		if err != nil {
-			return err
-		}
+	var result []diffResult
+	for _, updatedDashboard := range o.dashboards {
+		project := resource.GetProject(updatedDashboard.GetMetadata(), o.Project)
+		status, filePath := o.processDashboardDiff(updatedDashboard, project)
 
-		// Create the folder (+ any parent folder if applicable) where to store the output
-		err = os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("error creating the output folder: %v", err)
-		}
+		result = append(result, diffResult{
+			Dashboard: updatedDashboard.Metadata.Name,
+			Project:   project,
+			Status:    status,
+			Diff:      filePath,
+		})
 
-		filePath := path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name))
-		if writeErr := os.WriteFile(filePath, []byte(d), 0644); writeErr != nil { // nolint: gosec
-			return fmt.Errorf("unable to write the diff file: %w", writeErr)
-		}
-
-		if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s successfully created", filePath)); outputErr != nil {
-			return outputErr
+		if filePath != "" {
+			logrus.Infof("%s successfully generated", filePath)
 		}
 	}
-	return nil
+
+	return output.Handle(o.writer, o.Output, result)
+}
+
+func (o *option) processDashboardDiff(updatedDashboard *modelV1.Dashboard, project string) (string, string) {
+	currentDashboard, err := o.apiClient.V1().Dashboard(project).Get(updatedDashboard.Metadata.Name)
+	if err != nil {
+		if errors.Is(err, perseshttp.RequestNotFoundError) {
+			logrus.Infof("No dashboard %s found in project %s, skipping diff generation", updatedDashboard.Metadata.Name, project)
+			return statusNew, ""
+		}
+		logrus.WithError(err).Errorf("Unknown error while fetching dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
+		return statusError, ""
+	}
+
+	diff, err := dashboardDiff(currentDashboard, updatedDashboard)
+	if err != nil {
+		logrus.WithError(err).Warningf("Diff generation failed for dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
+		return statusError, ""
+	}
+
+	filePath := path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, currentDashboard.Metadata.Name))
+	if err := os.WriteFile(filePath, []byte(diff), 0644); err != nil { // nolint: gosec
+		logrus.WithError(err).Warningf("Unable to write the diff file for dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
+		return statusError, ""
+	}
+
+	return statusUpdated, filePath
 }
 
 func (o *option) setDashboards() error {
