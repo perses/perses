@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 
@@ -127,16 +126,11 @@ func (o *option) Execute() error {
 func (o *option) processDashboardDiff(updatedDashboard *modelV1.Dashboard, project string) (string, string) {
 	currentDashboard, err := o.apiClient.V1().Dashboard(project).Get(updatedDashboard.Metadata.Name)
 	if err != nil {
-		var reqErr *perseshttp.RequestError
-		if errors.As(err, &reqErr) {
-			if reqErr.StatusCode == http.StatusNotFound {
-				logrus.Infof("No dashboard %s found in project %s, skipping diff generation", updatedDashboard.Metadata.Name, project)
-				return statusNew, ""
-			}
-			logrus.WithError(err).Errorf("Unexpected error while fetching dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
-		} else {
-			logrus.WithError(err).Errorf("Unknown error while fetching dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
+		if errors.Is(err, perseshttp.RequestNotFoundError) {
+			logrus.Infof("No dashboard %s found in project %s, skipping diff generation", updatedDashboard.Metadata.Name, project)
+			return statusNew, ""
 		}
+		logrus.WithError(err).Errorf("Unknown error while fetching dashboard %s in project %s", updatedDashboard.Metadata.Name, project)
 		return statusError, ""
 	}
 
