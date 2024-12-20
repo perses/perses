@@ -17,8 +17,4 @@ export interface PersesPlugin {
   baseURL?: string;
 }
 
-export interface PersesPluginModule {
-  default: unknown;
-}
-
-export type PersesPluginType = 'panel';
+export type RemotePluginModule = Record<string, unknown>;

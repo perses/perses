@@ -6,99 +6,123 @@
   "spec": {
     "plugins": [
       {
-        "pluginType": "Panel",
-        "kind": "TimeSeriesChart",
-        "display": {
-          "name": "Time Series Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "TimeSeriesChart",
+          "display": {
+            "name": "Time Series Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "Table",
-        "display": {
+        "kind": "Panel",
+        "spec": {
           "name": "Table",
-          "description": ""
+          "display": {
+            "name": "Table",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "TimeSeriesTable",
-        "display": {
-          "name": "Time Series Table",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "TimeSeriesTable",
+          "display": {
+            "name": "Time Series Table",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "BarChart",
-        "display": {
-          "name": "Bar Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "BarChart",
+          "display": {
+            "name": "Bar Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "PieChart",
-        "display": {
-          "name": "Pie Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "PieChart",
+          "display": {
+            "name": "Pie Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "StatChart",
-        "display": {
-          "name": "Stat Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "StatChart",
+          "display": {
+            "name": "Stat Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "GaugeChart",
-        "display": {
-          "name": "Gauge Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "GaugeChart",
+          "display": {
+            "name": "Gauge Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "MarkdownChart",
-        "display": {
-          "name": "Markdown",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "MarkdownChart",
+          "display": {
+            "name": "Markdown",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "ScatterChart",
-        "display": {
-          "name": "Scatter Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "ScatterChart",
+          "display": {
+            "name": "Scatter Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "TraceTable",
-        "display": {
-          "name": "Trace Table",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "TraceTable",
+          "display": {
+            "name": "Trace Table",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "TracingGanttChart",
-        "display": {
-          "name": "Tracing Gantt Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "TracingGanttChart",
+          "display": {
+            "name": "Tracing Gantt Chart",
+            "description": ""
+          }
         }
       },
       {
-        "pluginType": "Panel",
-        "kind": "StatusHistoryChart",
-        "display": {
-          "name": "Status History Chart",
-          "description": ""
+        "kind": "Panel",
+        "spec": {
+          "name": "StatusHistoryChart",
+          "display": {
+            "name": "Status History Chart",
+            "description": ""
+          }
         }
       }
     ]

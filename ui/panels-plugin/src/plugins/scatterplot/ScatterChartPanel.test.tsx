@@ -46,8 +46,8 @@ const FakeTraceQueryPlugin: TraceQueryPlugin<UnknownSpec> = {
 };
 
 const MOCK_TRACE_QUERY_PLUGIN: MockPlugin = {
-  pluginType: 'TraceQuery',
-  kind: 'TempoTraceQuery',
+  kind: 'TraceQuery',
+  spec: { name: 'TempoTraceQuery' },
   plugin: FakeTraceQueryPlugin,
 };
 

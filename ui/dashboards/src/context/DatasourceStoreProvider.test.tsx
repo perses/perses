@@ -33,7 +33,7 @@ import {
 } from '@perses-dev/core';
 
 const PROJECT = 'perses';
-const FAKE_PLUGIN_KIND = 'FakeDatasourcePluginKind';
+const FAKE_PLUGIN_NAME = 'FakeDatasourcePlugin';
 
 const FakeDataSourcePlugin: DatasourcePlugin = {
   createClient: jest.fn().mockReturnValue(undefined),
@@ -44,8 +44,8 @@ const FakeDataSourcePlugin: DatasourcePlugin = {
 };
 
 const MOCK_DS_PLUGIN: MockPlugin = {
-  pluginType: 'Datasource',
-  kind: FAKE_PLUGIN_KIND,
+  kind: 'Datasource',
+  spec: { name: FAKE_PLUGIN_NAME },
   plugin: FakeDataSourcePlugin,
 };
 
@@ -65,14 +65,14 @@ interface TestData {
 }
 
 function definedInDashboard(props: { default: boolean }): DatasourceSpec {
-  return { default: props.default, plugin: { kind: FAKE_PLUGIN_KIND, spec: {} } };
+  return { default: props.default, plugin: { kind: FAKE_PLUGIN_NAME, spec: {} } };
 }
 
 function definedInProject(props: { name: string; default: boolean }): DatasourceResource {
   return {
     kind: 'Datasource',
     metadata: { name: props.name, project: PROJECT },
-    spec: { default: props.default, plugin: { kind: FAKE_PLUGIN_KIND, spec: {} } },
+    spec: { default: props.default, plugin: { kind: FAKE_PLUGIN_NAME, spec: {} } },
   };
 }
 
@@ -80,7 +80,7 @@ function definedGlobally(props: { name: string; default: boolean }): GlobalDatas
   return {
     kind: 'GlobalDatasource',
     metadata: { name: props.name },
-    spec: { default: props.default, plugin: { kind: FAKE_PLUGIN_KIND, spec: {} } },
+    spec: { default: props.default, plugin: { kind: FAKE_PLUGIN_NAME, spec: {} } },
   };
 }
 
@@ -114,12 +114,12 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         result: [
           {
             editLink: undefined,
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 name: 'Default (localDatasourceA from dashboard)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -134,7 +134,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 saved: true,
                 selector: {
                   group: 'dashboard',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'localDatasourceA',
                 },
               },
@@ -149,7 +149,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'project',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'projectDatasourceA',
                 },
               },
@@ -164,7 +164,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'globalDatasourceA',
                 },
               },
@@ -186,12 +186,12 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         result: [
           {
             editLink: undefined,
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 name: 'Default (datasourceA from global)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -205,7 +205,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceA',
                 },
               },
@@ -229,12 +229,12 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         result: [
           {
             editLink: undefined,
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 name: 'Default (localDatasourceA from dashboard)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -249,7 +249,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 saved: true,
                 selector: {
                   group: 'dashboard',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'localDatasourceA',
                 },
               },
@@ -264,7 +264,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'project',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'projectDatasourceA',
                 },
               },
@@ -279,7 +279,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'globalDatasourceA',
                 },
               },
@@ -301,13 +301,13 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         result: [
           {
             editLink: undefined,
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 // This is the default datasource because first of the list
                 name: 'Default (datasourceA from project)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -322,7 +322,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overriding: true,
                 selector: {
                   group: 'project',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceA',
                 },
               },
@@ -338,7 +338,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overriding: true, // Oddity coming from the algorithm. Not harmful as overriding is not checked if overridden is true
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceA',
                 },
               },
@@ -365,12 +365,12 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       expected: {
         result: [
           {
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 name: 'Default (defaultDatasource from global)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -386,7 +386,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 saved: true,
                 selector: {
                   group: 'dashboard',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceA',
                 },
               },
@@ -402,7 +402,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overriding: true,
                 selector: {
                   group: 'project',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceB',
                 },
               },
@@ -417,7 +417,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overridden: false,
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'defaultDatasource',
                 },
               },
@@ -427,7 +427,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overriding: true, // Oddity coming from the algorithm. Not harmful as overriding is not checked if overridden is true
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceB',
                 },
               },
@@ -437,7 +437,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 overriding: true, // Oddity coming from the algorithm. Not harmful as overriding is not checked if overridden is true
                 selector: {
                   group: 'global',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'datasourceA',
                 },
               },
@@ -462,12 +462,12 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         result: [
           {
             editLink: undefined,
-            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
             items: [
               {
                 name: 'Default (localDatasourceA from dashboard)',
                 selector: {
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                 },
               },
             ],
@@ -482,7 +482,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 saved: false,
                 selector: {
                   group: 'dashboard',
-                  kind: FAKE_PLUGIN_KIND,
+                  kind: FAKE_PLUGIN_NAME,
                   name: 'localDatasourceA',
                 },
               },
@@ -521,7 +521,9 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         </PluginRegistry>
       );
     };
-    const { result } = renderHook(() => useListDatasourceSelectItems(FAKE_PLUGIN_KIND), { wrapper });
+    const { result } = renderHook(() => useListDatasourceSelectItems(FAKE_PLUGIN_NAME), { wrapper });
+
+    console.log(result.current);
 
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(result.current.data).toEqual(data.expected.result);
