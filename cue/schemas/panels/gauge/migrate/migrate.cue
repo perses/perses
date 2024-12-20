@@ -24,8 +24,8 @@ kind:         "GaugeChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
-	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
-	if #unit != null {
+	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | "decimal"
+	{
 		format: unit: #unit
 	}
 
