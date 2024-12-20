@@ -31,7 +31,7 @@ import (
 )
 
 #myVarsBuilder: varGroupBuilder & {
-	#input: [for i in #input {#datasourceName: "promDemo"}]
+	#datasourceName: "promDemo"
 	#input: [
 		labelValuesVarBuilder & {
 			#name: "stack"
