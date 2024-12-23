@@ -154,10 +154,10 @@ function Router(): ReactElement {
  */
 function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
   const isAuthenticated = useIsAccessTokenExist();
-  const path = useLocation().pathname;
+  const location = useLocation();
   let to = SignInRoute;
-  if (path !== '' && path !== '/') {
-    to += `?${buildRedirectQueryString(path)}`;
+  if (location.pathname !== '' && location.pathname !== '/') {
+    to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
   }
   return isAuthenticated ? children : <Navigate to={to} />;
 }
