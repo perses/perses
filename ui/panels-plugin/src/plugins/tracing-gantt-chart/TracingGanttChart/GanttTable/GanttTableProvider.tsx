@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, ReactElement, useContext, useState } from 'react';
 
 interface GanttTableContextType {
   collapsedSpans: string[];
@@ -34,7 +34,7 @@ interface GanttTableProviderProps {
   children?: React.ReactNode;
 }
 
-export function GanttTableProvider(props: GanttTableProviderProps) {
+export function GanttTableProvider(props: GanttTableProviderProps): ReactElement {
   const { children } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [visibleSpans, setVisibleSpans] = useState<string[]>([]);

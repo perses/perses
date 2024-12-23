@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
+import { ReactElement } from 'react';
 import { VariableContext, VariableSrv } from '../../../runtime';
 
 declare module '@storybook/react' {
@@ -36,7 +37,7 @@ function isWithVariableParameter(
 // dashboards.
 // This decorator includes "PluginSystem" in the name to differentiate it from
 // the datasource store decorator in the `dashboards` package.
-export const WithPluginSystemVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithPluginSystemVariables = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withPluginSystemVariables;
   const defaultValue: VariableSrv = {
     state: {},

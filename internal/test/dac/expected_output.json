@@ -339,6 +339,14 @@
                   "text": "DOWN",
                   "backgroundColor": "#FF0000"
                 }
+              ],
+              "transforms": [
+                {
+                  "kind": "JoinByColumnValue",
+                  "spec": {
+                    "columns": ["instance"]
+                  }
+                }
               ]
             }
           },

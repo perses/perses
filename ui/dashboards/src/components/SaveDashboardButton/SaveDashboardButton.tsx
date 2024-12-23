@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
@@ -29,7 +29,11 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
   variant?: 'contained' | 'text' | 'outlined';
 }
 
-export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
+export const SaveDashboardButton = ({
+  onSave,
+  isDisabled,
+  variant = 'contained',
+}: SaveDashboardButtonProps): ReactElement => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard, setDashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
@@ -38,7 +42,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
-  const onSaveButtonClick = () => {
+  const onSaveButtonClick = (): void => {
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
@@ -69,7 +73,7 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
     }
   };
 
-  const saveDashboard = async () => {
+  const saveDashboard = async (): Promise<void> => {
     if (onSave) {
       try {
         setSavingDashboard(true);

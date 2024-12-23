@@ -14,6 +14,7 @@
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
 import { CompletionContext } from '@codemirror/autocomplete';
+import { Extension } from '@uiw/react-codemirror';
 import { TempoClient } from '../model/tempo-client';
 import { TempoDatasource } from '../plugins/tempo-datasource';
 import { traceQLHighlight } from './highlight';
@@ -46,7 +47,7 @@ export interface CompletionConfig {
   endpoint?: string;
 }
 
-export function TraceQLExtension(completionCfg: CompletionConfig) {
+export function TraceQLExtension(completionCfg: CompletionConfig): Array<LRLanguage | Extension> {
   const tempoClient = getTempoClient(completionCfg);
   const language = traceQLLanguage();
   const completion = language.data.of({

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { VariableOption } from '../../model';
 import { useDatasourceStore, usePlugin, useTimeRange, useAllVariableValues, VariableStateMap } from '../../runtime';
 
@@ -39,7 +39,7 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
   return result;
 }
 
-export function useListVariablePluginValues(definition: ListVariableDefinition) {
+export function useListVariablePluginValues(definition: ListVariableDefinition): UseQueryResult<VariableOption[]> {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();
@@ -85,7 +85,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
 /**
  * Returns a serialized string of the current state of variable values.
  */
-export function getVariableValuesKey(v: VariableStateMap) {
+export function getVariableValuesKey(v: VariableStateMap): string {
   return Object.values(v)
     .map((v) => JSON.stringify(v.value))
     .join(',');

@@ -13,8 +13,9 @@
 
 import { UnknownSpec } from '@perses-dev/core';
 import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 
-const FakeTimeSeriesChartOptionEditor = () => {
+const FakeTimeSeriesChartOptionEditor = (): ReactElement => {
   return <div>TimeSeriesChart options</div>;
 };
 

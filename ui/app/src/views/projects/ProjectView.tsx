@@ -13,7 +13,7 @@
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Stack, Grid, CircularProgress } from '@mui/material';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { ProjectResource } from '@perses-dev/core';
@@ -26,7 +26,7 @@ import { useDeleteProjectMutation, useProject, useUpdateProjectMutation } from '
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectTabs } from './ProjectTabs';
 
-function ProjectView() {
+function ProjectView(): ReactElement {
   const { projectName, tab } = useParams();
   if (projectName === undefined) {
     throw new Error('Unable to get the project name');
@@ -45,7 +45,7 @@ function ProjectView() {
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
   const [isRenameProjectDialogOpen, setIsRenameProjectDialogOpen] = useState<boolean>(false);
 
-  function handleProjectRename(project: ProjectResource, projectName: string) {
+  function handleProjectRename(project: ProjectResource, projectName: string): void {
     updateProjectMutation.mutate(
       { ...project, spec: { display: { ...project.spec.display, name: projectName } } },
       {
@@ -61,7 +61,7 @@ function ProjectView() {
     );
   }
 
-  function handleProjectDelete(project: string) {
+  function handleProjectDelete(project: string): void {
     deleteProjectMutation.mutate(
       { kind: 'Project', metadata: { name: project }, spec: {} },
       {

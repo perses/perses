@@ -20,7 +20,6 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -61,9 +60,6 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRoleBind
 func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
-	if err := s.validateGlobalRoleBinding(entity); err != nil {
-		return nil, err
-	}
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
@@ -91,10 +87,6 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 	// find the previous version of the GlobalRoleBinding
 	oldEntity, err := s.dao.Get(parameters.Name)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := s.validateGlobalRoleBinding(entity); err != nil {
 		return nil, err
 	}
 
@@ -146,24 +138,4 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalrolebindin
 
 func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
-}
-
-// Validating role and subjects are existing
-func (s *service) validateGlobalRoleBinding(globalRoleBinding *v1.GlobalRoleBinding) error {
-	if _, err := s.globalRoleDAO.Get(globalRoleBinding.Spec.Role); err != nil {
-		return apiInterface.HandleBadRequestError(fmt.Sprintf("global role %q doesn't exist", globalRoleBinding.Spec.Role))
-	}
-
-	for _, subject := range globalRoleBinding.Spec.Subjects {
-		if subject.Kind == v1.KindUser {
-			if _, err := s.userDAO.Get(subject.Name); err != nil {
-				if databaseModel.IsKeyNotFound(err) {
-					return apiInterface.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
-				}
-				logrus.WithError(err).Errorf("unable to find the user with the name %q", subject.Name)
-				return err
-			}
-		}
-	}
-	return nil
 }

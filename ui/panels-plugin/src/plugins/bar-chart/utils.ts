@@ -14,7 +14,7 @@
 import { BarChartData, SortOption } from '@perses-dev/components';
 import { DEFAULT_SORT } from './bar-chart-model';
 
-export function calculatePercentages(data: BarChartData[]) {
+export function calculatePercentages(data: BarChartData[]): Array<{ label: string; value: number }> {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);
   return data.map((seriesData) => {
     const percentage = ((seriesData.value ?? 0) / sum) * 100;
@@ -25,7 +25,7 @@ export function calculatePercentages(data: BarChartData[]) {
   });
 }
 
-export function sortSeriesData(data: BarChartData[], sortOrder: SortOption = DEFAULT_SORT) {
+export function sortSeriesData(data: BarChartData[], sortOrder: SortOption = DEFAULT_SORT): BarChartData[] {
   if (sortOrder === 'asc') {
     // sort in ascending order by value
     return data.sort((a, b) => {

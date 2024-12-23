@@ -16,7 +16,7 @@ import { PanelGroupDefinition, PanelGroupItemLayout } from '../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT, GRID_LAYOUT_COLS } from '../constants';
 
 // Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
-export function getYForNewRow(group: PanelGroupDefinition) {
+export function getYForNewRow(group: PanelGroupDefinition): number {
   let newRowY = 0;
   for (const layout of group.itemLayouts) {
     const itemMaxY = layout.y + layout.h;
@@ -172,7 +172,7 @@ type PanelKeyParts = {
   number?: number;
 };
 
-const removeWhiteSpaces = (str: string) => {
+const removeWhiteSpaces = (str: string): string => {
   return str.replace(/\s+/g, '');
 };
 

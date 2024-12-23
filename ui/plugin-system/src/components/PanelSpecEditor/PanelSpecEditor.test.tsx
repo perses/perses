@@ -14,13 +14,14 @@
 import { screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 import { PanelEditorValues } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {
-  const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+  const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>): void => {
     // Intermediary component to wrap the PanelSpecEditor with a form
-    const Component = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+    const Component = (props: Omit<PanelSpecEditorProps, 'control'>): ReactElement => {
       const form = useForm<PanelEditorValues>();
 
       return <PanelSpecEditor {...props} control={form.control} />;

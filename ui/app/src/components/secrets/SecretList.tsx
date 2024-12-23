@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Action, getMetadataProject, Secret } from '@perses-dev/core';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -52,7 +52,7 @@ export function SecretList<T extends Secret>({
   onCreate,
   onUpdate,
   onDelete,
-}: ListPropertiesWithCallbacks<T>) {
+}: ListPropertiesWithCallbacks<T>): ReactElement {
   const { infoSnackbar } = useSnackbar();
   const isReadonly = useIsReadonly();
 
@@ -114,7 +114,7 @@ export function SecretList<T extends Secret>({
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const secret = findSecret(name, project);
       setTargetedSecret(secret);
       setAction('create');
@@ -124,7 +124,7 @@ export function SecretList<T extends Secret>({
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const secret = findSecret(name, project);
       setTargetedSecret(secret);
       setAction('update');
@@ -134,7 +134,7 @@ export function SecretList<T extends Secret>({
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedSecret(findSecret(name, project));
       setDeleteSecretDialogOpened(true);
     },
@@ -151,8 +151,8 @@ export function SecretList<T extends Secret>({
         type: 'string',
         flex: 3,
         minWidth: 150,
-        valueGetter: (_, row) => row.name,
-        renderCell: (params) => (
+        valueGetter: (_, row): string => row.name,
+        renderCell: (params): ReactElement => (
           <>
             <span style={{ fontFamily: 'monospace' }}>{params.value}</span>
             <Tooltip title="Copy secret to clipboard" placement="top">
@@ -187,7 +187,7 @@ export function SecretList<T extends Secret>({
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -240,6 +240,7 @@ export function SecretList<T extends Secret>({
             isOpen={isSecretDrawerOpened}
             action={action}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleSecretSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
             onClose={() => setSecretDrawerOpened(false)}

@@ -37,10 +37,9 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model';
+import { useChartsTheme, useTimeZone } from '../context';
 import { CursorCoordinates, LineChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
-import { useTimeZone } from '../context/TimeZoneProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
@@ -108,7 +107,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
 
   useImperativeHandle(ref, () => {
     return {
-      highlightSeries({ id }: ChartInstanceFocusOpts) {
+      highlightSeries({ id }: ChartInstanceFocusOpts): void {
         if (!chartRef.current) {
           // when chart undef, do not highlight series when hovering over legend
           return;
@@ -116,7 +115,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
 
         chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
       },
-      clearHighlightedSeries: () => {
+      clearHighlightedSeries: (): void => {
         if (!chartRef.current) {
           // when chart undef, do not clear highlight series
           return;
@@ -128,7 +127,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      datazoom: (params) => {
+      datazoom: (params): void => {
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
@@ -216,7 +215,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
 
   return (
     <Box
-      sx={{ height }}
+      style={{ height }}
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (tooltipConfig.enablePinning && e.target instanceof HTMLCanvasElement) {

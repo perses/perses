@@ -21,6 +21,7 @@ spec: close({
 ```
 
 it should define:
+
 - the `model` package,
 - the variable's `kind`,
 - the variable's `spec` containing any field you want for this variable plugin.
@@ -42,6 +43,7 @@ spec: {
 ```
 
 it should define:
+
 - the `model` package,
 - the panel's `kind`,
 - the panel's `spec` containing any field you want for this panel plugin.
@@ -65,11 +67,12 @@ spec: {
 ```
 
 it should define:
+
 - the `model` package,
 - the query's `kind`,
 - the query's `spec` containing:
-  - a `datasource` field that holds the `kind` of datasource corresponding to this query type,
-  - any other field you want for this query plugin.
+    - a `datasource` field that holds the `kind` of datasource corresponding to this query type,
+    - any other field you want for this query plugin.
 
 ## Migration from Grafana
 
@@ -77,7 +80,8 @@ A Perses plugin can optionally embed a `migrate.cue`\* file at its root, that is
 
 *\* this is mandatory to have it named that way. We put in place this constraint because it makes sense to have a single file containing the remapping logic, with the benefit of making the backend logic easier (no need to search for the file). It's also easier to check the migration file of the different plugins, because you know which one to look for.*
 
-*:warning: If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the first one encountered by alphabetical order will take priority.*
+!!! warning
+    If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the first one encountered by alphabetical order will take priority.
 
 ### Variable
 
@@ -95,8 +99,8 @@ if #var.type == "custom" || #var.type == "interval" {
 - The file is named `migrate.cue`.
 - The file content is made of **one or more conditional block(s)**, separated by commas (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#var` definition.
-  - `#var` references a variable object from Grafana. You can access the different fields with like `#var.field.subfield`. To know the list of fields available, check the Grafana datamodel for the considered variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-  - You most certainly want a check on the `#var.type` value like shown in above example.
+    - `#var` references a variable object from Grafana. You can access the different fields with like `#var.field.subfield`. To know the list of fields available, check the Grafana datamodel for the considered variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+    - You most certainly want a check on the `#var.type` value like shown in above example.
 - Each conditional block contains a list of fields & assignments, meeting the requirements of the considered Perses variable plugin. Use the `#var.field.subfield` syntax to access the values from the Grafana variable, thus achieve its remapping into Perses.
 
 ### Panel
@@ -117,8 +121,8 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
 - The file is named `migrate.cue`.
 - The file content is made of **one or more conditional block(s)**, separated by commas (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#panel` definition.
-  - `#panel` references a panel object from Grafana. You can access the different fields with like `#panel.field.subfield`. To know the list of fields available, check the Grafana datamodel for the considered panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-  - You most certainly want a check on the `#panel.type` value like shown in above example.
+    - `#panel` references a panel object from Grafana. You can access the different fields with like `#panel.field.subfield`. To know the list of fields available, check the Grafana datamodel for the considered panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+    - You most certainly want a check on the `#panel.type` value like shown in above example.
 - Each conditional block contains a list of fields & assignments, meeting the requirements of the considered Perses panel plugin. Use the `#panel.field.subfield` syntax to access the values from the Grafana panel, thus achieve its remapping into Perses.
 
 #### Utilities
@@ -150,6 +154,6 @@ if #target.datasource.type != _|_ if #target.datasource.type == "prometheus" {
 - The file is named `migrate.cue`.
 - The file content is made of **one or more conditional block(s)**, separated by commas (even if you have only one).
 - Each conditional block defines one or more matches on attributes from the `#target` definition.
-  - `#target` references a target object from Grafana. You can access the different fields with like `#target.field.subfield`. To know the list of fields available, check the Grafana datamodel for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-  - You most certainly want a check on the `#target.datasource.type` value like shown in above example.
+    - `#target` references a target object from Grafana. You can access the different fields with like `#target.field.subfield`. To know the list of fields available, check the Grafana datamodel for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+    - You most certainly want a check on the `#target.datasource.type` value like shown in above example.
 - Each conditional block contains a list of fields & assignments, meeting the requirements of the considered Perses query plugin. Use the `#target.field.subfield` syntax to access the values from the Grafana target, thus achieve its remapping into Perses.

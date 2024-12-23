@@ -12,20 +12,23 @@
 // limitations under the License.
 
 import { Box, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface YAxisLabelProps {
   name: string;
   height: number;
 }
 
-export function YAxisLabel({ name, height }: YAxisLabelProps) {
+export function YAxisLabel({ name, height }: YAxisLabelProps): ReactElement {
   return (
     <Box
+      style={{
+        maxWidth: height, // allows rotated text to truncate instead of causing overlap
+        top: `calc(${height}px / 2)`,
+      }}
       sx={{
         display: 'inline-block',
-        maxWidth: height, // allows rotated text to truncate instead of causing overlap
         position: 'absolute',
-        top: `calc(${height}px / 2)`,
         transform: 'translateX(-50%) rotate(-90deg)',
         transformOrigin: 'top',
         textAlign: 'center',

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import {
@@ -42,7 +42,7 @@ interface UpdateEphemeralDashboardDialog {
  * @param props.onConfirm Action to perform when user confirmed.
  * @param props.ephemeralDashboard The ephemeral dashboard resource to rename.
  */
-export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDialog) => {
+export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDialog): ReactElement => {
   const { ephemeralDashboard, open, onClose, onSuccess } = props;
   const form = useForm<UpdateEphemeralDashboardValidationType>({
     resolver: zodResolver(updateEphemeralDashboardDialogValidationSchema),
@@ -82,7 +82,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
     });
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onClose();
     form.reset();
   };

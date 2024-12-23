@@ -14,8 +14,8 @@
 import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
-import { memo } from 'react';
-import { format } from 'date-fns';
+import { memo, ReactElement } from 'react';
+import { getDateAndTime } from '../utils';
 import { NearbySeriesArray } from './nearby-series';
 import {
   TOOLTIP_BG_COLOR_FALLBACK,
@@ -48,10 +48,8 @@ export const TooltipHeader = memo(function TooltipHeader({
     return null;
   }
 
-  const formatTimeSeriesHeader = (timeMs: number) => {
-    const date = new Date(timeMs);
-    const formattedDate = format(date, 'MMM dd, yyyy - ');
-    const formattedTime = format(date, 'HH:mm:ss');
+  const formatTimeSeriesHeader = (timeMs: number): ReactElement => {
+    const { formattedTime, formattedDate } = getDateAndTime(timeMs);
     return (
       <Box>
         <Typography

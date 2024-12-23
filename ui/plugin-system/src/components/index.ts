@@ -14,6 +14,7 @@
 export * from './CalculationSelector';
 export * from './DatasourceEditorForm';
 export * from './DatasourceSelect';
+export * from './HTTPSettingsEditor';
 export * from './LegendOptionsEditor';
 export * from './MultiQueryEditor';
 export * from './OptionsEditorRadios';

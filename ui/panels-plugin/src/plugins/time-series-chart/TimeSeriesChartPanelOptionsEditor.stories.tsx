@@ -13,7 +13,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { TimeSeriesChart } from '@perses-dev/panels-plugin';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { OptionsEditorTabs } from '@perses-dev/plugin-system';
 import { PanelDefinition } from '@perses-dev/core';
 import { produce } from 'immer';
@@ -27,11 +27,11 @@ type PanelOptionsEditorWrapperProps = {
   initialPanelDefinition: PanelDefinition<TimeSeriesChartOptions>;
 };
 
-const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEditorWrapperProps) => {
+const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEditorWrapperProps): ReactElement => {
   const [panelDefinition, setPanelDefinition] =
     useState<PanelDefinition<TimeSeriesChartOptions>>(initialPanelDefinition);
 
-  function handleChange(newChartOptions: TimeSeriesChartOptions) {
+  function handleChange(newChartOptions: TimeSeriesChartOptions): void {
     action('onChange')(newChartOptions);
     setPanelDefinition(
       produce(panelDefinition, (draft) => {

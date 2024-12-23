@@ -18,7 +18,7 @@ import { milliseconds } from 'date-fns';
  * Utils function to transform a refresh interval in {@link DurationString} format into a number of ms.
  * @param refreshInterval
  */
-export function getRefreshIntervalInMs(refreshInterval?: DurationString) {
+export function getRefreshIntervalInMs(refreshInterval?: DurationString): number {
   if (refreshInterval !== undefined && refreshInterval !== null) {
     return milliseconds(parseDurationString(refreshInterval));
   }

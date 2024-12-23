@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Legend, LegendProps } from './Legend';
 
@@ -46,7 +46,7 @@ const renderLegend = ({
   position = 'bottom',
   onItemMouseOver = jest.fn(),
   onItemMouseOut = jest.fn(),
-}: RenderLegendOpts = {}) => {
+}: RenderLegendOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
       <Legend

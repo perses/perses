@@ -24,7 +24,7 @@ import (
 
 // useNewIfPresent decides if we take the old or new string.
 // Return a boolean saying if the result is different from old value.
-func useNewIfPresent(old, new string) (string, bool) {
+func useNewIfPresent(old, new string) (string, bool) { // nolint: revive
 	if len(new) > 0 {
 		return new, old != new
 	}

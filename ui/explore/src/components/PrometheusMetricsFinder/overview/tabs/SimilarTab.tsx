@@ -13,7 +13,7 @@
 
 import { DatasourceSelector } from '@perses-dev/core';
 import { CircularProgress, Stack, StackProps } from '@mui/material';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';
@@ -25,7 +25,13 @@ export interface SimilarTabProps extends StackProps {
   onExplore: (metricName: string) => void;
 }
 
-export function SimilarTab({ filters, datasource, isMetadataEnabled, onExplore, ...props }: SimilarTabProps) {
+export function SimilarTab({
+  filters,
+  datasource,
+  isMetadataEnabled,
+  onExplore,
+  ...props
+}: SimilarTabProps): ReactElement {
   const filtersWithoutName: LabelFilter[] = useMemo(() => {
     return filters.filter((filter) => filter.label !== '__name__');
   }, [filters]);

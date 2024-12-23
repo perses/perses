@@ -42,7 +42,7 @@ body:
   - type: textarea
     attributes:
       label: Perses configuration file
-      description: Insert relevant configuration here. Don't forget to remove secrets.
+      description: Insert relevant configuration here. Don't forget to remove secrets. You can use the CLI to get it (all secret will be hidden). percli config --online
       render: yaml
   - type: textarea
     attributes:

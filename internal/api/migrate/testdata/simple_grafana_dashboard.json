@@ -122,7 +122,8 @@
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "Bps",
+          "decimal": 2
         },
         "overrides": []
       },
@@ -189,7 +190,8 @@
               }
             ]
           },
-          "unit": "h"
+          "unit": "h",
+          "decimal": 1
         },
         "overrides": []
       },
@@ -284,7 +286,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "decimal": 3
         },
         "overrides": []
       },
@@ -445,7 +448,12 @@
               "Time": true,
               "__name__": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "__name__": 1,
+              "Time": 0,
+              "Value": 3,
+              "apiserver": 2
+            },
             "renameByName": {
               "Time": "",
               "Value": "ValueCustomHeader",

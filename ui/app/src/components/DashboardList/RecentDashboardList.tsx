@@ -16,7 +16,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { useSnackbar } from '@perses-dev/components';
 import { DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
@@ -31,7 +31,7 @@ export interface RecentDashboardListProperties {
   isLoading?: boolean;
 }
 
-export function RecentDashboardList(props: RecentDashboardListProperties) {
+export function RecentDashboardList(props: RecentDashboardListProperties): ReactElement {
   const { dashboardList, hideProject, hideToolbar, isLoading } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
@@ -66,7 +66,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
   const [isDeleteDashboardDialogStateOpened, setDeleteDashboardDialogStateOpened] = useState<boolean>(false);
 
   const onRenameButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setRenameDashboardDialogStateOpened(true);
     },
@@ -92,7 +92,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
   );
 
   const onDeleteButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setDeleteDashboardDialogStateOpened(true);
     },
@@ -118,8 +118,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (_, row) => new Date(row.createdAt),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date => new Date(row.createdAt),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -131,8 +131,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (_, row) => new Date(row.updatedAt),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date => new Date(row.updatedAt),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -144,8 +144,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 150,
-        valueGetter: (_, row) => (row.viewedAt ? new Date(row.viewedAt) : undefined),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date | undefined => (row.viewedAt ? new Date(row.viewedAt) : undefined),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -157,7 +157,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'actions',
         flex: 0.5,
         minWidth: 100,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -204,24 +204,22 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         }}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
-      ></DashboardDataGrid>
-      <Box>
-        {targetedDashboard && (
-          <Box>
-            <RenameDashboardDialog
-              open={isRenameDashboardDialogStateOpened}
-              onClose={() => setRenameDashboardDialogStateOpened(false)}
-              dashboard={targetedDashboard}
-            />
-            <DeleteResourceDialog
-              open={isDeleteDashboardDialogStateOpened}
-              resource={targetedDashboard}
-              onSubmit={() => handleDashboardDelete(targetedDashboard)}
-              onClose={() => setDeleteDashboardDialogStateOpened(false)}
-            />
-          </Box>
-        )}
-      </Box>
+      />
+      {targetedDashboard && (
+        <Box>
+          <RenameDashboardDialog
+            open={isRenameDashboardDialogStateOpened}
+            onClose={() => setRenameDashboardDialogStateOpened(false)}
+            dashboard={targetedDashboard}
+          />
+          <DeleteResourceDialog
+            open={isDeleteDashboardDialogStateOpened}
+            resource={targetedDashboard}
+            onSubmit={() => handleDashboardDelete(targetedDashboard)}
+            onClose={() => setDeleteDashboardDialogStateOpened(false)}
+          />
+        </Box>
+      )}
     </Stack>
   );
 }

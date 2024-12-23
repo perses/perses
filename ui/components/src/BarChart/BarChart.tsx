@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { FormatOptions, formatValue } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
 import { getFormattedAxis } from '../utils';
@@ -41,7 +41,7 @@ export interface BarChartProps {
   mode?: ModeOption;
 }
 
-export function BarChart(props: BarChartProps) {
+export function BarChart(props: BarChartProps): ReactElement {
   const { width, height, data, format = { unit: 'decimal' }, mode = 'value' } = props;
   const chartsTheme = useChartsTheme();
 
@@ -79,17 +79,18 @@ export function BarChart(props: BarChartProps) {
         label: {
           show: true,
           position: 'right',
-          formatter: (params: { data: number[] }) => {
-            if (mode === 'percentage') {
-              return (
-                params.data[1] &&
-                formatValue(params.data[1], {
-                  unit: 'percent',
-                  decimalPlaces: format.decimalPlaces,
-                })
-              );
+          formatter: (params: { data: number[] }): string | undefined => {
+            if (!params.data[1]) {
+              return undefined;
             }
-            return params.data[1] && formatValue(params.data[1], format);
+
+            if (mode === 'percentage') {
+              return formatValue(params.data[1]!, {
+                unit: 'percent',
+                decimalPlaces: format.decimalPlaces,
+              });
+            }
+            return formatValue(params.data[1], format);
           },
           barMinWidth: BAR_WIN_WIDTH,
           barCategoryGap: BAR_GAP,
@@ -114,7 +115,13 @@ export function BarChart(props: BarChartProps) {
   }, [data, chartsTheme, width, mode, format]);
 
   return (
-    <Box sx={{ width: width, height: height, overflow: 'auto' }}>
+    <Box
+      style={{
+        width: width,
+        height: height,
+      }}
+      sx={{ overflow: 'auto' }}
+    >
       <EChart
         sx={{
           minHeight: height,

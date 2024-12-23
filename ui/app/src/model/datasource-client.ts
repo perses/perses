@@ -12,7 +12,14 @@
 // limitations under the License.
 
 import { DatasourceResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT, HTTPMethodDELETE, HTTPHeader } from './http';
 import buildQueryKey from './querykey-builder';
 import buildURL from './url-builder';
@@ -24,7 +31,11 @@ type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], Error>, 
   project?: string;
 };
 
-export function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boolean, name?: string) {
+export function buildDatasourceQueryParameters(
+  kind?: string,
+  defaultDatasource?: boolean,
+  name?: string
+): URLSearchParams {
   const q = new URLSearchParams();
   if (kind !== undefined) {
     q.append('kind', kind);
@@ -38,7 +49,12 @@ export function buildDatasourceQueryParameters(kind?: string, defaultDatasource?
   return q;
 }
 
-export function fetchDatasourceList(project: string, kind?: string, defaultDatasource?: boolean, name?: string) {
+export function fetchDatasourceList(
+  project: string,
+  kind?: string,
+  defaultDatasource?: boolean,
+  name?: string
+): Promise<DatasourceResource[]> {
   const url = buildURL({
     resource: resource,
     project: project,
@@ -51,7 +67,9 @@ export function fetchDatasourceList(project: string, kind?: string, defaultDatas
  * Used to create a new project datasource in the API.
  * Will automatically invalidate datasources and force the get query to be executed again.
  */
-export function useCreateDatasourceMutation(projectName: string) {
+export function useCreateDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
@@ -70,7 +88,9 @@ export function useCreateDatasourceMutation(projectName: string) {
  * Used to update a project datasource in the API.
  * Will automatically invalidate datasources and force the get query to be executed again.
  */
-export function useUpdateDatasourceMutation(projectName: string) {
+export function useUpdateDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
@@ -89,7 +109,9 @@ export function useUpdateDatasourceMutation(projectName: string) {
  * Used to delete a datasource in the API.
  * Will automatically invalidate datasources and force the get query to be executed again.
  */
-export function useDeleteDatasourceMutation(projectName: string) {
+export function useDeleteDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
@@ -111,7 +133,7 @@ export function useDeleteDatasourceMutation(projectName: string) {
  * Used to get a datasource in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasource(project: string, name: string) {
+export function useDatasource(project: string, name: string): UseQueryResult<DatasourceResource> {
   return useQuery<DatasourceResource, Error>({
     queryKey: buildQueryKey({ resource, parent: project, name }),
     queryFn: () => {
@@ -124,7 +146,7 @@ export function useDatasource(project: string, name: string) {
  * Used to get datasources in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasourceList(options: DatasourceListOptions) {
+export function useDatasourceList(options: DatasourceListOptions): UseQueryResult<DatasourceResource[]> {
   return useQuery<DatasourceResource[], Error>({
     queryKey: buildQueryKey({ resource, parent: options.project }),
     queryFn: () => {
@@ -134,7 +156,7 @@ export function useDatasourceList(options: DatasourceListOptions) {
   });
 }
 
-export function createDatasource(entity: DatasourceResource) {
+export function createDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
   const url = buildURL({ resource, project: entity.metadata.project });
   return fetchJson<DatasourceResource>(url, {
     method: HTTPMethodPOST,
@@ -143,7 +165,7 @@ export function createDatasource(entity: DatasourceResource) {
   });
 }
 
-export function getDatasource(project: string, name: string) {
+export function getDatasource(project: string, name: string): Promise<DatasourceResource> {
   const url = buildURL({ resource, project: project, name: name });
   return fetchJson<DatasourceResource>(url, {
     method: HTTPMethodGET,
@@ -151,7 +173,7 @@ export function getDatasource(project: string, name: string) {
   });
 }
 
-export function getDatasources(project?: string) {
+export function getDatasources(project?: string): Promise<DatasourceResource[]> {
   const url = buildURL({ resource, project: project });
   return fetchJson<DatasourceResource[]>(url, {
     method: HTTPMethodGET,
@@ -159,7 +181,7 @@ export function getDatasources(project?: string) {
   });
 }
 
-export function updateDatasource(entity: DatasourceResource) {
+export function updateDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
   const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetchJson<DatasourceResource>(url, {
     method: HTTPMethodPUT,
@@ -168,7 +190,7 @@ export function updateDatasource(entity: DatasourceResource) {
   });
 }
 
-export function deleteDatasource(entity: DatasourceResource) {
+export function deleteDatasource(entity: DatasourceResource): Promise<Response> {
   const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,

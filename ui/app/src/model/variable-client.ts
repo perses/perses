@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { VariableResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'variables';
 
-export function createVariable(entity: VariableResource) {
+export function createVariable(entity: VariableResource): Promise<VariableResource> {
   const project = entity.metadata.project;
   const url = buildURL({ resource, project });
   return fetchJson<VariableResource>(url, {
@@ -30,7 +30,7 @@ export function createVariable(entity: VariableResource) {
   });
 }
 
-function getVariable(name: string, project: string) {
+function getVariable(name: string, project: string): Promise<VariableResource> {
   const url = buildURL({ resource, project, name });
   return fetchJson<VariableResource>(url, {
     method: HTTPMethodGET,
@@ -38,7 +38,7 @@ function getVariable(name: string, project: string) {
   });
 }
 
-function getVariables(project?: string) {
+function getVariables(project?: string): Promise<VariableResource[]> {
   const url = buildURL({ resource, project });
   return fetchJson<VariableResource[]>(url, {
     method: HTTPMethodGET,
@@ -46,7 +46,7 @@ function getVariables(project?: string) {
   });
 }
 
-export function updateVariable(entity: VariableResource) {
+export function updateVariable(entity: VariableResource): Promise<VariableResource> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -57,7 +57,7 @@ export function updateVariable(entity: VariableResource) {
   });
 }
 
-export function deleteVariable(entity: VariableResource) {
+export function deleteVariable(entity: VariableResource): Promise<Response> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -71,7 +71,7 @@ export function deleteVariable(entity: VariableResource) {
  * Used to get a variable from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useVariable(name: string, project: string) {
+export function useVariable(name: string, project: string): UseQueryResult<VariableResource> {
   return useQuery<VariableResource, Error>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
@@ -84,7 +84,7 @@ export function useVariable(name: string, project: string) {
  * Used to get variables from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useVariableList(project?: string) {
+export function useVariableList(project?: string): UseQueryResult<VariableResource[]> {
   return useQuery<VariableResource[], Error>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
@@ -100,7 +100,9 @@ export function useVariableList(project?: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateVariableMutation(project: string) {
+export function useCreateVariableMutation(
+  project: string
+): UseMutationResult<VariableResource, Error, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
@@ -122,7 +124,9 @@ export function useCreateVariableMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateVariableMutation(project: string) {
+export function useUpdateVariableMutation(
+  project: string
+): UseMutationResult<VariableResource, Error, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
   return useMutation<VariableResource, Error, VariableResource>({
@@ -146,7 +150,9 @@ export function useUpdateVariableMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteVariableMutation(project: string) {
+export function useDeleteVariableMutation(
+  project: string
+): UseMutationResult<VariableResource, Error, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 

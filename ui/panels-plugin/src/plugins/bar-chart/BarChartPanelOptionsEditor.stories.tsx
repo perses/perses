@@ -13,7 +13,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { BarChart, BarChartOptions } from '@perses-dev/panels-plugin';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { OptionsEditorTabs } from '@perses-dev/plugin-system';
 import { PanelDefinition } from '@perses-dev/core';
 import { produce } from 'immer';
@@ -26,10 +26,10 @@ type PanelOptionsEditorWrapperProps = {
   initialPanelDefinition: PanelDefinition<BarChartOptions>;
 };
 
-const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEditorWrapperProps) => {
+const PanelOptionsEditorWrapper = ({ initialPanelDefinition }: PanelOptionsEditorWrapperProps): ReactElement => {
   const [panelDefinition, setPanelDefinition] = useState<PanelDefinition<BarChartOptions>>(initialPanelDefinition);
 
-  function handleChange(newChartOptions: BarChartOptions) {
+  function handleChange(newChartOptions: BarChartOptions): void {
     action('onChange')(newChartOptions);
     setPanelDefinition(
       produce(panelDefinition, (draft) => {

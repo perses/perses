@@ -17,6 +17,7 @@ import { Stack, IconButton, Typography, BoxProps, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
+import { ReactElement } from 'react';
 import { PluginEditor, PluginEditorProps } from '../PluginEditor';
 
 /**
@@ -52,7 +53,7 @@ export const QueryEditorContainer = ({
   onDelete,
   onChange,
   onCollapseExpand,
-}: QueryEditorContainerProps) => {
+}: QueryEditorContainerProps): ReactElement => {
   return (
     <Stack key={index} spacing={1}>
       <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
@@ -92,7 +93,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  * @param props
  * @constructor
  */
-function QueryEditor(props: QueryEditorProps) {
+function QueryEditor(props: QueryEditorProps): ReactElement {
   const { value, onChange, queryTypes, ...others } = props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {

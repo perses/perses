@@ -12,17 +12,23 @@
 // limitations under the License.
 
 import { TableVirtuosoHandle } from 'react-virtuoso';
+import { KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
 import { useTableKeyboardNav, UseTableKeyboardNavProps } from './useTableKeyboardNav';
 
 interface UseVirtualizedTableKeyboardNavProps extends Omit<UseTableKeyboardNavProps, 'onActiveCellChange'> {
-  visibleRange: React.MutableRefObject<{
+  visibleRange: MutableRefObject<{
     startIndex: number;
     endIndex: number;
   }>;
-  virtualTable: React.RefObject<TableVirtuosoHandle>;
+  virtualTable: RefObject<TableVirtuosoHandle>;
   maxRows: number;
   maxColumns: number;
 }
+
+type TableCellPosition = {
+  row: number;
+  column: number;
+};
 
 /**
  * Hook for managing keyboard navigation when using a virtualized table.
@@ -32,7 +38,12 @@ export function useVirtualizedTableKeyboardNav({
   virtualTable,
   maxRows,
   maxColumns,
-}: UseVirtualizedTableKeyboardNavProps) {
+}: UseVirtualizedTableKeyboardNavProps): {
+  activeCell: TableCellPosition;
+  isActive: boolean;
+  onTableKeyDown: KeyboardEventHandler<HTMLTableElement>;
+  onCellFocus: (cellPosition: TableCellPosition) => void;
+} {
   const baseKeyboard = useTableKeyboardNav({
     maxRows,
     maxColumns,

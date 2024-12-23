@@ -43,14 +43,14 @@ type WaitForStableCanvasOptions = {
 export async function waitForStableCanvas(
   canvasSelector: string,
   { interval = 250, timeout = 5000, expectedCount }: WaitForStableCanvasOptions = {}
-) {
+): Promise<void> {
   const maxChecks = Math.floor(timeout / interval);
 
   if (maxChecks < 1) {
     throw new Error('The canvas cannot be checked for stability with the current `interval` and `timeout` options.');
   }
 
-  function getCanvasData() {
+  function getCanvasData(): string[] {
     const canvases = document.querySelectorAll<HTMLCanvasElement>(canvasSelector);
     return [...canvases].map((canvas) => canvas?.toDataURL());
   }
@@ -58,7 +58,7 @@ export async function waitForStableCanvas(
   let prevCanvasData = getCanvasData();
   let totalChecks = 0;
 
-  async function checkCanvas() {
+  async function checkCanvas(): Promise<void> {
     const canvasData = getCanvasData();
     const hasExpectedCount = expectedCount === undefined || expectedCount === canvasData.length;
 
@@ -94,7 +94,7 @@ export async function waitForStableCanvas(
     }
   }
 
-  async function checkCanvasWithTimeout() {
+  async function checkCanvasWithTimeout(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(async () => {
         await checkCanvas();

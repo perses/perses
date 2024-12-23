@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material';
-import { useState, useRef } from 'react';
+import { useState, useRef, ReactElement } from 'react';
 import MenuDown from 'mdi-material-ui/MenuDown';
 
 export interface ButtonMenuProps {
@@ -23,13 +23,13 @@ export interface ButtonMenuProps {
  * ButtonMenu is a button with a drop down menu for more actions.
  * The first child is the button, the other are the menu entries.
  **/
-const ButtonMenu = ({ children }: ButtonMenuProps) => {
+const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
   const primary = children[0];
   const menuEntries = children.slice(1);
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     setOpen((prevOpen) => !prevOpen);
   };
 

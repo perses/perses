@@ -18,7 +18,7 @@ import { GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
 
 describe('GaugeChartOptionsEditorSettings', () => {
-  const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()) => {
+  const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />

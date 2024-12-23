@@ -35,7 +35,7 @@ filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
 	if #query != _|_ {#query},
-	{"group by (\(#label)) (\(#metric){\(filter)})"},
+	"group by (\(#label)) (\(#metric){\(filter)})",
 ][0]
 
 variable: promVarBuilder.variable & {

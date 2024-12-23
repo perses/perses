@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { Role, RoleResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleList } from '../../../components/roles/RoleList';
@@ -28,7 +28,7 @@ interface ProjectRolesProps {
   id?: string;
 }
 
-export function ProjectRoles(props: ProjectRolesProps) {
+export function ProjectRoles(props: ProjectRolesProps): ReactElement {
   const { projectName, id } = props;
 
   const { data, isLoading } = useRoleList(projectName);

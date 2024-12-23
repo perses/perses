@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Drawer } from '@perses-dev/components';
 import { PanelEditorValues } from '@perses-dev/core';
 import { usePanelEditor } from '../../context';
@@ -21,7 +21,7 @@ import { PanelEditorForm } from './PanelEditorForm';
 /**
  * The Add/Edit panel drawer for editing a panel's options.
  */
-export const PanelDrawer = () => {
+export const PanelDrawer = (): ReactElement => {
   const panelEditor = usePanelEditor();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
@@ -30,7 +30,7 @@ export const PanelDrawer = () => {
   // Drawer is open if we have a model and we're not transitioning out
   const isOpen = panelEditor !== undefined && isClosing === false;
 
-  function handleSave(values: PanelEditorValues) {
+  function handleSave(values: PanelEditorValues): void {
     // This shouldn't happen since we don't render the submit button until we have a model, but check to make TS happy
     if (panelEditor === undefined || values === undefined) {
       throw new Error('Cannot apply changes');
@@ -39,19 +39,19 @@ export const PanelDrawer = () => {
     setIsClosing(true);
   }
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     setIsClosing(true);
   };
 
   // Don't call closeDrawer on the store until the Drawer has completely transitioned out and reset close state
-  const handleExited = () => {
+  const handleExited = (): void => {
     panelEditor?.close();
     setIsClosing(false);
   };
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 

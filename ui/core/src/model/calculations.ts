@@ -172,7 +172,7 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
  * @param values - Array of time series data.
  * @param calculation - Name of the calculation to calculate.
  */
-export function getCalculation(values: TimeSeriesValueTuple[], calculation: CalculationType) {
+export function getCalculation(values: TimeSeriesValueTuple[], calculation: CalculationType): CalculationValue {
   return getCalculations(values, [calculation])[calculation];
 }
 

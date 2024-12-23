@@ -15,6 +15,7 @@ import { Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {
@@ -22,7 +23,7 @@ interface ProjectBreadcrumbsProps {
   dashboardName?: string;
 }
 
-function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
+function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps): ReactElement {
   const { project, dashboardName } = props;
 
   if (dashboardName) {

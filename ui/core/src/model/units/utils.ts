@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function shouldShortenValues(shortValues?: boolean) {
+export function shouldShortenValues(shortValues?: boolean): boolean {
   return shortValues !== false;
 }
 
-export function hasDecimalPlaces(decimalPlaces?: number) {
+export function hasDecimalPlaces(decimalPlaces?: number): boolean {
   return typeof decimalPlaces === 'number';
 }
 
 // Avoids maximumFractionDigits out-of-range error.
 // Allowed values are 0 to 20.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#maximumfractiondigits
-export function limitDecimalPlaces(num?: number) {
+export function limitDecimalPlaces(num?: number): number | undefined {
   if (!num) return num;
 
   if (num < 0) {

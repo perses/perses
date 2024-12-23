@@ -31,7 +31,7 @@ describe('OptionsEditorTabs', () => {
       content: <div>JSON editor</div>,
     },
   ];
-  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']) => {
+  const renderTabs = (otherTabs?: OptionsEditorTabsProps['tabs']): void => {
     const tabs = otherTabs ?? mockTabs;
     render(<OptionsEditorTabs tabs={tabs} />);
   };

@@ -40,7 +40,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
@@ -56,8 +55,8 @@ func DefaultConfig() apiConfig.Config {
 			EnableAuth:    false,
 			Authorization: apiConfig.AuthorizationConfig{},
 			Authentication: apiConfig.AuthenticationConfig{
-				AccessTokenTTL:  model.Duration(apiConfig.DefaultAccessTokenTTL),
-				RefreshTokenTTL: model.Duration(apiConfig.DefaultRefreshTokenTTL),
+				AccessTokenTTL:  common.Duration(apiConfig.DefaultAccessTokenTTL),
+				RefreshTokenTTL: common.Duration(apiConfig.DefaultRefreshTokenTTL),
 				Providers:       apiConfig.AuthProviders{EnableNative: true},
 			},
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),

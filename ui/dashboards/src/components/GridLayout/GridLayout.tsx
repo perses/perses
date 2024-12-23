@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -40,7 +40,7 @@ export interface GridLayoutProps {
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
-export function GridLayout(props: GridLayoutProps) {
+export function GridLayout(props: GridLayoutProps): ReactElement {
   const { panelGroupId, panelOptions, panelFullHeight } = props;
   const theme = useTheme();
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
@@ -86,7 +86,7 @@ export function GridLayout(props: GridLayoutProps) {
     return groupDefinition.itemLayouts;
   }, [groupDefinition.itemLayouts, itemLayoutViewed, panelFullHeight]);
 
-  const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
+  const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts): void => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
@@ -106,7 +106,7 @@ export function GridLayout(props: GridLayoutProps) {
     margin: [number, number],
     cols: number,
     containerPadding: [number, number]
-  ) => {
+  ): void => {
     const marginX = margin[0];
     const marginWidth = marginX * (cols - 1);
     const containerPaddingWidth = containerPadding[0] * 2;
@@ -182,7 +182,7 @@ export function GridLayout(props: GridLayoutProps) {
  * @returns grid item's width in px
  * https://github.com/react-grid-layout/react-grid-layout/blob/master/lib/calculateUtils.js#L14-L35
  */
-const calculateGridItemWidth = (w: number, colWidth: number) => {
+const calculateGridItemWidth = (w: number, colWidth: number): number => {
   // 0 * Infinity === NaN, which causes problems with resize contraints
   if (!Number.isFinite(w)) return w;
   return Math.round(colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN);

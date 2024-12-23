@@ -14,18 +14,18 @@
 package config
 
 import (
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type ProvisioningConfig struct {
 	Folders []string `json:"folders,omitempty" yaml:"folders,omitempty"`
 	// Interval is the refresh frequency
-	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
+	Interval common.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 
 func (p *ProvisioningConfig) Verify() error {
 	if p.Interval <= 0 {
-		p.Interval = model.Duration(defaultInterval)
+		p.Interval = common.Duration(defaultInterval)
 	}
 	return nil
 }

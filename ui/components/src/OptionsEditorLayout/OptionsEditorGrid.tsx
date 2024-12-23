@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Grid } from '@mui/material';
+import { ReactElement } from 'react';
 
 export type OptionsEditorGridProps = {
   /**
@@ -24,7 +25,7 @@ export type OptionsEditorGridProps = {
  * Top level grid container used to lay out content for editing in panel
  * options.
  */
-export const OptionsEditorGrid = ({ children }: OptionsEditorGridProps) => {
+export const OptionsEditorGrid = ({ children }: OptionsEditorGridProps): ReactElement => {
   return (
     <Grid container spacing={8}>
       {children}

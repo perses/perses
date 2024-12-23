@@ -49,7 +49,7 @@ export function createViewPanelSlice(
       return getViewPanelGroupId(get().panelGroups, get().viewPanel.panelGroupItemId, get().viewPanel.panelRef);
     },
 
-    setViewPanel(panelGroupItemId?: PanelGroupItemId) {
+    setViewPanel(panelGroupItemId?: PanelGroupItemId): void {
       set((state) => {
         state.viewPanel = {
           panelRef: undefined,

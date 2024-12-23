@@ -13,42 +13,41 @@
 
 import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
+import React, { Fragment, ReactElement, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { Alert, Box, Button, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { useIsExternalProviderEnabled, useIsNativeProviderEnabled } from '../../context/Config';
+import { FormEditorProps } from '../form-drawers';
 
-interface UserEditorFormProps {
-  initialUser: UserResource;
-  initialAction: Action;
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: UserResource) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
-}
+type UserEditorFormProps = FormEditorProps<UserResource>;
 
-export function UserEditorForm(props: UserEditorFormProps) {
-  const { initialUser, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function UserEditorForm({
+  initialValue,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: UserEditorFormProps): ReactElement {
   const externalProvidersEnabled = useIsExternalProviderEnabled();
   const nativeProviderEnabled = useIsNativeProviderEnabled();
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
-    const result = { ...initialUser };
+    const result = { ...initialValue };
     if (result.spec.nativeProvider?.password) result.spec.nativeProvider.password = '';
     if (result.spec.oauthProviders === undefined) result.spec.oauthProviders = [];
     return result;
-  }, [initialUser]);
+  }, [initialValue]);
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -74,7 +73,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialUserClean) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -93,46 +92,16 @@ export function UserEditorForm(props: UserEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} User</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
@@ -317,7 +286,15 @@ export function UserEditorForm(props: UserEditorFormProps) {
   );
 }
 
-function OAuthProvider({ control, index, action }: { control: Control<UserResource>; index: number; action: Action }) {
+function OAuthProvider({
+  control,
+  index,
+  action,
+}: {
+  control: Control<UserResource>;
+  index: number;
+  action: Action;
+}): ReactElement {
   return (
     <Stack direction="row" width="100%" gap={2}>
       <Stack gap={1} width="100%">

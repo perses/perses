@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
+import { render, RenderResult, screen } from '@testing-library/react';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { MemoryRouter } from 'react-router-dom';
@@ -34,7 +34,7 @@ describe('MetricList', () => {
     filters = [],
     isMetadataEnabled,
     onExplore,
-  }: Partial<MetricListProps>) =>
+  }: Partial<MetricListProps>): RenderResult =>
     render(
       <MemoryRouter>
         <VirtuosoMockContext.Provider value={{ viewportHeight: 400, itemHeight: 25 }}>

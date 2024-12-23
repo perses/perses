@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { OptionsEditorProps, PanelPlugin } from '../../../model';
 
-function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: string }>) {
+function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: string }>): ReactElement {
   return (
     <div>
       <label htmlFor="editor-input">BertPanel1 editor</label>
@@ -39,7 +40,7 @@ export const BertPanel1: PanelPlugin<{ option1: string }> = {
   createInitialOptions: () => ({ option1: '' }),
 };
 
-function BertPanel2Editor({ value, onChange }: OptionsEditorProps<{ option2: string }>) {
+function BertPanel2Editor({ value, onChange }: OptionsEditorProps<{ option2: string }>): ReactElement {
   return (
     <div>
       <label htmlFor="editor-input">BertPanel2 editor</label>
@@ -62,7 +63,7 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
     },
     {
       label: 'Custom Tab',
-      content: function Editor() {
+      content: function Editor(): ReactElement {
         return <div>custom content</div>;
       },
     },

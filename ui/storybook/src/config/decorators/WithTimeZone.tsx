@@ -13,8 +13,9 @@
 
 import { Decorator } from '@storybook/react';
 import { TimeZoneProvider } from '@perses-dev/components';
+import { ReactElement } from 'react';
 
-export const WithTimeZone: Decorator = (Story, context) => {
+export const WithTimeZone: Decorator = (Story, context): ReactElement => {
   const globalTimeZone = context.globals.timeZone;
   const timeZone = typeof globalTimeZone === 'string' ? globalTimeZone : undefined;
 

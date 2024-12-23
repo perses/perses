@@ -52,7 +52,7 @@ export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>
   return jsonData;
 };
 
-function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions) {
+function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions): Promise<TResponse> {
   const { datasourceUrl, headers = {} } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
@@ -70,14 +70,14 @@ function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptio
 /**
  * Returns a summary report of traces that satisfy the query.
  */
-export function search(params: SearchRequestParameters, queryOptions: QueryOptions) {
+export function search(params: SearchRequestParameters, queryOptions: QueryOptions): Promise<SearchResponse> {
   return fetchWithGet<SearchRequestParameters, SearchResponse>('/api/search', params, queryOptions);
 }
 
 /**
  * Returns an entire trace.
  */
-export function query(params: QueryRequestParameters, queryOptions: QueryOptions) {
+export function query(params: QueryRequestParameters, queryOptions: QueryOptions): Promise<QueryResponse> {
   return fetchWithGet<null, QueryResponse>(`/api/traces/${encodeURIComponent(params.traceId)}`, null, queryOptions);
 }
 
@@ -151,14 +151,20 @@ export async function searchWithFallback(
 /**
  * Returns a list of all tag names for a given scope.
  */
-export function searchTags(params: SearchTagsRequestParameters, queryOptions: QueryOptions) {
+export function searchTags(
+  params: SearchTagsRequestParameters,
+  queryOptions: QueryOptions
+): Promise<SearchTagsResponse> {
   return fetchWithGet<SearchTagsRequestParameters, SearchTagsResponse>('/api/v2/search/tags', params, queryOptions);
 }
 
 /**
  * Returns a list of all tag values for a given tag.
  */
-export function searchTagValues(params: SearchTagValuesRequestParameters, queryOptions: QueryOptions) {
+export function searchTagValues(
+  params: SearchTagValuesRequestParameters,
+  queryOptions: QueryOptions
+): Promise<SearchTagValuesResponse> {
   const { tag, ...rest } = params;
   return fetchWithGet<Omit<SearchTagValuesRequestParameters, 'tag'>, SearchTagValuesResponse>(
     `/api/v2/search/tag/${encodeURIComponent(tag)}/values`,

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Grid, MenuItem, Stack } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
@@ -28,30 +28,30 @@ import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
 import { ImportantDashboards } from './ImportantDashboards';
 
-function HomeView() {
+function HomeView(): ReactElement {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const userProjects = useDashboardCreateAllowedProjects();
 
-  const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);
-  const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
+  const handleAddProjectDialogSubmit = (entity: ProjectResource): void => navigate(`/projects/${entity.metadata.name}`);
+  const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector): void =>
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
 
   // Open/Close management for dialogs
   const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);
   const [isAddDashboardDialogOpen, setIsAddDashboardDialogOpen] = useState(false);
 
-  const handleAddProjectDialogOpen = () => {
+  const handleAddProjectDialogOpen = (): void => {
     setIsAddProjectDialogOpen(true);
   };
-  const handleAddProjectDialogClose = () => {
+  const handleAddProjectDialogClose = (): void => {
     setIsAddProjectDialogOpen(false);
   };
-  const handleAddDashboardDialogOpen = () => {
+  const handleAddDashboardDialogOpen = (): void => {
     setIsAddDashboardDialogOpen(true);
   };
-  const handleAddDashboardDialogClose = () => {
+  const handleAddDashboardDialogClose = (): void => {
     setIsAddDashboardDialogOpen(false);
   };
 

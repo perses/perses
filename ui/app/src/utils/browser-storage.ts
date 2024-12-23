@@ -26,7 +26,15 @@ export function useLocalStorage<T>(key: string, initialValue: T): StorageTuple<T
 }
 
 // Common functionality used by all storage hooks
-function useStorage<T>(storage: Storage, key: string, initialValue: T) {
+function useStorage<T>(
+  storage: Storage,
+  key: string,
+  initialValue: T
+): {
+  setValueAndStore: (value: T) => void;
+  setValue: (value: T) => void;
+  value: T;
+} {
   // Use state so that changes cause the page to re-render
   const [value, setValue] = useState<T>(() => {
     try {

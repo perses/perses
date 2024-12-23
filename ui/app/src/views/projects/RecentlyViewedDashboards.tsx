@@ -14,6 +14,7 @@
 import { Box, Stack, Typography, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import HistoryIcon from 'mdi-material-ui/History';
+import { ReactElement } from 'react';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
 import { MENU_TABS_HEIGHT } from '../../components/tabs';
@@ -23,7 +24,7 @@ interface RecentlyViewedDashboardsProps {
   id?: string;
 }
 
-export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
+export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps): ReactElement {
   const { data, isLoading } = useRecentDashboardList(props.projectName);
 
   return (

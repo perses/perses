@@ -45,7 +45,7 @@ export type QueryData<T = QueryDataType> = {
   refetch?: () => void;
 };
 
-export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]) {
+export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]): QueryData[] {
   return results.map(({ data, isFetching, isLoading, refetch, error }, i) => {
     return {
       definition: definitions[i],
@@ -87,7 +87,7 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
-      const isLoading = (pluginKind: string) => {
+      const isLoading = (pluginKind: string): boolean => {
         switch (pluginKind) {
           case 'PrometheusTimeSeriesQuery':
             return isTimeSeriesQueryLoading;

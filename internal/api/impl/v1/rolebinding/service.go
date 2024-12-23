@@ -25,7 +25,6 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/rbac"
 
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/schemas"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -62,9 +61,6 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.RoleBinding) (
 func (s *service) create(entity *v1.RoleBinding) (*v1.RoleBinding, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
-	if err := s.validateRoleBinding(entity); err != nil {
-		return nil, err
-	}
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
@@ -98,10 +94,6 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 	// find the previous version of the RoleBinding
 	oldEntity, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := s.validateRoleBinding(entity); err != nil {
 		return nil, err
 	}
 
@@ -168,26 +160,6 @@ func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *rolebinding.Q
 		return nil, err
 	}
 	return s.dao.RawMetadataList(query)
-}
-
-// Validating role and subjects are existing
-func (s *service) validateRoleBinding(roleBinding *v1.RoleBinding) error {
-	if _, err := s.roleDAO.Get(roleBinding.Metadata.Project, roleBinding.Spec.Role); err != nil {
-		return apiInterface.HandleBadRequestError(fmt.Sprintf("role %q doesn't exist", roleBinding.Spec.Role))
-	}
-
-	for _, subject := range roleBinding.Spec.Subjects {
-		if subject.Kind == v1.KindUser {
-			if _, err := s.userDAO.Get(subject.Name); err != nil {
-				if databaseModel.IsKeyNotFound(err) {
-					return apiInterface.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
-				}
-				logrus.WithError(err).Errorf("unable to find the user with the name %q", subject.Name)
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 func manageQuery(q *rolebinding.Query, params apiInterface.Parameters) (*rolebinding.Query, error) {

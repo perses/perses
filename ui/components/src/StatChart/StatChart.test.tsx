@@ -22,7 +22,7 @@ jest.mock('./calculateFontSize', () => ({
 }));
 
 describe('StatChart', () => {
-  const renderChart = (format: FormatOptions) => {
+  const renderChart = (format: FormatOptions): void => {
     const contentDimensions = {
       width: 200,
       height: 200,

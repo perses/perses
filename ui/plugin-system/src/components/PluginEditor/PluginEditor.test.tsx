@@ -13,7 +13,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { renderWithContext } from '../../test';
 import { DefaultPluginKinds } from '../../model';
 import { PluginEditor } from './PluginEditor';
@@ -26,7 +26,9 @@ type RenderComponentOptions = {
 };
 
 describe('PluginEditor', () => {
-  const renderComponent = ({ pluginTypes = ['Variable'], defaultPluginKinds, value }: RenderComponentOptions = {}) => {
+  const renderComponent: ({ pluginTypes, defaultPluginKinds, value }?: RenderComponentOptions) => {
+    onChange: jest.Mocked<PluginEditorProps['onChange']>;
+  } = ({ pluginTypes = ['Variable'], defaultPluginKinds, value }: RenderComponentOptions = {}) => {
     const testValue: PluginEditorProps['value'] = value || {
       selection: {
         type: 'Variable',
@@ -37,7 +39,7 @@ describe('PluginEditor', () => {
 
     // A test helper component that includes the state that's controlled from outside
     let onChange: jest.Mocked<PluginEditorProps['onChange']> = jest.fn();
-    function TestHelperForm() {
+    function TestHelperForm(): ReactElement {
       const [value, setValue] = useState(testValue);
       onChange = jest.fn((v) => setValue(v));
 
@@ -51,7 +53,7 @@ describe('PluginEditor', () => {
   };
 
   // Opens the PluginKindSelect and waits for loading to finish (i.e. options to appear)
-  const openPluginKind = async () => {
+  const openPluginKind: () => Promise<HTMLElement[]> = async () => {
     const select = screen.getByLabelText('Variable Type');
     userEvent.click(select);
     const options = await screen.findAllByTestId('option');

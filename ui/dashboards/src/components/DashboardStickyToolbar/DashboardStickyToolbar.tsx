@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import {
   AppBar,
   Box,
@@ -33,7 +33,7 @@ interface DashboardStickyToolbarProps {
   sx?: SxProps<Theme>;
 }
 
-export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
+export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): ReactElement {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
 
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });

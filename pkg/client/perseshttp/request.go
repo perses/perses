@@ -22,8 +22,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/perses/perses/pkg/model/api/v1/secret"
 )
 
 const (
@@ -40,12 +38,10 @@ type QueryInterface interface {
 // Any errors are stored until the end of your call, so you only have to
 // check once.
 type Request struct {
-	client        *http.Client
-	method        string
-	basicAuth     *secret.BasicAuth
-	authorization *secret.Authorization
-	headers       map[string]string
-	ctx           context.Context
+	client  *http.Client
+	method  string
+	headers map[string]string
+	ctx     context.Context
 
 	// all component relative to the url
 	baseURL *url.URL
@@ -63,16 +59,14 @@ type Request struct {
 }
 
 // NewRequest creates a new request helper object for accessing resource on the API
-func NewRequest(client *http.Client, method string, baseURL *url.URL, authorization *secret.Authorization, basicAuth *secret.BasicAuth, headers map[string]string) *Request {
+func NewRequest(client *http.Client, method string, baseURL *url.URL, headers map[string]string) *Request {
 	return &Request{
-		client:        client,
-		method:        method,
-		authorization: authorization,
-		basicAuth:     basicAuth,
-		headers:       headers,
-		baseURL:       baseURL,
-		apiPrefix:     defaultAPIPrefix,
-		apiVersion:    defaultAPIVersion,
+		client:     client,
+		method:     method,
+		headers:    headers,
+		baseURL:    baseURL,
+		apiPrefix:  defaultAPIPrefix,
+		apiVersion: defaultAPIVersion,
 	}
 }
 
@@ -199,37 +193,12 @@ func (r *Request) prepareRequest() (*http.Request, error) {
 	// set the accept content type
 	httpRequest.Header.Set("Accept", "application/json")
 
-	// set the token
-	if authErr := r.setupAuthentication(httpRequest); authErr != nil {
-		return nil, authErr
-	}
-
 	// set the default headers
 	for key, value := range r.headers {
 		httpRequest.Header.Set(key, value)
 	}
 
 	return httpRequest, nil
-}
-
-func (r *Request) setupAuthentication(req *http.Request) error {
-	basicAuth := r.basicAuth
-	if basicAuth != nil {
-		password, err := basicAuth.GetPassword()
-		if err != nil {
-			return err
-		}
-		req.SetBasicAuth(basicAuth.Username, password)
-	}
-	auth := r.authorization
-	if auth != nil {
-		credential, err := auth.GetCredentials()
-		if err != nil {
-			return err
-		}
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
-	}
-	return nil
 }
 
 // url build the final URL for the request, using the different pathParameter or queryParameter set

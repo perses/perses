@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Typography } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 export interface StorySectionProps {
   title: string;
@@ -24,7 +24,7 @@ export interface StorySectionProps {
  * Simple helper component to lay out more complex stories where you want to
  * lay out a combination of examples with a title and content.
  */
-export function StorySection({ title, level, children }: StorySectionProps) {
+export function StorySection({ title, level, children }: StorySectionProps): ReactElement {
   return (
     <div>
       <Typography variant={level} gutterBottom>

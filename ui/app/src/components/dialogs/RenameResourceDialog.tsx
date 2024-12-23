@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -36,7 +36,7 @@ interface RenameResourceDialogProps {
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
  */
-export function RenameResourceDialog(props: RenameResourceDialogProps) {
+export function RenameResourceDialog(props: RenameResourceDialogProps): ReactElement {
   const { resource, open, onSubmit, onClose } = props;
 
   const form = useForm<z.infer<typeof schema>>({
@@ -44,7 +44,7 @@ export function RenameResourceDialog(props: RenameResourceDialogProps) {
     mode: 'onBlur',
   });
 
-  function processForm(data: z.infer<typeof schema>) {
+  function processForm(data: z.infer<typeof schema>): void {
     onSubmit(data.name);
   }
 

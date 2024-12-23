@@ -17,6 +17,7 @@ import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@pers
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
+import { ReactElement } from 'react';
 import { PrometheusMetricsFinder } from '../PrometheusMetricsFinder';
 import { FinderQueryParams } from '../PrometheusMetricsFinder/types';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
@@ -27,7 +28,7 @@ interface MetricsExplorerQueryParams extends FinderQueryParams {
   queries?: QueryDefinition[];
 }
 
-function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
+function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const { width, ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
 
@@ -60,7 +61,7 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
+function MetricDataTable({ queries }: { queries: QueryDefinition[] }): ReactElement {
   const height = PANEL_PREVIEW_HEIGHT;
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
@@ -88,7 +89,7 @@ function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-export function MetricsExplorer() {
+export function MetricsExplorer(): ReactElement {
   const {
     data: { tab = 'table', queries = [], datasource = DEFAULT_PROM, filters = [], exploredMetric = undefined },
     setData,

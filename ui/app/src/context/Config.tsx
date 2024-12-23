@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 import { marked } from 'marked';
 import * as DOMPurify from 'dompurify';
 import { CircularProgress, Stack } from '@mui/material';
@@ -26,7 +26,7 @@ interface ConfigContextType {
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
-export function ConfigContextProvider(props: { children: React.ReactNode }) {
+export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
   if (isLoading || data === undefined) {
     return (

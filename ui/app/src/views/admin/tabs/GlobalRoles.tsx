@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { GlobalRoleResource, Role } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleList } from '../../../components/roles/RoleList';
@@ -27,7 +27,7 @@ interface GlobalRolesProps {
   id?: string;
 }
 
-export function GlobalRoles(props: GlobalRolesProps) {
+export function GlobalRoles(props: GlobalRolesProps): ReactElement {
   const { id } = props;
 
   const { data, isLoading } = useGlobalRoleList();

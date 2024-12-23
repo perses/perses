@@ -15,8 +15,7 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
-const decimalUnits = ['decimal'] as const;
-type DecimalUnit = (typeof decimalUnits)[number];
+type DecimalUnit = 'decimal';
 export type DecimalFormatOptions = {
   unit: DecimalUnit;
   decimalPlaces?: number;

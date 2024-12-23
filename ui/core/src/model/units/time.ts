@@ -15,8 +15,7 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
-const timeUnits = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'] as const;
-type TimeUnits = (typeof timeUnits)[number];
+type TimeUnits = 'milliseconds' | 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 export type TimeFormatOptions = {
   unit: TimeUnits;
   decimalPlaces?: number;

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen, within } from '@testing-library/react';
+import { render, RenderResult, screen, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { TableLegend, TableLegendProps } from './TableLegend';
 
@@ -49,7 +49,7 @@ const renderTableLegend = ({
   onSelectedItemsChange = jest.fn(),
   onItemMouseOver = jest.fn(),
   onItemMouseOut = jest.fn(),
-}: RenderTableLegendOpts = {}) => {
+}: RenderTableLegendOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
       <TableLegend

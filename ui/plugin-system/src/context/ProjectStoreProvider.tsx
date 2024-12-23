@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { ReactNode, createContext, useContext, useMemo } from 'react';
+import { ReactNode, createContext, useContext, useMemo, ReactElement } from 'react';
 import { fetchJson, ProjectResource } from '@perses-dev/core';
 import { useSetProjectParams } from './query-params';
 
@@ -37,7 +37,7 @@ export function useProjectList(): UseQueryResult<ProjectResource[], Error> {
   });
 }
 
-export function useProjectStore() {
+export function useProjectStore(): ProjectStore {
   const ctx = useContext(ProjectStoreContext);
   if (ctx === undefined) {
     throw new Error('No ProjectStoreContext found. Did you forget a Provider?');
@@ -45,7 +45,7 @@ export function useProjectStore() {
   return ctx;
 }
 
-export function ProjectStoreProvider(props: ProjectStoreProviderProps) {
+export function ProjectStoreProvider(props: ProjectStoreProviderProps): ReactElement {
   const { children, enabledURLParams } = props;
   const { project, setProject } = useSetProjectParams(enabledURLParams);
 
@@ -57,7 +57,7 @@ export function ProjectStoreProvider(props: ProjectStoreProviderProps) {
           name: project,
         },
       } as ProjectResource,
-      setProject: (project: ProjectResource) => {
+      setProject: (project: ProjectResource): void => {
         setProject(project.metadata.name);
       },
     }),

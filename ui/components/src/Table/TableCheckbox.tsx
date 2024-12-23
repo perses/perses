@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Checkbox, CheckboxProps, alpha } from '@mui/material';
+import { ReactElement } from 'react';
 import { TableDensity } from './model/table-model';
 
 export interface TableCheckboxProps extends Pick<CheckboxProps, 'checked' | 'indeterminate' | 'onChange'> {
@@ -19,7 +20,7 @@ export interface TableCheckboxProps extends Pick<CheckboxProps, 'checked' | 'ind
   density: TableDensity;
 }
 
-export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxProps) {
+export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxProps): ReactElement {
   const isCompact = density === 'compact';
 
   return (

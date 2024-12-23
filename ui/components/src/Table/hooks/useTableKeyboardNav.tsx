@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from 'react';
+import { KeyboardEventHandler, useCallback, useState } from 'react';
 
 export interface UseTableKeyboardNavProps {
   maxRows: number;
@@ -44,7 +44,7 @@ const DEFAULT_ACTIVE_CELL: TableCellPosition = {
 
 const ARROW_KEYS = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
 
-function isArrowKey(key: string) {
+function isArrowKey(key: string): boolean {
   return ARROW_KEYS.includes(key);
 }
 
@@ -54,11 +54,16 @@ function isArrowKey(key: string) {
  * like pagination, infinite scroll, and virtualization. See `useVirtualizedKeyboardNav`
  * for an example.
  */
-export function useTableKeyboardNav({ maxRows, maxColumns, onActiveCellChange }: UseTableKeyboardNavProps) {
+export function useTableKeyboardNav({ maxRows, maxColumns, onActiveCellChange }: UseTableKeyboardNavProps): {
+  activeCell: TableCellPosition;
+  isActive: boolean;
+  onTableKeyDown: KeyboardEventHandler<HTMLTableElement>;
+  onCellFocus: (cellPosition: TableCellPosition) => void;
+} {
   const [activeCell, setActiveCell] = useState<TableCellPosition>(DEFAULT_ACTIVE_CELL);
   const [isActive, setIsActive] = useState(false);
 
-  const handleCellFocus = (cellPosition: TableCellPosition) => {
+  const handleCellFocus = (cellPosition: TableCellPosition): void => {
     if (cellPosition.column === activeCell.column && cellPosition.row === activeCell.row && isActive) {
       return;
     }

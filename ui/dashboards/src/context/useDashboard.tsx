@@ -21,7 +21,10 @@ import {
 import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
-export function useDashboard() {
+export function useDashboard(): {
+  dashboard: DashboardResource | EphemeralDashboardResource;
+  setDashboard: (dashboardResource: DashboardResource | EphemeralDashboardResource) => void;
+} {
   const {
     panels,
     panelGroups,
@@ -95,7 +98,7 @@ export function useDashboard() {
           },
         } as EphemeralDashboardResource);
 
-  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource) => {
+  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource): void => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };

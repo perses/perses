@@ -67,7 +67,7 @@ export interface PanelGroupItemId {
 /*
  * Check if two PanelGroupItemId are equal
  */
-export function isPanelGroupItemIdEqual(a?: PanelGroupItemId, b?: PanelGroupItemId) {
+export function isPanelGroupItemIdEqual(a?: PanelGroupItemId, b?: PanelGroupItemId): boolean {
   return a?.panelGroupId === b?.panelGroupId && a?.panelGroupItemLayoutId === b?.panelGroupItemLayoutId;
 }
 
@@ -84,7 +84,7 @@ export function createPanelGroupSlice(
     panelGroups,
     panelGroupOrder,
 
-    swapPanelGroups(x, y) {
+    swapPanelGroups(x, y): void {
       set((state) => {
         if (x < 0 || x >= state.panelGroupOrder.length || y < 0 || y >= state.panelGroupOrder.length) {
           throw new Error('index out of bound');
@@ -100,7 +100,7 @@ export function createPanelGroupSlice(
       });
     },
 
-    updatePanelGroupLayouts(panelGroupId, itemLayouts) {
+    updatePanelGroupLayouts(panelGroupId, itemLayouts): void {
       set((state) => {
         const group = state.panelGroups[panelGroupId];
         if (group === undefined) {
@@ -168,7 +168,7 @@ export function createEmptyPanelGroup(): PanelGroupDefinition {
 /**
  * Private helper function that modifies panel group state to add a new panel
  */
-export function addPanelGroup(draft: WritableDraft<PanelGroupSlice>, newGroup: PanelGroupDefinition) {
+export function addPanelGroup(draft: WritableDraft<PanelGroupSlice>, newGroup: PanelGroupDefinition): void {
   draft.panelGroups[newGroup.id] = newGroup;
   draft.panelGroupOrder.unshift(newGroup.id);
 }

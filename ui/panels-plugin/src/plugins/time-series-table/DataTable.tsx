@@ -13,7 +13,7 @@
 /*
  eslint-disable @typescript-eslint/no-explicit-any
  */
-import { Fragment, ReactNode } from 'react';
+import { Fragment, ReactElement, ReactNode } from 'react';
 import { Alert, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
@@ -33,7 +33,7 @@ export interface DataTableProps {
  * @param result timeseries query result
  * @constructor
  */
-const DataTable = ({ result }: DataTableProps) => {
+const DataTable = ({ result }: DataTableProps): ReactElement | null => {
   if (!result) {
     return null;
   }
@@ -102,6 +102,8 @@ export const bucketRangeString = ([boundaryRule, leftBoundary, rightBoundary, _]
   return `${leftDelim(boundaryRule)}${leftBoundary} -> ${rightBoundary}${rightDelim(boundaryRule)}`;
 };
 
+// TODO: add typing to histogram and remove this exception
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const histogramTable = (h: any): ReactNode => (
   <Table>
     <TableHead>

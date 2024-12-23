@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetchJson } from '@perses-dev/core';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 
 const resource = 'health';
@@ -28,7 +28,7 @@ type HealthOptions = Omit<UseQueryOptions<HealthModel, Error>, 'queryKey' | 'que
 /**
  * Gets version information from the Perses server API.
  */
-export function useHealth(options?: HealthOptions) {
+export function useHealth(options?: HealthOptions): UseQueryResult<HealthModel> {
   return useQuery<HealthModel, Error>({
     queryKey: [resource],
     queryFn: () => {

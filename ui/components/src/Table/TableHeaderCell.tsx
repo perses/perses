@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TableSortLabel, Typography, tableSortLabelClasses } from '@mui/material';
+import { ReactElement } from 'react';
 import { TableCell, TableCellProps } from './TableCell';
 import { SortDirection } from './model/table-model';
 
@@ -42,7 +43,7 @@ export function TableHeaderCell({
   nextSortDirection,
   children,
   ...cellProps
-}: TableHeaderCellProps) {
+}: TableHeaderCellProps): ReactElement {
   const showSortLabel = !!onSort;
 
   const headerText = (

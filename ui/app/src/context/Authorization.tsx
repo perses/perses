@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactNode, useContext, useMemo } from 'react';
+import React, { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 import { Action, Permission, ProjectResource, Scope } from '@perses-dev/core';
 import { useAuthToken } from '../model/auth-client';
 import { useUserPermissions } from '../model/user-client';
@@ -30,7 +30,7 @@ interface AuthorizationContext {
 const AuthorizationContext = createContext<AuthorizationContext | undefined>(undefined);
 
 // Provide RBAC helpers for checking current user permissions
-export function AuthorizationProvider(props: { children: ReactNode }) {
+export function AuthorizationProvider(props: { children: ReactNode }): ReactElement {
   const enabled = useIsAuthEnabled();
   const { data: decodedToken } = useAuthToken();
   const username = decodedToken?.sub || '';

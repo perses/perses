@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { GlobalRoleBindingResource, RoleBinding } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
@@ -27,7 +27,7 @@ interface GlobalRoleBindingsProps {
   id?: string;
 }
 
-export function GlobalRoleBindings(props: GlobalRoleBindingsProps) {
+export function GlobalRoleBindings(props: GlobalRoleBindingsProps): ReactElement {
   const { id } = props;
 
   const { data, isLoading } = useGlobalRoleBindingList();

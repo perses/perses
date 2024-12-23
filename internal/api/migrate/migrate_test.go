@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,21 +14,18 @@
 package migrate
 
 import (
-	"fmt"
-	"os"
+	"encoding/json"
 	"path/filepath"
 	"testing"
 
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const testDataFolder = "testdata"
 
-func TestMigrate(t *testing.T) {
-
+func TestMig_Migrate(t *testing.T) {
 	testSuite := []struct {
 		title                       string
 		inputGrafanaDashboardFile   string
@@ -66,7 +63,7 @@ func TestMigrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
-			title:                       "dashboard with simple table panels, focused on validating the migration of column settings",
+			title:                       "dashboard with table panels, focused on validating the migration of column settings",
 			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
 			expectedPersesDashboardFile: "tables_perses_dashboard.json",
 			expectedErrorStr:            "",
@@ -77,43 +74,49 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "stat_calc_undefined_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a bar gauge",
+			inputGrafanaDashboardFile:   "barchart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with a piechart",
+			inputGrafanaDashboardFile:   "piechart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "piechart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard from user",
+			inputGrafanaDashboardFile:   "grafana_user_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_user_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
+	projectPath := testUtils.GetRepositoryPath()
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			inputGrafanaDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.inputGrafanaDashboardFile))
 			expectedPersesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile))
-
-			projectPath := testUtils.GetRepositoryPath()
-			svc, err := New(config.Schemas{
-				// use the real schemas for these tests
+			m, err := New(config.Schemas{
 				PanelsPath:    filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
 				QueriesPath:   filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
 				VariablesPath: filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
 			})
-			assert.NoError(t, err)
-
-			actualPersesDashboard, err := svc.Migrate(inputGrafanaDashboardRaw)
-
-			actualErrorStr := ""
 			if err != nil {
-				actualErrorStr = err.Error()
+				t.Fatal(err)
 			}
-			assert.Equal(t, test.expectedErrorStr, actualErrorStr)
-
-			actualPersesDashboardRaw := testUtils.JSONMarshalStrict(actualPersesDashboard)
-			fmt.Print(string(actualPersesDashboardRaw))
-			require.JSONEq(t, string(expectedPersesDashboardRaw), string(actualPersesDashboardRaw))
+			grafanaDashboard := &SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal(inputGrafanaDashboardRaw, grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			dashboard, err := m.Migrate(grafanaDashboard)
+			if err != nil {
+				t.Fatal(err)
+			}
+			raw := testUtils.JSONMarshalStrict(dashboard)
+			assert.JSONEq(t, string(expectedPersesDashboardRaw), string(raw))
 		})
 	}
-}
-
-func TestRearrangeGrafanaPanelsWithinExpandedRows(t *testing.T) {
-	input, _ := os.ReadFile("testdata/expanded_rows_before.json")
-	expectedAfter, _ := os.ReadFile("testdata/expanded_rows_after.json")
-
-	t.Run("It should move any wrongly-orphaned panels into the right expanded row", func(t *testing.T) {
-		actualAfter := rearrangeGrafanaPanelsWithinExpandedRows(input)
-		require.JSONEq(t, string(expectedAfter), string(actualAfter))
-	})
 }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { LinearProgress, TextField, Autocomplete, Popper, PopperProps } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
@@ -44,7 +44,7 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
   return options.value;
 }
 
-export function Variable({ name, source }: VariableProps) {
+export function Variable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
   const kind = ctx.definition?.kind;
   switch (kind) {
@@ -163,7 +163,7 @@ export function useListVariableState(
   return { value, loading, options, selectedOptions, viewOptions };
 }
 
-const StyledPopper = (props: PopperProps) => (
+const StyledPopper = (props: PopperProps): ReactElement => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
@@ -180,7 +180,7 @@ const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
   }
 };
 
-function ListVariable({ name, source }: VariableProps) {
+function ListVariable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
@@ -264,7 +264,7 @@ function ListVariable({ name, source }: VariableProps) {
   );
 }
 
-function TextVariable({ name, source }: VariableProps) {
+function TextVariable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;

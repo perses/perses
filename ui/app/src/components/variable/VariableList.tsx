@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Action, getResourceDisplayName, getVariableProject, Variable } from '@perses-dev/core';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -46,7 +46,7 @@ import { VariableDrawer } from './VariableDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>) {
+export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
@@ -109,7 +109,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const variable = findVariable(name, project);
       setTargetedVariable(variable);
       setAction('update');
@@ -119,7 +119,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const variable = findVariable(name, project);
       setTargetedVariable(variable);
       setAction('create');
@@ -129,7 +129,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedVariable(findVariable(name, project));
       setDeleteVariableDialogOpened(true);
     },
@@ -147,8 +147,8 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         type: 'string',
         flex: 3,
         minWidth: 150,
-        valueGetter: (_, row) => `$${row.name}`,
-        renderCell: (params) => (
+        valueGetter: (_, row): string => `$${row.name}`,
+        renderCell: (params): ReactElement => (
           <>
             <span style={{ fontFamily: 'monospace' }}>{params.value}</span>
             <Tooltip title="Copy variable to clipboard" placement="top">
@@ -176,7 +176,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -226,9 +226,10 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         <>
           <VariableDrawer
             variable={targetedVariable}
-            isOpen={isVariableDrawerOpened}
             action={action}
+            isOpen={isVariableDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleVariableSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
             onClose={() => setVariableDrawerOpened(false)}

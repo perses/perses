@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,7 +45,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 				},
 				Spec: EphemeralDashboardSpec{
 					EphemeralDashboardSpecBase{
-						TTL: model.Duration(24 * time.Hour),
+						TTL: common.Duration(24 * time.Hour),
 					},
 					DashboardSpec{
 						Variables: nil,
@@ -86,8 +85,8 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 								},
 							},
 						},
-						Duration:        model.Duration(6 * time.Hour),
-						RefreshInterval: model.Duration(20 * time.Second),
+						Duration:        common.Duration(6 * time.Hour),
+						RefreshInterval: common.Duration(20 * time.Second),
 					},
 				},
 			},
@@ -158,7 +157,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 				},
 				Spec: EphemeralDashboardSpec{
 					EphemeralDashboardSpecBase{
-						TTL: model.Duration(24 * time.Hour),
+						TTL: common.Duration(24 * time.Hour),
 					},
 					DashboardSpec{
 						Variables: []dashboard.Variable{
@@ -232,8 +231,8 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 								},
 							},
 						},
-						Duration:        model.Duration(6 * time.Hour),
-						RefreshInterval: model.Duration(15 * time.Second),
+						Duration:        common.Duration(6 * time.Hour),
+						RefreshInterval: common.Duration(15 * time.Second),
 					},
 				},
 			},
@@ -447,7 +446,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 		},
 		Spec: EphemeralDashboardSpec{
 			EphemeralDashboardSpecBase{
-				TTL: model.Duration(24 * time.Hour),
+				TTL: common.Duration(24 * time.Hour),
 			},
 			DashboardSpec{
 				Variables: []dashboard.Variable{
@@ -506,8 +505,8 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 						},
 					},
 				},
-				Duration:        model.Duration(6 * time.Hour),
-				RefreshInterval: model.Duration(30 * time.Second),
+				Duration:        common.Duration(6 * time.Hour),
+				RefreshInterval: common.Duration(30 * time.Second),
 			},
 		},
 	}

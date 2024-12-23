@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 
 interface ExplorerState<T> {
   explorer: string;
@@ -35,7 +35,10 @@ interface ExplorerManagerProviderProps {
   store?: [ExplorerState<unknown>, (state: ExplorerState<unknown>) => void];
 }
 
-export function ExplorerManagerProvider({ children, store: externalStore }: ExplorerManagerProviderProps) {
+export function ExplorerManagerProvider({
+  children,
+  store: externalStore,
+}: ExplorerManagerProviderProps): ReactElement {
   // cache the state of currently not rendered explore UIs
   const [explorerStateCache, setExplorerStateCache] = useState<
     Record<string, Omit<ExplorerState<unknown>, 'explorer'>>
@@ -46,7 +49,7 @@ export function ExplorerManagerProvider({ children, store: externalStore }: Expl
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
   const { explorer, data } = explorerState;
 
-  function setExplorer(newExplorer: string) {
+  function setExplorer(newExplorer: string): void {
     // store current explorer state
     explorerStateCache[explorer] = { data };
     setExplorerStateCache(explorerStateCache);
@@ -56,7 +59,7 @@ export function ExplorerManagerProvider({ children, store: externalStore }: Expl
     setExplorerState({ explorer: newExplorer, data: state.data });
   }
 
-  function setData(newData: unknown) {
+  function setData(newData: unknown): void {
     setExplorerState({ explorer, data: newData });
   }
 

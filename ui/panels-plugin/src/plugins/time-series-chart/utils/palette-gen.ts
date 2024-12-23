@@ -27,7 +27,7 @@ export interface SeriesColorProps {
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'categorical' or 'auto' aka generative
  */
-export function getSeriesColor(props: SeriesColorProps) {
+export function getSeriesColor(props: SeriesColorProps): string {
   const {
     categoricalPalette,
     visual,
@@ -89,6 +89,6 @@ export function getCategoricalPaletteColor(palette: string[], seriesIndex: numbe
 /*
  * Generate a consistent series name color (if series name includes 'error', it will have a red hue).
  */
-export function getConsistentSeriesNameColor(inputString: string) {
+export function getConsistentSeriesNameColor(inputString: string): string {
   return getConsistentColor(inputString, inputString.toLowerCase().includes('error'));
 }

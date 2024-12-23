@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Typography, Stack } from '@mui/material';
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 export type OptionsEditorGroupProps = {
   /**
@@ -26,7 +26,7 @@ export type OptionsEditorGroupProps = {
 /**
  * Group similar content within panel options.
  */
-export const OptionsEditorGroup = ({ title, children, icon }: OptionsEditorGroupProps) => {
+export const OptionsEditorGroup = ({ title, children, icon }: OptionsEditorGroupProps): ReactElement => {
   return (
     <Box>
       <Box display="flex" borderBottom={1} borderColor="grey.300" marginBottom={(theme) => theme.spacing(1)}>

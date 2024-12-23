@@ -84,7 +84,7 @@ func (o *OutputOption) Complete() error {
 }
 
 func AddOutputFlags(cmd *cobra.Command, o *OutputOption) {
-	cmd.Flags().StringVarP(&o.Output, "output", "o", "", "Kind of display: json or yaml. Default is yaml")
+	cmd.Flags().StringVarP(&o.Output, "output", "o", "", "Format of the output: json or yaml (default is yaml).")
 }
 
 type ProjectOption struct {

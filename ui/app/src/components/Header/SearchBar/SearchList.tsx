@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { isProjectMetadata, Resource } from '@perses-dev/core';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
@@ -50,7 +50,7 @@ export interface SearchListProps {
   buildRouting?: (resource: Resource) => string;
 }
 
-export function SearchList(props: SearchListProps) {
+export function SearchList(props: SearchListProps): ReactElement {
   const [currentSizeList, setCurrentSizeList] = useState<number>(sizeList);
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
   const filteredList: Array<KVSearchResult<Resource>> = useMemo(() => {

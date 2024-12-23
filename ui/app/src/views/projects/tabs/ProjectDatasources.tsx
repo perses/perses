@@ -13,7 +13,7 @@
 
 import { Card } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { getResourceDisplayName, DatasourceResource } from '@perses-dev/core';
 import {
   useCreateDatasourceMutation,
@@ -29,7 +29,7 @@ interface ProjectDatasourcesProps {
   id?: string;
 }
 
-export function ProjectDatasources(props: ProjectDatasourcesProps) {
+export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement {
   const { projectName, hideToolbar, id } = props;
   const { data, isLoading } = useDatasourceList({ project: projectName });
 

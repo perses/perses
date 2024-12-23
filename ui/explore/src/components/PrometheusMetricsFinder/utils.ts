@@ -25,12 +25,19 @@ import {
   SeriesRequestParameters,
   SeriesResponse,
 } from '@perses-dev/prometheus-plugin';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 
 // Retrieve metric metadata from the Prometheus API
-export function useMetricMetadata(metricName: string, datasource: DatasourceSelector, enabled?: boolean) {
+export function useMetricMetadata(
+  metricName: string,
+  datasource: DatasourceSelector,
+  enabled?: boolean
+): {
+  isLoading: false | true;
+  metadata: MetricMetadata | undefined;
+} {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   // histograms and summaries timeseries desc are not always added to prefixed timeseries
@@ -59,7 +66,7 @@ export function useMetricMetadata(metricName: string, datasource: DatasourceSele
   return { metadata, isLoading };
 }
 
-export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector) {
+export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector): UseQueryResult<LabelValuesResponse> {
   const {
     absoluteTimeRange: { start, end },
   } = useTimeRange();
@@ -83,7 +90,11 @@ export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector
 }
 
 // Retrieve label values from the Prometheus API for a given label name and filters
-export function useLabelValues(labelName: string, filters: LabelFilter[], datasource: DatasourceSelector) {
+export function useLabelValues(
+  labelName: string,
+  filters: LabelFilter[],
+  datasource: DatasourceSelector
+): UseQueryResult<LabelValuesResponse> {
   const {
     absoluteTimeRange: { start, end },
   } = useTimeRange();

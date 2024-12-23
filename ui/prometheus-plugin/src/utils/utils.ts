@@ -34,7 +34,7 @@ export function formatSeriesName(inputFormat: string, seriesLabels: SeriesLabels
 /*
  * Stringifies object of labels into valid PromQL for querying metric by label
  */
-function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean) {
+function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, removeExprWrap?: boolean): string {
   const labelStrings: string[] = [];
   Object.keys(labels)
     .sort()
@@ -59,7 +59,7 @@ export function getUniqueKeyForPrometheusResult(
     [key: string]: string;
   },
   { removeExprWrap }: { removeExprWrap?: boolean } = {}
-) {
+): string {
   const metricNameKey = '__name__';
   if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
     const stringifiedLabels = stringifyPrometheusMetricLabels(
@@ -81,7 +81,14 @@ export function getUniqueKeyForPrometheusResult(
 /*
  * Determine human-readable series name to be used in legend and tooltip
  */
-export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
+export function getFormattedPrometheusSeriesName(
+  query: string,
+  metric: Metric,
+  formatter?: string
+): {
+  name: string;
+  formattedName: string;
+} {
   // Name the series after the metric labels by default.
   const name = getUniqueKeyForPrometheusResult(metric);
 

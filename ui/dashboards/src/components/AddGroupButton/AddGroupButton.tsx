@@ -14,10 +14,11 @@
 import { Button } from '@mui/material';
 import AddGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardActions } from '../../context';
 
-export const AddGroupButton = () => {
+export const AddGroupButton = (): ReactElement => {
   const { openAddPanelGroup } = useDashboardActions();
 
   return (

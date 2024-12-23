@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
@@ -48,18 +48,18 @@ export function EditVariablesButton({
   label = 'Variables',
   color = 'primary',
   fullWidth,
-}: EditVariablesButtonProps) {
+}: EditVariablesButtonProps): ReactElement {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
   const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
   const builtinVariableDefinitions: BuiltinVariableDefinition[] = useBuiltinVariableDefinitions();
   const { setVariableDefinitions } = useVariableDefinitionActions();
 
-  const openVariableEditor = () => {
+  const openVariableEditor = (): void => {
     setIsVariableEditorOpen(true);
   };
 
-  const closeVariableEditor = () => {
+  const closeVariableEditor = (): void => {
     setIsVariableEditorOpen(false);
   };
 

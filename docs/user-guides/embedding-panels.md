@@ -3,8 +3,8 @@
 This little documentation aims to provide you the minimum code needed to have a Perses panel into your React
 application.
 
-> Disclaimer: We are working actively on reducing this amount of required dependencies/providers
-> working on some default values or opt-in/opt-out mechanisms.
+!!! info
+    We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
 
 ## Getting started (npm example)
 
@@ -24,7 +24,7 @@ npm i --save @perses-dev/components \
 
 Here replacing your App.tsx
 
-```tsx
+```typescript
 import React from 'react';
 import './App.css';
 

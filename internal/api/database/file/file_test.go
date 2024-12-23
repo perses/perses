@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func clear(t *testing.T) {
+func removeAllFiles(t *testing.T) {
 	if err := os.RemoveAll("./test"); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestDAO_Create(t *testing.T) {
 	}
 	assert.NoError(t, d.Create(projectEntity))
 	assert.True(t, databaseModel.IsKeyConflict(d.Create(projectEntity)))
-	clear(t)
+	removeAllFiles(t)
 }
 
 func TestDAO_Upsert(t *testing.T) {
@@ -60,7 +60,7 @@ func TestDAO_Upsert(t *testing.T) {
 	}
 	assert.NoError(t, d.Upsert(projectEntity))
 	assert.NoError(t, d.Upsert(projectEntity))
-	clear(t)
+	removeAllFiles(t)
 }
 
 func TestDAO_Get(t *testing.T) {
@@ -75,7 +75,7 @@ func TestDAO_Get(t *testing.T) {
 	result := &modelV1.Project{}
 	assert.NoError(t, d.Get(modelV1.KindProject, projectEntity.GetMetadata(), result))
 	assert.Equal(t, projectEntity.Metadata.Name, result.Metadata.Name)
-	clear(t)
+	removeAllFiles(t)
 }
 
 func TestDAO_Query(t *testing.T) {
@@ -93,7 +93,7 @@ func TestDAO_Query(t *testing.T) {
 	assert.NoError(t, d.Query(&project.Query{}, &result2))
 	assert.Equal(t, projectEntity.Metadata.Name, result[0].Metadata.Name)
 	assert.Equal(t, projectEntity.Metadata.Name, result2[0].Metadata.Name)
-	clear(t)
+	removeAllFiles(t)
 }
 
 func TestDAO_Delete(t *testing.T) {
@@ -108,5 +108,5 @@ func TestDAO_Delete(t *testing.T) {
 	assert.NoError(t, d.Delete(modelV1.KindProject, projectEntity.GetMetadata()))
 	result := &modelV1.Project{}
 	assert.True(t, databaseModel.IsKeyNotFound(d.Get(modelV1.KindProject, projectEntity.GetMetadata(), result)))
-	clear(t)
+	removeAllFiles(t)
 }

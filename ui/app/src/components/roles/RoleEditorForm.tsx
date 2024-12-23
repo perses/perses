@@ -13,29 +13,28 @@
 
 import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
+import React, { Fragment, ReactElement, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Box, Button, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { FormEditorProps } from '../form-drawers';
 
-interface RoleEditorFormProps {
-  initialRole: Role;
-  initialAction: Action;
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: Role) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
-}
+type RoleEditorFormProps = FormEditorProps<Role>;
 
-export function RoleEditorForm(props: RoleEditorFormProps) {
-  const { initialRole, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function RoleEditorForm({
+  initialValue,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleEditorFormProps): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -43,7 +42,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   const form = useForm<Role>({
     resolver: zodResolver(rolesEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialRole,
+    defaultValues: initialValue,
   });
 
   const processForm: SubmitHandler<Role> = (data: Role) => {
@@ -59,8 +58,8 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
-    if (JSON.stringify(initialRole) !== JSON.stringify(form.getValues())) {
+  function handleCancel(): void {
+    if (JSON.stringify(initialValue) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -78,46 +77,16 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} Role</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
@@ -201,7 +170,7 @@ interface PermissionControl {
   action: Action;
 }
 
-function PermissionControl({ control, index, action }: PermissionControl) {
+function PermissionControl({ control, index, action }: PermissionControl): ReactElement {
   const kind = useWatch({ control, name: 'kind' });
   // Role and GlobalRole don't have same scopes
   const availableScopes = useMemo(() => {

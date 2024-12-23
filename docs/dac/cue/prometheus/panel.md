@@ -1,6 +1,6 @@
 # Prometheus Panel builder
 
-The Prometheus Panel builder helps creating panels in the format expected by Perses.
+The Prometheus Panel builder is a simple wrapper to help creating panels that query a prometheus datasource.
 
 ## Usage
 
@@ -18,9 +18,9 @@ panelBuilder & {} // input parameters expected
 
 | Parameter       | Type                                                       | Mandatory/Optional | Default | Description                                                |
 |-----------------|------------------------------------------------------------|--------------------|---------|------------------------------------------------------------|
+| `spec`          | [PanelSpec](../../../api/dashboard.md#panel-specification) | Mandatory          |         | A PanelSpec object                                         |
 | `#clause`       | `"by"` \| `"without"` \| `""`                              | Optional           | `""`    | The aggregation clause for this panel's queries.           |
 | `#clauseLabels` | [...string]                                                | Optional           | []      | The labels on which to aggregate for this panel's queries. |
-| `spec`          | [PanelSpec](../../../api/dashboard.md#panel-specification) | Mandatory          |         | A PanelSpec object                                         |
 
 the panel spec object can use the following string fields provided by the builder, via interpolation:
 

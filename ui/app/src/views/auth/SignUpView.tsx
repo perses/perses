@@ -12,14 +12,14 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, Stack, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { SignInRoute } from '../../model/route';
 import { useCreateUserMutation } from '../../model/user-client';
 import { SignWrapper } from './SignWrapper';
 
-function SignUpView() {
+function SignUpView(): ReactElement {
   const createUserMutation = useCreateUserMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -28,7 +28,7 @@ function SignUpView() {
   const [firstname, setFirstname] = useState<string>('');
   const [lastname, setLastname] = useState<string>('');
 
-  const handleRegister = () => {
+  const handleRegister = (): void => {
     createUserMutation.mutate(
       {
         kind: 'User',
@@ -47,11 +47,11 @@ function SignUpView() {
     );
   };
 
-  const isSignUpDisabled = () => {
+  const isSignUpDisabled = (): boolean => {
     return createUserMutation.isLoading || login === '' || password === '';
   };
 
-  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (isSignUpDisabled()) {
       return;
     }

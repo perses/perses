@@ -35,7 +35,7 @@ export function getXValues(timeScale: TimeScale): number[] {
  * processes the time series values, filling in any timestamps that are missing
  * from the time series data with `null` values.
  */
-export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale) {
+export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale): TimeSeriesValueTuple[] {
   let timestamp = timeScale.startMs;
 
   const values = series.values;

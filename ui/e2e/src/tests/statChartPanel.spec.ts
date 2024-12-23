@@ -79,7 +79,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
   });
 });
 
-async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: number) {
+async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: number): Promise<void> {
   // Mock data response, so we can make assertions on consistent response data.
   await page.mockQueryRangeRequests({
     queries: [

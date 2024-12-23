@@ -173,6 +173,6 @@ export function mockTimeSeriesResponseWithManySeries({
 /*
  * Hard-coded mock response using test data
  */
-export function mockTimeSeriesResponseWithTestData() {
+export function mockTimeSeriesResponseWithTestData(): MockResponse {
   return mockSuccessfulTimeSeriesResponse(mockRangeQuery.data.result as unknown as SeriesData[]);
 }

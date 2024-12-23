@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
-import { createStore, useStore } from 'zustand';
+import { createContext, ReactElement, ReactNode, useContext, useMemo, useState } from 'react';
+import { createStore, StoreApi, useStore } from 'zustand';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
@@ -34,6 +34,8 @@ import {
   formatDuration,
   intervalToPrometheusDuration,
   BuiltinVariableDefinition,
+  TextVariableDefinition,
+  ListVariableDefinition,
 } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
@@ -104,10 +106,8 @@ type VariableDefinitionStore = {
 /**
  * Context object for {@link VariableDefinitionStore}.
  */
-const VariableDefinitionStoreContext = createContext<ReturnType<typeof createVariableDefinitionStore> | undefined>(
-  undefined
-);
-export function useVariableDefinitionStoreCtx() {
+const VariableDefinitionStoreContext = createContext<StoreApi<VariableDefinitionStore> | undefined>(undefined);
+export function useVariableDefinitionStoreCtx(): StoreApi<VariableDefinitionStore> {
   const context = useContext(VariableDefinitionStoreContext);
   if (!context) {
     throw new Error('VariableStoreContext not initialized');
@@ -158,7 +158,13 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
  * @param name name of the variable
  * @param source if given, it searches in the external variables
  */
-export function useVariableDefinitionAndState(name: string, source?: string) {
+export function useVariableDefinitionAndState(
+  name: string,
+  source?: string
+): {
+  definition: TextVariableDefinition | ListVariableDefinition | undefined;
+  state: VariableState | undefined;
+} {
   const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     const state = s.variableState.get({ name, source });
@@ -171,7 +177,14 @@ export function useVariableDefinitionAndState(name: string, source?: string) {
   });
 }
 
-export function useVariableDefinitionActions() {
+export function useVariableDefinitionActions(): {
+  setVariableLoading: (name: VariableName, loading: boolean, source?: string) => void;
+  getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
+  setVariableDefaultValues: () => VariableDefinition[];
+  setVariableValue: (variableName: VariableName, value: VariableValue, source?: string) => void;
+  setVariableOptions: (name: VariableName, options: VariableOption[], source?: string) => void;
+  setVariableDefinitions: (definitions: VariableDefinition[]) => void;
+} {
   const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     return {
@@ -185,12 +198,12 @@ export function useVariableDefinitionActions() {
   });
 }
 
-export function useVariableDefinitions() {
+export function useVariableDefinitions(): VariableDefinition[] {
   const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
-export function useExternalVariableDefinitions() {
+export function useExternalVariableDefinitions(): ExternalVariableDefinition[] {
   const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.externalVariableDefinitions);
 }
@@ -200,7 +213,7 @@ interface PluginProviderProps {
   builtinVariables?: BuiltinVariableDefinition[];
 }
 
-function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
+function PluginProvider({ children, builtinVariables }: PluginProviderProps): ReactElement {
   const originalValues = useVariableDefinitionStates();
   const definitions = useVariableDefinitions();
   const externalDefinitions = useExternalVariableDefinitions();
@@ -318,7 +331,7 @@ function createVariableDefinitionStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
-}: VariableDefinitionStoreArgs) {
+}: VariableDefinitionStoreArgs): StoreApi<VariableDefinitionStore> {
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
   const store = createStore<VariableDefinitionStore>()(
     devtools(
@@ -330,7 +343,7 @@ function createVariableDefinitionStore({
         ),
         variableDefinitions: initialVariableDefinitions,
         externalVariableDefinitions: externalVariableDefinitions,
-        setVariableDefinitions(definitions: VariableDefinition[]) {
+        setVariableDefinitions(definitions: VariableDefinition[]): void {
           set(
             (state) => {
               state.variableDefinitions = definitions;
@@ -344,7 +357,7 @@ function createVariableDefinitionStore({
             '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
           );
         },
-        setVariableOptions(name, options, source?: string) {
+        setVariableOptions(name, options, source?: string): void {
           set(
             (state) => {
               const varState = state.variableState.get({ name, source });
@@ -357,7 +370,7 @@ function createVariableDefinitionStore({
             '[Variables] setVariableOptions'
           );
         },
-        setVariableLoading(name, loading, source?: string) {
+        setVariableLoading(name, loading, source?: string): void {
           set(
             (state) => {
               const varState = state.variableState.get({ name, source });
@@ -370,7 +383,7 @@ function createVariableDefinitionStore({
             '[Variables] setVariableLoading'
           );
         },
-        setVariableValue: (name, value, source?: string) =>
+        setVariableValue: (name, value, source?: string): void =>
           set(
             (state) => {
               let val = value;
@@ -396,7 +409,7 @@ function createVariableDefinitionStore({
             false,
             '[Variables] setVariableValue'
           ),
-        setVariableDefaultValues: () => {
+        setVariableDefaultValues: (): VariableDefinition[] => {
           const variableDefinitions = get().variableDefinitions;
           const variableState = get().variableState;
           const updatedVariables = produce(variableDefinitions, (draft) => {
@@ -435,14 +448,17 @@ function createVariableDefinitionStore({
           );
           return updatedVariables;
         },
-        getSavedVariablesStatus: () => {
+        getSavedVariablesStatus: (): {
+          modifiedVariableNames: string[];
+          isSavedVariableModified: boolean;
+        } => {
           return checkSavedDefaultVariableStatus(get().variableDefinitions, get().variableState);
         },
       }))
     )
   );
 
-  return store;
+  return store as unknown as StoreApi<VariableDefinitionStore>; // TODO: @Gladorme check if we can avoid this cast
 }
 
 /**
@@ -476,7 +492,7 @@ export function VariableProvider({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariableDefinitions = [],
-}: VariableProviderProps) {
+}: VariableProviderProps): ReactElement {
   const [store] = useState(createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions }));
 
   return (
@@ -491,7 +507,7 @@ export function VariableProviderWithQueryParams({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariableDefinitions: builtinVariables = [],
-}: VariableProviderProps) {
+}: VariableProviderProps): ReactElement {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(

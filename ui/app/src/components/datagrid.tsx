@@ -21,6 +21,7 @@ import {
   GridValidRowModel,
 } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { ReactElement } from 'react';
 
 export const DATA_GRID_INITIAL_STATE_SORT_BY_NAME = {
   columns: {
@@ -63,7 +64,7 @@ export const DATA_GRID_STYLES = {
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-export function GridToolbar() {
+export function GridToolbar(): ReactElement {
   return (
     <GridToolbarContainer>
       <Stack direction="row" width="100%" gap={4} m={2}>

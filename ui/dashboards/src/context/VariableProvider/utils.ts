@@ -18,7 +18,13 @@ import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 /*
  * Check whether saved variable definitions are out of date with current default list values in Zustand store
  */
-export function checkSavedDefaultVariableStatus(definitions: VariableDefinition[], varState: VariableStoreStateMap) {
+export function checkSavedDefaultVariableStatus(
+  definitions: VariableDefinition[],
+  varState: VariableStoreStateMap
+): {
+  modifiedVariableNames: string[];
+  isSavedVariableModified: boolean;
+} {
   let isSavedVariableModified = false;
   const modifiedVariableNames: string[] = [];
   for (const savedVariable of definitions) {
@@ -91,7 +97,7 @@ export function forEachVariableDefinition(
   locals: VariableDefinition[],
   externals: ExternalVariableDefinition[],
   callbackFn: (varDef: VariableDefinition, name: string, source?: string) => void
-) {
+): void {
   locals.forEach((v) => callbackFn(v, v.spec.name));
   externals.forEach((ext) => ext.definitions.forEach((v) => callbackFn(v, v.spec.name, ext.source)));
 }

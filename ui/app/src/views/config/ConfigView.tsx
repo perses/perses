@@ -14,11 +14,12 @@
 import { Stack } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
 
-function ConfigView() {
+function ConfigView(): ReactElement {
   const { config } = useConfigContext();
   const isMobileSize = useIsMobileSize();
 

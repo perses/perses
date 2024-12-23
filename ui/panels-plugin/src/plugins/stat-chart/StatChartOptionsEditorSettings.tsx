@@ -28,10 +28,11 @@ import {
   FontSizeOption,
 } from '@perses-dev/components';
 import merge from 'lodash/merge';
+import { ReactElement } from 'react';
 import { DEFAULT_FORMAT } from '../gauge-chart/gauge-chart-model';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
-export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps) {
+export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
   // ensures decimalPlaces defaults to correct value

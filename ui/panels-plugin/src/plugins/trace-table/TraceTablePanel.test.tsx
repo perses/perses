@@ -19,7 +19,7 @@ import {
   TraceQueryPlugin,
   useDataQueries,
 } from '@perses-dev/plugin-system';
-import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
@@ -36,9 +36,9 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-function buildFakeTraceQuery(): TraceQueryPlugin<UnknownSpec> {
+function buildFakeTraceQuery(): TraceQueryPlugin {
   return {
-    getTraceData: async () => {
+    getTraceData: async (): Promise<never> => {
       throw Error('not implemented');
     },
     createInitialOptions: () => ({}),
@@ -63,12 +63,12 @@ const TEST_TRACE_TABLE_PROPS: TraceTablePanelProps = {
 
 describe('TraceTablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = () => {
+  const renderPanel = (): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
+      setRefreshInterval: (): Record<string, unknown> => ({}),
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
+      setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
       refresh: jest.fn(),
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,

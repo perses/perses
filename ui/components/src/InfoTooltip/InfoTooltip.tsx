@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import { ReactElement, ReactNode } from 'react';
 import {
   styled,
   TooltipProps as MuiTooltipProps,
@@ -24,7 +24,7 @@ export type TooltipPlacement = 'top' | 'left' | 'right' | 'bottom';
 
 interface InfoTooltipProps {
   description: string;
-  children: React.ReactNode;
+  children: ReactNode;
   id?: string;
   title?: string;
   placement?: TooltipPlacement;
@@ -40,7 +40,7 @@ export const InfoTooltip = ({
   children,
   enterDelay,
   enterNextDelay,
-}: InfoTooltipProps) => {
+}: InfoTooltipProps): ReactElement => {
   // Wrap children in a span to cover the following use cases:
   //  - Disabled buttons. MUI console.errors on putting these inside a tooltip.
   //  - Non-element tooltip children (e.g. text). The tooltip needs something that
@@ -63,7 +63,7 @@ export const InfoTooltip = ({
   );
 };
 
-const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' | 'description'>) => {
+const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' | 'description'>): ReactElement => {
   return (
     <>
       {title && (

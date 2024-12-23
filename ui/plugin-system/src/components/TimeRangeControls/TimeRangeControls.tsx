@@ -22,7 +22,7 @@ import {
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useTimeRange, useShowCustomTimeRangeSetting, useTimeRangeOptionsSetting } from '../../runtime';
 
@@ -54,7 +54,7 @@ export function TimeRangeControls({
   showRefreshInterval = true,
   showCustomTimeRange,
   timePresets,
-}: TimeRangeControlsProps) {
+}: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);

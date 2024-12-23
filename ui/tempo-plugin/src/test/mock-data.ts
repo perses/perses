@@ -14,7 +14,7 @@
 import { Span, TraceData } from '@perses-dev/core';
 import { QueryResponse, SearchResponse } from '../model/api-types';
 
-function addParentReferences(span: Span) {
+function addParentReferences(span: Span): void {
   for (const child of span.childSpans) {
     child.parentSpan = span;
     addParentReferences(child);

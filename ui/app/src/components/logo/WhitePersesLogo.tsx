@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SVGProps } from 'react';
+import { ReactElement, SVGProps } from 'react';
 
 interface PersesLogoProps extends SVGProps<SVGSVGElement> {
   title?: string;
 }
 
-function WhitePersesLogo(props: PersesLogoProps) {
+function WhitePersesLogo(props: PersesLogoProps): ReactElement {
   const { title = 'Perses Logo' } = props;
   return (
     <svg width="130" height="32" viewBox="0 0 367 120" fill="none" xmlns="http://www.w3.org/2000/svg">

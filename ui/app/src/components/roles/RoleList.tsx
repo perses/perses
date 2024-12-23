@@ -14,7 +14,7 @@
 import { getMetadataProject, Role, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -42,7 +42,7 @@ import { RoleDrawer } from './RoleDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) {
+export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -93,7 +93,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const role = findRole(name, project);
       setTargetedRole(role);
       setAction('create');
@@ -103,7 +103,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const role = findRole(name, project);
       setTargetedRole(role);
       setAction('update');
@@ -113,7 +113,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedRole(findRole(name, project));
       setDeleteRoleDialogOpened(true);
     },
@@ -133,7 +133,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -181,9 +181,10 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
         <>
           <RoleDrawer
             role={targetedRole}
-            isOpen={isRoleDrawerOpened}
             action={action}
+            isOpen={isRoleDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleRoleSave}
             onDelete={(v) => onDelete(v).then(() => setRoleDrawerOpened(false))}
             onClose={() => setRoleDrawerOpened(false)}

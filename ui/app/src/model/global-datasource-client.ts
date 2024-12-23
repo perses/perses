@@ -18,7 +18,11 @@ import { fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
 
-export function fetchGlobalDatasourceList(kind?: string, defaultDatasource?: boolean, name?: string) {
+export function fetchGlobalDatasourceList(
+  kind?: string,
+  defaultDatasource?: boolean,
+  name?: string
+): Promise<GlobalDatasourceResource[]> {
   const url = buildURL({
     resource: globalDatasourceResource,
     queryParams: buildDatasourceQueryParameters(kind, defaultDatasource, name),

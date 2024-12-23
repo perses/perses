@@ -17,6 +17,7 @@ import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { PROM_DATASOURCE_KIND } from '@perses-dev/prometheus-plugin';
 import PlusIcon from 'mdi-material-ui/Plus';
 import * as React from 'react';
+import { ReactElement } from 'react';
 import { LabelFilter } from '../types';
 import { LabelFilterInput } from './FilterInputs';
 
@@ -35,8 +36,8 @@ export function FinderFilters({
   onDatasourceChange,
   onFiltersChange,
   ...props
-}: ExplorerFiltersProps) {
-  function handleDatasourceChange(next: DatasourceSelector) {
+}: ExplorerFiltersProps): ReactElement {
+  function handleDatasourceChange(next: DatasourceSelector): void {
     onDatasourceChange(next);
   }
 

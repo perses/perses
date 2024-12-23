@@ -13,6 +13,7 @@
 
 import { Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, FormatControls } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { DEFAULT_FORMAT, DEFAULT_Y_AXIS, TimeSeriesChartYAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
@@ -20,7 +21,7 @@ export interface YAxisOptionsEditorProps {
   onChange: (yAxis: TimeSeriesChartYAxisOptions) => void;
 }
 
-export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps) {
+export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps): ReactElement {
   return (
     <OptionsEditorGroup title="Y Axis">
       <OptionsEditorControl
@@ -28,7 +29,7 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
         control={
           <Switch
             checked={value.show ?? DEFAULT_Y_AXIS.show}
-            onChange={(e) => {
+            onChange={(e): void => {
               onChange({
                 ...value,
                 show: e.target.checked,
@@ -39,7 +40,7 @@ export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps)
       />
       <FormatControls
         value={value.format ?? DEFAULT_FORMAT}
-        onChange={(newFormat) =>
+        onChange={(newFormat): void =>
           onChange({
             ...value,
             format: newFormat,

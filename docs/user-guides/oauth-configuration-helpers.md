@@ -46,11 +46,11 @@ authentication:
           scopes: ["https://graph.microsoft.com/.default"] # For Client Credentials
 ```
 
-> [!tip]
-> The **scope** used to generate a token from client credentials is different from the one used in other flows.
->
-> *Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow*
+!!! tip
+    The **scope** used to generate a token from client credentials is different from the one used in other flows.
 
-#### \<Place Your Provider here ...>
+    *Ref: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
+
+#### <Place Your Provider here ...\>
 
 ... (don't hesitate to propose new providers to add!)

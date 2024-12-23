@@ -17,7 +17,7 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import {
   DashboardResource,
   Display,
@@ -79,7 +79,7 @@ export interface DashboardProviderProps {
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
 
-export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T) {
+export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T): T {
   const store = useContext(DashboardContext);
   if (store === undefined) {
     throw new Error('No DashboardContext found. Did you forget a Provider?');
@@ -87,7 +87,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
-export function DashboardProvider(props: DashboardProviderProps) {
+export function DashboardProvider(props: DashboardProviderProps): ReactElement {
   const createDashboardStore = useCallback(initStore, [props]);
 
   // load plugin to retrieve initial spec if default panel kind is defined
@@ -115,7 +115,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
   );
 }
 
-function initStore(props: DashboardProviderProps) {
+function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
     initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
   } = props;
@@ -163,12 +163,12 @@ function initStore(props: DashboardProviderProps) {
           datasources,
           ttl,
           isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean) => set({ isEditMode }),
+          setEditMode: (isEditMode: boolean): void => set({ isEditMode }),
           setDashboard: ({
             kind,
             metadata,
             spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
-          }) => {
+          }): void => {
             set((state) => {
               state.kind = kind;
               state.metadata = metadata;

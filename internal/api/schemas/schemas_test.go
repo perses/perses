@@ -24,7 +24,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -91,7 +90,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
+					Duration:  common.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyFirstPanel": {
@@ -124,7 +123,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
+					Duration:  common.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -145,7 +144,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
+					Duration:  common.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -166,7 +165,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
+					Duration:  common.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -187,7 +186,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
+					Duration:  common.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -249,7 +248,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration: model.Duration(6 * time.Hour),
+					Duration: common.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
 							Kind: variable.KindList,
@@ -296,7 +295,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration: model.Duration(6 * time.Hour),
+					Duration: common.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
 							Kind: "ListVariable",

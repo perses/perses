@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
@@ -30,7 +30,7 @@ export interface NativeAuthBody {
   password: string;
 }
 
-export function useIsAccessTokenExist() {
+export function useIsAccessTokenExist(): boolean {
   const [cookies] = useCookies();
 
   // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
@@ -87,7 +87,7 @@ export function useAuthToken(): UseQueryResult<Payload | null> {
   });
 }
 
-export function useNativeAuthMutation() {
+export function useNativeAuthMutation(): UseMutationResult<void, Error, NativeAuthBody> {
   const queryClient = useQueryClient();
   return useMutation<void, Error, NativeAuthBody>({
     mutationKey: [authResource],
@@ -100,7 +100,7 @@ export function useNativeAuthMutation() {
   });
 }
 
-export function nativeAuth(body: NativeAuthBody) {
+export function nativeAuth(body: NativeAuthBody): Promise<void> {
   const url = buildURL({ resource: `${authResource}/providers/native/login`, apiPrefix: '/api' });
   return fetchJson<void>(url, {
     method: HTTPMethodPOST,
@@ -109,7 +109,7 @@ export function nativeAuth(body: NativeAuthBody) {
   });
 }
 
-export function refreshToken() {
+export function refreshToken(): Promise<Response> {
   const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,

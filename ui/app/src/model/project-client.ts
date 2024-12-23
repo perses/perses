@@ -12,7 +12,14 @@
 // limitations under the License.
 
 import { DashboardResource, ProjectResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { useMemo } from 'react';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -37,7 +44,7 @@ export interface ProjectWithDashboards {
   dashboards: DashboardResource[];
 }
 
-function createProject(entity: ProjectResource) {
+function createProject(entity: ProjectResource): Promise<ProjectResource> {
   const url = buildURL({ resource });
   return fetchJson<ProjectResource>(url, {
     method: HTTPMethodPOST,
@@ -46,7 +53,7 @@ function createProject(entity: ProjectResource) {
   });
 }
 
-export function getProject(name: string) {
+export function getProject(name: string): Promise<ProjectResource> {
   const url = buildURL({ resource, name });
   return fetchJson<ProjectResource>(url, {
     method: HTTPMethodGET,
@@ -54,7 +61,7 @@ export function getProject(name: string) {
   });
 }
 
-export function getProjects() {
+export function getProjects(): Promise<ProjectResource[]> {
   const url = buildURL({ resource });
   return fetchJson<ProjectResource[]>(url, {
     method: HTTPMethodGET,
@@ -62,7 +69,7 @@ export function getProjects() {
   });
 }
 
-function updateProject(entity: ProjectResource) {
+function updateProject(entity: ProjectResource): Promise<ProjectResource> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetchJson<ProjectResource>(url, {
@@ -72,7 +79,7 @@ function updateProject(entity: ProjectResource) {
   });
 }
 
-function deleteProject(entity: ProjectResource) {
+function deleteProject(entity: ProjectResource): Promise<Response> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetch(url, {
@@ -85,7 +92,7 @@ function deleteProject(entity: ProjectResource) {
  * Used to get a project from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useProject(name: string) {
+export function useProject(name: string): UseQueryResult<ProjectResource> {
   return useQuery<ProjectResource, Error>({
     queryKey: [resource, name],
     queryFn: () => {
@@ -98,7 +105,7 @@ export function useProject(name: string) {
  * Used to get projects from the API
  * Will automatically be refreshed when cache is invalidated
  */
-export function useProjectList(options?: ProjectListOptions) {
+export function useProjectList(options?: ProjectListOptions): UseQueryResult<ProjectResource[]> {
   const queryKey = buildQueryKey({ resource });
 
   return useQuery<ProjectResource[], Error>({
@@ -114,7 +121,7 @@ export function useProjectList(options?: ProjectListOptions) {
  * Returns a mutation that can be used to create a project.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateProjectMutation() {
+export function useCreateProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
@@ -136,7 +143,7 @@ export function useCreateProjectMutation() {
  * Returns a mutation that can be used to update a project.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateProjectMutation() {
+export function useUpdateProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
   return useMutation<ProjectResource, Error, ProjectResource>({
@@ -163,7 +170,7 @@ export function useUpdateProjectMutation() {
  * // ...
  * deleteProjectMutation.mutate("MyProjectName")
  */
-export function useDeleteProjectMutation() {
+export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 

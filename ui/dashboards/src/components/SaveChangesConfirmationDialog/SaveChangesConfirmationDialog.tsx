@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
 
-export const SaveChangesConfirmationDialog = () => {
+export const SaveChangesConfirmationDialog = (): ReactElement => {
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
   const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;

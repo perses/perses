@@ -67,7 +67,7 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
   },
 };
 
-function getLegendByName(name?: string) {
+function getLegendByName(name?: string): HTMLElement {
   if (typeof name !== 'string') {
     throw new Error('Legend name must be a string.');
   }
@@ -90,12 +90,12 @@ describe('TimeSeriesChartPanel', () => {
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = () => {
+  const renderPanel = (): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
+      setRefreshInterval: (): Record<string, unknown> => ({}),
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
+      setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
       refresh: jest.fn(),
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,

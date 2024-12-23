@@ -14,7 +14,8 @@
 import { Box, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
-import { Viewport, formatDuration, getSpanColor } from '../utils';
+import { ReactElement } from 'react';
+import { Viewport, formatDuration, getSpanColor, minSpanWidthPx } from '../utils';
 import { Ticks } from '../Ticks';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
 
@@ -27,7 +28,7 @@ export interface SpanDurationProps {
 /**
  * SpanDuration renders the right column of a SpanRow, i.e. the span bar and span duration
  */
-export function SpanDuration(props: SpanDurationProps) {
+export function SpanDuration(props: SpanDurationProps): ReactElement {
   const { options, span, viewport } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
@@ -47,7 +48,7 @@ export function SpanDuration(props: SpanDurationProps) {
           top: 0,
           bottom: 0,
           margin: 'auto',
-          minWidth: '2px',
+          minWidth: `${minSpanWidthPx}px`,
           height: '8px',
           borderRadius: muiTheme.shape.borderRadius,
         }}

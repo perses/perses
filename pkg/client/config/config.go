@@ -15,6 +15,7 @@ package config
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"net"
 	"net/http"
@@ -32,7 +33,7 @@ import (
 
 const connectionTimeout = 30 * time.Second
 
-type PublicOauth struct {
+type PublicOAuth struct {
 	ClientID       secret.Hidden    `json:"client_id" yaml:"client_id"`
 	ClientSecret   secret.Hidden    `json:"client_secret" yaml:"client_secret"`
 	TokenURL       string           `json:"token_url" yaml:"token_url"`
@@ -41,11 +42,11 @@ type PublicOauth struct {
 	AuthStyle      oauth2.AuthStyle `json:"auth_style" yaml:"auth_style"`
 }
 
-func newPublicOauth(oauthConfig *Oauth) *PublicOauth {
+func newPublicOauth(oauthConfig *OAuth) *PublicOAuth {
 	if oauthConfig == nil {
 		return nil
 	}
-	return &PublicOauth{
+	return &PublicOAuth{
 		ClientID:       secret.Hidden(oauthConfig.ClientID),
 		ClientSecret:   secret.Hidden(oauthConfig.ClientSecret),
 		TokenURL:       oauthConfig.TokenURL,
@@ -55,27 +56,12 @@ func newPublicOauth(oauthConfig *Oauth) *PublicOauth {
 	}
 }
 
-type PublicAuth struct {
-	NativeAuth *api.PublicAuth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
-	Oauth      *PublicOauth            `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
-	BasicAuth  *secret.PublicBasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
-}
-
-func newPublicAuth(auth *Auth) *PublicAuth {
-	if auth == nil {
-		return nil
-	}
-	return &PublicAuth{
-		Oauth:      newPublicOauth(auth.Oauth),
-		BasicAuth:  secret.NewPublicBasicAuth(auth.BasicAuth),
-		NativeAuth: api.NewPublicAuth(auth.NativeAuth),
-	}
-}
-
 // PublicRestConfigClient is the struct that should be used when printing the config
 type PublicRestConfigClient struct {
-	URL  *common.URL `json:"url" yaml:"url"`
-	Auth *PublicAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
+	URL        *common.URL             `json:"url" yaml:"url"`
+	NativeAuth *api.PublicAuth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
+	Oauth      *PublicOAuth            `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
+	BasicAuth  *secret.PublicBasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -89,14 +75,16 @@ func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient
 	}
 	return &PublicRestConfigClient{
 		URL:           config.URL,
-		Auth:          newPublicAuth(config.Auth),
+		NativeAuth:    api.NewPublicAuth(config.NativeAuth),
+		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
+		Oauth:         newPublicOauth(config.OAuth),
 		Authorization: secret.NewPublicAuthorization(config.Authorization),
 		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
 		Headers:       config.Headers,
 	}
 }
 
-type Oauth struct {
+type OAuth struct {
 	// ClientID is the application's ID.
 	ClientID string `json:"client_id" yaml:"client_id"`
 	// ClientSecret is the application's secret.
@@ -114,42 +102,40 @@ type Oauth struct {
 	AuthStyle oauth2.AuthStyle `json:"auth_style" yaml:"auth_style"`
 }
 
-type Auth struct {
-	NativeAuth *api.Auth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
-	Oauth      *Oauth            `json:"oauth,omitempty" yaml:"oauth,omitempty"`
-	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
-}
-
-func (a *Auth) Validate() error {
-	if a == nil {
-		return nil
-	}
-	nbAuthConfigured := 0
-	if a.NativeAuth != nil {
-		nbAuthConfigured++
-	}
-	if a.Oauth != nil {
-		nbAuthConfigured++
-	}
-	if a.BasicAuth != nil {
-		nbAuthConfigured++
-	}
-
-	if nbAuthConfigured > 1 {
-		return fmt.Errorf("only one type of authentication should be configured")
-	}
-	return nil
-}
-
 // RestConfigClient defines all parameters that can be set to customize the RESTClient
 type RestConfigClient struct {
-	URL  *common.URL `json:"url" yaml:"url"`
-	Auth *Auth       `json:"auth,omitempty" yaml:"auth,omitempty"`
+	URL        *common.URL       `json:"url" yaml:"url"`
+	NativeAuth *api.Auth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
+	OAuth      *OAuth            `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
 	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	Headers   map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+}
+
+func (c *RestConfigClient) Validate() error {
+	if c == nil {
+		return nil
+	}
+	nbAuthConfigured := 0
+	if c.NativeAuth != nil {
+		nbAuthConfigured++
+	}
+	if c.OAuth != nil {
+		nbAuthConfigured++
+	}
+	if c.BasicAuth != nil {
+		nbAuthConfigured++
+	}
+	if c.Authorization != nil {
+		nbAuthConfigured++
+	}
+	if nbAuthConfigured > 1 {
+		return fmt.Errorf("only one type of authentication should be configured")
+	}
+	return nil
 }
 
 func NewRoundTripper(timeout time.Duration, tlsConfig *secret.TLSConfig) (http.RoundTripper, error) {
@@ -174,29 +160,47 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	var basicAuth *secret.BasicAuth
 	var httpClient *http.Client
-	if config.Auth != nil {
-		if config.Auth.BasicAuth != nil {
-			basicAuth = config.Auth.BasicAuth
+
+	ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+		Transport: roundTripper,
+		Timeout:   connectionTimeout,
+	})
+	if config.BasicAuth != nil {
+		c := oauth2.Config{}
+		password, getPasswordErr := config.BasicAuth.GetPassword()
+		if getPasswordErr != nil {
+			return nil, getPasswordErr
 		}
-		if config.Auth.NativeAuth != nil {
-			roundTripper = transport.New(config.URL.URL, roundTripper, *config.Auth.NativeAuth)
+		httpClient = c.Client(ctx, &oauth2.Token{
+			AccessToken: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BasicAuth.Username, password))),
+			TokenType:   "basic",
+		})
+	}
+	if config.Authorization != nil {
+		c := oauth2.Config{}
+		credential, getCredentialErr := config.Authorization.GetCredentials()
+		if getCredentialErr != nil {
+			return nil, getCredentialErr
 		}
-		if config.Auth.Oauth != nil {
-			oauthConfig := &clientcredentials.Config{
-				ClientID:     config.Auth.Oauth.ClientID,
-				ClientSecret: config.Auth.Oauth.ClientSecret,
-				TokenURL:     config.Auth.Oauth.TokenURL,
-				Scopes:       config.Auth.Oauth.Scopes,
-				AuthStyle:    config.Auth.Oauth.AuthStyle,
-			}
-			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
-				Transport: roundTripper,
-				Timeout:   connectionTimeout,
-			})
-			httpClient = oauthConfig.Client(ctx)
+		httpClient = c.Client(ctx, &oauth2.Token{
+			AccessToken: credential,
+			TokenType:   config.Authorization.Type,
+		})
+	}
+	if config.NativeAuth != nil {
+		roundTripper = transport.New(config.URL.URL, roundTripper, *config.NativeAuth)
+	}
+	if config.OAuth != nil {
+		oauthConfig := &clientcredentials.Config{
+			ClientID:     config.OAuth.ClientID,
+			ClientSecret: config.OAuth.ClientSecret,
+			TokenURL:     config.OAuth.TokenURL,
+			Scopes:       config.OAuth.Scopes,
+			AuthStyle:    config.OAuth.AuthStyle,
 		}
+
+		httpClient = oauthConfig.Client(ctx)
 	}
 
 	if httpClient == nil {
@@ -207,10 +211,8 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 	}
 
 	return &perseshttp.RESTClient{
-		BaseURL:       config.URL.URL,
-		Authorization: config.Authorization,
-		BasicAuth:     basicAuth,
-		Client:        httpClient,
-		Headers:       config.Headers,
+		BaseURL: config.URL.URL,
+		Client:  httpClient,
+		Headers: config.Headers,
 	}, nil
 }

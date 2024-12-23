@@ -14,7 +14,7 @@
 import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
 import { Box } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, ReactElement } from 'react';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -30,7 +30,9 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> &
+export type VirtualizedTableProps<TableData> = Required<
+  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth'>
+> &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
     rows: Array<Row<TableData>>;
@@ -46,6 +48,7 @@ export function VirtualizedTable<TableData>({
   width,
   height,
   density,
+  defaultColumnWidth,
   onRowClick,
   onRowMouseOver,
   onRowMouseOut,
@@ -53,7 +56,7 @@ export function VirtualizedTable<TableData>({
   columns,
   headers,
   cellConfigs,
-}: VirtualizedTableProps<TableData>) {
+}: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   // Use a ref for these values because they are only needed for keyboard
@@ -87,12 +90,12 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
-      Table: (props) => {
+      Table: (props): ReactElement => {
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      TableRow: ({ item, ...props }) => {
+      TableRow: ({ item, ...props }): ReactElement | null => {
         const index = props['data-index'];
         const row = rows[index];
         if (!row) {
@@ -120,7 +123,7 @@ export function VirtualizedTable<TableData>({
   }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
 
   return (
-    <Box sx={{ width, height }}>
+    <Box style={{ width, height }}>
       <TableVirtuoso
         ref={virtuosoRef}
         totalCount={rows.length}
@@ -151,7 +154,7 @@ export function VirtualizedTable<TableData>({
                           onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
                           sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
                           nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
-                          width={column.getSize() || 'auto'}
+                          width={column.getSize() || defaultColumnWidth}
                           align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
@@ -210,7 +213,7 @@ export function VirtualizedTable<TableData>({
                     key={cell.id}
                     data-testid={cell.id}
                     title={description || cellConfig?.text || cellContent}
-                    width={cell.column.getSize() || 'auto'}
+                    width={cell.column.getSize() || defaultColumnWidth}
                     align={cell.column.columnDef.meta?.align}
                     density={density}
                     focusState={getFocusState(position)}

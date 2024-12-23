@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { Secret, SecretResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { SecretList } from '../../../components/secrets/SecretList';
@@ -28,7 +28,7 @@ interface ProjectSecretsProps {
   id?: string;
 }
 
-export function ProjectSecrets(props: ProjectSecretsProps) {
+export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
   const { projectName, id } = props;
 
   const { data, isLoading } = useSecretList(projectName);

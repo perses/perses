@@ -61,35 +61,35 @@ export class AppProjectPage {
     this.variableList = page.locator('#project-variable-list');
   }
 
-  async goto(projectName: string) {
+  async goto(projectName: string): Promise<void> {
     await this.page.goto(`/projects/${projectName}`);
   }
 
-  async gotoDashboardsTab() {
+  async gotoDashboardsTab(): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickTab('Dashboards');
     await navigationPromise;
   }
 
-  async gotoDatasourcesTab() {
+  async gotoDatasourcesTab(): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickTab('Datasources');
     await navigationPromise;
   }
 
-  async gotoSecretsTab() {
+  async gotoSecretsTab(): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickTab('Secrets');
     await navigationPromise;
   }
 
-  async gotoVariablesTab() {
+  async gotoVariablesTab(): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickTab('Variables');
     await navigationPromise;
   }
 
-  async createDashboard(name: string) {
+  async createDashboard(name: string): Promise<void> {
     await this.addDashboardButton.click();
 
     const nameInput = this.createDashboardDialog.getByRole('textbox', {
@@ -105,7 +105,7 @@ export class AppProjectPage {
    * @param projectName - Name of the project.
    * @param dashboardName - Name of the dashboard.
    */
-  async navigateToDashboard(projectName: string, dashboardName: string) {
+  async navigateToDashboard(projectName: string, dashboardName: string): Promise<void> {
     await this.goto(projectName);
 
     const navigationPromise = this.page.waitForNavigation();
@@ -118,7 +118,7 @@ export class AppProjectPage {
    * @param projectName - Name of the project.
    * @param dashboardName - Name of the dashboard.
    */
-  async navigateToDashboardFromRecentDashboards(projectName: string, dashboardName: string) {
+  async navigateToDashboardFromRecentDashboards(projectName: string, dashboardName: string): Promise<void> {
     await this.goto(projectName);
 
     const navigationPromise = this.page.waitForNavigation();
@@ -126,27 +126,27 @@ export class AppProjectPage {
     await navigationPromise;
   }
 
-  async clickTab(tabLabel: string) {
+  async clickTab(tabLabel: string): Promise<void> {
     const tab = this.page.getByRole('tab').getByText(tabLabel, {
       exact: false,
     });
     await tab.click();
   }
 
-  async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {
+  async clickDashboardItemInList(dashboardName: string, dashboardListId: string): Promise<void> {
     const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(new RegExp(`^${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
-  getDatasourceEditor() {
+  getDatasourceEditor(): DatasourceEditor {
     return new DatasourceEditor(this.datasourceEditor);
   }
 
-  getSecretEditor() {
+  getSecretEditor(): SecretEditor {
     return new SecretEditor(this.secretEditor);
   }
 
-  getVariableEditor() {
+  getVariableEditor(): VariableEditor {
     return new VariableEditor(this.variableEditor);
   }
 }

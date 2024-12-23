@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
@@ -27,8 +28,8 @@ export interface ModeSelectorProps {
   value?: ModeOption;
 }
 
-export function ModeSelector({ disablePercentageMode, onChange, value = 'value' }: ModeSelectorProps) {
-  const handleModeChange = (_: unknown, { id }: { id: ModeOption }) => {
+export function ModeSelector({ disablePercentageMode, onChange, value = 'value' }: ModeSelectorProps): ReactElement {
+  const handleModeChange = (_: unknown, { id }: { id: ModeOption }): void => {
     onChange(id);
   };
 

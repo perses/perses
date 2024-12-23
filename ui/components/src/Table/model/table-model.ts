@@ -23,6 +23,8 @@ import {
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
+export const DEFAULT_COLUMN_WIDTH = 150;
+
 export type TableDensity = 'compact' | 'standard' | 'comfortable';
 export type SortDirection = 'asc' | 'desc' | undefined;
 
@@ -74,6 +76,12 @@ export interface TableProps<TableData> {
    * by content in the table (e.g. font size, padding).
    */
   density?: TableDensity;
+
+  /**
+   *  When using "auto", the table will try to automatically adjust the width of columns to fit without overflowing.
+   *  If there is not enough width for each column, the display can unreadable.
+   */
+  defaultColumnWidth?: 'auto' | number;
 
   /**
    * When `true`, the first column of the table will include checkboxes.
@@ -291,7 +299,9 @@ export interface TableColumnConfig<TableData>
 /**
  * Takes in a perses table column and transforms it into a tanstack column.
  */
-export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableColumnConfig<TableData>>) {
+export function persesColumnsToTanstackColumns<TableData>(
+  columns: Array<TableColumnConfig<TableData>>
+): Array<ColumnDef<TableData>> {
   const tableCols: Array<ColumnDef<TableData>> = columns.map(
     ({ width, align, headerDescription, cellDescription, enableSorting, ...otherProps }) => {
       // Tanstack Table does not support an "auto" value to naturally size to fit

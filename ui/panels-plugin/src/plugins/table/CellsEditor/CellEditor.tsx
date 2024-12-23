@@ -11,11 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GridProps, IconButton, MenuItem, Stack, StackProps, TextField, Tooltip, Typography } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import {
+  Grid2Props as GridProps,
+  IconButton,
+  MenuItem,
+  Stack,
+  StackProps,
+  TextField,
+  Tooltip,
+  Typography,
+  Grid2 as Grid,
+} from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { OptionsColorPicker } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
 import { CellSettings, Condition } from '../table-model';
 
 interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
@@ -23,7 +33,7 @@ interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
   onChange: (condition: Condition) => void;
 }
 
-function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps) {
+function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps): ReactElement | null {
   if (condition.kind === 'Value') {
     return (
       <Stack gap={1} direction="row" {...props}>
@@ -120,10 +130,10 @@ export interface CellEditorProps extends Omit<GridProps, 'onChange'> {
   onDelete: () => void;
 }
 
-export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorProps) {
+export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorProps): ReactElement {
   return (
     <Grid container spacing={2} {...props}>
-      <Grid xs={5}>
+      <Grid size={{ xs: 5 }}>
         <Stack direction="row" gap={1} width="100%">
           <TextField
             select
@@ -173,7 +183,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
           />
         </Stack>
       </Grid>
-      <Grid xs={4}>
+      <Grid size={{ xs: 4 }}>
         <TextField
           label="Display text"
           value={cell.text}
@@ -181,7 +191,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
           fullWidth
         />
       </Grid>
-      <Grid xs={1}>
+      <Grid size={{ xs: 1 }}>
         <Stack direction="row" justifyContent="center" gap={1}>
           {cell.textColor ? (
             <OptionsColorPicker
@@ -197,7 +207,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
           )}
         </Stack>
       </Grid>
-      <Grid xs={1}>
+      <Grid size={{ xs: 1 }}>
         <Stack direction="row" justifyContent="center">
           {cell.backgroundColor ? (
             <OptionsColorPicker
@@ -213,7 +223,7 @@ export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorPro
           )}
         </Stack>
       </Grid>
-      <Grid xs={1} textAlign="end">
+      <Grid size={{ xs: 1 }} textAlign="end">
         <Tooltip title="Remove cell settings" placement="top">
           <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
             <DeleteIcon />

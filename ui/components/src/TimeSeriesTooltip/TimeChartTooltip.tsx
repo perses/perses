@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useRef, useState } from 'react';
+import { memo, MutableRefObject, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { FormatOptions, TimeSeries } from '@perses-dev/core';
@@ -24,7 +24,7 @@ import { TooltipHeader } from './TooltipHeader';
 import { TooltipContent } from './TooltipContent';
 
 export interface TimeChartTooltipProps {
-  chartRef: React.MutableRefObject<EChartsInstance | undefined>;
+  chartRef: MutableRefObject<EChartsInstance | undefined>;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
   enablePinning?: boolean;

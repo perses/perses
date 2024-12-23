@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
 
@@ -37,7 +38,7 @@ export function CompactLegend({
   onLegendItemClick,
   onItemMouseOver,
   onItemMouseOut,
-}: CompactLegendProps) {
+}: CompactLegendProps): ReactElement {
   return (
     <Box component="ul" sx={{ width: '100%', height, padding: [0, 1, 0, 0], overflowY: 'scroll', margin: 0 }}>
       {items.map((item, index) => (

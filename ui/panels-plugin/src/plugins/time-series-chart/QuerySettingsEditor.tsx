@@ -13,7 +13,7 @@
 
 import { IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { InfoTooltip, OptionsEditorGroup, OptionsColorPicker } from '@perses-dev/components';
-import { RefObject, useEffect, useMemo, useRef } from 'react';
+import { ReactElement, RefObject, useEffect, useMemo, useRef } from 'react';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import produce from 'immer';
@@ -29,7 +29,7 @@ export interface QuerySettingsEditorProps {
   onChange: (querySettingsList: QuerySettingsOptions[]) => void;
 }
 
-export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettingsEditorProps) {
+export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettingsEditorProps): ReactElement {
   // Every time a new query settings input is added, we want to focus the recently added input
   const recentlyAddedInputRef = useRef<HTMLInputElement | null>(null);
   const focusRef = useRef(false);
@@ -39,7 +39,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
     focusRef.current = false;
   }, [querySettingsList?.length]);
 
-  const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
+  const handleQueryIndexChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
       onChange(
         produce(querySettingsList, (draft) => {
@@ -52,7 +52,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
     }
   };
 
-  const handleColorModeChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
+  const handleColorModeChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (querySettingsList !== undefined) {
       onChange(
         produce(querySettingsList, (draft) => {
@@ -67,7 +67,7 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
     }
   };
 
-  const handleColorValueChange = (colorValue: string, i: number) => {
+  const handleColorValueChange = (colorValue: string, i: number): void => {
     if (querySettingsList !== undefined) {
       onChange(
         produce(querySettingsList, (draft) => {
@@ -181,7 +181,7 @@ export function QuerySettingsInput({
   onColorValueChange,
   onDelete,
   inputRef,
-}: QuerySettingsInputProps) {
+}: QuerySettingsInputProps): ReactElement {
   // current query index should also be selectable
   const selectableQueryIndexes = availableQueryIndexes.concat(queryIndex).sort((a, b) => a - b);
 

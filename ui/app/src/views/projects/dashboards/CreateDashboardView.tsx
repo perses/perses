@@ -21,7 +21,7 @@ import {
   DashboardSpec,
   EphemeralDashboardResource,
 } from '@perses-dev/core';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -34,7 +34,7 @@ export interface CreateDashboardState {
 /**
  * The View for creating a new Dashboard.
  */
-function CreateDashboardView() {
+function CreateDashboardView(): ReactElement | null {
   const { projectName } = useParams();
   const location = useLocation();
   const state: CreateDashboardState = location.state;

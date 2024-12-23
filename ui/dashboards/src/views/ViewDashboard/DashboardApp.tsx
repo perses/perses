@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
@@ -41,7 +41,7 @@ export interface DashboardAppProps {
   isCreating?: boolean;
 }
 
-export const DashboardApp = (props: DashboardAppProps) => {
+export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const {
     dashboardResource,
     dashboardTitleComponent,
@@ -65,7 +65,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
-  const handleDiscardChanges = () => {
+  const handleDiscardChanges = (): void => {
     // Reset to the original spec and exit edit mode
     if (originalDashboard) {
       setDashboard(originalDashboard);
@@ -77,13 +77,13 @@ export const DashboardApp = (props: DashboardAppProps) => {
     }
   };
 
-  const onEditButtonClick = () => {
+  const onEditButtonClick = (): void => {
     setEditMode(true);
     setOriginalDashboard(dashboard);
     setSavedDatasources(dashboard.spec.datasources ?? {});
   };
 
-  const onCancelButtonClick = () => {
+  const onCancelButtonClick = (): void => {
     // check if dashboard has been modified
     if (JSON.stringify(dashboard) === JSON.stringify(originalDashboard)) {
       setEditMode(false);

@@ -14,7 +14,7 @@
 import { styled, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import { MouseEvent, useCallback } from 'react';
+import { MouseEvent, ReactElement, useCallback } from 'react';
 import { Span } from '@perses-dev/core';
 import { useGanttTableContext } from './GanttTableProvider';
 
@@ -32,7 +32,7 @@ export interface SpanIndentsProps {
  * Note: This component gets re-rendered on every hover of any indention box,
  * therefore rendering performance is essential.
  */
-export function SpanIndents(props: SpanIndentsProps) {
+export function SpanIndents(props: SpanIndentsProps): ReactElement {
   const { span } = props;
   const { collapsedSpans, setCollapsedSpans, visibleSpans, hoveredParent, setHoveredParent } = useGanttTableContext();
   const theme = useTheme();

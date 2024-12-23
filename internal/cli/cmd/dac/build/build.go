@@ -51,17 +51,9 @@ func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'build'")
 	}
-
-	// Complete the output only if it has been set by the user
-	if len(o.Output) > 0 {
-		if outputErr := o.OutputOption.Complete(); outputErr != nil {
-			return outputErr
-		}
-	} else {
-		// Put explicitely a value when not provided, as we use it for file generation in Execute()
-		o.Output = output.YAMLOutput
+	if outputErr := o.OutputOption.Complete(); outputErr != nil {
+		return outputErr
 	}
-
 	return nil
 }
 
@@ -152,7 +144,8 @@ func (o *option) processFile(file string, extension string) error {
 	if o.Mode == modeStdout {
 		return output.HandleString(o.writer, string(cmdOutput))
 	}
-	// Otherwise, create an output file under the "built" directory:
+
+	// Otherwise, create an output file under the output directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
 	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), os.ModePerm)
@@ -190,7 +183,7 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "build",
-		Short: "Build the given DaC file, or directory containing DaC files",
+		Short: "Build the given DaC file(s)",
 		Long: `
 Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
 The supported languages for a DaC are:

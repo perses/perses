@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, ReactElement, useState } from 'react';
 import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
 import { useDatasourceStore, useTimeRange } from '@perses-dev/plugin-system';
-import { useEditJsonDialog } from '../../context/DashboardProvider';
-import { useDashboard } from '../../context/useDashboard';
+import { useEditJsonDialog, useDashboard } from '../../context';
 
 export interface EditJsonDialogProps {
   isReadonly: boolean;
   disableMetadataEdition?: boolean;
 }
 
-export const EditJsonDialog = (props: EditJsonDialogProps) => {
+export const EditJsonDialog = (props: EditJsonDialogProps): ReactElement => {
   const { isReadonly, disableMetadataEdition } = props;
   const { editJsonDialog, closeEditJsonDialog } = useEditJsonDialog();
 
@@ -37,7 +36,7 @@ export const EditJsonDialog = (props: EditJsonDialogProps) => {
   );
 };
 
-const EditJsonDialogForm = (props: EditJsonDialogProps) => {
+const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
   const { isReadonly, disableMetadataEdition } = props;
   const { closeEditJsonDialog } = useEditJsonDialog();
   const { setTimeRange, setRefreshInterval } = useTimeRange();
@@ -45,7 +44,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
   const { setLocalDatasources } = useDatasourceStore();
   const [draftDashboard, setDraftDashboard] = useState(dashboard);
 
-  const handleApply = (e: FormEvent) => {
+  const handleApply = (e: FormEvent): void => {
     e.preventDefault();
     setDashboard(draftDashboard);
     setTimeRange({ pastDuration: draftDashboard.spec.duration });
@@ -54,11 +53,11 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
     closeEditJsonDialog();
   };
 
-  const completeDraftDashboard = (dashboard: string | undefined) => {
+  const completeDraftDashboard = (dashboard: string | undefined): void => {
     try {
       const json = JSON.parse(dashboard ?? '{}');
       setDraftDashboard(json);
-    } catch (e) {
+    } catch (_) {
       // do nothing
     }
   };

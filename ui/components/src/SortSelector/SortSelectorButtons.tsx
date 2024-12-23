@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ButtonGroupProps } from '@mui/material';
+import { ReactElement } from 'react';
 import { SortOption } from './SortSelector';
 
 export interface SortSelectorButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {
@@ -19,21 +20,21 @@ export interface SortSelectorButtonsProps extends Omit<ButtonGroupProps, 'onChan
   onChange: (sort?: SortOption) => void;
 }
 
-export function SortSelectorButtons({ onChange, value, ...props }: SortSelectorButtonsProps) {
-  const handleSortChange = (sort?: SortOption) => {
+export function SortSelectorButtons({ onChange, value, ...props }: SortSelectorButtonsProps): ReactElement {
+  const handleSortChange = (sort?: SortOption): void => {
     onChange(sort);
   };
 
   return (
-    <ButtonGroup aria-label="Sort" sx={{ margin: 1 }} {...props}>
+    <ButtonGroup aria-label="Sort" {...props}>
       <Button onClick={() => handleSortChange(undefined)} variant={value === undefined ? 'contained' : 'outlined'}>
         None
       </Button>
       <Button onClick={() => handleSortChange('asc')} variant={value === 'asc' ? 'contained' : 'outlined'}>
-        Ascending
+        Asc
       </Button>
       <Button onClick={() => handleSortChange('desc')} variant={value === 'desc' ? 'contained' : 'outlined'}>
-        Descending
+        Desc
       </Button>
     </ButtonGroup>
   );

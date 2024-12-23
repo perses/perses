@@ -36,13 +36,13 @@ export const createDiscardChangesDialogSlice: StateCreator<
 > = (set) => ({
   isOpen: false,
 
-  openDiscardChangesConfirmationDialog(dialog) {
+  openDiscardChangesConfirmationDialog(dialog): void {
     set((state) => {
       state.discardChangesConfirmationDialog = dialog;
     });
   },
 
-  closeDiscardChangesConfirmationDialog() {
+  closeDiscardChangesConfirmationDialog(): void {
     set((state) => {
       state.discardChangesConfirmationDialog = undefined;
     });

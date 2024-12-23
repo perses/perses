@@ -25,7 +25,11 @@ export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<Prometheus
  * changes with the overall spec value once the input is blurred to prevent re-running queries in the panel's preview
  * every time the user types.
  */
-export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
+export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps): {
+  query: string;
+  handleQueryChange: (e: string) => void;
+  handleQueryBlur: () => void;
+} {
   const { onChange, value } = props;
 
   // Local copy of the query's value
@@ -40,13 +44,13 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
   }
 
   // Update our local state's copy as the user types
-  const handleQueryChange = (e: string) => {
+  const handleQueryChange = (e: string): void => {
     setQuery(e);
   };
 
   // Propagate changes to the query's value when the input is blurred to avoid constantly re-running queries in the
   // PanelPreview
-  const handleQueryBlur = () => {
+  const handleQueryBlur = (): void => {
     setLastSyncedQuery(query);
     onChange(
       produce(value, (draft) => {
@@ -61,7 +65,11 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
 /**
  * Hook to manage `seriesNameFormat` state to ensure panel preview does not rerender until text input is blurred
  */
-export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
+export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps): {
+  format: string | undefined;
+  handleFormatChange: (e: string) => void;
+  handleFormatBlur: () => void;
+} {
   const { onChange, value } = props;
 
   // TODO: reusable hook or helper util instead of duplicating from useQueryState
@@ -73,12 +81,12 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
   }
 
   // Update our local state as the user types
-  const handleFormatChange = (e: string) => {
+  const handleFormatChange = (e: string): void => {
     setFormat(e);
   };
 
   // Propagate changes to the panel preview component when seriesNameFormat TextField is blurred
-  const handleFormatBlur = () => {
+  const handleFormatBlur = (): void => {
     setLastSyncedFormat(format);
     onChange(
       produce(value, (draft) => {
@@ -93,7 +101,11 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
 /**
  * Hook to manage `minStep` state to ensure panel preview does not rerender until text input is blurred
  */
-export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps) {
+export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps): {
+  minStep: string | undefined;
+  handleMinStepChange: (e: DurationString) => void;
+  handleMinStepBlur: () => void;
+} {
   const { onChange, value } = props;
 
   // TODO: reusable hook or helper util instead of duplicating from useQueryState
@@ -105,12 +117,12 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps) {
   }
 
   // Update our local state as the user types
-  const handleMinStepChange = (e: DurationString) => {
+  const handleMinStepChange = (e: DurationString): void => {
     setMinStep(e);
   };
 
   // Propagate changes to the panel preview component when minStep TextField is blurred
-  const handleMinStepBlur = () => {
+  const handleMinStepBlur = (): void => {
     setLastSyncedMinStep(minStep);
     onChange(
       produce(value, (draft) => {

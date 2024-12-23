@@ -14,6 +14,7 @@
 import { Tooltip } from '@mui/material';
 import { Action, Scope } from '@perses-dev/core';
 import { GridActionsCellItem } from '@mui/x-data-grid';
+import { ReactElement } from 'react';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 
@@ -37,7 +38,7 @@ export function CRUDGridActionsCellItem({
   scope,
   project,
   onClick,
-}: CRUDGridActionsCellItemProps) {
+}: CRUDGridActionsCellItemProps): ReactElement {
   const isReadonly = useIsReadonly();
   const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
 

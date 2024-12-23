@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef } from 'react';
+import { ReactElement, useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
 import { InfoTooltip, ToolbarIconButton } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../../constants';
@@ -23,12 +23,12 @@ interface DownloadButtonProps {
 }
 
 // Button that enables downloading the dashboard as a JSON file
-export function DownloadButton({ heightPx }: DownloadButtonProps) {
+export function DownloadButton({ heightPx }: DownloadButtonProps): ReactElement {
   const { dashboard } = useDashboard();
   const hiddenLinkRef = useRef<HTMLAnchorElement>(null);
   const height = heightPx === undefined ? undefined : `${heightPx}px`;
 
-  const onDownloadButtonClick = () => {
+  const onDownloadButtonClick = (): void => {
     if (!hiddenLinkRef || !hiddenLinkRef.current) return;
     // Create blob URL
     const hiddenLinkUrl = URL.createObjectURL(

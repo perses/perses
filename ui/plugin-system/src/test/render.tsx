@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactNode } from 'react';
 import { PluginRegistry } from '../components/PluginRegistry';
 import { DefaultPluginKinds } from '../model';
 import { testPluginLoader } from './test-plugins';
@@ -26,10 +27,10 @@ type ContextOptions = {
  * wrapped around it.
  */
 export function renderWithContext(
-  ui: React.ReactNode,
+  ui: ReactNode,
   renderOptions?: Omit<RenderOptions, 'queries'>,
   contextOptions?: ContextOptions
-) {
+): RenderResult {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },

@@ -19,6 +19,7 @@
             "name": "PaaS",
             "hidden": true
           },
+          "defaultValue": "argos-world",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -74,9 +75,7 @@
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {
-              "visual": {}
-            }
+            "spec": {}
           },
           "queries": [
             {

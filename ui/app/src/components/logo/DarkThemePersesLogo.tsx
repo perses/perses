@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function DarkThemePersesLogo() {
+import { ReactElement } from 'react';
+
+function DarkThemePersesLogo(): ReactElement {
   return (
     <svg width="367" height="120" viewBox="0 0 367 120" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="367" height="120" />

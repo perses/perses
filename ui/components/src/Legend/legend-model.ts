@@ -46,7 +46,7 @@ export interface LegendItem {
  */
 export type SelectedLegendItemState = Record<LegendItem['id'], boolean> | 'ALL';
 
-export function isLegendItemVisuallySelected(item: LegendItem, selectedItems: SelectedLegendItemState) {
+export function isLegendItemVisuallySelected(item: LegendItem, selectedItems: SelectedLegendItemState): boolean {
   // In the "ALL" case, technically all legend items are selected, but we do
   // not render them differently.
   return selectedItems !== 'ALL' && !!selectedItems[item.id];

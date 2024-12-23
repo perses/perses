@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -36,7 +36,7 @@ export interface PanelEditorFormProps {
   onClose: () => void;
 }
 
-export function PanelEditorForm(props: PanelEditorFormProps) {
+export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, onSave, onClose } = props;
   const panelGroups = useListPanelGroups();
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
@@ -83,7 +83,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialValues) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -91,7 +91,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     }
   }
 
-  const handlePanelDefinitionChange = (nextPanelDefStr: string) => {
+  const handlePanelDefinitionChange = (nextPanelDefStr: string): void => {
     const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);
     const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
     // if panel plugin kind and spec are modified, then need to save current spec

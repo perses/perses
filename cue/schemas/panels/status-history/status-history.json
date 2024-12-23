@@ -1,0 +1,8 @@
+{
+    "kind": "StatusHistoryChart",
+    "spec": {
+        "legend": {
+            "position": "bottom"
+        }
+    }
+}

@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
+
 interface PersesLogoCroppedProps {
   color?: string;
   width?: number;
   height?: number;
 }
 
-function PersesLogoCropped(props: PersesLogoCroppedProps) {
+function PersesLogoCropped(props: PersesLogoCroppedProps): ReactElement {
   const { color = '#DE005D', width = 120, height = 120 } = props;
   return (
     <svg width={width} height={height} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">

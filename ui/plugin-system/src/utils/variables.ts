@@ -32,7 +32,7 @@ export function replaceVariables(text: string, variableState: VariableStateMap):
   return finalText;
 }
 
-export function replaceVariable(text: string, varName: string, variableValue: VariableValue) {
+export function replaceVariable(text: string, varName: string, variableValue: VariableValue): string {
   const variableSyntax = '$' + varName;
   const alternativeVariableSyntax = '${' + varName + '}';
 
@@ -60,7 +60,7 @@ const VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
 /**
  * Returns a list of variables
  */
-export const parseVariables = (text: string) => {
+export const parseVariables = (text: string): string[] => {
   const regex = VARIABLE_REGEX;
   const matches = new Set<string>();
   let match;

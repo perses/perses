@@ -34,9 +34,10 @@ import {
 } from '@perses-dev/components';
 import { CalculationType, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import { Button } from '@mui/material';
+import { ReactElement } from 'react';
 import { PieChartOptions, PieChartOptionsEditorProps, DEFAULT_FORMAT } from './pie-chart-model';
 
-export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps) {
+export function PieChartOptionsEditorSettings(props: PieChartOptionsEditorProps): ReactElement {
   const { onChange, value } = props;
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation: CalculationType) => {

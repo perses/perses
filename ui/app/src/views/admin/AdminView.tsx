@@ -14,11 +14,12 @@
 import { Stack } from '@mui/material';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import { useParams } from 'react-router-dom';
+import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { AdminTabs } from './AdminTabs';
 
-function AdminView() {
+function AdminView(): ReactElement {
   const { tab } = useParams();
   const isMobileSize = useIsMobileSize();
 

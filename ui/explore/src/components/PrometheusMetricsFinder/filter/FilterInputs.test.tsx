@@ -21,9 +21,9 @@ describe('FilterInputs', () => {
     labelValuesOptions,
     isLabelOptionsLoading,
     isLabelValuesOptionsLoading,
-    onChange = () => {},
-    onDelete = () => {},
-  }: Partial<RawFilterInputProps>) => {
+    onChange = (): void => {},
+    onDelete = (): void => {},
+  }: Partial<RawFilterInputProps>): void => {
     render(
       <RawFilterInput
         value={value}

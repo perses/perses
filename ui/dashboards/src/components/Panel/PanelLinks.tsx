@@ -14,17 +14,17 @@
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/core';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, ReactElement, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
-export function PanelLinks({ links }: { links: Link[] }) {
+export function PanelLinks({ links }: { links: Link[] }): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
-  const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null);
   };
 
@@ -68,7 +68,7 @@ export function PanelLinks({ links }: { links: Link[] }) {
   );
 }
 
-function LinkButton({ link }: { link: Link }) {
+function LinkButton({ link }: { link: Link }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
@@ -86,7 +86,7 @@ function LinkButton({ link }: { link: Link }) {
   );
 }
 
-function LinkMenuItem({ link }: { link: Link }) {
+function LinkMenuItem({ link }: { link: Link }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (

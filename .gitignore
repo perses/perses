@@ -19,6 +19,7 @@ Thumbs.db
 /bin
 /built
 /dist
+tsconfig.build.tsbuildinfo
 
 coverage.txt
 
@@ -31,6 +32,7 @@ EXTRACTED_CHANGELOG.md
 cue.mod/gen
 
 dev/local_db
+dev/extra/tempo-data
 
 .goreleaser.yaml
 

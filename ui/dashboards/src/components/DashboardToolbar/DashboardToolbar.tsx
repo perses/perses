@@ -14,6 +14,7 @@
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
@@ -35,7 +36,7 @@ export interface DashboardToolbarProps {
   onSave?: OnSaveDashboard;
 }
 
-export const DashboardToolbar = (props: DashboardToolbarProps) => {
+export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => {
   const {
     dashboardName,
     dashboardTitleComponent,

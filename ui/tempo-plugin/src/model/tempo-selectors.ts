@@ -30,7 +30,7 @@ export const DEFAULT_TEMPO: TempoDatasourceSelector = { kind: TEMPO_DATASOURCE_K
 /**
  * Returns true if the provided TempoDatasourceSelector is the default one.
  */
-export function isDefaultTempoSelector(selector: TempoDatasourceSelector) {
+export function isDefaultTempoSelector(selector: TempoDatasourceSelector): boolean {
   return selector.name === undefined;
 }
 

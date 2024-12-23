@@ -58,9 +58,16 @@ export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginTypes' | 'valu
  * remembers previous `spec` values that it's seen, allowing and restores those values if a user switches the plugin
  * kind back.
  */
-export function usePluginEditor(props: UsePluginEditorProps) {
+export function usePluginEditor(props: UsePluginEditorProps): {
+  pendingSelection?: PluginEditorSelection;
+  isLoading: boolean;
+  error: Error | null;
+  onSelectionChange: (s: PluginEditorSelection) => void;
+  onSpecChange: (next: UnknownSpec) => void;
+  rememberCurrentSpecState: () => void;
+} {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const { pluginTypes, value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
+  const { pluginTypes, value, onHideQueryEditorChange = (): void => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
 
   // Keep a stable reference, so we don't run the effect below when we don't need to
   const onChange = useEvent(props.onChange);

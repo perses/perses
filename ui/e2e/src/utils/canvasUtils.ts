@@ -13,7 +13,7 @@
 
 import { Locator } from '@playwright/test';
 
-function getCanvasDataURL(canvasEl: Locator) {
+function getCanvasDataURL(canvasEl: Locator): Promise<string | undefined> {
   return canvasEl.evaluate((node) => {
     if (node instanceof HTMLCanvasElement) {
       return node.toDataURL();
@@ -48,7 +48,7 @@ type WaitForStableCanvasOptions = {
 export async function waitForStableCanvas(
   canvasEl: Locator,
   { interval = 250, timeout = 5000 }: WaitForStableCanvasOptions = {}
-) {
+): Promise<void> {
   const maxChecks = Math.floor(timeout / interval);
 
   if (maxChecks < 1) {
@@ -58,7 +58,7 @@ export async function waitForStableCanvas(
   let prevCanvasData = await getCanvasDataURL(canvasEl);
   let totalChecks = 0;
 
-  async function checkCanvas() {
+  async function checkCanvas(): Promise<void> {
     const canvasData = await getCanvasDataURL(canvasEl);
     if (canvasData && canvasData === prevCanvasData) {
       // Data was stable for the interval.
@@ -74,7 +74,7 @@ export async function waitForStableCanvas(
     }
   }
 
-  async function checkCanvasWithTimeout() {
+  async function checkCanvasWithTimeout(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(async () => {
         await checkCanvas();

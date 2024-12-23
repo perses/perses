@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext, useMemo } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 import { buildRelativeTimeOption, TimeOption } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
 
@@ -34,7 +34,7 @@ export interface TimeRangeSettings {
 
 export const TimeRangeSettingsContext = createContext<TimeRangeSettings>(defaultTimeRangeSettings);
 
-export function useTimeRangeSettingsContext() {
+export function useTimeRangeSettingsContext(): TimeRangeSettings {
   const ctx = useContext(TimeRangeSettingsContext);
   if (ctx === undefined) {
     throw new Error('No TimeRangeContext found. Did you forget a Provider?');
@@ -76,7 +76,7 @@ export function useTimeRangeOptionsSetting(override?: TimeOption[]): TimeOption[
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
-export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps) {
+export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps): ReactElement {
   const ctx = useMemo(() => {
     return {
       showCustom: props.showCustom === undefined ? defaultTimeRangeSettings.showCustom : props.showCustom,

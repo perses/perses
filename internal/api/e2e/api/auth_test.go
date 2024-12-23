@@ -375,13 +375,11 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Auth: &config.Auth{
-				Oauth: &config.Oauth{
-					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-					TokenURL:     persesTokenURL.String(),
-					AuthStyle:    oauth2.AuthStyleInHeader,
-				},
+			OAuth: &config.OAuth{
+				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+				TokenURL:     persesTokenURL.String(),
+				AuthStyle:    oauth2.AuthStyleInHeader,
 			},
 		})
 		assert.NoError(t, err)
@@ -404,13 +402,11 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Auth: &config.Auth{
-				Oauth: &config.Oauth{
-					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-					TokenURL:     persesTokenURL.String(),
-					AuthStyle:    oauth2.AuthStyleInHeader,
-				},
+			OAuth: &config.OAuth{
+				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+				TokenURL:     persesTokenURL.String(),
+				AuthStyle:    oauth2.AuthStyleInHeader,
 			},
 		})
 		assert.NoError(t, err)
@@ -449,13 +445,11 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOIDC, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Auth: &config.Auth{
-				Oauth: &config.Oauth{
-					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-					TokenURL:     persesTokenURL.String(),
-					AuthStyle:    oauth2.AuthStyleInHeader,
-				},
+			OAuth: &config.OAuth{
+				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+				TokenURL:     persesTokenURL.String(),
+				AuthStyle:    oauth2.AuthStyleInHeader,
 			},
 		})
 		assert.NoError(t, err)
@@ -477,13 +471,11 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
-			Auth: &config.Auth{
-				Oauth: &config.Oauth{
-					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-					TokenURL:     persesTokenURL.String(),
-					AuthStyle:    oauth2.AuthStyleInHeader,
-				},
+			OAuth: &config.OAuth{
+				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+				TokenURL:     persesTokenURL.String(),
+				AuthStyle:    oauth2.AuthStyleInHeader,
 			},
 			URL: persesBaseURL,
 		})

@@ -233,7 +233,7 @@ const ROUNDED_STEP_INTERVALS = [
 /**
  * Round interval to clearer increments
  */
-export function roundStepInterval(stepMs: number) {
+export function roundStepInterval(stepMs: number): number {
   for (const { maxMs, roundedStepMs } of ROUNDED_STEP_INTERVALS) {
     if (stepMs < maxMs) {
       return roundedStepMs;
@@ -245,7 +245,7 @@ export function roundStepInterval(stepMs: number) {
 /**
  * Gets a suggested step/interval size for a time range based on the width of a visual component.
  */
-export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number) {
+export function getSuggestedStepMs(timeRange: AbsoluteTimeRange, width: number): number {
   const queryRangeMs = timeRange.end.valueOf() - timeRange.start.valueOf();
   const stepMs = Math.floor(queryRangeMs / width);
   return roundStepInterval(stepMs);

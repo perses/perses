@@ -14,7 +14,7 @@
 import { fetch as initialFetch, FetchError, UserFriendlyError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
 
-export async function fetch(...args: Parameters<typeof global.fetch>) {
+export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
   return initialFetch(...args).catch((error: UserFriendlyError | FetchError) => {
     if (error.status !== 401) {
       throw error;
@@ -29,7 +29,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>) {
   });
 }
 
-export async function fetchJson<T>(...args: Parameters<typeof global.fetch>) {
+export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
   const json: T = await response.json();
   return json;

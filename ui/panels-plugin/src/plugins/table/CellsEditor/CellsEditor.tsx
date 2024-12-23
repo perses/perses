@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Divider, Stack, Typography } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import { Button, Divider, Stack, Typography, Grid2 as Grid } from '@mui/material';
 
-import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
 import { CellSettings } from '../table-model';
 import { CellEditor } from './CellEditor';
 
@@ -24,49 +23,44 @@ export interface CellsEditorProps {
   onChange: (cellOptions: CellSettings[]) => void;
 }
 
-export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
-  const [cells, setCells] = useState<CellSettings[]>(cellSettings);
-
+export function CellsEditor({ cellSettings, onChange }: CellsEditorProps): ReactElement {
   function handleCellChange(index: number, cell: CellSettings): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells[index] = cell;
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
   function handleAddCellEditor(): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
   function handleCellDelete(index: number): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells.splice(index, 1);
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
   return (
     <Stack spacing={1}>
       <Grid container spacing={2}>
-        <Grid xs={5}>
+        <Grid size={{ xs: 5 }}>
           <Typography variant="subtitle1">Condition</Typography>
         </Grid>
-        <Grid xs={4}>
+        <Grid size={{ xs: 4 }}>
           <Typography variant="subtitle1">Display Text</Typography>
         </Grid>
-        <Grid xs={1} textAlign="center">
+        <Grid size={{ xs: 1 }} textAlign="center">
           <Typography variant="subtitle1">Color</Typography>
         </Grid>
-        <Grid xs={1} textAlign="center">
+        <Grid size={{ xs: 1 }} textAlign="center">
           <Typography variant="subtitle1">Background</Typography>
         </Grid>
-        <Grid xs={1}></Grid>
+        <Grid size={{ xs: 1 }}></Grid>
       </Grid>
       <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
-        {cells.map((cell, i) => (
+        {cellSettings.map((cell, i) => (
           <CellEditor
             key={i}
             cell={cell}

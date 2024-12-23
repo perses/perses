@@ -26,7 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -44,7 +44,7 @@ type clientDiscovery interface {
 	discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error)
 }
 
-func NewDiscovery(discoveryName string, refreshInterval model.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schemas schemas.Schemas) (taskhelper.Helper, error) {
+func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schemas schemas.Schemas) (taskhelper.Helper, error) {
 	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get a kubeConfig: %w", err)

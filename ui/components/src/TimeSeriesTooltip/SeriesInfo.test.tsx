@@ -16,7 +16,7 @@ import { screen } from '@testing-library/dom';
 import { SeriesInfo, SeriesInfoProps } from './SeriesInfo';
 
 describe('SeriesInfo', () => {
-  const renderComponent = (props: SeriesInfoProps) => {
+  const renderComponent = (props: SeriesInfoProps): void => {
     render(<SeriesInfo {...props} />);
   };
 

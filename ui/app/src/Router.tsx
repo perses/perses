@@ -47,7 +47,7 @@ const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
 const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboards/CreateEphemeralDashboardView'));
 const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
 
-function Router() {
+function Router(): ReactElement {
   const isAuthEnabled = useIsAuthEnabled();
   const isSignUpDisable = useIsSignUpDisable();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();

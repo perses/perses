@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps, Stack } from '@mui/material';
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
@@ -69,7 +69,7 @@ interface TabButtonProps extends CRUDButtonProps {
   projectName: string;
 }
 
-function TabButton({ index, projectName, ...props }: TabButtonProps) {
+function TabButton({ index, projectName, ...props }: TabButtonProps): ReactElement {
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -88,7 +88,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
 
   const isReadonly = useIsReadonly();
 
-  const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
+  const handleDashboardCreation = (dashboardSelector: DashboardSelector): void => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
   };
 
@@ -385,7 +385,7 @@ interface TabPanelProps extends BoxProps {
   value: string;
 }
 
-function TabPanel({ children, value, index, ...props }: TabPanelProps) {
+function TabPanel({ children, value, index, ...props }: TabPanelProps): ReactElement {
   return (
     <Box
       role="tabpanel"
@@ -399,7 +399,7 @@ function TabPanel({ children, value, index, ...props }: TabPanelProps) {
   );
 }
 
-function a11yProps(index: string) {
+function a11yProps(index: string): Record<string, unknown> {
   return {
     id: `project-tab-${index}`,
     'aria-controls': `project-tabpanel-${index}`,
@@ -411,7 +411,7 @@ interface DashboardVariableTabsProps {
   initialTab?: string;
 }
 
-export function ProjectTabs(props: DashboardVariableTabsProps) {
+export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const { projectName, initialTab } = props;
   const { tab } = useParams();
   const isAuthEnabled = useIsAuthEnabled();
@@ -432,7 +432,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
   const hasSecretReadPermission = useHasPermission('read', projectName, 'Secret');
   const hasVariableReadPermission = useHasPermission('read', projectName, 'Variable');
 
-  const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
+  const handleChange = (event: SyntheticEvent, newTabIndex: string): void => {
     setValue(newTabIndex);
     navigate(`/projects/${projectName}/${newTabIndex}`);
   };

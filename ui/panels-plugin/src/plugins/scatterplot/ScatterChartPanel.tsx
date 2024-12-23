@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { QueryDefinition, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
@@ -40,7 +40,7 @@ export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> 
 const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
 
 // Navigate to the Gantt Chart on the explore page by default
-function defaultClickHandler(data: EChartTraceValue) {
+function defaultClickHandler(data: EChartTraceValue): void {
   // clone the original query spec (including the datasource) and replace the query value with the trace id
   const query: QueryDefinition = JSON.parse(JSON.stringify(data.query));
   query.spec.plugin.spec.query = data.traceId;
@@ -69,7 +69,7 @@ function defaultClickHandler(data: EChartTraceValue) {
  * @returns a `ScatterPlot` component that contains an EChart which will handle
  * visualization of the data.
  */
-export function ScatterChartPanel(props: ScatterChartPanelProps) {
+export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement | null {
   const { spec, contentDimensions, onClick } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
   const chartsTheme = useChartsTheme();
@@ -193,7 +193,11 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
 }
 
 // exported for tests
-export function getSymbolSize(spanCount: number, spanCountRange: [number, number], sizeRange: [number, number]) {
+export function getSymbolSize(
+  spanCount: number,
+  spanCountRange: [number, number],
+  sizeRange: [number, number]
+): number {
   const [minSize, maxSize] = sizeRange;
   const [minSpanCount, maxSpanCount] = spanCountRange;
 

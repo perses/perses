@@ -11,7 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { DashboardResource } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
@@ -33,7 +40,7 @@ type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], Error>, 'q
  */
 export function useCreateDashboardMutation(
   onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown
-) {
+): UseMutationResult<DashboardResource, Error, DashboardResource> {
   const queryClient = useQueryClient();
 
   return useMutation<DashboardResource, Error, DashboardResource>({
@@ -52,7 +59,7 @@ export function useCreateDashboardMutation(
  * Used to get a dashboard in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboard(project: string, name: string) {
+export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource> {
   return useQuery<DashboardResource, Error>({
     queryKey: [resource, project, name],
     queryFn: () => {
@@ -65,7 +72,7 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(options: DashboardListOptions) {
+export function useDashboardList(options: DashboardListOptions): UseQueryResult<DashboardResource[]> {
   return useQuery<DashboardResource[], Error>({
     queryKey: [resource, options.project, options.metadataOnly],
     queryFn: () => {
@@ -84,7 +91,13 @@ export interface DatedDashboards {
  * Used to get dashboards seen recently by the user.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useRecentDashboardList(project?: string, maxSize?: number) {
+export function useRecentDashboardList(
+  project?: string,
+  maxSize?: number
+): {
+  isLoading: false | true;
+  data: DatedDashboards[];
+} {
   const { data, isLoading } = useDashboardList({ project: project, metadataOnly: true });
   const history = useNavHistory();
 
@@ -117,7 +130,7 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
  * Used to get important dashboards.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useImportantDashboardList(project?: string) {
+export function useImportantDashboardList(project?: string): { isLoading: false | true; data: DashboardResource[] } {
   const { data: dashboards, isLoading } = useDashboardList({ project: project, metadataOnly: true });
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
@@ -141,7 +154,7 @@ export function useImportantDashboardList(project?: string) {
  * Used to update a dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useUpdateDashboardMutation() {
+export function useUpdateDashboardMutation(): UseMutationResult<DashboardResource, Error, DashboardResource> {
   const queryClient = useQueryClient();
 
   return useMutation<DashboardResource, Error, DashboardResource>({
@@ -159,7 +172,7 @@ export function useUpdateDashboardMutation() {
  * Used to delete a dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useDeleteDashboardMutation() {
+export function useDeleteDashboardMutation(): UseMutationResult<DashboardResource, Error, DashboardResource> {
   const queryClient = useQueryClient();
   return useMutation<DashboardResource, Error, DashboardResource>({
     mutationKey: [resource],
@@ -175,7 +188,7 @@ export function useDeleteDashboardMutation() {
   });
 }
 
-export function createDashboard(entity: DashboardResource) {
+export function createDashboard(entity: DashboardResource): Promise<DashboardResource> {
   const url = buildURL({ resource: resource, project: entity.metadata.project });
   return fetchJson<DashboardResource>(url, {
     method: HTTPMethodPOST,
@@ -184,7 +197,7 @@ export function createDashboard(entity: DashboardResource) {
   });
 }
 
-export function getDashboard(project: string, name: string) {
+export function getDashboard(project: string, name: string): Promise<DashboardResource> {
   const url = buildURL({ resource: resource, project: project, name: name });
   return fetchJson<DashboardResource>(url, {
     method: HTTPMethodGET,
@@ -192,7 +205,7 @@ export function getDashboard(project: string, name: string) {
   });
 }
 
-export function getDashboards(project?: string, metadataOnly: boolean = false) {
+export function getDashboards(project?: string, metadataOnly: boolean = false): Promise<DashboardResource[]> {
   const queryParams = new URLSearchParams();
   if (metadataOnly) {
     queryParams.set('metadata_only', 'true');
@@ -204,7 +217,7 @@ export function getDashboards(project?: string, metadataOnly: boolean = false) {
   });
 }
 
-export function updateDashboard(entity: DashboardResource) {
+export function updateDashboard(entity: DashboardResource): Promise<DashboardResource> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetchJson<DashboardResource>(url, {
     method: HTTPMethodPUT,
@@ -213,7 +226,7 @@ export function updateDashboard(entity: DashboardResource) {
   });
 }
 
-export function deleteDashboard(entity: DashboardResource) {
+export function deleteDashboard(entity: DashboardResource): Promise<Response> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,

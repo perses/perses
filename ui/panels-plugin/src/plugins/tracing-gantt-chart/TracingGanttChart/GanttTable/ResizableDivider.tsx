@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent as ReactMouseEvent, useEffect, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, ReactElement, useEffect, useState } from 'react';
 import { Box, styled } from '@mui/material';
 import { useEvent } from '@perses-dev/core';
 
@@ -21,11 +21,11 @@ interface ResizableDividerProps {
   onMove: (left: number) => void;
 }
 
-export function ResizableDivider(props: ResizableDividerProps) {
+export function ResizableDivider(props: ResizableDividerProps): ReactElement {
   const { parentRef, spacing = 0, onMove } = props;
   const [isResizing, setResizing] = useState(false);
 
-  const handleMouseDown = (e: ReactMouseEvent) => {
+  const handleMouseDown = (e: ReactMouseEvent): void => {
     // disable any default actions (text selection, etc.)
     e.preventDefault();
 
@@ -51,13 +51,13 @@ export function ResizableDivider(props: ResizableDividerProps) {
 
   // capture mouseMove and mouseUp outside the element by attaching them to the window object
   useEffect(() => {
-    function startMouseAction() {
+    function startMouseAction(): void {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'col-resize';
     }
 
-    function stopMouseAction() {
+    function stopMouseAction(): void {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'inherit';
@@ -73,7 +73,7 @@ export function ResizableDivider(props: ResizableDividerProps) {
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
   // prevent onClick event when clicking on a divider
-  const stopEventPropagation = (e: ReactMouseEvent) => e.stopPropagation();
+  const stopEventPropagation = (e: ReactMouseEvent): void => e.stopPropagation();
 
   return <ResizableDividerBox onMouseDown={handleMouseDown} onClick={stopEventPropagation} />;
 }

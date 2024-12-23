@@ -14,6 +14,7 @@
 package migrate
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -48,8 +49,12 @@ func (e *endpoint) Migrate(ctx echo.Context) error {
 	if err := ctx.Bind(body); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	grafanaDashboard := migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard))
-	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))
+	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
+	grafanaDashboard := &migrate.SimplifiedDashboard{}
+	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
+		return apiinterface.HandleBadRequestError(err.Error())
+	}
+	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard)
 	if err != nil {
 		return err
 	}

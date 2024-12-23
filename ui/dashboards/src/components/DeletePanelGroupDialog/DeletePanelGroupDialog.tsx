@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent } from 'react';
+import { FormEvent, ReactElement } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useDeletePanelGroupDialog } from '../../context';
 
-export const DeletePanelGroupDialog = () => {
+export const DeletePanelGroupDialog = (): ReactElement => {
   const { deletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } = useDeletePanelGroupDialog();
 
   const panelGroupId = deletePanelGroupDialog?.panelGroupId;
 
-  const handleDelete = (e: FormEvent) => {
+  const handleDelete = (e: FormEvent): void => {
     e.preventDefault();
     if (panelGroupId === undefined) {
       throw new Error('group index is undefined');

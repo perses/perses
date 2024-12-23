@@ -25,7 +25,7 @@ import {
   DatasourceStoreProvider,
   VariableProvider,
 } from '@perses-dev/dashboards';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
@@ -34,7 +34,7 @@ export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   exploreTitleComponent?: React.ReactNode;
 }
 
-export function ViewExplore(props: ViewExploreProps) {
+export function ViewExplore(props: ViewExploreProps): ReactElement {
   const { datasourceApi, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
 
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);

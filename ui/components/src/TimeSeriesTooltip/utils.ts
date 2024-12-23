@@ -33,7 +33,7 @@ export function assembleTransform(
   tooltipHeight: number,
   tooltipWidth: number,
   containerElement?: Element | null
-) {
+): string | undefined {
   if (mousePos === null) {
     return undefined;
   }
@@ -86,7 +86,11 @@ export function assembleTransform(
 /**
  * Helper for tooltip positioning styles
  */
-export function getTooltipStyles(theme: Theme, pinnedPos: CursorCoordinates | null, maxHeight?: number) {
+export function getTooltipStyles(
+  theme: Theme,
+  pinnedPos: CursorCoordinates | null,
+  maxHeight?: number
+): Record<string, unknown> {
   const adjustedMaxHeight = maxHeight ? maxHeight - TOOLTIP_PADDING : undefined;
   return {
     minWidth: TOOLTIP_MIN_WIDTH,

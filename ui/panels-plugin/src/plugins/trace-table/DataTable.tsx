@@ -25,7 +25,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -52,7 +52,7 @@ interface Row extends TraceSearchResult {
   traceLink?: string;
 }
 
-export function DataTable(props: DataTableProps) {
+export function DataTable(props: DataTableProps): ReactElement {
   const { options, result, traceLink } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
@@ -82,8 +82,8 @@ export function DataTable(props: DataTableProps) {
         type: 'string',
         flex: 4,
         display: 'flex',
-        valueGetter: (_, trace) => `${trace.rootServiceName}: ${trace.rootTraceName}`,
-        renderCell: ({ row }) => (
+        valueGetter: (_, trace): string => `${trace.rootServiceName}: ${trace.rootTraceName}`,
+        renderCell: ({ row }): ReactElement => (
           <Box sx={{ my: 1 }}>
             <TraceName row={row} />
             <br />
@@ -107,8 +107,9 @@ export function DataTable(props: DataTableProps) {
         flex: 2,
         minWidth: 145,
         display: 'flex',
-        valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
-        renderCell: ({ row }) => {
+        valueGetter: (_, trace): number =>
+          Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
+        renderCell: ({ row }): ReactElement => {
           let totalSpanCount = 0;
           let totalErrorCount = 0;
           for (const stats of Object.values(row.serviceStats)) {
@@ -141,7 +142,7 @@ export function DataTable(props: DataTableProps) {
         flex: 1,
         minWidth: 70,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Typography display="inline">
             {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
           </Typography>
@@ -156,7 +157,7 @@ export function DataTable(props: DataTableProps) {
         flex: 3,
         minWidth: 240,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
             <Typography display="inline">{DATE_FORMATTER(new Date(row.startTimeUnixMs))}</Typography>
           </Tooltip>
@@ -173,9 +174,8 @@ export function DataTable(props: DataTableProps) {
       rows={rows}
       getRowHeight={() => 'auto'}
       getEstimatedRowHeight={() => 66}
-      autoHeight={true}
       disableRowSelectionOnClick={true}
-      pageSizeOptions={[20]}
+      pageSizeOptions={[10, 20, 50, 100]}
       initialState={{
         pagination: { paginationModel: { pageSize: 20 } },
       }}
@@ -187,7 +187,7 @@ interface TraceNameProps {
   row: Row;
 }
 
-function TraceName({ row: trace }: TraceNameProps) {
+function TraceName({ row: trace }: TraceNameProps): ReactElement {
   if (trace.traceLink) {
     return (
       <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={trace.traceLink}>
@@ -209,7 +209,7 @@ interface ServiceChipProps {
   serviceColor: string;
 }
 
-function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
+function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps): ReactElement {
   return (
     <Chip
       label={serviceName}
@@ -220,6 +220,8 @@ function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
       avatar={
         <Avatar
           sx={{
+            minWidth: 'fit-content', // by default width is fixed to 18px, which is not enough for multi-digit span counts
+            padding: '6px',
             backgroundColor: 'var(--service-color)',
             fontSize: '0.65rem',
             fontWeight: 'bold',

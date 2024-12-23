@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ButtonGroupProps } from '@mui/material';
+import { ReactElement } from 'react';
 
 export type AlignOption = 'left' | 'center' | 'right';
 
@@ -20,13 +21,13 @@ export interface AlignSelectorProps extends Omit<ButtonGroupProps, 'onChange'> {
   value?: AlignOption;
 }
 
-export function AlignSelector({ onChange, value = 'left', ...props }: AlignSelectorProps) {
-  const handleSortChange = (option: AlignOption) => {
+export function AlignSelector({ onChange, value = 'left', ...props }: AlignSelectorProps): ReactElement {
+  const handleSortChange = (option: AlignOption): void => {
     onChange(option);
   };
 
   return (
-    <ButtonGroup aria-label="Alignement" sx={{ margin: 1 }} {...props}>
+    <ButtonGroup aria-label="Alignement" {...props}>
       <Button key="left" onClick={() => handleSortChange('left')} variant={value === 'left' ? 'contained' : 'outlined'}>
         Left
       </Button>

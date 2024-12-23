@@ -13,6 +13,7 @@
 
 import { Breadcrumbs as MUIBreadcrumbs, Link, styled, Stack, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { ReactElement } from 'react';
 
 const BREADCRUMB_HEIGHT = '35px';
 
@@ -23,7 +24,7 @@ export const Breadcrumbs = styled(MUIBreadcrumbs)({
   lineHeight: BREADCRUMB_HEIGHT,
 });
 
-export function HomeLinkCrumb() {
+export function HomeLinkCrumb(): ReactElement {
   return <LinkCrumb to="/">Home</LinkCrumb>;
 }
 
@@ -31,7 +32,7 @@ export interface StackCrumbProps {
   children?: React.ReactNode;
 }
 
-export function StackCrumb(props: StackCrumbProps) {
+export function StackCrumb(props: StackCrumbProps): ReactElement {
   const { children } = props;
 
   return (
@@ -46,7 +47,7 @@ export interface LinkCrumbProps {
   to: string;
 }
 
-export function LinkCrumb(props: LinkCrumbProps) {
+export function LinkCrumb(props: LinkCrumbProps): ReactElement {
   const { children, to } = props;
 
   return (
@@ -60,7 +61,7 @@ export interface TitleCrumbProps {
   children?: React.ReactNode;
 }
 
-export function TitleCrumb(props: TitleCrumbProps) {
+export function TitleCrumb(props: TitleCrumbProps): ReactElement {
   const { children } = props;
 
   return <Typography variant="h1">{children}</Typography>;

@@ -21,7 +21,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/prometheus/common/model"
 )
 
 type Link struct {
@@ -99,15 +98,9 @@ type DashboardSpec struct {
 	Panels      map[string]*Panel          `json:"panels" yaml:"panels"`
 	Layouts     []dashboard.Layout         `json:"layouts" yaml:"layouts"`
 	// Duration is the default time range to use when getting data to fill the dashboard
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	Duration model.Duration `json:"duration" yaml:"duration"`
+	Duration common.Duration `json:"duration" yaml:"duration"`
 	// RefreshInterval is the default refresh interval to use when landing on the dashboard
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	RefreshInterval model.Duration `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	RefreshInterval common.Duration `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {

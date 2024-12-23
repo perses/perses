@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  ListVariableSpec,
-  TextVariableDefinition,
-  TextVariableSpec,
-  UnknownSpec,
-  VariableDefinition,
-} from '@perses-dev/core';
+import { ListVariableSpec, TextVariableDefinition, TextVariableSpec, VariableDefinition } from '@perses-dev/core';
 
 export type VariableEditorState = {
   name: string;
   title?: string;
   kind: 'TextVariable' | 'ListVariable' | 'BuiltinVariable';
   description?: string;
-  listVariableFields: Omit<ListVariableSpec<UnknownSpec>, 'name' | 'display'>;
+  listVariableFields: Omit<ListVariableSpec, 'name' | 'display'>;
   textVariableFields: Omit<TextVariableSpec, 'name' | 'display'>;
 };
 
@@ -34,7 +28,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition): 
     constant: (initialVariableDefinition as TextVariableDefinition).spec.constant ?? false,
   };
 
-  const listVariableFields: Omit<ListVariableSpec<UnknownSpec>, 'name' | 'display'> = {
+  const listVariableFields: Omit<ListVariableSpec, 'name' | 'display'> = {
     allowMultiple: false,
     allowAllValue: false,
     customAllValue: undefined,

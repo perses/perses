@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { getResourceExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { VariableList } from '../../../components/variable/VariableList';
@@ -29,7 +29,7 @@ interface ProjectVariablesProps {
   id?: string;
 }
 
-export function ProjectVariables(props: ProjectVariablesProps) {
+export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
   const { projectName, id } = props;
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {

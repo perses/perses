@@ -19,6 +19,7 @@ import {
   DatasourceSelectItemGroup,
 } from '@perses-dev/plugin-system';
 import { StoryFn, StoryContext } from '@storybook/react';
+import { ReactElement } from 'react';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -41,7 +42,7 @@ function isWithDatastoreStoreParameter(
 
 // This decorator includes "PluginSystem" in the name to differentiate it from
 // the datasource store decorator in the `dashboards` package.
-export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const { getPlugin } = usePluginRegistry();
 
   const initParameter = context.parameters.withPluginSystemDatasourceStore;

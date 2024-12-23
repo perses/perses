@@ -23,8 +23,7 @@ import {
 } from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
 import { sortedIndexBy } from 'lodash';
-import { TempoTraceQuerySpec } from '../../model/trace-query-model';
-import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/tempo-selectors';
+import { TempoTraceQuerySpec, TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model';
 import { TempoClient } from '../../model/tempo-client';
 import {
   SearchRequestParameters,
@@ -35,7 +34,7 @@ import {
   SpanEvent as TempoSpanEvent,
 } from '../../model/api-types';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
+export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
   return {
     start: Math.ceil(getUnixTime(start)),
@@ -59,17 +58,22 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
   );
 
   const getQuery = (): SearchRequestParameters => {
-    // if time range not defined -- only return the query from the spec
-    if (context.absoluteTimeRange === undefined) {
-      return { q: spec.query };
-    }
-    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
-    const { start, end } = getUnixTimeRange(context?.absoluteTimeRange);
-    return {
+    const params: SearchRequestParameters = {
       q: spec.query,
-      start,
-      end,
     };
+
+    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
+    if (context.absoluteTimeRange) {
+      const { start, end } = getUnixTimeRange(context.absoluteTimeRange);
+      params.start = start;
+      params.end = end;
+    }
+
+    if (spec.limit) {
+      params.limit = spec.limit;
+    }
+
+    return params;
   };
 
   /**
@@ -123,7 +127,7 @@ function parseEvent(event: TempoSpanEvent): SpanEvent {
  * parseSpan parses the Span API type to the internal representation
  * i.e. convert strings to numbers etc.
  */
-function parseSpan(span: TempoSpan) {
+function parseSpan(span: TempoSpan): Omit<Span, 'resource' | 'scope' | 'childSpans'> {
   return {
     traceId: span.traceId,
     spanId: span.spanId,

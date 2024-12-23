@@ -22,7 +22,7 @@ import {
   StackProps,
   Typography,
 } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';
@@ -35,7 +35,7 @@ export interface JobList extends StackProps {
   onExplore: (metricName: string) => void;
 }
 
-export function JobList({ job, filters, datasource, isMetadataEnabled, onExplore, ...props }: JobList) {
+export function JobList({ job, filters, datasource, isMetadataEnabled, onExplore, ...props }: JobList): ReactElement {
   const filtersWithJobWithoutName: LabelFilter[] = useMemo(() => {
     const result = filters.filter((filter) => filter.label !== '__name__' && filter.label !== 'job');
     result.push({ label: 'job', labelValues: [job], operator: '=' });
@@ -72,7 +72,14 @@ export interface JobSection extends StackProps {
   onExplore: (metricName: string) => void;
 }
 
-export function JobSection({ jobs, filters, datasource, isMetadataEnabled, onExplore, ...props }: JobSection) {
+export function JobSection({
+  jobs,
+  filters,
+  datasource,
+  isMetadataEnabled,
+  onExplore,
+  ...props
+}: JobSection): ReactElement {
   const [currentJob, setCurrentJob] = useState<string>(jobs[0] ?? '');
 
   if (!currentJob) {
@@ -120,7 +127,7 @@ export interface JobTabProps extends StackProps {
   onExplore: (metricName: string) => void;
 }
 
-export function JobTab({ filters, datasource, isMetadataEnabled, onExplore, ...props }: JobTabProps) {
+export function JobTab({ filters, datasource, isMetadataEnabled, onExplore, ...props }: JobTabProps): ReactElement {
   const { data: jobData, isLoading: isJobLoading } = useLabelValues('job', filters, datasource);
 
   if (isJobLoading) {

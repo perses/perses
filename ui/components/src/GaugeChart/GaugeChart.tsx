@@ -16,7 +16,8 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { ReactElement } from 'react';
+import { useChartsTheme } from '../context';
 import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -42,7 +43,7 @@ export interface GaugeChartProps {
   max?: number;
 }
 
-export function GaugeChart(props: GaugeChartProps) {
+export function GaugeChart(props: GaugeChartProps): ReactElement {
   const { width, height, data, format, axisLine, max } = props;
   const chartsTheme = useChartsTheme();
 
@@ -156,8 +157,8 @@ export function GaugeChart(props: GaugeChartProps) {
                   // at this level because the `formatter` function argument is `NaN`
                   // when the value is `null`, making it difficult to differentiate
                   // `null` from a true `NaN` case.
-                  () => 'null'
-                : (value: number) => {
+                  (): string => 'null'
+                : (value: number): string | undefined => {
                     return formatValue(value, format);
                   },
           },
@@ -199,7 +200,12 @@ export function GaugeChart(props: GaugeChartProps) {
  * Responsive font size depending on number of characters, clamp used
  * to ensure size stays within given range
  */
-export function getResponsiveValueSize(value: number | null, format: FormatOptions, width: number, height: number) {
+export function getResponsiveValueSize(
+  value: number | null,
+  format: FormatOptions,
+  width: number,
+  height: number
+): string {
   const MIN_SIZE = 3;
   const MAX_SIZE = 24;
   const SIZE_MULTIPLIER = 0.7;

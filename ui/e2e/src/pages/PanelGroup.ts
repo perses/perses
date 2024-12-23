@@ -64,58 +64,58 @@ export class PanelGroup {
     });
   }
 
-  isOpen() {
+  isOpen(): Promise<boolean> {
     return this.content.isVisible();
   }
 
-  async isExpanded() {
+  async isExpanded(): Promise<void> {
     await expect(this.content).toBeVisible();
     await expect(this.collapseButton).toBeVisible();
   }
 
-  async isCollapsed() {
+  async isCollapsed(): Promise<void> {
     await expect(this.content).toBeHidden();
     await expect(this.expandButton).toBeVisible();
   }
 
-  async expand() {
+  async expand(): Promise<void> {
     await this.expandButton.click();
     // Wait for all animations to complete to avoid misclicking as the panel
     // group animates open.
     await waitForAnimations(this.container);
   }
 
-  async collapse() {
+  async collapse(): Promise<void> {
     await this.collapseButton.click();
     // Wait for all animations to complete to avoid misclicking as the panel
     // group animates closed.
     await waitForAnimations(this.container);
   }
 
-  async startEditing() {
+  async startEditing(): Promise<void> {
     await this.editButton.click();
   }
 
-  async moveUp() {
+  async moveUp(): Promise<void> {
     await this.moveUpButton.click();
   }
 
-  async moveDown() {
+  async moveDown(): Promise<void> {
     await this.moveDownButton.click();
   }
 
-  async delete() {
+  async delete(): Promise<void> {
     await this.deleteButton.click();
   }
 
-  async addPanel() {
+  async addPanel(): Promise<void> {
     await this.addPanelButton.click();
   }
 
   /**
    * Get information about the bounds of the panel group.
    */
-  async getBounds() {
+  async getBounds(): Promise<{ x: number; y: number; width: number; height: number }> {
     const groupBounds = await this.container.boundingBox();
 
     // These values shouldn't be null in the cases we are using them, so thowing an error
@@ -132,7 +132,7 @@ export class PanelGroup {
    * Gets the percentage of the height and width of a panel within the group.
    * Useful for asserting resizing and responsive behavior.
    */
-  async getPanelPercentOfBounds(panel: Panel) {
+  async getPanelPercentOfBounds(panel: Panel): Promise<{ width: number; height: number }> {
     const groupBounds = await this.getBounds();
     const panelBounds = await panel.getBounds();
 

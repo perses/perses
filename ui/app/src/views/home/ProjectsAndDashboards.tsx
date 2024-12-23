@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { ChangeEvent, MouseEvent, useCallback, useMemo, useState } from 'react';
+import { ChangeEvent, MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react';
 import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
@@ -42,7 +42,7 @@ interface ProjectAccordionProps {
   row: ProjectWithDashboards;
 }
 
-function ProjectAccordion({ row }: ProjectAccordionProps) {
+function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
   const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -51,18 +51,18 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
   const hasPermission = useHasPermission('delete', row.project.metadata.name, 'Project');
   const deleteProjectMutation = useDeleteProjectMutation();
 
-  function openDeleteProjectConfirmDialog($event: MouseEvent) {
+  function openDeleteProjectConfirmDialog($event: MouseEvent): void {
     $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
     setIsDeleteProjectDialogOpen(true);
   }
 
-  function closeDeleteProjectConfirmDialog() {
+  function closeDeleteProjectConfirmDialog(): void {
     setIsDeleteProjectDialogOpen(false);
   }
 
-  function handleProjectDelete(project: ProjectResource) {
+  function handleProjectDelete(project: ProjectResource): void {
     deleteProjectMutation.mutate(project, {
-      onSuccess: (deletedProject: ProjectResource) => {
+      onSuccess: (deletedProject: ProjectResource): void => {
         successSnackbar(`Project ${deletedProject.metadata.name} has been successfully deleted`);
         closeDeleteProjectConfirmDialog();
       },
@@ -124,7 +124,7 @@ interface RenderDashboardListProps {
   projectRows: ProjectWithDashboards[];
 }
 
-function RenderDashboardList(props: RenderDashboardListProps) {
+function RenderDashboardList(props: RenderDashboardListProps): ReactElement {
   const { projectRows } = props;
 
   if (projectRows.length === 0) {
@@ -146,7 +146,7 @@ interface SearchableDashboardsProps {
   id?: string;
 }
 
-export function SearchableDashboards(props: SearchableDashboardsProps) {
+export function SearchableDashboards(props: SearchableDashboardsProps): ReactElement {
   const kvSearch = useMemo(
     () =>
       new KVSearch<ProjectWithDashboards>({
@@ -205,7 +205,7 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
   );
 }
 
-export function ProjectsAndDashboards() {
+export function ProjectsAndDashboards(): ReactElement {
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>

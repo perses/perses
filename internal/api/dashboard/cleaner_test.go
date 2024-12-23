@@ -20,10 +20,10 @@ import (
 	"time"
 
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -110,7 +110,7 @@ func TestCleaner_Execute(t *testing.T) {
 			},
 			Spec: v1.EphemeralDashboardSpec{
 				EphemeralDashboardSpecBase: v1.EphemeralDashboardSpecBase{
-					TTL: model.Duration(30 * time.Minute),
+					TTL: common.Duration(30 * time.Minute),
 				},
 			},
 		},
@@ -122,7 +122,7 @@ func TestCleaner_Execute(t *testing.T) {
 			},
 			Spec: v1.EphemeralDashboardSpec{
 				EphemeralDashboardSpecBase: v1.EphemeralDashboardSpecBase{
-					TTL: model.Duration(time.Hour),
+					TTL: common.Duration(time.Hour),
 				},
 			},
 		},

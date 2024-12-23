@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
-import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
-import { useMemo, useState } from 'react';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { LoadingOverlay, Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { ReactElement, useMemo, useState } from 'react';
+import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
-import { TableCellConfig, TableCellConfigs } from '@perses-dev/components/dist/Table/model/table-model';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
 /*
@@ -35,7 +34,7 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: column.cellDescription ? (_) => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
+        cellDescription: column.cellDescription ? (_): string => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
         align: column.align,
@@ -58,19 +57,19 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
     if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
       const numericValue = Number(value);
       if (
-        setting.condition.spec?.min &&
-        setting.condition.spec?.max &&
+        setting.condition.spec?.min !== undefined &&
+        setting.condition.spec?.max !== undefined &&
         numericValue >= +setting.condition.spec?.min &&
         numericValue <= +setting.condition.spec?.max
       ) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.min && numericValue >= +setting.condition.spec?.min) {
+      if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.max && numericValue <= +setting.condition.spec?.max) {
+      if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
     }
@@ -105,23 +104,38 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
 
 export type TableProps = PanelProps<TableOptions>;
 
-export function TablePanel({ contentDimensions, spec }: TableProps) {
+export function TablePanel({ contentDimensions, spec }: TableProps): ReactElement | null {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const data: Array<Record<string, unknown>> = useMemo(() => {
+  const rawData: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
-      .flatMap((d: QueryData<TimeSeriesData>) => d.data)
-      .flatMap((d: TimeSeriesData | undefined) => d?.series || [])
-      .map((ts: TimeSeries) => {
+      .flatMap(
+        (d: QueryData<TimeSeriesData>, queryIndex: number) =>
+          d.data?.series.map((ts: TimeSeries) => ({ ts, queryIndex })) || []
+      )
+      .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
         if (ts.values[0] === undefined) {
           return { ...ts.labels };
         }
-        return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels }; // TODO: support multiple values and timestamps
+        if (queryResults.length === 1) {
+          return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels };
+        }
+
+        // If there is more than one query, we need to add the query index to the value key to avoid conflicts
+        const labels = Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
+          if (key) acc[`${key} #${queryIndex + 1}`] = value;
+          return acc;
+        }, {} as Labels);
+
+        // If there are multiple queries, we need to add the query index to the value key to avoid conflicts
+        // Timestamp is not indexed as it will be the same for all queries
+        return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...labels };
       });
   }, [queryResults]);
+
+  // Transform will be applied by their orders on the original data
+  const data = useTransformData(rawData, spec.transforms ?? []);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
@@ -139,12 +153,25 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
 
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
-    for (const key of keys) {
+
+    // Taking the customized columns first for the ordering of the columns in the table
+    const customizedColumns =
+      spec.columnSettings?.map((column) => column.name).filter((name) => keys.includes(name)) ?? [];
+    const defaultColumns = keys.filter((key) => !customizedColumns.includes(key));
+
+    for (const key of customizedColumns) {
       const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
       }
     }
+    for (const key of defaultColumns) {
+      const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
+      if (columnConfig !== undefined) {
+        columns.push(columnConfig);
+      }
+    }
+
     return columns;
   }, [keys, spec.columnSettings]);
 
@@ -186,9 +213,20 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return result;
   }, [data, keys, spec.cellSettings]);
 
-  function handleSortingChange(sorting: SortingState) {
-    setSorting(sorting);
+  function generateDefaultSortingState(): SortingState {
+    return (
+      spec.columnSettings
+        ?.filter((column) => column.sort !== undefined)
+        .map((column) => {
+          return {
+            id: column.name,
+            desc: column.sort === 'desc',
+          };
+        }) ?? []
+    );
   }
+
+  const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
 
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
@@ -203,11 +241,12 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
       data={data}
       columns={columns}
       cellConfigs={cellConfigs}
-      sorting={sorting}
       height={contentDimensions.height}
       width={contentDimensions.width}
       density={spec.density}
-      onSortingChange={handleSortingChange}
+      defaultColumnWidth={spec.defaultColumnWidth}
+      sorting={sorting}
+      onSortingChange={setSorting}
     />
   );
 }

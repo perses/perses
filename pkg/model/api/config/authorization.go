@@ -16,8 +16,8 @@ package config
 import (
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	"github.com/prometheus/common/model"
 )
 
 var (
@@ -26,14 +26,14 @@ var (
 
 type AuthorizationConfig struct {
 	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
-	CheckLatestUpdateInterval model.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
+	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
 	if a.CheckLatestUpdateInterval <= 0 {
-		a.CheckLatestUpdateInterval = model.Duration(defaultCacheInterval)
+		a.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*role.Permission{}

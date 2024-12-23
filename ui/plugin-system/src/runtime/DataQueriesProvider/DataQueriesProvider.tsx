@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
 
+import { useUsageMetrics } from '../UsageMetricsProvider';
 import {
   DataQueriesProviderProps,
   UseDataQueryResults,
@@ -27,7 +28,7 @@ import {
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
 
-export function useDataQueriesContext() {
+export function useDataQueriesContext(): DataQueriesContextType {
   const ctx = useContext(DataQueriesContext);
   if (ctx === undefined) {
     throw new Error('No DataQueriesContext found. Did you forget a Provider?');
@@ -58,7 +59,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
   return filteredCtx;
 }
 
-export function DataQueriesProvider(props: DataQueriesProviderProps) {
+export function DataQueriesProvider(props: DataQueriesProviderProps): ReactElement {
   const { definitions, options, children, queryOptions } = props;
 
   // Returns a query kind, for example "TimeSeriesQuery" = getQueryType("PrometheusTimeSeriesQuery")
@@ -73,6 +74,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
       },
     };
   });
+
+  const usageMetrics = useUsageMetrics();
 
   // Filter definitions for time series query and other future query plugins
   const timeSeriesQueries = queryDefinitions.filter(
@@ -95,6 +98,18 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
       ...transformQueryResults(traceResults, traceQueries),
     ];
 
+    if (queryOptions?.enabled) {
+      for (const result of mergedQueryResults) {
+        if (!result.isLoading && !result.isFetching && !result.error) {
+          usageMetrics.markQuery(result.definition, 'success');
+        } else if (result.error) {
+          usageMetrics.markQuery(result.definition, 'error');
+        } else {
+          usageMetrics.markQuery(result.definition, 'pending');
+        }
+      }
+    }
+
     return {
       queryResults: mergedQueryResults,
       isFetching: mergedQueryResults.some((result) => result.isFetching),
@@ -102,7 +117,15 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
       refetchAll,
       errors: mergedQueryResults.map((result) => result.error),
     };
-  }, [timeSeriesQueries, timeSeriesResults, traceQueries, traceResults, refetchAll]);
+  }, [
+    timeSeriesQueries,
+    timeSeriesResults,
+    traceQueries,
+    traceResults,
+    refetchAll,
+    queryOptions?.enabled,
+    usageMetrics,
+  ]);
 
   return <DataQueriesContext.Provider value={ctx}>{children}</DataQueriesContext.Provider>;
 }

@@ -15,11 +15,12 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, VariableProvider } from '../../context';
+import { StoreApi } from 'zustand';
+import { DashboardProvider, DashboardStoreState, VariableProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { PanelGroupDialog } from './PanelGroupDialog';
 describe('Add Panel Group', () => {
-  const renderDialog = () => {
+  const renderDialog: () => StoreApi<DashboardStoreState> = () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(

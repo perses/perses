@@ -14,6 +14,7 @@
 import { Definition, UnknownSpec } from '@perses-dev/core';
 import { DataQueriesProvider, DataQueriesProviderProps } from '@perses-dev/plugin-system';
 import { StoryFn, StoryContext } from '@storybook/react';
+import { ReactElement } from 'react';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -32,7 +33,7 @@ function isWithDataQueriesParameter(
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithDataQueries = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithDataQueries = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withDataQueries;
   const parameter = isWithDataQueriesParameter(initParameter)
     ? initParameter

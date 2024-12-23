@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardSpec, PanelRef } from '../model';
+import { DashboardSpec, PanelDefinition, PanelRef } from '../model';
 
 /**
  * Resolve a PanelRef (JSON reference) against the provided DashboardSpec to
  * a PanelDefinition.
  */
-export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef) {
+export function resolvePanelRef(spec: DashboardSpec, panelRef: PanelRef): PanelDefinition {
   const panelsKey = getPanelKeyFromRef(panelRef);
   const panelDefinition = spec.panels[panelsKey];
   if (panelDefinition === undefined) {
@@ -33,7 +33,7 @@ const REF_PREFIX_LENGTH = 14;
 /**
  * Gets the unique key for a panel from a PanelRef.
  */
-export function getPanelKeyFromRef(panelRef: PanelRef) {
+export function getPanelKeyFromRef(panelRef: PanelRef): string {
   return panelRef.$ref.substring(REF_PREFIX_LENGTH);
 }
 

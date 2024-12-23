@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { getResourceExtendedDisplayName, Resource } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
 
@@ -30,7 +30,7 @@ interface DeleteResourceDialogProps<T extends Resource> {
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
  */
-export function DeleteResourceDialog<T extends Resource>(props: DeleteResourceDialogProps<T>) {
+export function DeleteResourceDialog<T extends Resource>(props: DeleteResourceDialogProps<T>): ReactElement {
   const { resource, open, onSubmit, onClose } = props;
 
   return (

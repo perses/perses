@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { RoleBindingResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'rolebindings';
 
-export function createRoleBinding(entity: RoleBindingResource) {
+export function createRoleBinding(entity: RoleBindingResource): Promise<RoleBindingResource> {
   const project = entity.metadata.project;
   const url = buildURL({ resource, project });
   return fetchJson<RoleBindingResource>(url, {
@@ -30,7 +30,7 @@ export function createRoleBinding(entity: RoleBindingResource) {
   });
 }
 
-function getRoleBinding(name: string, project: string) {
+function getRoleBinding(name: string, project: string): Promise<RoleBindingResource> {
   const url = buildURL({ resource, project, name });
   return fetchJson<RoleBindingResource>(url, {
     method: HTTPMethodGET,
@@ -38,7 +38,7 @@ function getRoleBinding(name: string, project: string) {
   });
 }
 
-function getRoleBindings(project?: string) {
+function getRoleBindings(project?: string): Promise<RoleBindingResource[]> {
   const url = buildURL({ resource, project });
   return fetchJson<RoleBindingResource[]>(url, {
     method: HTTPMethodGET,
@@ -46,7 +46,7 @@ function getRoleBindings(project?: string) {
   });
 }
 
-export function updateRoleBinding(entity: RoleBindingResource) {
+export function updateRoleBinding(entity: RoleBindingResource): Promise<RoleBindingResource> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -57,7 +57,7 @@ export function updateRoleBinding(entity: RoleBindingResource) {
   });
 }
 
-export function deleteRoleBinding(entity: RoleBindingResource) {
+export function deleteRoleBinding(entity: RoleBindingResource): Promise<Response> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -71,7 +71,7 @@ export function deleteRoleBinding(entity: RoleBindingResource) {
  * Used to get a roleBinding from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleBinding(name: string, project: string) {
+export function useRoleBinding(name: string, project: string): UseQueryResult<RoleBindingResource> {
   return useQuery<RoleBindingResource, Error>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
@@ -84,7 +84,7 @@ export function useRoleBinding(name: string, project: string) {
  * Used to get roleBindings from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleBindingList(project?: string) {
+export function useRoleBindingList(project?: string): UseQueryResult<RoleBindingResource[]> {
   return useQuery<RoleBindingResource[], Error>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
@@ -100,7 +100,9 @@ export function useRoleBindingList(project?: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateRoleBindingMutation(project: string) {
+export function useCreateRoleBindingMutation(
+  project: string
+): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
@@ -122,7 +124,9 @@ export function useCreateRoleBindingMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateRoleBindingMutation(project: string) {
+export function useUpdateRoleBindingMutation(
+  project: string
+): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
   return useMutation<RoleBindingResource, Error, RoleBindingResource>({
@@ -146,7 +150,9 @@ export function useUpdateRoleBindingMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteRoleBindingMutation(project: string) {
+export function useDeleteRoleBindingMutation(
+  project: string
+): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 

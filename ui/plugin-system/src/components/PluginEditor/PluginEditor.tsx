@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -24,7 +25,7 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  * previous plugin's spec state. If you just want this behavior, but in a different UI layout from this, try the
  * `usePluginEditor` hook that powers this component.
  */
-export function PluginEditor(props: PluginEditorProps) {
+export function PluginEditor(props: PluginEditorProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { value, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);

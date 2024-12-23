@@ -38,7 +38,7 @@ export function createDuplicatePanelSlice(): StateCreator<
   DuplicatePanelSlice
 > {
   return (set) => ({
-    duplicatePanel(panelGroupItemId: PanelGroupItemId) {
+    duplicatePanel(panelGroupItemId: PanelGroupItemId): void {
       set((state) => {
         const panels = state.panels;
 

@@ -30,6 +30,6 @@ export interface ScatterChartOptions {
 /**
  * Creates the initial/empty options for a ScatterChart panel.
  */
-export function createInitialScatterChartOptions() {
+export function createInitialScatterChartOptions(): Record<string, unknown> {
   return {};
 }

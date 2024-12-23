@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, ReactElement } from 'react';
 import {
   Button,
   Stack,
@@ -50,12 +50,12 @@ import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from 
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
-function getVariableLabelByKind(kind: string) {
+function getVariableLabelByKind(kind: string): 'List' | 'Text' | undefined {
   return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
 }
 
-function getValidation(variableDefinitions: VariableDefinition[]) {
-  const errors = [];
+function getValidation(variableDefinitions: VariableDefinition[]): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
 
   /**  Variable names must be unique */
   const variableNames = variableDefinitions.map((variableDefinition) => variableDefinition.spec.name);
@@ -75,7 +75,7 @@ export function VariableEditor(props: {
   builtinVariableDefinitions: BuiltinVariableDefinition[];
   onChange: (variableDefinitions: VariableDefinition[]) => void;
   onCancel: () => void;
-}) {
+}): ReactElement {
   const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
   const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
   const [variableFormAction, setVariableFormAction] = useState<Action>('update');
@@ -90,7 +90,7 @@ export function VariableEditor(props: {
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     if (JSON.stringify(props.variableDefinitions) !== JSON.stringify(variableDefinitions)) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
@@ -108,13 +108,13 @@ export function VariableEditor(props: {
     }
   };
 
-  const removeVariable = (index: number) => {
+  const removeVariable = (index: number): void => {
     setVariableDefinitions((draft) => {
       draft.splice(index, 1);
     });
   };
 
-  const addVariable = () => {
+  const addVariable = (): void => {
     setVariableFormAction('create');
     setVariableDefinitions((draft) => {
       draft.push({
@@ -128,12 +128,12 @@ export function VariableEditor(props: {
     setVariableEditIdx(variableDefinitions.length);
   };
 
-  const editVariable = (index: number) => {
+  const editVariable = (index: number): void => {
     setVariableFormAction('update');
     setVariableEditIdx(index);
   };
 
-  const toggleVariableVisibility = (index: number, visible: boolean) => {
+  const toggleVariableVisibility = (index: number, visible: boolean): void => {
     setVariableDefinitions((draft) => {
       const v = draft[index];
       if (!v) {
@@ -149,7 +149,7 @@ export function VariableEditor(props: {
     });
   };
 
-  const changeVariableOrder = (index: number, direction: 'up' | 'down') => {
+  const changeVariableOrder = (index: number, direction: 'up' | 'down'): void => {
     setVariableDefinitions((draft) => {
       if (direction === 'up') {
         const prevElement = draft[index - 1];
@@ -171,7 +171,7 @@ export function VariableEditor(props: {
     });
   };
 
-  const overrideVariable = (v: VariableDefinition) => {
+  const overrideVariable = (v: VariableDefinition): void => {
     setVariableDefinitions((draft) => {
       draft.push(v);
     });
@@ -183,8 +183,9 @@ export function VariableEditor(props: {
         <ValidationProvider>
           <VariableEditorForm
             initialVariableDefinition={currentEditingVariableDefinition}
-            initialAction={variableFormAction}
+            action={variableFormAction}
             isDraft={true}
+            onActionChange={setVariableFormAction}
             onSave={(definition: VariableDefinition) => {
               setVariableDefinitions((draft) => {
                 draft[variableEditIdx] = definition;
@@ -406,7 +407,7 @@ const TableCell = styled(MuiTableCell)(({ theme }) => ({
   borderBottom: `solid 1px ${theme.palette.divider}`,
 }));
 
-export function VariableName(props: { name: string; state: VariableState | undefined }) {
+export function VariableName(props: { name: string; state: VariableState | undefined }): ReactElement {
   const { name, state } = props;
   return (
     <>

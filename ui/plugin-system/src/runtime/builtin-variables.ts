@@ -21,7 +21,7 @@ export type BuiltinVariableSrv = {
 
 export const BuiltinVariableContext = createContext<BuiltinVariableSrv | undefined>(undefined);
 
-export function useBuiltinVariableContext() {
+export function useBuiltinVariableContext(): BuiltinVariableSrv {
   const ctx = useContext(BuiltinVariableContext);
   if (ctx === undefined) {
     throw new Error('No BuiltinVariableContext found. Did you forget a Provider?');

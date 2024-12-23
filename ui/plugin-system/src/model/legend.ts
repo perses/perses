@@ -79,7 +79,7 @@ export const LEGEND_VALUE_CONFIG = legendValues.reduce(
   {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>
 );
 
-export function validateLegendSpec(legend?: LegendOptionsBase) {
+export function validateLegendSpec(legend?: LegendOptionsBase): boolean {
   if (legend === undefined) {
     // undefined is valid since this is how legend is hidden by default
     return true;

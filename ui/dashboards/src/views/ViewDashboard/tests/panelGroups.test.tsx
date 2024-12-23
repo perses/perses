@@ -19,7 +19,7 @@ import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../
 import { DashboardApp } from '../DashboardApp';
 
 describe('Panel Groups', () => {
-  const renderDashboard = () => {
+  const renderDashboard = (): void => {
     renderWithContext(
       <DatasourceStoreProvider {...defaultDatasourceProps}>
         <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>

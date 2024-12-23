@@ -19,6 +19,7 @@ import {
   QueryCache,
   QueryKey,
   QueryObserverOptions,
+  UseQueryResult,
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
@@ -37,13 +38,13 @@ export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
 /**
  * Returns a serialized string of the current state of variable values.
  */
-function getVariableValuesKey(v: VariableStateMap) {
+function getVariableValuesKey(v: VariableStateMap): string {
   return Object.values(v)
     .map((v) => JSON.stringify(v.value))
     .join(',');
 }
 
-function filterVariableStateMap(v: VariableStateMap, names?: string[]) {
+function filterVariableStateMap(v: VariableStateMap, names?: string[]): VariableStateMap {
   if (!names) {
     return v;
   }
@@ -58,7 +59,10 @@ function getQueryOptions({
   plugin?: TimeSeriesQueryPlugin;
   definition: TimeSeriesQueryDefinition;
   context: TimeSeriesQueryContext;
-}) {
+}): {
+  queryKey: QueryKey;
+  queryEnabled: boolean;
+} {
   const { timeRange, datasourceStore, suggestedStepMs, mode, variableState, refreshKey } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
@@ -98,7 +102,7 @@ export const useTimeSeriesQuery = (
   definition: TimeSeriesQueryDefinition,
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: QueryObserverOptions<TimeSeriesData>
-) => {
+): UseQueryResult<TimeSeriesData> => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
@@ -125,7 +129,7 @@ export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
-) {
+): Array<UseQueryResult<TimeSeriesData>> {
   const { getPlugin } = usePluginRegistry();
   const context = {
     ...useTimeSeriesQueryContext(),
@@ -145,7 +149,7 @@ export function useTimeSeriesQueries(
       return {
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
-        queryFn: async () => {
+        queryFn: async (): Promise<TimeSeriesData> => {
           const ctx: TimeSeriesQueryContext = {
             ...context,
             // Keep suggested step changes out of the query key, so we don´t have to run again query when it changes
@@ -179,7 +183,7 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
 /**
  * Get active time series queries for query results summary
  */
-export function useActiveTimeSeriesQueries() {
+export function useActiveTimeSeriesQueries(): TimeSeriesDataQuery[] {
   const queryClient = useQueryClient();
   const queryCache = queryClient.getQueryCache();
   return getActiveTimeSeriesQueries(queryCache);
@@ -188,7 +192,7 @@ export function useActiveTimeSeriesQueries() {
 /**
  * Filter all cached queries down to only active time series queries
  */
-export function getActiveTimeSeriesQueries(cache: QueryCache) {
+export function getActiveTimeSeriesQueries(cache: QueryCache): TimeSeriesDataQuery[] {
   const queries: TimeSeriesDataQuery[] = [];
 
   for (const query of cache.findAll({ type: 'active' })) {

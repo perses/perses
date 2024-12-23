@@ -15,7 +15,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Dashboard, VariableList } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, TimeRangeValue, VariableDefinition } from '@perses-dev/core';
 import {
   mockTimeSeriesResponseWithManySeries,
   mockTimeSeriesResponseWithNullValues,
@@ -210,7 +210,16 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
   },
 };
 
-function formatProviderParameters(dashboardState: DashboardResource) {
+function formatProviderParameters(dashboardState: DashboardResource): {
+  withVariables: { props: { initialVariableDefinitions: VariableDefinition[] } };
+  withDashboard: {
+    props: { initialState: { dashboardResource: DashboardResource }; dashboardResource: DashboardResource };
+  };
+  withTimeRange: {
+    props: { initialTimeRange: TimeRangeValue | undefined };
+  };
+  withDatasourceStore: { props: { dashboardResource: DashboardResource } };
+} {
   return {
     withDashboard: {
       props: {

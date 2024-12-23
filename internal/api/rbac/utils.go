@@ -21,6 +21,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -66,7 +67,7 @@ func findGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
 	return nil
 }
 
-// addEntry is appending a project or global permission to user list of permissions
+// addEntry is appending a project or global permission to the user list of permissions
 // Empty project equal to Global permission
 func addEntry(usersPermissions usersPermissions, user string, project string, permission *v1Role.Permission) {
 	if _, ok := usersPermissions[user]; !ok {
@@ -107,7 +108,12 @@ func (r *cacheImpl) buildUsersPermissions() (usersPermissions, error) {
 	for _, usr := range users {
 		for _, globalRoleBinding := range globalRoleBindings {
 			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				globalRolePermissions := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
+				globalRole := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role)
+				if globalRole == nil {
+					logrus.Warningf("global role %q listed in the global role binding %q does not exist", globalRoleBinding.Spec.Role, globalRoleBinding.Metadata.Name)
+					continue
+				}
+				globalRolePermissions := globalRole.Spec.Permissions
 				for i := range globalRolePermissions {
 					addEntry(permissionBuild, usr.Metadata.Name, GlobalProject, &globalRolePermissions[i])
 				}
@@ -118,7 +124,12 @@ func (r *cacheImpl) buildUsersPermissions() (usersPermissions, error) {
 	for _, usr := range users {
 		for _, roleBinding := range roleBindings {
 			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				rolePermissions := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
+				projectRole := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role)
+				if projectRole == nil {
+					logrus.Warningf("role %q listed in the role binding %s/%s does not exist", roleBinding.Spec.Role, roleBinding.Metadata.Project, roleBinding.Metadata.Name)
+					continue
+				}
+				rolePermissions := projectRole.Spec.Permissions
 				for i := range rolePermissions {
 					addEntry(permissionBuild, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
 				}

@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/perses/common/config"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,12 +30,12 @@ type EphemeralDashboard struct {
 	// When true user will be able to use the ephemeral dashboard at project level.
 	Enable bool `json:"enable" yaml:"enable"`
 	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-	CleanupInterval model.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
+	CleanupInterval common.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
 }
 
 func (e *EphemeralDashboard) Verify() error {
 	if e.Enable && e.CleanupInterval <= 0 {
-		e.CleanupInterval = model.Duration(defaultEphemeralDashboardsCleanupInterval)
+		e.CleanupInterval = common.Duration(defaultEphemeralDashboardsCleanupInterval)
 	}
 	return nil
 }
@@ -64,7 +64,7 @@ type Config struct {
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	// DEPRECATED.
 	// Please use the config EphemeralDashboard instead.
-	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
+	EphemeralDashboardsCleanupInterval common.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 	// EphemeralDashboard contains the config about the ephemeral dashboard feature
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.

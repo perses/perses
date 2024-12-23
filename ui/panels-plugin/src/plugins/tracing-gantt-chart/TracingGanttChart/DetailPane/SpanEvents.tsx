@@ -14,36 +14,38 @@
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
 import { Span, SpanEvent } from '@perses-dev/core';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
+import { ReactElement } from 'react';
 import { formatDuration } from '../utils';
+import { GanttTrace } from '../trace';
 import { AttributeList } from './Attributes';
 
 export interface SpanEventListProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   span: Span;
 }
 
-export function SpanEventList(props: SpanEventListProps) {
-  const { rootSpan, span } = props;
+export function SpanEventList(props: SpanEventListProps): ReactElement {
+  const { trace, span } = props;
 
   return (
     <>
       {span.events
         .sort((a, b) => a.timeUnixMs - b.timeUnixMs)
         .map((event, i) => (
-          <SpanEventItem key={i} rootSpan={rootSpan} event={event} />
+          <SpanEventItem key={i} trace={trace} event={event} />
         ))}
     </>
   );
 }
 
 interface SpanEventItemProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   event: SpanEvent;
 }
 
-function SpanEventItem(props: SpanEventItemProps) {
-  const { rootSpan, event } = props;
-  const relativeTime = event.timeUnixMs - rootSpan.startTimeUnixMs;
+function SpanEventItem(props: SpanEventItemProps): ReactElement {
+  const { trace, event } = props;
+  const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 
   return (
     <Accordion disableGutters>

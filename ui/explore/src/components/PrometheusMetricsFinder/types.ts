@@ -17,6 +17,7 @@ export type Operator = '=' | '!=' | '=~' | '!~';
 
 export interface Settings {
   isMetadataEnabled: boolean;
+  isPanelEnabled: boolean;
 }
 
 export interface FinderQueryParams {

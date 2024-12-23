@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
-import React, { DispatchWithoutAction, SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
+import React, { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   BoxProps,
-  Button,
   Divider,
   FormControl,
   FormControlLabel,
@@ -31,39 +30,38 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { FormEditorProps } from '../form-drawers';
 
 const basicAuthIndex = 'basicAuth';
 const authorizationIndex = 'authorization';
 
-interface SecretEditorFormProps {
-  initialSecret: Secret;
-  initialAction: Action;
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: Secret) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
-}
+type SecretEditorFormProps = FormEditorProps<Secret>;
 
-export function SecretEditorForm(props: SecretEditorFormProps) {
-  const { initialSecret, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function SecretEditorForm({
+  initialValue,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: SecretEditorFormProps): ReactElement {
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialSecretClean: Secret = useMemo(() => {
-    const result = { ...initialSecret };
+    const result = { ...initialValue };
     if (result.spec.basicAuth?.password) result.spec.basicAuth.password = '';
     if (result.spec.authorization?.credentials) result.spec.authorization.credentials = '';
     if (result.spec.tlsConfig?.ca) result.spec.tlsConfig.ca = '';
     if (result.spec.tlsConfig?.cert) result.spec.tlsConfig.cert = '';
     if (result.spec.tlsConfig?.key) result.spec.tlsConfig.key = '';
     return result;
-  }, [initialSecret]);
+  }, [initialValue]);
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -84,7 +82,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialSecretClean) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -103,7 +101,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
     initialSecretClean.spec.basicAuth ? basicAuthIndex : authorizationIndex
   );
 
-  const handleTabChange = (event: SyntheticEvent, newValue: string) => {
+  const handleTabChange = (event: SyntheticEvent, newValue: string): void => {
     if (newValue === basicAuthIndex) {
       form.setValue('spec.basicAuth', { username: '', password: '', passwordFile: '' });
     } else if (newValue === authorizationIndex) {
@@ -132,46 +130,16 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} Secret</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
@@ -596,7 +564,7 @@ interface TabPanelProps extends BoxProps {
   value: string;
 }
 
-function TabPanel({ children, value, index, ...props }: TabPanelProps) {
+function TabPanel({ children, value, index, ...props }: TabPanelProps): ReactElement {
   return (
     <Box
       role="tabpanel"

@@ -66,7 +66,16 @@
                   "text": "Good"
                 }
               ],
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -98,7 +107,16 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -130,7 +148,24 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                },
+                {
+                  "header": "hello",
+                  "name": "bonjour"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -164,8 +199,20 @@
             "spec": {
               "columnSettings": [
                 {
+                  "header": "hello",
+                  "name": "value"
+                },
+                {
                   "hide": true,
-                  "name": "Time"
+                  "name": "timestamp"
+                },
+                {
+                  "hide": false,
+                  "name": "value"
+                },
+                {
+                  "name": "hello",
+                  "width": 100
                 }
               ],
               "density": "compact"
@@ -199,7 +246,18 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "family",
+                  "name": "job",
+                  "width": 100
+                },
+                {
+                  "header": "bonjour",
+                  "name": "value",
+                  "width": 100
+                }
+              ],
               "density": "compact"
             }
           },
@@ -231,7 +289,16 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "hello",
+                  "name": "value"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -263,7 +330,16 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "name": "value",
+                  "width": 150
+                },
+                {
+                  "name": "value",
+                  "width": 200
+                }
+              ],
               "density": "compact"
             }
           },
@@ -295,7 +371,24 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
+                {
+                  "header": "Timestamp",
+                  "name": "timestamp"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -327,7 +420,28 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
+                {
+                  "header": "Timestamp",
+                  "name": "timestamp"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                },
+                {
+                  "name": "group",
+                  "width": 150
+                }
+              ],
               "density": "compact"
             }
           },

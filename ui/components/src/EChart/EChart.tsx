@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
@@ -110,7 +110,7 @@ export interface EChartsProps<T> {
   onChartInitialized?: (instance: ECharts) => void;
 }
 
-export const EChart = React.memo(function EChart<T>({
+export const EChart = memo(function EChart<T>({
   option,
   theme,
   renderer,
@@ -135,7 +135,7 @@ export const EChart = React.memo(function EChart<T>({
     if (_instance !== undefined) {
       _instance.current = chartElement.current;
     }
-    return () => {
+    return (): void => {
       if (chartElement.current === null) return;
       chartElement.current.dispose();
       chartElement.current = null;
@@ -165,7 +165,7 @@ export const EChart = React.memo(function EChart<T>({
     }, 200);
     window.addEventListener('resize', updateSize);
     updateSize();
-    return () => {
+    return (): void => {
       window.removeEventListener('resize', updateSize);
     };
   }, []);
@@ -175,7 +175,7 @@ export const EChart = React.memo(function EChart<T>({
     const chart = chartElement.current;
     if (!chart || onEvents === undefined) return;
     bindEvents(chart, onEvents);
-    return () => {
+    return (): void => {
       if (chart === undefined) return;
       if (chart.isDisposed() === true) return;
       for (const event in onEvents) {
@@ -208,10 +208,10 @@ export const EChart = React.memo(function EChart<T>({
 });
 
 // Validate event config and bind custom events
-function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>) {
+function bindEvents<T>(instance: ECharts, events?: OnEventsType<T>): void {
   if (events === undefined) return;
 
-  function bindEvent(eventName: EventName, OnEventFunction: unknown) {
+  function bindEvent(eventName: EventName, OnEventFunction: unknown): void {
     if (typeof OnEventFunction === 'function') {
       if (isMouseEvent(eventName)) {
         instance.on(eventName, (params) => OnEventFunction(params, instance));

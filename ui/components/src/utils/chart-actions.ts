@@ -27,7 +27,7 @@ export interface ZoomEventData {
  * Enable dataZoom without requring user to click toolbox icon.
  * https://stackoverflow.com/questions/57183297/is-there-a-way-to-use-zoom-of-type-select-without-showing-the-toolbar
  */
-export function enableDataZoom(chart: EChartsInstance) {
+export function enableDataZoom(chart: EChartsInstance): void {
   const chartModel = chart['_model'];
   if (chartModel === undefined) return;
   if (chartModel.option.toolbox !== undefined && chartModel.option.toolbox.length > 0) {
@@ -45,7 +45,7 @@ export function enableDataZoom(chart: EChartsInstance) {
 /**
  * Restore chart to original state before zoom or other actions were dispatched
  */
-export function restoreChart(chart: EChartsInstance) {
+export function restoreChart(chart: EChartsInstance): void {
   // TODO: support incremental unzoom instead of restore to original state
   chart.dispatchAction({
     type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
@@ -56,7 +56,7 @@ export function restoreChart(chart: EChartsInstance) {
  * Clear all highlighted series when cursor exits canvas
  * https://echarts.apache.org/en/api.html#action.downplay
  */
-export function clearHighlightedSeries(chart: EChartsInstance) {
+export function clearHighlightedSeries(chart: EChartsInstance): void {
   if (chart.dispatchAction !== undefined) {
     // Clear any selected data points
     chart.dispatchAction({
@@ -75,7 +75,7 @@ export function clearHighlightedSeries(chart: EChartsInstance) {
  * Used to determine if cursor is over chart canvas and closest datapoint.
  * https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
  */
-export function getPointInGrid(cursorCoordX: number, cursorCoordY: number, chart?: EChartsInstance) {
+export function getPointInGrid(cursorCoordX: number, cursorCoordY: number, chart?: EChartsInstance): number[] | null {
   if (chart === undefined) {
     return null;
   }
@@ -101,7 +101,7 @@ export function batchDispatchNearbySeriesActions(
   nonEmphasizedSeriesIndexes: number[],
   emphasizedDatapoints: DatapointInfo[],
   duplicateDatapoints: DatapointInfo[]
-) {
+): void {
   // Accounts for multiple series that are rendered direct on top of eachother.
   // Only applies select state to the datapoint that is visible to avoid color mismatch.
   const lastEmphasizedDatapoint =
@@ -155,7 +155,7 @@ export function batchDispatchNearbySeriesActions(
 /*
  * Determine whether a markLine was pushed into the final series, which means crosshair was already pinned onClick
  */
-export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping) {
+export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping): boolean {
   const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
   return isCrosshairPinned;
 }

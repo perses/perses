@@ -48,7 +48,7 @@ describe('Panel', () => {
     definition?: PanelDefinition,
     editHandlers?: PanelProps['editHandlers'],
     panelOptions?: PanelProps['panelOptions']
-  ) => {
+  ): void => {
     definition ??= createTestPanel();
 
     renderWithContext(
@@ -71,7 +71,7 @@ describe('Panel', () => {
   };
 
   // Helper to get the panel once rendered
-  const getPanel = () => screen.getByTestId('panel');
+  const getPanel = (): HTMLElement => screen.getByTestId('panel');
 
   it('should render panel', async () => {
     renderPanel();

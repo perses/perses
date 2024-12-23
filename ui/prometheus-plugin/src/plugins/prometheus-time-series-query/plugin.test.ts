@@ -62,7 +62,7 @@ const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<PrometheusDatasource
   };
 });
 
-const createStubContext = () => {
+const createStubContext = (): TimeSeriesQueryContext => {
   const stubTimeSeriesContext: TimeSeriesQueryContext = {
     datasourceStore: {
       getDatasource: getDatasource,

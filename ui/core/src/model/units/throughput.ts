@@ -16,21 +16,19 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
-const throughputUnits = [
-  'bits/sec',
-  'bytes/sec',
-  'counts/sec',
-  'events/sec',
-  'messages/sec',
-  'ops/sec',
-  'packets/sec',
-  'reads/sec',
-  'records/sec',
-  'requests/sec',
-  'rows/sec',
-  'writes/sec',
-] as const;
-type ThroughputUnit = (typeof throughputUnits)[number];
+type ThroughputUnit =
+  | 'bits/sec'
+  | 'bytes/sec'
+  | 'counts/sec'
+  | 'events/sec'
+  | 'messages/sec'
+  | 'ops/sec'
+  | 'packets/sec'
+  | 'reads/sec'
+  | 'records/sec'
+  | 'requests/sec'
+  | 'rows/sec'
+  | 'writes/sec';
 export type ThroughputFormatOptions = {
   unit: ThroughputUnit;
   decimalPlaces?: number;

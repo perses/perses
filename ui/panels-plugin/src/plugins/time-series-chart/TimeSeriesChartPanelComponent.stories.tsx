@@ -29,7 +29,7 @@ import {
   WithQueryParams,
   StorySection,
 } from '@perses-dev/storybook';
-import { ComponentProps } from 'react';
+import { ComponentProps, ReactElement } from 'react';
 import { legendModes, legendPositions } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 
@@ -39,7 +39,7 @@ type TimeSeriesChartWrapperProps = TimeSeriesChartProps & {
   height?: number;
   width?: number;
 };
-function TimeSeriesChartWrapper({ height, width, ...otherProps }: TimeSeriesChartWrapperProps) {
+function TimeSeriesChartWrapper({ height, width, ...otherProps }: TimeSeriesChartWrapperProps): ReactElement {
   return (
     <div style={{ width: width, height: height }}>
       <TimeSeriesChart.PanelComponent {...otherProps} />

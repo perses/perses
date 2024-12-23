@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { formatValue, FormatOptions } from '@perses-dev/core';
 import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
@@ -48,7 +48,7 @@ export interface StatChartProps {
   valueFontSize?: FontSizeOption;
 }
 
-export function StatChart(props: StatChartProps) {
+export function StatChart(props: StatChartProps): ReactElement {
   const { width, height, data, format, color, sparkline, showSeriesName, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
 
@@ -132,7 +132,7 @@ export function StatChart(props: StatChartProps) {
       yAxis: {
         type: 'value',
         show: false,
-        min: (value: { min: number; max: number }) => {
+        min: (value: { min: number; max: number }): number => {
           if (value.min >= 0 && value.min <= 1) {
             // helps with percent-decimal units, or datasets that return 0 or 1 booleans
             return 0;

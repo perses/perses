@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { UserResource } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
@@ -28,7 +28,7 @@ interface UsersProps {
   id?: string;
 }
 
-export function Users(props: UsersProps) {
+export function Users(props: UsersProps): ReactElement {
   const { id } = props;
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {

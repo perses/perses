@@ -25,7 +25,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	v1Dashboard "github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/prometheus/common/model"
 )
 
 func Name(name string) Option {
@@ -51,14 +50,14 @@ func ProjectName(name string) Option {
 
 func RefreshInterval(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Dashboard.Spec.RefreshInterval = model.Duration(seconds)
+		builder.Dashboard.Spec.RefreshInterval = common.Duration(seconds)
 		return nil
 	}
 }
 
 func Duration(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Dashboard.Spec.Duration = model.Duration(seconds)
+		builder.Dashboard.Spec.Duration = common.Duration(seconds)
 		return nil
 	}
 }

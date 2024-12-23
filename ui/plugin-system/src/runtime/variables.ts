@@ -130,7 +130,7 @@ export type VariableSrv = {
 
 export const VariableContext = createContext<VariableSrv | undefined>(undefined);
 
-function useVariableContext() {
+function useVariableContext(): VariableSrv {
   const ctx = useContext(VariableContext);
   if (ctx === undefined) {
     throw new Error('No VariableContext found. Did you forget a Provider?');

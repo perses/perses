@@ -14,7 +14,7 @@
 /**
  * Calls `global.fetch` and determines which type of error to show for non-200 responses.
  */
-export async function fetch(...args: Parameters<typeof global.fetch>) {
+export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
   const response = await global.fetch(...args);
   if (response.ok === false) {
     const contentType = response.headers.get('content-type');
@@ -42,7 +42,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>) {
  * decodes the response body as JSON, casting it to type `T`. Returns the
  * decoded body.
  */
-export async function fetchJson<T>(...args: Parameters<typeof global.fetch>) {
+export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
   const json: T = await response.json();
   return json;

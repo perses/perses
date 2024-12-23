@@ -18,8 +18,7 @@ import { TempoTraceQuery } from './plugins/tempo-trace-query/TempoTraceQuery';
 export { TempoTraceQuery, TempoDatasource };
 
 // For consumers to leverage in DatasourceStoreProvider onCreate
-export * from './model/tempo-client';
-export * from './model/tempo-selectors';
+export * from './model';
 
 // For consumers of TraceQLExtension
 export * from './components/TraceQLExtension';

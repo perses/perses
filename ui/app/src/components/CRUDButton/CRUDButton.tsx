@@ -13,6 +13,7 @@
 
 import { Button, ButtonProps, Tooltip } from '@mui/material';
 import { Action, Scope } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -37,7 +38,7 @@ export function CRUDButton({
   disabled,
   onClick,
   ...props
-}: CRUDButtonProps) {
+}: CRUDButtonProps): ReactElement {
   const isReadonly = useIsReadonly();
   const isMobileSize = useIsMobileSize();
   const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');

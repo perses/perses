@@ -13,6 +13,7 @@
 
 import { Select, SelectProps, MenuItem, Stack, ListItemText } from '@mui/material';
 import { ProjectResource } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { useProjectList } from '../context';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
@@ -28,7 +29,7 @@ export interface ProjectSelectProps extends Omit<SelectProps<string>, OmittedMui
  * Displays a MUI input for selecting a Project of a particular kind. Note: The 'value' and `onChange` handler for
  * the input deal with a `ProjectSelector`.
  */
-export function ProjectSelect(props: ProjectSelectProps) {
+export function ProjectSelect(props: ProjectSelectProps): ReactElement {
   const { onChange, value, ...others } = props;
 
   const { data, isLoading } = useProjectList();

@@ -14,7 +14,7 @@
 import { getResourceDisplayName, getMetadataProject, Datasource, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -43,7 +43,7 @@ import { DatasourceDrawer } from './DatasourceDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCallbacks<T>) {
+export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -101,7 +101,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const datasource = findDatasource(name, project);
       setTargetedDatasource(datasource);
       setAction('update');
@@ -111,7 +111,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const datasource = findDatasource(name, project);
       setTargetedDatasource(datasource);
       setAction('create');
@@ -121,7 +121,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedDatasource(findDatasource(name, project));
       setDeleteDatasourceDialogOpened(true);
     },
@@ -143,7 +143,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         headerName: 'Name',
         type: 'string',
         flex: 2,
-        renderCell: (params) => <span style={{ fontFamily: 'monospace' }}>{params.value}</span>,
+        renderCell: (params): ReactElement => <span style={{ fontFamily: 'monospace' }}>{params.value}</span>,
       },
       VERSION_COL_DEF,
       DESCRIPTION_COL_DEF,
@@ -156,7 +156,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -204,9 +204,10 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         <>
           <DatasourceDrawer
             datasource={targetedDatasource}
-            isOpen={isDatasourceDrawerOpened}
             action={action}
+            isOpen={isDatasourceDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleDatasourceSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
             onClose={() => setDatasourceDrawerOpened(false)}

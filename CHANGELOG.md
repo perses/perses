@@ -1,5 +1,48 @@
 # Changelog
 
+## 0.49.0 / 2024-11-05
+
+This update introduces a toggleable Tree view in the PromQL editor (Prom 3.0-like), as well as new customization options for the Table panel.
+
+It also introduces a way to track the time to load the dashboards.
+
+- [FEATURE] Table panel: Add Join and Merge transformations (#2359)
+- [FEATURE] PromQL Tree view / Debugger (#2344)
+- [FEATURE] Table panel: Add cell settings (#2298)
+  [FEATURE] Usage Tracking Frontend Work (#2211)
+- [ENHANCEMENT] Change timeseries panel's legend migration (#2335)
+- [ENHANCEMENT] Add counts/sec unit to the mapping list for migration (#2365)
+- [ENHANCEMENT] Handle collapsed/panels missing in row (#2330)
+- [ENHANCEMENT] migration: Map durations to seconds (#2331)
+- [ENHANCEMENT] Add --force option to allow applying resource despite project config inconsistencies (#1937)
+- [ENHANCEMENT] TraceQL auto-completion: Improve completion of string span attribute values (#2366)
+- [ENHANCEMENT] TracingGanttChart: print `<empty string>` if value is empty (#2367)
+- [ENHANCEMENT] TempoTraceQuery: allow setting search result limit (#2352)
+- [ENHANCEMENT] TracingGanttChart: align span duration label location based on available space (#2348)
+- [ENHANCEMENT] TracingGanttChart: show up to 2 fractional digits (#2347)
+- [ENHANCEMENT] Allows variables to be empty (#2324)
+- [ENHANCEMENT] Migration: Don't fail on `fieldConfig.defaults.thresholds.steps` absence (#2325)
+- [ENHANCEMENT] Configuration of the HTTP client for oauth/oidc providers (#2311)
+- [ENHANCEMENT] Grafana migration: use new CUE evaluator to improve memory usage (#2312)
+- [ENHANCEMENT] Improve the query editor's look (#2299)
+- [ENHANCEMENT] Add decimal migrations; Add barchart migration (#2386)
+- [ENHANCEMENT] tempo-plugin: export all models (including TempoTraceQuerySpec) (#2384)
+- [ENHANCEMENT] TraceTable: show scrollbar only if content overflows (#2385)
+- [BUGFIX] Fix migration failed when excludeByName is not present in transformation.id == "organize" (#2332)
+- [BUGFIX] Migration: Add lineWidth constraint (#2333)
+- [BUGFIX] support YAML extension in database configuration (#2372)
+- [BUGFIX] TraceTable: expand the span count bubble in the service name chips (#2368)
+- [BUGFIX] Fix migrate cmd by making the flag schemas.<schema_kind> mandatory when being offline (#2363)
+- [BUGFIX] TracingGanttChart: calculate start and end time from all spans (#2351)
+- [BUGFIX] Add http headers for GET requests in a Prometheus client (#2357)
+- [BUGFIX] Grafana migration: fix some failing cases (#2314)
+- [BUGFIX] Prevents saving empty PromQL strings (#2304)
+- [BREAKINGCHANGE] Refactor the way to manage authentication in the perses http client (#2388)
+- [DOC] better wording for `percli dac`'s commands helpers (#2350)
+- [DOC] Update Contact information (#2321)
+- [DOC] Fix some storybooks links (#2334)
+- [DOC] remove perses intro (#2394)
+
 ## 0.48.0 / 2024-10-09
 
 This update introduces a brand-new Prometheus metric finder,

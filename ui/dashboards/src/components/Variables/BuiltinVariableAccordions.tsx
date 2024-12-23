@@ -26,13 +26,15 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { InfoTooltip } from '@perses-dev/components';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 
 type BuiltinVariableAccordionsProps = {
   builtinVariableDefinitions: BuiltinVariableDefinition[];
 };
 
-export function BuiltinVariableAccordions({ builtinVariableDefinitions }: BuiltinVariableAccordionsProps) {
+export function BuiltinVariableAccordions({
+  builtinVariableDefinitions,
+}: BuiltinVariableAccordionsProps): ReactElement {
   const builtinVariablesBySource = useMemo(() => {
     const result: Record<string, BuiltinVariableDefinition[]> = {};
     for (const definition of builtinVariableDefinitions) {
@@ -73,10 +75,10 @@ export function BuiltinVariableAccordions({ builtinVariableDefinitions }: Builti
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="builtin" id="builtin">
             <Typography variant="h2">
               <InfoTooltip
-                title={`${source} Builtin Variables`}
+                title={`${source} Built-in Variables`}
                 description="Variables computed during dashboard rendering."
               >
-                <span>{source} Builtin Variables</span>
+                <span>{source} Built-in Variables</span>
               </InfoTooltip>
             </Typography>
           </AccordionSummary>

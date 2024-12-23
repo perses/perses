@@ -80,13 +80,13 @@ class Cache {
     this.emptyDatasources = new LRUCache<string, boolean>(option);
   }
 
-  setDatasources(list: DatasourceResource[]) {
+  setDatasources(list: DatasourceResource[]): void {
     for (const dts of list) {
       this.setDatasource(dts);
     }
   }
 
-  setDatasource(dts: DatasourceResource) {
+  setDatasource(dts: DatasourceResource): void {
     const kind = dts.spec.plugin.kind;
     const project = dts.metadata.project;
     if (dts.spec.default) {
@@ -97,11 +97,17 @@ class Cache {
     this.datasources.set(this.generateKey({ kind: kind, name: dts.metadata.name }, project), dts);
   }
 
-  setUndefinedDatasource(project: string, selector: DatasourceSelector) {
+  setUndefinedDatasource(project: string, selector: DatasourceSelector): void {
     this.emptyDatasources.set(this.generateKey(selector, project), true);
   }
 
-  getDatasource(project: string, selector: DatasourceSelector) {
+  getDatasource(
+    project: string,
+    selector: DatasourceSelector
+  ): {
+    resource: DatasourceResource | undefined;
+    keyExist: boolean;
+  } {
     const key = this.generateKey(selector, project);
     const resource = this.datasources.get(this.generateKey(selector, project));
     let keyExists = true;
@@ -111,13 +117,13 @@ class Cache {
     return { resource: resource, keyExist: keyExists };
   }
 
-  setGlobalDatasources(list: GlobalDatasourceResource[]) {
+  setGlobalDatasources(list: GlobalDatasourceResource[]): void {
     for (const dts of list) {
       this.setGlobalDatasource(dts);
     }
   }
 
-  setGlobalDatasource(dts: GlobalDatasourceResource) {
+  setGlobalDatasource(dts: GlobalDatasourceResource): void {
     const kind = dts.spec.plugin.kind;
     if (dts.spec.default) {
       // in case it's the default datasource for the given kind, we store it twice
@@ -127,11 +133,14 @@ class Cache {
     this.globalDatasources.set(this.generateKey({ kind: kind, name: dts.metadata.name }), dts);
   }
 
-  setUndefinedGlobalDatasource(selector: DatasourceSelector) {
+  setUndefinedGlobalDatasource(selector: DatasourceSelector): void {
     this.emptyDatasources.set(this.generateKey(selector), true);
   }
 
-  getGlobalDatasource(selector: DatasourceSelector) {
+  getGlobalDatasource(selector: DatasourceSelector): {
+    resource: GlobalDatasourceResource | undefined;
+    keyExist: boolean;
+  } {
     const key = this.generateKey(selector);
     const resource = this.globalDatasources.get(this.generateKey(selector));
     let keyExists = true;

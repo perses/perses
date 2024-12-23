@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps, Stack } from '@mui/material';
-import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
@@ -63,7 +63,7 @@ interface TabButtonProps extends CRUDButtonProps {
   index: string;
 }
 
-function TabButton({ index, ...props }: TabButtonProps) {
+function TabButton({ index, ...props }: TabButtonProps): ReactElement {
   const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalRoleMutation = useCreateGlobalRoleMutation();
   const createGlobalRoleBindingMutation = useCreateGlobalRoleBindingMutation();
@@ -348,7 +348,7 @@ interface TabPanelProps extends BoxProps {
   value: string;
 }
 
-function TabPanel({ children, value, index, ...props }: TabPanelProps) {
+function TabPanel({ children, value, index, ...props }: TabPanelProps): ReactElement {
   return (
     <Box
       role="tabpanel"
@@ -362,7 +362,7 @@ function TabPanel({ children, value, index, ...props }: TabPanelProps) {
   );
 }
 
-function a11yProps(index: string) {
+function a11yProps(index: string): Record<string, unknown> {
   return {
     id: `admin-tab-${index}`,
     'aria-controls': `admin-tabpanel-${index}`,
@@ -373,7 +373,7 @@ interface AdminTabsProps {
   initialTab?: string;
 }
 
-export function AdminTabs(props: AdminTabsProps) {
+export function AdminTabs(props: AdminTabsProps): ReactElement {
   const { initialTab } = props;
   const isAuthEnabled = useIsAuthEnabled();
 
@@ -389,7 +389,7 @@ export function AdminTabs(props: AdminTabsProps) {
   const hasGlobalVariableReadPermission = useHasPermission('read', GlobalProject, 'GlobalVariable');
   const hasUserReadPermission = useHasPermission('read', GlobalProject, 'User');
 
-  const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
+  const handleChange = (event: SyntheticEvent, newTabIndex: string): void => {
     setValue(newTabIndex);
     navigate(`/admin/${newTabIndex}`);
   };

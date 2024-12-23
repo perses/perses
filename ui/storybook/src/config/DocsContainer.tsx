@@ -14,6 +14,7 @@
 import { DocsContainer as BaseContainer } from '@storybook/addon-docs';
 import { useDarkMode } from 'storybook-dark-mode';
 import { themes } from '@storybook/theming';
+import { ReactElement } from 'react';
 
 // Doing this instead of using the exported `DocsContainerProps` because it is
 // missing the `children` property (they modify it to add `children` when
@@ -23,7 +24,7 @@ type DocsContainerProps = React.ComponentProps<typeof BaseContainer>;
 // Solution for having dark mode on docs page combo of the following:
 // https://github.com/hipstersmoothie/storybook-dark-mode/issues/127#issuecomment-1070524402
 // https://github.com/hipstersmoothie/storybook-dark-mode/issues/205
-export const DocsContainer = ({ children, context }: DocsContainerProps) => {
+export const DocsContainer = ({ children, context }: DocsContainerProps): ReactElement => {
   const isDarkMode = useDarkMode();
 
   return (

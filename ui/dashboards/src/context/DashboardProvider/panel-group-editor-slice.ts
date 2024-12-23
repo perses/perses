@@ -57,7 +57,7 @@ export const createPanelGroupEditorSlice: StateCreator<
 > = (set, get) => ({
   panelGroupEditor: undefined,
 
-  openAddPanelGroup: () => {
+  openAddPanelGroup: (): void => {
     // Create the editor state
     const editor: PanelGroupEditor = {
       mode: 'Add',
@@ -86,7 +86,7 @@ export const createPanelGroupEditorSlice: StateCreator<
     });
   },
 
-  openEditPanelGroup: (panelGroupId) => {
+  openEditPanelGroup: (panelGroupId): void => {
     const existingGroup = get().panelGroups[panelGroupId];
     if (existingGroup === undefined) {
       throw new Error(`Panel group with Id ${panelGroupId} does not exist`);

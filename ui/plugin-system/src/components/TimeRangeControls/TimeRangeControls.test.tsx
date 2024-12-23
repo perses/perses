@@ -14,11 +14,11 @@
 import { generatePath } from 'react-router';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
-import { screen, act, RenderOptions, render } from '@testing-library/react';
+import { screen, act, RenderOptions, render, RenderResult } from '@testing-library/react';
 import { DurationString } from '@perses-dev/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QueryParamProvider } from 'use-query-params';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
 import { SnackbarProvider } from '@perses-dev/components';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
@@ -38,7 +38,7 @@ interface CustomRouterProps {
  * Workaround for React router upgrade type errors.
  * More details: https://stackoverflow.com/a/69948457/17575201
  */
-const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }) => {
+const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }): ReactElement => {
   const [state, setState] = useState({
     action: history.action,
     location: history.location,
@@ -60,13 +60,13 @@ export function renderWithContext(
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
   history?: MemoryHistory
-) {
+): RenderResult {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
   const customHistory = history ?? createMemoryHistory();
 
-  const BaseRender = () => (
+  const BaseRender = (): ReactElement => (
     <CustomRouter history={customHistory}>
       <QueryClientProvider client={queryClient}>
         <QueryParamProvider adapter={ReactRouter6Adapter}>
@@ -83,7 +83,7 @@ describe('TimeRangeControls', () => {
   const testDefaultTimeRange = { pastDuration: '30m' as DurationString };
   const testDefaultRefreshInterval = '0s';
 
-  const renderTimeRangeControls = (testURLParams: boolean) => {
+  const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
       <>
         {testURLParams ? (

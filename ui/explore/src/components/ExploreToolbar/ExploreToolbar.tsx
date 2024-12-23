@@ -13,13 +13,13 @@
 
 import { Stack, Box, useTheme, useMediaQuery } from '@mui/material';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 export interface ExploreToolbarProps {
   exploreTitleComponent?: React.ReactNode;
 }
 
-export const ExploreToolbar = (props: ExploreToolbarProps) => {
+export const ExploreToolbar = (props: ExploreToolbarProps): ReactElement => {
   const { exploreTitleComponent } = props;
 
   const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));

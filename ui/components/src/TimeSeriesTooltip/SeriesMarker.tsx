@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
+import { ReactElement } from 'react';
 import { combineSx } from '../utils';
 
 interface SeriesMarkerProps extends BoxProps<'div'> {
   markerColor: string;
 }
 
-export function SeriesMarker(props: SeriesMarkerProps) {
+export function SeriesMarker(props: SeriesMarkerProps): ReactElement {
   const { markerColor, sx } = props;
   return (
     <Box

@@ -14,7 +14,7 @@
 import { Action, UserResource } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -41,7 +41,7 @@ import { UserDrawer } from './UserDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
+export function UserList(props: ListPropertiesWithCallbacks<UserResource>): ReactElement {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -93,7 +93,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       const user = findUser(name);
       setTargetedUser(user);
       setAction('create');
@@ -103,7 +103,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       const user = findUser(name);
       setTargetedUser(user);
       setAction('update');
@@ -113,7 +113,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       setTargetedUser(findUser(name));
       setDeleteUserDialogOpened(true);
     },
@@ -146,7 +146,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
@@ -194,9 +194,10 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
         <>
           <UserDrawer
             user={targetedUser}
-            isOpen={isUserDrawerOpened}
             action={action}
+            isOpen={isUserDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleUserSave}
             onDelete={(v) => onDelete(v).then(() => setUserDrawerOpened(false))}
             onClose={() => setUserDrawerOpened(false)}
