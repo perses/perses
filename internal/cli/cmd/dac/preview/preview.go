@@ -14,8 +14,10 @@
 package preview
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -28,6 +30,7 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
@@ -38,6 +41,7 @@ type previewResponse struct {
 	Project   string `json:"project" yaml:"project"`
 	Dashboard string `json:"dashboard" yaml:"dashboard"`
 	Preview   string `json:"preview" yaml:"preview"`
+	Current   string `json:"current,omitempty" yaml:"current,omitempty"`
 }
 
 func newEphemeralDashboard(project string, name string, ttl common.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
@@ -146,13 +150,32 @@ func (o *option) computeEphemeralDashboardName(dashboardName string) string {
 }
 
 func (o *option) buildPreviewResponse(dashboard *modelV1.Dashboard, tmpDashboard *modelV1.EphemeralDashboard) previewResponse {
+	project := tmpDashboard.Metadata.Project
+	name := dashboard.Metadata.Name
+
 	finalURL := &url.URL{}
 	*finalURL = *o.apiClient.RESTClient().BaseURL
-	finalURL.Path = fmt.Sprintf("/%s/%s/%s/%s", utils.PathProject, tmpDashboard.Metadata.Project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
+	finalURL.Path = fmt.Sprintf("/%s/%s/%s/%s", utils.PathProject, project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
+
+	// Check if the dashboard already exists to provide the "current" URL
+	currentURL := &url.URL{}
+	_, err := o.apiClient.V1().Dashboard(project).Get(name)
+	if err != nil {
+		var reqErr *perseshttp.RequestError
+		if errors.As(err, &reqErr) && reqErr.StatusCode == http.StatusNotFound {
+			logrus.Infof("No dashboard %s found in project %s, no current link to provide", name, project)
+		}
+	} else {
+		*currentURL = *o.apiClient.RESTClient().BaseURL
+		currentURL.Path = fmt.Sprintf("/%s/%s/%s/%s", utils.PathProject, project, utils.PathDashboard, name)
+	}
+
 	return previewResponse{
-		Dashboard: dashboard.Metadata.Name,
-		Project:   tmpDashboard.Metadata.Project,
-		Preview:   finalURL.String()}
+		Dashboard: name,
+		Project:   project,
+		Preview:   finalURL.String(),
+		Current:   currentURL.String(),
+	}
 }
 
 func (o *option) SetWriter(writer io.Writer) {
