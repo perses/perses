@@ -33,7 +33,7 @@ type OAuthProvider struct {
 type UserSpec struct {
 	FirstName      string          `json:"firstName,omitempty" yaml:"firstName,omitempty"`
 	LastName       string          `json:"lastName,omitempty" yaml:"lastName,omitempty"`
-	NativeProvider NativeProvider  `json:"nativeProvider,omitempty" yaml:"nativeProvider,omitempty"`
+	NativeProvider *NativeProvider `json:"nativeProvider,omitempty" yaml:"nativeProvider,omitempty"`
 	OauthProviders []OAuthProvider `json:"oauthProviders,omitempty" yaml:"oauthProviders,omitempty"`
 }
 
@@ -71,6 +71,9 @@ func (u *User) UnmarshalJSON(data []byte) error {
 func (u *User) validate() error {
 	if u.Kind != KindUser {
 		return fmt.Errorf("invalid kind: '%s' for a User type", u.Kind)
+	}
+	if u.Spec.NativeProvider != nil && len(u.Spec.OauthProviders) > 0 {
+		return fmt.Errorf("user with multiple provider cannot be accepted")
 	}
 	return nil
 }
