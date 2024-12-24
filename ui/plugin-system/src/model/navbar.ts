@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module dac
+import { UnknownSpec } from '@perses-dev/core';
+import { Plugin } from './plugin-base';
 
-go 1.23.0
-
-toolchain go1.23.4
-
-replace github.com/perses/perses => ../../../../../../../ // Use current version
-
-require github.com/perses/perses v0.43.0
+/**
+ * Plugin for handling custom extensions in the top navigation bar like a new icon button.
+ * It can also be used to place some fixed component on the screen like a chatbot, why not?
+ */
+export interface NavBarPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
+  Component: React.ComponentType;
+}

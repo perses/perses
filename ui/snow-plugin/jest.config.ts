@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module dac
+import type { Config } from '@jest/types';
+import shared from '../jest.shared';
 
-go 1.23.0
+const jestConfig: Config.InitialOptions = {
+  ...shared,
 
-toolchain go1.23.4
+  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
+};
 
-replace github.com/perses/perses => ../../../../../../../ // Use current version
-
-require github.com/perses/perses v0.43.0
+export default jestConfig;

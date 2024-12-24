@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module dac
+import { SnowNavbar } from './plugins/snow-navbar';
 
-go 1.23.0
-
-toolchain go1.23.4
-
-replace github.com/perses/perses => ../../../../../../../ // Use current version
-
-require github.com/perses/perses v0.43.0
+// Export plugins under the same name as the kinds they handle from the plugin.json
+export { SnowNavbar };
