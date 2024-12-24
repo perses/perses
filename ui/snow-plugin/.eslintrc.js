@@ -11,12 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module dac
-
-go 1.23.0
-
-toolchain go1.23.4
-
-replace github.com/perses/perses => ../../../../../../../ // Use current version
-
-require github.com/perses/perses v0.43.0
+module.exports = require('../.eslintrc.base.js');

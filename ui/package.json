@@ -36,7 +36,8 @@
     "plugin-system",
     "prometheus-plugin",
     "storybook",
-    "tempo-plugin"
+    "tempo-plugin",
+    "snow-plugin"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.62",
