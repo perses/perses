@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import { VariablePlugin } from './variables';
 import { DatasourcePlugin } from './datasource';
 import { Plugin } from './plugin-base';
 import { TraceQueryPlugin } from './trace-queries';
+import { NavBarPlugin } from './navbar';
 
 /**
  * Information about a module/package that contains plugins.
@@ -63,6 +64,7 @@ export interface SupportedPlugins {
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;
   Datasource: DatasourcePlugin;
+  Navbar: NavBarPlugin;
 }
 
 /**

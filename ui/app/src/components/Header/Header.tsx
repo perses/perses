@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import Cog from 'mdi-material-ui/Cog';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Compass from 'mdi-material-ui/Compass';
 import React from 'react';
+import { useListPluginMetadata, usePlugins } from '@perses-dev/plugin-system';
 import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { AdminRoute, ConfigRoute } from '../../model/route';
 import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
@@ -42,6 +43,10 @@ export default function Header(): JSX.Element {
     'GlobalVariable',
     'User',
   ]);
+
+  // Collect all the available plugins of type "NavBar"
+  const { data: navBarPluginsMetadata } = useListPluginMetadata(['Navbar']);
+  const navbarPlugins = usePlugins('Navbar', navBarPluginsMetadata ?? []);
 
   return (
     <AppBar position="relative">
@@ -128,6 +133,8 @@ export default function Header(): JSX.Element {
             justifyContent: 'end',
           }}
         >
+          {navbarPlugins.map((plugin, i) => plugin.data && <plugin.data.Component key={`${i}`} />)}
+
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>

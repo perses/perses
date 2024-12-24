@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,11 +15,13 @@ import { Box } from '@mui/material';
 
 import { useLocation } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
 import { AuthorizationProvider } from './context/Authorization';
+import { bundledPluginLoader } from './model/bundled-plugins';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -37,8 +39,9 @@ function App(): ReactElement {
           backgroundColor: ({ palette }) => palette.background.default,
         }}
       >
-        {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
+          {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+        </PluginRegistry>
         <Box
           sx={{
             flex: 1,

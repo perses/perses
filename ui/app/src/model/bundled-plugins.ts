@@ -13,6 +13,7 @@
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
 import tempoResource from '@perses-dev/tempo-plugin/plugin.json';
+import snowResource from '@perses-dev/snow-plugin/plugin.json';
 
 import { PluginLoader, PluginModuleResource, dynamicImportPluginLoader } from '@perses-dev/plugin-system';
 
@@ -31,5 +32,9 @@ export const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: tempoResource as PluginModuleResource,
     importPlugin: () => import('@perses-dev/tempo-plugin'),
+  },
+  {
+    resource: snowResource as PluginModuleResource,
+    importPlugin: () => import('@perses-dev/snow-plugin'),
   },
 ]);
