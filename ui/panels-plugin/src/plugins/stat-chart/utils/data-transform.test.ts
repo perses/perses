@@ -15,7 +15,8 @@ import { testChartsTheme } from '@perses-dev/components';
 import { ThresholdOptions } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts';
 import { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
-import { convertSparkline, getStatChartColor } from './data-transform';
+import { convertSparkline } from './data-transform';
+import { getStatChartColor } from './get-color';
 
 const thresholds: ThresholdOptions = {
   steps: [
