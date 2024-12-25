@@ -12,9 +12,23 @@
 // limitations under the License.
 
 package migrate
+import (
+	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
+)
+import "list"
 
 #grafanaType: "status-history"
 #panel:       _
+
+#mapping: {
+    type: string
+    options: [...{
+        key: string
+        value: string
+        text: string
+        color: string
+    }]
+}
 
 kind: "StatusHistoryChart"
 spec: {
@@ -41,7 +55,7 @@ spec: {
 										value: option.text
 									}
 									if option.color != _|_ {
-										color: *#mapping.color[option.color] | option.color
+										color: *commonMigrate.#mapping.color[option.color] | option.color
 									}
 								}
 							}
@@ -54,7 +68,7 @@ spec: {
 					#result: {
 						value: *mapping.options.result.text | ""
 						if mapping.options.result.color != _|_ {
-							color: *#mapping.color[mapping.options.result.color] | mapping.options.result.color
+							color: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
 						}
 					}
 					[//switch
