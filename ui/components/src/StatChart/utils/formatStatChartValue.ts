@@ -13,7 +13,7 @@
 
 import { FormatOptions, formatValue } from '@perses-dev/core';
 
-export const formatStatChartValue = (value?: string | number | null, format?: FormatOptions) => {
+export const formatStatChartValue = (value?: string | number | null, format?: FormatOptions): string => {
   if (value === null) {
     return 'null';
   } else if (typeof value === 'number') {

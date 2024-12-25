@@ -13,7 +13,7 @@
 
 import { Button, Divider, Stack, Typography, Grid2 as Grid } from '@mui/material';
 
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { ValueMapping } from '@perses-dev/core';
 import { ValueMappingEditor } from './ValueMappingEditor';
@@ -23,7 +23,7 @@ export interface ValueMappingsEditorProps {
   onChange: (valueMappings: ValueMapping[]) => void;
 }
 
-export function ValueMappingsEditor({ mappings, onChange }: ValueMappingsEditorProps) {
+export const ValueMappingsEditor: FC<ValueMappingsEditorProps> = ({ mappings, onChange }) => {
   const [valueMappings, setValueMappings] = useState<ValueMapping[]>(mappings);
 
   function handleValueMappingChange(index: number, mapping: ValueMapping): void {
@@ -77,4 +77,4 @@ export function ValueMappingsEditor({ mappings, onChange }: ValueMappingsEditorP
       </Button>
     </Stack>
   );
-}
+};

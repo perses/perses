@@ -13,7 +13,10 @@
 
 import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeries } from '@perses-dev/core';
 
-export const calculateValue = (calculation: CalculationType, seriesData: TimeSeries) => {
+export const calculateValue = (
+  calculation: CalculationType,
+  seriesData: TimeSeries
+): ReturnType<(typeof CalculationsMap)[CalculationType]> => {
   if (CalculationsMap[calculation] === undefined) {
     console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
   }

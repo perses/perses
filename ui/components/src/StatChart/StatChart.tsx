@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { FormatOptions } from '@perses-dev/core';
 import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
@@ -49,7 +49,7 @@ export interface StatChartProps {
   valueFontSize?: FontSizeOption;
 }
 
-export function StatChart(props: StatChartProps) {
+export const StatChart: FC<StatChartProps> = (props) => {
   const { width, height, data, sparkline, showSeriesName, format, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
   const color = data.color;
@@ -178,7 +178,7 @@ export function StatChart(props: StatChartProps) {
       )}
     </Box>
   );
-}
+};
 
 const SeriesName = styled(Typography, {
   shouldForwardProp: (prop) => prop !== 'padding' && prop !== 'fontSize',

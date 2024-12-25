@@ -21,7 +21,7 @@ import {
   PersesChartsTheme,
 } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
-import { useMemo } from 'react';
+import { FC, useMemo } from 'react';
 import { applyValueMapping, TimeSeriesData, ValueMapping } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
@@ -34,7 +34,7 @@ const SPACING = 2;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
-export function StatChartPanel(props: StatChartPanelProps) {
+export const StatChartPanel: FC<StatChartPanelProps> = (props) => {
   const { spec, contentDimensions } = props;
 
   const { format, sparkline, valueFontSize: valueFontSize } = spec;
@@ -95,7 +95,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
       )}
     </Stack>
   );
-}
+};
 
 const useStatChartData = (
   queryResults: UseDataQueryResults<TimeSeriesData>['queryResults'],

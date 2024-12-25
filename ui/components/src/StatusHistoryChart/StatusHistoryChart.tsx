@@ -25,6 +25,7 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
 import { EChartsCoreOption } from 'echarts';
+import { FC } from 'react';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { EChart } from '../EChart';
@@ -63,7 +64,7 @@ export interface StatusHistoryChartProps {
   colors?: Array<{ value: number | string; color: string }>;
 }
 
-export function StatusHistoryChart(props: StatusHistoryChartProps) {
+export const StatusHistoryChart: FC<StatusHistoryChartProps> = (props) => {
   const { height, data, xAxisCategories, yAxisCategories, timeScale, colors } = props;
   const { timeZone } = useTimeZone();
   const chartsTheme = useChartsTheme();
@@ -158,4 +159,4 @@ export function StatusHistoryChart(props: StatusHistoryChartProps) {
       />
     </Box>
   );
-}
+};

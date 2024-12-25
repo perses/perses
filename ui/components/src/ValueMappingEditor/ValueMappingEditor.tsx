@@ -25,6 +25,7 @@ import {
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ValueMapping } from '@perses-dev/core';
+import { FC } from 'react';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 
 interface ValueMappingConditionEditorProps extends Omit<StackProps, 'onChange'> {
@@ -32,7 +33,7 @@ interface ValueMappingConditionEditorProps extends Omit<StackProps, 'onChange'> 
   onChange: (condition: ValueMapping) => void;
 }
 
-function ConditionEditor({ mapping, onChange, ...props }: ValueMappingConditionEditorProps) {
+const ConditionEditor: FC<ValueMappingConditionEditorProps> = ({ mapping, onChange, ...props }) => {
   switch (mapping.kind) {
     case 'Value':
       return (
@@ -146,15 +147,15 @@ function ConditionEditor({ mapping, onChange, ...props }: ValueMappingConditionE
     default:
       return null;
   }
-}
+};
 export interface ValueMappingEditorProps extends Omit<GridProps, 'onChange'> {
   mapping: ValueMapping;
   onChange: (mapping: ValueMapping) => void;
   onDelete: () => void;
 }
 
-export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: ValueMappingEditorProps) {
-  const handleColorChange = (color?: string) => {
+export const ValueMappingEditor: FC<ValueMappingEditorProps> = ({ mapping, onChange, onDelete, ...props }) => {
+  const handleColorChange = (color?: string): void => {
     onChange({
       ...mapping,
       spec: {
@@ -260,4 +261,4 @@ export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: Va
       </Grid>
     </Grid>
   );
-}
+};

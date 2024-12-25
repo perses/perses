@@ -14,14 +14,15 @@
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ValueMapping } from '@perses-dev/core';
 import { ValueMappingsEditor } from '@perses-dev/components';
+import { FC } from 'react';
 import { StatusHistoryChartOptions } from './status-history-model';
 
 export type StatusHistoryValueMappingEditorProps = OptionsEditorProps<StatusHistoryChartOptions>;
 
-export function StatusHistoryValueMappingEditor({ onChange, value }: StatusHistoryValueMappingEditorProps) {
+export const StatusHistoryValueMappingEditor: FC<StatusHistoryValueMappingEditorProps> = ({ onChange, value }) => {
   function handleValueMappingChange(mappings: ValueMapping[]): void {
     onChange({ ...value, mappings });
   }
 
   return <ValueMappingsEditor mappings={value.mappings ?? []} onChange={handleValueMappingChange} />;
-}
+};

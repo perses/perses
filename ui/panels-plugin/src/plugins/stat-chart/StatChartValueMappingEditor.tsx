@@ -15,13 +15,14 @@ import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ValueMapping } from '@perses-dev/core';
 import { ValueMappingsEditor } from '@perses-dev/components';
 import { StatChartOptions } from '@perses-dev/panels-plugin';
+import { FC } from 'react';
 
 export type StatChartValueMappingEditorProps = OptionsEditorProps<StatChartOptions>;
 
-export function StatChartValueMappingEditor({ onChange, value }: StatChartValueMappingEditorProps) {
+export const StatChartValueMappingEditor: FC<StatChartValueMappingEditorProps> = ({ onChange, value }) => {
   function handleValueMappingChange(mappings: ValueMapping[]): void {
     onChange({ ...value, mappings });
   }
 
   return <ValueMappingsEditor mappings={value.mappings ?? []} onChange={handleValueMappingChange} />;
-}
+};
