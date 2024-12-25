@@ -35,7 +35,7 @@ const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
   color: string;
-  calculatedValue?: string | number | null | undefined;
+  calculatedValue?: string | number | null;
   seriesData?: GraphSeries;
 }
 
