@@ -147,7 +147,7 @@ export function StatusHistoryChart(props: StatusHistoryChartProps) {
   };
 
   return (
-    <Box sx={{ height: height, overflow: 'auto' }}>
+    <Box style={{ height: height }} sx={{ overflow: 'auto' }}>
       <EChart
         sx={{
           width: '100%',
