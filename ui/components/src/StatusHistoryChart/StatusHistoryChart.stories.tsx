@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { ReactElement } from 'react';
 import { StatusHistoryChart, StatusHistoryChartProps, StatusHistoryDataItem } from './StatusHistoryChart';
 
 const DEFAULT_DATA: StatusHistoryDataItem[] = [
