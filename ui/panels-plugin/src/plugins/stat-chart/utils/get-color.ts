@@ -55,7 +55,7 @@ function getColorFromThresholds(
   if (thresholds?.steps && typeof value === 'number') {
     const matchingColors = thresholds.steps
       .map((step, index) => {
-        if (value > step.value) {
+        if (value >= step.value) {
           return step.color ?? chartsTheme.thresholds.palette[index] ?? defaultColor;
         }
         return null;
