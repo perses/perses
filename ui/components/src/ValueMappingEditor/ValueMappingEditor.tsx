@@ -11,8 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GridProps, IconButton, MenuItem, Stack, StackProps, TextField, Tooltip, Typography } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import {
+  Grid2Props as GridProps,
+  IconButton,
+  MenuItem,
+  Stack,
+  StackProps,
+  TextField,
+  Tooltip,
+  Typography,
+  Grid2 as Grid,
+} from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { ValueMapping } from '@perses-dev/core';
@@ -159,7 +168,7 @@ export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: Va
   };
   return (
     <Grid container spacing={2} {...props}>
-      <Grid xs={5}>
+      <Grid size={{ xs: 5 }}>
         <Stack direction="row" gap={1} width="100%">
           <TextField
             select
@@ -207,7 +216,7 @@ export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: Va
           />
         </Stack>
       </Grid>
-      <Grid xs={4}>
+      <Grid size={{ xs: 4 }}>
         <TextField
           label="Display text"
           value={mapping.spec?.result?.value ?? ''}
@@ -226,7 +235,7 @@ export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: Va
           fullWidth
         />
       </Grid>
-      <Grid xs={1}>
+      <Grid size={{ xs: 1 }}>
         <Stack direction="row" justifyContent="center" gap={1}>
           {mapping.spec?.result?.color ? (
             <OptionsColorPicker
@@ -242,7 +251,7 @@ export function ValueMappingEditor({ mapping, onChange, onDelete, ...props }: Va
           )}
         </Stack>
       </Grid>
-      <Grid xs={1} textAlign="end">
+      <Grid size={{ xs: 1 }} textAlign="end">
         <Tooltip title="Remove mapping settings" placement="top">
           <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
             <DeleteIcon />
