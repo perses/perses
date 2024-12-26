@@ -49,7 +49,7 @@ describe('applyValueMapping', () => {
     expect(result).toEqual({ value: 'in range', color: 'blue' });
   });
 
-  it('should map value based on Regex mapping', () => {
+  it('should map value based on Regex exact match mapping', () => {
     const mappings: ValueMapping[] = [
       {
         kind: 'Regex',
@@ -61,6 +61,20 @@ describe('applyValueMapping', () => {
     ];
     const result = applyValueMapping('test123', mappings);
     expect(result).toEqual({ value: 'regex match', color: 'green' });
+  });
+
+  it('should map value based on Regex with groups mapping', () => {
+    const mappings: ValueMapping[] = [
+      {
+        kind: 'Regex',
+        spec: {
+          pattern: '(.+)0+(.+)0+(.+)',
+          result: { value: '$1.$2.$3', color: 'green' },
+        },
+      },
+    ];
+    const result = applyValueMapping('30300', mappings);
+    expect(result).toEqual({ value: '3.3.0', color: 'green' });
   });
 
   it('should map value based on Misc mapping', () => {

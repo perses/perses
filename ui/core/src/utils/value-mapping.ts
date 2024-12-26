@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MappedValue, ValueMapping } from '../model';
+import { createRegexFromString } from './regexp';
 
 export function applyValueMapping(value: number | string, mappings: ValueMapping[] = []): MappedValue {
   if (!mappings.length) {
@@ -42,10 +43,19 @@ export function applyValueMapping(value: number | string, mappings: ValueMapping
       }
       case 'Regex': {
         const regexOptions = mapping.spec;
-        const regex = new RegExp(regexOptions.pattern);
-        if (regex.test(value.toString())) {
-          mappedItem.value = regexOptions.result.value;
-          mappedItem.color = regexOptions.result.color;
+        const stringValue = value.toString();
+
+        if (!regexOptions.pattern) {
+          break;
+        }
+
+        const regex = createRegexFromString(regexOptions.pattern);
+
+        if (stringValue.match(regex)) {
+          if (regexOptions.result.value !== null) {
+            mappedItem.value = stringValue.replace(regex, regexOptions.result.value.toString() || '');
+            mappedItem.color = regexOptions.result.color;
+          }
         }
         break;
       }
