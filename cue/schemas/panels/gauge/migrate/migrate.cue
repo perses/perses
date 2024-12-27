@@ -24,14 +24,18 @@ kind:         "GaugeChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 
-	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | "decimal"
-	{
+	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
+	if #unit != null {
 		format: unit: #unit
 	}
-
-	#decimal: *#panel.fieldConfig.defaults.decimal | *#panel.fieldConfig.defaults.decimals | null
+	#decimal: *#panel.fieldConfig.defaults.decimal | null
 	if #decimal != null {
-		format: decimalPlaces: #decimal
+		format: {
+			decimalPlaces: #decimal
+			if #unit == null {
+				unit: "decimal"
+			}
+		}
 	}
 
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
