@@ -22,7 +22,7 @@ import {
 } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { FC, useMemo } from 'react';
-import { applyValueMapping, Labels, TimeSeriesData, ValueMapping } from '@perses-dev/core';
+import { applyValueMapping, Labels, createRegexFromString, TimeSeriesData, ValueMapping } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline } from './utils/data-transform';
@@ -113,7 +113,10 @@ const useStatChartData = (
       for (const seriesData of result.data.series) {
         const calculatedValue = calculateValue(calculation, seriesData);
 
+        // get label metric value
         const labelValue = getLabelValue(metricLabel, seriesData.labels);
+
+        // get actual value to display
         const displayValue = getValueOrLabel(calculatedValue, mappings, labelValue);
 
         const color = getStatChartColor(chartsTheme, spec, calculatedValue);
@@ -150,7 +153,8 @@ const getLabelValue = (fieldLabel?: string, labels?: Labels): string | undefined
     return undefined;
   }
   for (const [key, value] of Object.entries(labels)) {
-    if (fieldLabel.toLowerCase() === key.toLowerCase()) {
+    const regex = createRegexFromString(fieldLabel);
+    if (regex.test(key)) {
       return value;
     }
   }

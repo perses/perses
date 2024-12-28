@@ -13,14 +13,15 @@
 
 import { TextField } from '@mui/material';
 import { OptionsEditorControl } from '@perses-dev/components';
+import { FC } from 'react';
 
 export interface MetricLabelInputProps {
   value?: string;
   onChange: (metricLabel?: string) => void;
 }
 
-export function MetricLabelInput({ value, onChange }: MetricLabelInputProps) {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+export const MetricLabelInput: FC<MetricLabelInputProps> = ({ value, onChange }) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const newValue = event.target.value;
     onChange(newValue || undefined);
   };
@@ -32,4 +33,4 @@ export function MetricLabelInput({ value, onChange }: MetricLabelInputProps) {
       control={<TextField fullWidth name="Metric label" value={value || ''} onChange={handleChange} />}
     />
   );
-}
+};

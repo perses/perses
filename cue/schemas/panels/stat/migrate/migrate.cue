@@ -17,7 +17,6 @@ import (
 	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
 )
 import "list"
-import "strings"
 
 #grafanaType: "stat"
 #panel:       _
@@ -35,8 +34,9 @@ import "strings"
 kind: "StatChart"
 spec: {
 	calculation: *commonMigrate.#mapping.calc[#panel.options.reduceOptions.calcs[0]] | commonMigrate.#defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
-	if (*#panel.options.reduceOptions.fields | _|_) != _|_ {
-		metricLabel: strings.Replace(strings.Replace(#panel.options.reduceOptions.fields, "/^", "", 1), "$/", "", 1)
+    #metricLabel: *#panel.options.reduceOptions.fields | null
+	if #metricLabel != null {
+		metricLabel: #metricLabel
 	}
 	#unit: *commonMigrate.#mapping.unit[#panel.fieldConfig.defaults.unit] | null
 	if #unit != null {
