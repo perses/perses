@@ -32,6 +32,7 @@ Available Commands:
   lint        Static check of the resources
   login       Log in to the Perses API
   migrate     migrate a Grafana dashboard to the Perses format
+  plugin      Commands related to plugins development
   project     Select the project used by default.
   refresh     refresh the access token when it expires
   version     Display client version.
@@ -272,9 +273,9 @@ has two modes:
 
 1. An online mode that requires an active connection to a remote Perses server that holds the translation logic.
 2. An offline mode that requires three different folders:
-    - charts folders
-    - queries folders
-    - variables folders
+   - charts folders
+   - queries folders
+   - variables folders
 
 Each of the above folders should contain a file named `migrate.cue`, that holds the logic of the migration for each
 plugin. For more information about these files, please read the documentation about [CUE in Perses](../plugins/cue.md).

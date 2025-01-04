@@ -17,4 +17,4 @@ provisioning:
 ```
 
 You can add any folder you would like. Perses will ignore any files not managed and will loop recursively through any
-subfolders contained in the folders configured.
+sub-folders contained in the folders configured.

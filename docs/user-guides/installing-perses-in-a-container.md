@@ -11,19 +11,36 @@ Start the Perses container image using one of the following commands depending o
 ```shell
 # podman command.
 #
-$ podman run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
+$ podman run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses
 ```
 
 ```shell
 # docker command.
 #
-$ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
+$ docker run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses
 ```
 
-The details in this command are that we give the container a referencable name (--name perses), detach the container
-from the command line (-d), map the local machine port 8080 to the container port 8080 (-p 127.0.0.1:8080:8080), and use
-the image version supported in these instructions (latest). Note: you can use any local port you have available, but you
-need to map to container port 8080.
+The details in this command are that we give the container a referencable name (--name perses), automatically remove
+the container when it stops (--rm), map the local machine port 8080 to the container port 8080 (-p 127.0.0.1:8080:8080),
+and use the image version supported in these instructions (latest). Note: you can use any local port you have available,
+but you need to map to container port 8080.
+
+The resulting console output should be something like:
+
+```shell
+time="2025-01-04T11:40:04Z" level=warning msg="encryption_key is not provided and therefore it will use a default one. For production instance you should provide the key."
+ ___________
+\___________/
+     ___________      ______
+    \___________/     | ___ \
+ ___________          | |_/ /__ _ __ ___  ___  ___
+\___________/         |  __/ _ \ '__/ __|/ _ \/ __|
+ ___                  | | |  __/ |  \__ \  __/\__ \
+\___/                 \_|  \___|_|  |___/\___||___/  [PERSES_VERSION]
+__________________________________________________________
+
+⇨ http server started on [::]:8080
+```
 
 ### Tags
 
@@ -40,11 +57,11 @@ We are publishing a set of tags to match different requirements when running Per
 
 Examples:
 
-- images built from the main branch: `persesdev/perses:main-2023-12-14-f66e10ce-distroless-debug`
-  or `persesdev/perses:main-2023-12-14-f66e10ce-distroless`
+- images built from the main branch: `persesdev/perses:main-2023-12-23-a2223483-distroless-debug`
+  or `persesdev/perses:main-2023-12-23-a2223483-distroless`
 - latest Perses image: `persesdev/perses` or `persesdev/perses:latest-debug`
-- precise release image: `persesdev/perses:v0.42.1`, `persesdev/perses:v0.42.1-debug`, `persesdev/perses:v0.42.1-distroless`, `persesdev/perses:v0.42.1-distroless-debug`
-- minor release image: `persesdev/perses:v0.42`, `persesdev/perses:v0.42-debug`, `persesdev/perses:v0.42-distroless`, `persesdev/perses:v0.42-distroless-debug`
+- precise release image: `persesdev/perses:v0.50.0`, `persesdev/perses:v0.50.0-debug`, `persesdev/perses:v0.50.0-distroless`, `persesdev/perses:v0.50.0-distroless-debug`
+- minor release image: `persesdev/perses:v0.50`, `persesdev/perses:v0.50-debug`, `persesdev/perses:v0.50-distroless`, `persesdev/perses:v0.50-distroless-debug`
 
 ## Connect a browser (default)
 
@@ -55,4 +72,4 @@ For fun, you can optionally flip the switch in the top right corner to enable da
 
 ## What's next?
 
-In the next section, you start exploring Perses and the available tooling.
+Explore the online [Perses documentation](https://perses.dev/)
