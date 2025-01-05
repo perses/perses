@@ -28,13 +28,18 @@ cd perses
 make build
 
 ...
-... LOTS OF BUILD LOG LINES HERE ...
-...
+Tasks:    18 successful, 18 total
+Cached:    0 cached, 18 total
+  Time:    36.594s
+
+>> compressing assets
+scripts/compress_assets.sh
+GOARCH=arm64 GOOS=darwin go generate ./internal/api
+>> build the perses api
+CGO_ENABLED=0 GOARCH=arm64 GOOS=darwin go build -ldflags "-s -w -X github.com/prometheus/common/version.Version=[VERSION] -X github.com/prometheus/common/version.Revision=30eaafd7658bfa95a40610e81c64fd3d8d1285a7 -X github.com/prometheus/common/version.BuildDate=2025-01-04 -X github.com/prometheus/common/version.Branch=main" -o ./bin/perses ./cmd/perses
 >> build the perses cli
-CGO_ENABLED=0 GOARCH=arm64 GOOS=darwin go build -ldflags "-s -w -X github.com/prometheus/common/version.Version=0.42.1 
--X github.com/prometheus/common/version.Revision=20a69c0d8e063bcb193f9f209d4d571c1bbadde2 
--X github.com/prometheus/common/version.BuildDate=2024-01-02 
--X github.com/prometheus/common/version.Branch=main" -o ./bin/percli ./cmd/percli
+CGO_ENABLED=0 GOARCH=arm64 GOOS=darwin go build -ldflags "-s -w -X github.com/prometheus/common/version.Version=[VERSION] -X github.com/prometheus/common/version.Revision=30eaafd7658bfa95a40610e81c64fd3d8d1285a7 -X github.com/prometheus/common/version.BuildDate=2025-01-04 -X github.com/prometheus/common/version.Branch=main" -o ./bin/percli ./cmd/percli
+Perses server built successfully!
 ```
 
 Note the last line stating that you have successfully built your own instance of Perses!
@@ -52,7 +57,7 @@ To start the server you just built:
  ___________          | |_/ /__ _ __ ___  ___  ___
 \___________/         |  __/ _ \ '__/ __|/ _ \/ __|
  ___                  | | |  __/ |  \__ \  __/\__ \
-\___/                 \_|  \___|_|  |___/\___||___/  0.47.0
+\___/                 \_|  \___|_|  |___/\___||___/  [PERSES_VERSION]
 __________________________________________________________
 
 ⇨ http server started on [::]:8080
@@ -70,4 +75,4 @@ For fun, you can optionally flip the switch in the top right corner to enable da
 
 ## What's next?
 
-In the next section, you start exploring Perses and the available tooling.
+Explore the online [Perses documentation](https://perses.dev/)
