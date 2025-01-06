@@ -16,13 +16,55 @@ package lint
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/perses/perses/internal/api/schemas"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/spf13/cobra"
 )
+
+func isPackageModel(file string) (bool, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(data), "package model"), nil
+}
+
+func validateSchemas(schemaFolder string) error {
+	return filepath.WalkDir(schemaFolder, func(currentPath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == "migrate" {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(currentPath) != ".cue" {
+			return nil
+		}
+		if isModel, openFileErr := isPackageModel(currentPath); openFileErr != nil {
+			if openFileErr != nil {
+				return openFileErr
+			}
+			if !isModel {
+				return nil
+			}
+		}
+		currentDir, _ := path.Split(currentPath)
+		if _, schemaErr := schemas.Load(currentDir); schemaErr != nil {
+			return schemaErr
+		}
+		return nil
+	})
+}
 
 type option struct {
 	persesCMD.Option
@@ -46,7 +88,7 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	if _, err := schemas.Load(o.schemaFolder); err != nil {
+	if err := validateSchemas(o.schemaFolder); err != nil {
 		return err
 	}
 	return output.HandleString(o.writer, "current plugin is valid")
