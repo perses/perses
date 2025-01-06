@@ -24,13 +24,13 @@ import (
 
 // expected user inputs
 #name:     string
-#display?: v1Common.#Display
 #project?:  string
-#variables?: [...v1Dashboard.#Variable]
+#display?: v1Common.#Display
 #panelGroups: [string]: {
 	layout: v1Dashboard.#Layout
 	panels: [string]: v1.#Panel
 }
+#variables?: [...v1Dashboard.#Variable]
 #datasources?: [string]: v1.#DatasourceSpec
 #duration?:        string
 #refreshInterval?: string
