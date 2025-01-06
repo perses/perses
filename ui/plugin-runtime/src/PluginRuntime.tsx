@@ -16,7 +16,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
-export const pluginRuntime = init({
+// eslint-disable @typescript-eslint/no-require-imports
+export const pluginRuntime: FederationHost = init({
   name: '@perses/perses-ui-host',
   remotes: [], // all remotes are loaded dynamically
   shared: {

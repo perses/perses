@@ -21,7 +21,7 @@ interface PluginLoaderProps<P> {
   props?: P;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 function PluginContainer<P>({ pluginFn, props }: { pluginFn: Function; props: P }): JSX.Element {
   return pluginFn(props);
 }
