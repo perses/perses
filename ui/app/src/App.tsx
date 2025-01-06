@@ -39,9 +39,11 @@ function App(): ReactElement {
           backgroundColor: ({ palette }) => palette.background.default,
         }}
       >
-        <PluginRegistry pluginLoader={bundledPluginLoader}>
-          {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-        </PluginRegistry>
+        {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && (
+          <PluginRegistry pluginLoader={bundledPluginLoader}>
+            <Header />
+          </PluginRegistry>
+        )}
         <Box
           sx={{
             flex: 1,
