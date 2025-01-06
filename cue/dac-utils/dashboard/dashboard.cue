@@ -25,7 +25,7 @@ import (
 // expected user inputs
 #name:     string
 #display?: v1Common.#Display
-#project:  string
+#project?:  string
 #variables?: [...v1Dashboard.#Variable]
 #panelGroups: [string]: {
 	layout: v1Dashboard.#Layout
@@ -38,8 +38,10 @@ import (
 // output: the dashboard in the format expected by Perses 
 v1.#Dashboard & {
 	metadata: {
-		name:    #name
-		project: #project
+		name: #name
+		if #project != _|_ {
+			project: #project
+		}
 	}
 	spec: {
 		if #display != _|_ {
