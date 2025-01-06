@@ -113,7 +113,7 @@ export function GridTitle(props: GridTitleProps): ReactElement {
                   onClick={(e) => {
                     // Don't trigger expand/collapse
                     e.stopPropagation();
-                    moveDown && moveDown();
+                    moveDown?.();
                   }}
                 >
                   <ArrowDownIcon />
@@ -126,7 +126,7 @@ export function GridTitle(props: GridTitleProps): ReactElement {
                   onClick={(e) => {
                     // Don't trigger expand/collapse
                     e.stopPropagation();
-                    moveUp && moveUp();
+                    moveUp?.();
                   }}
                 >
                   <ArrowUpIcon />

@@ -14,6 +14,7 @@
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { TempoClient, query, search, searchTagValues, searchTags, searchWithFallback } from '../model/tempo-client';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
+import { TempoDatasourceEditor } from './TempoDatasourceEditor';
 
 /**
  * Creates a TempoClient for a specific datasource spec.
@@ -45,7 +46,6 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
 
 export const TempoDatasource: DatasourcePlugin<TempoDatasourceSpec, TempoClient> = {
   createClient,
-  // TODO add a options editor component for tempo datasource
-  // OptionsEditorComponent: TempoDatasourceEditor,
+  OptionsEditorComponent: TempoDatasourceEditor,
   createInitialOptions: () => ({ directUrl: '' }),
 };

@@ -68,7 +68,7 @@ function ImportView(): ReactElement {
           data: json,
         });
       }
-    } catch (e) {
+    } catch (_) {
       setDashboard(undefined);
     }
   };

@@ -15,8 +15,7 @@ import { FormEvent, ReactElement, useState } from 'react';
 import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
 import { useDatasourceStore, useTimeRange } from '@perses-dev/plugin-system';
-import { useEditJsonDialog } from '../../context/DashboardProvider';
-import { useDashboard } from '../../context/useDashboard';
+import { useEditJsonDialog, useDashboard } from '../../context';
 
 export interface EditJsonDialogProps {
   isReadonly: boolean;
@@ -58,7 +57,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
     try {
       const json = JSON.parse(dashboard ?? '{}');
       setDraftDashboard(json);
-    } catch (e) {
+    } catch (_) {
       // do nothing
     }
   };
