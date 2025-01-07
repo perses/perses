@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.50.0-rc.1 / 2025-01-07
+
+- [ENHANCEMENT] `percli plugin lint`: improve the way to find the schema files (#2526)
+- [ENHANCEMENT] `percli dac diff`: add output + avoid early return when processing a directory (#2500)
+- [ENHANCEMENT] DaC CUE SDK: accurate constraints for duration attributes (#2525)
+- [ENHANCEMENT] DaC CUE SDK: add datasource param to the var group builder (#2524)
+- [ENHANCEMENT] Use Perses logo for the app loader (#2518)
+- [ENHANCEMENT] Table panel: editor text fields are debounced (#2470)
+- [BUGFIX] DaC CUE SDK: Fix inconsistencies in mandatory vs optional attributes in dashboard lib (#2540)
+- [BUGFIX] Fix preview display name with prefix (#2520)
+- [BUGFIX] Fix for migration of decimal units (#2493)
+- [BUGFIX] Table panel: fix cell mapping for range condition (#2517)
+- [DOC] Align plugin doc with the migration revamp (#2516)
+
 ## 0.50.0-rc.0 / 2024-12-17
 
 This release significantly enhances the migration feature with better performance and reduced disruptions, thanks to a complete overhaul of its logic.
