@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.4
 
 require (
-	cuelang.org/go v0.11.0
+	cuelang.org/go v0.11.1
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
 	github.com/efficientgo/core v1.0.0-rc.3
