@@ -28,6 +28,7 @@ func (f *Plugins) Verify() error {
 	return nil
 }
 
+// TODO : how to avoid user to know where the plugins are stored in the docker image
 type Plugins struct {
 	// Path is the path to the directory containing the runtime plugins
 	Path        string `json:"path,omitempty" yaml:"path,omitempty"`

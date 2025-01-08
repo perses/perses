@@ -32,6 +32,7 @@ type Plugin interface {
 	Load() error
 	List() ([]byte, error)
 	UnzipArchives()
+	Schema() schema.Schema
 }
 
 func New(plugins config.Plugins) Plugin {
@@ -54,6 +55,10 @@ type pluginFile struct {
 func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
 	return os.ReadFile(pluginFilePath)
+}
+
+func (p *pluginFile) Schema() schema.Schema {
+	return p.sch
 }
 
 func (p *pluginFile) UnzipArchives() {
