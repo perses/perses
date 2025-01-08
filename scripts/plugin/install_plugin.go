@@ -42,23 +42,20 @@ type plugin struct {
 func downloadPlugin(plugin plugin) {
 	pluginName := fmt.Sprintf("%s-%s", plugin.PluginName, plugin.Version)
 	resp, err := http.Get(fmt.Sprintf("%s/%s/%s.tar.gz", githubURL, pluginName, pluginName))
+	defer resp.Body.Close()
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to download plugin %s", pluginName)
 		return
 	}
-	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		logrus.Errorf("unable to download plugin %s, status code %d", pluginName, resp.StatusCode)
 		return
 	}
-
 	out, err := os.Create(filepath.Join(pluginArchiveFolder, fmt.Sprintf("%s.tar.gz", pluginName)))
+	defer out.Close()
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to create file for plugin %s", pluginName)
-		return
 	}
-	defer out.Close()
 
 	if _, copyErr := io.Copy(out, resp.Body); copyErr != nil {
 		logrus.WithError(copyErr).Errorf("unable to copy plugin %s", pluginName)
