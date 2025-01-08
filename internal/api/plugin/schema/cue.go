@@ -15,26 +15,14 @@ package schema
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
-	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/load"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/sirupsen/logrus"
 )
 
 const kindPath = "kind"
-
-var cueValidationOptions = []cue.Option{
-	cue.Concrete(true),
-	cue.Attributes(true),
-	cue.Definitions(true),
-	cue.Hidden(true),
-}
 
 func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
@@ -74,30 +62,4 @@ func loadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) 
 		return nil, buildInstance.Err
 	}
 	return buildInstance, nil
-}
-
-func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType string, pluginName string) error {
-	if schema == nil {
-		return fmt.Errorf("schema not found for plugin %s", plugin.Kind)
-	}
-	pluginData, err := plugin.JSONMarshal()
-	if err != nil {
-		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
-		return err
-	}
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
-	pluginValue := ctx.CompileBytes(pluginData)
-	finalValue := pluginValue.Unify(ctx.BuildInstance(schema))
-	if validateErr := finalValue.Validate(cueValidationOptions...); validateErr != nil {
-		// retrieve the full error detail to provide better insights to the end user:
-		ex, errOs := os.Executable()
-		if errOs != nil {
-			logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
-		}
-		fullErrStr := errors.Details(validateErr, &errors.Config{Cwd: filepath.Dir(ex)})
-		logrus.Debug(fullErrStr)
-
-		return fmt.Errorf("invalid %s %s: %s", pluginType, pluginName, fullErrStr)
-	}
-	return nil
 }

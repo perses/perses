@@ -61,10 +61,6 @@ func (p *pluginFile) Schema() schema.Schema {
 	return p.sch
 }
 
-func (p *pluginFile) UnzipArchives() error {
-	return p.archibal.unzipAll()
-}
-
 func (p *pluginFile) Load() error {
 	files, err := os.ReadDir(p.path)
 	if err != nil {
@@ -124,24 +120,24 @@ func (p *pluginFile) Load() error {
 
 func isPluginValid(pluginPath string) (bool, error) {
 	// check if the plugin folder exists
-	exist, err := fileExists(pluginPath)
+	exist, err := isFileExist(pluginPath)
 	if !exist || err != nil {
 		return false, err
 	}
 	// check if the manifest file exists
-	exist, err = fileExists(filepath.Join(pluginPath, ManifestFileName))
+	exist, err = isFileExist(filepath.Join(pluginPath, ManifestFileName))
 	if !exist || err != nil {
 		return false, err
 	}
 	// check if the package.json file exists
-	exist, err = fileExists(filepath.Join(pluginPath, PackageJSONFile))
+	exist, err = isFileExist(filepath.Join(pluginPath, PackageJSONFile))
 	if !exist || err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
-func fileExists(filePath string) (bool, error) {
+func isFileExist(filePath string) (bool, error) {
 	_, osErr := os.Stat(filePath)
 	if osErr != nil {
 		if errors.Is(osErr, os.ErrNotExist) {
