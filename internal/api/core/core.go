@@ -91,6 +91,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 
 	// extract the plugin archive
 	serviceManager.GetPlugin().UnzipArchives()
+	if pluginErr := serviceManager.GetPlugin().Load(); pluginErr != nil {
+		return nil, nil, fmt.Errorf("unable to load the plugins: %w", pluginErr)
+	}
 
 	// register the API
 	runner.HTTPServerBuilder().
