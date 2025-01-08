@@ -15,18 +15,59 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
 // TODO: probably doesn't make sense to keep this script in the repository. Probably we should move it to the perses/plugins repository
+
+type validateFunc func(plugin common.Plugin, name string) error
+
+func validateSchemas(folder string, vf validateFunc) {
+	logrus.Infof("validate schemas under %q", folder)
+	dirEntries, err := os.ReadDir(folder)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	for _, dir := range dirEntries {
+		if dir.Name() == ".DS_Store" {
+			continue
+		}
+		data, readErr := os.ReadFile(filepath.Join(folder, dir.Name(), fmt.Sprintf("%s.json", dir.Name())))
+		if readErr != nil {
+			logrus.Fatal(readErr)
+		}
+		plugin := &common.Plugin{}
+		if jsonErr := json.Unmarshal(data, plugin); jsonErr != nil {
+			logrus.Fatal(jsonErr)
+		}
+		if validateErr := vf(*plugin, dir.Name()); validateErr != nil {
+			logrus.Fatal(validateErr)
+		}
+	}
+}
+
+func validateAllSchemas(sch schema.Schema) {
+	validateSchemas(panelsPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidatePanel(plugin, name)
+	})
+	validateSchemas(datasourcesPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidateDatasource(plugin, name)
+	})
+	validateSchemas(variablesPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidateVariable(plugin, name)
+	})
+}
 
 func validateAllDashboards(sch schema.Schema) {
 	logrus.Info("validate all dashboards in dev/data")
@@ -83,13 +124,11 @@ func main() {
 	cfg := config.Plugins{}
 	_ = cfg.Verify()
 	pluginService := plugin.New(cfg)
-	if err := pluginService.UnzipArchives(); err != nil {
-		logrus.Fatal(err)
-	}
 	if err := pluginService.Load(); err != nil {
 		logrus.Fatal(err)
 	}
 	sch := pluginService.Schema()
+	validateAllSchemas(sch)
 	validateAllDashboards(sch)
 	validateAllDatasources(sch)
 	validateAllGlobalDatasources(sch)
