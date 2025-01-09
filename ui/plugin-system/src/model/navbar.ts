@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/core';
+import { ComponentType } from 'react';
 import { Plugin } from './plugin-base';
 
 /**
@@ -19,5 +20,5 @@ import { Plugin } from './plugin-base';
  * It can also be used to place some fixed component on the screen like a chatbot, why not?
  */
 export interface NavBarPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  Component: React.ComponentType;
+  Component: ComponentType;
 }
