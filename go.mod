@@ -21,7 +21,7 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.13.3
-	github.com/mholt/archives v0.0.0-20241216060121-23e0af8fe73d
+	github.com/mholt/archives v0.1.0
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.27.0
