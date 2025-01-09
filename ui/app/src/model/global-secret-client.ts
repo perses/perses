@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalSecretResource } from '@perses-dev/core';
+import { GlobalSecretResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -68,8 +68,8 @@ export function deleteGlobalSecret(entity: GlobalSecretResource): Promise<Respon
  * Used to get a global secret from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalSecret(name: string): UseQueryResult<GlobalSecretResource> {
-  return useQuery<GlobalSecretResource, Error>({
+export function useGlobalSecret(name: string): UseQueryResult<GlobalSecretResource, StatusError> {
+  return useQuery<GlobalSecretResource, StatusError>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
       return getGlobalSecret(name);
@@ -81,8 +81,8 @@ export function useGlobalSecret(name: string): UseQueryResult<GlobalSecretResour
  * Used to get global secrets from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalSecretList(): UseQueryResult<GlobalSecretResource[]> {
-  return useQuery<GlobalSecretResource[], Error>({
+export function useGlobalSecretList(): UseQueryResult<GlobalSecretResource[], StatusError> {
+  return useQuery<GlobalSecretResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
       return getGlobalSecrets();
@@ -94,11 +94,15 @@ export function useGlobalSecretList(): UseQueryResult<GlobalSecretResource[]> {
  * Returns a mutation that can be used to create a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
+export function useCreateGlobalSecretMutation(): UseMutationResult<
+  GlobalSecretResource,
+  StatusError,
+  GlobalSecretResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalSecretResource, Error, GlobalSecretResource>({
+  return useMutation<GlobalSecretResource, StatusError, GlobalSecretResource>({
     mutationKey: queryKey,
     mutationFn: (entity: GlobalSecretResource) => {
       return createGlobalSecret(entity);
@@ -113,11 +117,15 @@ export function useCreateGlobalSecretMutation(): UseMutationResult<GlobalSecretR
  * Returns a mutation that can be used to update a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
+export function useUpdateGlobalSecretMutation(): UseMutationResult<
+  GlobalSecretResource,
+  StatusError,
+  GlobalSecretResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalSecretResource, Error, GlobalSecretResource>({
+  return useMutation<GlobalSecretResource, StatusError, GlobalSecretResource>({
     mutationKey: queryKey,
     mutationFn: (secret: GlobalSecretResource) => {
       return updateGlobalSecret(secret);
@@ -135,11 +143,15 @@ export function useUpdateGlobalSecretMutation(): UseMutationResult<GlobalSecretR
  * Returns a mutation that can be used to delete a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useDeleteGlobalSecretMutation(): UseMutationResult<GlobalSecretResource, Error, GlobalSecretResource> {
+export function useDeleteGlobalSecretMutation(): UseMutationResult<
+  GlobalSecretResource,
+  StatusError,
+  GlobalSecretResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalSecretResource, Error, GlobalSecretResource>({
+  return useMutation<GlobalSecretResource, StatusError, GlobalSecretResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: GlobalSecretResource) => {
       await deleteGlobalSecret(entity);
