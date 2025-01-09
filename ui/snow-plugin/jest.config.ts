@@ -16,8 +16,6 @@ import shared from '../jest.shared';
 
 const jestConfig: Config.InitialOptions = {
   ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
 };
 
 export default jestConfig;
