@@ -27,6 +27,7 @@ const (
 	defaultInterval        = 1 * time.Hour
 )
 
+// DEPRECATED: Schemas is depreacted
 type Schemas struct {
 	PanelsPath      string          `json:"panels_path,omitempty" yaml:"panels_path,omitempty"`
 	QueriesPath     string          `json:"queries_path,omitempty" yaml:"queries_path,omitempty"`

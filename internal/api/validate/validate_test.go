@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -40,26 +40,27 @@ func TestDashboardSpec(t *testing.T) {
 		},
 	}
 
+	projectPath := testUtils.GetRepositoryPath()
+
+	pl := plugin.New(config.Plugins{
+		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+	})
+	if err := pl.UnzipArchives(); err != nil {
+		t.Fatalf("failed to unzip archives: %s", err)
+	}
+	if err := pl.Load(); err != nil {
+		t.Fatalf("failed to load plugin: %s", err)
+	}
+
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			persesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.dashboardFile))
 
-			projectPath := testUtils.GetRepositoryPath()
-			schemasService, schErr := schemas.New(config.Schemas{
-				// use the real schemas for these tests
-				PanelsPath:      filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
-				QueriesPath:     filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
-				DatasourcesPath: filepath.Join(projectPath, "cue", config.DefaultDatasourcesPath),
-				VariablesPath:   filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
-			})
-			if schErr != nil {
-				t.Fatal(schErr)
-			}
-
 			var persesDashboard modelV1.Dashboard
 			testUtils.JSONUnmarshal(persesDashboardRaw, &persesDashboard)
 
-			err := DashboardSpec(persesDashboard.Spec, schemasService)
+			err := DashboardSpec(persesDashboard.Spec, pl.Schema())
 
 			actualErrorStr := ""
 			if err != nil {
@@ -89,23 +90,24 @@ func TestDatasource(t *testing.T) {
 		},
 	}
 
+	projectPath := testUtils.GetRepositoryPath()
+
+	pl := plugin.New(config.Plugins{
+		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+	})
+	if err := pl.UnzipArchives(); err != nil {
+		t.Fatalf("failed to unzip archives: %s", err)
+	}
+	if err := pl.Load(); err != nil {
+		t.Fatalf("failed to load plugin: %s", err)
+	}
+
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			var datasourcesRaw [][]byte
 			for _, file := range test.datasourceFiles {
 				datasourcesRaw = append(datasourcesRaw, testUtils.ReadFile(filepath.Join(testDataFolder, file)))
-			}
-
-			projectPath := testUtils.GetRepositoryPath()
-			schemasService, schErr := schemas.New(config.Schemas{
-				// use the real schemas for these tests
-				PanelsPath:      filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
-				QueriesPath:     filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
-				DatasourcesPath: filepath.Join(projectPath, "cue", config.DefaultDatasourcesPath),
-				VariablesPath:   filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
-			})
-			if schErr != nil {
-				t.Fatal(schErr)
 			}
 
 			var datasources []*modelV1.Datasource
@@ -117,7 +119,7 @@ func TestDatasource(t *testing.T) {
 			}
 
 			for _, datasource := range datasources {
-				err := Datasource(datasource, datasources, schemasService)
+				err := Datasource(datasource, datasources, pl.Schema())
 				if test.expectedErrorStr == "" {
 					assert.NoError(t, err)
 				} else {

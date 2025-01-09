@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// DEPRECATED: this package is not used anymore. It is replaced by the package internal/plugin/schema.
 package schemas
 
 import (
@@ -117,6 +118,7 @@ func getSchema(modelKind string, pluginKindName string, cueDefs *cueDefs) (cue.V
 	return schema, nil
 }
 
+// DEPRECATED: Use internal/plugin/schema.Schema instead
 type Schemas interface {
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error

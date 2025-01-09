@@ -17,7 +17,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
@@ -35,32 +36,26 @@ type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.DirectoryOption
-	writer             io.Writer
-	errWriter          io.Writer
-	chartsSchemas      string
-	queriesSchemas     string
-	datasourcesSchemas string
-	variablesSchemas   string
-	online             bool
-	sch                schemas.Schemas
-	apiClient          api.ClientInterface
+	writer     io.Writer
+	errWriter  io.Writer
+	pluginPath string
+	online     bool
+	sch        schema.Schema
+	apiClient  api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
-	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.datasourcesSchemas) > 0 || len(o.variablesSchemas) > 0 {
-		var err error
-		o.sch, err = schemas.New(apiConfig.Schemas{
-			PanelsPath:      o.chartsSchemas,
-			QueriesPath:     o.queriesSchemas,
-			DatasourcesPath: o.datasourcesSchemas,
-			VariablesPath:   o.variablesSchemas,
+	if len(o.pluginPath) > 0 {
+		pl := plugin.New(apiConfig.Plugins{
+			Path: o.pluginPath,
 		})
-		if err != nil {
+		if err := pl.Load(); err != nil {
 			return err
 		}
+		o.sch = pl.Schema()
 	}
 	if o.online {
 		// Finally, get the api client we will need later.
@@ -186,18 +181,10 @@ percli lint -f ./resources.json --online
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
-	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
-	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")
-	cmd.Flags().StringVar(&o.datasourcesSchemas, "schemas.datasources", "", "Path to the CUE schemas for the datasources")
-	cmd.Flags().StringVar(&o.variablesSchemas, "schemas.variables", "", "Path to the CUE schemas for the dashboard variables")
+	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
-
-	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
-	// So no need to use / load the schemas with the CLI.
-	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
-	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
-	cmd.MarkFlagsMutuallyExclusive("schemas.datasources", "online")
-	cmd.MarkFlagsMutuallyExclusive("schemas.variables", "online")
+	// So no need to use / load the plugins with the CLI.
+	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
 	return cmd
 }

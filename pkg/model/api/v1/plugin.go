@@ -13,31 +13,14 @@
 
 package v1
 
-import "github.com/perses/perses/pkg/model/api/v1/common"
+import (
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
+)
 
 const PluginModuleKind = "PluginModule"
 
-type PluginSpec struct {
-	Display *common.Display `json:"display"`
-	Name    string          `json:"name"`
-}
-
-type Plugin struct {
-	Kind string     `json:"kind"`
-	Spec PluginSpec `json:"spec"`
-}
-
-type PluginModuleSpec struct {
-	Plugins []Plugin `json:"plugins"`
-}
-
-type PluginModuleMetadata struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-}
-
 type PluginModule struct {
-	Kind     string               `json:"kind"`
-	Metadata PluginModuleMetadata `json:"metadata"`
-	Spec     PluginModuleSpec     `json:"spec"`
+	Kind     string                `json:"kind" yaml:"kind"`
+	Metadata plugin.ModuleMetadata `json:"metadata" yaml:"metadata"`
+	Spec     plugin.ModuleSpec     `json:"spec" yaml:"spec"`
 }

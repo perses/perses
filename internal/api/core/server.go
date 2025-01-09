@@ -91,7 +91,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
-		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
+		validateendpoint.New(serviceManager.GetSchema(), serviceManager.GetDashboard()),
 		authEndpoint,
 	}
 	return &api{

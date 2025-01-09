@@ -17,11 +17,10 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 )
@@ -32,7 +31,7 @@ import (
 // For example in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
 var variableNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
-func DashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
+func DashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
 		return err
 	}
@@ -40,7 +39,7 @@ func DashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
 
 }
 
-func DashboardSpecWithVars(spec modelV1.DashboardSpec, sch schemas.Schemas, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+func DashboardSpecWithVars(spec modelV1.DashboardSpec, sch schema.Schema, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, projectVariables, globalVariables); err != nil {
 		return err
 	}
@@ -48,7 +47,7 @@ func DashboardSpecWithVars(spec modelV1.DashboardSpec, sch schemas.Schemas, proj
 	return validateDashboardSpec(spec, sch)
 }
 
-func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
+func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Schema) error {
 	if err := validateDatasourcePlugin(entity.GetDatasourceSpec().Plugin, entity.GetMetadata().GetName(), sch); err != nil {
 		return err
 	}
@@ -58,7 +57,7 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 	return nil
 }
 
-func Variable(entity modelV1.VariableInterface, sch schemas.Schemas) error {
+func Variable(entity modelV1.VariableInterface, sch schema.Schema) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
 	}
@@ -109,14 +108,14 @@ func validateVariableNames(variables []dashboard.Variable) error {
 	return nil
 }
 
-func validateDatasourcePlugin(plugin common.Plugin, name string, sch schemas.Schemas) error {
+func validateDatasourcePlugin(plugin common.Plugin, name string, sch schema.Schema) error {
 	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
 	}
 	return sch.ValidateDatasource(plugin, name)
 }
 
-func validateDashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
+func validateDashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
 	if err := validateVariableNames(spec.Variables); err != nil {
 		return err
 	}

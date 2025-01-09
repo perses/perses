@@ -14,20 +14,21 @@
 package config
 
 const (
-	defaultPluginPath        = "plugins"
-	defaultArchivePluginPath = "plugins-archive"
+	DefaultPluginPath        = "plugins"
+	DefaultArchivePluginPath = "plugins-archive"
 )
 
 func (f *Plugins) Verify() error {
 	if len(f.Path) == 0 {
-		f.Path = defaultPluginPath
+		f.Path = DefaultPluginPath
 	}
 	if len(f.ArchivePath) == 0 {
-		f.ArchivePath = defaultArchivePluginPath
+		f.ArchivePath = DefaultArchivePluginPath
 	}
 	return nil
 }
 
+// TODO : how to avoid user to know where the plugins are stored in the docker image
 type Plugins struct {
 	// Path is the path to the directory containing the runtime plugins
 	Path        string `json:"path,omitempty" yaml:"path,omitempty"`

@@ -15,63 +15,20 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
-var panelsPath = filepath.Join("cue", config.DefaultPanelsPath)
-var queriesPath = filepath.Join("cue", config.DefaultQueriesPath)
-var datasourcesPath = filepath.Join("cue", config.DefaultDatasourcesPath)
-var variablesPath = filepath.Join("cue", config.DefaultVariablesPath)
+// TODO: probably doesn't make sense to keep this script in the repository. Probably we should move it to the perses/plugins repository
 
-type validateFunc func(plugin common.Plugin, name string) error
-
-func validateSchemas(folder string, vf validateFunc) {
-	logrus.Infof("validate schemas under %q", folder)
-	dirEntries, err := os.ReadDir(folder)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	for _, dir := range dirEntries {
-		if dir.Name() == ".DS_Store" {
-			continue
-		}
-		data, readErr := os.ReadFile(filepath.Join(folder, dir.Name(), fmt.Sprintf("%s.json", dir.Name())))
-		if readErr != nil {
-			logrus.Fatal(readErr)
-		}
-		plugin := &common.Plugin{}
-		if jsonErr := json.Unmarshal(data, plugin); jsonErr != nil {
-			logrus.Fatal(jsonErr)
-		}
-		if validateErr := vf(*plugin, dir.Name()); validateErr != nil {
-			logrus.Fatal(validateErr)
-		}
-	}
-}
-
-func validateAllSchemas(sch schemas.Schemas) {
-	validateSchemas(panelsPath, func(plugin common.Plugin, name string) error {
-		return sch.ValidatePanel(plugin, name)
-	})
-	validateSchemas(datasourcesPath, func(plugin common.Plugin, name string) error {
-		return sch.ValidateDatasource(plugin, name)
-	})
-	validateSchemas(variablesPath, func(plugin common.Plugin, name string) error {
-		return sch.ValidateVariable(plugin, name)
-	})
-}
-
-func validateAllDashboards(sch schemas.Schemas) {
+func validateAllDashboards(sch schema.Schema) {
 	logrus.Info("validate all dashboards in dev/data")
 	data, err := os.ReadFile(path.Join("dev", "data", "9-dashboard.json"))
 	if err != nil {
@@ -88,7 +45,7 @@ func validateAllDashboards(sch schemas.Schemas) {
 	}
 }
 
-func validateAllDatasources(sch schemas.Schemas) {
+func validateAllDatasources(sch schema.Schema) {
 	logrus.Info("validate all datasources in dev/data")
 	data, err := os.ReadFile(path.Join("dev", "data", "8-datasource.json"))
 	if err != nil {
@@ -105,7 +62,7 @@ func validateAllDatasources(sch schemas.Schemas) {
 	}
 }
 
-func validateAllGlobalDatasources(sch schemas.Schemas) {
+func validateAllGlobalDatasources(sch schema.Schema) {
 	logrus.Info("validate all globalDatasources in dev/data")
 	data, err := os.ReadFile(path.Join("dev", "data", "4-globaldatasource.json"))
 	if err != nil {
@@ -123,18 +80,16 @@ func validateAllGlobalDatasources(sch schemas.Schemas) {
 }
 
 func main() {
-	cfg := config.Schemas{
-		PanelsPath:      panelsPath,
-		QueriesPath:     queriesPath,
-		DatasourcesPath: datasourcesPath,
-		VariablesPath:   variablesPath,
-	}
+	cfg := config.Plugins{}
 	_ = cfg.Verify()
-	sch, err := schemas.New(cfg)
-	if err != nil {
+	pluginService := plugin.New(cfg)
+	if err := pluginService.UnzipArchives(); err != nil {
 		logrus.Fatal(err)
 	}
-	validateAllSchemas(sch)
+	if err := pluginService.Load(); err != nil {
+		logrus.Fatal(err)
+	}
+	sch := pluginService.Schema()
 	validateAllDashboards(sch)
 	validateAllDatasources(sch)
 	validateAllGlobalDatasources(sch)

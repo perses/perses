@@ -17,14 +17,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api"
-
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/validate"
-
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -32,10 +30,10 @@ import (
 type service struct {
 	variable.Service
 	dao variable.DAO
-	sch schemas.Schemas
+	sch schema.Schema
 }
 
-func NewService(dao variable.DAO, sch schemas.Schemas) variable.Service {
+func NewService(dao variable.DAO, sch schema.Schema) variable.Service {
 	return &service{
 		dao: dao,
 		sch: sch,

@@ -20,19 +20,19 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
-	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/internal/api/validate"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type endpoint struct {
-	sch       schemas.Schemas
+	sch       schema.Schema
 	dashboard dashboard.Service
 }
 
-func New(sch schemas.Schemas, dashboard dashboard.Service) route.Endpoint {
+func New(sch schema.Schema, dashboard dashboard.Service) route.Endpoint {
 	return &endpoint{
 		sch:       sch,
 		dashboard: dashboard,
@@ -77,7 +77,7 @@ func (e *endpoint) ValidateGlobalVariable(ctx echo.Context) error {
 	return validateVariable(&v1.GlobalVariable{}, e.sch, ctx)
 }
 
-func validateDatasource(entity v1.DatasourceInterface, sch schemas.Schemas, ctx echo.Context) error {
+func validateDatasource(entity v1.DatasourceInterface, sch schema.Schema, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
@@ -87,7 +87,7 @@ func validateDatasource(entity v1.DatasourceInterface, sch schemas.Schemas, ctx 
 	return ctx.NoContent(http.StatusOK)
 }
 
-func validateVariable(entity v1.VariableInterface, sch schemas.Schemas, ctx echo.Context) error {
+func validateVariable(entity v1.VariableInterface, sch schema.Schema, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
