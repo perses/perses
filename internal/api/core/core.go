@@ -75,10 +75,15 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
 
-	// extract the plugin archive
-	serviceManager.GetPlugin().UnzipArchives()
-	if pluginErr := serviceManager.GetPlugin().Load(); pluginErr != nil {
-		return nil, nil, fmt.Errorf("unable to load the plugins: %w", pluginErr)
+	// Extract the plugin archives and load the plugins.
+	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.
+	unzipErr := serviceManager.GetPlugin().UnzipArchives()
+	if unzipErr != nil {
+		logrus.WithError(unzipErr).Error("unable to unzip the plugin archives")
+	} else {
+		if pluginErr := serviceManager.GetPlugin().Load(); pluginErr != nil {
+			logrus.WithError(pluginErr).Error("unable to load the plugins")
+		}
 	}
 
 	// register the API

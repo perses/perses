@@ -79,6 +79,9 @@ type sch struct {
 
 func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
 	return filepath.WalkDir(filepath.Join(pluginPath, module.Spec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if d.IsDir() {
 			if d.Name() == "migrate" {
 				return fs.SkipDir
