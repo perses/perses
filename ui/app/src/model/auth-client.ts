@@ -15,20 +15,59 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResul
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
+import { useQueryParam } from 'use-query-params';
+import { useEffect, useState } from 'react';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
 const authResource = 'auth';
 const jwtPayload = 'jwtPayload';
+const redirectQueryParam = 'rd';
+const cookieRefreshTime = 500;
 
 export interface NativeAuthBody {
   login: string;
   password: string;
 }
 
-export function useIsAccessTokenExist(): boolean {
+export function useIsAccessTokenExist(isAuthEnabled: boolean): boolean {
   const [cookies] = useCookies();
-  return cookies[jwtPayload] !== undefined;
+
+  // Warm the access token request cache back
+  // If the refresh token is not expired, the debounce mechanism will get the refreshed accedd token.
+  // Otherwise, debounce will let pass the empty access token and auth guard will redirect to sign in.
+  if (isAuthEnabled && cookies[jwtPayload] === undefined) {
+    refreshToken();
+  }
+
+  // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
+  const [debouncedValue, setDebouncedValue] = useState(cookies);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(cookies);
+    }, cookieRefreshTime);
+
+    return (): void => clearTimeout(timer);
+  }, [cookies]);
+
+  return debouncedValue[jwtPayload] !== undefined;
+}
+
+/**
+ * Get the redirect path from URL's query params.
+ * This is used to retrieve the original path that a user desired before being redirected to the login page.
+ */
+export function useRedirectQueryParam(): string {
+  const [path] = useQueryParam<string>(redirectQueryParam);
+  return path ?? '/';
+}
+
+/**
+ * Build a query string with the redirect path. Related with {@link useRedirectQueryParam}
+ * @param path original path desired by the user before being redirected to the login page.
+ */
+export function buildRedirectQueryString(path: string): string {
+  return `${redirectQueryParam}=${encodeURIComponent(path)}`;
 }
 
 interface Payload {

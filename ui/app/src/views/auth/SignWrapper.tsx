@@ -48,6 +48,7 @@ import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
 import { useConfigContext } from '../../context/Config';
+import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth-client';
 
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.
@@ -136,6 +137,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   }));
   const socialProviders = [...oidcProviders, ...oauthProviders];
   const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
+  const path = useRedirectQueryParam();
 
   return (
     <Stack
@@ -169,7 +171,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
               fullWidth={true}
               style={{ fontSize: '1em' }}
               onClick={() => {
-                window.location.href = `/api/auth/providers/${provider.path}/login`;
+                window.location.href = `/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
               }}
             >
               Sign in with {provider.name}
