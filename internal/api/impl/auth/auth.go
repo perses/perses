@@ -36,6 +36,14 @@ import (
 const (
 	xForwardedProto = "X-Forwarded-Proto"
 	xForwardedHost  = "X-Forwarded-Host"
+	// redirectQueryParam is a query param key used to retrieve the original path that
+	// a user desired before being redirected to the login page.
+	// It is used in native and external authentication flows.
+	redirectQueryParam = "rd"
+	// redirectURLQueryParam is a query param key used to send to external provider the
+	// callback URL that will serve to retrieve the token.
+	// It is used only in external authentication flows.
+	redirectURIQueryParam = "redirect_uri"
 )
 
 func getRedirectURI(r *http.Request, authKind string, slugID string) string {

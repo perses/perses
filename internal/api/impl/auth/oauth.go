@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -284,7 +283,7 @@ func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
 func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// Save the state cookie, will be verified in the codeExchangeHandler
-	state := uuid.NewString()
+	state := ctx.Request().URL.Query().Get(redirectQueryParam)
 	if err := e.saveStateCookie(ctx, state); err != nil {
 		e.logWithError(err).Error("Failed to save state in a cookie.")
 		return err
@@ -300,7 +299,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -321,10 +320,12 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	code := ctx.QueryParam("code")
 
 	// Verify that the state in the query match the saved one
-	if _, err := e.readStateCookie(ctx); err != nil {
+	state, err := e.readStateCookie(ctx)
+	if err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
 		return err
 	}
+	redirectURI := state
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)
@@ -336,8 +337,9 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	opts := []oauth2.AuthCodeOption{oauth2.VerifierOption(verifier)}
 
 	// If the Redirect URL is not setup by config, we build it from request
+	// TODO: Is it really necessary for a token redeem?
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
 	}
 
 	providerCtx := e.newQueryContext(ctx)
@@ -360,7 +362,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return err
 	}
 
-	return ctx.Redirect(302, "/")
+	return ctx.Redirect(http.StatusFound, redirectURI)
 }
 
 // deviceCodeHandler is the http handler on Perses side that will trigger the "Device Authorization"
