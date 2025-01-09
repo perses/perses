@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceResource } from '@perses-dev/core';
+import { DatasourceResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -27,7 +27,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'datasources';
 
-type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], Error>, 'queryKey' | 'queryFn'> & {
+type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], StatusError>, 'queryKey' | 'queryFn'> & {
   project?: string;
 };
 
@@ -69,11 +69,11 @@ export function fetchDatasourceList(
  */
 export function useCreateDatasourceMutation(
   projectName: string
-): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
-  return useMutation<DatasourceResource, Error, DatasourceResource>({
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
     mutationKey: key,
     mutationFn: (datasource: DatasourceResource) => {
       return createDatasource(datasource);
@@ -90,11 +90,11 @@ export function useCreateDatasourceMutation(
  */
 export function useUpdateDatasourceMutation(
   projectName: string
-): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
-  return useMutation<DatasourceResource, Error, DatasourceResource>({
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
     mutationKey: key,
     mutationFn: (datasource: DatasourceResource) => {
       return updateDatasource(datasource);
@@ -111,11 +111,11 @@ export function useUpdateDatasourceMutation(
  */
 export function useDeleteDatasourceMutation(
   projectName: string
-): UseMutationResult<DatasourceResource, Error, DatasourceResource> {
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const key = buildQueryKey({ resource, parent: projectName });
 
-  return useMutation<DatasourceResource, Error, DatasourceResource>({
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
     mutationKey: key,
     mutationFn: (entity: DatasourceResource) => {
       return deleteDatasource(entity).then(() => {
@@ -133,8 +133,8 @@ export function useDeleteDatasourceMutation(
  * Used to get a datasource in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasource(project: string, name: string): UseQueryResult<DatasourceResource> {
-  return useQuery<DatasourceResource, Error>({
+export function useDatasource(project: string, name: string): UseQueryResult<DatasourceResource, StatusError> {
+  return useQuery<DatasourceResource, StatusError>({
     queryKey: buildQueryKey({ resource, parent: project, name }),
     queryFn: () => {
       return getDatasource(project, name);
@@ -146,8 +146,8 @@ export function useDatasource(project: string, name: string): UseQueryResult<Dat
  * Used to get datasources in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasourceList(options: DatasourceListOptions): UseQueryResult<DatasourceResource[]> {
-  return useQuery<DatasourceResource[], Error>({
+export function useDatasourceList(options: DatasourceListOptions): UseQueryResult<DatasourceResource[], StatusError> {
+  return useQuery<DatasourceResource[], StatusError>({
     queryKey: buildQueryKey({ resource, parent: options.project }),
     queryFn: () => {
       return getDatasources(options.project);

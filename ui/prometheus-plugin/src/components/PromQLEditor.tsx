@@ -29,14 +29,6 @@ const treeViewStr = 'Tree View';
 const treeViewOpenStr = 'Open ' + treeViewStr;
 const treeViewCloseStr = 'Close ' + treeViewStr;
 
-function getErrMessage(error: unknown): string {
-  let errorMessage = 'An unknown error occurred';
-  if (error && error instanceof Error) {
-    errorMessage = error.message.trim();
-  }
-  return errorMessage;
-}
-
 export type PromQLEditorProps = {
   completeConfig: CompleteConfiguration;
   datasource: PrometheusDatasourceSelector;
@@ -61,7 +53,6 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
   }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
-  const errorMessage = useMemo(() => getErrMessage(error), [error]);
 
   const handleShowTreeView = (): void => {
     setTreeViewVisible(!isTreeViewVisible);
@@ -133,7 +124,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                 <ErrorAlert
                   error={{
                     name: `${treeViewStr} not available`,
-                    message: errorMessage,
+                    message: error.message,
                   }}
                 />
               ) : (

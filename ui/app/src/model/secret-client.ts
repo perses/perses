@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SecretResource } from '@perses-dev/core';
+import { SecretResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -71,8 +71,8 @@ export function deleteSecret(entity: SecretResource): Promise<Response> {
  * Used to get a secret from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useSecret(name: string, project: string): UseQueryResult<SecretResource> {
-  return useQuery<SecretResource, Error>({
+export function useSecret(name: string, project: string): UseQueryResult<SecretResource, StatusError> {
+  return useQuery<SecretResource, StatusError>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
       return getSecret(name, project);
@@ -84,8 +84,8 @@ export function useSecret(name: string, project: string): UseQueryResult<SecretR
  * Used to get secrets from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useSecretList(project?: string): UseQueryResult<SecretResource[], Error> {
-  return useQuery<SecretResource[], Error>({
+export function useSecretList(project?: string): UseQueryResult<SecretResource[], StatusError> {
+  return useQuery<SecretResource[], StatusError>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
       return getSecrets(project);
@@ -100,11 +100,13 @@ export function useSecretList(project?: string): UseQueryResult<SecretResource[]
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
+export function useCreateSecretMutation(
+  project: string
+): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<SecretResource, Error, SecretResource>({
+  return useMutation<SecretResource, StatusError, SecretResource>({
     mutationKey: queryKey,
     mutationFn: (secret: SecretResource) => {
       return createSecret(secret);
@@ -122,10 +124,12 @@ export function useCreateSecretMutation(project: string): UseMutationResult<Secr
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
+export function useUpdateSecretMutation(
+  project: string
+): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
-  return useMutation<SecretResource, Error, SecretResource>({
+  return useMutation<SecretResource, StatusError, SecretResource>({
     mutationKey: queryKey,
     mutationFn: (secret: SecretResource) => {
       return updateSecret(secret);
@@ -146,11 +150,13 @@ export function useUpdateSecretMutation(project: string): UseMutationResult<Secr
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
+export function useDeleteSecretMutation(
+  project: string
+): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<SecretResource, Error, SecretResource>({
+  return useMutation<SecretResource, StatusError, SecretResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: SecretResource) => {
       await deleteSecret(entity);

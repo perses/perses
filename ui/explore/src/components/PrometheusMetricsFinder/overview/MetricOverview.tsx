@@ -135,7 +135,7 @@ export function MetricOverview({
   ...props
 }: MetricOverviewProps): ReactElement {
   const [tab, setTab] = useState(0);
-  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
+  const { metadata, isLoading: isMetadataLoading, error } = useMetricMetadata(metricName, datasource);
 
   const filtersWithMetricName: LabelFilter[] = useMemo(() => {
     const result = filters.filter((filter) => filter.label !== '__name__');
@@ -152,6 +152,10 @@ export function MetricOverview({
     if (tab !== undefined) {
       setTab(tab);
     }
+  }
+
+  if (error) {
+    return <Stack {...props}>Error: {error.message}</Stack>;
   }
 
   return (

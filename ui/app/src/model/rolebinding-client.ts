@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RoleBindingResource } from '@perses-dev/core';
+import { RoleBindingResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -71,8 +71,8 @@ export function deleteRoleBinding(entity: RoleBindingResource): Promise<Response
  * Used to get a roleBinding from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleBinding(name: string, project: string): UseQueryResult<RoleBindingResource> {
-  return useQuery<RoleBindingResource, Error>({
+export function useRoleBinding(name: string, project: string): UseQueryResult<RoleBindingResource, StatusError> {
+  return useQuery<RoleBindingResource, StatusError>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
       return getRoleBinding(name, project);
@@ -84,8 +84,8 @@ export function useRoleBinding(name: string, project: string): UseQueryResult<Ro
  * Used to get roleBindings from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleBindingList(project?: string): UseQueryResult<RoleBindingResource[]> {
-  return useQuery<RoleBindingResource[], Error>({
+export function useRoleBindingList(project?: string): UseQueryResult<RoleBindingResource[], StatusError> {
+  return useQuery<RoleBindingResource[], StatusError>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
       return getRoleBindings(project);
@@ -102,11 +102,11 @@ export function useRoleBindingList(project?: string): UseQueryResult<RoleBinding
  */
 export function useCreateRoleBindingMutation(
   project: string
-): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
+): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<RoleBindingResource, Error, RoleBindingResource>({
+  return useMutation<RoleBindingResource, StatusError, RoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: (roleBinding: RoleBindingResource) => {
       return createRoleBinding(roleBinding);
@@ -126,10 +126,10 @@ export function useCreateRoleBindingMutation(
  */
 export function useUpdateRoleBindingMutation(
   project: string
-): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
+): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
-  return useMutation<RoleBindingResource, Error, RoleBindingResource>({
+  return useMutation<RoleBindingResource, StatusError, RoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: (roleBinding: RoleBindingResource) => {
       return updateRoleBinding(roleBinding);
@@ -152,11 +152,11 @@ export function useUpdateRoleBindingMutation(
  */
 export function useDeleteRoleBindingMutation(
   project: string
-): UseMutationResult<RoleBindingResource, Error, RoleBindingResource> {
+): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<RoleBindingResource, Error, RoleBindingResource>({
+  return useMutation<RoleBindingResource, StatusError, RoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: RoleBindingResource) => {
       await deleteRoleBinding(entity);
