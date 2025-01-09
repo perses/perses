@@ -14,9 +14,6 @@ if [[ $1 == "--e2e" ]]; then
   cp ${config_file} ${previous_file}
   sed 's/enable_auth: true/enable_auth: false/g' ${previous_file} >${config_file}
   rm ${previous_file}
-
-  # install and overwrite the default plugins
-  ./scripts/plugin/install_plugins.sh --overwrite true
 fi
 
 # Run backend server

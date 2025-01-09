@@ -31,7 +31,7 @@ const pluginFileName = "plugin-modules.json"
 type Plugin interface {
 	Load() error
 	List() ([]byte, error)
-	UnzipArchives()
+	UnzipArchives() error
 	Schema() schema.Schema
 }
 
@@ -61,10 +61,8 @@ func (p *pluginFile) Schema() schema.Schema {
 	return p.sch
 }
 
-func (p *pluginFile) UnzipArchives() {
-	if err := p.archibal.unzipAll(); err != nil {
-		logrus.WithError(err).Error("unable to unzip archives")
-	}
+func (p *pluginFile) UnzipArchives() error {
+	return p.archibal.unzipAll()
 }
 
 func (p *pluginFile) Load() error {

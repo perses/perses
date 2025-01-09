@@ -14,16 +14,16 @@
 package config
 
 const (
-	defaultPluginPath        = "plugins"
-	defaultArchivePluginPath = "plugins-archive"
+	DefaultPluginPath        = "plugins"
+	DefaultArchivePluginPath = "plugins-archive"
 )
 
 func (f *Plugins) Verify() error {
 	if len(f.Path) == 0 {
-		f.Path = defaultPluginPath
+		f.Path = DefaultPluginPath
 	}
 	if len(f.ArchivePath) == 0 {
-		f.ArchivePath = defaultArchivePluginPath
+		f.ArchivePath = DefaultArchivePluginPath
 	}
 	return nil
 }
