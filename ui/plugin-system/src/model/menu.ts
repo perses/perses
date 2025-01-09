@@ -16,9 +16,9 @@ import { ComponentType } from 'react';
 import { Plugin } from './plugin-base';
 
 /**
- * Plugin for handling custom extensions in the top navigation bar like a new icon button.
+ * Plugin for handling custom extensions in the top navigation bar like a new menu icon button.
  * It can also be used to place some fixed component on the screen like a chatbot, why not?
  */
-export interface NavBarPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
+export interface MenuPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   Component: ComponentType;
 }

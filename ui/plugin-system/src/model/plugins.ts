@@ -18,7 +18,7 @@ import { VariablePlugin } from './variables';
 import { DatasourcePlugin } from './datasource';
 import { Plugin } from './plugin-base';
 import { TraceQueryPlugin } from './trace-queries';
-import { NavBarPlugin } from './navbar';
+import { MenuPlugin } from './menu';
 
 /**
  * Information about a module/package that contains plugins.
@@ -64,7 +64,7 @@ export interface SupportedPlugins {
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;
   Datasource: DatasourcePlugin;
-  Navbar: NavBarPlugin;
+  Menu: MenuPlugin;
 }
 
 /**

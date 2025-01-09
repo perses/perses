@@ -44,9 +44,9 @@ export default function Header(): JSX.Element {
     'User',
   ]);
 
-  // Collect all the available plugins of type "NavBar"
-  const { data: navBarPluginsMetadata } = useListPluginMetadata(['Navbar']);
-  const navbarPlugins = usePlugins('Navbar', navBarPluginsMetadata ?? []);
+  // Collect all the available plugins of type "Menu"
+  const { data: menuPluginsMetadata } = useListPluginMetadata(['Menu']);
+  const menuPlugins = usePlugins('Menu', menuPluginsMetadata ?? []);
 
   return (
     <AppBar position="relative">
@@ -133,7 +133,7 @@ export default function Header(): JSX.Element {
             justifyContent: 'end',
           }}
         >
-          {navbarPlugins.map((plugin, i) => plugin.data && <plugin.data.Component key={`${i}`} />)}
+          {menuPlugins.map((plugin, i) => plugin.data && <plugin.data.Component key={`${i}`} />)}
 
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>

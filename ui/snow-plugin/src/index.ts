@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SnowNavbar } from './plugins/snow-navbar';
+import { SnowMenu } from './plugins/snow-menu';
 
 // Export plugins under the same name as the kinds they handle from the plugin.json
-export { SnowNavbar };
+export { SnowMenu };

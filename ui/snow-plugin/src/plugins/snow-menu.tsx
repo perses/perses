@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { NavBarPlugin } from '@perses-dev/plugin-system/dist/model/navbar';
+import { MenuPlugin } from '@perses-dev/plugin-system/src/model/menu';
 import { IconButton } from '@mui/material';
 import SnowflakeIcon from 'mdi-material-ui/Snowflake';
 import Snowfall from 'react-snowfall';
@@ -52,7 +52,7 @@ function SnowButton(): ReactElement | null {
   );
 }
 
-export const SnowNavbar: NavBarPlugin<void> = {
+export const SnowMenu: MenuPlugin<void> = {
   createInitialOptions(): void {
     return;
   },

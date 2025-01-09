@@ -6,8 +6,8 @@
   "spec": {
     "plugins": [
       {
-        "pluginType": "Navbar",
-        "kind": "SnowNavbar",
+        "pluginType": "Menu",
+        "kind": "SnowMenu",
         "display": {
           "name": "Snow menu",
           "description": "Allow to trigger snow in Perses!"
