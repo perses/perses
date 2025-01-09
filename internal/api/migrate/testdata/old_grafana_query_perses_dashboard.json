@@ -78,11 +78,6 @@
                 "display": "line",
                 "lineWidth": 3,
                 "stack": "all"
-              },
-              "yAxis": {
-                "format": {
-                  "unit": "decimal"
-                }
               }
             }
           }

@@ -23,9 +23,6 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last",
-              "format": {
-                "unit": "decimal"
-              },
               "thresholds": {
                 "steps": [
                   {
