@@ -10,10 +10,50 @@
         "defaults": {
           "mappings": [
             {
-              "id": 1,
-              "text": "unset",
-              "type": 1,
-              "value": 0
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "light-red",
+                  "index": 0,
+                  "text": "Down"
+                },
+                "1": {
+                  "color": "light-green",
+                  "index": 1,
+                  "text": "Up"
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 10,
+                "to": 100,
+                "result": {
+                  "text": "xxx",
+                  "index": 2
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "bac",
+                  "index": 3
+                }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "asdf;sndf",
+                "result": {
+                  "text": "xxx",
+                  "index": 4
+                }
+              }
             }
           ],
           "thresholds": {

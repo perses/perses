@@ -13,15 +13,33 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { ReactElement } from 'react';
-import { StatusHistoryChart, StatusHistoryChartProps, StatusHistoryData } from './StatusHistoryChart';
+import { StatusHistoryChart, StatusHistoryChartProps, StatusHistoryDataItem } from './StatusHistoryChart';
 
-const DEFAULT_DATA: StatusHistoryData[] = [
-  [0, 0, 1],
-  [1, 0, 2],
-  [2, 0, 3],
-  [0, 1, 2],
-  [1, 1, 3],
-  [2, 1, 1],
+const DEFAULT_DATA: StatusHistoryDataItem[] = [
+  {
+    value: [0, 0, 1],
+    label: '1',
+  },
+  {
+    value: [1, 0, 2],
+    label: '2',
+  },
+  {
+    value: [2, 0, 3],
+    label: '3',
+  },
+  {
+    value: [0, 1, 2],
+    label: '2',
+  },
+  {
+    value: [1, 1, 3],
+    label: '3',
+  },
+  {
+    value: [2, 1, 1],
+    label: '1',
+  },
 ];
 
 const meta: Meta<typeof StatusHistoryChart> = {

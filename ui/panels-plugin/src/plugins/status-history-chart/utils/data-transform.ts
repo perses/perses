@@ -11,18 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getColorForValue, LegendItem } from '@perses-dev/components';
-import { TimeScale, TimeSeriesData } from '@perses-dev/core';
+import { FALLBACK_COLOR, getColorsForValues, LegendItem, StatusHistoryDataItem } from '@perses-dev/components';
+import { applyValueMapping, TimeScale, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
+import { StatusHistoryChartOptions } from '../status-history-model';
 import { getCommonTimeScaleForQueries } from './get-timescale';
 
 interface StatusHistoryDataModel {
   legendItems: LegendItem[];
-  statusHistoryData: Array<[number, number, number | undefined]>;
+  statusHistoryData: StatusHistoryDataItem[];
   xAxisCategories: number[];
   yAxisCategories: string[];
   timeScale?: TimeScale;
+  colors: Array<{
+    value: string | number;
+    color: string;
+  }>;
 }
 
 function generateCompleteTimestamps(timescale?: TimeScale): number[] {
@@ -39,7 +44,8 @@ function generateCompleteTimestamps(timescale?: TimeScale): number[] {
 
 export function useStatusHistoryDataModel(
   queryResults: Array<QueryData<TimeSeriesData>>,
-  colors: string[]
+  themeColors: string[],
+  spec: StatusHistoryChartOptions
 ): StatusHistoryDataModel {
   return useMemo(() => {
     if (!queryResults || queryResults.length === 0) {
@@ -48,13 +54,15 @@ export function useStatusHistoryDataModel(
         statusHistoryData: [],
         xAxisCategories: [],
         yAxisCategories: [],
+        colors: [],
       };
     }
 
     const timeScale = getCommonTimeScaleForQueries(queryResults);
-    const statusHistoryData: Array<[number, number, number]> = [];
+    const statusHistoryData: StatusHistoryDataItem[] = [];
     const yAxisCategories: string[] = [];
     const legendSet = new Set<number>();
+    const hasValueMappings = spec.mappings?.length;
 
     const xAxisCategories = generateCompleteTimestamps(timeScale);
 
@@ -72,20 +80,53 @@ export function useStatusHistoryDataModel(
 
         item.values.forEach(([time, value]) => {
           const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time);
-
           if (value !== null && itemIndexOnXaxis !== -1) {
+            let itemLabel: string | number = value;
+            if (hasValueMappings) {
+              const mappedValue = applyValueMapping(value, spec.mappings);
+              itemLabel = mappedValue.value;
+            }
             legendSet.add(value);
-            statusHistoryData.push([itemIndexOnXaxis, yIndex, value]);
+            statusHistoryData.push({
+              value: [itemIndexOnXaxis, yIndex, value],
+              label: String(itemLabel),
+            });
           }
         });
       });
     });
 
-    const legendItems: LegendItem[] = Array.from(legendSet).map((value, idx) => {
-      const color = colors[idx] || getColorForValue(value, colors[0] || '#1f77b4');
+    const uniqueValues = Array.from(legendSet);
+    const colorsForValues = getColorsForValues(uniqueValues, themeColors);
+
+    // get colors from theme and generate colors if not provided
+    const colors = uniqueValues.map((value, index) => {
+      let valueColor: string = colorsForValues[index] ?? FALLBACK_COLOR;
+
+      if (hasValueMappings) {
+        const mappedValue = applyValueMapping(value, spec.mappings);
+        valueColor = mappedValue.color ?? valueColor;
+      }
+
+      return {
+        value,
+        color: valueColor,
+      };
+    });
+
+    const legendItems: LegendItem[] = uniqueValues.map((value, idx) => {
+      let label = String(value);
+
+      if (hasValueMappings) {
+        const mappedValue = applyValueMapping(value, spec.mappings);
+        label = String(mappedValue.value);
+      }
+
+      const color = colors.find((i) => i.value === value)?.color || FALLBACK_COLOR;
+
       return {
         id: `${idx}-${value}`,
-        label: String(value),
+        label,
         color,
       };
     });
@@ -96,6 +137,7 @@ export function useStatusHistoryDataModel(
       legendItems,
       statusHistoryData,
       timeScale,
+      colors,
     };
-  }, [queryResults, colors]);
+  }, [queryResults, spec.mappings, themeColors]);
 }

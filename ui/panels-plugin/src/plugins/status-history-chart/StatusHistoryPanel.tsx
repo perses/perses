@@ -32,10 +32,8 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
   const PADDING = chartsTheme.container.padding.default;
   const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
 
-  const { statusHistoryData, yAxisCategories, xAxisCategories, legendItems, timeScale } = useStatusHistoryDataModel(
-    queryResults,
-    chartsTheme.echartsTheme.color as string[]
-  );
+  const { statusHistoryData, yAxisCategories, xAxisCategories, legendItems, timeScale, colors } =
+    useStatusHistoryDataModel(queryResults, chartsTheme.echartsTheme.color as string[], spec);
 
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
     ? {
@@ -75,6 +73,7 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
                 data={statusHistoryData}
                 timeScale={timeScale}
                 height={height}
+                colors={colors}
               />
             </Box>
           );

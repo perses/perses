@@ -17,6 +17,7 @@ import { StatusHistoryData } from './StatusHistoryChart';
 
 interface CustomTooltipProps {
   data: StatusHistoryData;
+  label?: string;
   marker: string;
   xAxisCategories: number[];
   yAxisCategories: string[];
@@ -25,12 +26,13 @@ interface CustomTooltipProps {
 
 export function generateTooltipHTML({
   data,
+  label,
   marker,
   xAxisCategories,
   yAxisCategories,
   theme,
 }: CustomTooltipProps): string {
-  const [x, y, value] = data;
+  const [x, y] = data;
   const xAxisLabel = xAxisCategories[x];
 
   const { formattedDate, formattedTime } = getDateAndTime(xAxisLabel);
@@ -59,7 +61,7 @@ export function generateTooltipHTML({
           <strong>${yAxisCategories[y]}</strong>
         </div>
         <div>
-          ${value}
+          ${label}
         </div>
       </div>
     </div>
