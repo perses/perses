@@ -14,12 +14,12 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialStatChartOptions, StatChartOptions } from './stat-chart-model';
 import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings';
-import { StatChartPanel } from './StatChartPanel';
+import { StatChartPanel, StatChartPanelProps } from './StatChartPanel';
 
 /**
  * The core StatChart panel plugin for Perses.
  */
-export const StatChart: PanelPlugin<StatChartOptions> = {
+export const StatChart: PanelPlugin<StatChartOptions, StatChartPanelProps> = {
   PanelComponent: StatChartPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [

@@ -13,7 +13,7 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTableOptions, TableOptions } from './table-model';
-import { TablePanel } from './TablePanel';
+import { TablePanel, TableProps } from './TablePanel';
 import { TableColumnsEditor } from './TableColumnsEditor';
 import { TableSettingsEditor } from './TableSettingsEditor';
 import { TableCellsEditor } from './TableCellsEditor';
@@ -22,8 +22,9 @@ import { TableTransformsEditor } from './TableTransformsEditor';
 /**
  * The core TimeSeriesTable panel plugin for Perses.
  */
-export const Table: PanelPlugin<TableOptions> = {
+export const Table: PanelPlugin<TableOptions, TableProps> = {
   PanelComponent: TablePanel,
+  // TODO: handle other query types
   supportedQueryTypes: ['TimeSeriesQuery'],
   queryOptions: {
     mode: 'instant',

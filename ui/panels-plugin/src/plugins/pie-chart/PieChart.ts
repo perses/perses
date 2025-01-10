@@ -14,12 +14,12 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialPieChartOptions, PieChartOptions } from './pie-chart-model';
 import { PieChartOptionsEditorSettings } from './PieChartOptionsEditorSettings';
-import { PieChartPanel } from './PieChartPanel';
+import { PieChartPanel, PieChartPanelProps } from './PieChartPanel';
 
 /**
  * The core PieChart panel plugin for Perses.
  */
-export const PieChart: PanelPlugin<PieChartOptions> = {
+export const PieChart: PanelPlugin<PieChartOptions, PieChartPanelProps> = {
   PanelComponent: PieChartPanel,
   panelOptionsEditorComponents: [
     {

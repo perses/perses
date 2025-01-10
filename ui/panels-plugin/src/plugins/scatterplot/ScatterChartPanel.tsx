@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
-import { QueryDefinition, TraceSearchResult } from '@perses-dev/core';
+import { QueryDefinition, TraceData, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
-import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
+import { NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
@@ -27,7 +27,7 @@ export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnix
   errorCount: number;
 }
 
-export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> {
+export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions, TraceData> {
   /**
    * Custom onClick event handler.
    * If this field is unset or undefined, a default handler which links to the Gantt chart on the explore page is configured.
@@ -70,8 +70,7 @@ function defaultClickHandler(data: EChartTraceValue): void {
  * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement | null {
-  const { spec, contentDimensions, onClick } = props;
-  const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
+  const { spec, contentDimensions, queryResults: traceResults, onClick } = props;
   const chartsTheme = useChartsTheme();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
   const sizeRange = spec.sizeRange || DEFAULT_SIZE_RANGE;
@@ -80,15 +79,11 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
   // https://echarts.apache.org/handbook/en/concepts/dataset
   const { dataset, minSpanCount, maxSpanCount } = useMemo(() => {
-    if (traceIsLoading) {
-      return { dataset: [], minSpanCount: 0, maxSpanCount: 0 };
-    }
-
     const dataset = [];
     let minSpanCount: number | undefined;
     let maxSpanCount: number | undefined;
     for (const result of traceResults) {
-      if (result.isLoading || result.data === undefined || result.data.searchResult === undefined) continue;
+      if (result.data.searchResult === undefined) continue;
       const dataSeries = result.data.searchResult.map((trace) => {
         let spanCount = 0;
         let errorCount = 0;
@@ -119,7 +114,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
       });
     }
     return { dataset, minSpanCount: minSpanCount ?? 0, maxSpanCount: maxSpanCount ?? 0 };
-  }, [traceIsLoading, traceResults]);
+  }, [traceResults]);
 
   // Formatting for the dataset
   // 1. Map x,y coordinates
@@ -158,15 +153,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps): ReactElement |
     }
     return series;
   }, [dataset, defaultColor, minSpanCount, maxSpanCount, sizeRange]);
-
-  if (traceIsLoading) {
-    return <LoadingOverlay />;
-  }
-
-  const queryError = traceResults.find((d) => d.error);
-  if (queryError) {
-    throw queryError.error;
-  }
 
   const tracesFound = traceResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
   if (!tracesFound) {

@@ -110,6 +110,21 @@ export const MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY = [
     isSuccess: true,
     isError: false,
     data: MOCK_TRACE_SEARCH_RESULT_EMPTY,
+    definition: {
+      kind: 'TraceQuery',
+      spec: {
+        plugin: {
+          kind: 'TempoTraceQuery',
+          spec: {
+            query: '{}',
+            datasource: {
+              kind: 'TempoDatasource',
+              name: 'tempolocal',
+            },
+          },
+        },
+      },
+    },
     dataUpdatedAt: 1666500979895,
     error: null,
     errorUpdatedAt: 0,

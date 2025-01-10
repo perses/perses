@@ -12,17 +12,18 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { ContentWithLegend, LoadingOverlay, StatusHistoryChart, useChartsTheme } from '@perses-dev/components';
-import { PanelProps, useDataQueries, validateLegendSpec } from '@perses-dev/plugin-system';
+import { ContentWithLegend, StatusHistoryChart, useChartsTheme } from '@perses-dev/components';
+import { PanelProps, validateLegendSpec } from '@perses-dev/plugin-system';
 import { merge } from 'lodash';
 import { ReactElement, useMemo } from 'react';
+import { TimeSeriesData } from '@perses-dev/core';
 import { useStatusHistoryDataModel } from './utils/data-transform';
 import { StatusHistoryChartOptions } from './status-history-model.js';
 
-export type StatusHistoryChartPanelProps = PanelProps<StatusHistoryChartOptions>;
+export type StatusHistoryChartPanelProps = PanelProps<StatusHistoryChartOptions, TimeSeriesData>;
 
 export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactElement | null {
-  const { spec, contentDimensions } = props;
+  const { spec, contentDimensions, queryResults } = props;
 
   const legend = useMemo(() => {
     return spec.legend && validateLegendSpec(spec.legend) ? merge({}, spec.legend) : undefined;
@@ -30,7 +31,6 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
 
   const chartsTheme = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
-  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
 
   const { statusHistoryData, yAxisCategories, xAxisCategories, legendItems, timeScale } = useStatusHistoryDataModel(
     queryResults,
@@ -48,9 +48,6 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps): ReactEl
     return null;
   }
 
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
       <ContentWithLegend
