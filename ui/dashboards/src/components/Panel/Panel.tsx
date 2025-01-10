@@ -16,6 +16,7 @@ import useResizeObserver from 'use-resize-observer';
 import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
+import { useDataQueriesContext } from '@perses-dev/plugin-system';
 import { PanelGroupItemId } from '../../context';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
@@ -83,6 +84,8 @@ export const Panel = memo(function Panel(props: PanelProps) {
 
   const chartsTheme = useChartsTheme();
 
+  const { queryResults } = useDataQueriesContext();
+
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
   };
@@ -119,6 +122,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           description={definition.spec.display.description}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
+          queryResults={queryResults}
           links={definition.spec.links}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
@@ -142,6 +146,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           <PanelContent
             definition={definition}
             panelPluginKind={definition.spec.plugin.kind}
+            queryResults={queryResults}
             spec={definition.spec.plugin.spec}
             contentDimensions={contentDimensions}
           />
