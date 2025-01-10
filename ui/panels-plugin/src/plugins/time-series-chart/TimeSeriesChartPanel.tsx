@@ -23,11 +23,11 @@ import {
   StepOptions,
   TimeSeries,
   TimeSeriesValueTuple,
+  TimeSeriesData,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
   PanelProps,
-  useDataQueries,
   useTimeRange,
   validateLegendSpec,
   legendValues,
@@ -47,7 +47,6 @@ import {
   TimeChartSeriesMapping,
   TooltipConfig,
   DEFAULT_TOOLTIP_CONFIG,
-  LoadingOverlay,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -65,7 +64,7 @@ import {
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
-export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
+export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions, TimeSeriesData>;
 
 // Using an "ALL" value to handle the case on first loading the chart where we
 // want to select all, but do not want all of the legend items to be visually highlighted.
@@ -79,6 +78,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement | null {
   const {
     spec: { thresholds, yAxis, tooltip, querySettings: querySettingsList },
+    queryResults,
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -90,10 +90,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
   // ECharts theme comes from ChartsProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
   const categoricalPalette = chartsTheme.echartsTheme.color;
-
-  const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
-
-  const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
   // TODO: consider refactoring how the layout/spacing/alignment are calculated
   // the next time significant changes are made to the time series panel (e.g.
@@ -136,15 +132,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   // Populate series data based on query results
   const { timeScale, timeChartData, timeSeriesMapping, legendItems } = useMemo(() => {
-    // If loading or fetching, we display a loading indicator.
-    // We skip the expensive loops below until we are done loading or fetching.
-    if (isLoading || isFetching) {
-      return {
-        timeChartData: [],
-        timeSeriesMapping: [],
-      };
-    }
-
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
@@ -166,9 +153,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     // Mapping of each set of query results to be ECharts option compatible
     // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
     for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
-      // Skip queries that are still loading or don't have data
-      if (!result || result.isLoading || result.isFetching || result.data === undefined) continue;
+      const result = queryResults[queryIndex]!;
 
       // Retrieve querySettings for this query, if exists.
       // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
@@ -296,8 +281,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
     legend,
     visual,
     querySettingsList,
-    isFetching,
-    isLoading,
     yAxis?.max,
     yAxis?.min,
     categoricalPalette,
@@ -345,21 +328,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps): ReactElement 
 
   if (adjustedContentDimensions === undefined) {
     return null;
-  }
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
-
-  // At this point, we have a response from the backend for all queries. (We're past loading === true).
-  // If we don't data from any of the queries, then check if we want to show an error.
-  // Put another way: If any queries have data, even if other queries failed, we will show the data (not the error).
-  // Unfortunately, partial errors get swallowed in this case.
-  // This could be refactored when someone takes a look at validation and error-handling.
-  if (!hasData) {
-    for (const result of queryResults) {
-      if (result.error) throw result.error;
-    }
   }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid

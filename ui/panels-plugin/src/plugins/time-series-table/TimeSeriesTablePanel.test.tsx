@@ -11,58 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  MockPlugin,
-  mockPluginRegistry,
-  PluginRegistry,
-  TimeRangeContext,
-  TimeSeriesQueryPlugin,
-  useDataQueries,
-} from '@perses-dev/plugin-system';
-import { TimeRangeValue, TimeSeriesData, toAbsoluteTimeRange } from '@perses-dev/core';
+import { TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesTableProps } from '@perses-dev/panels-plugin';
 import { render, screen } from '@testing-library/react';
-import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
-import { ReactElement } from 'react';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
-  MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE,
-  MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
+  MOCK_TIME_SERIES_QUERY_DEFINITION,
 } from '../../test';
 import { TimeSeriesTablePanel } from './TimeSeriesTablePanel';
 
-jest.mock('@perses-dev/plugin-system', () => {
-  return {
-    ...jest.requireActual('@perses-dev/plugin-system'),
-    useDataQueries: jest.fn(),
-  };
-});
-
-const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
-
-function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin {
-  return {
-    getTimeSeriesData: async (): Promise<TimeSeriesData> => {
-      return data;
-    },
-    OptionsEditorComponent: (): ReactElement => {
-      return <div>Edit options here</div>;
-    },
-    createInitialOptions: () => ({}),
-  };
-}
-
-function buildMockQueryPlugin(data: TimeSeriesData): MockPlugin {
-  return {
-    pluginType: 'TimeSeriesQuery',
-    kind: 'PrometheusTimeSeriesQuery',
-    plugin: buildFakeTimeSeriesQuery(data),
-  };
-}
-
-const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
+const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -73,37 +33,19 @@ const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
 describe('TimeSeriesTablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (data: TimeSeriesData): void => {
-    const mockTimeRangeContext = {
-      refreshIntervalInMs: 0,
-      setRefreshInterval: (): Record<string, unknown> => ({}),
-      timeRange: TEST_TIME_RANGE,
-      setTimeRange: (): Record<string, unknown> => ({}),
-      absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
-      refresh: jest.fn(),
-      refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
-    };
-
     render(
       <SnackbarProvider>
-        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-          <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin(data))}>
-            <ChartsProvider chartsTheme={testChartsTheme}>
-              <TimeRangeContext.Provider value={mockTimeRangeContext}>
-                <TimeSeriesTablePanel {...TEST_TIME_SERIES_TABLE_PROPS} />
-              </TimeRangeContext.Provider>
-            </ChartsProvider>
-          </PluginRegistry>
-        </VirtuosoMockContext.Provider>
+        <ChartsProvider chartsTheme={testChartsTheme}>
+          <TimeSeriesTablePanel
+            {...TEST_TIME_SERIES_TABLE_PROPS}
+            queryResults={[{ definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data }]}
+          />
+        </ChartsProvider>
       </SnackbarProvider>
     );
   };
 
   it('should render multi values with timestamps', async () => {
-    (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE,
-      isLoading: false,
-      isFetching: false,
-    });
     renderPanel(MOCK_TIME_SERIES_DATA_MULTIVALUE);
 
     expect(
@@ -120,11 +62,6 @@ describe('TimeSeriesTablePanel', () => {
   });
 
   it('should render single value without timestamp', async () => {
-    (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
-      isLoading: false,
-      isFetching: false,
-    });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
 
     expect(
