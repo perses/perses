@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { Box, Skeleton, Stack } from '@mui/material';
+import { Box, Skeleton, Stack, useTheme } from '@mui/material';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
-import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
-import { CalculationsMap, DEFAULT_CALCULATION } from '@perses-dev/core';
+import { CalculationsMap, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import {
   GaugeChartOptions,
@@ -30,15 +30,13 @@ const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: undefined };
 const GAUGE_MIN_WIDTH = 90;
 const PANEL_PADDING_OFFSET = 20;
 
-export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
+export type GaugeChartPanelProps = PanelProps<GaugeChartOptions, TimeSeriesData>;
 
 export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | null {
-  const { spec: pluginSpec, contentDimensions } = props;
+  const { spec: pluginSpec, queryResults, contentDimensions } = props;
   const { calculation, max } = pluginSpec;
 
   const { thresholds: thresholdsColors } = useChartsTheme();
-
-  const { queryResults, isLoading } = useDataQueries('TimeSeriesQuery');
 
   // ensures all default format properties set if undef
   const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
@@ -67,21 +65,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
     return seriesData;
   }, [queryResults, calculation]);
 
-  if (queryResults[0]?.error) throw queryResults[0]?.error;
-
   if (contentDimensions === undefined) return null;
-
-  // TODO: remove Skeleton, add loading state to match mockups
-  if (isLoading) {
-    return (
-      <Skeleton
-        sx={{ margin: '0 auto' }}
-        variant="circular"
-        width={contentDimensions.width > contentDimensions.height ? contentDimensions.height : contentDimensions.width}
-        height={contentDimensions.height}
-      />
-    );
-  }
 
   // needed for end value of last threshold color segment
   let thresholdMax = max;
@@ -150,6 +134,20 @@ export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | nul
           </Box>
         );
       })}
+    </Stack>
+  );
+}
+
+export function GaugeChartLoading({ contentDimensions }: GaugeChartPanelProps): React.ReactElement {
+  const theme = useTheme();
+  const diameter =
+    contentDimensions === undefined
+      ? 30
+      : Math.min(contentDimensions.width, contentDimensions.height) - parseInt(theme.spacing()) * 2;
+
+  return (
+    <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+      <Skeleton variant="circular" width={diameter} height={diameter} aria-label="Loading..." />
     </Stack>
   );
 }

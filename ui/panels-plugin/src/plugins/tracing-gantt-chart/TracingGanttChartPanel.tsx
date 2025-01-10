@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
+import { PanelProps } from '@perses-dev/plugin-system';
+import { NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
+import { TraceData } from '@perses-dev/core';
 import { TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 import { AttributeLinks } from './TracingGanttChart/DetailPane/Attributes';
 
-export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions> {
+export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions, TraceData> {
   /**
    * Allows custom links for each attribute in the detail pane.
    * Example:
@@ -31,25 +32,15 @@ export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChar
 }
 
 export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
-  const { spec, attributeLinks } = props;
+  const { spec, queryResults, attributeLinks } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
-  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   if (queryResults.length > 1) {
     return <TextOverlay message="This panel does not support more than one query." />;
   }
 
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
-
-  const queryError = queryResults.find((d) => d.error);
-  if (queryError) {
-    throw queryError.error;
-  }
-
-  const trace = queryResults[0]?.data?.trace;
+  const trace = queryResults[0]?.data.trace;
   if (!trace) {
     return <NoDataOverlay resource="trace" />;
   }

@@ -28,7 +28,7 @@ import {
   EChartsValues,
   TimeSeriesOption,
 } from '@perses-dev/components';
-import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
+import { useTimeSeriesQueries, PanelData } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -58,10 +58,8 @@ export const BLUR_FADEOUT_OPACITY = 0.5;
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScaleForQueries(
-  queries: UseDataQueryResults<TimeSeriesData>['queryResults']
-): TimeScale | undefined {
-  const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
+export function getCommonTimeScaleForQueries(queries: Array<PanelData<TimeSeriesData>>): TimeScale | undefined {
+  const seriesData = queries.map((query) => query.data);
   return getCommonTimeScale(seriesData);
 }
 

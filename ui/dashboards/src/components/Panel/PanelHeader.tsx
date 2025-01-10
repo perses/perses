@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, Typography, Stack, CardHeaderProps, styled, IconButton } from '@mui/material';
+import { CardHeader, Typography, Stack, CardHeaderProps, styled, IconButton, CircularProgress } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -20,7 +20,8 @@ import DragIcon from 'mdi-material-ui/DragVertical';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import AlertIcon from 'mdi-material-ui/Alert';
+import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode } from 'react';
 import { Link } from '@perses-dev/core';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
@@ -42,6 +43,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
     onDuplicatePanelClick: () => void;
     onDeletePanelClick: () => void;
   };
+  queryResults: QueryData[];
 }
 
 export function PanelHeader({
@@ -51,6 +53,7 @@ export function PanelHeader({
   links,
   readHandlers,
   editHandlers,
+  queryResults,
   sx,
   extra,
   ...rest
@@ -60,6 +63,29 @@ export function PanelHeader({
 
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
+
+  let queryStateIndicator: CardHeaderProps['action'] = undefined;
+  const hasData = queryResults.some((q) => q.data);
+  const isFetching = queryResults.some((q) => q.isFetching);
+  const queryErrors = queryResults.filter((q) => q.error);
+  if (isFetching && hasData) {
+    // If the panel has no data, the panel content will show the loading overlay (or an error).
+    // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
+    queryStateIndicator = <CircularProgress aria-label="loading" size="1.125rem" />;
+  } else if (queryErrors.length > 0) {
+    const errorTexts = queryErrors
+      .map((q) => q.error)
+      .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+      .join('\n');
+
+    queryStateIndicator = (
+      <InfoTooltip description={errorTexts}>
+        <HeaderIconButton aria-label="panel errors" size="small">
+          <AlertIcon fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }
 
   let readActions: CardHeaderProps['action'] = undefined;
   if (readHandlers !== undefined) {
@@ -169,7 +195,7 @@ export function PanelHeader({
       }
       action={
         <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-          {editHandlers === undefined && extra} {readActions} {editActions}
+          {queryStateIndicator} {editHandlers === undefined && extra} {readActions} {editActions}
         </HeaderActionWrapper>
       }
       sx={combineSx(
