@@ -12,38 +12,32 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { StatChart, StatChartData, useChartsTheme, GraphSeries, LoadingOverlay } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
 import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
-import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps, PanelData } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
 
 const MIN_WIDTH = 100;
 const SPACING = 2;
 
-export type StatChartPanelProps = PanelProps<StatChartOptions>;
+export type StatChartPanelProps = PanelProps<StatChartOptions, TimeSeriesData>;
 
 export function StatChartPanel(props: StatChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, format, sparkline, thresholds, valueFontSize: valueFontSize },
     contentDimensions,
+    queryResults,
   } = props;
 
-  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
   const statChartData = useStatChartData(queryResults, calculation);
   const isMultiSeries = statChartData.length > 1;
 
   const chartsTheme = useChartsTheme();
 
-  if (queryResults[0]?.error) throw queryResults[0]?.error;
-
   if (contentDimensions === undefined) return null;
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
 
   // Calculates chart width
   const spacing = SPACING * (statChartData.length - 1);
@@ -88,7 +82,7 @@ export function StatChartPanel(props: StatChartPanelProps): ReactElement | null 
 }
 
 const useStatChartData = (
-  queryResults: UseDataQueryResults<TimeSeriesData>['queryResults'],
+  queryResults: Array<PanelData<TimeSeriesData>>,
   calculation: CalculationType
 ): StatChartData[] => {
   return useMemo(() => {
@@ -99,9 +93,6 @@ const useStatChartData = (
 
     const statChartData: StatChartData[] = [];
     for (const result of queryResults) {
-      // Skip queries that are still loading or don't have data
-      if (result.isLoading || result.isFetching || result.data === undefined) continue;
-
       for (const seriesData of result.data.series) {
         const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
         const series: GraphSeries = {

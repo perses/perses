@@ -11,34 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChart, BarChartData, LoadingOverlay, useChartsTheme } from '@perses-dev/components';
+import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
-import { CalculationType, CalculationsMap } from '@perses-dev/core';
-import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationType, CalculationsMap, TimeSeriesData } from '@perses-dev/core';
+import { PanelProps } from '@perses-dev/plugin-system';
 import { BarChartOptions } from './bar-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 
-export type BarChartPanelProps = PanelProps<BarChartOptions>;
+export type BarChartPanelProps = PanelProps<BarChartOptions, TimeSeriesData>;
 
 export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, format, sort, mode },
     contentDimensions,
+    queryResults,
   } = props;
 
   const chartsTheme = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
 
-  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery'); // gets data queries from a context provider, see DataQueriesProvider
-
   const barChartData: BarChartData[] = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
     const barChartData: BarChartData[] = [];
     for (const result of queryResults) {
-      // Skip queries that are still loading or don't have data
-      if (result.isLoading || result.isFetching || result.data === undefined) continue;
-
       for (const seriesData of result.data.series) {
         const series = {
           value: calculate(seriesData.values) ?? null,
@@ -56,13 +52,7 @@ export function BarChartPanel(props: BarChartPanelProps): ReactElement | null {
     }
   }, [queryResults, sort, mode, calculation]);
 
-  if (queryResults[0]?.error) throw queryResults[0]?.error;
-
   if (contentDimensions === undefined) return null;
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
 
   return (
     <Box sx={{ padding: `${PADDING}px` }}>
