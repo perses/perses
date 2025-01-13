@@ -31,7 +31,7 @@ func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensit
 		if c.HTTPDiscovery != nil {
 			helper, err = httpsd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.HTTPDiscovery, svc)
 		} else if c.KubernetesDiscovery != nil {
-			helper, err = kubesd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.KubernetesDiscovery, svc, serviceManager.GetSchemas())
+			helper, err = kubesd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.KubernetesDiscovery, svc, serviceManager.GetSchema())
 		}
 		if err != nil {
 			return nil, err

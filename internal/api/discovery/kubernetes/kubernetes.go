@@ -19,11 +19,12 @@ import (
 	"strings"
 	"time"
 
+	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/discovery/cuetils"
 	"github.com/perses/perses/internal/api/discovery/service"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -44,7 +45,7 @@ type clientDiscovery interface {
 	discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error)
 }
 
-func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schemas schemas.Schemas) (taskhelper.Helper, error) {
+func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schema schema.Schema) (taskhelper.Helper, error) {
 	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get a kubeConfig: %w", err)
@@ -73,7 +74,7 @@ func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *co
 	sd := &discovery{
 		cfg:       cfg,
 		svc:       svc,
-		schemas:   schemas,
+		schema:    schema,
 		name:      discoveryName,
 		discovery: d,
 	}
@@ -85,7 +86,7 @@ type discovery struct {
 	cfg       *config.KubernetesDiscovery
 	discovery clientDiscovery
 	svc       *service.ApplyService
-	schemas   schemas.Schemas
+	schema    schema.Schema
 	name      string
 }
 
@@ -105,10 +106,11 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 }
 
 func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
-	schema, err := d.schemas.GetDatasourceSchema(d.cfg.DatasourcePluginKind)
+	sch, err := d.schema.GetDatasourceSchema(d.cfg.DatasourcePluginKind)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get datasource schema")
 		return nil, nil
 	}
-	return cuetils.NewFromSchema(schema)
+	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	return cuetils.NewFromSchema(ctx.BuildInstance(sch))
 }

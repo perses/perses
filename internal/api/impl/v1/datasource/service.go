@@ -20,7 +20,7 @@ import (
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -30,10 +30,10 @@ import (
 type service struct {
 	datasource.Service
 	dao datasource.DAO
-	sch schemas.Schemas
+	sch schema.Schema
 }
 
-func NewService(dao datasource.DAO, sch schemas.Schemas) datasource.Service {
+func NewService(dao datasource.DAO, sch schema.Schema) datasource.Service {
 	return &service{
 		dao: dao,
 		sch: sch,
