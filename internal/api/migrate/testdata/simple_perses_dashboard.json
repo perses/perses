@@ -413,6 +413,7 @@
               },
               "yAxis": {
                 "format": {
+                  "unit": "decimal",
                   "decimalPlaces": 3
                 }
               },
