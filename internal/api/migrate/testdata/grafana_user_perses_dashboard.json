@@ -110,6 +110,398 @@
                   ]
               }
           },
+          "2": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_remaining",
+                      "description": "Current remaining capacity in bytes"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "bytes"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (hadoop_hdfs_datanode_remaining{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "3": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_failed_volumes",
+                      "description": "Total number of failed volumes"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "bytes"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (hadoop_hdfs_datanode_failed_volumes{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "4": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_bytes_written_rate",
+                      "description": "Total rate of bytes written to DataNode"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "bytes/sec"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_bytes_written{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "5": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_bytes_read_rate",
+                      "description": "Total rate of bytes read from DataNode"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "bytes/sec"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_bytes_read{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "6": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_total_write_time",
+                      "description": "Total number of milliseconds spent on write operation"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "milliseconds"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (hadoop_hdfs_datanode_total_write_time{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "7": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_total_read_time",
+                      "description": "Total number of milliseconds spent on read operation"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "milliseconds"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (hadoop_hdfs_datanode_total_read_time{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
+                                      "seriesNameFormat": "{{_target}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "8": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_block_operations_total_rate",
+                      "description": "Total number of blocks in different oprations"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "counts/sec"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_block_operations_total{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
+                                      "seriesNameFormat": "{{_target}}_{{oper}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "9": {
+              "kind": "Panel",
+              "spec": {
+                  "display": {
+                      "name": "datanode_from_client_total_rate",
+                      "description": "Total number of each operations from different client"
+                  },
+                  "plugin": {
+                      "kind": "TimeSeriesChart",
+                      "spec": {
+                          "legend": {
+                              "mode": "list",
+                              "position": "bottom",
+                              "values": []
+                          },
+                          "visual": {
+                              "areaOpacity": 0.1,
+                              "connectNulls": false,
+                              "display": "line",
+                              "lineWidth": 1
+                          },
+                          "yAxis": {
+                              "format": {
+                                  "unit": "counts/sec"
+                              }
+                          }
+                      }
+                  },
+                  "queries": [
+                      {
+                          "kind": "TimeSeriesQuery",
+                          "spec": {
+                              "plugin": {
+                                  "kind": "PrometheusTimeSeriesQuery",
+                                  "spec": {
+                                      "datasource": {
+                                          "kind": "PrometheusDatasource",
+                                          "name": "${datasource}"
+                                      },
+                                      "minStep": "",
+                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_from_client_total{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
+                                      "seriesNameFormat": "{{_target}}_{{client}}_{{oper}}"
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
           "10": {
               "kind": "Panel",
               "spec": {
@@ -590,55 +982,6 @@
                   ]
               }
           },
-          "2": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_remaining",
-                      "description": "Current remaining capacity in bytes"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "bytes"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (hadoop_hdfs_datanode_remaining{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
           "20": {
               "kind": "Panel",
               "spec": {
@@ -725,349 +1068,6 @@
                                       "minStep": "",
                                       "query": "avg without (instance) (rate(hadoop_hdfs_datanode_datanode_network_errors{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
                                       "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "3": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_failed_volumes",
-                      "description": "Total number of failed volumes"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "bytes"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (hadoop_hdfs_datanode_failed_volumes{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "4": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_bytes_written_rate",
-                      "description": "Total rate of bytes written to DataNode"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "bytes/sec"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_bytes_written{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "5": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_bytes_read_rate",
-                      "description": "Total rate of bytes read from DataNode"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "bytes/sec"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_bytes_read{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "6": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_total_write_time",
-                      "description": "Total number of milliseconds spent on write operation"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "milliseconds"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (hadoop_hdfs_datanode_total_write_time{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "7": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_total_read_time",
-                      "description": "Total number of milliseconds spent on read operation"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "milliseconds"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (hadoop_hdfs_datanode_total_read_time{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"})",
-                                      "seriesNameFormat": "{{_target}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "8": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_block_operations_total_rate",
-                      "description": "Total number of blocks in different oprations"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "counts/sec"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_block_operations_total{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
-                                      "seriesNameFormat": "{{_target}}_{{oper}}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
-              }
-          },
-          "9": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "datanode_from_client_total_rate",
-                      "description": "Total number of each operations from different client"
-                  },
-                  "plugin": {
-                      "kind": "TimeSeriesChart",
-                      "spec": {
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom",
-                              "values": []
-                          },
-                          "visual": {
-                              "areaOpacity": 0.1,
-                              "connectNulls": false,
-                              "display": "line",
-                              "lineWidth": 1
-                          },
-                          "yAxis": {
-                              "format": {
-                                  "unit": "counts/sec"
-                              }
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "datasource": {
-                                          "kind": "PrometheusDatasource",
-                                          "name": "${datasource}"
-                                      },
-                                      "minStep": "",
-                                      "query": "avg without (instance) (rate(hadoop_hdfs_datanode_from_client_total{bar_stack_id=\"$bar_stack_id\", _target=~\"$datanode\"}[$__rate_interval]))",
-                                      "seriesNameFormat": "{{_target}}_{{client}}_{{oper}}"
                                   }
                               }
                           }
