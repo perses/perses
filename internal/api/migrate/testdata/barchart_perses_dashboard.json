@@ -1,68 +1,68 @@
 {
   "kind": "Dashboard",
   "metadata": {
-      "name": "barchart",
-      "createdAt": "0001-01-01T00:00:00Z",
-      "updatedAt": "0001-01-01T00:00:00Z",
-      "version": 0,
-      "project": ""
+    "name": "barchart",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
   },
   "spec": {
-      "display": {
-          "name": "Barchart panel dash"
-      },
-      "panels": {
-          "0": {
-              "kind": "Panel",
-              "spec": {
-                  "display": {
-                      "name": "Some metrics",
-                      "description": "Just displaying some metrics with Bar panel"
-                  },
-                  "plugin": {
-                      "kind": "BarChart",
-                      "spec": {
-                          "calculation": "last-number",
-                          "format": {
-                              "decimalPlaces": 2,
-                              "unit": "percent"
-                          }
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "query": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}"
-                                  }
-                              }
-                          }
-                      }
-                  ]
+    "display": {
+      "name": "Barchart panel dash"
+    },
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Some metrics",
+            "description": "Just displaying some metrics with Bar panel"
+          },
+          "plugin": {
+            "kind": "BarChart",
+            "spec": {
+              "calculation": "last-number",
+              "format": {
+                "decimalPlaces": 2,
+                "unit": "percent"
               }
-          }
-      },
-      "layouts": [
-          {
-              "kind": "Grid",
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
               "spec": {
-                  "items": [
-                      {
-                          "x": 6,
-                          "y": 11,
-                          "width": 6,
-                          "height": 4,
-                          "content": {
-                              "$ref": "#/spec/panels/0"
-                          }
-                      }
-                  ]
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}"
+                  }
+                }
               }
-          }
-      ],
-      "duration": "1h"
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 6,
+              "y": 11,
+              "width": 6,
+              "height": 4,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
   }
 }
