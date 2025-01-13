@@ -124,24 +124,24 @@ func (p *pluginFile) Load() error {
 
 func isPluginValid(pluginPath string) (bool, error) {
 	// check if the plugin folder exists
-	exist, err := isFileExist(pluginPath)
+	exist, err := fileExists(pluginPath)
 	if !exist || err != nil {
 		return false, err
 	}
 	// check if the manifest file exists
-	exist, err = isFileExist(filepath.Join(pluginPath, ManifestFileName))
+	exist, err = fileExists(filepath.Join(pluginPath, ManifestFileName))
 	if !exist || err != nil {
 		return false, err
 	}
 	// check if the package.json file exists
-	exist, err = isFileExist(filepath.Join(pluginPath, PackageJSONFile))
+	exist, err = fileExists(filepath.Join(pluginPath, PackageJSONFile))
 	if !exist || err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
-func isFileExist(filePath string) (bool, error) {
+func fileExists(filePath string) (bool, error) {
 	_, osErr := os.Stat(filePath)
 	if osErr != nil {
 		if errors.Is(osErr, os.ErrNotExist) {
