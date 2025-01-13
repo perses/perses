@@ -1,81 +1,81 @@
 {
   "kind": "Dashboard",
   "metadata": {
-      "name": "piechart",
-      "createdAt": "0001-01-01T00:00:00Z",
-      "updatedAt": "0001-01-01T00:00:00Z",
-      "version": 0,
-      "project": ""
+    "name": "piechart",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
   },
   "spec": {
-      "display": {
-          "name": "Piechart sample"
-      },
-      "panels": {
-          "0": {
-              "kind": "Panel",
+    "display": {
+      "name": "Piechart sample"
+    },
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Piechart sample"
+          },
+          "plugin": {
+            "kind": "PieChart",
+            "spec": {
+              "calculation": "last-number",
+              "legend": {
+                "mode": "list",
+                "position": "bottom"
+              },
+              "radius": 50
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
               "spec": {
-                  "display": {
-                      "name": "Piechart sample"
-                  },
-                  "plugin": {
-                      "kind": "PieChart",
-                      "spec": {
-                          "calculation": "last-number",
-                          "legend": {
-                              "mode": "list",
-                              "position": "bottom"
-                          },
-                          "radius": 50
-                      }
-                  },
-                  "queries": [
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "query": "matching{job=\"abc\"}",
-                                      "seriesNameFormat": "matching roles"
-                                  }
-                              }
-                          }
-                      },
-                      {
-                          "kind": "TimeSeriesQuery",
-                          "spec": {
-                              "plugin": {
-                                  "kind": "PrometheusTimeSeriesQuery",
-                                  "spec": {
-                                      "query": "nonmatching{job=\"abc2\"}",
-                                      "seriesNameFormat": "non-matching roles"
-                                  }
-                              }
-                          }
-                      }
-                  ]
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "matching{job=\"abc\"}",
+                    "seriesNameFormat": "matching roles"
+                  }
+                }
               }
-          }
-      },
-      "layouts": [
-          {
-              "kind": "Grid",
+            },
+            {
+              "kind": "TimeSeriesQuery",
               "spec": {
-                  "items": [
-                      {
-                          "x": 12,
-                          "y": 11,
-                          "width": 12,
-                          "height": 6,
-                          "content": {
-                              "$ref": "#/spec/panels/0"
-                          }
-                      }
-                  ]
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "nonmatching{job=\"abc2\"}",
+                    "seriesNameFormat": "non-matching roles"
+                  }
+                }
               }
-          }
-      ],
-      "duration": "1h"
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "items": [
+            {
+              "x": 12,
+              "y": 11,
+              "width": 12,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
   }
 }
