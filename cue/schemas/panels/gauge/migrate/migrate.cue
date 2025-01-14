@@ -28,10 +28,14 @@ spec: {
 	if #unit != null {
 		format: unit: #unit
 	}
-
 	#decimal: *#panel.fieldConfig.defaults.decimal | *#panel.fieldConfig.defaults.decimals | null
 	if #decimal != null {
-		format: decimalPlaces: #decimal
+		format: {
+			decimalPlaces: #decimal
+			if #unit == null {
+				unit: "decimal"
+			}
+		}
 	}
 
 	#steps: *#panel.fieldConfig.defaults.thresholds.steps | null

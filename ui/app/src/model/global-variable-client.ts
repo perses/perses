@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalVariableResource } from '@perses-dev/core';
+import { GlobalVariableResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -68,8 +68,8 @@ export function deleteGlobalVariable(entity: GlobalVariableResource): Promise<Re
  * Used to get a global variable from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalVariable(name: string): UseQueryResult<GlobalVariableResource> {
-  return useQuery<GlobalVariableResource, Error>({
+export function useGlobalVariable(name: string): UseQueryResult<GlobalVariableResource, StatusError> {
+  return useQuery<GlobalVariableResource, StatusError>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
       return getGlobalVariable(name);
@@ -81,8 +81,8 @@ export function useGlobalVariable(name: string): UseQueryResult<GlobalVariableRe
  * Used to get global variables from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalVariableList(): UseQueryResult<GlobalVariableResource[]> {
-  return useQuery<GlobalVariableResource[], Error>({
+export function useGlobalVariableList(): UseQueryResult<GlobalVariableResource[], StatusError> {
+  return useQuery<GlobalVariableResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
       return getGlobalVariables();
@@ -96,13 +96,13 @@ export function useGlobalVariableList(): UseQueryResult<GlobalVariableResource[]
  */
 export function useCreateGlobalVariableMutation(): UseMutationResult<
   GlobalVariableResource,
-  Error,
+  StatusError,
   GlobalVariableResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalVariableResource, Error, GlobalVariableResource>({
+  return useMutation<GlobalVariableResource, StatusError, GlobalVariableResource>({
     mutationKey: queryKey,
     mutationFn: (entity: GlobalVariableResource) => {
       return createGlobalVariable(entity);
@@ -119,13 +119,13 @@ export function useCreateGlobalVariableMutation(): UseMutationResult<
  */
 export function useUpdateGlobalVariableMutation(): UseMutationResult<
   GlobalVariableResource,
-  Error,
+  StatusError,
   GlobalVariableResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalVariableResource, Error, GlobalVariableResource>({
+  return useMutation<GlobalVariableResource, StatusError, GlobalVariableResource>({
     mutationKey: queryKey,
     mutationFn: (variable: GlobalVariableResource) => {
       return updateGlobalVariable(variable);
@@ -145,13 +145,13 @@ export function useUpdateGlobalVariableMutation(): UseMutationResult<
  */
 export function useDeleteGlobalVariableMutation(): UseMutationResult<
   GlobalVariableResource,
-  Error,
+  StatusError,
   GlobalVariableResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalVariableResource, Error, GlobalVariableResource>({
+  return useMutation<GlobalVariableResource, StatusError, GlobalVariableResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: GlobalVariableResource) => {
       await deleteGlobalVariable(entity);

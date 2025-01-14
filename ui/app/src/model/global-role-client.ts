@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, GlobalRoleResource } from '@perses-dev/core';
+import { fetch, fetchJson, GlobalRoleResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -67,8 +67,8 @@ export function deleteGlobalRole(entity: GlobalRoleResource): Promise<Response> 
  * Used to get a globalRole from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalRole(name: string): UseQueryResult<GlobalRoleResource> {
-  return useQuery<GlobalRoleResource, Error>({
+export function useGlobalRole(name: string): UseQueryResult<GlobalRoleResource, StatusError> {
+  return useQuery<GlobalRoleResource, StatusError>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
       return getGlobalRole(name);
@@ -80,8 +80,8 @@ export function useGlobalRole(name: string): UseQueryResult<GlobalRoleResource> 
  * Used to get globalRoles from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalRoleList(): UseQueryResult<GlobalRoleResource[]> {
-  return useQuery<GlobalRoleResource[], Error>({
+export function useGlobalRoleList(): UseQueryResult<GlobalRoleResource[], StatusError> {
+  return useQuery<GlobalRoleResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
       return globalRoleClient();
@@ -93,11 +93,11 @@ export function useGlobalRoleList(): UseQueryResult<GlobalRoleResource[]> {
  * Returns a mutation that can be used to create a globalRole.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, Error, GlobalRoleResource> {
+export function useCreateGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, StatusError, GlobalRoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalRoleResource, Error, GlobalRoleResource>({
+  return useMutation<GlobalRoleResource, StatusError, GlobalRoleResource>({
     mutationKey: queryKey,
     mutationFn: (globalRole: GlobalRoleResource) => {
       return createGlobalRole(globalRole);
@@ -112,10 +112,10 @@ export function useCreateGlobalRoleMutation(): UseMutationResult<GlobalRoleResou
  * Returns a mutation that can be used to update a globalRole.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, Error, GlobalRoleResource> {
+export function useUpdateGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, StatusError, GlobalRoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
-  return useMutation<GlobalRoleResource, Error, GlobalRoleResource>({
+  return useMutation<GlobalRoleResource, StatusError, GlobalRoleResource>({
     mutationKey: queryKey,
     mutationFn: (globalRole: GlobalRoleResource) => {
       return updateGlobalRole(globalRole);
@@ -133,11 +133,11 @@ export function useUpdateGlobalRoleMutation(): UseMutationResult<GlobalRoleResou
  * Returns a mutation that can be used to delete a globalRole.
  * Will automatically refresh the cache for all the list.
  */
-export function useDeleteGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, Error, GlobalRoleResource> {
+export function useDeleteGlobalRoleMutation(): UseMutationResult<GlobalRoleResource, StatusError, GlobalRoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalRoleResource, Error, GlobalRoleResource>({
+  return useMutation<GlobalRoleResource, StatusError, GlobalRoleResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: GlobalRoleResource) => {
       await deleteGlobalRole(entity);
