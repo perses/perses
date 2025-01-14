@@ -1,20 +1,6 @@
 # Changelog
 
-## 0.50.0-rc.1 / 2025-01-07
-
-- [ENHANCEMENT] `percli plugin lint`: improve the way to find the schema files (#2526)
-- [ENHANCEMENT] `percli dac diff`: add output + avoid early return when processing a directory (#2500)
-- [ENHANCEMENT] DaC CUE SDK: accurate constraints for duration attributes (#2525)
-- [ENHANCEMENT] DaC CUE SDK: add datasource param to the var group builder (#2524)
-- [ENHANCEMENT] Use Perses logo for the app loader (#2518)
-- [ENHANCEMENT] Table panel: editor text fields are debounced (#2470)
-- [BUGFIX] DaC CUE SDK: Fix inconsistencies in mandatory vs optional attributes in dashboard lib (#2540)
-- [BUGFIX] Fix preview display name with prefix (#2520)
-- [BUGFIX] Fix for migration of decimal units (#2493)
-- [BUGFIX] Table panel: fix cell mapping for range condition (#2517)
-- [DOC] Align plugin doc with the migration revamp (#2516)
-
-## 0.50.0-rc.0 / 2024-12-17
+## 0.50.0 / 2025-01-15
 
 This release significantly enhances the migration feature with better performance and reduced disruptions, thanks to a complete overhaul of its logic.
 We’ve also addressed numerous updates to the migration process itself, incorporating fixes and enhancements to better cover use cases raised by the community - thank you for your contributions!
@@ -22,8 +8,13 @@ Additionally, we’ve begun implementing new CLI commands to lay the groundwork 
 Finally, thanks to the community again we’re introducing a new Status History panel, and the Table panel has been enriched with multiple improvements.
 
 - [FEATURE] Status History panel (#2403)
-- [FEATURE] new CLI command for plugins development (#2410) (#2459) (#2471)
+- [FEATURE] new CLI command for plugins development (#2410) (#2459) (#2471) (#2526)
 - [FEATURE] Table panel: columns can be reordered (#2392)
+- [ENHANCEMENT] `percli dac diff`: add output + avoid early return when processing a directory (#2500)
+- [ENHANCEMENT] DaC CUE SDK: accurate constraints for duration attributes (#2525)
+- [ENHANCEMENT] DaC CUE SDK: add datasource param to the var group builder (#2524)
+- [ENHANCEMENT] Use Perses logo for the app loader (#2518)
+- [ENHANCEMENT] Table panel: editor text fields are debounced (#2470)
 - [ENHANCEMENT] Add yellow mapping from grafana (#2461)
 - [ENHANCEMENT] Update text migration (#2465)
 - [ENHANCEMENT] Full rewrite of the migration script (#2481)
@@ -45,7 +36,16 @@ Finally, thanks to the community again we’re introducing a new Status History 
 - [ENHANCEMENT] Refactor struct field names and add validation for duration fields (#2360)
 - [ENHANCEMENT] More user-friendly helpers for prometheus built-in variables (#2407)
 - [BREAKINGCHANGE] copy duration type from prometheus/common (#2440)
-- [BUGFIX] `dac diff`: fix output folder not found (#2484)
+- [BUGFIX] Update unit's migration (#2519)
+- [BUGFIX] GaugeChartPanel: fix empty state (#2548)
+- [BUGFIX] Fixes tooltip display in EDGE / IE (#2547)
+- [BUGFIX] Redirect to the desired page after login success (#2354)
+- [BUGFIX] DaC CUE SDK: Fix inconsistencies in mandatory vs optional attributes in dashboard lib (#2540)
+- [BUGFIX] Fix preview display name with prefix (#2520)
+- [BUGFIX] Fix for migration of decimal units (#2493)
+- [BUGFIX] Table panel: fix cell mapping for range condition (#2517)
+- [BUGFIX] `percli dac setup`: fix useless requirement of go CLI when using CUE (#2544)
+- [BUGFIX] `percli dac diff`: fix output folder not found (#2484)
 - [BUGFIX] Table: mapping with min range 0 not working (#2472)
 - [BUGFIX] Table: fix migration of joinByField transform (#2458)
 - [BUGFIX] Fix Panel JSON validation (#2456)
@@ -55,6 +55,7 @@ Finally, thanks to the community again we’re introducing a new Status History 
 - [BUGFIX] Fix login command avoiding reusing previous config (#2416)
 - [BUGFIX] Remove some SX props leaking (#2408)
 - [BUGFIX] Edit mode not working after clicking on the resource row (#2404)
+- [DOC] Align plugin doc with the migration revamp (#2516)
 - [DOC] Adjustments in CLI doc (#2480)
 - [DOC] Adjust markdown syntax following issues spotted on website (#2397)
 
