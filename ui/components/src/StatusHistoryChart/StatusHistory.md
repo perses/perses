@@ -1,4 +1,5 @@
 # Status History Chart
+
 It allows you to visualize the status of various metrics over time.
 
 ## Usage
