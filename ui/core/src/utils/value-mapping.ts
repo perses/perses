@@ -27,7 +27,7 @@ export function applyValueMapping(value: number | string, mappings: ValueMapping
         const valueOptions = mapping.spec;
 
         if (String(valueOptions.value) === String(value)) {
-          mappedItem.value = valueOptions.result.value;
+          mappedItem.value = valueOptions.result.value || mappedItem.value;
           mappedItem.color = valueOptions.result.color;
         }
         break;
@@ -35,8 +35,15 @@ export function applyValueMapping(value: number | string, mappings: ValueMapping
       case 'Range': {
         const rangeOptions = mapping.spec;
         const newValue = value as number;
-        if (newValue >= rangeOptions.from && newValue <= rangeOptions.to) {
-          mappedItem.value = rangeOptions.result.value;
+
+        if (rangeOptions.from === undefined && rangeOptions.to === undefined) {
+          break;
+        }
+
+        const from = rangeOptions.from !== undefined ? rangeOptions.from : -Infinity;
+        const to = rangeOptions.to !== undefined ? rangeOptions.to : Infinity;
+        if (newValue >= from && newValue <= to) {
+          mappedItem.value = rangeOptions.result.value || mappedItem.value;
           mappedItem.color = rangeOptions.result.color;
         }
         break;
@@ -53,7 +60,8 @@ export function applyValueMapping(value: number | string, mappings: ValueMapping
 
         if (stringValue.match(regex)) {
           if (regexOptions.result.value !== null) {
-            mappedItem.value = stringValue.replace(regex, regexOptions.result.value.toString() || '');
+            mappedItem.value =
+              stringValue.replace(regex, regexOptions.result.value.toString() || '') || mappedItem.value;
             mappedItem.color = regexOptions.result.color;
           }
         }
@@ -62,7 +70,7 @@ export function applyValueMapping(value: number | string, mappings: ValueMapping
       case 'Misc': {
         const miscOptions = mapping.spec;
         if (isMiscValueMatch(miscOptions.value, value)) {
-          mappedItem.value = miscOptions.result.value;
+          mappedItem.value = miscOptions.result.value || mappedItem.value;
           mappedItem.color = miscOptions.result.color;
         }
         break;

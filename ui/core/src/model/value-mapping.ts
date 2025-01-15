@@ -28,8 +28,8 @@ export interface ValueMappingOptions {
 export interface ValueMappingOptionsRange {
   kind: 'Range';
   spec: {
-    from: number;
-    to: number;
+    from?: number;
+    to?: number;
     result: MappedValue;
   };
 }

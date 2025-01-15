@@ -59,14 +59,24 @@ const ConditionEditor: FC<ValueMappingConditionEditorProps> = ({ mapping, onChan
             label="From"
             placeholder="Start of range"
             value={mapping.spec?.from ?? ''}
-            onChange={(e) => onChange({ ...mapping, spec: { ...mapping.spec, from: e.target.value === '' ? undefined : +e.target.value } })}
+            onChange={(e) =>
+              onChange({
+                ...mapping,
+                spec: { ...mapping.spec, from: e.target.value === '' ? undefined : +e.target.value },
+              })
+            }
             fullWidth
           />
           <TextField
             label="To"
             placeholder="End of range (inclusive)"
             value={mapping.spec?.to ?? ''}
-            onChange={(e) => onChange({ ...mapping, spec: { ...mapping.spec, to: e.target.value === '' ? undefined : +e.target.value } })}
+            onChange={(e) =>
+              onChange({
+                ...mapping,
+                spec: { ...mapping.spec, to: e.target.value === '' ? undefined : +e.target.value },
+              })
+            }
             fullWidth
           />
         </Stack>
