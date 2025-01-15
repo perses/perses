@@ -14,16 +14,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DEFAULT_CALCULATION } from '@perses-dev/core';
 import { BarChart } from '@perses-dev/panels-plugin';
-import {
-  WithDataQueries,
-  WithPluginRegistry,
-  WithTimeRange,
-  WithPluginSystemVariables,
-  WithPluginSystemDatasourceStore,
-  WithPluginSystemBuiltinVariables,
-} from '@perses-dev/plugin-system/src/stories/shared-utils';
-import { mockTimeSeriesResponseWithManySeries } from '@perses-dev/internal-utils';
-import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { mockTimeSeriesPanelDataWithManySeries } from '@perses-dev/internal-utils';
+import { waitForStableCanvas } from '@perses-dev/storybook';
 
 // Mock time range values used for mocking the time range in the system and
 // mock data responses to ensure consistent results when viewing and taking
@@ -31,6 +23,15 @@ import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQuery
 // Currently has a 6 hour time range.
 const TIMESERIES_EXAMPLE_MOCK_END = 1673805600000;
 const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 6 * 60 * 60 * 1000;
+const panelData = {
+  Random: mockTimeSeriesPanelDataWithManySeries({
+    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+    startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+    endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+    totalSeries: 12,
+    totalDatapoints: 1000,
+  }),
+};
 
 /**
  * The panel component for the `BarChart` panel plugin.
@@ -40,28 +41,16 @@ const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 6 * 60 * 60 
  */
 const meta: Meta<typeof BarChart.PanelComponent> = {
   component: BarChart.PanelComponent,
-  argTypes: {},
+  argTypes: {
+    queryResults: {
+      options: Object.keys(panelData),
+      mapping: panelData,
+    },
+  },
+  args: {
+    queryResults: panelData.Random,
+  },
   parameters: {
-    withDataQueries: {
-      props: {
-        definitions: [
-          {
-            kind: 'PrometheusTimeSeriesQuery',
-            spec: {
-              query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-            },
-          },
-        ],
-      },
-    },
-    withTimeRange: {
-      props: {
-        initialTimeRange: {
-          start: new Date(TIMESERIES_EXAMPLE_MOCK_START),
-          end: new Date(TIMESERIES_EXAMPLE_MOCK_END),
-        },
-      },
-    },
     happo: {
       beforeScreenshot: async () => {
         await waitForStableCanvas('canvas', {
@@ -69,36 +58,7 @@ const meta: Meta<typeof BarChart.PanelComponent> = {
         });
       },
     },
-    msw: {
-      handlers: {
-        queryRange: mockQueryRangeRequests({
-          queries: [
-            {
-              query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-              response: {
-                body: mockTimeSeriesResponseWithManySeries({
-                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
-                  totalSeries: 12,
-                  totalDatapoints: 1000,
-                }),
-              },
-            },
-          ],
-        }),
-      },
-    },
   },
-  decorators: [
-    WithDataQueries,
-    WithPluginSystemBuiltinVariables,
-    WithPluginSystemVariables,
-    WithPluginSystemDatasourceStore,
-    WithPluginRegistry,
-    WithTimeRange,
-    WithQueryClient,
-    WithQueryParams,
-  ],
   render: (args) => {
     return <BarChart.PanelComponent {...args} />;
   },
