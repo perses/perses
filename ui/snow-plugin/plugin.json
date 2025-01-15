@@ -1,0 +1,18 @@
+{
+  "kind": "PluginModule",
+  "metadata": {
+    "name": "Snow"
+  },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Menu",
+        "kind": "SnowMenu",
+        "display": {
+          "name": "Snow menu",
+          "description": "Allow to trigger snow in Perses!"
+        }
+      }
+    ]
+  }
+}
