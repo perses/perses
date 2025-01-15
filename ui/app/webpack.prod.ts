@@ -22,7 +22,7 @@ const prodConfig: Configuration = {
   devtool: false,
   optimization: {
     // TODO: Could this also be replaced with swc minifier?
-    minimizer: [new EsbuildPlugin({ target: 'es2018' })],
+    minimizer: [new EsbuildPlugin({ target: 'es2022' })],
   },
 };
 
