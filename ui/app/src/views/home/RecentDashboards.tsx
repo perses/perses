@@ -14,6 +14,7 @@
 import { Card, Stack } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
 import { ReactElement } from 'react';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 
@@ -27,7 +28,9 @@ export function RecentDashboards(): ReactElement {
         <h2>Recently Viewed Dashboards</h2>
       </Stack>
       <Card id="recent-dashboard-list">
-        <RecentDashboardList dashboardList={data} isLoading={isLoading} />
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <RecentDashboardList dashboardList={data} isLoading={isLoading} />
+        </ErrorBoundary>
       </Card>
     </Stack>
   );
