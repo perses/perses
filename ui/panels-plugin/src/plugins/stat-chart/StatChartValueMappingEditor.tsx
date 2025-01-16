@@ -11,16 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ValueMapping } from '@perses-dev/core';
-import { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ValueMappingsEditor } from '@perses-dev/components';
+import { StatChartOptions } from '@perses-dev/panels-plugin';
+import { FC } from 'react';
 
-export function createInitialStatusHistoryChartOptions(): Record<string, unknown> {
-  return {};
-}
+export type StatChartValueMappingEditorProps = OptionsEditorProps<StatChartOptions>;
 
-export interface StatusHistoryChartOptions {
-  legend?: LegendSpecOptions;
-  mappings?: ValueMapping[];
-}
+export const StatChartValueMappingEditor: FC<StatChartValueMappingEditorProps> = ({ onChange, value }) => {
+  function handleValueMappingChange(mappings: ValueMapping[]): void {
+    onChange({ ...value, mappings });
+  }
 
-export type StatusHistroyChartEditorProps = OptionsEditorProps<StatusHistoryChartOptions>;
+  return <ValueMappingsEditor mappings={value.mappings ?? []} onChange={handleValueMappingChange} />;
+};
