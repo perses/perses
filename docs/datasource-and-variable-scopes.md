@@ -26,4 +26,3 @@ For the variables:
 - The panel uses the standard cluster variable, which is globally defined.
 - The namespace list is restricted to those relevant to the project or application, so a custom project-specific variable is used instead of the global one.
 - The pod variable is defined at the dashboard level, making it accessible exclusively within this dashboard.
-
