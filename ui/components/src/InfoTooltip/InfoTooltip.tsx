@@ -81,6 +81,7 @@ const TooltipContent = ({ title, description }: Pick<InfoTooltipProps, 'title' |
         variant="caption"
         sx={(theme) => ({
           color: theme.palette.text.primary,
+          whiteSpace: 'pre-line',
         })}
       >
         {description}

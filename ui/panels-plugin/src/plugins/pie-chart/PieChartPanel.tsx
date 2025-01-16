@@ -14,7 +14,6 @@
 import {
   PieChart,
   PieChartData,
-  LoadingOverlay,
   useChartsTheme,
   ContentWithLegend,
   SelectedLegendItemState,
@@ -25,25 +24,25 @@ import {
 } from '@perses-dev/components';
 import { Box, useTheme } from '@mui/material';
 import { useMemo, useState, useRef, ReactElement } from 'react';
-import { CalculationType, CalculationsMap, DEFAULT_LEGEND } from '@perses-dev/core';
-import { validateLegendSpec, useDataQueries, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationType, CalculationsMap, DEFAULT_LEGEND, TimeSeriesData } from '@perses-dev/core';
+import { validateLegendSpec, PanelProps } from '@perses-dev/plugin-system';
 import merge from 'lodash/merge';
 import { getSeriesColor } from '../time-series-chart/utils/palette-gen';
 import { DEFAULT_VISUAL, QuerySettingsOptions } from '../time-series-chart/time-series-chart-model';
 import { PieChartOptions } from './pie-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
 
-export type PieChartPanelProps = PanelProps<PieChartOptions>;
+export type PieChartPanelProps = PanelProps<PieChartOptions, TimeSeriesData>;
 
 export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   const {
     spec: { calculation, sort, mode, querySettings: querySettingsList },
     contentDimensions,
+    queryResults,
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
   const PADDING = chartsTheme.container.padding.default;
-  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery'); // gets data queries from a context provider, see DataQueriesProvider
   const chartId = useId('time-series-panel');
   const categoricalPalette = chartsTheme.echartsTheme.color;
 
@@ -57,9 +56,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
     const legendItems: LegendItem[] = [];
 
     for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
-      const result = queryResults[queryIndex];
-      // Skip queries that are still loading or don't have data
-      if (!result || result.isLoading || result.isFetching || result.data === undefined) continue;
+      const result = queryResults[queryIndex]!;
 
       let seriesIndex = 0;
       for (const seriesData of result.data.series) {
@@ -147,12 +144,7 @@ export function PieChartPanel(props: PieChartPanelProps): ReactElement | null {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
 
-  if (queryResults[0]?.error) throw queryResults[0]?.error;
   if (contentDimensions === undefined) return null;
-
-  if (isLoading || isFetching) {
-    return <LoadingOverlay />;
-  }
 
   return (
     <Box sx={{ padding: `${PADDING}px` }}>

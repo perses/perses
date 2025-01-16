@@ -16,13 +16,13 @@
 import { Fragment, ReactElement, ReactNode } from 'react';
 import { Alert, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
-import { QueryData } from '@perses-dev/plugin-system';
+import { PanelData } from '@perses-dev/plugin-system';
 import { SeriesName } from './SeriesName';
 
 const MAX_FORMATABLE_SERIES = 1000;
 
 export interface DataTableProps {
-  result: Array<QueryData<TimeSeriesData>>;
+  result: Array<PanelData<TimeSeriesData>>;
 }
 
 /**

@@ -46,7 +46,7 @@ export function LoadingOverlay(props: LoadingOverlayProps): ReactElement {
   const { variant = 'rounded' } = props;
 
   return (
-    <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', padding: '0 10px' }}>
+    <Stack sx={{ height: '100%', alignItems: 'center', justifyContent: 'center', px: 1 }}>
       <Skeleton variant={variant} width="100%" height="30%" aria-label="Loading..." />
     </Stack>
   );

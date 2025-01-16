@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PanelPlugin, PanelProps } from '@perses-dev/plugin-system';
+import { TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesTablePanel } from './TimeSeriesTablePanel';
 
 type TimeSeriesTableOptions = Record<string, unknown>;
@@ -19,7 +20,7 @@ type TimeSeriesTableOptions = Record<string, unknown>;
 /**
  * The core TimeSeriesTable panel plugin for Perses.
  */
-export const TimeSeriesTable: PanelPlugin<TimeSeriesTableOptions> = {
+export const TimeSeriesTable: PanelPlugin<TimeSeriesTableOptions, TimeSeriesTableProps> = {
   PanelComponent: TimeSeriesTablePanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
   queryOptions: {
@@ -30,4 +31,4 @@ export const TimeSeriesTable: PanelPlugin<TimeSeriesTableOptions> = {
   },
 };
 
-export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions>;
+export type TimeSeriesTableProps = PanelProps<TimeSeriesTableOptions, TimeSeriesData>;

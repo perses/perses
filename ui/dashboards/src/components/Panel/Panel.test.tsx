@@ -14,10 +14,18 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
-import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, TimeRangeProvider, useDataQueriesContext } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
 import { VariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
+
+jest.mock('@perses-dev/plugin-system', () => {
+  return {
+    ...jest.requireActual('@perses-dev/plugin-system'),
+    useDataQueriesContext: jest.fn(() => ({ queryResults: [] })),
+  };
+});
+
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
     kind: 'Panel',
@@ -64,7 +72,9 @@ describe('Panel', () => {
             },
           ]}
         >
-          <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+          <DataQueriesProvider definitions={[]}>
+            <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+          </DataQueriesProvider>
         </VariableProvider>
       </TimeRangeProvider>
     );
@@ -183,5 +193,32 @@ describe('Panel', () => {
     );
     const panel = getPanel();
     expect(panel).not.toHaveTextContent('Extra content');
+  });
+
+  it('shows loading indicator if 1/2 queries are loading', () => {
+    (useDataQueriesContext as jest.Mock).mockReturnValue({
+      queryResults: [{ isFetching: true }, { data: [] }],
+    });
+
+    renderPanel();
+    expect(screen.queryByLabelText('loading')).toBeTruthy();
+  });
+
+  it('does not show a loading indicator if 2/2 queries are loading', () => {
+    (useDataQueriesContext as jest.Mock).mockReturnValue({
+      queryResults: [{ isFetching: true }, { isFetching: true }],
+    });
+
+    renderPanel();
+    expect(screen.queryByLabelText('loading')).toBeFalsy();
+  });
+
+  it('shows query errors in the tooltip', () => {
+    (useDataQueriesContext as jest.Mock).mockReturnValue({
+      queryResults: [{ error: 'test error' }],
+    });
+
+    renderPanel();
+    expect(screen.queryByLabelText('panel errors')).toBeTruthy();
   });
 });

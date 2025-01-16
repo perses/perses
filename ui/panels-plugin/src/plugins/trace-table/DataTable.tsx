@@ -20,7 +20,7 @@ import {
   formatDuration,
   msToPrometheusDuration,
 } from '@perses-dev/core';
-import { QueryData } from '@perses-dev/plugin-system';
+import { PanelData } from '@perses-dev/plugin-system';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
@@ -43,7 +43,7 @@ export type TraceLink = (params: { query: QueryDefinition; traceId: string }) =>
 
 export interface DataTableProps {
   options: TraceTableOptions;
-  result: Array<QueryData<TraceData>>;
+  result: Array<PanelData<TraceData>>;
   traceLink?: TraceLink;
 }
 
