@@ -2,9 +2,9 @@
 
 Datasources & Variables in Perses can be configured at different scopes. The available scopes are:
 
-- Global
-- Project
-- Dashboard
+- **Global**
+- **Project**
+- **Dashboard**
 
 The idea behind this approach is to:
 

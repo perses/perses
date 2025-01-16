@@ -2,7 +2,7 @@
 
 ## Choose a scope
 
-There are different scopes in which you can define a datasource, depending on how much you want it to be shared. More about scopes [here](../concepts/datasource-variable-scopes.md)
+There are different scopes in which you can define a datasource, depending on how much you want it to be shared. More about scopes [here](../concepts/datasource-variable-scopes.md).
 
 ### Dashboard
 
