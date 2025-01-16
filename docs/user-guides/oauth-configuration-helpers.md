@@ -47,7 +47,7 @@ authentication:
 ```
 
 !!! tip
-The **scope** used to generate a token from client credentials is different from the one used in other flows.
+    The **scope** used to generate a token from client credentials is different from the one used in other flows.
 
 ```
 *Ref: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
