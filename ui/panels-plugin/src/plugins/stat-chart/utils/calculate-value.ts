@@ -11,21 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeries } from '@perses-dev/core';
 
-import (
-	"github.com/perses/perses/cue/schemas/common"
-)
-
-#legend: {
-	position: "bottom" | "right"
-	mode?:    "list" | "table"
-	size?:    "small" | "medium"
-}
-
-kind: "StatusHistoryChart"
-
-spec: close({
-	legend?: #legend
-	mappings?: [...common.#mappings]
-})
+export const calculateValue = (
+  calculation: CalculationType,
+  seriesData: TimeSeries
+): ReturnType<(typeof CalculationsMap)[CalculationType]> => {
+  if (CalculationsMap[calculation] === undefined) {
+    console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
+  }
+  const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
+  return calculate(seriesData.values);
+};
