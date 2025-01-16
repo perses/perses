@@ -18,7 +18,7 @@ Most of these benefits comes from not dealing with the Perses JSON format direct
 Just pick your favorite to start with DaC. If you don't have one, give a try to both!
 
 !!! note
-CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
+	CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
 
 ```
 However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
@@ -119,7 +119,7 @@ You should then have a look at the [Go SDK documentation](../dac/go/README.md) t
 You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/cli/cmd/dac/build/testdata/go/main.go).
 
 !!! warning
-Do not log / print on the standard stdout! It would break the output of the `dac build` command.
+	Do not log / print on the standard stdout! It would break the output of the `dac build` command.
 
 Quick start example:
 
@@ -185,7 +185,7 @@ percli dac build -f my_dashboard.cue -ojson
 If the build is successful, the result can be found in the generated `built` folder.
 
 !!! note
-the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
+	the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
 ### Build multiple dashboards at once
 

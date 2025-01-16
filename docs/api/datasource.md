@@ -2,12 +2,9 @@
 
 ## Choose a scope
 
-There are three different scopes in which you can define a datasource, depending on how much you want it to be shared.
+There are different scopes in which you can define a datasource, depending on how much you want it to be shared. More about scopes [here](../concepts/datasource-variable-scopes.md)
 
-- for common use cases, use higher scopes to reuse the same datasource on multiple dashboards
-- for more specific needs, use lower scopes to restrict the datasource availability to a specific set of (or even a single) dashboard(s).
-
-### Dashboard level
+### Dashboard
 
 We have extended the dashboard spec to include a list of datasources:
 
@@ -21,7 +18,7 @@ interface DashboardSpec {
 Of course, the scope of such definition is the dashboard where it is defined.
 It cannot be used outside the dashboard.
 
-### Project level
+### Project
 
 In case you would like to share a datasource across different dashboards in the **same** project, you will need to
 create a `Datasource`.
@@ -34,7 +31,7 @@ metadata:
 spec: <Datasource specification>
 ```
 
-### Global level
+### Global
 
 When we talk about scope and user permission in a REST API, the easiest way is to associate one permission per endpoint.
 If we want to provide a datasource shared by all projects, then it makes sense to have a different object that is

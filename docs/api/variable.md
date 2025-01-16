@@ -2,13 +2,9 @@
 
 ## Choose a scope
 
-There are three different scopes in which you can define a variable, depending on how much you want it to be shared.
+There are different scopes in which you can define a variable, depending on how much you want it to be shared. More about scopes [here](../concepts/datasource-variable-scopes.md)
 
-- for common use cases, use higher scopes to reuse the same variable on multiple dashboards
-- for more specific needs, use lower scopes to restrict the variable availability to a specific set of (or even a
-  single) dashboard(s).
-
-### Dashboard level
+### Dashboard
 
 That's the usual level to define a variable.
 
@@ -19,7 +15,7 @@ interface DashboardSpec {
 }
 ```
 
-### Project level
+### Project
 
 In case you would like to share a variable across different dashboards in the **same** project, you will need to
 create a `Variable`.
@@ -32,7 +28,7 @@ metadata:
 spec: <Variable specification>
 ```
 
-### Global level
+### Global
 
 When we talk about scope and user permission in a REST API, the easiest way is to associate one permission per endpoint.
 If we want to provide a variable shared by all projects, then it makes sense to have a different object that is
