@@ -30,8 +30,8 @@ Perses aims to tackle multiple goals:
    benefit from the work achieved here. For example, these packages might be used in the future to improve the display
    of the data in the Prometheus UI.
 3. Offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual
-   application namespaces (using CRDs). For more information you can take a look at
-   [the doc](./docs/design-docs/kubernetes.md) which would give you an idea of how it would work.
+   application namespaces (using CRDs). For more information you can take a look at the
+   [Perses Operator](https://github.com/perses/perses-operator).
 4. To be friendly to Dashboard-as-Code users, by providing a complete static validation of the dashboard format. That
    means you will be able to validate your dashboards in a CI/CD using the Perses CLI (named `percli`)
 5. Support plugins, to allow users to extend the capacities natively provided.
