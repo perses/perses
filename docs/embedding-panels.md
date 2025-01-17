@@ -4,7 +4,7 @@ This little documentation aims to provide you the minimum code needed to have a 
 application.
 
 !!! info
-We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
+    We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
 
 ## Getting started (npm example)
 
@@ -161,7 +161,7 @@ export default App;
 
 You should see a perses panel going to your browser
 
-<img src="../images/embedded-panel-screenshot.png">
+<img src="./images/embedded-panel-screenshot.png">
 
 ## Definitions by provider
 

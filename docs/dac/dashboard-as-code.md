@@ -37,7 +37,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../tooling/cli.md).
+- `percli`, the [CLI of Perses](../cli.md).
 - `cue`, the [CLI of Cuelang](https://cuelang.org/).
 
 ### Repository setup
@@ -79,7 +79,7 @@ You can also check an example of DaC usage [here](https://github.com/perses/pers
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../tooling/cli.md).
+- `percli`, the [CLI of Perses](../cli.md).
 - `go`, the [programming language](https://go.dev/).
 
 ### Repository setup

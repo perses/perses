@@ -64,7 +64,7 @@ __________________________________________________________
 ```
 
 If you are interested in exploring how to configure your Perses server, please see the
-[configuration documentation](configuration.md).
+[configuration documentation](../configuration/configuration.md).
 
 ## Connect a browser (default)
 
