@@ -102,19 +102,19 @@ func (o *option) Validate() error {
 		return err
 	}
 
-	if o.language != cueLanguage && o.language != goLanguage {
+	switch o.language {
+	case cueLanguage:
+		if err := exec.Command("cue", "version").Run(); err != nil {
+			return fmt.Errorf("unable to use the required cue binary: %w", err)
+		}
+	case goLanguage:
+		if err := exec.Command("go", "version").Run(); err != nil {
+			return fmt.Errorf("unable to use the required go binary: %w", err)
+		}
+	default:
 		return fmt.Errorf("language %q is not supported", o.language)
 	}
 
-	if o.language == cueLanguage {
-		if err := exec.Command("cue", "version").Run(); err != nil {
-			return fmt.Errorf("unable to use the cue binary: %w", err)
-		}
-	}
-
-	if err := exec.Command("go", "version").Run(); err != nil {
-		return fmt.Errorf("unable to use the go binary: %w", err)
-	}
 	return nil
 }
 

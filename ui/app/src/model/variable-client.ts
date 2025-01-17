@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableResource } from '@perses-dev/core';
+import { StatusError, VariableResource } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -71,8 +71,8 @@ export function deleteVariable(entity: VariableResource): Promise<Response> {
  * Used to get a variable from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useVariable(name: string, project: string): UseQueryResult<VariableResource> {
-  return useQuery<VariableResource, Error>({
+export function useVariable(name: string, project: string): UseQueryResult<VariableResource, StatusError> {
+  return useQuery<VariableResource, StatusError>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
       return getVariable(name, project);
@@ -84,8 +84,8 @@ export function useVariable(name: string, project: string): UseQueryResult<Varia
  * Used to get variables from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useVariableList(project?: string): UseQueryResult<VariableResource[]> {
-  return useQuery<VariableResource[], Error>({
+export function useVariableList(project?: string): UseQueryResult<VariableResource[], StatusError> {
+  return useQuery<VariableResource[], StatusError>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
       return getVariables(project);
@@ -102,11 +102,11 @@ export function useVariableList(project?: string): UseQueryResult<VariableResour
  */
 export function useCreateVariableMutation(
   project: string
-): UseMutationResult<VariableResource, Error, VariableResource> {
+): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<VariableResource, Error, VariableResource>({
+  return useMutation<VariableResource, StatusError, VariableResource>({
     mutationKey: queryKey,
     mutationFn: (variable: VariableResource) => {
       return createVariable(variable);
@@ -126,10 +126,10 @@ export function useCreateVariableMutation(
  */
 export function useUpdateVariableMutation(
   project: string
-): UseMutationResult<VariableResource, Error, VariableResource> {
+): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
-  return useMutation<VariableResource, Error, VariableResource>({
+  return useMutation<VariableResource, StatusError, VariableResource>({
     mutationKey: queryKey,
     mutationFn: (variable: VariableResource) => {
       return updateVariable(variable);
@@ -152,11 +152,11 @@ export function useUpdateVariableMutation(
  */
 export function useDeleteVariableMutation(
   project: string
-): UseMutationResult<VariableResource, Error, VariableResource> {
+): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<VariableResource, Error, VariableResource>({
+  return useMutation<VariableResource, StatusError, VariableResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: VariableResource) => {
       await deleteVariable(entity);

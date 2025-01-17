@@ -10,7 +10,9 @@ Perses is configured via command-line flags and a configuration file
   -log.level string
         log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
   -log.method-trace
-        include the calling method as a field in the log. Can be useful to see immediately where the log comes from
+        Include the calling method as a field in the log. Can be useful to see immediately where the log comes from
+  -pprof
+        Enable pprof
   -web.hide-port
         If true, it won t be print on stdout the port listened to receive the HTTP request
   -web.listen-address string

@@ -1,7 +1,7 @@
 // Base config for all typescript packages
 {
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "es2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "jsx": "react-jsx",
@@ -22,7 +22,7 @@
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs",
-      "target": "es5",
+      "target": "es2022",
       "esModuleInterop": true
     }
   }

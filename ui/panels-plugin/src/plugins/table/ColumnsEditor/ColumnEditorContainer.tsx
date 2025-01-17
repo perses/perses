@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -89,13 +89,16 @@ export function ColumnEditorContainer({
             </IconButton>
           </Tooltip>
           <Tooltip title="Reorder column settings" placement="top">
-            <DragButton
-              onMoveUp={onMoveUp}
-              onMoveDown={onMoveDown}
-              menuSx={{
-                '.MuiPaper-root': { backgroundColor: (theme) => theme.palette.background.lighter },
-              }}
-            />
+            {/* Drag button do not forward ref and it's needed for tooltip. Using dummy box wrapper as fix */}
+            <Box>
+              <DragButton
+                onMoveUp={onMoveUp}
+                onMoveDown={onMoveDown}
+                menuSx={{
+                  '.MuiPaper-root': { backgroundColor: (theme) => theme.palette.background.lighter },
+                }}
+              />
+            </Box>
           </Tooltip>
         </Stack>
       </Stack>

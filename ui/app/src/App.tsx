@@ -12,14 +12,12 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-
 import { useLocation } from 'react-router-dom';
 import { ReactElement } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
-import { AuthorizationProvider } from './context/Authorization';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -28,9 +26,19 @@ function isDashboardViewRoute(pathname: string): boolean {
 function App(): ReactElement {
   const location = useLocation();
   return (
-    <AuthorizationProvider>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: ({ palette }) => palette.background.default,
+      }}
+    >
+      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+
       <Box
         sx={{
+          flex: 1,
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
@@ -40,19 +48,10 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-          }}
-        >
-          <Router />
-        </Box>
-        {!isDashboardViewRoute(location.pathname) && <Footer />}
+        <Router />
       </Box>
-    </AuthorizationProvider>
+      {!isDashboardViewRoute(location.pathname) && <Footer />}
+    </Box>
   );
 }
 

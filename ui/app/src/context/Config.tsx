@@ -14,11 +14,11 @@
 import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 import { marked } from 'marked';
 import * as DOMPurify from 'dompurify';
-import { CircularProgress, Stack } from '@mui/material';
 import { DashboardSelector, DurationString } from '@perses-dev/core';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
 import { ConfigModel, useConfig } from '../model/config-client';
+import { PersesLoader } from '../components/PersesLoader';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -29,11 +29,7 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
   if (isLoading || data === undefined) {
-    return (
-      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Stack>
-    );
+    return <PersesLoader />;
   }
   return (
     <ConfigContext.Provider value={{ config: data }}>

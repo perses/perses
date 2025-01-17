@@ -93,7 +93,24 @@ type ZREventProperties = {
   zrByTouch?: boolean;
 };
 
-export type ZRRawMouseEvent = MouseEvent & ZREventProperties;
+export type ZRRawMouseEvent = (MouseEvent | PointerEvent) & ZREventProperties;
+
+type ZRBrowser = {
+  ie: RegExpMatchArray | null;
+  edge: RegExpMatchArray | null;
+};
+
+export const browser: ZRBrowser = {
+  // IE 11 Trident/7.0; rv:11.0
+  ie: navigator.userAgent.match(/MSIE\s([\d.]+)/) || navigator.userAgent.match(/Trident\/.+?rv:(([\d.]+))/),
+  // IE 12 and 12+
+  edge: navigator.userAgent.match(/Edge?\/([\d.]+)/),
+};
+
+export const pointerEventsSupported =
+  'onpointerdown' in window && (browser.edge || (browser.ie && browser.ie[1] && +browser.ie[1] >= 11));
+
+export const trackingEventName = pointerEventsSupported ? 'pointermove' : 'mousemove';
 
 export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
@@ -120,10 +137,14 @@ export const useMousePosition = (): CursorData['coords'] => {
         target: e.target,
       });
     };
-    window.addEventListener('mousemove', setFromEvent);
 
-    return () => {
-      window.removeEventListener('mousemove', setFromEvent);
+    // Devices that both enabled touch and mouse don't trigger touch events correctly
+    // which leads to missing zrender mousemove coordinates
+    // {@link https://github.com/ecomfe/zrender/blob/ae8cfaae186e6c1bf66b5dc431b2cdda5e67dacf/src/dom/HandlerProxy.ts#L423-L428 }
+    window.addEventListener(trackingEventName, setFromEvent);
+
+    return (): void => {
+      window.removeEventListener(trackingEventName, setFromEvent);
     };
   }, []);
 

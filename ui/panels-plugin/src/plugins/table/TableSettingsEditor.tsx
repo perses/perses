@@ -19,9 +19,10 @@ import {
   OptionsEditorGroup,
   TableDensity,
   DEFAULT_COLUMN_WIDTH,
+  TextField,
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Switch, TextField } from '@mui/material';
+import { Switch } from '@mui/material';
 import { ChangeEvent, ReactElement } from 'react';
 import { TableOptions } from './table-model';
 
@@ -52,8 +53,8 @@ function DefaultColumnsWidthControl({
             <TextField
               type="number"
               value={value ?? DEFAULT_COLUMN_WIDTH}
-              InputProps={{ inputProps: { min: 1, step: 1 } }}
-              onChange={(e) => onChange(parseInt(e.target.value))}
+              slotProps={{ htmlInput: { min: 1, step: 1 } }}
+              onChange={(value) => onChange(parseInt(value))}
             />
           }
         />

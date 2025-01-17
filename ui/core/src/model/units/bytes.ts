@@ -27,8 +27,7 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 
 const DEFAULT_NUMBRO_MANTISSA = 2;
 
-const bytesUnits = ['bytes'] as const;
-type BytesUnit = (typeof bytesUnits)[number];
+type BytesUnit = 'bytes';
 export type BytesFormatOptions = {
   unit: BytesUnit;
   decimalPlaces?: number;

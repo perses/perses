@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import { DashboardResource, fetchJson } from '@perses-dev/core';
+import { DashboardResource, fetchJson, StatusError } from '@perses-dev/core';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -23,8 +23,8 @@ export interface MigrateBodyRequest {
   grafanaDashboard: Record<string, unknown>;
 }
 
-export function useMigrate(): UseMutationResult<DashboardResource, Error, MigrateBodyRequest> {
-  return useMutation<DashboardResource, Error, MigrateBodyRequest>({
+export function useMigrate(): UseMutationResult<DashboardResource, StatusError, MigrateBodyRequest> {
+  return useMutation<DashboardResource, StatusError, MigrateBodyRequest>({
     mutationKey: [resource],
     mutationFn: (body) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });

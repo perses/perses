@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, ProjectResource } from '@perses-dev/core';
+import { DashboardResource, ProjectResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -37,7 +37,7 @@ const resource = 'projects';
  */
 const dependingResources = [dashboardResource, variableResource, datasourceResource];
 
-type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
+type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], StatusError>, 'queryKey' | 'queryFn'>;
 
 export interface ProjectWithDashboards {
   project: ProjectResource;
@@ -92,8 +92,8 @@ function deleteProject(entity: ProjectResource): Promise<Response> {
  * Used to get a project from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useProject(name: string): UseQueryResult<ProjectResource> {
-  return useQuery<ProjectResource, Error>({
+export function useProject(name: string): UseQueryResult<ProjectResource, StatusError> {
+  return useQuery<ProjectResource, StatusError>({
     queryKey: [resource, name],
     queryFn: () => {
       return getProject(name);
@@ -105,10 +105,10 @@ export function useProject(name: string): UseQueryResult<ProjectResource> {
  * Used to get projects from the API
  * Will automatically be refreshed when cache is invalidated
  */
-export function useProjectList(options?: ProjectListOptions): UseQueryResult<ProjectResource[]> {
+export function useProjectList(options?: ProjectListOptions): UseQueryResult<ProjectResource[], StatusError> {
   const queryKey = buildQueryKey({ resource });
 
-  return useQuery<ProjectResource[], Error>({
+  return useQuery<ProjectResource[], StatusError>({
     queryKey: queryKey,
     queryFn: () => {
       return getProjects();
@@ -121,11 +121,11 @@ export function useProjectList(options?: ProjectListOptions): UseQueryResult<Pro
  * Returns a mutation that can be used to create a project.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
+export function useCreateProjectMutation(): UseMutationResult<ProjectResource, StatusError, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<ProjectResource, Error, ProjectResource>({
+  return useMutation<ProjectResource, StatusError, ProjectResource>({
     mutationKey: queryKey,
     mutationFn: (project: ProjectResource) => {
       return createProject(project);
@@ -143,10 +143,10 @@ export function useCreateProjectMutation(): UseMutationResult<ProjectResource, E
  * Returns a mutation that can be used to update a project.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
+export function useUpdateProjectMutation(): UseMutationResult<ProjectResource, StatusError, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
-  return useMutation<ProjectResource, Error, ProjectResource>({
+  return useMutation<ProjectResource, StatusError, ProjectResource>({
     mutationKey: queryKey,
     mutationFn: (project: ProjectResource) => {
       return updateProject(project);
@@ -170,11 +170,11 @@ export function useUpdateProjectMutation(): UseMutationResult<ProjectResource, E
  * // ...
  * deleteProjectMutation.mutate("MyProjectName")
  */
-export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, Error, ProjectResource> {
+export function useDeleteProjectMutation(): UseMutationResult<ProjectResource, StatusError, ProjectResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<ProjectResource, Error, ProjectResource>({
+  return useMutation<ProjectResource, StatusError, ProjectResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: ProjectResource) => {
       await deleteProject(entity);
@@ -218,7 +218,7 @@ function mergeQueryResults(first: UseQueryResult, ...others: UseQueryResult[]): 
   return first;
 }
 
-export function useProjectsWithDashboards(): UseQueryResult<ProjectWithDashboards[]> {
+export function useProjectsWithDashboards(): UseQueryResult<ProjectWithDashboards[], StatusError> {
   const projectsQueryResult = useProjectList();
   const dashboardsQueryResult = useDashboardList({ project: undefined, metadataOnly: true });
 
@@ -243,5 +243,5 @@ export function useProjectsWithDashboards(): UseQueryResult<ProjectWithDashboard
       }
       return result;
     }, [projectsQueryResult.data, dashboardsQueryResult.data]),
-  } as UseQueryResult<ProjectWithDashboards[]>;
+  } as UseQueryResult<ProjectWithDashboards[], StatusError>;
 }

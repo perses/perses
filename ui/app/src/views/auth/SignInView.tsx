@@ -12,22 +12,22 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useNativeAuthMutation, useIsAccessTokenExist } from '../../model/auth-client';
+import { useNativeAuthMutation, useRedirectQueryParam } from '../../model/auth-client';
 import { SignUpRoute } from '../../model/route';
 import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView(): ReactElement {
   const isSignUpDisable = useIsSignUpDisable();
-  const isAccessTokenExist = useIsAccessTokenExist();
   const authMutation = useNativeAuthMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const [login, setLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const redirectPath = useRedirectQueryParam();
 
   const handleLogin = (): void => {
     authMutation.mutate(
@@ -35,7 +35,7 @@ function SignInView(): ReactElement {
       {
         onSuccess: () => {
           successSnackbar(`Successfully login`);
-          navigate('/');
+          navigate(redirectPath);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -58,12 +58,6 @@ function SignInView(): ReactElement {
       handleLogin();
     }
   };
-
-  useEffect(() => {
-    if (isAccessTokenExist) {
-      navigate('/');
-    }
-  });
 
   return (
     <SignWrapper>

@@ -65,11 +65,19 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
+      if (
+        setting.condition.spec?.min !== undefined &&
+        setting.condition.spec?.max === undefined &&
+        numericValue >= +setting.condition.spec?.min
+      ) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
+      if (
+        setting.condition.spec?.min === undefined &&
+        setting.condition.spec?.max !== undefined &&
+        numericValue <= +setting.condition.spec?.max
+      ) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
     }
