@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.7.1
+      - uses: perses/github-actions@v0.8.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -47,7 +47,7 @@ jobs:
           DEBUG: pw:webserver
           HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report

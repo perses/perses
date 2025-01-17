@@ -20,6 +20,13 @@ describe('TransformsEditor', () => {
     render(<TransformsEditor value={value} onChange={onChange} />);
   }
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('can add a new transformation', () => {
     const onChange = jest.fn();
     renderTableColumnsEditor([], onChange);
@@ -38,6 +45,7 @@ describe('TransformsEditor', () => {
 
     const columnInput = screen.getByRole('textbox', { name: /Column/i });
     fireEvent.change(columnInput, { target: { value: 'MySuperName' } });
+    jest.advanceTimersByTime(500);
     expect(onChange).toHaveBeenCalledWith([{ kind: 'MergeIndexedColumns', spec: { column: 'MySuperName' } }]);
   });
 });

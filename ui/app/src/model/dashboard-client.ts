@@ -19,7 +19,7 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, StatusError } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
 import { useImportantDashboardSelectors } from '../context/Config';
@@ -29,7 +29,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'dashboards';
 
-type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], Error>, 'queryKey' | 'queryFn'> & {
+type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], StatusError>, 'queryKey' | 'queryFn'> & {
   project?: string;
   metadataOnly?: boolean;
 };
@@ -40,10 +40,10 @@ type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], Error>, 'q
  */
 export function useCreateDashboardMutation(
   onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown
-): UseMutationResult<DashboardResource, Error, DashboardResource> {
+): UseMutationResult<DashboardResource, StatusError, DashboardResource> {
   const queryClient = useQueryClient();
 
-  return useMutation<DashboardResource, Error, DashboardResource>({
+  return useMutation<DashboardResource, StatusError, DashboardResource>({
     mutationKey: [resource],
     mutationFn: (dashboard) => {
       return createDashboard(dashboard);
@@ -59,8 +59,8 @@ export function useCreateDashboardMutation(
  * Used to get a dashboard in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource> {
-  return useQuery<DashboardResource, Error>({
+export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource, StatusError> {
+  return useQuery<DashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getDashboard(project, name);
@@ -72,8 +72,8 @@ export function useDashboard(project: string, name: string): UseQueryResult<Dash
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(options: DashboardListOptions): UseQueryResult<DashboardResource[]> {
-  return useQuery<DashboardResource[], Error>({
+export function useDashboardList(options: DashboardListOptions): UseQueryResult<DashboardResource[], StatusError> {
+  return useQuery<DashboardResource[], StatusError>({
     queryKey: [resource, options.project, options.metadataOnly],
     queryFn: () => {
       return getDashboards(options.project, options.metadataOnly);

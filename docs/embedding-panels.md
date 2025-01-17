@@ -161,7 +161,7 @@ export default App;
 
 You should see a perses panel going to your browser
 
-<img src="../images/embedded-panel-screenshot.png">
+<img src="./images/embedded-panel-screenshot.png">
 
 ## Definitions by provider
 

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, GlobalRoleBindingResource } from '@perses-dev/core';
+import { fetch, fetchJson, GlobalRoleBindingResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -67,8 +67,8 @@ export function deleteGlobalRoleBinding(entity: GlobalRoleBindingResource): Prom
  * Used to get a globalRoleBinding from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalRoleBinding(name: string): UseQueryResult<GlobalRoleBindingResource> {
-  return useQuery<GlobalRoleBindingResource, Error>({
+export function useGlobalRoleBinding(name: string): UseQueryResult<GlobalRoleBindingResource, StatusError> {
+  return useQuery<GlobalRoleBindingResource, StatusError>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
       return getGlobalRoleBinding(name);
@@ -80,8 +80,8 @@ export function useGlobalRoleBinding(name: string): UseQueryResult<GlobalRoleBin
  * Used to get globalRoleBindings from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalRoleBindingList(): UseQueryResult<GlobalRoleBindingResource[]> {
-  return useQuery<GlobalRoleBindingResource[], Error>({
+export function useGlobalRoleBindingList(): UseQueryResult<GlobalRoleBindingResource[], StatusError> {
+  return useQuery<GlobalRoleBindingResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
       return getGlobalRoleBindings();
@@ -95,13 +95,13 @@ export function useGlobalRoleBindingList(): UseQueryResult<GlobalRoleBindingReso
  */
 export function useCreateGlobalRoleBindingMutation(): UseMutationResult<
   GlobalRoleBindingResource,
-  Error,
+  StatusError,
   GlobalRoleBindingResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalRoleBindingResource, Error, GlobalRoleBindingResource>({
+  return useMutation<GlobalRoleBindingResource, StatusError, GlobalRoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: (globalRoleBinding: GlobalRoleBindingResource) => {
       return createGlobalRoleBinding(globalRoleBinding);
@@ -118,12 +118,12 @@ export function useCreateGlobalRoleBindingMutation(): UseMutationResult<
  */
 export function useUpdateGlobalRoleBindingMutation(): UseMutationResult<
   GlobalRoleBindingResource,
-  Error,
+  StatusError,
   GlobalRoleBindingResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
-  return useMutation<GlobalRoleBindingResource, Error, GlobalRoleBindingResource>({
+  return useMutation<GlobalRoleBindingResource, StatusError, GlobalRoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: (globalRoleBinding: GlobalRoleBindingResource) => {
       return updateGlobalRoleBinding(globalRoleBinding);
@@ -143,13 +143,13 @@ export function useUpdateGlobalRoleBindingMutation(): UseMutationResult<
  */
 export function useDeleteGlobalRoleBindingMutation(): UseMutationResult<
   GlobalRoleBindingResource,
-  Error,
+  StatusError,
   GlobalRoleBindingResource
 > {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<GlobalRoleBindingResource, Error, GlobalRoleBindingResource>({
+  return useMutation<GlobalRoleBindingResource, StatusError, GlobalRoleBindingResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: GlobalRoleBindingResource) => {
       await deleteGlobalRoleBinding(entity);

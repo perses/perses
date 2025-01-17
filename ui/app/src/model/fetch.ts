@@ -11,20 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch as initialFetch, FetchError, UserFriendlyError } from '@perses-dev/core';
+import { fetch as initialFetch, StatusError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
-import { SignInRoute } from './route';
 
 export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
-  return initialFetch(...args).catch((error: UserFriendlyError | FetchError) => {
+  return initialFetch(...args).catch((error: StatusError) => {
     if (error.status !== 401) {
       throw error;
     }
     return refreshToken()
-      .catch((refreshTokenError: UserFriendlyError | FetchError) => {
-        if (refreshTokenError.status === 400) {
-          window.location.href = SignInRoute;
-        }
+      .catch((_: StatusError) => {
         throw error;
       })
       .then(() => {

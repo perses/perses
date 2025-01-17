@@ -48,10 +48,14 @@ export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Pr
   return json;
 }
 
+export interface StatusError extends Error {
+  status: number;
+}
+
 /**
  * Error thrown when fetch returns a non-200 response.
  */
-export class FetchError extends Error {
+export class FetchError extends Error implements StatusError {
   status: number;
   constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
@@ -63,7 +67,7 @@ export class FetchError extends Error {
 /**
  * General error type for an error that has a message that is OK to show to the end user.
  */
-export class UserFriendlyError extends Error {
+export class UserFriendlyError extends Error implements StatusError {
   status: number;
   constructor(message: string, status: number) {
     super(message);

@@ -163,7 +163,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           datasources,
           ttl,
           isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean) => set({ isEditMode }),
+          setEditMode: (isEditMode: boolean): void => set({ isEditMode }),
           setDashboard: ({
             kind,
             metadata,

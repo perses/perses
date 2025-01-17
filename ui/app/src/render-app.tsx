@@ -24,7 +24,7 @@ import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
 import { ConfigContextProvider } from './context/Config';
 import { getBasePathName } from './model/route';
-
+import { AuthorizationProvider } from './context/Authorization';
 /**
  * Renders the Perses application in the target container.
  */
@@ -53,17 +53,19 @@ export function renderApp(container: Element | null): void {
       <BrowserRouter basename={basePath}>
         <CookiesProvider>
           <QueryClientProvider client={queryClient}>
-            <ConfigContextProvider>
-              <QueryParamProvider adapter={ReactRouter6Adapter}>
-                <DarkModeContextProvider>
+            <DarkModeContextProvider>
+              <ConfigContextProvider>
+                <QueryParamProvider adapter={ReactRouter6Adapter}>
                   <NavHistoryProvider>
                     <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                      <App />
+                      <AuthorizationProvider>
+                        <App />
+                      </AuthorizationProvider>
                     </SnackbarProvider>
                   </NavHistoryProvider>
-                </DarkModeContextProvider>
-              </QueryParamProvider>
-            </ConfigContextProvider>
+                </QueryParamProvider>
+              </ConfigContextProvider>
+            </DarkModeContextProvider>
           </QueryClientProvider>
         </CookiesProvider>
       </BrowserRouter>

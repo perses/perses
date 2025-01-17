@@ -21,8 +21,13 @@ interface PluginLoaderProps<P> {
   props?: P;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function PluginContainer<P>({ pluginFn, props }: { pluginFn: Function; props: P }): JSX.Element {
+function PluginContainer<P>({
+  pluginFn,
+  props,
+}: {
+  pluginFn: (props: P | undefined) => JSX.Element;
+  props: P | undefined;
+}): JSX.Element {
   return pluginFn(props);
 }
 
@@ -73,5 +78,7 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>): JSX.El
     return null;
   }
 
-  return <PluginContainer key={name} pluginFn={pluginFunction} props={props} />;
+  return (
+    <PluginContainer key={name} pluginFn={pluginFunction as (props: P | undefined) => JSX.Element} props={props} />
+  );
 }

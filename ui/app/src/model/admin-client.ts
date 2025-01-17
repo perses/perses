@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasourceResource } from '@perses-dev/core';
+import { GlobalDatasourceResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -26,7 +26,10 @@ import { fetch, fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
 
-type GlobalDatasourceListOptions = Omit<UseQueryOptions<GlobalDatasourceResource[], Error>, 'queryKey' | 'queryFn'>;
+type GlobalDatasourceListOptions = Omit<
+  UseQueryOptions<GlobalDatasourceResource[], StatusError>,
+  'queryKey' | 'queryFn'
+>;
 
 /**
  * Used to create a new global datasource in the API.
@@ -34,12 +37,12 @@ type GlobalDatasourceListOptions = Omit<UseQueryOptions<GlobalDatasourceResource
  */
 export function useCreateGlobalDatasourceMutation(): UseMutationResult<
   GlobalDatasourceResource,
-  Error,
+  StatusError,
   GlobalDatasourceResource
 > {
   const queryClient = useQueryClient();
 
-  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
+  return useMutation<GlobalDatasourceResource, StatusError, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
     mutationFn: (datasource: GlobalDatasourceResource) => {
       return createGlobalDatasource(datasource);
@@ -56,12 +59,12 @@ export function useCreateGlobalDatasourceMutation(): UseMutationResult<
  */
 export function useUpdateGlobalDatasourceMutation(): UseMutationResult<
   GlobalDatasourceResource,
-  Error,
+  StatusError,
   GlobalDatasourceResource
 > {
   const queryClient = useQueryClient();
 
-  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
+  return useMutation<GlobalDatasourceResource, StatusError, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
     mutationFn: (datasource: GlobalDatasourceResource) => {
       return updateGlobalDatasource(datasource);
@@ -78,11 +81,11 @@ export function useUpdateGlobalDatasourceMutation(): UseMutationResult<
  */
 export function useDeleteGlobalDatasourceMutation(): UseMutationResult<
   GlobalDatasourceResource,
-  Error,
+  StatusError,
   GlobalDatasourceResource
 > {
   const queryClient = useQueryClient();
-  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
+  return useMutation<GlobalDatasourceResource, StatusError, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
     mutationFn: (entity: GlobalDatasourceResource) => {
       return deleteGlobalDatasource(entity).then(() => {
@@ -100,8 +103,8 @@ export function useDeleteGlobalDatasourceMutation(): UseMutationResult<
  * Used to get a global datasource from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalDatasource(name: string): UseQueryResult<GlobalDatasourceResource> {
-  return useQuery<GlobalDatasourceResource, Error>({
+export function useGlobalDatasource(name: string): UseQueryResult<GlobalDatasourceResource, StatusError> {
+  return useQuery<GlobalDatasourceResource, StatusError>({
     queryKey: [globalDatasourceResource, name],
     queryFn: () => {
       return getGlobalDatasource(name);
@@ -115,8 +118,8 @@ export function useGlobalDatasource(name: string): UseQueryResult<GlobalDatasour
  */
 export function useGlobalDatasourceList(
   options: GlobalDatasourceListOptions
-): UseQueryResult<GlobalDatasourceResource[]> {
-  return useQuery<GlobalDatasourceResource[], Error>({
+): UseQueryResult<GlobalDatasourceResource[], StatusError> {
+  return useQuery<GlobalDatasourceResource[], StatusError>({
     queryKey: [globalDatasourceResource],
     queryFn: () => {
       return getGlobalDatasources();
