@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RoleResource } from '@perses-dev/core';
+import { RoleResource, StatusError } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -71,8 +71,8 @@ export function deleteRole(entity: RoleResource): Promise<Response> {
  * Used to get a role from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRole(name: string, project: string): UseQueryResult<RoleResource> {
-  return useQuery<RoleResource, Error>({
+export function useRole(name: string, project: string): UseQueryResult<RoleResource, StatusError> {
+  return useQuery<RoleResource, StatusError>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
       return getRole(name, project);
@@ -84,8 +84,8 @@ export function useRole(name: string, project: string): UseQueryResult<RoleResou
  * Used to get roles from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useRoleList(project?: string): UseQueryResult<RoleResource[]> {
-  return useQuery<RoleResource[], Error>({
+export function useRoleList(project?: string): UseQueryResult<RoleResource[], StatusError> {
+  return useQuery<RoleResource[], StatusError>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
       return getRoles(project);
@@ -100,11 +100,11 @@ export function useRoleList(project?: string): UseQueryResult<RoleResource[]> {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
+export function useCreateRoleMutation(project: string): UseMutationResult<RoleResource, StatusError, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<RoleResource, Error, RoleResource>({
+  return useMutation<RoleResource, StatusError, RoleResource>({
     mutationKey: queryKey,
     mutationFn: (role: RoleResource) => {
       return createRole(role);
@@ -122,10 +122,10 @@ export function useCreateRoleMutation(project: string): UseMutationResult<RoleRe
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
+export function useUpdateRoleMutation(project: string): UseMutationResult<RoleResource, StatusError, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
-  return useMutation<RoleResource, Error, RoleResource>({
+  return useMutation<RoleResource, StatusError, RoleResource>({
     mutationKey: queryKey,
     mutationFn: (role: RoleResource) => {
       return updateRole(role);
@@ -146,11 +146,11 @@ export function useUpdateRoleMutation(project: string): UseMutationResult<RoleRe
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteRoleMutation(project: string): UseMutationResult<RoleResource, Error, RoleResource> {
+export function useDeleteRoleMutation(project: string): UseMutationResult<RoleResource, StatusError, RoleResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
-  return useMutation<RoleResource, Error, RoleResource>({
+  return useMutation<RoleResource, StatusError, RoleResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: RoleResource) => {
       await deleteRole(entity);

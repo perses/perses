@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Permission, UserResource } from '@perses-dev/core';
+import { Permission, StatusError, UserResource } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -80,8 +80,8 @@ function getUserPermissions(username: string): Promise<Record<string, Permission
  * Used to get a global secret from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useUser(name: string): UseQueryResult<UserResource> {
-  return useQuery<UserResource, Error>({
+export function useUser(name: string): UseQueryResult<UserResource, StatusError> {
+  return useQuery<UserResource, StatusError>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
       return getUser(name);
@@ -93,8 +93,8 @@ export function useUser(name: string): UseQueryResult<UserResource> {
  * Used to get global secrets from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useUserList(): UseQueryResult<UserResource[]> {
-  return useQuery<UserResource[], Error>({
+export function useUserList(): UseQueryResult<UserResource[], StatusError> {
+  return useQuery<UserResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
       return getUsers();
@@ -106,11 +106,11 @@ export function useUserList(): UseQueryResult<UserResource[]> {
  * Returns a mutation that can be used to create a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateUserMutation(): UseMutationResult<UserResource, Error, UserResource> {
+export function useCreateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<UserResource, Error, UserResource>({
+  return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
     mutationFn: (entity: UserResource) => {
       return createUser(entity);
@@ -125,11 +125,11 @@ export function useCreateUserMutation(): UseMutationResult<UserResource, Error, 
  * Returns a mutation that can be used to update a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateUserMutation(): UseMutationResult<UserResource, Error, UserResource> {
+export function useUpdateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<UserResource, Error, UserResource>({
+  return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
     mutationFn: (secret: UserResource) => {
       return updateUser(secret);
@@ -147,11 +147,11 @@ export function useUpdateUserMutation(): UseMutationResult<UserResource, Error, 
  * Returns a mutation that can be used to delete a global secret.
  * Will automatically refresh the cache for all the list.
  */
-export function useDeleteUserMutation(): UseMutationResult<UserResource, Error, UserResource> {
+export function useDeleteUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
-  return useMutation<UserResource, Error, UserResource>({
+  return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
     mutationFn: async (entity: UserResource) => {
       await deleteUser(entity);
@@ -168,8 +168,8 @@ export function useDeleteUserMutation(): UseMutationResult<UserResource, Error, 
  * Used to get users from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useUserPermissions(username: string): UseQueryResult<Record<string, Permission[]>> {
-  return useQuery<Record<string, Permission[]>, Error>({
+export function useUserPermissions(username: string): UseQueryResult<Record<string, Permission[]>, StatusError> {
+  return useQuery<Record<string, Permission[]>, StatusError>({
     queryKey: [userKey, username, 'permissions'],
     queryFn: () => {
       return getUserPermissions(username);

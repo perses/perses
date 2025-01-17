@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { EphemeralDashboardResource } from '@perses-dev/core';
+import { EphemeralDashboardResource, StatusError } from '@perses-dev/core';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 import { fetchJson } from './fetch';
@@ -25,10 +25,10 @@ export const resource = 'ephemeraldashboards';
  */
 export function useCreateEphemeralDashboardMutation(
   onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown
-): UseMutationResult<EphemeralDashboardResource, Error, EphemeralDashboardResource> {
+): UseMutationResult<EphemeralDashboardResource, StatusError, EphemeralDashboardResource> {
   const queryClient = useQueryClient();
 
-  return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
+  return useMutation<EphemeralDashboardResource, StatusError, EphemeralDashboardResource>({
     mutationKey: [resource],
     mutationFn: (ephemeralDashboard) => {
       return createEphemeralDashboard(ephemeralDashboard);
@@ -46,12 +46,12 @@ export function useCreateEphemeralDashboardMutation(
  */
 export function useUpdateEphemeralDashboardMutation(): UseMutationResult<
   EphemeralDashboardResource,
-  Error,
+  StatusError,
   EphemeralDashboardResource
 > {
   const queryClient = useQueryClient();
 
-  return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
+  return useMutation<EphemeralDashboardResource, StatusError, EphemeralDashboardResource>({
     mutationKey: [resource],
     mutationFn: (ephemeralDashboard) => {
       return updateEphemeralDashboard(ephemeralDashboard);
@@ -68,11 +68,11 @@ export function useUpdateEphemeralDashboardMutation(): UseMutationResult<
  */
 export function useDeleteEphemeralDashboardMutation(): UseMutationResult<
   EphemeralDashboardResource,
-  Error,
+  StatusError,
   EphemeralDashboardResource
 > {
   const queryClient = useQueryClient();
-  return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
+  return useMutation<EphemeralDashboardResource, StatusError, EphemeralDashboardResource>({
     mutationKey: [resource],
     mutationFn: (entity: EphemeralDashboardResource) => {
       return deleteEphemeralDashboard(entity).then(() => {
@@ -92,8 +92,11 @@ export function useDeleteEphemeralDashboardMutation(): UseMutationResult<
  * Used to get an ephemeral dashboard from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useEphemeralDashboard(project: string, name: string): UseQueryResult<EphemeralDashboardResource> {
-  return useQuery<EphemeralDashboardResource, Error>({
+export function useEphemeralDashboard(
+  project: string,
+  name: string
+): UseQueryResult<EphemeralDashboardResource, StatusError> {
+  return useQuery<EphemeralDashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getEphemeralDashboard(project, name);
@@ -105,8 +108,8 @@ export function useEphemeralDashboard(project: string, name: string): UseQueryRe
  * Used to get ephemeral dashboards from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useEphemeralDashboardList(project?: string): UseQueryResult<EphemeralDashboardResource[]> {
-  return useQuery<EphemeralDashboardResource[], Error>({
+export function useEphemeralDashboardList(project?: string): UseQueryResult<EphemeralDashboardResource[], StatusError> {
+  return useQuery<EphemeralDashboardResource[], StatusError>({
     queryKey: [resource, project],
     queryFn: () => {
       return getEphemeralDashboards(project);

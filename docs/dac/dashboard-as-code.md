@@ -20,9 +20,11 @@ Just pick your favorite to start with DaC. If you don't have one, give a try to 
 !!! note
 	CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
 
-	However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
+```
+However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
 
-	This statement applies also to any other language we might have a SDK for in the future.
+This statement applies also to any other language we might have a SDK for in the future.
+```
 
 Also, as-code means it's GitOps-friendly, meaning that you can also benefit from:
 
@@ -35,7 +37,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../tooling/cli.md).
+- `percli`, the [CLI of Perses](../cli.md).
 - `cue`, the [CLI of Cuelang](https://cuelang.org/).
 
 ### Repository setup
@@ -77,7 +79,7 @@ You can also check an example of DaC usage [here](https://github.com/perses/pers
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../tooling/cli.md).
+- `percli`, the [CLI of Perses](../cli.md).
 - `go`, the [programming language](https://go.dev/).
 
 ### Repository setup

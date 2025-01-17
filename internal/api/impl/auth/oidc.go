@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -208,10 +207,10 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 	}
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
 	}
 	codeExchangeHandler := rp.AuthURLHandler(func() string {
-		return uuid.New().String()
+		return ctx.Request().URL.Query().Get(redirectQueryParam)
 	}, e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)
 	return handler(ctx)
@@ -227,11 +226,8 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 //   - save the user in database if it's a new user, or update it with the collected information
 //   - ultimately, generate a Perses user session with an access and refresh token
 func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], _ string, _ rp.RelyingParty, info *oidcUserInfo) {
-		redirectURI := r.URL.Query().Get("redirect_uri")
-		if redirectURI == "" {
-			redirectURI = "/"
-		}
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
+		redirectURI := state
 
 		setCookie := func(cookie *http.Cookie) {
 			http.SetCookie(w, cookie)
@@ -248,8 +244,9 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 
 	var opts []rp.URLParamOpt
 	// If the Redirect URL is not setup by config, we build it from request
+	// TODO: Is it really necessary for a token redeem?
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)

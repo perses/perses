@@ -18,7 +18,6 @@ import {
   ListVariableDefinition,
   ListVariableSpec,
   TextVariableDefinition,
-  UnknownSpec,
   VariableName,
   VariableValue,
 } from '@perses-dev/core';
@@ -58,7 +57,7 @@ export function Variable({ name, source }: VariableProps): ReactElement {
 }
 
 export function useListVariableState(
-  spec: ListVariableSpec<UnknownSpec> | undefined,
+  spec: ListVariableSpec | undefined,
   state: VariableState | undefined,
   variablesOptionsQuery: Partial<UseQueryResult<VariableOption[]>>
 ): {
@@ -190,7 +189,6 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
     ctx.state,
     variablesOptionsQuery
   );
-  const [inputValue, setInputValue] = useState<string>('');
   const [inputWidth, setInputWidth] = useState(MIN_VARIABLE_WIDTH);
 
   const title = definition?.spec.display?.name ?? name;
@@ -226,7 +224,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
         limitTags={3}
         size="small"
         disableClearable
-        PopperComponent={StyledPopper}
+        slots={{ popper: StyledPopper }}
         renderInput={(params) => {
           return allowMultiple ? (
             <TextField {...params} label={title} />
@@ -250,9 +248,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
             setVariableValue(name, variableOptionToVariableValue(value), source);
           }
         }}
-        inputValue={inputValue}
         onInputChange={(_, newInputValue) => {
-          setInputValue(newInputValue);
           if (!allowMultiple) {
             setInputWidth(getWidthPx(newInputValue, 'list'));
           }
@@ -287,8 +283,10 @@ function TextVariable({ name, source }: VariableProps): ReactElement {
       onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}
       label={definition?.spec.display?.name ?? name}
-      InputProps={{
-        readOnly: definition?.spec.constant ?? false,
+      slotProps={{
+        input: {
+          readOnly: definition?.spec.constant ?? false,
+        },
       }}
       sx={{
         width: `${inputWidth}px`,

@@ -205,7 +205,7 @@ describe('getCommonTimeScale', () => {
   ];
 
   test.each(undefinedSeriesData)('returns undefined $name', ({ seriesData }) => {
-    expect(getCommonTimeScale(seriesData)).toBeUndefined;
+    expect(getCommonTimeScale(seriesData)).toBeUndefined();
   });
 
   test('uses the specified time scale when a single series is available', () => {

@@ -93,7 +93,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const role = findRole(name, project);
       setTargetedRole(role);
       setAction('create');
@@ -103,7 +103,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const role = findRole(name, project);
       setTargetedRole(role);
       setAction('update');
@@ -113,7 +113,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedRole(findRole(name, project));
       setDeleteRoleDialogOpened(true);
     },
@@ -133,7 +133,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}

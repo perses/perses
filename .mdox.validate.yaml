@@ -17,3 +17,9 @@ validators:
   # code 502
   - regex: 'storybook\.js\.com'
     type: 'ignore'
+  # timeout
+  - regex: 'tanstack\.com'
+    type: 'ignore'
+  # timeout
+  - regex: 'github\.com'
+    type: 'ignore'

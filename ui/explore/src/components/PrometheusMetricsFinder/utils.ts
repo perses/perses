@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, StatusError } from '@perses-dev/core';
 import { useMemo } from 'react';
 import {
   LabelNamesRequestParameters,
@@ -37,13 +37,14 @@ export function useMetricMetadata(
 ): {
   isLoading: false | true;
   metadata: MetricMetadata | undefined;
+  error: StatusError | null;
 } {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   // histograms and summaries timeseries desc are not always added to prefixed timeseries
   const name = metricName.replace(/(_count|_sum|_bucket)$/, '');
 
-  const { data, isLoading } = useQuery<MetricMetadataResponse>({
+  const { data, isLoading, error } = useQuery<MetricMetadataResponse, StatusError>({
     enabled: !!client && enabled,
     queryKey: ['metricMetadata', name], // Not indexed on datasource, assuming a metric metadata should be similar across datasources
     queryFn: async () => {
@@ -63,16 +64,19 @@ export function useMetricMetadata(
     return undefined;
   }, [data, name]);
 
-  return { metadata, isLoading };
+  return { metadata, isLoading, error };
 }
 
-export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector): UseQueryResult<LabelValuesResponse> {
+export function useLabels(
+  filters: LabelFilter[],
+  datasource: DatasourceSelector
+): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  return useQuery<LabelValuesResponse>({
+  return useQuery<LabelValuesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['labels', 'datasource', datasource.name, 'start', start, 'end', end, 'filters', ...filters],
     queryFn: async () => {
@@ -94,13 +98,13 @@ export function useLabelValues(
   labelName: string,
   filters: LabelFilter[],
   datasource: DatasourceSelector
-): UseQueryResult<LabelValuesResponse> {
+): UseQueryResult<LabelValuesResponse, StatusError> {
   const {
     absoluteTimeRange: { start, end },
   } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  return useQuery<LabelValuesResponse>({
+  return useQuery<LabelValuesResponse, StatusError>({
     enabled: !!client,
     queryKey: ['labelValues', labelName, 'datasource', datasource.name, 'start', start, 'end', 'filters', ...filters],
     queryFn: async () => {

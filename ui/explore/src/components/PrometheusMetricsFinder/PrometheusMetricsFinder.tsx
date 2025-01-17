@@ -99,7 +99,7 @@ export function MetricNameExplorer({
   onExplore,
   ...props
 }: MetricNameExplorerProps): ReactElement {
-  const { data, isLoading } = useLabelValues('__name__', filters, datasource);
+  const { data, isLoading, error } = useLabelValues('__name__', filters, datasource);
   const [search, setSearch] = useState('');
   const fuzzy = useMemo(() => new Fuzzy({ includeMatches: true, excludedChars: [' '] }), []);
 
@@ -109,6 +109,10 @@ export function MetricNameExplorer({
     }
     return undefined;
   }, [data, fuzzy, search]);
+
+  if (error) {
+    return <Stack width="100%">Error: {error.message}</Stack>;
+  }
 
   if (isLoading) {
     return (

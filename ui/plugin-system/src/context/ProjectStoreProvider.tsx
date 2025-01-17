@@ -13,7 +13,7 @@
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { ReactNode, createContext, useContext, useMemo, ReactElement } from 'react';
-import { fetchJson, ProjectResource } from '@perses-dev/core';
+import { fetchJson, ProjectResource, StatusError } from '@perses-dev/core';
 import { useSetProjectParams } from './query-params';
 
 export interface ProjectStore {
@@ -28,8 +28,8 @@ export interface ProjectStoreProviderProps {
 
 export const ProjectStoreContext = createContext<ProjectStore | undefined>(undefined);
 
-export function useProjectList(): UseQueryResult<ProjectResource[], Error> {
-  return useQuery<ProjectResource[], Error>({
+export function useProjectList(): UseQueryResult<ProjectResource[], StatusError> {
+  return useQuery<ProjectResource[], StatusError>({
     queryKey: ['projects'],
     queryFn: () => {
       return fetchJson<ProjectResource[]>('/api/v1/projects');

@@ -21,13 +21,14 @@ import {
   VisualMapComponent,
   LegendComponentOption,
 } from 'echarts/components';
-import { EChartsCoreOption, use } from 'echarts/core';
+import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
-import { ReactElement, useMemo } from 'react';
-import { useChartsTheme, useTimeZone } from '../context';
+import { EChartsCoreOption } from 'echarts';
+import { FC } from 'react';
+import { useChartsTheme } from '../context/ChartsProvider';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import { EChart } from '../EChart';
-import { getColorsForValues } from './utils/get-color';
 import { getFormattedStatusHistoryAxisLabel } from './get-formatted-axis-label';
 import { generateTooltipHTML } from './StatusHistoryTooltip';
 
@@ -43,44 +44,39 @@ use([
 
 export type StatusHistoryData = [number, number, number | undefined];
 
+export interface StatusHistoryDataItem {
+  value: StatusHistoryData;
+  label?: string;
+  itemStyle?: {
+    color?: string;
+    borderColor?: string;
+    borderWidth?: number;
+  };
+}
+
 export interface StatusHistoryChartProps {
   height: number;
-  data: StatusHistoryData[];
+  data: StatusHistoryDataItem[];
   xAxisCategories: number[];
   yAxisCategories: string[];
   legend?: LegendComponentOption;
   timeScale?: TimeScale;
+  colors?: Array<{ value: number | string; color: string }>;
 }
 
-export function StatusHistoryChart(props: StatusHistoryChartProps): ReactElement {
-  const { height, data, xAxisCategories, yAxisCategories, timeScale } = props;
+export const StatusHistoryChart: FC<StatusHistoryChartProps> = (props) => {
+  const { height, data, xAxisCategories, yAxisCategories, timeScale, colors } = props;
   const { timeZone } = useTimeZone();
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
 
-  const uniqueValues = useMemo(
-    () => [...new Set(data.map((item) => item[2]))].filter((value): value is number => value !== undefined),
-    [data]
-  );
-
-  // get colors from theme and generate colors if not provided
-  const pieces = useMemo(() => {
-    const themeColors = Array.isArray(chartsTheme.echartsTheme.color)
-      ? chartsTheme.echartsTheme.color.filter((color): color is string => typeof color === 'string')
-      : [];
-
-    return uniqueValues.map((value, index) => ({
-      value,
-      color: getColorsForValues(uniqueValues, themeColors)[index],
-    }));
-  }, [uniqueValues, chartsTheme.echartsTheme.color]);
-
   const option: EChartsCoreOption = {
     tooltip: {
       appendToBody: true,
-      formatter: (params: { data: StatusHistoryData; marker: string }) => {
+      formatter: (params: { data: StatusHistoryDataItem; marker: string }) => {
         return generateTooltipHTML({
-          data: params.data,
+          data: params.data.value,
+          label: params.data.label,
           marker: params.marker,
           xAxisCategories,
           yAxisCategories,
@@ -126,7 +122,7 @@ export function StatusHistoryChart(props: StatusHistoryChartProps): ReactElement
     visualMap: {
       show: false,
       type: 'piecewise',
-      pieces,
+      pieces: colors,
     },
     series: [
       {
@@ -163,4 +159,4 @@ export function StatusHistoryChart(props: StatusHistoryChartProps): ReactElement
       />
     </Box>
   );
-}
+};

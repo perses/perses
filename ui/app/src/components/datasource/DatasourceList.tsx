@@ -101,7 +101,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const datasource = findDatasource(name, project);
       setTargetedDatasource(datasource);
       setAction('update');
@@ -111,7 +111,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const datasource = findDatasource(name, project);
       setTargetedDatasource(datasource);
       setAction('create');
@@ -121,7 +121,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedDatasource(findDatasource(name, project));
       setDeleteDatasourceDialogOpened(true);
     },
@@ -143,7 +143,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         headerName: 'Name',
         type: 'string',
         flex: 2,
-        renderCell: (params) => <span style={{ fontFamily: 'monospace' }}>{params.value}</span>,
+        renderCell: (params): ReactElement => <span style={{ fontFamily: 'monospace' }}>{params.value}</span>,
       },
       VERSION_COL_DEF,
       DESCRIPTION_COL_DEF,
@@ -156,7 +156,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
