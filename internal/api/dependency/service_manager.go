@@ -51,8 +51,8 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
-	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -116,16 +116,13 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	migrateService, err := migrate.New(conf.Schemas)
-	if err != nil {
-		return nil, err
-	}
 	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
 	if err != nil {
 		return nil, err
 	}
 	pluginService := plugin.New(conf.Plugins)
 	schemaService := pluginService.Schema()
+	migrateService := pluginService.Migration()
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)

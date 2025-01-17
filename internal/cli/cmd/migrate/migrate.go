@@ -19,7 +19,8 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/migrate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -38,16 +39,14 @@ type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.OutputOption
-	writer           io.Writer
-	errWriter        io.Writer
-	rowInput         []string
-	input            map[string]string
-	chartsSchemas    string
-	queriesSchemas   string
-	variablesSchemas string
-	online           bool
-	mig              migrate.Migration
-	apiClient        api.ClientInterface
+	writer     io.Writer
+	errWriter  io.Writer
+	rowInput   []string
+	input      map[string]string
+	pluginPath string
+	online     bool
+	mig        migrate.Migration
+	apiClient  api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
@@ -58,16 +57,14 @@ func (o *option) Complete(args []string) error {
 		return outputErr
 	}
 	o.completeInput()
-	if len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0 && len(o.variablesSchemas) > 0 {
-		var err error
-		o.mig, err = migrate.New(apiConfig.Schemas{
-			PanelsPath:    o.chartsSchemas,
-			QueriesPath:   o.queriesSchemas,
-			VariablesPath: o.variablesSchemas,
+	if len(o.pluginPath) > 0 {
+		pl := plugin.New(apiConfig.Plugins{
+			Path: o.pluginPath,
 		})
-		if err != nil {
+		if err := pl.Load(); err != nil {
 			return err
 		}
+		o.mig = pl.Migration()
 	}
 	if o.online {
 		// Finally, get the api client we will need later.
@@ -99,9 +96,6 @@ func (o *option) completeInput() {
 }
 
 func (o *option) Validate() error {
-	if !o.online && (len(o.chartsSchemas) == 0 || len(o.queriesSchemas) == 0 || len(o.variablesSchemas) == 0) {
-		return fmt.Errorf("in case you want an offline validation, you need to provide the schemas using the flag schemas.<schema_type>")
-	}
 	return nil
 }
 
@@ -163,17 +157,10 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddOutputFlags(cmd, &o.OutputOption)
 	opt.MarkFileFlagAsMandatory(cmd)
-	cmd.Flags().StringArrayVar(&o.rowInput, "input", o.rowInput, "Grafana input values. Syntax supported is InputName=InputValue")
-	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
-	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")
-	cmd.Flags().StringVar(&o.variablesSchemas, "schemas.variables", "", "Path to the CUE schemas for the dashboard variables")
+	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
-
-	// When the online flags are used,
-	// the CLI will call the endpoint /migrate that will then use the schema from the server.
+	// When "online" flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.
 	// So no need to use / load the schemas with the CLI.
-	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
-	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
-	cmd.MarkFlagsMutuallyExclusive("schemas.variables", "online")
+	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
 	return cmd
 }

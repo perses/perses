@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// DEPREACTED: this package is not used anymore. Use package internal/plugin/migrate instead
 package migrate
 
 import (
@@ -45,6 +46,7 @@ func ReplaceInputValue(input map[string]string, grafanaDashboard string) string 
 	return result
 }
 
+// DEPRECATED
 type Migration interface {
 	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
 }

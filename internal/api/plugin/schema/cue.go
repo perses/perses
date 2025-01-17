@@ -38,16 +38,16 @@ var cueValidationOptions = []cue.Option{
 
 func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
-	schemaInstance, err := loadSchemaInstance(schemaPath, "model")
+	schemaInstance, err := LoadSchemaInstance(schemaPath, "model")
 	if err != nil {
 		return "", nil, err
 	}
 	// We are building the value from instance so we can read the kind value.
-	sch := ctx.BuildInstance(schemaInstance)
-	if sch.Err() != nil {
-		return "", nil, sch.Err()
+	schema := ctx.BuildInstance(schemaInstance)
+	if schema.Err() != nil {
+		return "", nil, schema.Err()
 	}
-	kindValue := sch.LookupPath(cue.ParsePath(kindPath))
+	kindValue := schema.LookupPath(cue.ParsePath(kindPath))
 	if kindValue.Err() != nil {
 		return "", nil, fmt.Errorf("unable to retrieve the kind value: %w", kindValue.Err())
 	}
@@ -58,7 +58,7 @@ func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	return kind, schemaInstance, nil
 }
 
-func loadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) {
+func LoadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) {
 	// load the cue files into build.Instances slice
 	// package `model` is imposed so that we don't mix model-related files with migration-related files
 	buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: pkg})

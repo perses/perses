@@ -1,0 +1,213 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "bhxw4yB4k",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "queues-test"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "name": "PaaS",
+            "hidden": true
+          },
+          "defaultValue": "argos-world",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "grafana",
+                "migration",
+                "not",
+                "supported"
+              ]
+            }
+          },
+          "name": "datasource"
+        }
+      }
+    ],
+    "panels": {
+      "0_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Purpose of the Dashboard"
+          },
+          "plugin": {
+            "kind": "MarkdownChart",
+            "spec": {
+              "text": "This dashboard does have some purpose, let me reminder... uuuuh..."
+            }
+          }
+        }
+      },
+      "0_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Point of Contact"
+          },
+          "plugin": {
+            "kind": "MarkdownChart",
+            "spec": {
+              "text": "<p>In case of issue with the dashboard, you're on your own mate</p>"
+            }
+          }
+        }
+      },
+      "1_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Queueing rate",
+            "description": "Messages Enqueued-Dequeued per second.\n\n - Queueing rate: Rate of messages enqueued (no BE instance ready)\n - Dequeueing rate (negative): Rate of messages dequeued (a BE instance became available)"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "$datasource"
+                    },
+                    "minStep": "2m",
+                    "query": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))",
+                    "seriesNameFormat": "Queueing rate"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "1_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My table-old panel",
+            "description": "This is a table panel using the legacy model"
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "columnSettings": [
+                {
+                  "header": "Time",
+                  "hide": true,
+                  "name": "Time"
+                },
+                {
+                  "align": "right",
+                  "header": "APP Component",
+                  "name": "app_component"
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "$datasource"
+                    },
+                    "minStep": "",
+                    "query": "sum by (app_component, namespace, stack) (storage_scrape_collector_success{stack=~\"muc10\"})",
+                    "seriesNameFormat": "{{app_component}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Dashboard Info",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0_0"
+              }
+            },
+            {
+              "x": 12,
+              "y": 1,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0_1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Overview",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 10,
+              "content": {
+                "$ref": "#/spec/panels/1_0"
+              }
+            },
+            {
+              "x": 12,
+              "y": 2,
+              "width": 12,
+              "height": 11,
+              "content": {
+                "$ref": "#/spec/panels/1_1"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}
