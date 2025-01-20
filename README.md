@@ -16,25 +16,20 @@
 
 ## Overview
 
-Perses, a [Cloud Native Computing Foundation](https://cncf.io) sandbox project, is a dashboard tool to visualize observability data from Prometheus/Thanos/Jaeger.
+Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics & Tempo traces, with plans to expand its capabilities in the future to include logging, profiling, additional technologies for monitoring and tracing, and more.
+
+Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
 | ![img.png](https://github.com/perses/perses/assets/5657041/3bd8ae57-da7b-4447-9478-cefe19d61a71) | ![img.png](https://github.com/perses/perses/assets/5657041/ba46beab-c8fb-4583-bc2f-71c9893f7906) |
 |:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
 
-Perses aims to tackle multiple goals:
+Beyond its core usage, Perses aims to achieve several broader goals:
 
-1. Become a **standard** dashboard visualization tool for Prometheus and other datasources. It will focus on being
-   GitOps-compatible and thus enabling a smooth Dashboard-as-Code workflow, via a new and well-defined dashboard
-   definition model.
-2. Provide different npm packages, so that anyone that would like to embed panels and dashboards in their own UI could
-   benefit from the work achieved here. For example, these packages might be used in the future to improve the display
-   of the data in the Prometheus UI.
-3. Offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual
-   application namespaces (using CRDs). For more information you can take a look at the
-   [Perses Operator](https://github.com/perses/perses-operator).
-4. To be friendly to Dashboard-as-Code users, by providing a complete static validation of the dashboard format. That
-   means you will be able to validate your dashboards in a CI/CD using the Perses CLI (named `percli`)
-5. Support plugins, to allow users to extend the capacities natively provided.
+- **Open specification for dashboards**. Perses is also an initiative to define a standardized dashboard specification, fostering interoperability across observability tools.
+- **Integrability**. Perses provides various npm packages that allow developers to embed panels and dashboards into their own UIs, benefiting from the work done in Perses. For instance, these packages could be used in the future to enhance data visualization in the Prometheus UI.
+- **Extensibility**. Perses is soon to support plugins, enabling users to extend the tool’s native capabilities to suit specific needs.
+- **GitOps-friendly**. SDKs, CI/CD libraries, static validation, native CLI.. Perses provides everything you need for a great Dashboard-as-Code experience.
+- **Kubernetes-native mode**. Dashboard definitions will be deployable into and readable from individual application namespaces using Custom Resource Definitions (CRDs). For more information on that topic you can take a look at the [Perses Operator](https://github.com/perses/perses-operator).
 
 ## Try it
 
