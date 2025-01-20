@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DatasourceDefinition } from '@perses-dev/core';
-import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import React, { DispatchWithoutAction, ReactElement, useState } from 'react';
-import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PluginEditor } from '../PluginEditor';
-import { getSubmitText, getTitleAction } from '../../utils';
+import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
+import { Action, DatasourceDefinition } from '@perses-dev/core';
+import { DispatchWithoutAction, ReactElement, useState } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { useValidationSchemas } from '../../context';
+import { getSubmitText, getTitleAction } from '../../utils';
+import { PluginEditor } from '../PluginEditor';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;

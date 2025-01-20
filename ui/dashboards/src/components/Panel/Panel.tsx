@@ -17,7 +17,7 @@ import { PanelDefinition } from '@perses-dev/core';
 import { ReactNode, memo, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { PanelGroupItemId } from '../../context';
-import { DynamicPanelContent } from '../DynamicPanel/DynamicPanelContent';
+import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
 export interface PanelProps extends CardProps<'section'> {
@@ -139,7 +139,12 @@ export const Panel = memo(function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec]}>
-          <DynamicPanelContent definition={definition} contentDimensions={contentDimensions} />
+          <PanelContent
+            definition={definition}
+            panelPluginKind={definition.spec.plugin.kind}
+            spec={definition.spec.plugin.spec}
+            contentDimensions={contentDimensions}
+          />
         </ErrorBoundary>
       </CardContent>
     </Card>

@@ -127,7 +127,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     rememberCurrentSpecState();
     onChange({
       selection: pendingSelection,
-      spec: plugin.createInitialOptions(),
+      spec: plugin.createInitialOptions ? plugin.createInitialOptions() : {},
     });
 
     if (pendingSelection.type === 'Panel') {

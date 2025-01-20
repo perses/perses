@@ -15,8 +15,12 @@ import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
-import { remotePluginLoader } from '@perses-dev/plugin-runtime';
-import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
+import {
+  PluginRegistry,
+  UsageMetricsProvider,
+  ValidationProvider,
+  remotePluginLoader,
+} from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
