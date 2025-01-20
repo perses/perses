@@ -85,7 +85,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const [isDeleteDashboardDialogStateOpened, setDeleteDashboardDialogStateOpened] = useState<boolean>(false);
 
   const handleRenameButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setRenameDashboardDialogStateOpened(true);
     },
@@ -131,7 +131,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setDuplicateDashboardDialogStateOpened(true);
     },
@@ -157,7 +157,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const handleDeleteButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setDeleteDashboardDialogStateOpened(true);
     },
@@ -177,7 +177,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         type: 'actions',
         flex: 0.5,
         minWidth: 100,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}

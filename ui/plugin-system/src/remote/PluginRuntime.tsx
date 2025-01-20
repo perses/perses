@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,19 +73,19 @@ export const pluginRuntime = init({
       },
     },
     '@perses-dev/components': {
-      version: '0.49.0',
+      version: '0.50.0',
       lib: () => require('@perses-dev/components'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.49.0',
+        requiredVersion: '^0.50.0',
       },
     },
     '@perses-dev/plugin-system': {
-      version: '0.49.0',
+      version: '0.50.0',
       lib: () => require('@perses-dev/plugin-system'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.49.0',
+        requiredVersion: '^0.50.0',
       },
     },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK

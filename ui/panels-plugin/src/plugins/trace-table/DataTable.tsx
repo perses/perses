@@ -107,7 +107,8 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 2,
         minWidth: 145,
         display: 'flex',
-        valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
+        valueGetter: (_, trace): number =>
+          Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
         renderCell: ({ row }): ReactElement => {
           let totalSpanCount = 0;
           let totalErrorCount = 0;
@@ -141,7 +142,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 1,
         minWidth: 70,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Typography display="inline">
             {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
           </Typography>
@@ -156,7 +157,7 @@ export function DataTable(props: DataTableProps): ReactElement {
         flex: 3,
         minWidth: 240,
         display: 'flex',
-        renderCell: ({ row }) => (
+        renderCell: ({ row }): ReactElement => (
           <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
             <Typography display="inline">{DATE_FORMATTER(new Date(row.startTimeUnixMs))}</Typography>
           </Tooltip>

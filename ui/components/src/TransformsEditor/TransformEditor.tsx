@@ -18,8 +18,8 @@ import {
   Stack,
   StackProps,
   Switch,
-  TextField,
   Typography,
+  TextField as MuiTextField,
 } from '@mui/material';
 import {
   JoinByColumnValueTransform,
@@ -29,6 +29,7 @@ import {
   Transform,
 } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { TextField } from '../controls';
 
 interface TransformSpecEditorProps<Spec> {
   value: Spec;
@@ -46,9 +47,9 @@ function JoinByColumnValueTransformEditor({
         multiple
         id="join-columns"
         sx={{ width: '100%' }}
-        options={[]}
+        options={[]} // TODO: autofill columns name when query results is available to panel editors
         value={value.spec.columns ?? []}
-        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
+        renderInput={(params) => <MuiTextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
             ...value,
@@ -92,7 +93,7 @@ function MergeColumnsTransformEditor({
         sx={{ width: '100%' }}
         options={[]}
         value={value.spec.columns ?? []}
-        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
+        renderInput={(params) => <MuiTextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
             ...value,
@@ -110,12 +111,12 @@ function MergeColumnsTransformEditor({
         label="Output Name"
         value={value.spec.name ?? ''}
         sx={{ width: '100%' }}
-        onChange={(e) => {
+        onChange={(name) => {
           onChange({
             ...value,
             spec: {
               ...value.spec,
-              name: e.target.value,
+              name: name,
             },
           });
         }}
@@ -154,10 +155,10 @@ function MergeIndexedColumnsTransformEditor({
         placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
         value={value.spec.column ?? ''}
         sx={{ width: '100%' }}
-        onChange={(e) => {
+        onChange={(column) => {
           onChange({
             ...value,
-            spec: { ...value.spec, column: e.target.value },
+            spec: { ...value.spec, column: column },
           });
         }}
         required
@@ -217,7 +218,7 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
         select
         label="Kind"
         value={value.kind}
-        onChange={(e) => onChange({ ...value, kind: e.target.value as unknown as Transform['kind'] } as Transform)}
+        onChange={(kind) => onChange({ ...value, kind: kind as unknown as Transform['kind'] } as Transform)}
       >
         <MenuItem value="JoinByColumnValue">
           <Stack>

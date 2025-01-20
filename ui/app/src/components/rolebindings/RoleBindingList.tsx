@@ -97,7 +97,7 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const roleBinding = findRoleBinding(name, project);
       setTargetedRoleBinding(roleBinding);
       setAction('create');
@@ -107,7 +107,7 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       const roleBinding = findRoleBinding(name, project);
       setTargetedRoleBinding(roleBinding);
       setAction('update');
@@ -117,7 +117,7 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
+    (name: string, project?: string) => (): void => {
       setTargetedRoleBinding(findRoleBinding(name, project));
       setDeleteRoleBindingDialogOpened(true);
     },
@@ -138,7 +138,7 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}

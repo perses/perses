@@ -32,6 +32,7 @@ Available Commands:
   lint        Static check of the resources
   login       Log in to the Perses API
   migrate     migrate a Grafana dashboard to the Perses format
+  plugin      Commands related to plugins development
   project     Select the project used by default.
   refresh     refresh the access token when it expires
   version     Display client version.
@@ -277,7 +278,7 @@ has two modes:
     - variables folders
 
 Each of the above folders should contain a file named `migrate.cue`, that holds the logic of the migration for each
-plugin. For more information about these files, please read the documentation about [CUE in Perses](../plugins/cue.md).
+plugin. For more information about these files, please read the documentation about [CUE in Perses](./plugins/cue.md).
 
 In both modes, if the command runs successfully, it will return the dashboard in the Perses format.
 
@@ -331,4 +332,4 @@ spec:
 
 ### Dashboard-as-Code
 
-The CLI also comes in handy when you want to create & manage dashboards as code. For this topic please refer to [DaC user guide](../user-guides/dashboard-as-code.md).
+The CLI also comes in handy when you want to create & manage dashboards as code. For this topic please refer to [DaC user guide](./dac/dashboard-as-code.md).

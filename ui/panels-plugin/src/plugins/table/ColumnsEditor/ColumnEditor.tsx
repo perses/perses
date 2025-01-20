@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Divider, FormControlLabel, Stack, StackProps, Switch } from '@mui/material';
 import { ReactElement, useState } from 'react';
-import { AlignSelector, SortSelectorButtons } from '@perses-dev/components';
+import { AlignSelector, SortSelectorButtons, TextField } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
@@ -34,7 +34,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
         <TextField
           label="Name"
           value={column.name}
-          onChange={(e) => onChange({ ...column, name: e.target.value })}
+          onChange={(value) => onChange({ ...column, name: value })}
           required
         />
 
@@ -44,19 +44,19 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           label="Header"
           value={column.header ?? ''}
           fullWidth
-          onChange={(e) => onChange({ ...column, header: e.target.value ? e.target.value : undefined })}
+          onChange={(value) => onChange({ ...column, header: value ? value : undefined })}
         />
         <TextField
           label="Header Description"
           value={column.headerDescription ?? ''}
           fullWidth
-          onChange={(e) => onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })}
+          onChange={(value) => onChange({ ...column, headerDescription: value ? value : undefined })}
         />
         <TextField
           label="Cell Description"
           value={column.cellDescription ?? ''}
           fullWidth
-          onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
+          onChange={(value) => onChange({ ...column, cellDescription: value ? value : undefined })}
         />
       </Stack>
 
@@ -144,12 +144,12 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             type="number"
             value={width}
             fullWidth
-            // set visibility instead of wrapping in a if condition, in order to keep same layout
+            // set visibility instead of wrapping in an if condition, in order to keep same layout
             sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible', flex: 2 }}
-            InputProps={{ inputProps: { min: 1 } }}
-            onChange={(e) => {
-              setWidth(+e.target.value);
-              onChange({ ...column, width: +e.target.value });
+            slotProps={{ htmlInput: { min: 1 } }}
+            onChange={(value) => {
+              setWidth(+value);
+              onChange({ ...column, width: +value });
             }}
           />
         </Stack>

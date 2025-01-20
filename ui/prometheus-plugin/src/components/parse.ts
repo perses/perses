@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useDatasourceClient } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, StatusError } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { ParseQueryRequestParameters, ParseQueryResponse, PrometheusClient } from '../model';
 
@@ -20,10 +20,10 @@ export function useParseQuery(
   content: string,
   datasource: DatasourceSelector,
   enabled?: boolean
-): UseQueryResult<ParseQueryResponse> {
+): UseQueryResult<ParseQueryResponse, StatusError> {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  return useQuery<ParseQueryResponse>({
+  return useQuery<ParseQueryResponse, StatusError>({
     enabled: !!client && enabled,
     queryKey: ['parseQuery', content, 'datasource', datasource],
     queryFn: async () => {

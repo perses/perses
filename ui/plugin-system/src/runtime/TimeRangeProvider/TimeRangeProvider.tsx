@@ -97,7 +97,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
         refresh();
       }, refreshIntervalInMs);
 
-      return () => clearInterval(interval);
+      return (): void => clearInterval(interval);
     }
   }, [refresh, refreshIntervalInMs]);
 

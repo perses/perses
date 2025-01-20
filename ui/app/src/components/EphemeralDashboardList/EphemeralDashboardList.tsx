@@ -92,7 +92,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
     useState<boolean>(false);
 
   const onRenameButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setRenameEphemeralDashboardDialogStateOpened(true);
     },
@@ -118,7 +118,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
   );
 
   const onDeleteButtonClick = useCallback(
-    (project: string, name: string) => () => {
+    (project: string, name: string) => (): void => {
       setTargetedDashboard(getDashboard(project, name));
       setDeleteEphemeralDashboardDialogStateOpened(true);
     },
@@ -136,8 +136,8 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
         type: 'dateTime',
         flex: 3,
         minWidth: 150,
-        valueGetter: (_, row) => new Date(row.expireAt),
-        renderCell: (params) => (
+        valueGetter: (_, row): Date => new Date(row.expireAt),
+        renderCell: (params): ReactElement => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
           </Tooltip>
@@ -151,7 +151,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
         type: 'actions',
         flex: 0.5,
         minWidth: 100,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}

@@ -93,7 +93,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       const user = findUser(name);
       setTargetedUser(user);
       setAction('create');
@@ -103,7 +103,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       const user = findUser(name);
       setTargetedUser(user);
       setAction('update');
@@ -113,7 +113,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string) => () => {
+    (name: string) => (): void => {
       setTargetedUser(findUser(name));
       setDeleteUserDialogOpened(true);
     },
@@ -146,7 +146,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
         type: 'actions',
         flex: 0.5,
         minWidth: 150,
-        getActions: (params: GridRowParams<Row>) => [
+        getActions: (params: GridRowParams<Row>): ReactElement[] => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
