@@ -301,6 +301,7 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last-number",
+              "metricLabel": "",
               "sparkline": {},
               "format": {
                 "unit": "bytes/sec",

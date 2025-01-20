@@ -11,20 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './CalculationSelector';
-export * from './DatasourceEditorForm';
-export * from './DatasourceSelect';
-export * from './HTTPSettingsEditor';
-export * from './LegendOptionsEditor';
-export * from './MultiQueryEditor';
-export * from './OptionsEditorRadios';
-export * from './OptionsEditorTabs';
-export * from './PanelSpecEditor';
-export * from './PluginEditor';
-export * from './PluginKindSelect';
-export * from './PluginRegistry';
-export * from './PluginSpecEditor';
-export * from './TimeRangeControls';
-export * from './Variables';
-export * from './ProjectSelect';
 export * from './MetricLabelInput';

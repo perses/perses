@@ -25,6 +25,7 @@ export interface StatChartDefinition extends Definition<StatChartOptions> {
 export interface StatChartOptions {
   calculation: CalculationType;
   format: FormatOptions;
+  metricLabel?: string;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
