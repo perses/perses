@@ -14,81 +14,55 @@
 package lint
 
 import (
+	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
-	"path"
-	"path/filepath"
-	"strings"
 
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/spf13/cobra"
 )
 
-func isPackageModel(file string) (bool, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return false, err
-	}
-	return strings.Contains(string(data), "package model"), nil
-}
-
-func validateSchemas(schemaFolder string) error {
-	return filepath.WalkDir(schemaFolder, func(currentPath string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			if d.Name() == "migrate" {
-				return fs.SkipDir
-			}
-			return nil
-		}
-		if filepath.Ext(currentPath) != ".cue" {
-			return nil
-		}
-		if isModel, openFileErr := isPackageModel(currentPath); openFileErr != nil {
-			if openFileErr != nil {
-				return openFileErr
-			}
-			if !isModel {
-				return nil
-			}
-		}
-		currentDir, _ := path.Split(currentPath)
-		if _, schemaErr := schemas.Load(currentDir); schemaErr != nil {
-			return schemaErr
-		}
-		return nil
-	})
-}
-
 type option struct {
 	persesCMD.Option
-	schemaFolder string
-	writer       io.Writer
-	errWriter    io.Writer
+	cfg       config.PluginConfig
+	cfgPath   string
+	writer    io.Writer
+	errWriter io.Writer
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'update'")
 	}
+	cfg, err := config.Resolve(o.cfgPath)
+	if err != nil {
+		return fmt.Errorf("unable to resolve the configuration: %w", err)
+	}
+	o.cfg = cfg
 	return nil
 }
 
 func (o *option) Validate() error {
-	if _, err := os.Stat(o.schemaFolder); os.IsNotExist(err) {
-		return fmt.Errorf("folder %s does not exist or has not been found", o.schemaFolder)
+	if exist, err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil || !exist {
+		return fmt.Errorf("required files are missing: %w", err)
+	}
+	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
+		return errors.New("cue modules not found")
 	}
 	return nil
 }
 
 func (o *option) Execute() error {
-	if err := validateSchemas(o.schemaFolder); err != nil {
+	npmPackageData, readErr := plugin.ReadPackage(o.cfg.FrontendPath)
+	if readErr != nil {
+		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
+	}
+	if _, _, err := schema.Load("", npmPackageData.Perses); err != nil {
 		return err
 	}
 	return output.HandleString(o.writer, "current plugin is valid")
@@ -111,6 +85,7 @@ func NewCMD() *cobra.Command {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVar(&o.schemaFolder, "schemas-path", "schemas", "Path to the folder containing the cuelang schema")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
+
 	return cmd
 }

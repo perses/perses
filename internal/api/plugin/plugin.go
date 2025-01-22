@@ -15,7 +15,6 @@ package plugin
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -77,7 +76,7 @@ func (p *pluginFile) Load() error {
 			continue
 		}
 		pluginPath := filepath.Join(p.path, file.Name())
-		if valid, validErr := isPluginValid(pluginPath); !valid || validErr != nil {
+		if valid, validErr := IsRequiredFileExists(pluginPath, pluginPath, pluginPath); !valid || validErr != nil {
 			if validErr != nil {
 				logrus.WithError(validErr).Error("unable to check if the plugin is valid")
 			} else {
@@ -120,34 +119,4 @@ func (p *pluginFile) Load() error {
 		return marshalErr
 	}
 	return os.WriteFile(filepath.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
-}
-
-func isPluginValid(pluginPath string) (bool, error) {
-	// check if the plugin folder exists
-	exist, err := fileExists(pluginPath)
-	if !exist || err != nil {
-		return false, err
-	}
-	// check if the manifest file exists
-	exist, err = fileExists(filepath.Join(pluginPath, ManifestFileName))
-	if !exist || err != nil {
-		return false, err
-	}
-	// check if the package.json file exists
-	exist, err = fileExists(filepath.Join(pluginPath, PackageJSONFile))
-	if !exist || err != nil {
-		return false, err
-	}
-	return true, nil
-}
-
-func fileExists(filePath string) (bool, error) {
-	_, osErr := os.Stat(filePath)
-	if osErr != nil {
-		if errors.Is(osErr, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, osErr
-	}
-	return true, nil
 }

@@ -31,7 +31,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO Put in common with percli plugin lint command.
 func isPackageModel(file string) (bool, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -47,6 +46,46 @@ func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
 		}
 	}
 	return nil
+}
+
+// Load is loading the plugin schema returning the kind of the schema and the instance of the schema.
+func Load(pluginPath string, moduleSpec plugin.ModuleSpec) (string, *build.Instance, error) {
+	var kind string
+	var instance *build.Instance
+	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == "migrate" {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(currentPath) != ".cue" {
+			return nil
+		}
+		if isModel, openFileErr := isPackageModel(currentPath); openFileErr != nil {
+			if openFileErr != nil {
+				return openFileErr
+			}
+			if !isModel {
+				return nil
+			}
+		}
+		currentDir, _ := path.Split(currentPath)
+		var schemaErr error
+		kind, instance, schemaErr = LoadModelSchema(currentDir)
+		if schemaErr != nil {
+			return schemaErr
+		}
+		pl := getPlugin(moduleSpec.Plugins, kind)
+		if pl == nil {
+			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", kind)
+		}
+		return fs.SkipDir
+	})
+	return kind, instance, err
 }
 
 type Schema interface {
@@ -78,50 +117,23 @@ type sch struct {
 }
 
 func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
-	return filepath.WalkDir(filepath.Join(pluginPath, module.Spec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			if d.Name() == "migrate" {
-				return fs.SkipDir
-			}
-			return nil
-		}
-		if filepath.Ext(currentPath) != ".cue" {
-			return nil
-		}
-		if isModel, openFileErr := isPackageModel(currentPath); openFileErr != nil {
-			if openFileErr != nil {
-				return openFileErr
-			}
-			if !isModel {
-				return nil
-			}
-		}
-		currentDir, _ := path.Split(currentPath)
-		kind, instance, schemaErr := LoadModelSchema(currentDir)
-		if schemaErr != nil {
-			return schemaErr
-		}
-		pl := getPlugin(module.Spec.Plugins, kind)
-		if pl == nil {
-			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", kind)
-		}
-		switch pl.Kind {
-		case plugin.KindDatasource:
-			s.datasources[kind] = instance
-		case plugin.KindTimeSeriesQuery:
-			s.queries[kind] = instance
-		case plugin.KindVariable:
-			s.variables[kind] = instance
-		case plugin.KindPanel:
-			s.panels[kind] = instance
-		default:
-			return fmt.Errorf("unknown kind %s", pl.Kind)
-		}
-		return fs.SkipDir
-	})
+	kind, instance, err := Load(pluginPath, module.Spec)
+	if err != nil {
+		return err
+	}
+	switch kind {
+	case plugin.KindDatasource:
+		s.datasources[kind] = instance
+	case plugin.KindTimeSeriesQuery:
+		s.queries[kind] = instance
+	case plugin.KindVariable:
+		s.variables[kind] = instance
+	case plugin.KindPanel:
+		s.panels[kind] = instance
+	default:
+		return fmt.Errorf("unknown kind %s", kind)
+	}
+	return nil
 }
 
 func (s *sch) ValidateDatasource(plugin common.Plugin, dtsName string) error {
