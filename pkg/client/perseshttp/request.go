@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	urlutils "github.com/perses/perses/pkg/client/url"
 )
 
 const (
@@ -205,11 +207,7 @@ func (r *Request) prepareRequest() (*http.Request, error) {
 func (r *Request) url() string {
 	path := r.buildPath()
 
-	finalURL := &url.URL{}
-	if r.baseURL != nil {
-		*finalURL = *r.baseURL
-	}
-	finalURL.Path = path
+	finalURL := urlutils.CloneURLAddingPath(r.baseURL, path)
 
 	if r.queryParam != nil {
 		finalURL.RawQuery = r.queryParam.Encode()

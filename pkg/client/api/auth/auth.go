@@ -21,6 +21,7 @@ import (
 
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	urlutils "github.com/perses/perses/pkg/client/url"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
@@ -129,9 +130,9 @@ func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret s
 }
 
 func (c *auth) deviceAuthURL(authKind, authProvider string) string {
-	return fmt.Sprintf("%s%s/%s/%s/%s/%s", c.client.BaseURL.String(), utils.APIPrefix, utils.PathAuthProviders, authKind, authProvider, utils.PathDeviceCode)
+	return urlutils.CloneURLAddingPath(c.client.BaseURL, utils.APIPrefix, utils.PathAuthProviders, authKind, authProvider, utils.PathDeviceCode).String()
 }
 
 func (c *auth) tokenURL(authKind, authProvider string) string {
-	return fmt.Sprintf("%s%s/%s/%s/%s/%s", c.client.BaseURL.String(), utils.APIPrefix, utils.PathAuthProviders, authKind, authProvider, utils.PathToken)
+	return urlutils.CloneURLAddingPath(c.client.BaseURL, utils.APIPrefix, utils.PathAuthProviders, authKind, authProvider, utils.PathToken).String()
 }
