@@ -16,6 +16,7 @@ package common
 import (
 	"encoding/json"
 	"net/url"
+	"path"
 )
 
 func ParseURL(rawURL string) (*URL, error) {
@@ -32,6 +33,18 @@ func MustParseURL(rawURL string) *URL {
 		panic(err)
 	}
 	return &URL{URL: u}
+}
+
+func NewURL(u *URL, paths ...string) *URL {
+	result := &URL{
+		URL: &url.URL{},
+	}
+	if u == nil {
+		return result
+	}
+	*result.URL = *u.URL
+	result.Path = path.Join(paths...)
+	return result
 }
 
 type URL struct {

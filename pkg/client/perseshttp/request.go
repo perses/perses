@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 const (
@@ -44,7 +46,7 @@ type Request struct {
 	ctx     context.Context
 
 	// all component relative to the url
-	baseURL *url.URL
+	baseURL *common.URL
 	// API
 	apiPrefix  string // it's the api prefix such as /api
 	apiVersion string
@@ -59,7 +61,7 @@ type Request struct {
 }
 
 // NewRequest creates a new request helper object for accessing resource on the API
-func NewRequest(client *http.Client, method string, baseURL *url.URL, headers map[string]string) *Request {
+func NewRequest(client *http.Client, method string, baseURL *common.URL, headers map[string]string) *Request {
 	return &Request{
 		client:     client,
 		method:     method,
@@ -205,11 +207,7 @@ func (r *Request) prepareRequest() (*http.Request, error) {
 func (r *Request) url() string {
 	path := r.buildPath()
 
-	finalURL := &url.URL{}
-	if r.baseURL != nil {
-		*finalURL = *r.baseURL
-	}
-	finalURL.Path = path
+	finalURL := common.NewURL(r.baseURL, path)
 
 	if r.queryParam != nil {
 		finalURL.RawQuery = r.queryParam.Encode()

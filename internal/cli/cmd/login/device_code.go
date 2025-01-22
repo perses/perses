@@ -36,7 +36,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 	}
 
 	// Display the user code and verification URL
-	if outErr := output.HandleString(l.writer, fmt.Sprintf("Go to %s and enter this user code: %s\nWaiting for user to authorize the application...", deviceCodeResponse.VerificationURI, deviceCodeResponse.UserCode)); err != nil {
+	if outErr := output.HandleString(l.writer, fmt.Sprintf("Go to %s and enter this user code: %s\nWaiting for user to authorize the application...", deviceCodeResponse.VerificationURI, deviceCodeResponse.UserCode)); outErr != nil {
 		return nil, outErr
 	}
 
