@@ -113,6 +113,8 @@ func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
 			s.datasources[kind] = instance
 		case plugin.KindTimeSeriesQuery:
 			s.queries[kind] = instance
+		case plugin.KindTraceQuery:
+			s.queries[kind] = instance
 		case plugin.KindVariable:
 			s.variables[kind] = instance
 		case plugin.KindPanel:
