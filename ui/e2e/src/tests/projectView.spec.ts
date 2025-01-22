@@ -76,7 +76,7 @@ test.describe('ProjectView', () => {
     await variableEditor.setName('list_var');
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
-    await variableEditor.selectSource('Custom List');
+    await variableEditor.selectSource('Static List Variable');
     await variableEditor.setListValue('test');
     await variableEditor.saveButton.click();
 
