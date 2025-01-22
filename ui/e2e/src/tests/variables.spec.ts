@@ -54,7 +54,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setName('list_var');
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
-    await variableEditor.selectSource('Custom List');
+    await variableEditor.selectSource('Static List Variable');
     await variableEditor.setListValue('Test');
     await variableEditor.addButton.click();
 

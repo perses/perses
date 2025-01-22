@@ -14,13 +14,13 @@
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
 import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
-import { remotePluginLoader } from '@perses-dev/plugin-runtime';
 import {
   PluginRegistry,
   TimeRangeProviderWithQueryParams,
   ValidationProvider,
   VariableEditorForm,
   useInitialTimeRange,
+  remotePluginLoader,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
