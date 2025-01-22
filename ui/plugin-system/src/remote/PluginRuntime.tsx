@@ -13,8 +13,11 @@
 // limitations under the License.
 
 import { FederationHost, init, loadRemote } from '@module-federation/enhanced/runtime';
+import * as ReactQuery from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactRouterDOM from 'react-router-dom';
+import * as ReactHookForm from 'react-hook-form';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
 export const pluginRuntime = init({
@@ -35,6 +38,30 @@ export const pluginRuntime = init({
       shareConfig: {
         singleton: true,
         requiredVersion: '^18.2.0',
+      },
+    },
+    'react-router-dom': {
+      version: '6.11.0',
+      lib: () => ReactRouterDOM,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^6.11.0',
+      },
+    },
+    '@tanstack/react-query': {
+      version: '4.36.1',
+      lib: () => ReactQuery,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^4.36.1',
+      },
+    },
+    'react-hook-form': {
+      version: '7.52.2',
+      lib: () => ReactHookForm,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^7.52.2',
       },
     },
     echarts: {
@@ -124,6 +151,14 @@ export const pluginRuntime = init({
       shareConfig: {
         singleton: true,
         requiredVersion: '^7.4.0',
+      },
+    },
+    immer: {
+      version: '9.0.15',
+      lib: () => require('immer'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^9.0.15',
       },
     },
   },
