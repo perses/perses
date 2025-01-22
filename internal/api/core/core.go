@@ -95,7 +95,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		APIRegistration(persesAPI).
 		GzipSkipper(func(c echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
-			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
+			return strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/proxy", conf.APIPrefix))
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
