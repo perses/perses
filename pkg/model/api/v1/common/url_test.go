@@ -62,3 +62,10 @@ func TestURL_ENV(t *testing.T) {
 	assert.Equal(t, os.Getenv("PREFIX_URL"), `http://localhost:8080`)
 	_ = os.Unsetenv("PREFIX_URL")
 }
+
+func TestNewURL(t *testing.T) {
+	// Create a new URL
+	u := MustParseURL("https://example.com/")
+	assert.Equal(t, "https://example.com/foo/bar/zob/lob", NewURL(u, "foo/", "bar", "/zob/lob").String())
+	assert.Equal(t, "https://example.com", NewURL(u).String())
+}

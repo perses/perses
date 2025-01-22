@@ -15,12 +15,12 @@ package transport
 
 import (
 	"net/http"
-	"net/url"
 	"sync"
 
 	"github.com/perses/perses/pkg/client/api/auth"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"golang.org/x/oauth2"
 )
 
@@ -59,7 +59,7 @@ func (t *tokenManager) getToken() (*oauth2.Token, error) {
 	return t.token, nil
 }
 
-func New(baseURL *url.URL, base http.RoundTripper, nativeAuth modelAPI.Auth) http.RoundTripper {
+func New(baseURL *common.URL, base http.RoundTripper, nativeAuth modelAPI.Auth) http.RoundTripper {
 	client := auth.New(&perseshttp.RESTClient{
 		BaseURL: baseURL,
 		Client:  &http.Client{Transport: base},

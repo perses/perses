@@ -15,7 +15,8 @@ package perseshttp
 
 import (
 	"net/http"
-	"net/url"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.
@@ -23,7 +24,7 @@ type RESTClient struct {
 	// Default headers for all client requests (not editable)
 	Headers map[string]string
 	// base is the root URL for all invocations of the client
-	BaseURL *url.URL
+	BaseURL *common.URL
 	// Set specific behavior of the client. If not, set http.DefaultClient will be used.
 	Client *http.Client
 }
