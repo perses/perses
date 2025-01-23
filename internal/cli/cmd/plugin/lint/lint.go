@@ -53,7 +53,7 @@ func (o *option) Validate() error {
 		return fmt.Errorf("required files are missing: %w", err)
 	}
 	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
-		return errors.New("cue modules not found")
+		return errors.New("cue.mod folder not found")
 	}
 	return nil
 }
