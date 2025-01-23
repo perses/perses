@@ -48,8 +48,8 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@rspack/cli": "^0.6.5",
-    "@rspack/core": "^0.6.5",
-    "@rspack/plugin-react-refresh": "^0.6.5"
+    "@rspack/cli": "^1.2.2",
+    "@rspack/core": "^1.2.2",
+    "@rspack/plugin-react-refresh": "^1.0.1"
   }
 }
