@@ -59,6 +59,8 @@ func ReplaceInputValue(input map[string]string, grafanaDashboard string) string 
 }
 
 // TODO Put in common with percli plugin lint command.
+// isPackageMigrate is a function that checks if a cuelang file belongs to the package migrate.
+// For that, we are opening the file and checking if the string "package migrate" is present.
 func isPackageMigrate(file string) (bool, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -240,6 +242,7 @@ func (m *mig) Load(pluginPath string, module v1.PluginModule) error {
 		// At this point, we are in the "migrate" directory.
 		// TODO: replace usage of path.Join by filepath.Join when it makes sense. Pretty sure the windows issue regarding the wrong path usage, is due to the usage of path.Join.
 		migrateFilePath := filepath.Join(currentPath, "migrate.cue")
+		// We are verifying if the package is a package migrate. Otherwise, we won't be able to use it.
 		if isMigrate, openFileErr := isPackageMigrate(migrateFilePath); openFileErr != nil {
 			if openFileErr != nil {
 				return openFileErr

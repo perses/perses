@@ -23,7 +23,7 @@ const (
 	grafanaPanelRowType = "row"
 )
 
-type GrisPosition struct {
+type GridPosition struct {
 	Height int `json:"h"`
 	Width  int `json:"w"`
 	X      int `json:"x"`
@@ -36,7 +36,7 @@ type Panel struct {
 	Description  string            `json:"description"`
 	Collapsed    bool              `json:"collapsed"`
 	Panels       []Panel           `json:"panels"`
-	GridPosition GrisPosition      `json:"gridPos"`
+	GridPosition GridPosition      `json:"gridPos"`
 	Targets      []json.RawMessage `json:"targets"`
 	json.RawMessage
 }
