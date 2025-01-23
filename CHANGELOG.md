@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.50.1 / 2025-01-23
+
+- [FEATURE] Label metrics in stat chart (#2574)
+- [FEATURE] Value mapping settings for Status History and Stat Chart (#2462)
+- [BUGFIX] Inject API prefix in all UI assets (#2576)
+- [BUGFIX] Login with percli when using OIDC was broken (#2577)
+- [BUGFIX] ListVariable: fix autocomplete when 'All' is selected (#2554)
+
 ## 0.50.0 / 2025-01-15
 
 This release significantly enhances the migration feature with better performance and reduced disruptions, thanks to a complete overhaul of its logic.
