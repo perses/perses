@@ -13,8 +13,12 @@
 
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Datasource, DatasourceDefinition } from '@perses-dev/core';
-import { remotePluginLoader } from '@perses-dev/plugin-runtime';
-import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
+import {
+  DatasourceEditorForm,
+  PluginRegistry,
+  ValidationProvider,
+  remotePluginLoader,
+} from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';

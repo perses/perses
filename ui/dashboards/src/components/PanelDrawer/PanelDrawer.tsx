@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { ReactElement, useState } from 'react';
-import { Drawer } from '@perses-dev/components';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelEditorValues } from '@perses-dev/core';
 import { usePanelEditor } from '../../context';
 import { PanelEditorForm } from './PanelEditorForm';
@@ -59,12 +59,14 @@ export const PanelDrawer = (): ReactElement => {
     <Drawer isOpen={isOpen} onClose={handleClickOut} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
       {panelEditor && (
-        <PanelEditorForm
-          initialAction={panelEditor.mode}
-          initialValues={panelEditor.initialValues}
-          onSave={handleSave}
-          onClose={handleClose}
-        />
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <PanelEditorForm
+            initialAction={panelEditor.mode}
+            initialValues={panelEditor.initialValues}
+            onSave={handleSave}
+            onClose={handleClose}
+          />
+        </ErrorBoundary>
       )}
     </Drawer>
   );

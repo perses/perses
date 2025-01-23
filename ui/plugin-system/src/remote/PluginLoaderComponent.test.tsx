@@ -15,7 +15,7 @@ import { FederationHost } from '@module-federation/enhanced/runtime';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
-import { PluginLoader } from './PluginLoader';
+import { PluginLoaderComponent } from './PluginLoaderComponent';
 import * as PluginRuntime from './PluginRuntime';
 
 global.fetch = jest.fn(() => Promise.resolve({ ok: true } as Response));
@@ -54,7 +54,7 @@ class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { err
   }
 }
 
-describe('PluginLoader', () => {
+describe('PluginLoaderComponent', () => {
   const mockPlugin: PersesPlugin = {
     name: 'test-plugin',
     moduleName: 'test-module',
@@ -71,7 +71,7 @@ describe('PluginLoader', () => {
     }));
 
     act(() => {
-      render(<PluginLoader plugin={mockPlugin} />);
+      render(<PluginLoaderComponent plugin={mockPlugin} />);
     });
 
     await waitFor(() => {
@@ -92,13 +92,15 @@ describe('PluginLoader', () => {
     act(() => {
       render(
         <SimpleErrorBoundary>
-          <PluginLoader plugin={mockPlugin} />
+          <PluginLoaderComponent plugin={mockPlugin} />
         </SimpleErrorBoundary>
       );
     });
 
     await waitFor(() => {
-      expect(screen.getByText('PluginLoader: Plugin module does not have a test-plugin export')).toBeInTheDocument();
+      expect(
+        screen.getByText('PluginLoaderComponent: Plugin module test-module does not have a test-plugin export')
+      ).toBeInTheDocument();
     });
   });
 
@@ -112,13 +114,15 @@ describe('PluginLoader', () => {
     act(() => {
       render(
         <SimpleErrorBoundary>
-          <PluginLoader plugin={mockPlugin} />
+          <PluginLoaderComponent plugin={mockPlugin} />
         </SimpleErrorBoundary>
       );
     });
 
     await waitFor(() => {
-      expect(screen.getByText('PluginLoader: Plugin test-plugin export is not a function')).toBeInTheDocument();
+      expect(
+        screen.getByText('PluginLoaderComponent: Plugin test-plugin export is not a function')
+      ).toBeInTheDocument();
     });
   });
 });
