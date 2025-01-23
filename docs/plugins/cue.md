@@ -79,7 +79,27 @@ it should define:
 A Perses plugin can optionally embed a `migrate` folder file at its root, that contains a `migrate.cue` file. This file is basically describing in CUE language how to convert a given Grafana object into an instance of this plugin. In such case your plugin is considered as the Perses equivalent of this Grafana object type, i.e it will be used as part of the translation process when a Grafana dashboard is received on the `/api/migrate` endpoint.
 
 !!! warning
-    If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana object, be aware that the last one encountered by alphabetical order will take priority.
+    If ever you come to the situation where you have 2 or more plugins describing a migration logic for the same Grafana panel type, be aware that the last one encountered by alphabetical order will take priority.
+
+### Variable
+
+A variable migration file looks like the following:
+
+```cue
+if #var.type == "custom" || #var.type == "interval" {
+    kind: "StaticListVariable"
+    spec: {
+        values: strings.Split(#var.query, ",")
+    }
+},
+```
+
+- The file is named `migrate.cue`.
+- The file content is made of **one or more conditional block(s)**, separated by commas (even if you have only one).
+- Each conditional block defines one or more matches on attributes from the `#var` definition.
+    - `#var` references a variable object from Grafana. You can access the different fields with like `#var.field.subfield`. To know the list of fields available, check the Grafana datamodel for the considered variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+    - You most certainly want a check on the `#var.type` value like shown in above example.
+- Each conditional block contains a list of fields & assignments, meeting the requirements of the considered Perses variable plugin. Use the `#var.field.subfield` syntax to access the values from the Grafana variable, thus achieve its remapping into Perses.
 
 ### Panel
 

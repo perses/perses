@@ -4,9 +4,10 @@ Perses has various authentication flows configurable. You can choose to authenti
 [native provider](./authentication.md#native-provider) that will allow you to create some users,
 or else rely on an external [identity provider](./authentication.md#external-oidcoauth-providers).
 
-In both cases
-- each new user will be saved in the Perses database.
-- at login time, a Perses session (access_token/refresh_token) will be created
+In both cases:
+
+- Each new user will be saved in the Perses database.
+- At login time, a Perses session (access_token/refresh_token) will be created
 
 Please note that the number of identity providers is not limited.
 
