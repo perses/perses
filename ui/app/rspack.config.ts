@@ -23,7 +23,7 @@ module.exports = {
   context: __dirname,
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/',
+    publicPath: 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,

@@ -6,7 +6,7 @@ help you configure the most common providers.
 ### Supported OAuth flows
 
 We support three types of authentication flows.
-See [authentication.md](../design-docs/authentication.md) for more information.
+See [authentication.md](../auth/authentication.md) for more information.
 
 #### Authorization Code Flow [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1)
 

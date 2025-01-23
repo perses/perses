@@ -16,7 +16,6 @@ package preview
 import (
 	"fmt"
 	"io"
-	"net/url"
 	"strings"
 
 	"github.com/perses/perses/internal/api/utils"
@@ -146,13 +145,11 @@ func (o *option) computeEphemeralDashboardName(dashboardName string) string {
 }
 
 func (o *option) buildPreviewResponse(dashboard *modelV1.Dashboard, tmpDashboard *modelV1.EphemeralDashboard) previewResponse {
-	finalURL := &url.URL{}
-	*finalURL = *o.apiClient.RESTClient().BaseURL
-	finalURL.Path = fmt.Sprintf("/%s/%s/%s/%s", utils.PathProject, tmpDashboard.Metadata.Project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
+	previewURL := common.NewURL(o.apiClient.RESTClient().BaseURL, utils.PathProject, tmpDashboard.Metadata.Project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
 	return previewResponse{
 		Dashboard: dashboard.Metadata.Name,
 		Project:   tmpDashboard.Metadata.Project,
-		Preview:   finalURL.String()}
+		Preview:   previewURL.String()}
 }
 
 func (o *option) SetWriter(writer io.Writer) {

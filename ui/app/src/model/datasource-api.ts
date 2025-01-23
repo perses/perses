@@ -16,6 +16,7 @@ import { BuildDatasourceProxyUrlFunc, DatasourceApi } from '@perses-dev/dashboar
 import LRUCache from 'lru-cache';
 import { fetchDatasourceList } from './datasource-client';
 import { fetchGlobalDatasourceList } from './global-datasource-client';
+import { getBasePathName } from './route';
 
 export class HTTPDatasourceAPI implements DatasourceApi {
   /**
@@ -32,6 +33,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
    * @param project
    */
   buildProxyUrl({ project, dashboard, name }: { project?: string; dashboard?: string; name: string }): string {
+    const basePath = getBasePathName();
     let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
     if (dashboard) {
       url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
@@ -39,7 +41,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
     if (project) {
       url = `projects/${encodeURIComponent(project)}/${url}`;
     }
-    return `/proxy/${url}`;
+    return `${basePath}/proxy/${url}`;
   }
 
   getDatasource(project: string, selector: DatasourceSelector): Promise<DatasourceResource | undefined> {

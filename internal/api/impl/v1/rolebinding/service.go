@@ -96,7 +96,7 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 	}
 
 	// If you do want to change the role for a binding, you need to remove the binding object and create a replacement.
-	// More info at: https://github.com/perses/perses/blob/main/docs/authorization.md#rolebinding-and-globalrolebinding-update-restriction
+	// More info at: https://github.com/perses/perses/blob/main/docs/auth/authorization.md#rolebinding-and-globalrolebinding-update-restriction
 	if entity.Spec.Role != oldEntity.Spec.Role {
 		return nil, apiInterface.HandleBadRequestError("spec.role can't be updated")
 	}

@@ -27,3 +27,4 @@ export * from './PluginSpecEditor';
 export * from './TimeRangeControls';
 export * from './Variables';
 export * from './ProjectSelect';
+export * from './MetricLabelInput';
