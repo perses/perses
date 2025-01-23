@@ -31,27 +31,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func isPackageModel(file string) (bool, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return false, err
-	}
-	return strings.Contains(string(data), "package model"), nil
+type LoadSchema struct {
+	Kind     string
+	Name     string
+	Instance *build.Instance
 }
 
-func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
-	for _, p := range plugins {
-		if p.Spec.Name == kind {
-			return &p
-		}
-	}
-	return nil
-}
-
-// Load is loading the plugin schema returning the kind of the schema and the instance of the schema.
-func Load(pluginPath string, moduleSpec plugin.ModuleSpec) (string, *build.Instance, error) {
-	var kind string
-	var instance *build.Instance
+// Load is loading the list of the schema associated with the given plugin module.
+func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error) {
+	var schemas []LoadSchema
 	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -74,18 +62,39 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) (string, *build.Insta
 			}
 		}
 		currentDir, _ := path.Split(currentPath)
-		var schemaErr error
-		kind, instance, schemaErr = LoadModelSchema(currentDir)
+		name, instance, schemaErr := LoadModelSchema(currentDir)
 		if schemaErr != nil {
 			return schemaErr
 		}
-		pl := getPlugin(moduleSpec.Plugins, kind)
+		pl := getPlugin(moduleSpec.Plugins, name)
 		if pl == nil {
-			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", kind)
+			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", name)
 		}
+		schemas = append(schemas, LoadSchema{
+			Kind:     pl.Kind,
+			Name:     name,
+			Instance: instance,
+		})
 		return fs.SkipDir
 	})
-	return kind, instance, err
+	return schemas, err
+}
+
+func isPackageModel(file string) (bool, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(data), "package model"), nil
+}
+
+func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
+	for _, p := range plugins {
+		if p.Spec.Name == kind {
+			return &p
+		}
+	}
+	return nil
 }
 
 type Schema interface {
@@ -117,22 +126,25 @@ type sch struct {
 }
 
 func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
-	kind, instance, err := Load(pluginPath, module.Spec)
+	schemas, err := Load(pluginPath, module.Spec)
 	if err != nil {
 		return err
 	}
-	switch kind {
-	case plugin.KindDatasource:
-		s.datasources[kind] = instance
-	case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery:
-		s.queries[kind] = instance
-	case plugin.KindVariable:
-		s.variables[kind] = instance
-	case plugin.KindPanel:
-		s.panels[kind] = instance
-	default:
-		return fmt.Errorf("unknown kind %s", kind)
+	for _, schema := range schemas {
+		switch schema.Kind {
+		case plugin.KindDatasource:
+			s.datasources[schema.Name] = schema.Instance
+		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery:
+			s.queries[schema.Name] = schema.Instance
+		case plugin.KindVariable:
+			s.variables[schema.Name] = schema.Instance
+		case plugin.KindPanel:
+			s.panels[schema.Name] = schema.Instance
+		default:
+			return fmt.Errorf("unknown kind %s", schema.Kind)
+		}
 	}
+
 	return nil
 }
 

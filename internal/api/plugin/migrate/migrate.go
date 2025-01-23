@@ -58,7 +58,53 @@ func ReplaceInputValue(input map[string]string, grafanaDashboard string) string 
 	return result
 }
 
-// TODO Put in common with percli plugin lint command.
+func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema, error) {
+	var schemas []schema.LoadSchema
+	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		if d.Name() != migrationFolder {
+			return nil
+		}
+		// At this point, we are in the "migrate" directory.
+		migrateFilePath := filepath.Join(currentPath, "migrate.cue")
+		// We are verifying if the package is a package migrate. Otherwise, we won't be able to use it.
+		if isMigrate, openFileErr := isPackageMigrate(migrateFilePath); openFileErr != nil {
+			if openFileErr != nil {
+				return openFileErr
+			}
+			if !isMigrate {
+				return fs.SkipDir
+			}
+		}
+
+		instance, schemaErr := LoadMigrateSchema(currentPath)
+		if schemaErr != nil {
+			return schemaErr
+		}
+		// Here we are reading the migrate.cue file to determinate which kind of plugin it is supposed to migrate.
+		// This is because we can have multiple plugins in the same plugin module, and as such, it's impossible to know which plugin is associated with the migration script.
+		// We could try to enforce the convention that the migration script is a subfolder of the schema folder of the plugin it is supposed to migrate.
+		// But it's not certain you have the migration script, and besides, it's almost certain user won't respect this convention.
+		// Finally, reading the migration script to determinate the kind of plugin is not that complicated, we have just a couple of rules to follow, and it's the most flexible way.
+		pluginKind, err := getPluginKind(migrateFilePath)
+		if err != nil {
+			return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
+		}
+		schemas = append(schemas, schema.LoadSchema{
+			Kind:     pluginKind,
+			Instance: instance,
+			Name:     currentPath,
+		})
+		return fs.SkipDir
+	})
+	return schemas, err
+}
+
 // isPackageMigrate is a function that checks if a cuelang file belongs to the package migrate.
 // For that, we are opening the file and checking if the string "package migrate" is present.
 func isPackageMigrate(file string) (bool, error) {
@@ -229,52 +275,21 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 }
 
 func (m *mig) Load(pluginPath string, module v1.PluginModule) error {
-	return filepath.WalkDir(filepath.Join(pluginPath, module.Spec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() {
-			return nil
-		}
-		if d.Name() != migrationFolder {
-			return nil
-		}
-		// At this point, we are in the "migrate" directory.
-		// TODO: replace usage of path.Join by filepath.Join when it makes sense. Pretty sure the windows issue regarding the wrong path usage, is due to the usage of path.Join.
-		migrateFilePath := filepath.Join(currentPath, "migrate.cue")
-		// We are verifying if the package is a package migrate. Otherwise, we won't be able to use it.
-		if isMigrate, openFileErr := isPackageMigrate(migrateFilePath); openFileErr != nil {
-			if openFileErr != nil {
-				return openFileErr
-			}
-			if !isMigrate {
-				return fs.SkipDir
-			}
-		}
-
-		instance, schemaErr := LoadMigrateSchema(currentPath)
-		if schemaErr != nil {
-			return schemaErr
-		}
-		// Here we are reading the migrate.cue file to determinate which kind of plugin it is supposed to migrate.
-		// This is because we can have multiple plugins in the same plugin module, and as such, it's impossible to know which plugin is associated with the migration script.
-		// We could try to enforce the convention that the migration script is a subfolder of the schema folder of the plugin it is supposed to migrate.
-		// But it's not certain you have the migration script, and besides, it's almost certain user won't respect this convention.
-		// Finally, reading the migration script to determinate the kind of plugin is not that complicated, we have just a couple of rules to follow, and it's the most flexible way.
-		pluginKind, err := getPluginKind(migrateFilePath)
-		if err != nil {
-			return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
-		}
-		switch pluginKind {
+	schemas, err := Load(pluginPath, module.Spec)
+	if err != nil {
+		return err
+	}
+	for _, sch := range schemas {
+		switch sch.Kind {
 		case plugin.KindQuery:
-			m.queries = append(m.queries, instance)
+			m.queries = append(m.queries, sch.Instance)
 		case plugin.KindVariable:
-			m.variables = append(m.variables, instance)
+			m.variables = append(m.variables, sch.Instance)
 		case plugin.KindPanel:
-			m.loadPanel(currentPath, instance)
+			m.loadPanel(sch.Name, sch.Instance)
 		}
-		return fs.SkipDir
-	})
+	}
+	return nil
 }
 
 func (m *mig) loadPanel(schemaPath string, panelInstance *build.Instance) {

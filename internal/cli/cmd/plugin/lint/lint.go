@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
@@ -62,7 +63,10 @@ func (o *option) Execute() error {
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
-	if _, _, err := schema.Load("", npmPackageData.Perses); err != nil {
+	if _, err := schema.Load("", npmPackageData.Perses); err != nil {
+		return err
+	}
+	if _, err := migrate.Load("", npmPackageData.Perses); err != nil {
 		return err
 	}
 	return output.HandleString(o.writer, "current plugin is valid")
