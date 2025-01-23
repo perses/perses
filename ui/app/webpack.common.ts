@@ -26,7 +26,7 @@ export const commonConfig: Configuration = {
   entry: path.resolve(__dirname, './src/bundle.ts'),
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: '/',
+    publicPath: 'PREFIX_PATH_PLACEHOLDER/',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', 'jsx', '.json'],
