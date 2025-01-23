@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -33,6 +34,7 @@ type Plugin interface {
 	List() ([]byte, error)
 	UnzipArchives() error
 	Schema() schema.Schema
+	Migration() migrate.Migration
 }
 
 func New(plugins config.Plugins) Plugin {
@@ -43,6 +45,7 @@ func New(plugins config.Plugins) Plugin {
 			targetFolder: plugins.Path,
 		},
 		sch: schema.New(),
+		mig: migrate.New(),
 	}
 }
 
@@ -50,6 +53,7 @@ type pluginFile struct {
 	path     string
 	archibal *arch
 	sch      schema.Schema
+	mig      migrate.Migration
 }
 
 func (p *pluginFile) List() ([]byte, error) {
@@ -59,6 +63,10 @@ func (p *pluginFile) List() ([]byte, error) {
 
 func (p *pluginFile) Schema() schema.Schema {
 	return p.sch
+}
+
+func (p *pluginFile) Migration() migrate.Migration {
+	return p.mig
 }
 
 func (p *pluginFile) UnzipArchives() error {
@@ -106,8 +114,13 @@ func (p *pluginFile) Load() error {
 		}
 		// TODO with this current implementation, we cannot load a plugin that does not have a schema.
 		//  We should probably add a flag to the plugin to indicate if it has a schema or not.
+		//  Actually we already know what plugin type should have a schema or not. So we simply have to determinate based on the plugin type which one should have a schema or not.
 		if pluginSchemaLoadErr := p.sch.Load(pluginPath, pluginModule); pluginSchemaLoadErr != nil {
 			logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
+			continue
+		}
+		if pluginMigrateLoadErr := p.mig.Load(pluginPath, pluginModule); pluginMigrateLoadErr != nil {
+			logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
 			continue
 		}
 		pluginModuleList = append(pluginModuleList, pluginModule)

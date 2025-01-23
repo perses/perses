@@ -26,6 +26,7 @@ const (
 	KindPanel           = "Panel"
 	KindTimeSeriesQuery = "TimeSeriesQuery"
 	KindTraceQuery      = "TraceQuery"
+	KindQuery           = "Query"
 )
 
 type Spec struct {
