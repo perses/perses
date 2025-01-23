@@ -71,7 +71,7 @@ const devConfig: Configuration = {
       {
         context: ['/api', '/proxy'],
         target: 'http://localhost:8080',
-      }
+      },
     ],
     client: {
       // By default, the error overlay is not shown because it can get in the
