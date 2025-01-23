@@ -189,7 +189,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		})
 	}
 	if config.NativeAuth != nil {
-		roundTripper = transport.New(config.URL.URL, roundTripper, *config.NativeAuth)
+		roundTripper = transport.New(config.URL, roundTripper, *config.NativeAuth)
 	}
 	if config.OAuth != nil {
 		oauthConfig := &clientcredentials.Config{
@@ -211,7 +211,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 	}
 
 	return &perseshttp.RESTClient{
-		BaseURL: config.URL.URL,
+		BaseURL: config.URL,
 		Client:  httpClient,
 		Headers: config.Headers,
 	}, nil

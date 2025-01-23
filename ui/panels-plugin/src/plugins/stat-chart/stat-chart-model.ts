@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType, Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
+import { CalculationType, Definition, ThresholdOptions, FormatOptions, ValueMapping } from '@perses-dev/core';
 import { FontSizeOption } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
@@ -25,9 +25,11 @@ export interface StatChartDefinition extends Definition<StatChartOptions> {
 export interface StatChartOptions {
   calculation: CalculationType;
   format: FormatOptions;
+  metricLabel?: string;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
+  mappings?: ValueMapping[];
 }
 
 export interface StatChartSparklineOptions {

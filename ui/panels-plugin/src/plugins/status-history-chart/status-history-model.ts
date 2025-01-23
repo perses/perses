@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ValueMapping } from '@perses-dev/core';
 import { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export function createInitialStatusHistoryChartOptions(): Record<string, unknown> {
@@ -19,6 +20,7 @@ export function createInitialStatusHistoryChartOptions(): Record<string, unknown
 
 export interface StatusHistoryChartOptions {
   legend?: LegendSpecOptions;
+  mappings?: ValueMapping[];
 }
 
 export type StatusHistroyChartEditorProps = OptionsEditorProps<StatusHistoryChartOptions>;

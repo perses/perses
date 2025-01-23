@@ -17,8 +17,6 @@ import (
 	"github.com/perses/perses/cue/schemas/common"
 )
 
-#legendValue: common.#calculation
-
 #legend: {
 	position: "bottom" | "right"
 	mode?:    "list" | "table"
@@ -26,6 +24,8 @@ import (
 }
 
 kind: "StatusHistoryChart"
+
 spec: close({
 	legend?: #legend
+	mappings?: [...common.#mappings]
 })
