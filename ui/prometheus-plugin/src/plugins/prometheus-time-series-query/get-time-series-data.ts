@@ -31,6 +31,7 @@ import {
   MatrixData,
   VectorData,
   ScalarData,
+  InstantQueryResultType,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
@@ -130,7 +131,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
     stepMs: step * 1000,
 
-    series: buildTimeSeries(result, query, seriesNameFormat),
+    series: buildTimeSeries(query, result, seriesNameFormat),
     metadata: {
       notices,
       executedQueryString: query,
@@ -140,7 +141,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   return chartData;
 };
 
-function buildVectorData(data: VectorData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+function buildVectorData(query: string, data: VectorData, seriesNameFormat: string | undefined): TimeSeries[] {
   return data.result.map((res) => {
     const { metric, value } = res;
 
@@ -156,7 +157,7 @@ function buildVectorData(data: VectorData, query: string, seriesNameFormat: stri
   });
 }
 
-function buildMatrixData(data: MatrixData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+function buildMatrixData(query: string, data: MatrixData, seriesNameFormat: string | undefined): TimeSeries[] {
   return data.result.map((res) => {
     const { metric, values } = res;
 
@@ -172,7 +173,7 @@ function buildMatrixData(data: MatrixData, query: string, seriesNameFormat: stri
   });
 }
 
-function buildScalarData(data: ScalarData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+function buildScalarData(query: string, data: ScalarData, seriesNameFormat: string | undefined): TimeSeries[] {
   const { name, formattedName } = getFormattedPrometheusSeriesName(query, {}, seriesNameFormat);
   return [
     {
@@ -183,11 +184,7 @@ function buildScalarData(data: ScalarData, query: string, seriesNameFormat: stri
   ];
 }
 
-function buildTimeSeries(
-  data: MatrixData | VectorData | ScalarData | undefined,
-  query: string,
-  seriesNameFormat?: string
-): TimeSeries[] {
+function buildTimeSeries(query: string, data?: InstantQueryResultType, seriesNameFormat?: string): TimeSeries[] {
   if (!data) {
     return [];
   }
@@ -196,11 +193,11 @@ function buildTimeSeries(
 
   switch (resultType) {
     case 'vector':
-      return buildVectorData(data, query, seriesNameFormat);
+      return buildVectorData(query, data, seriesNameFormat);
     case 'matrix':
-      return buildMatrixData(data, query, seriesNameFormat);
+      return buildMatrixData(query, data, seriesNameFormat);
     case 'scalar':
-      return buildScalarData(data, query, seriesNameFormat);
+      return buildScalarData(query, data, seriesNameFormat);
     default:
       console.warn('Unknown result type', resultType, data);
       return [];

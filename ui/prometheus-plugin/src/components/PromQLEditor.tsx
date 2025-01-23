@@ -22,7 +22,7 @@ import CloseIcon from 'mdi-material-ui/Close';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
 import { replacePromBuiltinVariables } from '../plugins/prometheus-time-series-query/replace-prom-builtin-variables';
-import { useParseQuery } from './parse';
+import { useParseQuery } from './query';
 import TreeNode from './TreeNode';
 
 const treeViewStr = 'Tree View';
@@ -138,7 +138,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                   {isLoading ? (
                     <CircularProgress />
                   ) : parseQueryResponse?.data ? (
-                    <TreeNode node={parseQueryResponse.data} reverse={false} />
+                    <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} datasource={datasource} />
                   ) : null}
                 </div>
               )}

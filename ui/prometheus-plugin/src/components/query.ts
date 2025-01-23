@@ -1,7 +1,7 @@
 // Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain TQueryFnData extends any = unknownany = unknown at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -14,7 +14,13 @@
 import { useDatasourceClient } from '@perses-dev/plugin-system';
 import { DatasourceSelector, StatusError } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { ParseQueryRequestParameters, ParseQueryResponse, PrometheusClient } from '../model';
+import {
+  InstantQueryRequestParameters,
+  InstantQueryResponse,
+  ParseQueryRequestParameters,
+  ParseQueryResponse,
+  PrometheusClient,
+} from '../model';
 
 export function useParseQuery(
   content: string,
@@ -30,6 +36,27 @@ export function useParseQuery(
       const params: ParseQueryRequestParameters = { query: content };
 
       return await client!.parseQuery(params);
+    },
+  });
+}
+
+export function useInstantQuery(
+  content: string,
+  datasource: DatasourceSelector,
+  enabled?: boolean,
+  recordResponseTime?: (time: number) => void
+): UseQueryResult<InstantQueryResponse, StatusError> {
+  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+
+  return useQuery<InstantQueryResponse, StatusError>({
+    enabled: !!client && enabled,
+    queryKey: ['instantQuery', content, 'datasource', datasource],
+    queryFn: async () => {
+      const params: InstantQueryRequestParameters = { query: content };
+      const startTime = performance.now();
+      const response = await client!.instantQuery(params);
+      recordResponseTime && recordResponseTime(performance.now() - startTime);
+      return response;
     },
   });
 }

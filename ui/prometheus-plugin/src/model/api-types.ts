@@ -62,13 +62,21 @@ export interface ScalarData {
   result: ValueTuple;
 }
 
+export interface StringData {
+  resultType: 'string';
+  result: ValueTuple;
+}
+
 export interface InstantQueryRequestParameters {
   query: string;
   time?: UnixTimestampSeconds;
   timeout?: DurationString;
 }
 
-export type InstantQueryResponse = ApiResponse<MatrixData | VectorData | ScalarData>;
+export type InstantQueryResultType = MatrixData | VectorData | ScalarData | StringData;
+
+// Ref https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
+export type InstantQueryResponse = ApiResponse<InstantQueryResultType>;
 
 export interface RangeQueryRequestParameters {
   query: string;

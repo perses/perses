@@ -77,6 +77,8 @@ export const getNodeChildren = (node: ASTNode): ASTNode[] => {
   }
 };
 
+export const aggregatorsWithParam = ['topk', 'bottomk', 'quantile', 'count_values', 'limitk', 'limit_ratio'];
+
 export const escapeString = (str: string): string => {
   return str.replace(/([\\"])/g, '\\$1');
 };
