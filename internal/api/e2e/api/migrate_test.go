@@ -38,13 +38,13 @@ func TestMigrateEndpoint(t *testing.T) {
 	}{
 		{
 			title:                "grafana dashboard containing simple vars & panels",
-			initialDashboardPath: "internal/api/migrate/testdata/simple_grafana_dashboard.json",
-			resultDashboardPath:  "internal/api/migrate/testdata/simple_perses_dashboard.json",
+			initialDashboardPath: "internal/api/plugin/migrate/testdata/simple_grafana_dashboard.json",
+			resultDashboardPath:  "internal/api/plugin/migrate/testdata/simple_perses_dashboard.json",
 		},
 		{
 			title:                "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
-			initialDashboardPath: "internal/api/migrate/testdata/old_grafana_panels_grafana_dashboard.json",
-			resultDashboardPath:  "internal/api/migrate/testdata/old_grafana_panels_perses_dashboard.json",
+			initialDashboardPath: "internal/api/plugin/migrate/testdata/old_grafana_panels_grafana_dashboard.json",
+			resultDashboardPath:  "internal/api/plugin/migrate/testdata/old_grafana_panels_perses_dashboard.json",
 		},
 	}
 	for _, test := range testSuite {
