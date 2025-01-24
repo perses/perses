@@ -78,6 +78,10 @@ export type InstantQueryResultType = MatrixData | VectorData | ScalarData | Stri
 // Ref https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
 export type InstantQueryResponse = ApiResponse<InstantQueryResultType>;
 
+export type MonitoredInstantQueryResponse = InstantQueryResponse & {
+  responseTime: number;
+};
+
 export interface RangeQueryRequestParameters {
   query: string;
   start: UnixTimestampSeconds;

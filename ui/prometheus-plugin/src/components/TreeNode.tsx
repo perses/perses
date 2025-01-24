@@ -78,7 +78,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
   const [nodeEl, setNodeEl] = useState<HTMLDivElement | null>(null);
   const nodeRef = useCallback((node: HTMLDivElement) => setNodeEl(node), []);
 
-  const [responseTime, setResponseTime] = useState<number>(0);
   const [resultStats, setResultStats] = useState<{
     numSeries: number;
     labelExamples: Record<string, Array<{ value: string; count: number }>>;
@@ -118,7 +117,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
     data: instantQueryResponse,
     isLoading,
     error,
-  } = useInstantQuery(serializeNode(queryNode) ?? '', datasource, mergedChildState === 'success', setResponseTime);
+  } = useInstantQuery(serializeNode(queryNode) ?? '', datasource, mergedChildState === 'success');
 
   // report the node state to the parent
   useEffect(() => {
@@ -299,7 +298,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
           <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
             {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
             &nbsp;&nbsp;–&nbsp;&nbsp;
-            {responseTime}ms
+            {instantQueryResponse.responseTime}ms
             {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
           </Typography>
           {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (

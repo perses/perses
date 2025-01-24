@@ -16,7 +16,7 @@ import { DatasourceSelector, StatusError } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import {
   InstantQueryRequestParameters,
-  InstantQueryResponse,
+  MonitoredInstantQueryResponse,
   ParseQueryRequestParameters,
   ParseQueryResponse,
   PrometheusClient,
@@ -44,20 +44,20 @@ export function useParseQuery(
 export function useInstantQuery(
   content: string,
   datasource: DatasourceSelector,
-  enabled?: boolean,
-  recordResponseTime?: (time: number) => void
-): UseQueryResult<InstantQueryResponse, StatusError> {
+  enabled?: boolean
+): UseQueryResult<MonitoredInstantQueryResponse, StatusError> {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  return useQuery<InstantQueryResponse, StatusError>({
+  return useQuery<MonitoredInstantQueryResponse, StatusError>({
     enabled: !!client && enabled,
     queryKey: ['instantQuery', content, 'datasource', datasource],
     queryFn: async () => {
       const params: InstantQueryRequestParameters = { query: content };
       const startTime = performance.now();
       const response = await client!.instantQuery(params);
-      recordResponseTime && recordResponseTime(performance.now() - startTime);
-      return response;
+      const responseTime = performance.now() - startTime;
+
+      return { ...response, responseTime };
     },
   });
 }
