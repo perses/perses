@@ -14,6 +14,7 @@
 import path from 'path';
 import rspack from '@rspack/core';
 import refreshPlugin from '@rspack/plugin-react-refresh';
+import TerserPlugin from 'terser-webpack-plugin';
 
 const isDev = process.env.NODE_ENV === 'development';
 /**
@@ -33,6 +34,9 @@ module.exports = {
   },
   experiments: {
     css: true,
+  },
+  optimization: {
+    minimizer: [new TerserPlugin(), new rspack.LightningCssMinimizerRspackPlugin()],
   },
   module: {
     rules: [
