@@ -16,7 +16,7 @@ import { FederationHost, init, loadRemote } from '@module-federation/enhanced/ru
 import * as ReactQuery from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactRouterDOM from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import * as ReactHookForm from 'react-hook-form';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
@@ -25,27 +25,27 @@ export const pluginRuntime = init({
   remotes: [], // all remotes are loaded dynamically
   shared: {
     react: {
-      version: '18.2.0',
+      version: React.version,
       lib: () => React,
       shareConfig: {
         singleton: true,
-        requiredVersion: '^18.2.0',
+        requiredVersion: `^${React.version}`,
       },
     },
     'react-dom': {
-      version: '18.2.0',
+      version: '18.3.1',
       lib: () => ReactDOM,
       shareConfig: {
         singleton: true,
-        requiredVersion: '^18.2.0',
+        requiredVersion: `^18.3.1`,
       },
     },
     'react-router-dom': {
-      version: '6.11.0',
+      version: '6.26.0',
       lib: () => ReactRouterDOM,
       shareConfig: {
         singleton: true,
-        requiredVersion: '^6.11.0',
+        requiredVersion: '^6.26.0',
       },
     },
     '@tanstack/react-query': {

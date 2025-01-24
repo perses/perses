@@ -14,6 +14,7 @@
 import path from 'path';
 import rspack from '@rspack/core';
 import refreshPlugin from '@rspack/plugin-react-refresh';
+import TerserPlugin from 'terser-webpack-plugin';
 
 const isDev = process.env.NODE_ENV === 'development';
 /**
@@ -23,13 +24,19 @@ module.exports = {
   context: __dirname,
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: 'PREFIX_PATH_PLACEHOLDER/',
+    publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
   entry: path.resolve(__dirname, './src/bundle.ts'),
   resolve: {
     extensions: ['...', '.ts', '.tsx', '.jsx'],
+  },
+  experiments: {
+    css: true,
+  },
+  optimization: {
+    minimizer: [new TerserPlugin(), new rspack.LightningCssMinimizerRspackPlugin()],
   },
   module: {
     rules: [
@@ -85,7 +92,7 @@ module.exports = {
           // way of e2e tests and can be annoying for some developer workflows.
           // If you like the overlay, you can enable it by setting the the specified
           // env var.
-          overlay: process.env.ERROR_OVERLAY === 'true' ?? false,
+          overlay: process.env.ERROR_OVERLAY === 'true',
         },
       }
     : undefined,
@@ -97,6 +104,7 @@ module.exports = {
     new rspack.HtmlRspackPlugin({
       template: './index.html',
       favicon: './favicon.ico',
+      publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),
