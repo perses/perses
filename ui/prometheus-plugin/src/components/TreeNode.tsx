@@ -18,7 +18,7 @@ import CircleIcon from 'mdi-material-ui/Circle';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
 import { StatusError } from '@perses-dev/core';
-import { MonitoredInstantQueryResponse, PrometheusDatasourceSelector } from '../model';
+import { PrometheusDatasourceSelector } from '../model';
 import ASTNode, { nodeType } from './promql/ast';
 import { escapeString, getNodeChildren } from './promql/utils';
 import { formatNode } from './promql/format';
