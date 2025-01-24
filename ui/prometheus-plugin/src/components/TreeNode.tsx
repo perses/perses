@@ -183,7 +183,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       return;
     }
 
-    reportNodeState && reportNodeState(childIdx, 'success');
+    if (reportNodeState) {
+      reportNodeState(childIdx, 'success');
+    }
 
     let resultSeries = 0;
     const labelValuesByName: Record<string, Record<string, number>> = {};
@@ -226,7 +228,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
   }, [instantQueryResponse, reportNodeState, childIdx]);
 
   const innerNode = (
-    <Stack gap={2}>
+    <Stack direction="row" gap={2}>
       <Box
         ref={nodeRef}
         sx={{
@@ -271,14 +273,14 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
           </Typography>
         </Stack>
       ) : (
-        <Stack>
+        <Stack direction="row" gap={1}>
           <Typography>
             {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
             &nbsp;&nbsp;–&nbsp;&nbsp;
             {responseTime}ms
             {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–&nbsp;&nbsp;</>}
           </Typography>
-          <Stack>
+          <Stack direction="row" gap={1}>
             {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
               <Tooltip
                 key={ln}
@@ -318,7 +320,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
                 arrow
               >
                 <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  <Typography variant="body2">{ln}</Typography>
+                  <Typography variant="body2" component="span">
+                    {ln}
+                  </Typography>
                   <Typography variant="body2" component="span" color="text.secondary">
                     : {cnt}
                   </Typography>

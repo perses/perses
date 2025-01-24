@@ -40,6 +40,7 @@ export function useParseQuery(
   });
 }
 
+// TODO replace setter by return val
 export function useInstantQuery(
   content: string,
   datasource: DatasourceSelector,
