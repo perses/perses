@@ -23,6 +23,7 @@ module.exports = {
   context: __dirname,
   output: {
     path: path.resolve(__dirname, './dist'),
+    publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
@@ -99,6 +100,7 @@ module.exports = {
     new rspack.HtmlRspackPlugin({
       template: './index.html',
       favicon: './favicon.ico',
+      publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),
