@@ -1,7 +1,7 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain TQueryFnData extends any = unknownany = unknown at
+// You may obtain a copy of the License at
 //
 // http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -40,7 +40,6 @@ export function useParseQuery(
   });
 }
 
-// TODO replace setter by return val
 export function useInstantQuery(
   content: string,
   datasource: DatasourceSelector,

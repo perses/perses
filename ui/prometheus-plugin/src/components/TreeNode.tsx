@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -56,14 +56,15 @@ interface TreeNodeProps {
   node: ASTNode;
   // The parent element of this node.
   parentEl?: HTMLDivElement | null;
-  // used to compute the position of the connector line between this node and its parent.
+  // Used to compute the position of the connector line between this node and its parent.
   reverse: boolean;
-  // The index of this node in its parent's children.
-  // used to render the node's individual query
+  // Datasource used for the node's individual query.
   datasource: PrometheusDatasourceSelector;
-  // used to render the node's individual query
+  // The index of this node in its parent's children.
+  // Used to render the node's individual query.
   childIdx: number;
-  // used to render the node's individual query
+  // Function to report the node state to the parent.
+  // Used to render the node's individual query.
   reportNodeState?: (childIdx: number, state: NodeState) => void;
 }
 
