@@ -255,23 +255,44 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       </Box>
       {/* The node's individual query: */}
       {mergedChildState === 'waiting' ? (
-        <CircularProgress /* TODO: put something different than running state like in Prom UI? */ />
+        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+          <CircularProgress size={16} color="inherit" />
+          <Typography variant="body2" color="text.secondary">
+            Waiting for child query
+          </Typography>
+        </Box>
       ) : mergedChildState === 'running' ? (
-        <CircularProgress />
+        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+          <CircularProgress size={16} />
+          <Typography variant="body2" color="primary">
+            Running...
+          </Typography>
+        </Box>
       ) : mergedChildState === 'error' ? (
         <Stack>
           <AlertCircle />
           Blocked on child query error
         </Stack>
       ) : isLoading ? (
-        <CircularProgress /* TODO: put something different than running state like in Prom UI? */ />
+        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+          <CircularProgress size={16} color="secondary" />
+          <Typography variant="body2" color="text.secondary">
+            Loading...
+          </Typography>
+        </Box>
       ) : error ? (
-        <Stack>
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          sx={{ color: (theme) => theme.palette.error.main }}
+          marginBottom={1.5}
+        >
           <AlertCircle />
-          <Typography>
+          <Typography variant="body2">
             <strong>Error executing query:</strong> {error.message}
           </Typography>
-        </Stack>
+        </Box>
       ) : (
         <Stack direction="row" gap={1} alignItems="center" marginBottom={1.5}>
           <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
