@@ -40,8 +40,6 @@ function App(): ReactElement {
         sx={{
           flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
           backgroundColor: ({ palette }) => palette.background.default,
           '--perses-colors-gray-100': (theme) => theme.palette.grey[100],
           '--perses-colors-gray-300': (theme) => theme.palette.grey[300],
