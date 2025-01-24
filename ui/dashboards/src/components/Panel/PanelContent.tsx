@@ -67,12 +67,17 @@ export function PanelContent(props: PanelContentProps): ReactElement {
 
   // No query has data, show loading overlay if any query is loading.
   if (queryResults.some((q) => q.isLoading)) {
-    const Component = plugin?.LoadingComponent;
-    return Component ? (
-      <Component spec={spec} contentDimensions={contentDimensions} definition={definition} queryResults={[]} />
-    ) : (
-      <LoadingOverlay />
-    );
+    if (plugin?.LoadingComponent) {
+      return (
+        <plugin.LoadingComponent
+          spec={spec}
+          contentDimensions={contentDimensions}
+          definition={definition}
+          queryResults={[]}
+        />
+      );
+    }
+    return <LoadingOverlay />;
   }
 
   // No query has data or is loading, show the error if any query has an error.
