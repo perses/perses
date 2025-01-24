@@ -24,7 +24,7 @@ database:
 
 provisioning:
   folders:
-  - "dev/data"
+    - "dev/data"
 
 schemas:
   panels_path: "cue/schemas/panels"

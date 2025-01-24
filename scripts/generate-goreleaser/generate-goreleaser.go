@@ -28,5 +28,6 @@ func main() {
 		"cue/schemas/",
 		"cue.mod/",
 		"docs/examples/config.docker.yaml",
+		"plugins-archive",
 	})
 }

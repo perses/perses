@@ -17,16 +17,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api"
-
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/role"
-	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/rbac"
-
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -37,10 +35,10 @@ type service struct {
 	roleDAO role.DAO
 	userDAO user.DAO
 	rbac    rbac.RBAC
-	sch     schemas.Schemas
+	sch     schema.Schema
 }
 
-func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schemas.Schemas) rolebinding.Service {
+func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schema.Schema) rolebinding.Service {
 	return &service{
 		dao:     dao,
 		rbac:    rbac,
@@ -98,7 +96,7 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 	}
 
 	// If you do want to change the role for a binding, you need to remove the binding object and create a replacement.
-	// More info at: https://github.com/perses/perses/blob/main/docs/authorization.md#rolebinding-and-globalrolebinding-update-restriction
+	// More info at: https://github.com/perses/perses/blob/main/docs/auth/authorization.md#rolebinding-and-globalrolebinding-update-restriction
 	if entity.Spec.Role != oldEntity.Spec.Role {
 		return nil, apiInterface.HandleBadRequestError("spec.role can't be updated")
 	}

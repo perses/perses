@@ -36,7 +36,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
   // Use as default the plugin kind explicitly set as default or the first in the list
   const { data: queryPlugins } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
-  const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.kind ?? '';
+  const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
     useErrorBoundary: true,

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
@@ -44,12 +45,14 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
         helperText={error?.message}
         onChange={onSelectionChange}
       />
-      <PluginSpecEditor
-        pluginSelection={value.selection}
-        value={value.spec}
-        onChange={onSpecChange}
-        isReadonly={isReadonly}
-      />
+      <ErrorBoundary FallbackComponent={ErrorAlert}>
+        <PluginSpecEditor
+          pluginSelection={value.selection}
+          value={value.spec}
+          onChange={onSpecChange}
+          isReadonly={isReadonly}
+        />
+      </ErrorBoundary>
     </Box>
   );
 }

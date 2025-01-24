@@ -11,21 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
-import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
+import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import {
   PluginRegistry,
   TimeRangeProviderWithQueryParams,
+  ValidationProvider,
   VariableEditorForm,
   useInitialTimeRange,
-  ValidationProvider,
+  remotePluginLoader,
 } from '@perses-dev/plugin-system';
-import { bundledPluginLoader } from '../../model/bundled-plugins';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
-import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
+import { DrawerProps } from '../form-drawers';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -76,7 +76,7 @@ export function VariableDrawer<T extends Variable>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={bundledPluginLoader}>
+        <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>

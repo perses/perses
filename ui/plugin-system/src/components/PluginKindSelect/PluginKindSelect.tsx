@@ -47,7 +47,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
         return '';
       }
       const selectedValue = optionValueToSelection(selected as string);
-      return data?.find((v) => v.pluginType === selectedValue.type && v.kind === selectedValue.kind)?.display.name;
+      return data?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display.name;
     },
     [data]
   );
@@ -68,10 +68,10 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       {data?.map((metadata) => (
         <MenuItem
           data-testid="option"
-          key={metadata.pluginType + metadata.kind}
-          value={selectionToOptionValue({ type: metadata.pluginType, kind: metadata.kind })}
+          key={metadata.kind + metadata.spec.name}
+          value={selectionToOptionValue({ type: metadata.kind, kind: metadata.spec.name })}
         >
-          {metadata.display.name}
+          {metadata.spec.display.name}
         </MenuItem>
       ))}
     </TextField>

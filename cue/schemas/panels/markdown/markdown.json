@@ -1,5 +1,5 @@
 {
-  "kind": "Markdown",
+  "kind": "MarkdownChart",
   "spec": {
     "text": "## Some panels!\nOn this page, you'll find panels.\n\nGo to [Google](https://www.google.com)"
   }

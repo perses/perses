@@ -17,15 +17,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api"
-
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/rbac"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -36,10 +35,10 @@ type service struct {
 	globalRoleDAO globalrole.DAO
 	userDAO       user.DAO
 	rbac          rbac.RBAC
-	sch           schemas.Schemas
+	sch           schema.Schema
 }
 
-func NewService(dao globalrolebinding.DAO, globalRoleDAO globalrole.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schemas.Schemas) globalrolebinding.Service {
+func NewService(dao globalrolebinding.DAO, globalRoleDAO globalrole.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schema.Schema) globalrolebinding.Service {
 	return &service{
 		dao:           dao,
 		globalRoleDAO: globalRoleDAO,
@@ -91,7 +90,7 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 	}
 
 	// If you do want to change the role for a binding, you need to remove the binding object and create a replacement.
-	// More info at: https://github.com/perses/perses/blob/main/docs/authorization.md#rolebinding-and-globalrolebinding-update-restriction
+	// More info at: https://github.com/perses/perses/blob/main/docs/auth/authorization.md#rolebinding-and-globalrolebinding-update-restriction
 	if entity.Spec.Role != oldEntity.Spec.Role {
 		return nil, apiInterface.HandleBadRequestError("spec.role can't be updated")
 	}

@@ -17,15 +17,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api"
-
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -35,10 +34,10 @@ type service struct {
 	dao           ephemeraldashboard.DAO
 	globalVarDAO  globalvariable.DAO
 	projectVarDAO variable.DAO
-	sch           schemas.Schemas
+	sch           schema.Schema
 }
 
-func NewService(dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schemas.Schemas) ephemeraldashboard.Service {
+func NewService(dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) ephemeraldashboard.Service {
 	return &service{
 		dao:           dao,
 		globalVarDAO:  globalVarDAO,

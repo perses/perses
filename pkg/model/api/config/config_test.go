@@ -72,7 +72,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     "time_range": {
       "disable_custom": false
     }
-  }
+  },
+  "plugins": {}
 }`,
 		},
 		{
@@ -139,6 +140,10 @@ func TestJSONMarshalConfig(t *testing.T) {
         "2w"
       ]
     }
+  },
+  "plugins": {
+    "path": "plugins",
+    "archive_path": "plugins-archive"
   }
 }`,
 		},
@@ -218,6 +223,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "information": "# Hello World\n## File Database setup"
   },
+  "plugins": { 
+    "path": "plugins",
+    "archive_path": "plugins-archive"
+	},
   "provisioning": {
     "folders": [
       "dev/data"
@@ -281,6 +290,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+				},
+				Plugins: Plugins{
+					Path:        "plugins",
+					ArchivePath: "plugins-archive",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -352,12 +365,16 @@ frontend:
       dashboard: "DuplicatePanels"
     - project: "Unknown"
       dashboard: "Dashboard"
-  
+
   information: |-
     # Hello World
     ## File Database setup
 
 ephemeral_dashboards_cleanup_interval: "2h"
+
+plugins:
+  path: "custom/plugins"
+  archive_path: "custom/plugins/archive"
 `,
 			result: Config{
 				Security: Security{
@@ -431,6 +448,10 @@ ephemeral_dashboards_cleanup_interval: "2h"
 						DisableCustomTimeRange: false,
 						Options:                defaultTimeRangeOptions,
 					},
+				},
+				Plugins: Plugins{
+					Path:        "custom/plugins",
+					ArchivePath: "custom/plugins/archive",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{

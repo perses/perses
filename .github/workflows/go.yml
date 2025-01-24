@@ -65,6 +65,8 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.11.0"
+      - name: generate files
+        run: make generate
       - name: test
         run: make integration-test
   test-mysql:
@@ -89,6 +91,8 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.11.0"
+      - name: generate files
+        run: make generate
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -106,7 +110,7 @@ jobs:
       - name: generate files
         run: make assets-compress
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.1.1
+        uses: golangci/golangci-lint-action@v6.2.0
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
@@ -125,6 +129,8 @@ jobs:
           cue_version: "v0.11.0"
       - name: eval cue schema
         run: make cue-eval
+      - name: download plugin
+        run: make install-default-plugins
       - name: test cue schema
         run: make cue-test
   check-cue-gen:
