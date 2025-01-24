@@ -253,7 +253,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
         {/* The node (visible box) itself. */}
         {formatNode(node, false, 1)}
       </Box>
-      {/* The node's individual query */}
+      {/* The node's individual query: */}
       {mergedChildState === 'waiting' ? (
         <CircularProgress /* TODO: put something different than running state like in Prom UI? */ />
       ) : mergedChildState === 'running' ? (
@@ -273,66 +273,68 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
           </Typography>
         </Stack>
       ) : (
-        <Stack direction="row" gap={1}>
-          <Typography>
+        <Stack direction="row" gap={1} alignItems="center" marginBottom={1.5}>
+          <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
             {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
             &nbsp;&nbsp;–&nbsp;&nbsp;
             {responseTime}ms
-            {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–&nbsp;&nbsp;</>}
+            {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
           </Typography>
-          <Stack direction="row" gap={1}>
-            {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
-              <Tooltip
-                key={ln}
-                title={
-                  <Box sx={{ p: 1, bgcolor: 'grey.900', color: 'grey.100' }}>
-                    <List dense>
-                      {resultStats.labelExamples[ln]?.map(({ value, count }) => (
-                        <ListItem
-                          key={value}
+          {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
+            <Tooltip
+              key={ln}
+              title={
+                <Box sx={{ p: 1, bgcolor: 'grey.900', color: 'grey.100' }}>
+                  <List dense>
+                    {resultStats.labelExamples[ln]?.map(({ value, count }) => (
+                      <ListItem
+                        key={value}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          py: 0.5,
+                        }}
+                      >
+                        <Chip
+                          label={escapeString(value)}
                           sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            py: 0.5,
+                            color: 'red',
+                            bgcolor: 'grey.800',
+                            fontFamily: 'monospace',
                           }}
-                        >
-                          <Chip
-                            label={escapeString(value)}
-                            sx={{
-                              color: 'red',
-                              bgcolor: 'grey.800',
-                              fontFamily: 'monospace',
-                            }}
-                          />
-                          <Typography variant="body2" component="span">
-                            ({count}x)
-                          </Typography>
-                        </ListItem>
-                      ))}
-                      {cnt > maxLabelValues && (
-                        <ListItem>
-                          <Typography variant="body2">...</Typography>
-                        </ListItem>
-                      )}
-                    </List>
-                  </Box>
-                }
-                arrow
-              >
-                <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  <Typography variant="body2" component="span">
-                    {ln}
-                  </Typography>
-                  <Typography variant="body2" component="span" color="text.secondary">
-                    : {cnt}
-                  </Typography>
-                </span>
-              </Tooltip>
-            ))}
-            {resultStats.sortedLabelCards.length > maxLabelNames ? (
-              <Typography>...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
-            ) : null}
-          </Stack>
+                        />
+                        <Typography variant="body2" component="span">
+                          ({count}x)
+                        </Typography>
+                      </ListItem>
+                    ))}
+                    {cnt > maxLabelValues && (
+                      <ListItem>
+                        <Typography variant="body2">...</Typography>
+                      </ListItem>
+                    )}
+                  </List>
+                </Box>
+              }
+              arrow
+            >
+              <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                <Typography
+                  variant="body2"
+                  component="span"
+                  sx={{ fontFamily: 'monospace', color: (theme) => theme.palette.success.main }}
+                >
+                  {ln}
+                </Typography>
+                <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
+                  : {cnt}
+                </Typography>
+              </span>
+            </Tooltip>
+          ))}
+          {resultStats.sortedLabelCards.length > maxLabelNames ? (
+            <Typography>...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
+          ) : null}
         </Stack>
       )}
     </Stack>
