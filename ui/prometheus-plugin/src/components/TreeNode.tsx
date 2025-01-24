@@ -15,7 +15,7 @@
 
 import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
 import { StatusError } from '@perses-dev/core';
 import { PrometheusDatasourceSelector } from '../model';
@@ -68,7 +68,14 @@ interface TreeNodeProps {
   reportNodeState?: (childIdx: number, state: NodeState) => void;
 }
 
-const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource, childIdx, reportNodeState }) => {
+export default function TreeNode({
+  node,
+  parentEl,
+  reverse,
+  datasource,
+  childIdx,
+  reportNodeState,
+}: TreeNodeProps): ReactElement {
   const theme = useTheme();
   const children = getNodeChildren(node);
 
@@ -312,9 +319,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       ))}
     </div>
   );
-};
-
-export default TreeNode;
+}
 
 interface QueryStatusProps {
   mergedChildState: NodeState;
@@ -328,7 +333,13 @@ interface QueryStatusProps {
   responseTime?: number;
 }
 
-const QueryStatus: React.FC<QueryStatusProps> = ({ mergedChildState, isLoading, error, resultStats, responseTime }) => {
+function QueryStatus({
+  mergedChildState,
+  isLoading,
+  error,
+  resultStats,
+  responseTime,
+}: QueryStatusProps): ReactElement {
   if (mergedChildState === 'waiting') {
     return (
       <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
@@ -468,4 +479,4 @@ const QueryStatus: React.FC<QueryStatusProps> = ({ mergedChildState, isLoading, 
       ) : null}
     </Stack>
   );
-};
+}
