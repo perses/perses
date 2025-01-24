@@ -189,6 +189,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
     }
 
     let resultSeries = 0;
+    // labelValuesByName records the number of times each label value appears for each label name.
     const labelValuesByName: Record<string, Record<string, number>> = {};
     const { resultType, result } = instantQueryResponse.data;
 
@@ -196,7 +197,6 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       resultSeries = 1;
     } else if (result && result.length > 0) {
       resultSeries = result.length;
-      // TODO comment
       result.forEach((s) => {
         Object.entries(s.metric).forEach(([ln, lv]) => {
           // TODO: If we ever want to include __name__ here again, we cannot use the
@@ -209,8 +209,9 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       });
     }
 
-    // TODO comment
+    // labelCardinalities records the number of unique label values for each label name.
     const labelCardinalities: Record<string, number> = {};
+    // labelExamples records the most common label values for each label name.
     const labelExamples: Record<string, Array<{ value: string; count: number }>> = {};
     Object.entries(labelValuesByName).forEach(([ln, lvs]) => {
       labelCardinalities[ln] = Object.keys(lvs).length;
@@ -257,10 +258,10 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
       {/* The node's individual query: */}
       <QueryStatus
         mergedChildState={mergedChildState}
-        instantQueryResponse={instantQueryResponse}
         isLoading={isLoading}
         error={error}
         resultStats={resultStats}
+        responseTime={instantQueryResponse?.responseTime}
       />
     </Stack>
   );
@@ -316,7 +317,6 @@ export default TreeNode;
 
 interface QueryStatusProps {
   mergedChildState: NodeState;
-  instantQueryResponse?: MonitoredInstantQueryResponse;
   isLoading: boolean;
   error: StatusError | null;
   resultStats: {
@@ -324,15 +324,10 @@ interface QueryStatusProps {
     labelExamples: Record<string, Array<{ value: string; count: number }>>;
     sortedLabelCards: Array<[string, number]>;
   };
+  responseTime?: number;
 }
 
-const QueryStatus: React.FC<QueryStatusProps> = ({
-  mergedChildState,
-  instantQueryResponse,
-  isLoading,
-  error,
-  resultStats,
-}) => {
+const QueryStatus: React.FC<QueryStatusProps> = ({ mergedChildState, isLoading, error, resultStats, responseTime }) => {
   if (mergedChildState === 'waiting') {
     return (
       <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
@@ -397,7 +392,7 @@ const QueryStatus: React.FC<QueryStatusProps> = ({
       <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
         {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
         &nbsp;&nbsp;–&nbsp;&nbsp;
-        {instantQueryResponse!.responseTime}ms
+        {responseTime}ms
         {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
       </Typography>
       {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
@@ -422,7 +417,7 @@ const QueryStatus: React.FC<QueryStatusProps> = ({
                       component="span"
                       sx={{
                         color: (theme) =>
-                          theme.palette.mode === 'dark' // TODO we shouldnt have to do that I guess
+                          theme.palette.mode === 'dark' // TODO we shouldnt have to do that I guess..
                             ? theme.palette.warning.dark
                             : theme.palette.warning.main,
                         fontFamily: 'monospace',
