@@ -13,7 +13,8 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/pages/query/TreeNode.tsx
 
-import { Box, Chip, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useTheme } from '@mui/material';
+import CircleIcon from 'mdi-material-ui/Circle';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
 import { PrometheusDatasourceSelector } from '../model';
@@ -305,25 +306,32 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
             <Tooltip
               key={ln}
               title={
-                <Box sx={{ p: 1, bgcolor: 'grey.900', color: 'grey.100' }}>
+                <Box>
                   <List dense>
                     {resultStats.labelExamples[ln]?.map(({ value, count }) => (
                       <ListItem
                         key={value}
                         sx={{
                           display: 'flex',
-                          justifyContent: 'space-between',
-                          py: 0.5,
+                          gap: 1,
+                          py: 0,
+                          px: 0.5,
                         }}
                       >
-                        <Chip
-                          label={escapeString(value)}
+                        <CircleIcon sx={{ fontSize: 8 }} />
+                        <Typography
+                          variant="body2"
+                          component="span"
                           sx={{
-                            color: 'red',
-                            bgcolor: 'grey.800',
+                            color: (theme) =>
+                              theme.palette.mode === 'dark' // TODO we shouldnt have to do that I guess
+                                ? theme.palette.warning.dark
+                                : theme.palette.warning.main,
                             fontFamily: 'monospace',
                           }}
-                        />
+                        >
+                          {escapeString(value)}
+                        </Typography>
                         <Typography variant="body2" component="span">
                           ({count}x)
                         </Typography>
