@@ -337,8 +337,16 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
                       </ListItem>
                     ))}
                     {cnt > maxLabelValues && (
-                      <ListItem>
-                        <Typography variant="body2">...</Typography>
+                      <ListItem
+                        sx={{
+                          display: 'flex',
+                          gap: 1,
+                          py: 0,
+                          px: 0.5,
+                        }}
+                      >
+                        <CircleIcon sx={{ fontSize: 8 }} />
+                        <Typography variant="body2">. . .</Typography>
                       </ListItem>
                     )}
                   </List>
@@ -361,7 +369,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
             </Tooltip>
           ))}
           {resultStats.sortedLabelCards.length > maxLabelNames ? (
-            <Typography>...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
+            <Typography variant="body2">...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
           ) : null}
         </Stack>
       )}
