@@ -39,3 +39,6 @@ dev/extra/tempo-data
 /.github/perses-ci/
 
 *.ignore.*
+
+/plugins
+/plugins-archive

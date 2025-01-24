@@ -17,6 +17,8 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
 const (
@@ -24,14 +26,10 @@ const (
 	PackageJSONFile  = "package.json"
 )
 
-type NPMPerses struct {
-	PluginType string `json:"pluginType"`
-}
-
 type NPMPackage struct {
-	Author  string    `json:"author"`
-	Version string    `json:"version"`
-	Perses  NPMPerses `json:"perses"`
+	Author  string            `json:"author"`
+	Version string            `json:"version"`
+	Perses  plugin.ModuleSpec `json:"perses"`
 }
 
 type BuildInfo struct {
@@ -39,14 +37,14 @@ type BuildInfo struct {
 	Name    string `json:"buildName"`
 }
 
-type Metadata struct {
+type ManifetsMetadata struct {
 	BuildInfo BuildInfo `json:"buildInfo"`
 }
 
 type NPMManifest struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Metadata Metadata `json:"metaData"`
+	ID       string           `json:"id"`
+	Name     string           `json:"name"`
+	Metadata ManifetsMetadata `json:"metaData"`
 }
 
 func ReadManifest(pluginPath string) (*NPMManifest, error) {

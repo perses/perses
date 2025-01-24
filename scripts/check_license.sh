@@ -2,8 +2,8 @@
 
 set -e
 
-exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*" "*/storybook-static/*")
-exclude_files=("*_go_gen.cue")
+exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*" "*/storybook-static/*" "./plugins/*")
+exclude_files=("migrate.cue" "*_go_gen.cue")
 year=$(date +'%Y')
 
 license_copyright="The Perses Authors"

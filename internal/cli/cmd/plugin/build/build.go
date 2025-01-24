@@ -26,25 +26,30 @@ import (
 	"github.com/perses/perses/internal/api/archive"
 	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	persesCMD.Option
-	skipNPMBuild   bool
-	archiveFormat  archive.Format
-	frontendFolder string
-	schemaFolder   string
-	distFolder     string
-	writer         io.Writer
-	errWriter      io.Writer
+	skipNPMBuild  bool
+	archiveFormat archive.Format
+	cfg           config.PluginConfig
+	cfgPath       string
+	writer        io.Writer
+	errWriter     io.Writer
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'build'")
 	}
+	cfg, err := config.Resolve(o.cfgPath)
+	if err != nil {
+		return fmt.Errorf("unable to resolve the configuration: %w", err)
+	}
+	o.cfg = cfg
 	return nil
 }
 
@@ -52,14 +57,12 @@ func (o *option) Validate() error {
 	if !archive.IsValidFormat(o.archiveFormat) {
 		return fmt.Errorf("archive format %q not managed", o.archiveFormat)
 	}
+	// Check if the required files are present
+	if exist, err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil || !exist {
+		return fmt.Errorf("required files are missing: %w", err)
+	}
 	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
 		return errors.New("cue modules not found")
-	}
-	if _, err := os.Stat(path.Join(o.frontendFolder, plugin.PackageJSONFile)); os.IsNotExist(err) {
-		return errors.New("package.json not found")
-	}
-	if _, err := os.Stat(path.Join(o.distFolder, plugin.ManifestFileName)); os.IsNotExist(err) {
-		return fmt.Errorf("%s not found", plugin.ManifestFileName)
 	}
 	return nil
 }
@@ -72,7 +75,7 @@ func (o *option) Execute() error {
 		}
 	}
 	// Get the plugin name from the manifest file
-	manifest, err := plugin.ReadManifest(o.distFolder)
+	manifest, err := plugin.ReadManifest(o.cfg.DistPath)
 	if err != nil {
 		return fmt.Errorf("unable to read manifest: %w", err)
 	}
@@ -105,24 +108,24 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 		list[license] = license
 	}
 	// add the package.json file required to get the type of the plugin.
-	list[path.Join(o.frontendFolder, "package.json")] = "package.json"
+	list[path.Join(o.cfg.FrontendPath, plugin.PackageJSONFile)] = plugin.PackageJSONFile
 
 	// Add the dist content at the root of the archive (saying differently, dist folder should not appear in the archive)
-	distFiles, err := os.ReadDir(o.distFolder)
+	distFiles, err := os.ReadDir(o.cfg.DistPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read 'dist' directory: %w", err)
 	}
 	for _, f := range distFiles {
-		list[path.Join(o.distFolder, f.Name())] = f.Name()
+		list[path.Join(o.cfg.DistPath, f.Name())] = f.Name()
 	}
 
 	// Do the same for the Cuelang schemas
-	cueFiles, err := os.ReadDir(o.schemaFolder)
+	cueFiles, err := os.ReadDir(o.cfg.SchemasPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read 'schema' directory: %w", err)
 	}
 	for _, f := range cueFiles {
-		list[path.Join(o.schemaFolder, f.Name())] = path.Join("schemas", f.Name())
+		list[path.Join(o.cfg.SchemasPath, f.Name())] = path.Join("schemas", f.Name())
 	}
 
 	// Add the cue.mod folder at the root of the archive
@@ -151,9 +154,7 @@ func NewCMD() *cobra.Command {
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
 	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip-npm-build", false, "")
-	cmd.Flags().StringVar(&o.distFolder, "dist-path", "dist", "Path to the folder containing the result of npm build")
-	cmd.Flags().StringVar(&o.frontendFolder, "frontend-path", "", "Path to the folder containing the package.json file")
-	cmd.Flags().StringVar(&o.schemaFolder, "schemas-path", "schemas", "Path to the folder containing the cuelang schema")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
 
 	return cmd
 }

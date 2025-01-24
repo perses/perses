@@ -40,6 +40,10 @@ function App(): ReactElement {
         sx={{
           flex: 1,
           display: 'flex',
+          backgroundColor: ({ palette }) => palette.background.default,
+          '--perses-colors-gray-100': (theme) => theme.palette.grey[100],
+          '--perses-colors-gray-300': (theme) => theme.palette.grey[300],
+          '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
         <Router />

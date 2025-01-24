@@ -31,6 +31,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	"github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	"github.com/perses/perses/internal/api/impl/v1/health"
+	"github.com/perses/perses/internal/api/impl/v1/plugin"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/role"
 	"github.com/perses/perses/internal/api/impl/v1/rolebinding"
@@ -68,6 +69,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
+		plugin.NewEndpoint(serviceManager.GetPlugin()),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
@@ -89,7 +91,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
-		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
+		validateendpoint.New(serviceManager.GetSchema(), serviceManager.GetDashboard()),
 		authEndpoint,
 	}
 	return &api{

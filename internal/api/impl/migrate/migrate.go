@@ -19,7 +19,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api"
 )

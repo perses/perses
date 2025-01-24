@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
-    "start": "webpack serve --config webpack.dev.ts",
-    "build": "webpack --config webpack.prod.ts",
+    "start": "cross-env NODE_ENV=development rspack serve",
+    "build": "rspack build",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
-    "analyze": "webpack --config webpack.analyze.ts"
+    "analyze": "rspack build --analyze"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
@@ -48,23 +48,8 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@svgr/webpack": "^7.0.0",
-    "@types/circular-dependency-plugin": "^5.0.8",
-    "@types/loadable__component": "^5.13.8",
-    "@types/webpack-bundle-analyzer": "^4.7.0",
-    "circular-dependency-plugin": "^5.2.2",
-    "css-loader": "^6.10.0",
-    "dotenv-defaults": "^5.0.2",
-    "eslint-webpack-plugin": "^4.0.1",
-    "fork-ts-checker-webpack-plugin": "^8.0.0",
-    "html-webpack-plugin": "^5.6.0",
-    "style-loader": "^3.3.4",
-    "ts-loader": "^9.5.1",
-    "ts-node": "^10.9.2",
-    "webpack": "^5.90.3",
-    "webpack-bundle-analyzer": "^4.10.1",
-    "webpack-cli": "5.1.4",
-    "webpack-dev-server": "^5.0.2",
-    "webpack-merge": "^5.10.0"
+    "@rspack/cli": "^1.2.2",
+    "@rspack/core": "^1.2.2",
+    "@rspack/plugin-react-refresh": "^1.0.1"
   }
 }

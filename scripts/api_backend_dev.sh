@@ -19,4 +19,4 @@ fi
 # Run backend server
 echo ">> start the api server"
 echo '>> Log in with user: `admin` and password: `password`'
-./bin/perses -config ./dev/config.yaml
+./bin/perses --config ./dev/config.yaml --log.level=debug

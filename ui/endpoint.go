@@ -47,11 +47,15 @@ var (
 
 type frontend struct {
 	echoUtils.Register
-	apiPrefix string
+	apiPrefix   string
+	pluginsPath string
 }
 
 func NewPersesFrontend(cfg config.Config) echoUtils.Register {
-	return &frontend{apiPrefix: cfg.APIPrefix}
+	return &frontend{
+		apiPrefix:   cfg.APIPrefix,
+		pluginsPath: cfg.Plugins.Path,
+	}
 }
 
 func (f *frontend) RegisterRoute(e *echo.Echo) {
@@ -64,6 +68,9 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	// The middleware `routerMiddleware` is here to redirect the request to the React app if the URL path is matching one of the React routes.
 	// Otherwise, the request is redirected to the `assetHandler` that is serving the static files, by changing the URL path to the correct path (with `contentRewrite`).
 	e.GET(f.apiPrefix+"/*", assetHandler(f.apiPrefix), routerMiddleware(f.apiPrefix), contentRewrite)
+
+	// This route is serving the static files of the various plugins.
+	e.Static(f.apiPrefix+"/plugins", f.pluginsPath)
 }
 
 // assetHandler is here to serve the static files of the React app.

@@ -26,7 +26,6 @@ import (
 	"github.com/perses/perses/internal/api/discovery"
 	"github.com/perses/perses/internal/api/provisioning"
 	"github.com/perses/perses/internal/api/rbac"
-	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/ui"
@@ -51,14 +50,6 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesFrontend := ui.NewPersesFrontend(conf)
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
 
-	// enable hot reload of CUE schemas for dashboard validation:
-	// - watch for changes on the schemas folders
-	// - register a cron task to reload all the schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of schemas: %w", err)
-	}
-
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {
 		ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
@@ -67,11 +58,6 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}
 		runner.WithTimerTasks(time.Duration(conf.EphemeralDashboard.CleanupInterval), ephemeralDashboardsCleaner)
 	}
-
-	runner.WithTasks(watcher)
-	// The Cuelang context used to validate the data is keeping in memory something when it validates a JSON.
-	// So to keep the memory low, we need sometime to flush the Cuelang context and that's what is done naturally with the reloader.
-	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader)
 
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
@@ -87,6 +73,17 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	if conf.Security.EnableAuth {
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
+	}
+
+	// Extract the plugin archives and load the plugins.
+	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.
+	unzipErr := serviceManager.GetPlugin().UnzipArchives()
+	if unzipErr != nil {
+		logrus.WithError(unzipErr).Error("unable to unzip the plugin archives")
+	} else {
+		if pluginErr := serviceManager.GetPlugin().Load(); pluginErr != nil {
+			logrus.WithError(pluginErr).Error("unable to load the plugins")
+		}
 	}
 
 	// register the API

@@ -71,6 +71,10 @@ func DefaultConfig() apiConfig.Config {
 			VariablesPath:   filepath.Join(projectPath, "cue", apiConfig.DefaultVariablesPath),
 			Interval:        0,
 		},
+		Plugins: apiConfig.Plugins{
+			Path:        filepath.Join(projectPath, "plugins"),
+			ArchivePath: filepath.Join(projectPath, "plugins-archive"),
+		},
 	}
 }
 

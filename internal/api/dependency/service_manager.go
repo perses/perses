@@ -51,9 +51,10 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
-	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/migrate"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/rbac"
-	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
@@ -71,8 +72,9 @@ type ServiceManager interface {
 	GetHealth() health.Service
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
+	GetPlugin() plugin.Plugin
 	GetProject() project.Service
-	GetSchemas() schemas.Schemas
+	GetSchema() schema.Schema
 	GetRBAC() rbac.RBAC
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
@@ -97,8 +99,9 @@ type service struct {
 	health             health.Service
 	jwt                crypto.JWT
 	migrate            migrate.Migration
+	plugin             plugin.Plugin
 	project            project.Service
-	schemas            schemas.Schemas
+	schema             schema.Schema
 	rbac               rbac.RBAC
 	role               role.Service
 	roleBinding        rolebinding.Service
@@ -113,32 +116,27 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	schemasService, err := schemas.New(conf.Schemas)
-	if err != nil {
-		return nil, err
-	}
-	migrateService, err := migrate.New(conf.Schemas)
-	if err != nil {
-		return nil, err
-	}
 	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
 	if err != nil {
 		return nil, err
 	}
-	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemasService)
-	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
-	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemasService)
+	pluginService := plugin.New(conf.Plugins)
+	schemaService := pluginService.Schema()
+	migrateService := pluginService.Migration()
+	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
+	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService)
+	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())
-	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
-	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
-	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), rbacService, schemasService)
-	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), rbacService, schemasService)
+	variableService := variableImpl.NewService(dao.GetVariable(), schemaService)
+	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemaService)
+	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), rbacService, schemaService)
+	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), rbacService, schemaService)
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
-	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
+	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemaService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), rbacService)
-	roleService := roleImpl.NewService(dao.GetRole(), rbacService, schemasService)
-	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), rbacService, schemasService)
+	roleService := roleImpl.NewService(dao.GetRole(), rbacService, schemaService)
+	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), rbacService, schemaService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser())
 	viewService := viewImpl.NewMetricsViewService()
@@ -157,11 +155,12 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		health:             healthService,
 		jwt:                jwtService,
 		migrate:            migrateService,
+		plugin:             pluginService,
 		project:            projectService,
 		rbac:               rbacService,
 		role:               roleService,
 		roleBinding:        roleBindingService,
-		schemas:            schemasService,
+		schema:             schemaService,
 		secret:             secretService,
 		user:               userService,
 		variable:           variableService,
@@ -222,12 +221,16 @@ func (s *service) GetMigration() migrate.Migration {
 	return s.migrate
 }
 
+func (s *service) GetPlugin() plugin.Plugin {
+	return s.plugin
+}
+
 func (s *service) GetProject() project.Service {
 	return s.project
 }
 
-func (s *service) GetSchemas() schemas.Schemas {
-	return s.schemas
+func (s *service) GetSchema() schema.Schema {
+	return s.schema
 }
 
 func (s *service) GetRBAC() rbac.RBAC {
