@@ -16,7 +16,7 @@ import { FederationHost, init, loadRemote } from '@module-federation/enhanced/ru
 import * as ReactQuery from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactRouterDOM from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
 import * as ReactHookForm from 'react-hook-form';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
