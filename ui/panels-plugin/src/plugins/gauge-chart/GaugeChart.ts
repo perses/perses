@@ -14,14 +14,13 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialGaugeChartOptions, GaugeChartOptions } from './gauge-chart-model';
 import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettings';
-import { GaugeChartLoading, GaugeChartPanel, GaugeChartPanelProps } from './GaugeChartPanel';
+import { GaugeChartPanel } from './GaugeChartPanel';
 
 /**
  * The core GaugeChart panel plugin for Perses.
  */
-export const GaugeChart: PanelPlugin<GaugeChartOptions, GaugeChartPanelProps> = {
+export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
   PanelComponent: GaugeChartPanel,
-  LoadingComponent: GaugeChartLoading,
   supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [
     {

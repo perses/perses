@@ -13,7 +13,7 @@
 
 import { getColorForValue, LegendItem } from '@perses-dev/components';
 import { TimeScale, TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { QueryData } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import { getCommonTimeScaleForQueries } from './get-timescale';
 
@@ -38,7 +38,7 @@ function generateCompleteTimestamps(timescale?: TimeScale): number[] {
 }
 
 export function useStatusHistoryDataModel(
-  queryResults: Array<PanelData<TimeSeriesData>>,
+  queryResults: Array<QueryData<TimeSeriesData>>,
   colors: string[]
 ): StatusHistoryDataModel {
   return useMemo(() => {

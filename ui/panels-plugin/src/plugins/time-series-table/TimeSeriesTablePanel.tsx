@@ -11,16 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
-import { useChartsTheme } from '@perses-dev/components';
+import { LoadingOverlay, useChartsTheme } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { TimeSeriesTableProps } from './TimeSeriesTable';
 import DataTable from './DataTable';
 
 export function TimeSeriesTablePanel(props: TimeSeriesTableProps): ReactElement {
-  const { contentDimensions, queryResults } = props;
+  const { contentDimensions } = props;
   const chartsTheme = useChartsTheme();
+  const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
   const contentPadding = chartsTheme.container.padding.default;
+
+  if (isLoading || isFetching) {
+    return <LoadingOverlay />;
+  }
 
   return (
     <Box sx={{ height: contentDimensions?.height || 0, padding: `${contentPadding}px`, overflowY: 'scroll' }}>

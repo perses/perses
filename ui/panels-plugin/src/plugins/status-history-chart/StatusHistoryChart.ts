@@ -15,9 +15,9 @@ import { PanelPlugin } from '@perses-dev/plugin-system';
 
 import { createInitialStatusHistoryChartOptions, StatusHistoryChartOptions } from './status-history-model';
 import { StatusHistoryChartOptionsEditorSettings } from './StatusHistoryChartOptionsEditorSettings';
-import { StatusHistoryChartPanelProps, StatusHistoryPanel } from './StatusHistoryPanel';
+import { StatusHistoryPanel } from './StatusHistoryPanel';
 
-export const StatusHistoryChart: PanelPlugin<StatusHistoryChartOptions, StatusHistoryChartPanelProps> = {
+export const StatusHistoryChart: PanelPlugin<StatusHistoryChartOptions> = {
   PanelComponent: StatusHistoryPanel,
   supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [{ label: 'Settings', content: StatusHistoryChartOptionsEditorSettings }],

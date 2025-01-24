@@ -12,14 +12,52 @@
 // limitations under the License.
 
 import { screen, render, within } from '@testing-library/react';
-import { TimeSeriesData } from '@perses-dev/core';
+import { TimeRangeValue, TimeSeriesData, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import {
+  MockPlugin,
+  mockPluginRegistry,
+  PluginRegistry,
+  TimeRangeContext,
+  TimeSeriesQueryPlugin,
+  useDataQueries,
+} from '@perses-dev/plugin-system';
 import { TableOptions, TimeSeriesTableProps } from '@perses-dev/panels-plugin';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { MOCK_TIME_SERIES_DATA_SINGLEVALUE, MOCK_TIME_SERIES_QUERY_DEFINITION } from '../../test';
+import { ReactElement } from 'react';
+import { MOCK_TIME_SERIES_DATA_SINGLEVALUE, MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE } from '../../test';
 import { TablePanel } from './TablePanel';
 
-const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> = {
+jest.mock('@perses-dev/plugin-system', () => {
+  return {
+    ...jest.requireActual('@perses-dev/plugin-system'),
+    useDataQueries: jest.fn(),
+  };
+});
+
+function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin<UnknownSpec> {
+  return {
+    getTimeSeriesData: async (): Promise<TimeSeriesData> => {
+      return data;
+    },
+    OptionsEditorComponent: (): ReactElement => {
+      return <div>Edit options here</div>;
+    },
+    createInitialOptions: () => ({}),
+  };
+}
+
+function buildMockQueryPlugin(data: TimeSeriesData): MockPlugin {
+  return {
+    pluginType: 'TimeSeriesQuery',
+    kind: 'PrometheusTimeSeriesQuery',
+    plugin: buildFakeTimeSeriesQuery(data),
+  };
+}
+
+const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
+
+const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -30,20 +68,35 @@ const TEST_TIME_SERIES_TABLE_PROPS: Omit<TimeSeriesTableProps, 'queryResults'> =
 describe('TablePanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = (data: TimeSeriesData, options?: TableOptions): void => {
+    const mockTimeRangeContext = {
+      refreshIntervalInMs: 0,
+      setRefreshInterval: (): Record<string, unknown> => ({}),
+      timeRange: TEST_TIME_RANGE,
+      setTimeRange: (): Record<string, unknown> => ({}),
+      absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
+      refresh: jest.fn(),
+      refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
+    };
+
     render(
       <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TablePanel
-            {...TEST_TIME_SERIES_TABLE_PROPS}
-            spec={options ?? {}}
-            queryResults={[{ definition: MOCK_TIME_SERIES_QUERY_DEFINITION, data }]}
-          />
-        </ChartsProvider>
+        <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin(data))}>
+          <ChartsProvider chartsTheme={testChartsTheme}>
+            <TimeRangeContext.Provider value={mockTimeRangeContext}>
+              <TablePanel {...TEST_TIME_SERIES_TABLE_PROPS} spec={options ?? {}} />
+            </TimeRangeContext.Provider>
+          </ChartsProvider>
+        </PluginRegistry>
       </VirtuosoMockContext.Provider>
     );
   };
 
   it('should render time series in table', async () => {
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
+      isLoading: false,
+      isFetching: false,
+    });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
 
     expect(await screen.findAllByRole('columnheader')).toHaveLength(8); // 1 timestamp column +  1 value column + 6 labels columns
@@ -60,6 +113,11 @@ describe('TablePanel', () => {
   }, 15000); // Github Actions is slow
 
   it('should apply column settings', async () => {
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
+      isLoading: false,
+      isFetching: false,
+    });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
       columnSettings: [
         { name: 'value', header: 'Value', headerDescription: 'Timeseries Value' },
@@ -85,6 +143,11 @@ describe('TablePanel', () => {
   });
 
   it('should apply transforms', async () => {
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
+      isLoading: false,
+      isFetching: false,
+    });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
       transforms: [
         {

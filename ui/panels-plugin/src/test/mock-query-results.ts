@@ -274,15 +274,3 @@ export const MOCK_NULL_QUERY_RESULT = [
     isStale: true,
   },
 ];
-
-export const MOCK_TIME_SERIES_QUERY_DEFINITION = {
-  kind: 'TimeSeriesQuery',
-  spec: {
-    plugin: {
-      kind: 'PrometheusTimeSeriesQuery',
-      spec: {
-        query: '',
-      },
-    },
-  },
-};

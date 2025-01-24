@@ -11,15 +11,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData } from '@perses-dev/plugin-system';
-import { TraceData } from '@perses-dev/core';
+import {
+  MockPlugin,
+  mockPluginRegistry,
+  PluginRegistry,
+  TimeRangeContext,
+  TraceQueryPlugin,
+  useDataQueries,
+} from '@perses-dev/plugin-system';
+import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { render, screen } from '@testing-library/react';
+import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MemoryRouter } from 'react-router-dom';
 import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from '../../test';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
-const TEST_TRACE_TABLE_PROPS: Omit<TraceTablePanelProps, 'queryResults'> = {
+jest.mock('@perses-dev/plugin-system', () => {
+  return {
+    ...jest.requireActual('@perses-dev/plugin-system'),
+    useDataQueries: jest.fn(),
+  };
+});
+
+const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
+
+function buildFakeTraceQuery(): TraceQueryPlugin {
+  return {
+    getTraceData: async (): Promise<never> => {
+      throw Error('not implemented');
+    },
+    createInitialOptions: () => ({}),
+  };
+}
+
+function buildMockQueryPlugin(): MockPlugin {
+  return {
+    pluginType: 'TraceQuery',
+    kind: 'TempoTraceQuery',
+    plugin: buildFakeTraceQuery(),
+  };
+}
+
+const TEST_TRACE_TABLE_PROPS: TraceTablePanelProps = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -29,18 +63,39 @@ const TEST_TRACE_TABLE_PROPS: Omit<TraceTablePanelProps, 'queryResults'> = {
 
 describe('TraceTablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (queryResults: Array<PanelData<TraceData>>): void => {
+  const renderPanel = (): void => {
+    const mockTimeRangeContext = {
+      refreshIntervalInMs: 0,
+      setRefreshInterval: (): Record<string, unknown> => ({}),
+      timeRange: TEST_TIME_RANGE,
+      setTimeRange: (): Record<string, unknown> => ({}),
+      absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
+      refresh: jest.fn(),
+      refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
+    };
+
     render(
       <MemoryRouter>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} queryResults={queryResults} />
-        </ChartsProvider>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+          <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin())}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TimeRangeContext.Provider value={mockTimeRangeContext}>
+                <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} />
+              </TimeRangeContext.Provider>
+            </ChartsProvider>
+          </PluginRegistry>
+        </VirtuosoMockContext.Provider>
       </MemoryRouter>
     );
   };
 
   it('should render multi values with timestamps', async () => {
-    renderPanel(MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT);
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
+      isLoading: false,
+      isFetching: false,
+    });
+    renderPanel();
 
     const rows = screen.getAllByRole('row');
     const lastRow = rows[rows.length - 1];

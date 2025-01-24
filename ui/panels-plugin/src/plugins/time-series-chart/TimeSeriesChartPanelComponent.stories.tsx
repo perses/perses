@@ -13,9 +13,22 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { TimeSeriesChart } from '@perses-dev/panels-plugin';
-import { WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
-import { mockTimeSeriesPanelDataWithManySeries } from '@perses-dev/internal-utils';
-import { waitForStableCanvas, StorySection } from '@perses-dev/storybook';
+import {
+  WithDataQueries,
+  WithPluginRegistry,
+  WithTimeRange,
+  WithPluginSystemVariables,
+  WithPluginSystemDatasourceStore,
+  WithPluginSystemBuiltinVariables,
+} from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { mockTimeSeriesResponseWithManySeries } from '@perses-dev/internal-utils';
+import {
+  mockQueryRangeRequests,
+  waitForStableCanvas,
+  WithQueryClient,
+  WithQueryParams,
+  StorySection,
+} from '@perses-dev/storybook';
 import { ComponentProps, ReactElement } from 'react';
 import { legendModes, legendPositions } from '@perses-dev/core';
 import { Stack } from '@mui/material';
@@ -40,15 +53,6 @@ function TimeSeriesChartWrapper({ height, width, ...otherProps }: TimeSeriesChar
 // Currenting has a 6 hour time range.
 const TIMESERIES_EXAMPLE_MOCK_END = 1673805600000;
 const TIMESERIES_EXAMPLE_MOCK_START = TIMESERIES_EXAMPLE_MOCK_END - 6 * 60 * 60 * 1000;
-const panelData = {
-  Random: mockTimeSeriesPanelDataWithManySeries({
-    query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-    startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
-    endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
-    totalSeries: 20,
-    totalDatapoints: 10000,
-  }),
-};
 
 /**
  * The panel component for the `TimeSeriesChart` panel plugin.
@@ -58,16 +62,20 @@ const panelData = {
  */
 const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
   component: TimeSeriesChart.PanelComponent,
-  argTypes: {
-    queryResults: {
-      options: Object.keys(panelData),
-      mapping: panelData,
-    },
-  },
-  args: {
-    queryResults: panelData.Random,
-  },
+  argTypes: {},
   parameters: {
+    withDataQueries: {
+      props: {
+        definitions: [
+          {
+            kind: 'PrometheusTimeSeriesQuery',
+            spec: {
+              query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+            },
+          },
+        ],
+      },
+    },
     withTimeRange: {
       props: {
         initialTimeRange: {
@@ -83,8 +91,36 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
         });
       },
     },
+    msw: {
+      handlers: {
+        queryRange: mockQueryRangeRequests({
+          queries: [
+            {
+              query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+              response: {
+                body: mockTimeSeriesResponseWithManySeries({
+                  startTimeMs: TIMESERIES_EXAMPLE_MOCK_START,
+                  endTimeMs: TIMESERIES_EXAMPLE_MOCK_END,
+                  totalSeries: 20,
+                  totalDatapoints: 10000,
+                }),
+              },
+            },
+          ],
+        }),
+      },
+    },
   },
-  decorators: [WithTimeRange],
+  decorators: [
+    WithDataQueries,
+    WithPluginSystemBuiltinVariables,
+    WithPluginSystemVariables,
+    WithPluginSystemDatasourceStore,
+    WithPluginRegistry,
+    WithTimeRange,
+    WithQueryClient,
+    WithQueryParams,
+  ],
   render: (args) => {
     return (
       <TimeSeriesChartWrapper width={args.contentDimensions?.width} height={args.contentDimensions?.height} {...args} />

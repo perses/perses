@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { getCommonTimeScale, TimeScale, TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { UseDataQueryResults } from '@perses-dev/plugin-system';
 
-export function getCommonTimeScaleForQueries(queries: Array<PanelData<TimeSeriesData>>): TimeScale | undefined {
-  const seriesData = queries.map((query) => query.data);
+export function getCommonTimeScaleForQueries(
+  queries: UseDataQueryResults<TimeSeriesData>['queryResults']
+): TimeScale | undefined {
+  const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
   return getCommonTimeScale(seriesData);
 }

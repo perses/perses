@@ -14,15 +14,45 @@
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
-import { TimeRangeContext } from '@perses-dev/plugin-system';
+import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import {
+  PluginRegistry,
+  useDataQueries,
+  TimeRangeContext,
+  TimeSeriesQueryPlugin,
+  mockPluginRegistry,
+  MockPlugin,
+} from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { MOCK_TIME_SERIES_DATA_MULTIVALUE } from '../../test';
+import { MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE, MOCK_TIME_SERIES_DATA_MULTIVALUE } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
+
+jest.mock('@perses-dev/plugin-system', () => {
+  return {
+    ...jest.requireActual('@perses-dev/plugin-system'),
+    useDataQueries: jest.fn(),
+  };
+});
+
+const FakeTimeSeriesQuery: TimeSeriesQueryPlugin<UnknownSpec> = {
+  getTimeSeriesData: async () => {
+    return MOCK_TIME_SERIES_DATA_MULTIVALUE;
+  },
+  OptionsEditorComponent: () => {
+    return <div>Edit options here</div>;
+  },
+  createInitialOptions: () => ({}),
+};
+
+const MOCK_PROM_QUERY_PLUGIN: MockPlugin = {
+  pluginType: 'TimeSeriesQuery',
+  kind: 'PrometheusTimeSeriesQuery',
+  plugin: FakeTimeSeriesQuery,
+};
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-const TEST_TIME_SERIES_PANEL: Omit<TimeSeriesChartProps, 'queryResults'> = {
+const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -33,18 +63,6 @@ const TEST_TIME_SERIES_PANEL: Omit<TimeSeriesChartProps, 'queryResults'> = {
     },
     yAxis: {
       format: { unit: 'decimal', decimalPlaces: 2 },
-    },
-  },
-};
-
-const TEST_QUERY_DEFINITION = {
-  kind: 'TimeSeriesQuery',
-  spec: {
-    plugin: {
-      kind: 'PrometheusTimeSeriesQuery',
-      spec: {
-        query: '',
-      },
     },
   },
 };
@@ -62,6 +80,15 @@ function getLegendByName(name?: string): HTMLElement {
 }
 
 describe('TimeSeriesChartPanel', () => {
+  beforeEach(() => {
+    // TODO: remove and instead use addMockPlugin after rest of runtime dependencies are mocked
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE,
+      isLoading: false,
+      isFetching: false,
+    });
+  });
+
   // Helper to render the panel with some context set
   const renderPanel = (): void => {
     const mockTimeRangeContext = {
@@ -76,14 +103,13 @@ describe('TimeSeriesChartPanel', () => {
 
     render(
       <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <ChartsProvider chartsTheme={testChartsTheme}>
-          <TimeRangeContext.Provider value={mockTimeRangeContext}>
-            <TimeSeriesChartPanel
-              {...TEST_TIME_SERIES_PANEL}
-              queryResults={[{ definition: TEST_QUERY_DEFINITION, data: MOCK_TIME_SERIES_DATA_MULTIVALUE }]}
-            />
-          </TimeRangeContext.Provider>
-        </ChartsProvider>
+        <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
+          <ChartsProvider chartsTheme={testChartsTheme}>
+            <TimeRangeContext.Provider value={mockTimeRangeContext}>
+              <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
+            </TimeRangeContext.Provider>
+          </ChartsProvider>
+        </PluginRegistry>
       </VirtuosoMockContext.Provider>
     );
   };

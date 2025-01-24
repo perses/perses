@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesData } from '@perses-dev/core';
-import { PanelData } from '@perses-dev/plugin-system';
+import { QueryData } from '@perses-dev/plugin-system';
 import { renderHook } from '@testing-library/react';
 import { useStatusHistoryDataModel } from './data-transform';
 
@@ -28,7 +28,7 @@ describe('useStatusHistoryDataModel', () => {
   });
 
   it('should process query results correctly', () => {
-    const queryResults: Array<PanelData<TimeSeriesData>> = [
+    const queryResults: Array<QueryData<TimeSeriesData>> = [
       {
         data: {
           timeRange: {
@@ -51,6 +51,9 @@ describe('useStatusHistoryDataModel', () => {
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         definition: { query: 'some-query' } as any,
+        error: undefined,
+        isFetching: false,
+        isLoading: false,
       },
     ];
     const colors = ['#ff0000', '#00ff00'];

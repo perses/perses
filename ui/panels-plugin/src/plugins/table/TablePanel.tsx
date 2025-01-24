@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelData, PanelProps } from '@perses-dev/plugin-system';
-import { Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
+import { LoadingOverlay, Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
 import { ReactElement, useMemo, useState } from 'react';
 import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
@@ -110,13 +110,16 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
   return undefined;
 }
 
-export type TableProps = PanelProps<TableOptions, TimeSeriesData>;
+export type TableProps = PanelProps<TableOptions>;
 
-export function TablePanel({ contentDimensions, spec, queryResults }: TableProps): ReactElement | null {
+export function TablePanel({ contentDimensions, spec }: TableProps): ReactElement | null {
+  // TODO: handle other query types
+  const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
+
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
       .flatMap(
-        (d: PanelData<TimeSeriesData>, queryIndex: number) =>
+        (d: QueryData<TimeSeriesData>, queryIndex: number) =>
           d.data?.series.map((ts: TimeSeries) => ({ ts, queryIndex })) || []
       )
       .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
@@ -232,6 +235,10 @@ export function TablePanel({ contentDimensions, spec, queryResults }: TableProps
   }
 
   const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
+
+  if (isLoading || isFetching) {
+    return <LoadingOverlay />;
+  }
 
   if (contentDimensions === undefined) {
     return null;
