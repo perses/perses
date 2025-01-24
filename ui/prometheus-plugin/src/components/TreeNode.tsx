@@ -17,7 +17,8 @@ import { Box, CircularProgress, List, ListItem, Stack, Tooltip, Typography, useT
 import CircleIcon from 'mdi-material-ui/Circle';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import AlertCircle from 'mdi-material-ui/AlertCircle';
-import { PrometheusDatasourceSelector } from '../model';
+import { StatusError } from '@perses-dev/core';
+import { MonitoredInstantQueryResponse, PrometheusDatasourceSelector } from '../model';
 import ASTNode, { nodeType } from './promql/ast';
 import { escapeString, getNodeChildren } from './promql/utils';
 import { formatNode } from './promql/format';
@@ -254,125 +255,13 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
         {formatNode(node, false, 1)}
       </Box>
       {/* The node's individual query: */}
-      {mergedChildState === 'waiting' ? (
-        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-          <CircularProgress size={16} color="inherit" />
-          <Typography variant="body2" color="text.secondary">
-            Waiting for child query
-          </Typography>
-        </Box>
-      ) : mergedChildState === 'running' ? (
-        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-          <CircularProgress size={16} />
-          <Typography variant="body2" color="primary">
-            Running...
-          </Typography>
-        </Box>
-      ) : mergedChildState === 'error' ? (
-        <Stack>
-          <AlertCircle />
-          Blocked on child query error
-        </Stack>
-      ) : isLoading ? (
-        <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-          <CircularProgress size={16} color="secondary" />
-          <Typography variant="body2" color="text.secondary">
-            Loading...
-          </Typography>
-        </Box>
-      ) : error ? (
-        <Box
-          display="flex"
-          alignItems="center"
-          gap={1}
-          sx={{ color: (theme) => theme.palette.error.main }}
-          marginBottom={1.5}
-        >
-          <AlertCircle />
-          <Typography variant="body2">
-            <strong>Error executing query:</strong> {error.message}
-          </Typography>
-        </Box>
-      ) : (
-        <Stack direction="row" gap={1} alignItems="center" marginBottom={1.5}>
-          <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
-            {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
-            &nbsp;&nbsp;–&nbsp;&nbsp;
-            {instantQueryResponse.responseTime}ms
-            {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
-          </Typography>
-          {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
-            <Tooltip
-              key={ln}
-              title={
-                <Box>
-                  <List dense>
-                    {resultStats.labelExamples[ln]?.map(({ value, count }) => (
-                      <ListItem
-                        key={value}
-                        sx={{
-                          display: 'flex',
-                          gap: 1,
-                          py: 0,
-                          px: 0.5,
-                        }}
-                      >
-                        <CircleIcon sx={{ fontSize: 8 }} />
-                        <Typography
-                          variant="body2"
-                          component="span"
-                          sx={{
-                            color: (theme) =>
-                              theme.palette.mode === 'dark' // TODO we shouldnt have to do that I guess
-                                ? theme.palette.warning.dark
-                                : theme.palette.warning.main,
-                            fontFamily: 'monospace',
-                          }}
-                        >
-                          {escapeString(value)}
-                        </Typography>
-                        <Typography variant="body2" component="span">
-                          ({count}x)
-                        </Typography>
-                      </ListItem>
-                    ))}
-                    {cnt > maxLabelValues && (
-                      <ListItem
-                        sx={{
-                          display: 'flex',
-                          gap: 1,
-                          py: 0,
-                          px: 0.5,
-                        }}
-                      >
-                        <CircleIcon sx={{ fontSize: 8 }} />
-                        <Typography variant="body2">. . .</Typography>
-                      </ListItem>
-                    )}
-                  </List>
-                </Box>
-              }
-              arrow
-            >
-              <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                <Typography
-                  variant="body2"
-                  component="span"
-                  sx={{ fontFamily: 'monospace', color: (theme) => theme.palette.success.main }}
-                >
-                  {ln}
-                </Typography>
-                <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
-                  : {cnt}
-                </Typography>
-              </span>
-            </Tooltip>
-          ))}
-          {resultStats.sortedLabelCards.length > maxLabelNames ? (
-            <Typography variant="body2">...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
-          ) : null}
-        </Stack>
-      )}
+      <QueryStatus
+        mergedChildState={mergedChildState}
+        instantQueryResponse={instantQueryResponse}
+        isLoading={isLoading}
+        error={error}
+        resultStats={resultStats}
+      />
     </Stack>
   );
 
@@ -424,3 +313,163 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, datasource
 };
 
 export default TreeNode;
+
+interface QueryStatusProps {
+  mergedChildState: NodeState;
+  instantQueryResponse?: MonitoredInstantQueryResponse;
+  isLoading: boolean;
+  error: StatusError | null;
+  resultStats: {
+    numSeries: number;
+    labelExamples: Record<string, Array<{ value: string; count: number }>>;
+    sortedLabelCards: Array<[string, number]>;
+  };
+}
+
+const QueryStatus: React.FC<QueryStatusProps> = ({
+  mergedChildState,
+  instantQueryResponse,
+  isLoading,
+  error,
+  resultStats,
+}) => {
+  if (mergedChildState === 'waiting') {
+    return (
+      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+        <CircularProgress size={16} color="inherit" />
+        <Typography variant="body2" color="text.secondary">
+          Waiting for child query
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (mergedChildState === 'running') {
+    return (
+      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+        <CircularProgress size={16} />
+        <Typography variant="body2" color="primary">
+          Running...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (mergedChildState === 'error') {
+    return (
+      <Stack>
+        <AlertCircle />
+        Blocked on child query error
+      </Stack>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+        <CircularProgress size={16} color="secondary" />
+        <Typography variant="body2" color="text.secondary">
+          Loading...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={1}
+        sx={{ color: (theme) => theme.palette.error.main }}
+        marginBottom={1.5}
+      >
+        <AlertCircle />
+        <Typography variant="body2">
+          <strong>Error executing query:</strong> {error.message}
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Stack direction="row" gap={1} alignItems="center" marginBottom={1.5}>
+      <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
+        {resultStats.numSeries} result{resultStats.numSeries !== 1 && 's'}
+        &nbsp;&nbsp;–&nbsp;&nbsp;
+        {instantQueryResponse!.responseTime}ms
+        {resultStats.sortedLabelCards.length > 0 && <>&nbsp;&nbsp;–</>}
+      </Typography>
+      {resultStats.sortedLabelCards.slice(0, maxLabelNames).map(([ln, cnt]) => (
+        <Tooltip
+          key={ln}
+          title={
+            <Box>
+              <List dense>
+                {resultStats.labelExamples[ln]?.map(({ value, count }) => (
+                  <ListItem
+                    key={value}
+                    sx={{
+                      display: 'flex',
+                      gap: 1,
+                      py: 0,
+                      px: 0.5,
+                    }}
+                  >
+                    <CircleIcon sx={{ fontSize: 8 }} />
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      sx={{
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' // TODO we shouldnt have to do that I guess
+                            ? theme.palette.warning.dark
+                            : theme.palette.warning.main,
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {escapeString(value)}
+                    </Typography>
+                    <Typography variant="body2" component="span">
+                      ({count}x)
+                    </Typography>
+                  </ListItem>
+                ))}
+                {cnt > maxLabelValues && (
+                  <ListItem
+                    sx={{
+                      display: 'flex',
+                      gap: 1,
+                      py: 0,
+                      px: 0.5,
+                    }}
+                  >
+                    <CircleIcon sx={{ fontSize: 8 }} />
+                    <Typography variant="body2">. . .</Typography>
+                  </ListItem>
+                )}
+              </List>
+            </Box>
+          }
+          arrow
+        >
+          <span style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <Typography
+              variant="body2"
+              component="span"
+              sx={{ fontFamily: 'monospace', color: (theme) => theme.palette.success.main }}
+            >
+              {ln}
+            </Typography>
+            <Typography variant="body2" component="span" sx={{ color: (theme) => theme.palette.grey[500] }}>
+              : {cnt}
+            </Typography>
+          </span>
+        </Tooltip>
+      ))}
+      {resultStats.sortedLabelCards.length > maxLabelNames ? (
+        <Typography variant="body2">...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
+      ) : null}
+    </Stack>
+  );
+};
