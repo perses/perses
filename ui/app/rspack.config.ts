@@ -23,7 +23,6 @@ module.exports = {
   context: __dirname,
   output: {
     path: path.resolve(__dirname, './dist'),
-    publicPath: 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
@@ -88,7 +87,7 @@ module.exports = {
           // way of e2e tests and can be annoying for some developer workflows.
           // If you like the overlay, you can enable it by setting the the specified
           // env var.
-          overlay: process.env.ERROR_OVERLAY === 'true' ?? false,
+          overlay: process.env.ERROR_OVERLAY === 'true',
         },
       }
     : undefined,
