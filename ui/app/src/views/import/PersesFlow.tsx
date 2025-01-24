@@ -71,7 +71,7 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
             />
             <Button
               variant="contained"
-              disabled={dashboardMutation.isLoading || projectName.length === 0 || isReadonly}
+              disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
             >

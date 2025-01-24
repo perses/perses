@@ -48,7 +48,7 @@ function SignUpView(): ReactElement {
   };
 
   const isSignUpDisabled = (): boolean => {
-    return createUserMutation.isLoading || login === '' || password === '';
+    return createUserMutation.isPending || login === '' || password === '';
   };
 
   const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -79,7 +79,7 @@ function SignUpView(): ReactElement {
       <Button variant="contained" disabled={isSignUpDisabled()} onClick={() => handleRegister()}>
         Register
       </Button>
-      {createUserMutation.isLoading && <LinearProgress />}
+      {createUserMutation.isPending && <LinearProgress />}
       <Typography sx={{ textAlign: 'center' }}>
         Already have an account?&nbsp;
         <Link underline="hover" component={RouterLink} to={SignInRoute}>
