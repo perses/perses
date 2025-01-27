@@ -49,7 +49,8 @@ export function useInstantQuery(
 
   return useQuery<MonitoredInstantQueryResponse, StatusError>({
     enabled: !!client && enabled,
-    queryKey: ['instantQuery', content, 'datasource', datasource],
+    // TODO: for some reason the caching is not working: identical nodes still fire their requests after each change made to the promQL
+    queryKey: ['instantQuery', content, 'datasource', datasource.kind],
     queryFn: async () => {
       const params: InstantQueryRequestParameters = { query: content };
       const startTime = performance.now();

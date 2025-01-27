@@ -124,7 +124,7 @@ export default function TreeNode({
   // Individual query for the current node
   const {
     data: instantQueryResponse,
-    isLoading,
+    isFetching,
     error,
   } = useInstantQuery(serializeNode(queryNode) ?? '', datasource, mergedChildState === 'success');
 
@@ -133,11 +133,11 @@ export default function TreeNode({
     if (reportNodeState) {
       if (mergedChildState === 'error' || error) {
         reportNodeState(childIdx, 'error');
-      } else if (isLoading) {
+      } else if (isFetching) {
         reportNodeState(childIdx, 'running');
       }
     }
-  }, [mergedChildState, error, isLoading, reportNodeState, childIdx]);
+  }, [mergedChildState, error, isFetching, reportNodeState, childIdx]);
 
   // This function is passed down to the child nodes so they can report their state.
   const childReportNodeState = useCallback(
@@ -266,7 +266,7 @@ export default function TreeNode({
       {/* The node's individual query: */}
       <QueryStatus
         mergedChildState={mergedChildState}
-        isLoading={isLoading}
+        isFetching={isFetching}
         error={error}
         resultStats={resultStats}
         responseTime={instantQueryResponse?.responseTime}
@@ -323,7 +323,7 @@ export default function TreeNode({
 
 interface QueryStatusProps {
   mergedChildState: NodeState;
-  isLoading: boolean;
+  isFetching: boolean;
   error: StatusError | null;
   resultStats: {
     numSeries: number;
@@ -335,31 +335,17 @@ interface QueryStatusProps {
 
 function QueryStatus({
   mergedChildState,
-  isLoading,
+  isFetching,
   error,
   resultStats,
   responseTime,
 }: QueryStatusProps): ReactElement {
   if (mergedChildState === 'waiting') {
-    return (
-      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-        <CircularProgress size={16} color="inherit" />
-        <Typography variant="body2" color="text.secondary">
-          Waiting for child query
-        </Typography>
-      </Box>
-    );
+    return <ProgressState text="Waiting for child query" />;
   }
 
   if (mergedChildState === 'running') {
-    return (
-      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-        <CircularProgress size={16} />
-        <Typography variant="body2" color="primary">
-          Running...
-        </Typography>
-      </Box>
-    );
+    return <ProgressState text="Running" />;
   }
 
   if (mergedChildState === 'error') {
@@ -371,15 +357,8 @@ function QueryStatus({
     );
   }
 
-  if (isLoading) {
-    return (
-      <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
-        <CircularProgress size={16} color="secondary" />
-        <Typography variant="body2" color="text.secondary">
-          Loading...
-        </Typography>
-      </Box>
-    );
+  if (isFetching) {
+    return <ProgressState text="Loading" />;
   }
 
   if (error) {
@@ -478,5 +457,16 @@ function QueryStatus({
         <Typography variant="body2">...{resultStats.sortedLabelCards.length - maxLabelNames} more...</Typography>
       ) : null}
     </Stack>
+  );
+}
+
+function ProgressState({ text }: { text: string }): ReactElement {
+  return (
+    <Box display="flex" alignItems="center" gap={1} marginBottom={1.5}>
+      <CircularProgress size={16} color="secondary" />
+      <Typography variant="body2" color="text.secondary">
+        {text}...
+      </Typography>
+    </Box>
   );
 }
