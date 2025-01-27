@@ -13,6 +13,12 @@
 
 package config
 
+import (
+	"errors"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
+
 const (
 	DefaultPluginPath        = "plugins"
 	DefaultArchivePluginPath = "plugins-archive"
@@ -31,6 +37,37 @@ func (f *Plugins) Verify() error {
 // TODO : how to avoid user to know where the plugins are stored in the docker image
 type Plugins struct {
 	// Path is the path to the directory containing the runtime plugins
-	Path        string `json:"path,omitempty" yaml:"path,omitempty"`
-	ArchivePath string `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
+	Path           string                `json:"path,omitempty" yaml:"path,omitempty"`
+	ArchivePath    string                `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
+	DevEnvironment *PluginDevEnvironment `json:"dev_environment,omitempty" yaml:"dev_environment,omitempty"`
+}
+
+type PluginDevEnvironment struct {
+	URL     *common.URL           `json:"url,omitempty" yaml:"url,omitempty"`
+	Plugins []PluginInDevelopment `json:"plugins" yaml:"plugins"`
+}
+
+func (p *PluginDevEnvironment) Verify() error {
+	if p.URL == nil {
+		p.URL = common.MustParseURL("http://localhost:3005")
+	}
+	if len(p.Plugins) == 0 {
+		return errors.New("no plugins defined")
+	}
+	return nil
+}
+
+type PluginInDevelopment struct {
+	Name         string `json:"name" yaml:"name"`
+	AbsolutePath string `json:"absolute_path" yaml:"absolute_path"`
+}
+
+func (p *PluginInDevelopment) Verify() error {
+	if len(p.Name) == 0 {
+		return errors.New("the name of the plugin in development must be set")
+	}
+	if len(p.AbsolutePath) == 0 {
+		return errors.New("the absolute path of the plugin in development must be set")
+	}
+	return nil
 }
