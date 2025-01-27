@@ -74,7 +74,7 @@
     "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.11",
     "ts-node": "^10.9.2",
-    "turbo": "^2.0.12",
+    "turbo": "^2.3.4",
     "typedoc": "^0.25.8",
     "typescript": "5.4.5",
     "wait-on": "^7.0.1"
