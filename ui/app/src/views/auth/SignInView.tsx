@@ -45,7 +45,7 @@ function SignInView(): ReactElement {
   };
 
   const isSignInDisabled = (): boolean => {
-    return authMutation.isLoading || login === '' || password === '';
+    return authMutation.isPending || login === '' || password === '';
   };
 
   const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -72,7 +72,7 @@ function SignInView(): ReactElement {
       <Button variant="contained" disabled={isSignInDisabled()} onClick={() => handleLogin()}>
         Sign in
       </Button>
-      {authMutation.isLoading && <LinearProgress />}
+      {authMutation.isPending && <LinearProgress />}
       {!isSignUpDisable && (
         <Typography sx={{ textAlign: 'center' }}>
           Don&lsquo;t have an account yet?&nbsp;

@@ -102,7 +102,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
       </Alert>
       <Button
         variant="contained"
-        disabled={migrateMutation.isLoading}
+        disabled={migrateMutation.isPending}
         startIcon={<AutoFix />}
         onClick={() => {
           migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: dashboard ?? {} });
@@ -110,7 +110,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
       >
         Migrate
       </Button>
-      {migrateMutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
+      {migrateMutation.isPending && <CircularProgress sx={{ alignSelf: 'center' }} />}
       {migrateMutation.isError && (
         <Alert variant="outlined" severity="error">
           {migrateMutation.error.message}
@@ -144,7 +144,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
             />
             <Button
               variant="contained"
-              disabled={dashboardMutation.isLoading || projectName.length === 0 || isReadonly}
+              disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
             >
