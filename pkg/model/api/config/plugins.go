@@ -58,8 +58,9 @@ func (p *PluginDevEnvironment) Verify() error {
 }
 
 type PluginInDevelopment struct {
-	Name         string `json:"name" yaml:"name"`
-	AbsolutePath string `json:"absolute_path" yaml:"absolute_path"`
+	Name         string      `json:"name" yaml:"name"`
+	URL          *common.URL `json:"url,omitempty" yaml:"url,omitempty"`
+	AbsolutePath string      `json:"absolute_path" yaml:"absolute_path"`
 }
 
 func (p *PluginInDevelopment) Verify() error {

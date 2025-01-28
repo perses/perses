@@ -127,7 +127,11 @@ func pluginDevProxyMiddleware(devEnvironment config.PluginDevEnvironment) echo.M
 				var proxyErr error
 				// Then we need to route this request to the dev environment.
 				// We just have to replace the URL as the path should remain the same.
-				reverseProxy := httputil.NewSingleHostReverseProxy(devEnvironment.URL.URL)
+				proxyURL := devEnvironment.URL
+				if plg.URL != nil {
+					proxyURL = plg.URL
+				}
+				reverseProxy := httputil.NewSingleHostReverseProxy(proxyURL.URL)
 				reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
 					logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", devEnvironment.URL.String(), err)
 					proxyErr = err
