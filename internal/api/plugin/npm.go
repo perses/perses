@@ -15,9 +15,12 @@ package plugin
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
 	"os"
 	"path"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
@@ -53,10 +56,20 @@ func ReadManifest(pluginPath string) (*NPMManifest, error) {
 	return manifestData, readFile(manifestFilePath, manifestData)
 }
 
+func ReadManifestFromNetwork(url *common.URL, pluginName string) (*NPMManifest, error) {
+	manifestData := &NPMManifest{}
+	return manifestData, readFileFromNetwork(url, pluginName, ManifestFileName, manifestData)
+}
+
 func ReadPackage(pluginPath string) (*NPMPackage, error) {
 	packageFilePath := path.Join(pluginPath, PackageJSONFile)
 	packageData := &NPMPackage{}
 	return packageData, readFile(packageFilePath, packageData)
+}
+
+func ReadPackageFromNetwork(url *common.URL, pluginName string) (*NPMPackage, error) {
+	packageData := &NPMPackage{}
+	return packageData, readFileFromNetwork(url, pluginName, PackageJSONFile, packageData)
 }
 
 func readFile[T any](filePath string, result *T) error {
@@ -65,4 +78,32 @@ func readFile[T any](filePath string, result *T) error {
 		return err
 	}
 	return json.Unmarshal(data, result)
+}
+
+func readFileFromNetwork[T any](url *common.URL, pluginName string, fileName string, result *T) error {
+	httpClient := http.DefaultClient
+	httpRequest, err := prepareRequestToReadFileFromNetwork(url, pluginName, fileName)
+	if err != nil {
+		return err
+	}
+	resp, err := httpClient.Do(httpRequest)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, result)
+}
+
+func prepareRequestToReadFileFromNetwork(url *common.URL, pluginName string, fileName string) (*http.Request, error) {
+	finalURL := common.NewURL(url, "plugins", pluginName, fileName)
+	httpRequest, err := http.NewRequest(http.MethodGet, finalURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpRequest.Header.Set("Accept", "application/json")
+	return httpRequest, nil
 }
