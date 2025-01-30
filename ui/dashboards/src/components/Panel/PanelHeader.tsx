@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, Typography, Stack, CardHeaderProps, styled, IconButton } from '@mui/material';
+import { CardHeader, Typography, Stack, CardHeaderProps, styled, IconButton, Box } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,10 +21,53 @@ import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode } from 'react';
+import { PropsWithChildren, ReactElement, ReactNode, useState } from 'react';
 import { Link } from '@perses-dev/core';
+import MenuIcon from 'mdi-material-ui/Menu';
+import Popover from '@mui/material/Popover';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { PanelLinks } from './PanelLinks';
+
+const ShowAction: React.FC<PropsWithChildren> = ({ children }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = (): undefined => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
+
+  return (
+    <>
+      <HeaderIconButton
+        aria-describedby={id}
+        onClick={handleClick}
+        aria-label={ARIA_LABEL_TEXT.editPanel('expand')}
+        size="small"
+      >
+        <MenuIcon fontSize="inherit" />
+      </HeaderIconButton>
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+      >
+        <Box sx={{ padding: '8px' }}>{children}</Box>
+      </Popover>
+    </>
+  );
+};
+
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
@@ -118,11 +161,6 @@ export function PanelHeader({
             <DeleteIcon fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-        <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
-          <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
-            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
-          </HeaderIconButton>
-        </InfoTooltip>
       </>
     );
   }
@@ -168,12 +206,50 @@ export function PanelHeader({
         </Stack>
       }
       action={
-        <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-          {editHandlers === undefined && extra} {readActions} {editActions}
+        <HeaderActionWrapper
+          sx={combineSx((theme) => {
+            theme.containerQueries('primary').up(200);
+            return {};
+          })}
+          direction="row"
+          spacing={0.25}
+          alignItems="center"
+        >
+          <Box
+            sx={{
+              '@container responsiveBox (min-width: 200px)': {
+                display: 'block',
+              },
+              display: 'none',
+            }}
+          >
+            {editHandlers === undefined && extra} {readActions} {editActions}
+          </Box>
+          {editActions && (
+            <>
+              <Box
+                sx={{
+                  '@container responsiveBox (max-width: 200px)': {
+                    display: 'block',
+                  },
+                  display: 'none',
+                }}
+              >
+                <ShowAction>{editActions}</ShowAction>
+              </Box>
+              <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
+                <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
+                  <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
+                </HeaderIconButton>
+              </InfoTooltip>
+            </>
+          )}
         </HeaderActionWrapper>
       }
       sx={combineSx(
         (theme) => ({
+          containerType: 'inline-size',
+          containerName: 'responsiveBox',
           padding: theme.spacing(1),
           borderBottom: `solid 1px ${theme.palette.divider}`,
           '.MuiCardHeader-content': {
