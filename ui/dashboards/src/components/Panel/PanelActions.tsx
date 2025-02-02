@@ -189,7 +189,9 @@ const ShowAction: React.FC<PropsWithChildren<{ title: string }>> = ({ children, 
           horizontal: 'left',
         }}
       >
-        <Box sx={{ padding: '8px' }}>{children}</Box>
+        <Box sx={{ padding: '8px' }} onClick={handleClose}>
+          {children}
+        </Box>
       </Popover>
     </>
   );
