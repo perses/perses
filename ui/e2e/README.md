@@ -20,8 +20,7 @@ This package contains end-to-end tests for Perses written using [Playwright](htt
 
 Tests are run during local development using the configuration in `local.playwright.config.ts`. The tests depend on the local development servers (backend and UI) to test against. By default, locally run tests will not take screenshots for visual testing.
 
-- Update the configuration at `dev/config.yaml` to `enable_auth: false` as the end-to-end tests do not use auth.
-- Start the backend server from the project root: `./scripts/api_backend_dev.sh`
+- Start the backend server from the project root and disable authentication: `./scripts/api_backend_dev.sh --e2e`.
 - Change to the `ui` directory.
 - Start the UI server: `npm start`
   - Important to ensure libraries are built since e2e imports from other Perses packages
