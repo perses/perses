@@ -96,6 +96,7 @@ test.describe('Dashboard: Panels', () => {
     const smallerSize = await panel.getBounds();
     expect(smallerSize.width / originalSize.width).toBeCloseTo(smallMultiplier, 1);
     expect(smallerSize.height / originalSize.height).toBeCloseTo(smallMultiplier, 1);
+    await expect(panel.container.locator('button.show-actions')).toBeVisible();
 
     // Resize bigger
     const largeMultiplier = 1.5;
@@ -106,6 +107,7 @@ test.describe('Dashboard: Panels', () => {
     const largerSize = await panel.getBounds();
     expect(largerSize.width / originalSize.width).toBeCloseTo(largeMultiplier, 1);
     expect(largerSize.height / originalSize.height).toBeCloseTo(largeMultiplier, 1);
+    await expect(panel.container.locator('button.show-actions')).toBeHidden();
   });
 
   // There was previously a bug related to going to a smaller screen and back to
