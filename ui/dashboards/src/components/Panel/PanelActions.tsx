@@ -132,7 +132,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
             display: 'none',
           }))}
         >
-          <ShowAction>{editActions}</ShowAction>
+          <ShowAction title={title}>{editActions}</ShowAction>
         </Box>
       )}
 
@@ -154,7 +154,7 @@ const HeaderActionWrapper = styled(Stack)(() => ({
   marginBottom: -4,
 }));
 
-const ShowAction: React.FC<PropsWithChildren> = ({ children }) => {
+const ShowAction: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
@@ -174,7 +174,7 @@ const ShowAction: React.FC<PropsWithChildren> = ({ children }) => {
         className="show-actions"
         aria-describedby={id}
         onClick={handleClick}
-        aria-label={ARIA_LABEL_TEXT.editPanel('expand')}
+        aria-label={ARIA_LABEL_TEXT.showPanelActions(title)}
         size="small"
       >
         <MenuIcon fontSize="inherit" />
