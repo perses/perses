@@ -1,42 +1,45 @@
 # ROADMAP
 
-## K8s Native
-
-Perses as a dashboard tooling should be Kubernetes native. That means being able to deploy Perses on K8s and being able
-to deploy dashboard alongside the associated applications.
-
-For that, we aim to provide:
-
-- an operator that will deploy Perses and the required CRDs. Work is going one in the
-  repository https://github.com/perses/perses-operator.
-- a helm chart that should help to install Perses with or without the operator on k8s. Work is available in the
-  repository: https://github.com/perses/helm-charts.
-
 ## Plugin system
 
-While we already have a plugin system, it has a couple of limitations:
+When this document was created (in March 2024), we mentioned that we were going to entirely review the plugin system.
 
-- First, we are not able to externalize the plugins. So that means any plugin needs to be built in the upstream
-  application which is super limited as we won't be able to accept and maintain any kind of plugin the community / end
-  user would like.
-- Then today, it's really hard to understand how we can implement a plugin, and that shouldn't be the case at all.
+Indeed, this has been reviewed but not yet released. We are very close to providing a first version.
+We are still working on this as we are missing a few things, like documentation, the ability to use it in the explorer,
+and basically cleaning the old system.
 
-So for the next 6 months, we are going to entirely review the plugin architecture.
+You can follow this issue to get updates on where we stand: https://github.com/perses/perses/issues/1543
 
-Here is the issue if you want to follow this topic: https://github.com/perses/perses/issues/1543
+### Plugin Versioning
 
-## Explorer
+In the second version of the new plugin system, we are going to tackle the topic of how plugins can be versioned and
+upgraded.
 
-When you are creating a dashboard, you are sometimes facing the issue that you don't really know the name of a metrics,
-what it looks like, etc.
+Discussion is already ongoing on this topic: https://github.com/perses/perses/discussions/1186
 
-So having an Observability explorer to see metrics, traces and logs is a real need.
+### More Data-sources to come
 
-Here is the discussion if you want to follow this topic: https://github.com/perses/perses/discussions/1859
+Once the new plugin system is released, we will unblock the possibility to support other data sources besides Prometheus
+and Tempo.
+
+We are going to support Logs Datasource, starting with OpenSearch and Loki.
+
+We are currently discussing whether we should support ClickHouse in the core plugins or if we should let ClickHouse
+support Perses on their own side.
+Please follow [this issue](https://github.com/perses/perses/issues/1778) if you are interested in this topic or if you
+want to give your opinion.
+
+## Marketplace
+
+At some point, Perses will need a Marketplace to share which plugins, dashboards, and Dashboard as Code libraries are
+available.
+
+We haven't started working on it yet. Discussion is ongoing here: https://github.com/perses/perses/discussions/2439
 
 ## Alert view
 
-We are thinking about creating an alert view in the Perses application. There is no current work on this area for the
-moment. It will come once above goals are finished.
+We are considering creating an alert view in the Perses application. There is no current work in this area at the
+moment. It will come once the above goals are finished.
 
-If you would like to start to work on that, no worries probably opening a discussion to propose a design would be a start.
+If you would like to start working on that, no worries, probably opening a discussion to propose a design would be a
+start.
