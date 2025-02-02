@@ -114,10 +114,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
     <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
       <Box
         sx={combineSx((theme) => ({
-          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).up(HEADER_ACTIONS_MIN_WIDTH)]: {
-            display: 'block',
+          display: 'block',
+          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_ACTIONS_MIN_WIDTH)]: {
+            display: 'none',
           },
-          display: 'none',
         }))}
       >
         {editHandlers === undefined && extra} {readActions} {editActions}
@@ -126,10 +126,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
       {editActions && (
         <Box
           sx={combineSx((theme) => ({
-            [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_ACTIONS_MIN_WIDTH)]: {
-              display: 'block',
+            display: 'block',
+            [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).up(HEADER_ACTIONS_MIN_WIDTH)]: {
+              display: 'none',
             },
-            display: 'none',
           }))}
         >
           <ShowAction title={title}>{editActions}</ShowAction>
