@@ -47,18 +47,16 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
   );
 
   const rows = useMemo(() => {
-    return dashboardList.map(
-      (datedDashboard) =>
-        ({
-          project: datedDashboard.dashboard.metadata.project,
-          name: datedDashboard.dashboard.metadata.name,
-          displayName: getResourceDisplayName(datedDashboard.dashboard),
-          version: datedDashboard.dashboard.metadata.version,
-          createdAt: datedDashboard.dashboard.metadata.createdAt,
-          updatedAt: datedDashboard.dashboard.metadata.updatedAt,
-          viewedAt: datedDashboard.date,
-        }) as Row
-    );
+    return dashboardList.map<Row>((datedDashboard, index) => ({
+      index,
+      project: datedDashboard.dashboard.metadata.project,
+      name: datedDashboard.dashboard.metadata.name,
+      displayName: getResourceDisplayName(datedDashboard.dashboard),
+      version: datedDashboard.dashboard.metadata.version ?? 0,
+      createdAt: datedDashboard.dashboard.metadata.createdAt ?? '',
+      updatedAt: datedDashboard.dashboard.metadata.updatedAt ?? '',
+      viewedAt: datedDashboard.date,
+    }));
   }, [dashboardList]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
