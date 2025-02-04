@@ -156,8 +156,7 @@ func (o *option) buildPreviewResponse(dashboard *modelV1.Dashboard, tmpDashboard
 
 	// Check if the dashboard already exists to provide the "current" URL
 	currentURL := &common.URL{}
-	_, err := o.apiClient.V1().Dashboard(project).Get(name)
-	if err != nil {
+	if _, err := o.apiClient.V1().Dashboard(project).Get(name); err != nil {
 		var reqErr *perseshttp.RequestError
 		if errors.As(err, &reqErr) && reqErr.StatusCode == http.StatusNotFound {
 			logrus.Infof("No dashboard %s found in project %s, no current link to provide", name, project)
