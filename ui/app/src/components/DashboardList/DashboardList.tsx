@@ -66,17 +66,15 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const rows = useMemo(() => {
-    return dashboardList.map(
-      (dashboard) =>
-        ({
-          project: dashboard.metadata.project,
-          name: dashboard.metadata.name,
-          displayName: getResourceDisplayName(dashboard),
-          version: dashboard.metadata.version,
-          createdAt: dashboard.metadata.createdAt,
-          updatedAt: dashboard.metadata.updatedAt,
-        }) as Row
-    );
+    return dashboardList.map<Row>((dashboard, index) => ({
+      index,
+      project: dashboard.metadata.project,
+      name: dashboard.metadata.name,
+      displayName: getResourceDisplayName(dashboard),
+      version: dashboard.metadata.version ?? 0,
+      createdAt: dashboard.metadata.createdAt ?? '',
+      updatedAt: dashboard.metadata.updatedAt ?? '',
+    }));
   }, [dashboardList]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
