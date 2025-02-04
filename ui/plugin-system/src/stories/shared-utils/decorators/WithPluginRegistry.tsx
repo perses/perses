@@ -11,41 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { PluginRegistry, remotePluginLoader } from '@perses-dev/plugin-system';
 import { StoryFn } from '@storybook/react';
-import {
-  PluginRegistry,
-  PluginLoader,
-  PluginModuleResource,
-  dynamicImportPluginLoader,
-} from '@perses-dev/plugin-system';
 
-import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
-import panelsResource from '@perses-dev/panels-plugin/plugin.json';
 import { ReactElement } from 'react';
-
-const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
-  {
-    resource: prometheusResource as PluginModuleResource,
-    // This throws an error in CI (but not locally for some reason), likely because
-    // this package isn't a dependency for dashboards. We probably do not want to
-    // make it one solely for type-checking in storybook.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    importPlugin: () => import('@perses-dev/prometheus-plugin'),
-  },
-  {
-    resource: panelsResource as PluginModuleResource,
-    // Same comment as above.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    importPlugin: () => import('@perses-dev/panels-plugin'),
-  },
-]);
 
 export const WithPluginRegistry = (Story: StoryFn): ReactElement => {
   return (
     <PluginRegistry
-      pluginLoader={bundledPluginLoader}
+      pluginLoader={remotePluginLoader()}
       defaultPluginKinds={{
         TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
         TraceQuery: 'TempoTraceQuery',

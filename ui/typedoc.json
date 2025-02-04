@@ -1,14 +1,5 @@
 {
   "entryPointStrategy": "packages",
-  "entryPoints": [
-    "components",
-    "core",
-    "dashboards",
-    "explore",
-    "panels-plugin",
-    "plugin-system",
-    "prometheus-plugin",
-    "tempo-plugin",
-  ],
+  "entryPoints": ["components", "core", "dashboards", "explore", "panels-plugin", "plugin-system"],
   "out": "typedoc"
 }

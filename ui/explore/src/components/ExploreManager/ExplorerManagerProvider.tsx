@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 
 interface ExplorerState<T> {
-  explorer: string;
+  explorer?: string;
   data: T;
   // tab: number;
   // queries: QueryDefinition[];
@@ -22,7 +22,7 @@ interface ExplorerState<T> {
 
 interface ExplorerManagerContextType<T> {
   /** observability signal, for example metrics or traces */
-  explorer: string;
+  explorer?: string;
   data: T;
   setExplorer: (explorer: string) => void;
   setData: (data: T) => void;
@@ -44,15 +44,17 @@ export function ExplorerManagerProvider({
     Record<string, Omit<ExplorerState<unknown>, 'explorer'>>
   >({});
   // local store in case external store is not provided by prop
-  const localStore = useState<ExplorerState<unknown>>({ explorer: 'metrics', data: {} });
+  const localStore = useState<ExplorerState<unknown>>({ explorer: undefined, data: {} });
   // use store provided by 'store' prop if available, otherwise use local store
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
   const { explorer, data } = explorerState;
 
   function setExplorer(newExplorer: string): void {
-    // store current explorer state
-    explorerStateCache[explorer] = { data };
-    setExplorerStateCache(explorerStateCache);
+    if (explorer) {
+      // store current explorer state
+      explorerStateCache[explorer] = { data };
+      setExplorerStateCache(explorerStateCache);
+    }
 
     // restore previous explorer state (if any)
     const state = explorerStateCache[newExplorer] ?? { data: {} };

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,5 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+import { UnknownSpec } from '@perses-dev/core';
+import { Plugin } from './plugin-base';
+
+export interface ExploreComponentProps<Spec> {
+  spec: Spec;
+}
+
+/**
+ * Plugin that defines options for an external system that Perses talks to for data.
+ */
+export interface ExplorePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
+  ExploreComponent: React.ComponentType<ExploreComponentProps<Spec>>;
+}

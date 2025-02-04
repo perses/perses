@@ -12,3 +12,5 @@
 // limitations under the License.
 
 export * from './ExploreManager';
+export * from './ExplorerManagerProvider';
+export * from './query-params';
