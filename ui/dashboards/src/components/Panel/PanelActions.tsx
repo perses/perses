@@ -111,36 +111,42 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
   }, [editHandlers, title]);
 
   return (
-    <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-      <Box
-        sx={combineSx((theme) => ({
-          display: 'block',
-          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_ACTIONS_MIN_WIDTH)]: {
-            display: 'none',
-          },
-        }))}
-      >
-        {editHandlers === undefined && extra} {readActions} {editActions}
-      </Box>
-
+    <HeaderActionWrapper
+      direction="row"
+      spacing={0.25}
+      alignItems="center"
+      sx={{ display: editHandlers !== undefined || readHandlers?.isPanelViewed ? 'flex' : 'var(--panel-hover, none)' }}
+    >
+      {editHandlers === undefined && extra} {readActions}
       {editActions && (
-        <Box
-          sx={combineSx((theme) => ({
-            display: 'block',
-            [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).up(HEADER_ACTIONS_MIN_WIDTH)]: {
-              display: 'none',
-            },
-          }))}
-        >
-          <ShowAction title={title}>{editActions}</ShowAction>
-        </Box>
+        <>
+          <Box
+            sx={combineSx((theme) => ({
+              display: 'block',
+              [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_ACTIONS_MIN_WIDTH)]: {
+                display: 'none',
+              },
+            }))}
+          >
+            {editActions}
+          </Box>
+          <Box
+            sx={combineSx((theme) => ({
+              display: 'block',
+              [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).up(HEADER_ACTIONS_MIN_WIDTH)]: { display: 'none' },
+            }))}
+          >
+            <ShowAction title={title}>{editActions}</ShowAction>
+          </Box>
+        </>
       )}
-
-      <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
-        <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
-          <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
-        </HeaderIconButton>
-      </InfoTooltip>
+      {editActions && (
+        <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
+          <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
+            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      )}
     </HeaderActionWrapper>
   );
 };

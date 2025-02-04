@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
+import { Box, CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import { Link } from '@perses-dev/core';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
@@ -67,7 +67,7 @@ export function PanelHeader({
               // `minHeight` guarantees that the header has the correct height
               // when there is no title (i.e. in the preview)
               lineHeight: '24px',
-              minHeight: '24px',
+              minHeight: '26px',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -77,16 +77,18 @@ export function PanelHeader({
           </Typography>
           {/* Show the info tooltip when description is defined and is not all whitespace */}
           {description !== undefined && description.trim().length > 0 && (
-            <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
-              <HeaderIconButton aria-label="panel description" size="small">
-                <InformationOutlineIcon
-                  aria-describedby="info-tooltip"
-                  aria-hidden={false}
-                  fontSize="inherit"
-                  sx={{ color: (theme) => theme.palette.text.secondary }}
-                />
-              </HeaderIconButton>
-            </InfoTooltip>
+            <Box sx={{ display: editHandlers === undefined ? 'var(--panel-hover, none)' : 'flex' }}>
+              <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
+                <HeaderIconButton aria-label="panel description" size="small">
+                  <InformationOutlineIcon
+                    aria-describedby="info-tooltip"
+                    aria-hidden={false}
+                    fontSize="inherit"
+                    sx={{ color: (theme) => theme.palette.text.secondary }}
+                  />
+                </HeaderIconButton>
+              </InfoTooltip>
+            </Box>
           )}
           {links !== undefined && links.length > 0 && <PanelLinks links={links} />}
         </Stack>
