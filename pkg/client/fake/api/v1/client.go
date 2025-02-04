@@ -31,6 +31,10 @@ func (c *client) RESTClient() *perseshttp.RESTClient {
 	return c.restClient
 }
 
+func (c *client) Dashboard(_ string) v1.DashboardInterface {
+	return &dashboard{}
+}
+
 func (c *client) EphemeralDashboard(_ string) v1.EphemeralDashboardInterface {
 	return &ephemeralDashboard{}
 }
