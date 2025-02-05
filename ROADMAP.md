@@ -17,17 +17,26 @@ upgraded.
 
 Discussion is already ongoing on this topic: https://github.com/perses/perses/discussions/1186
 
-### More Data-sources to come
+### More data-sources to come
 
 Once the new plugin system is released, we will unblock the possibility to support other data sources besides Prometheus
 and Tempo.
 
-We are going to support Logs Datasource, starting with OpenSearch and Loki.
+1. We are going to support Logs Datasource, starting with OpenSearch and Loki.
 
-We are currently discussing whether we should support ClickHouse in the core plugins or if we should let ClickHouse
-support Perses on their own side.
-Please follow [this issue](https://github.com/perses/perses/issues/1778) if you are interested in this topic or if you
-want to give your opinion.
+2. We are currently discussing whether we should support ClickHouse in the core plugins or if we should let ClickHouse
+   support Perses on their own side.
+   Please follow [this issue](https://github.com/perses/perses/issues/1778)
+   if you are interested in this topic or if you want to give your opinion.
+
+3. We are also considering supporting Jaeger as a data source.
+   This is still in the discussion phase. If you are interested, please let us know.
+
+### More panels to come
+
+We are willing to add more panels.
+For the moment we are considering adding a panel to display native
+histogram: https://github.com/perses/perses/issues/2601
 
 ## Marketplace
 
