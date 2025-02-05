@@ -65,6 +65,7 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
       format: { unit: 'decimal', decimalPlaces: 2 },
     },
   },
+  queryResults: [],
 };
 
 function getLegendByName(name?: string): HTMLElement {

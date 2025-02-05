@@ -68,6 +68,7 @@ const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
     height: 500,
   },
   spec: {},
+  queryResults: [],
 };
 
 describe('TimeSeriesTablePanel', () => {

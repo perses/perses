@@ -30,9 +30,9 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   description?: string;
   links?: Link[];
   extra?: ReactNode;
+  queryResults: QueryData[];
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
-  queryResults: QueryData[];
 }
 
 export function PanelHeader({
@@ -40,9 +40,9 @@ export function PanelHeader({
   title: rawTitle,
   description: rawDescription,
   links,
+  queryResults,
   readHandlers,
   editHandlers,
-  queryResults,
   sx,
   extra,
   ...rest

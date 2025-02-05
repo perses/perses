@@ -121,9 +121,9 @@ export const Panel = memo(function Panel(props: PanelProps) {
           id={headerId}
           title={definition.spec.display.name}
           description={definition.spec.display.description}
+          queryResults={queryResults}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
-          queryResults={queryResults}
           links={definition.spec.links}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
@@ -147,9 +147,9 @@ export const Panel = memo(function Panel(props: PanelProps) {
           <PanelContent
             definition={definition}
             panelPluginKind={definition.spec.plugin.kind}
-            queryResults={queryResults}
             spec={definition.spec.plugin.spec}
             contentDimensions={contentDimensions}
+            queryResults={queryResults}
           />
         </ErrorBoundary>
       </CardContent>

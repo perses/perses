@@ -57,6 +57,7 @@ const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
     height: 500,
   },
   spec: {},
+  queryResults: [],
 };
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
