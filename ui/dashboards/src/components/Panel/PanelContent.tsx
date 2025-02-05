@@ -50,10 +50,18 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     throw new Error(`Missing PanelComponent from panel plugin for kind '${panelPluginKind}'`);
   }
 
+  for (const queryResult of queryResults) {
+    if (!supportedQueryTypes.includes(queryResult.definition.kind)) {
+      throw new Error(
+        `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`
+      );
+    }
+  }
+
   // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.
   const queryResultsWithData = queryResults.flatMap((q) =>
-    q.data && supportedQueryTypes.includes(q.definition.kind) ? [{ data: q.data, definition: q.definition }] : []
+    q.data ? [{ data: q.data, definition: q.definition }] : []
   );
   if (queryResultsWithData.length > 0 || queryResults.length === 0) {
     return (
