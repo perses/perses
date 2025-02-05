@@ -22,7 +22,7 @@ import { Panel, PanelProps } from './Panel';
 jest.mock('@perses-dev/plugin-system', () => {
   return {
     ...jest.requireActual('@perses-dev/plugin-system'),
-    useDataQueriesContext: jest.fn(() => ({ queryResults: [] })),
+    useDataQueriesContext: jest.fn(() => ({ queryResults: [{ definition: { kind: 'TimeSeriesQuery' }, data: [] }] })),
   };
 });
 
