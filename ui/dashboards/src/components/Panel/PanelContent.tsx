@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { usePlugin, PanelProps, QueryData } from '@perses-dev/plugin-system';
-import { UnknownSpec, PanelDefinition } from '@perses-dev/core';
+import { usePlugin, PanelProps, QueryData, PanelPlugin } from '@perses-dev/plugin-system';
+import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { LoadingOverlay } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
@@ -34,6 +34,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   const PanelComponent = plugin?.PanelComponent;
   const supportedQueryTypes = plugin?.supportedQueryTypes || [];
 
+  // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {
     return (
       <Skeleton
@@ -65,19 +66,9 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     );
   }
 
-  // No query has data, show loading overlay if any query is loading.
-  if (queryResults.some((q) => q.isLoading)) {
-    if (plugin?.LoadingComponent) {
-      return (
-        <plugin.LoadingComponent
-          spec={spec}
-          contentDimensions={contentDimensions}
-          definition={definition}
-          queryResults={[]}
-        />
-      );
-    }
-    return <LoadingOverlay />;
+  // No query has data, show loading overlay if any query is fetching data.
+  if (queryResults.some((q) => q.isFetching)) {
+    return <PanelLoading plugin={plugin} spec={spec} definition={definition} contentDimensions={contentDimensions} />;
   }
 
   // No query has data or is loading, show the error if any query has an error.
@@ -87,6 +78,26 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     throw queryError.error;
   }
 
-  // At this point, no query has data, is loading, or has an error. Render an empty panel.
-  return <PanelComponent spec={spec} contentDimensions={contentDimensions} definition={definition} queryResults={[]} />;
+  // At this point, no query has data, is loading, or has an error.
+  // This can happen if all queries are disabled (e.g. dependent dashboard variables are loading, or they are not in the viewport of the browser).
+  // Most likely, some query will be enabled later. Render the panel loading skeleton.
+  return <PanelLoading plugin={plugin} spec={spec} definition={definition} contentDimensions={contentDimensions} />;
+}
+
+interface PanelLoadingProps extends Pick<PanelContentProps, 'spec' | 'definition' | 'contentDimensions'> {
+  plugin?: PanelPlugin<UnknownSpec, PanelProps<UnknownSpec, QueryDataType>>;
+}
+
+function PanelLoading({ plugin, spec, definition, contentDimensions }: PanelLoadingProps): ReactElement {
+  if (plugin?.LoadingComponent) {
+    return (
+      <plugin.LoadingComponent
+        spec={spec}
+        contentDimensions={contentDimensions}
+        definition={definition}
+        queryResults={[]}
+      />
+    );
+  }
+  return <LoadingOverlay />;
 }
