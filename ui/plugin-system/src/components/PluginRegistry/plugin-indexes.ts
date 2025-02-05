@@ -13,13 +13,13 @@
 
 import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
-import { PluginLoader, PluginMetadata, PluginModuleResource, PluginType } from '../../model';
+import { PluginLoader, PluginMetadataWithModule, PluginModuleResource, PluginType } from '../../model';
 
 export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
   pluginResourcesByNameAndKind: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
-  pluginMetadataByKind: Map<string, PluginMetadata[]>;
+  pluginMetadataByKind: Map<string, PluginMetadataWithModule[]>;
 }
 
 /**
@@ -35,7 +35,7 @@ export function usePluginIndexes(
 
     // Create the two indexes from the installed plugins
     const pluginResourcesByNameAndKind = new Map<string, PluginModuleResource>();
-    const pluginMetadataByKind = new Map<string, PluginMetadata[]>();
+    const pluginMetadataByKind = new Map<string, PluginMetadataWithModule[]>();
 
     for (const resource of installedPlugins) {
       for (const pluginMetadata of resource.spec.plugins) {
@@ -57,7 +57,7 @@ export function usePluginIndexes(
           list = [];
           pluginMetadataByKind.set(kind, list);
         }
-        list.push(pluginMetadata);
+        list.push({ ...pluginMetadata, module: resource.metadata });
       }
     }
 

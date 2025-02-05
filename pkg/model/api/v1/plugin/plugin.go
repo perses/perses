@@ -27,6 +27,7 @@ const (
 	KindTimeSeriesQuery = "TimeSeriesQuery"
 	KindTraceQuery      = "TraceQuery"
 	KindQuery           = "Query"
+	KindExplore         = "Explore"
 )
 
 type Spec struct {
@@ -67,7 +68,7 @@ func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Plugin) validate() error {
 	if p.Kind != KindVariable && p.Kind != KindDatasource &&
-		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery {
+		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery && p.Kind != KindExplore {
 		return fmt.Errorf("invalid plugin kind %s", p.Kind)
 	}
 	return nil

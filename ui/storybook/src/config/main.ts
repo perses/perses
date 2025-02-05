@@ -70,11 +70,6 @@ const pkgConfig: PkgConfig[] = [
     directory: path.resolve(uiRoot, 'plugin-system/src'),
     title: 'Plugin System',
   },
-  {
-    pkg: '@perses-dev/prometheus-plugin',
-    directory: path.resolve(uiRoot, 'prometheus-plugin/src'),
-    title: 'Prometheus Plugin',
-  },
 ];
 
 // File selector for stories.

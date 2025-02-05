@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext } from 'react';
-import { useQuery, useQueries, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { BuiltinVariableDefinition } from '@perses-dev/core';
-import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
+import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { createContext, useContext } from 'react';
+import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>>;
-  listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadata[]>;
+  listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadataWithModule[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
 
@@ -83,7 +83,7 @@ export function usePlugins<T extends PluginType>(
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
 type UseListPluginMetadataOptions = Omit<
-  UseQueryOptions<PluginMetadata[], Error, PluginMetadata[], [string, string[]]>,
+  UseQueryOptions<PluginMetadataWithModule[], Error, PluginMetadataWithModule[], [string, string[]]>,
   'queryKey' | 'queryFn'
 >;
 
@@ -93,7 +93,7 @@ type UseListPluginMetadataOptions = Omit<
 export function useListPluginMetadata(
   pluginTypes: string[],
   options?: UseListPluginMetadataOptions
-): UseQueryResult<PluginMetadata[]> {
+): UseQueryResult<PluginMetadataWithModule[]> {
   const { listPluginMetadata } = usePluginRegistry();
   return useQuery({
     queryKey: ['listPluginMetadata', pluginTypes],

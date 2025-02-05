@@ -9,8 +9,7 @@
       "@perses-dev/dashboards": ["../dashboards/src"],
       "@perses-dev/explore": ["../explore/src"],
       "@perses-dev/panels-plugin": ["../panels-plugin/src"],
-      "@perses-dev/plugin-system": ["../plugin-system/src"],
-      "@perses-dev/prometheus-plugin": ["../prometheus-plugin/src"]
+      "@perses-dev/plugin-system": ["../plugin-system/src"]
     }
   }
 }

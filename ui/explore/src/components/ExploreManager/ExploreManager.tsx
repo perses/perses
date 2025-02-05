@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import { PluginLoaderComponent, useListPluginMetadata } from '@perses-dev/plugin-system';
+import { ReactElement, ReactNode, useEffect, useMemo } from 'react';
 import { ExploreToolbar } from '../ExploreToolbar';
-import { TracesExplorer } from './TracesExplorer';
-import { MetricsExplorer } from './MetricsExplorer';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 export interface ExploreManagerProps {
@@ -26,7 +25,29 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { explorer, setExplorer } = useExplorerManagerContext();
 
+  const plugins = useListPluginMetadata(['Explore']);
+
   const smallScreen = useMediaQuery('(max-width: 768px)');
+
+  const explorerPluginsMap = useMemo(
+    () =>
+      Object.fromEntries(plugins.data?.map((plugin) => [`${plugin.module.name}-${plugin.spec.name}`, plugin]) ?? []),
+    [plugins.data]
+  );
+
+  useEffect(() => {
+    const plugins = Object.keys(explorerPluginsMap);
+    if (!explorer && plugins?.[0]) {
+      setExplorer(plugins[0]);
+    }
+  }, [explorerPluginsMap, explorer, setExplorer]);
+
+  const currentPlugin = explorer ? explorerPluginsMap[explorer] : undefined;
+
+  if (!explorer) {
+    return <div>No explorer plugin available</div>;
+  }
+
   return (
     <Stack sx={{ width: '100%' }} px={2} pb={2} pt={1.5} gap={3}>
       <ExploreToolbar exploreTitleComponent={exploreTitleComponent} />
@@ -44,12 +65,24 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
             minWidth: '100px',
           }}
         >
-          <Tab value="metrics" label="Metrics" />
-          <Tab value="traces" label="Traces" />
+          {plugins.data?.map((plugin) => (
+            <Tab
+              key={`${plugin.module.name}-${plugin.spec.name}`}
+              value={`${plugin.module.name}-${plugin.spec.name}`}
+              label={plugin.spec.display.name}
+            />
+          ))}
         </Tabs>
         <Card sx={{ padding: '10px', width: '100%' }}>
-          {explorer === 'metrics' && <MetricsExplorer />}
-          {explorer === 'traces' && <TracesExplorer />}
+          {currentPlugin && (
+            <PluginLoaderComponent
+              key={`${currentPlugin.module.name}-${currentPlugin.spec.name}`}
+              plugin={{
+                name: currentPlugin.spec.name,
+                moduleName: currentPlugin.module.name,
+              }}
+            />
+          )}
         </Card>
       </Stack>
     </Stack>

@@ -88,6 +88,22 @@ export const pluginRuntime = init({
         requiredVersion: '^0.50.0',
       },
     },
+    '@perses-dev/explore': {
+      version: '0.50.0',
+      lib: () => require('@perses-dev/explore'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^0.50.0',
+      },
+    },
+    '@perses-dev/dashboards': {
+      version: '0.50.0',
+      lib: () => require('@perses-dev/dashboards'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^0.50.0',
+      },
+    },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK
     'date-fns': {
       version: '2.29.3',

@@ -68,9 +68,6 @@ These packages are published to npm with the `@perses-dev` namespace.
 - [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the
   definitions for the runtime available to plugins (e.g. the current time range state, the current variable
   state).
-- [`prometheus-plugin`](./prometheus-plugin): a plugin module with multiple
-  plugin types (e.g. `Variable`, `ChartQuery`, etc.) for supporting Prometheus
-  in Perses.
 
 ### Internal tooling
 
