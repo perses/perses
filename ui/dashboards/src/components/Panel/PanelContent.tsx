@@ -50,12 +50,12 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     throw new Error(`Missing PanelComponent from panel plugin for kind '${panelPluginKind}'`);
   }
 
-  // Render the panel if any query has data.
+  // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.
   const queryResultsWithData = queryResults.flatMap((q) =>
     q.data && supportedQueryTypes.includes(q.definition.kind) ? [{ data: q.data, definition: q.definition }] : []
   );
-  if (queryResultsWithData.length > 0) {
+  if (queryResultsWithData.length > 0 || queryResults.length === 0) {
     return (
       <PanelComponent
         spec={spec}
@@ -78,7 +78,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     throw queryError.error;
   }
 
-  // At this point, no query has data, is loading, or has an error.
+  // At this point, one or more queries are defined, but no query has data, is loading, or has an error.
   // This can happen if all queries are disabled (e.g. dependent dashboard variables are loading, or they are not in the viewport of the browser).
   // Most likely, some query will be enabled later. Render the panel loading skeleton.
   return <PanelLoading plugin={plugin} spec={spec} definition={definition} contentDimensions={contentDimensions} />;

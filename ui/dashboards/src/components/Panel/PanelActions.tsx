@@ -58,7 +58,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     const isFetching = queryResults.some((q) => q.isFetching);
     const queryErrors = queryResults.filter((q) => q.error);
     if (isFetching && hasData) {
-      // If the panel has no data, the panel content will show the loading overlay (or an error).
+      // If the panel has no data, the panel content will show the loading overlay.
       // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
