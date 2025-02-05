@@ -332,4 +332,4 @@ spec:
 
 ### Dashboard-as-Code
 
-The CLI also comes in handy when you want to create & manage dashboards as code. For this topic please refer to [DaC user guide](./dac/dashboard-as-code.md).
+The CLI also comes in handy when you want to create & manage dashboards as code. For this topic please refer to [DaC user guide](./dac/getting-started.md).

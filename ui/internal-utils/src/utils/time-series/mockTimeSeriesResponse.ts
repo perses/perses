@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MatrixData } from '@perses-dev/prometheus-plugin';
 import mockRangeQuery from '../../data/mock-query-range.json';
 
 type ExampleMetric = {
@@ -52,7 +51,7 @@ interface MockManySeriesConfig extends MockTimeSeriesValueConfig {
   totalSeries?: number;
 }
 
-function mockSuccessfulTimeSeriesResponse(result: MatrixData['result']): MockResponse {
+function mockSuccessfulTimeSeriesResponse(result: SeriesData[]): MockResponse {
   return {
     status: 'success',
     data: {

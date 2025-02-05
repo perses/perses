@@ -19,6 +19,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -47,14 +48,16 @@ var (
 
 type frontend struct {
 	echoUtils.Register
-	apiPrefix   string
-	pluginsPath string
+	apiPrefix            string
+	pluginsPath          string
+	pluginDevEnvironment *config.PluginDevEnvironment
 }
 
 func NewPersesFrontend(cfg config.Config) echoUtils.Register {
 	return &frontend{
-		apiPrefix:   cfg.APIPrefix,
-		pluginsPath: cfg.Plugins.Path,
+		apiPrefix:            cfg.APIPrefix,
+		pluginsPath:          cfg.Plugins.Path,
+		pluginDevEnvironment: cfg.Plugins.DevEnvironment,
 	}
 }
 
@@ -69,8 +72,13 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	// Otherwise, the request is redirected to the `assetHandler` that is serving the static files, by changing the URL path to the correct path (with `contentRewrite`).
 	e.GET(f.apiPrefix+"/*", assetHandler(f.apiPrefix), routerMiddleware(f.apiPrefix), contentRewrite)
 
+	pluginGroup := e.Group(f.apiPrefix + "/plugins")
+	if f.pluginDevEnvironment != nil {
+		proxyMiddleware := pluginDevProxyMiddleware(*f.pluginDevEnvironment)
+		pluginGroup.Use(proxyMiddleware)
+	}
 	// This route is serving the static files of the various plugins.
-	e.Static(f.apiPrefix+"/plugins", f.pluginsPath)
+	pluginGroup.Static("/", f.pluginsPath)
 }
 
 // assetHandler is here to serve the static files of the React app.
@@ -100,6 +108,73 @@ func assetHandler(apiPrefix string) echo.HandlerFunc {
 		_, err = c.Response().Write(data)
 		return apiinterface.HandleError(err)
 	}
+}
+
+// pluginDevProxyMiddleware is here to proxy the request to the dev environment.
+//
+// When developing a plugin, you will be able to serve the files of the plugin using a dev server (with rsbuild).
+// This middleware will route any request to a plugin listed in the dev environment to the dev server.
+func pluginDevProxyMiddleware(devEnvironment config.PluginDevEnvironment) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			for _, plg := range devEnvironment.Plugins {
+				if !strings.Contains(c.Request().URL.Path, plg.Name) {
+					continue
+				}
+				// We are going to serve a plugin from a dev environment, let's set up the proxy to redirect the traffic.
+				req := c.Request()
+				res := c.Response()
+				var proxyErr error
+				// Then we need to route this request to the dev environment.
+				// We just have to replace the URL as the path should remain the same.
+				proxyURL := devEnvironment.URL
+				if plg.URL != nil {
+					proxyURL = plg.URL
+				}
+				reverseProxy := httputil.NewSingleHostReverseProxy(proxyURL.URL)
+				reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
+					logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", devEnvironment.URL.String(), err)
+					proxyErr = err
+				}
+				if transportErr := proxyPrepareRequest(c, devEnvironment); transportErr != nil {
+					return transportErr
+				}
+				// Reverse proxy request.
+				reverseProxy.ServeHTTP(res, req)
+				// Return any error handled during proxying request.
+				if proxyErr != nil {
+					// we need to wrap the error with an Echo Error,
+					// otherwise the error will be hidden by the middleware "middleware.HandleError".
+					status := res.Status
+					if status < 400 {
+						// if there is an error and the status code doesn't match the error, then let's use a default one
+						status = 500
+					}
+					return echo.NewHTTPError(status, proxyErr.Error())
+				}
+				return nil
+			}
+			return next(c)
+		}
+	}
+}
+
+func proxyPrepareRequest(c echo.Context, devEnvironment config.PluginDevEnvironment) error {
+	req := c.Request()
+	// We have to modify the HOST of the request to match the host of the targetURL
+	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
+	// It has been done to fix an error returned by Openshift itself saying the target doesn't exist.
+	// Since we are using HTTP/1, setting the HOST is setting also a header, so if the host and the header are different,
+	// then maybe it is blocked by the Openshift router.
+	req.Host = devEnvironment.URL.Host
+	// Fix header
+	if len(req.Header.Get(echo.HeaderXRealIP)) == 0 {
+		req.Header.Set(echo.HeaderXRealIP, c.RealIP())
+	}
+	if len(req.Header.Get(echo.HeaderXForwardedProto)) == 0 {
+		req.Header.Set(echo.HeaderXForwardedProto, c.Scheme())
+	}
+	return nil
 }
 
 // routerMiddleware is here to serve properly the React app.

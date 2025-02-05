@@ -18,9 +18,14 @@ import { Plugin } from './plugin-base';
 import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { TraceQueryPlugin } from './trace-queries';
 import { VariablePlugin } from './variables';
+import { ExplorePlugin } from './explore';
 
 export interface PluginModuleSpec {
   plugins: PluginMetadata[];
+}
+
+export interface PluginMetadataWithModule extends PluginMetadata {
+  module: PluginModuleMetadata;
 }
 
 /**
@@ -73,6 +78,7 @@ export interface SupportedPlugins {
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;
   Datasource: DatasourcePlugin;
+  Explore: ExplorePlugin;
 }
 
 /**

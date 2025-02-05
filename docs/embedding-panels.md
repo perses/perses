@@ -4,7 +4,7 @@ This little documentation aims to provide you the minimum code needed to have a 
 application.
 
 !!! info
-    We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
+We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
 
 ## Getting started (npm example)
 
@@ -16,7 +16,7 @@ npx create-react-app perses-embedded-panel --template typescript
 npm i --save @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/panels-plugin \
   @tanstack/react-query @perses-dev/dashboards \
-  @mui/material @perses-dev/prometheus-plugin \
+  @mui/material \
   @emotion/styled @hookform/resolvers
 ```
 
@@ -25,35 +25,46 @@ npm i --save @perses-dev/components \
 Here replacing your App.tsx
 
 ```typescript
-import React from 'react';
-import './App.css';
+import React from "react";
+import "./App.css";
 
-import { ChartsProvider, generateChartsTheme, getTheme, SnackbarProvider } from '@perses-dev/components';
+import {
+  ChartsProvider,
+  generateChartsTheme,
+  getTheme,
+  SnackbarProvider,
+} from "@perses-dev/components";
 import {
   DataQueriesProvider,
   dynamicImportPluginLoader,
   PluginModuleResource,
   PluginRegistry,
   TimeRangeProvider,
-} from '@perses-dev/plugin-system';
-import { TimeSeriesChart } from '@perses-dev/panels-plugin';
-import { ThemeProvider } from '@mui/material';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DatasourceStoreProvider, VariableProvider } from '@perses-dev/dashboards';
-import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
-import panelsResource from '@perses-dev/panels-plugin/plugin.json';
-import { DashboardResource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core';
-import { DatasourceApi } from '@perses-dev/dashboards';
+} from "@perses-dev/plugin-system";
+import { TimeSeriesChart } from "@perses-dev/panels-plugin";
+import { ThemeProvider } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  DatasourceStoreProvider,
+  VariableProvider,
+} from "@perses-dev/dashboards";
+import panelsResource from "@perses-dev/panels-plugin/plugin.json";
+import {
+  DashboardResource,
+  GlobalDatasourceResource,
+  DatasourceResource,
+} from "@perses-dev/core";
+import { DatasourceApi } from "@perses-dev/dashboards";
 
 const fakeDatasource: GlobalDatasourceResource = {
-  kind: 'GlobalDatasource',
-  metadata: { name: 'hello' },
+  kind: "GlobalDatasource",
+  metadata: { name: "hello" },
   spec: {
     default: true,
     plugin: {
-      kind: 'PrometheusDatasource',
+      kind: "PrometheusDatasource",
       spec: {
-        directUrl: 'https://prometheus.demo.do.prometheus.io',
+        directUrl: "https://prometheus.demo.do.prometheus.io",
       },
     },
   },
@@ -77,27 +88,23 @@ class DatasourceApiImpl implements DatasourceApi {
   }
 
   buildProxyUrl(): string {
-    return '/prometheus';
+    return "/prometheus";
   }
 }
 export const fakeDatasourceApi = new DatasourceApiImpl();
 export const fakeDashboard = {
-  kind: 'Dashboard',
+  kind: "Dashboard",
   metadata: {},
   spec: {},
 } as DashboardResource;
 
 function App() {
-  const muiTheme = getTheme('light');
+  const muiTheme = getTheme("light");
   const chartsTheme = generateChartsTheme(muiTheme, {});
   const pluginLoader = dynamicImportPluginLoader([
     {
-      resource: prometheusResource as PluginModuleResource,
-      importPlugin: () => import('@perses-dev/prometheus-plugin'),
-    },
-    {
       resource: panelsResource as PluginModuleResource,
-      importPlugin: () => import('@perses-dev/panels-plugin'),
+      importPlugin: () => import("@perses-dev/panels-plugin"),
     },
   ]);
 
@@ -112,22 +119,32 @@ function App() {
   return (
     <ThemeProvider theme={muiTheme}>
       <ChartsProvider chartsTheme={chartsTheme}>
-        <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant="default" content="">
+        <SnackbarProvider
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          variant="default"
+          content=""
+        >
           <PluginRegistry
             pluginLoader={pluginLoader}
             defaultPluginKinds={{
-              Panel: 'TimeSeriesChart',
-              TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+              Panel: "TimeSeriesChart",
+              TimeSeriesQuery: "PrometheusTimeSeriesQuery",
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
+              <TimeRangeProvider
+                refreshInterval="0s"
+                timeRange={{ pastDuration: "30m" }}
+              >
                 <VariableProvider>
-                  <DatasourceStoreProvider dashboardResource={fakeDashboard} datasourceApi={fakeDatasourceApi}>
+                  <DatasourceStoreProvider
+                    dashboardResource={fakeDashboard}
+                    datasourceApi={fakeDatasourceApi}
+                  >
                     <DataQueriesProvider
                       definitions={[
                         {
-                          kind: 'PrometheusTimeSeriesQuery',
+                          kind: "PrometheusTimeSeriesQuery",
                           spec: { query: `up{job="prometheus"}` },
                         },
                       ]}
@@ -139,8 +156,8 @@ function App() {
                         }}
                         spec={{
                           legend: {
-                            position: 'bottom',
-                            size: 'medium',
+                            position: "bottom",
+                            size: "medium",
                           },
                         }}
                       />

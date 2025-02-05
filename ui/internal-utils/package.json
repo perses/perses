@@ -8,8 +8,5 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix"
-  },
-  "devDependencies": {
-    "@perses-dev/prometheus-plugin": "0.50.1"
   }
 }

@@ -20,7 +20,7 @@ This package contains end-to-end tests for Perses written using [Playwright](htt
 
 Tests are run during local development using the configuration in `local.playwright.config.ts`. The tests depend on the local development servers (backend and UI) to test against. By default, locally run tests will not take screenshots for visual testing.
 
-- Start the backend server from the project root: `./scripts/api_backend_dev.sh`
+- Start the backend server from the project root and disable authentication: `./scripts/api_backend_dev.sh --e2e`.
 - Change to the `ui` directory.
 - Start the UI server: `npm start`
   - Important to ensure libraries are built since e2e imports from other Perses packages
@@ -30,7 +30,7 @@ Tests are run during local development using the configuration in `local.playwri
 
 ### Locally with screenshots (maintainers only)
 
-*This option is limited to maintainers because it requires access to secrets in the Happo account.*
+_This option is limited to maintainers because it requires access to secrets in the Happo account._
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 

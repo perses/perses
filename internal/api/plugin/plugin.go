@@ -37,20 +37,32 @@ type Plugin interface {
 }
 
 func New(plugins config.Plugins) Plugin {
+	sch := schema.New()
+	mig := migrate.New()
+	var dev *pluginDev
+	if plugins.DevEnvironment != nil {
+		dev = &pluginDev{
+			cfg: *plugins.DevEnvironment,
+			sch: sch,
+			mig: mig,
+		}
+	}
 	return &pluginFile{
 		path: plugins.Path,
 		archibal: &arch{
 			folder:       plugins.ArchivePath,
 			targetFolder: plugins.Path,
 		},
-		sch: schema.New(),
-		mig: migrate.New(),
+		dev: dev,
+		sch: sch,
+		mig: mig,
 	}
 }
 
 type pluginFile struct {
 	path     string
 	archibal *arch
+	dev      *pluginDev
 	sch      schema.Schema
 	mig      migrate.Migration
 }
@@ -124,6 +136,10 @@ func (p *pluginFile) Load() error {
 		}
 		pluginModuleList = append(pluginModuleList, pluginModule)
 	}
+	if p.dev != nil {
+		devPluginModuleList := p.dev.load()
+		pluginModuleList = mergePluginModules(pluginModuleList, devPluginModuleList)
+	}
 	if len(pluginModuleList) == 0 {
 		pluginModuleList = make([]v1.PluginModule, 0)
 	}
@@ -132,4 +148,27 @@ func (p *pluginFile) Load() error {
 		return marshalErr
 	}
 	return os.WriteFile(filepath.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
+}
+
+func mergePluginModules(prodModule, devModule []v1.PluginModule) []v1.PluginModule {
+	if len(devModule) == 0 {
+		return prodModule
+	}
+	if len(prodModule) == 0 {
+		return devModule
+	}
+	prodModuleMap := make(map[string]v1.PluginModule)
+	for _, module := range prodModule {
+		prodModuleMap[module.Metadata.Name] = module
+	}
+	// Modules from dev environment are overriding the one from the production environment.
+	// In production environment, we should not have any module from the dev environment.
+	for _, module := range devModule {
+		prodModuleMap[module.Metadata.Name] = module
+	}
+	var pluginModuleList []v1.PluginModule
+	for _, module := range prodModuleMap {
+		pluginModuleList = append(pluginModuleList, module)
+	}
+	return pluginModuleList
 }

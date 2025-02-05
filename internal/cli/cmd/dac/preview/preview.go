@@ -14,8 +14,10 @@
 package preview
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"strings"
 
 	"github.com/perses/perses/internal/api/utils"
@@ -27,6 +29,7 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
@@ -37,6 +40,7 @@ type previewResponse struct {
 	Project   string `json:"project" yaml:"project"`
 	Dashboard string `json:"dashboard" yaml:"dashboard"`
 	Preview   string `json:"preview" yaml:"preview"`
+	Current   string `json:"current,omitempty" yaml:"current,omitempty"`
 }
 
 func newEphemeralDashboard(project string, name string, ttl common.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
@@ -145,11 +149,28 @@ func (o *option) computeEphemeralDashboardName(dashboardName string) string {
 }
 
 func (o *option) buildPreviewResponse(dashboard *modelV1.Dashboard, tmpDashboard *modelV1.EphemeralDashboard) previewResponse {
-	previewURL := common.NewURL(o.apiClient.RESTClient().BaseURL, utils.PathProject, tmpDashboard.Metadata.Project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
+	project := tmpDashboard.Metadata.Project
+	name := dashboard.Metadata.Name
+
+	previewURL := common.NewURL(o.apiClient.RESTClient().BaseURL, utils.PathProject, project, utils.PathEphemeralDashboard, tmpDashboard.Metadata.Name)
+
+	// Check if the dashboard already exists to provide the "current" URL
+	currentURL := &common.URL{}
+	if _, err := o.apiClient.V1().Dashboard(project).Get(name); err != nil {
+		var reqErr *perseshttp.RequestError
+		if errors.As(err, &reqErr) && reqErr.StatusCode == http.StatusNotFound {
+			logrus.Infof("No dashboard %s found in project %s, no current link to provide", name, project)
+		}
+	} else {
+		currentURL = common.NewURL(o.apiClient.RESTClient().BaseURL, utils.PathProject, project, utils.PathDashboard, name)
+	}
+
 	return previewResponse{
-		Dashboard: dashboard.Metadata.Name,
-		Project:   tmpDashboard.Metadata.Project,
-		Preview:   previewURL.String()}
+		Dashboard: name,
+		Project:   project,
+		Preview:   previewURL.String(),
+		Current:   currentURL.String(),
+	}
 }
 
 func (o *option) SetWriter(writer io.Writer) {

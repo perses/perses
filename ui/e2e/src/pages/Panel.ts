@@ -28,6 +28,7 @@ export class Panel {
   readonly editButton: Locator;
   readonly deleteButton: Locator;
   readonly duplicateButton: Locator;
+  readonly showActionsButton: Locator;
 
   readonly resizeHandle: Locator;
 
@@ -50,6 +51,9 @@ export class Panel {
     });
     this.duplicateButton = this.container.getByRole('button', {
       name: 'duplicate panel',
+    });
+    this.showActionsButton = this.container.getByRole('button', {
+      name: 'show panel actions',
     });
 
     // Need to look up to panel draggable parent first to get the resize handle.

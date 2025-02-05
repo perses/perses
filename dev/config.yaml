@@ -26,13 +26,6 @@ provisioning:
   folders:
     - "dev/data"
 
-schemas:
-  panels_path: "cue/schemas/panels"
-  queries_path: "cue/schemas/queries"
-  datasources_path: "cue/schemas/datasources"
-  variables_path: "cue/schemas/variables"
-  interval: "5m"
-
 ephemeral_dashboard:
   enable: true
   cleanup_interval: 1h

@@ -10,9 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
-import tempoResource from '@perses-dev/tempo-plugin/plugin.json';
 
 import { PluginLoader, PluginModuleResource, dynamicImportPluginLoader } from '@perses-dev/plugin-system';
 
@@ -22,15 +20,7 @@ import { PluginLoader, PluginModuleResource, dynamicImportPluginLoader } from '@
 // TODO: this can be removed when all plugins are loaded dynamically
 export const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
-    resource: prometheusResource as PluginModuleResource,
-    importPlugin: () => import('@perses-dev/prometheus-plugin'),
-  },
-  {
     resource: panelsResource as PluginModuleResource,
     importPlugin: () => import('@perses-dev/panels-plugin'),
-  },
-  {
-    resource: tempoResource as PluginModuleResource,
-    importPlugin: () => import('@perses-dev/tempo-plugin'),
   },
 ]);

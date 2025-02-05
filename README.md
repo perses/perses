@@ -44,7 +44,7 @@ You can create your own project(s) and dashboard(s) there, no one else will be a
    * Authentication and authorization are available.
 2. On the GitOps aspect:
    * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/cli.md)
-   * Two SDKs (in Golang and in Cuelang) are available to code dashboards. See [Dashboard-as-Code](./docs/dac/dashboard-as-code.md) guide.
+   * Two SDKs (in Golang and in Cuelang) are available to code dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
      Probably these SDKs are going to evolve depending on the feedbacks we might receive. Still it's likely to be about adding more
      util functions rather than breaking things.
 3. We are eager to change the current plugin architecture to make it potentially simpler and above all to be able to
