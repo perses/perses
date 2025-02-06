@@ -148,4 +148,9 @@ jobs:
       - name: generate cue files
         run: make cue-gen
       - name: check for changes
-        run: git diff --exit-code || { echo "CUE generated files are not up to date. Please run 'make cue-gen' and commit the changes."; exit 1; } 
+        run: |
+          git add .
+          if ! git diff --cached --exit-code; then
+            echo "CUE generated files are not up to date. Please run 'make cue-gen' and commit the changes."
+            exit 1
+          fi
