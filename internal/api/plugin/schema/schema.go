@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -61,7 +60,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 				return nil
 			}
 		}
-		currentDir, _ := path.Split(currentPath)
+		currentDir, _ := filepath.Split(currentPath)
 		name, instance, schemaErr := LoadModelSchema(currentDir)
 		if schemaErr != nil {
 			return schemaErr
