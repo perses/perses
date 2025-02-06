@@ -7,7 +7,6 @@ require (
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
 	github.com/efficientgo/core v1.0.0-rc.3
-	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-sql-driver/mysql v1.8.1
@@ -87,6 +86,7 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
+	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.1 // indirect
