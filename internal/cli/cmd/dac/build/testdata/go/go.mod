@@ -13,9 +13,7 @@
 
 module dac
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.23.4
 
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 

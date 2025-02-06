@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -33,9 +32,9 @@ import (
 func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
 	switch m := metadata.(type) {
 	case *modelV1.ProjectMetadata:
-		return path.Join(modelV1.PluralKindMap[kind], m.Project, m.Name), nil
+		return filepath.Join(modelV1.PluralKindMap[kind], m.Project, m.Name), nil
 	case *modelV1.Metadata:
-		return path.Join(modelV1.PluralKindMap[kind], m.Name), nil
+		return filepath.Join(modelV1.PluralKindMap[kind], m.Name), nil
 	}
 	return "", fmt.Errorf("metadata %T not managed", metadata)
 }
@@ -299,7 +298,7 @@ func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 }
 
 func (d *DAO) buildPath(key string) string {
-	return path.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
+	return filepath.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
 }
 
 func (d *DAO) unmarshal(data []byte, entity interface{}) error {

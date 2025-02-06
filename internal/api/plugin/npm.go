@@ -18,7 +18,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -51,7 +51,7 @@ type NPMManifest struct {
 }
 
 func ReadManifest(pluginPath string) (*NPMManifest, error) {
-	manifestFilePath := path.Join(pluginPath, ManifestFileName)
+	manifestFilePath := filepath.Join(pluginPath, ManifestFileName)
 	manifestData := &NPMManifest{}
 	return manifestData, readFile(manifestFilePath, manifestData)
 }
@@ -62,7 +62,7 @@ func ReadManifestFromNetwork(url *common.URL, pluginName string) (*NPMManifest, 
 }
 
 func ReadPackage(pluginPath string) (*NPMPackage, error) {
-	packageFilePath := path.Join(pluginPath, PackageJSONFile)
+	packageFilePath := filepath.Join(pluginPath, PackageJSONFile)
 	packageData := &NPMPackage{}
 	return packageData, readFile(packageFilePath, packageData)
 }
