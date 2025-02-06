@@ -31,7 +31,7 @@ import (
 )
 
 type LoadSchema struct {
-	Kind     string
+	Kind     plugin.Kind
 	Name     string
 	Instance *build.Instance
 }

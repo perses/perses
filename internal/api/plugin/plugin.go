@@ -123,9 +123,10 @@ func (p *pluginFile) Load() error {
 			},
 			Spec: npmPackageData.Perses,
 		}
-		// TODO with this current implementation, we cannot load a plugin that does not have a schema.
-		//  We should probably add a flag to the plugin to indicate if it has a schema or not.
-		//  Actually we already know what plugin type should have a schema or not. So we simply have to determinate based on the plugin type which one should have a schema or not.
+		if !IsSchemaRequired(pluginModule.Spec) {
+			logrus.Debugf("plugin %q does not require schema, so it will be skipped", pluginModule.Metadata.Name)
+			continue
+		}
 		if pluginSchemaLoadErr := p.sch.Load(pluginPath, pluginModule); pluginSchemaLoadErr != nil {
 			logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
 			continue

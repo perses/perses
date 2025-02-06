@@ -115,7 +115,7 @@ func isPackageMigrate(file string) (bool, error) {
 	return strings.Contains(string(data), "package migrate"), nil
 }
 
-func getPluginKind(migrateFile string) (string, error) {
+func getPluginKind(migrateFile string) (plugin.Kind, error) {
 	data, err := os.ReadFile(migrateFile)
 	if err != nil {
 		return "", err

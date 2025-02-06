@@ -49,6 +49,10 @@ func (p *pluginDev) load() []v1.PluginModule {
 			},
 			Spec: npmPackageData.Perses,
 		}
+		if !IsSchemaRequired(pluginModule.Spec) {
+			logrus.Debugf("plugin %q does not require schema, so it will be skipped", pluginModule.Metadata.Name)
+			continue
+		}
 		if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
 			logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
 			continue
