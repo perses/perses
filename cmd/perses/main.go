@@ -18,7 +18,6 @@ import (
 
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/internal/api/impl/v1/view"
-	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -42,7 +41,6 @@ func registerMetrics(register prometheus.Registerer) {
 	register.MustRegister(collectors.NewGoCollector())
 	register.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 	view.RegisterMetrics(register)
-	schemas.RegisterMetrics(register)
 }
 
 func main() {
