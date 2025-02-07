@@ -40,9 +40,7 @@ archives:
       - LICENSE
       - README.md
       - CHANGELOG.md
-      - cue/schemas/
       - plugins-archive
-      - cue.mod/
       - src: "docs/examples/config.archive.yaml"
         dst: "./config.yaml"
 release:

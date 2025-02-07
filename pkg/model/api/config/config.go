@@ -54,7 +54,8 @@ type Config struct {
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
 	// Schemas contain the configuration to get access to the CUE schemas
-	Schemas Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
+	// DEPRECATED: This field is deprecated. Please remove it from your config.
+	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	// GlobalDatasourceDiscovery is the configuration that helps to generate a list of global datasource based on the discovery chosen.
@@ -81,6 +82,9 @@ func (c *Config) Verify() error {
 			Enable:          true,
 			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
 		}
+	}
+	if c.Schemas != nil {
+		logrus.Warn("'schemas' is deprecated. Please remove it from your config")
 	}
 	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
 		c.APIPrefix = "/" + c.APIPrefix

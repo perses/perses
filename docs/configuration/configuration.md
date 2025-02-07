@@ -80,6 +80,7 @@ security: <Security config> # Optional
 database: <Database config> # Optional
 
 # The configuration to access the CUE schemas
+# This config is deprecated. It will be removed in the future. Please remove it from your config. 
 schemas: <Schemas config> # Optional
 
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
