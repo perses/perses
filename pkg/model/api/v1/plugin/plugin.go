@@ -20,14 +20,16 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+type Kind string
+
 const (
-	KindVariable        = "Variable"
-	KindDatasource      = "Datasource"
-	KindPanel           = "Panel"
-	KindTimeSeriesQuery = "TimeSeriesQuery"
-	KindTraceQuery      = "TraceQuery"
-	KindQuery           = "Query"
-	KindExplore         = "Explore"
+	KindVariable        Kind = "Variable"
+	KindDatasource      Kind = "Datasource"
+	KindPanel           Kind = "Panel"
+	KindTimeSeriesQuery Kind = "TimeSeriesQuery"
+	KindTraceQuery      Kind = "TraceQuery"
+	KindQuery           Kind = "Query"
+	KindExplore         Kind = "Explore"
 )
 
 type Spec struct {
@@ -36,8 +38,8 @@ type Spec struct {
 }
 
 type Plugin struct {
-	Kind string `json:"kind" yaml:"kind"`
-	Spec Spec   `json:"spec" yaml:"spec"`
+	Kind Kind `json:"kind" yaml:"kind"`
+	Spec Spec `json:"spec" yaml:"spec"`
 }
 
 func (p *Plugin) UnmarshalJSON(data []byte) error {

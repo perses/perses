@@ -63,11 +63,13 @@ func (o *option) Execute() error {
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
-	if _, err := schema.Load("", npmPackageData.Perses); err != nil {
-		return err
-	}
-	if _, err := migrate.Load("", npmPackageData.Perses); err != nil {
-		return err
+	if plugin.IsSchemaRequired(npmPackageData.Perses) {
+		if _, err := schema.Load("", npmPackageData.Perses); err != nil {
+			return err
+		}
+		if _, err := migrate.Load("", npmPackageData.Perses); err != nil {
+			return err
+		}
 	}
 	return output.HandleString(o.writer, "current plugin is valid")
 }

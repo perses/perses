@@ -17,6 +17,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
 // IsRequiredFileExists checks if the required files to make a plugin valid, are present in the given folders.
@@ -32,14 +34,16 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 		return false, err
 	}
 	// check if the package.json file exists
-	exist, err = fileExists(filepath.Join(frontendFolder, PackageJSONFile))
-	if !exist || err != nil {
+	npmPackageData, readErr := ReadPackage(frontendFolder)
+	if readErr != nil {
 		return false, err
 	}
-	// check if the schema folder exists
-	exist, err = fileExists(schemaFolder)
-	if !exist || err != nil {
-		return false, err
+	// check if the schema folder exists only if it requires schema
+	if IsSchemaRequired(npmPackageData.Perses) {
+		exist, err = fileExists(schemaFolder)
+		if !exist || err != nil {
+			return false, err
+		}
 	}
 	return true, nil
 }
@@ -53,4 +57,15 @@ func fileExists(filePath string) (bool, error) {
 		return false, osErr
 	}
 	return true, nil
+}
+
+// IsSchemaRequired check if any plugins described in the module require a schema
+func IsSchemaRequired(moduleSpec plugin.ModuleSpec) bool {
+	for _, plg := range moduleSpec.Plugins {
+		if plg.Kind == plugin.KindDatasource || plg.Kind == plugin.KindPanel || plg.Kind == plugin.KindVariable ||
+			plg.Kind == plugin.KindQuery || plg.Kind == plugin.KindTimeSeriesQuery || plg.Kind == plugin.KindTraceQuery {
+			return true
+		}
+	}
+	return false
 }
