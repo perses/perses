@@ -25,7 +25,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
-	apiinterface "github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/api/interface"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"

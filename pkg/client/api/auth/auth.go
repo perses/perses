@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/perses/api/utils"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"

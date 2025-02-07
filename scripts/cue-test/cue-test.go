@@ -18,9 +18,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/perses/perses/internal/api/plugin"
-	"github.com/perses/perses/internal/api/plugin/schema"
-	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/api/plugin"
+	"github.com/perses/perses/api/plugin/schema"
+	"github.com/perses/perses/api/validate"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"

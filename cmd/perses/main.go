@@ -16,8 +16,8 @@ package main
 import (
 	"flag"
 
-	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/internal/api/impl/v1/view"
+	"github.com/perses/perses/api/core"
+	"github.com/perses/perses/api/impl/v1/view"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"

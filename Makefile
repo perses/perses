@@ -162,7 +162,7 @@ build-cli:
 
 .PHONY: generate
 generate: assets-compress install-default-plugins
-	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
+	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./api
 
 .PHONY: extract-changelog
 extract-changelog:
