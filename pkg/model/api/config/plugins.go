@@ -15,31 +15,54 @@ package config
 
 import (
 	"errors"
+	"os"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 const (
-	DefaultPluginPath        = "plugins"
-	DefaultArchivePluginPath = "plugins-archive"
+	DefaultPluginPath                   = "plugins"
+	DefaultPluginPathInContainer        = "/etc/perses/plugins"
+	DefaultArchivePluginPath            = "plugins-archive"
+	DefaultArchivePluginPathInContainer = "/etc/perses/plugins-archive"
 )
 
-func (f *Plugins) Verify() error {
-	if len(f.Path) == 0 {
-		f.Path = DefaultPluginPath
+func isRunningInContainer() bool {
+	// This file exists when podman is used
+	if _, err := os.Stat("/run/.containerenv"); err == nil {
+		return true
 	}
-	if len(f.ArchivePath) == 0 {
-		f.ArchivePath = DefaultArchivePluginPath
+	// This file exists when docker is used
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
 	}
-	return nil
+	return false
 }
 
-// TODO : how to avoid user to know where the plugins are stored in the docker image
 type Plugins struct {
 	// Path is the path to the directory containing the runtime plugins
 	Path           string                `json:"path,omitempty" yaml:"path,omitempty"`
 	ArchivePath    string                `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
 	DevEnvironment *PluginDevEnvironment `json:"dev_environment,omitempty" yaml:"dev_environment,omitempty"`
+}
+
+func (p *Plugins) Verify() error {
+	runningInContainer := isRunningInContainer()
+	if len(p.Path) == 0 {
+		if runningInContainer {
+			p.Path = DefaultPluginPathInContainer
+		} else {
+			p.Path = DefaultPluginPath
+		}
+	}
+	if len(p.ArchivePath) == 0 {
+		if runningInContainer {
+			p.ArchivePath = DefaultArchivePluginPathInContainer
+		} else {
+			p.ArchivePath = DefaultArchivePluginPath
+		}
+	}
+	return nil
 }
 
 type PluginDevEnvironment struct {
