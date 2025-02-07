@@ -34,7 +34,7 @@ Cached:    0 cached, 18 total
 
 >> compressing assets
 scripts/compress_assets.sh
-GOARCH=arm64 GOOS=darwin go generate ./internal/api
+GOARCH=arm64 GOOS=darwin go generate ./api
 >> build the perses api
 CGO_ENABLED=0 GOARCH=arm64 GOOS=darwin go build -ldflags "-s -w -X github.com/prometheus/common/version.Version=[VERSION] -X github.com/prometheus/common/version.Revision=30eaafd7658bfa95a40610e81c64fd3d8d1285a7 -X github.com/prometheus/common/version.BuildDate=2025-01-04 -X github.com/prometheus/common/version.Branch=main" -o ./bin/perses ./cmd/perses
 >> build the perses cli

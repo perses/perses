@@ -43,7 +43,7 @@ It's first strongly recommended to ramp up on CUE if you are not familiar with t
 
 You should then have a look at the [CUE SDK documentation](../dac/cue/README.md) to better understand how to use the framework.
 
-You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/test/dac/input.cue).
+You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/test/dac/input.cue).
 
 ## Getting started with the Go SDK
 
@@ -86,7 +86,7 @@ It's first strongly recommended to ramp up on Go if you are not familiar with th
 
 You should then have a look at the [Go SDK documentation](../dac/go/README.md) to better understand how to use the framework.
 
-You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/cli/cmd/dac/build/testdata/go/main.go).
+You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/cli/cmd/dac/build/testdata/go/main.go).
 
 !!! warning
 	Do not log / print on the standard stdout! It would break the output of the `dac build` command.
