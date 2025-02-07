@@ -48,7 +48,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -64,7 +64,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate files
         run: make generate
       - name: test
@@ -90,7 +90,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate files
         run: make generate
       - name: test
@@ -126,7 +126,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: eval cue schema
         run: make cue-eval
       - name: download plugin
@@ -144,7 +144,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate cue files
         run: make cue-gen
       - name: check for changes
