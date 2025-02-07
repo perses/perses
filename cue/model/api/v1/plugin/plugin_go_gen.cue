@@ -6,13 +6,24 @@ package plugin
 
 import "github.com/perses/perses/cue/model/api/v1/common"
 
-#KindVariable:        "Variable"
-#KindDatasource:      "Datasource"
-#KindPanel:           "Panel"
-#KindTimeSeriesQuery: "TimeSeriesQuery"
-#KindTraceQuery:      "TraceQuery"
-#KindQuery:           "Query"
-#KindExplore:         "Explore"
+#Kind: string // #enumKind
+
+#enumKind:
+	#KindVariable |
+	#KindDatasource |
+	#KindPanel |
+	#KindTimeSeriesQuery |
+	#KindTraceQuery |
+	#KindQuery |
+	#KindExplore
+
+#KindVariable:        #Kind & "Variable"
+#KindDatasource:      #Kind & "Datasource"
+#KindPanel:           #Kind & "Panel"
+#KindTimeSeriesQuery: #Kind & "TimeSeriesQuery"
+#KindTraceQuery:      #Kind & "TraceQuery"
+#KindQuery:           #Kind & "Query"
+#KindExplore:         #Kind & "Explore"
 
 #Spec: {
 	display?: null | common.#Display @go(Display,*common.Display)
