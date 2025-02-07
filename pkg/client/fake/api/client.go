@@ -55,7 +55,6 @@ func (c *client) Config() (*apiConfig.Config, error) {
 			EnableAuth: true,
 		},
 		Database:     apiConfig.Database{},
-		Schemas:      apiConfig.Schemas{},
 		Provisioning: apiConfig.ProvisioningConfig{},
 		Frontend:     apiConfig.Frontend{},
 	}, nil

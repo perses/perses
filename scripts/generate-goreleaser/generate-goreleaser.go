@@ -25,8 +25,6 @@ var baseConfig []byte
 func main() {
 	goreleasergenerate.GenerateGoreleaserConfig(baseConfig, "perses", []string{
 		"LICENSE",
-		"cue/schemas/",
-		"cue.mod/",
 		"docs/examples/config.docker.yaml",
 		"plugins-archive",
 	})
