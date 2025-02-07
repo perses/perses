@@ -115,7 +115,7 @@ jobs:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
           args: --timeout 5m
-  cue-eval:
+  cue-def:
     name: cue
     runs-on: ubuntu-latest
     steps:
@@ -127,8 +127,8 @@ jobs:
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
-      - name: eval cue schema
-        run: make cue-eval
+      - name: check cue schema
+        run: make cue-def
       - name: download plugin
         run: make install-default-plugins
       - name: test cue schema
