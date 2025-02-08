@@ -53,13 +53,17 @@ func (p *pluginDev) load() []v1.PluginModule {
 			logrus.Debugf("plugin %q does not require schema, so it will be skipped", pluginModule.Metadata.Name)
 			continue
 		}
-		if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
-			logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
-			continue
-		}
-		if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
-			logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
-			continue
+		if !plg.DisableSchema {
+			if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
+				logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
+				continue
+			}
+			if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
+				logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
+				continue
+			}
+		} else {
+			logrus.Debugf("schema is disabled for plugin %q", pluginModule.Metadata.Name)
 		}
 		pluginModuleList = append(pluginModuleList, pluginModule)
 	}

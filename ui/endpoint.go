@@ -56,8 +56,8 @@ type frontend struct {
 func NewPersesFrontend(cfg config.Config) echoUtils.Register {
 	return &frontend{
 		apiPrefix:            cfg.APIPrefix,
-		pluginsPath:          cfg.Plugins.Path,
-		pluginDevEnvironment: cfg.Plugins.DevEnvironment,
+		pluginsPath:          cfg.Plugin.Path,
+		pluginDevEnvironment: cfg.Plugin.DevEnvironment,
 	}
 }
 

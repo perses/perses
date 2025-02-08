@@ -64,7 +64,7 @@ func DefaultConfig() apiConfig.Config {
 		EphemeralDashboard: apiConfig.EphemeralDashboard{
 			Enable: true,
 		},
-		Plugins: apiConfig.Plugins{
+		Plugin: apiConfig.Plugin{
 			Path:        filepath.Join(projectPath, "plugins"),
 			ArchivePath: filepath.Join(projectPath, "plugins-archive"),
 		},

@@ -39,14 +39,17 @@ func isRunningInContainer() bool {
 	return false
 }
 
-type Plugins struct {
+type Plugin struct {
 	// Path is the path to the directory containing the runtime plugins
-	Path           string                `json:"path,omitempty" yaml:"path,omitempty"`
-	ArchivePath    string                `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
+	Path string `json:"path,omitempty" yaml:"path,omitempty"`
+	// ArchivePath is the path to the directory containing the archived plugins
+	// When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
+	ArchivePath string `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
+	// DevEnvironment is the configuration to use when developing a plugin
 	DevEnvironment *PluginDevEnvironment `json:"dev_environment,omitempty" yaml:"dev_environment,omitempty"`
 }
 
-func (p *Plugins) Verify() error {
+func (p *Plugin) Verify() error {
 	runningInContainer := isRunningInContainer()
 	if len(p.Path) == 0 {
 		if runningInContainer {
@@ -81,9 +84,17 @@ func (p *PluginDevEnvironment) Verify() error {
 }
 
 type PluginInDevelopment struct {
-	Name         string      `json:"name" yaml:"name"`
-	URL          *common.URL `json:"url,omitempty" yaml:"url,omitempty"`
-	AbsolutePath string      `json:"absolute_path" yaml:"absolute_path"`
+	// The name of the plugin in development
+	Name string `json:"name" yaml:"name"`
+	// DisableSchema is used to disable the schema validation of the plugin.
+	// It is useful when the plugin is in development and the schema is not yet defined.
+	DisableSchema bool `json:"disable_schema,omitempty" yaml:"disable_schema,omitempty"`
+	// The URL of the development server hosting the plugin.
+	// It is usually created by the command `rsbuild dev`.
+	// If defined, it will override the URL defined in the `PluginDevEnvironment`.
+	URL *common.URL `json:"url,omitempty" yaml:"url,omitempty"`
+	// The absolute path to the plugin repository
+	AbsolutePath string `json:"absolute_path" yaml:"absolute_path"`
 }
 
 func (p *PluginInDevelopment) Verify() error {

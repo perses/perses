@@ -96,7 +96,7 @@ func TestMig_Migrate(t *testing.T) {
 	}
 	projectPath := testUtils.GetRepositoryPath()
 
-	pl := New(config.Plugins{
+	pl := New(config.Plugin{
 		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
 		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
 	})

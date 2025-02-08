@@ -44,7 +44,7 @@ database:
     extension: "yaml" # The extension of the files read / stored. "yaml" or "json" are the only extension accepted. Yaml is the default one
 ```
 
-Note: to have the corresponding environment variable you just have to contact all previous key in the yaml and put it in
+Note: to have the corresponding environment variable, you have to append all previous keys in the YAML and put it in
 uppercase. Every environment variable for this config are prefixed by `PERSES`
 
 For example, the environment variable corresponding to the file extension of the file DB would be:
@@ -52,6 +52,21 @@ For example, the environment variable corresponding to the file extension of the
 ```bash
 PERSES_DATABASE_FILE_EXTENSION=yaml
 ```
+
+When you have a list of objects, you can use the index to specify the object you want to configure.
+For example, to configure the first provisioning folder, the environment variable would be:
+
+```bash
+PERSES_PROVISIONING_FOLDERS_0="/path/to/the/folder"
+```
+
+Another example, to configure the name of the globaldatasource discovery, the environment variable would be:
+
+```bash
+PERSES_GLOBAL_DATASOURCE_DISCOVERY_0_DISCOVERY_NAME="my-discovery"
+```
+
+```bash
 
 ### Definition
 
@@ -102,6 +117,9 @@ ephemeral_dashboard: < EphemeralDashboard config > # Optional
 
 # Any configuration related to the UI itself
 frontend: <Frontend config> # Optional
+
+# The configuration to access and load the runtime plugins 
+plugin: <Plugin config> # Optional
 ```
 
 ### Security config
@@ -665,4 +683,49 @@ project: <string>
 
 # The dashboard name (dashboard.metadata.name)
 dashboard: <string>
+```
+
+
+### Plugin config
+
+```yaml
+# The path to the folder containing the plugins
+# The default value depends if Perses is running in a container or not.
+folder: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
+
+# The path to the folder containing the plugins archive. 
+# When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
+archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
+
+dev_environment: <PluginDevEnvironment config> # Optional
+```
+
+#### PluginDevEnvironment config
+
+```yaml
+# The URL of the development server hosting the plugin. 
+# It is usually created by the command `rsbuild dev`.
+url: <string> | default = http://localhost:3005 # Optional
+
+plugins: 
+  - <PluginInDevelopment config>
+```
+
+##### PluginInDevelopment config
+
+```yaml
+# The name of the plugin in development
+name: <string>
+
+# A way to disable the schema validation of the plugin in development.
+# It can be useful when you are developing a plugin and, you don't want to have the schema validation. 
+# For example, because you didn't yet define the schema.
+disable_schema: <bool> | default = false # Optional
+
+# The unique URL of the development server hosting this specific plugin.
+# If defined, it will override the URL defined in the `PluginDevEnvironment` config.
+url: <string> # Optional
+
+# The absolute path to the plugin in development.
+absolute_path: <string>
 ```
