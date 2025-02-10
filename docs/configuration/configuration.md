@@ -482,31 +482,31 @@ A TLS config allows configuring TLS connections.
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
 ca: <string> # Optional
-ca_file: <filename> # Optional
+caFile: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
 cert: <string> # Optional
-cert_file: <filename> # Optional
+certFile: <filename> # Optional
 key: <secret> # Optional
-key_file: <filename> # Optional
+keyFile: <filename> # Optional
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-server_name: <string> # Optional
+serverName: <string> # Optional
 
 # Disable validation of the server certificate.
-insecure_skip_verify: <boolean> # Optional
+insecureSkipVerify: <boolean> # Optional
 
 # Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Prometheus will use Go default minimum version, which is TLS 1.2.
+# If unset, Perses will use Go default minimum version, which is TLS 1.2.
 # See MinVersion in https://pkg.go.dev/crypto/tls#Config.
 min_version: <string> # Optional
 # Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Prometheus will use Go default maximum version, which is TLS 1.3.
+# If unset, Perses will use Go default maximum version, which is TLS 1.3.
 # See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
 max_version: <string> # Optional
 ```
