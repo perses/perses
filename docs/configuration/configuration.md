@@ -718,8 +718,7 @@ plugins:
 name: <string>
 
 # A way to disable the schema validation of the plugin in development.
-# It can be useful when you are developing a plugin and, you don't want to have the schema validation. 
-# For example, because you didn't yet define the schema.
+# It can be useful when you are developing a plugin, and you didn't define the schema yet.
 disable_schema: <bool> | default = false # Optional
 
 # The unique URL of the development server hosting this specific plugin.
