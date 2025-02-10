@@ -140,7 +140,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
           </Box>
         </>
       )}
-      {editActions && (
+      {editActions && !readHandlers?.isPanelViewed && (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
           <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
             <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
