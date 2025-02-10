@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
-import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanel } from '../../context';
+import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { isPanelGroupItemIdEqual } from '../../context/DashboardProvider/panel-group-slice';
 
@@ -36,7 +36,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   } = panelDefinition;
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
-  const viewPanelGroupItemId = useViewPanel();
+  const viewPanelGroupItemId = useViewPanelGroup();
   const { ref, inView } = useInView({
     threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
     initialInView: false,

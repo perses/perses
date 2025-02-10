@@ -319,7 +319,7 @@ export function useDashboardDuration(): DurationString {
   return useDashboardStore(selectDashboardDuration);
 }
 
-const selectViewPanelActions: (state: DashboardStoreState) => {
+const selectViewPanel: (state: DashboardStoreState) => {
   setViewPanel: DashboardStoreState['setViewPanel'];
   getViewPanel: DashboardStoreState['getViewPanel'];
   viewPanelId: DashboardStoreState['viewPanel']['panelGroupItemId'];
@@ -328,7 +328,6 @@ const selectViewPanelActions: (state: DashboardStoreState) => {
   getViewPanel: state.getViewPanel,
   viewPanelId: state.getViewPanel(),
 });
-
 /**
  * Returns actions related to the ViewPanel.
  */
@@ -337,7 +336,17 @@ export function useViewPanel(): {
   getViewPanel: ViewPanelSlice['getViewPanel'];
   viewPanelId: ViewPanelSlice['viewPanel']['panelGroupItemId'];
 } {
-  return useDashboardStore(selectViewPanelActions);
+  return useDashboardStore(selectViewPanel);
+}
+
+const selectViewPanelGroup: (state: DashboardStoreState) => PanelGroupItemId | undefined = (
+  state: DashboardStoreState
+) => state.getViewPanel();
+/**
+ * Gets the Panel Group for the view panel.
+ */
+export function useViewPanelGroup(): PanelGroupItemId | undefined {
+  return useDashboardStore(selectViewPanelGroup);
 }
 
 const selectSaveChangesConfirmationDialog: ({
