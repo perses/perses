@@ -31,12 +31,17 @@ type pluginDev struct {
 func (p *pluginDev) load() []v1.PluginModule {
 	var pluginModuleList []v1.PluginModule
 	for _, plg := range p.cfg.Plugins {
-		manifest, err := ReadManifestFromNetwork(p.cfg.URL, plg.Name)
+		urlToUse := p.cfg.URL
+		if plg.URL != nil {
+			urlToUse = plg.URL
+		}
+
+		manifest, err := ReadManifestFromNetwork(urlToUse, plg.Name)
 		if err != nil {
 			logrus.WithError(err).Error("failed to load plugin manifest")
 			continue
 		}
-		npmPackageData, readErr := ReadPackageFromNetwork(p.cfg.URL, plg.Name)
+		npmPackageData, readErr := ReadPackageFromNetwork(urlToUse, plg.Name)
 		if readErr != nil {
 			logrus.WithError(readErr).Error("failed to load plugin package")
 			continue
