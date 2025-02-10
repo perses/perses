@@ -101,8 +101,8 @@ func (p *PluginInDevelopment) Verify() error {
 	if len(p.Name) == 0 {
 		return errors.New("the name of the plugin in development must be set")
 	}
-	if len(p.AbsolutePath) == 0 {
-		return errors.New("the absolute path of the plugin in development must be set")
+	if len(p.AbsolutePath) == 0 && !p.DisableSchema {
+		return errors.New("the absolute path of the plugin in development must be set to load the schema. Disable the schema if you don't want to load it")
 	}
 	return nil
 }

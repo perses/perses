@@ -14,29 +14,24 @@
 package plugin
 
 import (
-	"github.com/perses/perses/internal/api/plugin/migrate"
-	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-type pluginDev struct {
-	cfg config.PluginDevEnvironment
-	sch schema.Schema
-	mig migrate.Migration
-}
-
-func (p *pluginDev) load() []v1.PluginModule {
-	var pluginModuleList []v1.PluginModule
-	for _, plg := range p.cfg.Plugins {
-		manifest, err := ReadManifestFromNetwork(p.cfg.URL, plg.Name)
+func (p *pluginFile) loadDevPlugin() {
+	for _, plg := range p.devEnvironment.Plugins {
+		devURL := p.devEnvironment.URL
+		if plg.URL != nil {
+			devURL = plg.URL
+		}
+		manifest, err := ReadManifestFromNetwork(devURL, plg.Name)
 		if err != nil {
 			logrus.WithError(err).Error("failed to load plugin manifest")
 			continue
 		}
-		npmPackageData, readErr := ReadPackageFromNetwork(p.cfg.URL, plg.Name)
+		npmPackageData, readErr := ReadPackageFromNetwork(devURL, plg.Name)
 		if readErr != nil {
 			logrus.WithError(readErr).Error("failed to load plugin package")
 			continue
@@ -49,11 +44,16 @@ func (p *pluginDev) load() []v1.PluginModule {
 			},
 			Spec: npmPackageData.Perses,
 		}
-		if !IsSchemaRequired(pluginModule.Spec) {
-			logrus.Debugf("plugin %q does not require schema, so it will be skipped", pluginModule.Metadata.Name)
-			continue
+		pluginLoaded := Loaded{
+			DevEnvironment: &config.PluginInDevelopment{
+				Name:          plg.Name,
+				URL:           devURL,
+				DisableSchema: plg.DisableSchema,
+				AbsolutePath:  plg.AbsolutePath,
+			},
+			Module: pluginModule,
 		}
-		if !plg.DisableSchema {
+		if IsSchemaRequired(pluginModule.Spec) && !plg.DisableSchema {
 			if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
 				logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
 				continue
@@ -63,9 +63,8 @@ func (p *pluginDev) load() []v1.PluginModule {
 				continue
 			}
 		} else {
-			logrus.Debugf("schema is disabled for plugin %q", pluginModule.Metadata.Name)
+			logrus.Debugf("schema is disabled or not required for plugin %q", pluginModule.Metadata.Name)
 		}
-		pluginModuleList = append(pluginModuleList, pluginModule)
+		p.loaded[manifest.Name] = pluginLoaded
 	}
-	return pluginModuleList
 }
