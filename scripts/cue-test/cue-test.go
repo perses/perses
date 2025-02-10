@@ -80,7 +80,7 @@ func validateAllGlobalDatasources(sch schema.Schema) {
 }
 
 func main() {
-	cfg := config.Plugins{}
+	cfg := config.Plugin{}
 	_ = cfg.Verify()
 	pluginService := plugin.New(cfg)
 	if err := pluginService.UnzipArchives(); err != nil {

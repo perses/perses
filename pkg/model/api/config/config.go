@@ -54,7 +54,8 @@ type Config struct {
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
 	// Schemas contain the configuration to get access to the CUE schemas
-	// DEPRECATED: This field is deprecated. Please remove it from your config.
+	// DEPRECATED.
+	// Please remove it from your config.
 	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
@@ -70,8 +71,8 @@ type Config struct {
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
-	// Plugins contains the config for runtime plugins.
-	Plugins Plugins `json:"plugins,omitempty" yaml:"plugins,omitempty"`
+	// Plugin contains the config for runtime plugins.
+	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 }
 
 func (c *Config) Verify() error {

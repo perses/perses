@@ -36,22 +36,22 @@ type Plugin interface {
 	Migration() migrate.Migration
 }
 
-func New(plugins config.Plugins) Plugin {
+func New(plugin config.Plugin) Plugin {
 	sch := schema.New()
 	mig := migrate.New()
 	var dev *pluginDev
-	if plugins.DevEnvironment != nil {
+	if plugin.DevEnvironment != nil {
 		dev = &pluginDev{
-			cfg: *plugins.DevEnvironment,
+			cfg: *plugin.DevEnvironment,
 			sch: sch,
 			mig: mig,
 		}
 	}
 	return &pluginFile{
-		path: plugins.Path,
+		path: plugin.Path,
 		archibal: &arch{
-			folder:       plugins.ArchivePath,
-			targetFolder: plugins.Path,
+			folder:       plugin.ArchivePath,
+			targetFolder: plugin.Path,
 		},
 		dev: dev,
 		sch: sch,

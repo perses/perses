@@ -94,7 +94,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/proxy", conf.APIPrefix)) ||
 				// When serving the plugins from a dev server, we don't want to compress the response since it's already compressed by rsbuild.
-				(conf.Plugins.DevEnvironment != nil && strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/plugins", conf.APIPrefix)))
+				(conf.Plugin.DevEnvironment != nil && strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/plugins", conf.APIPrefix)))
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
