@@ -173,6 +173,45 @@ Once you are satisfied with the result of your DaC definition for a given dashbo
 percli apply -f built/my_dashboard.json
 ```
 
-### CICD setup
+### CI/CD setup
 
-TODO
+Setting up a CI/CD pipeline for your Dashboard-as-Code workflow is straightforward, as [percli](../cli.md) provides all the necessary commands to automate the process. You can integrate percli with any CI/CD technology of your choice: Jenkins, CircleCI, GitLab CI/CD, etc.
+
+The key steps typically involve:
+
+- Building the dashboards using `percli dac build` to generate the final JSON/YAML definitions.
+- Validating the output to ensure correctness before deployment.
+- Deploying the dashboards to Perses with `percli apply`.
+
+If you are using GitHub Actions, we provide a [standard library](https://github.com/perses/cli-actions) that simplifies this integration. This includes:
+
+- A pre-configured workflow designed for common DaC CI/CD setups, making it easy to adopt without extensive configuration. 
+
+	Example of usage:
+	```yaml
+	jobs:
+	  dac:
+	   uses: perses/cli-actions/.github/workflows/dac.yaml@v0.1.0
+	   with:
+	     url: https://demo.perses.dev
+	     directory: ./dac
+	     server-validation: true
+	   secrets:
+	     username: ${{ secrets.USR }}
+	     password: ${{ secrets.PWD }}
+	```
+
+- Independent actions for each CLI command, allowing you to build customized workflows.
+
+	Example of usage:
+	```yaml
+	steps:
+	  - name: Deploy the dashboards
+	    uses: perses/cli-actions/actions/apply_resources@v0.1.0
+	    with:
+	      directory: ./testdata/dashboards_folder
+	```
+
+	The full list of actions is available [here](https://github.com/perses/cli-actions/blob/main/README.md#actions).
+
+By leveraging these tools, you can ensure that your dashboards are automatically validated and deployed in a consistent and reliable manner.
