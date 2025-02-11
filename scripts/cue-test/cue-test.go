@@ -16,7 +16,7 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -30,7 +30,7 @@ import (
 
 func validateAllDashboards(sch schema.Schema) {
 	logrus.Info("validate all dashboards in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "9-dashboard.json"))
+	data, err := os.ReadFile(filepath.Join("dev", "data", "9-dashboard.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func validateAllDashboards(sch schema.Schema) {
 
 func validateAllDatasources(sch schema.Schema) {
 	logrus.Info("validate all datasources in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "8-datasource.json"))
+	data, err := os.ReadFile(filepath.Join("dev", "data", "8-datasource.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func validateAllDatasources(sch schema.Schema) {
 
 func validateAllGlobalDatasources(sch schema.Schema) {
 	logrus.Info("validate all globalDatasources in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "4-globaldatasource.json"))
+	data, err := os.ReadFile(filepath.Join("dev", "data", "4-globaldatasource.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func validateAllGlobalDatasources(sch schema.Schema) {
 }
 
 func main() {
-	cfg := config.Plugins{}
+	cfg := config.Plugin{}
 	_ = cfg.Verify()
 	pluginService := plugin.New(cfg)
 	if err := pluginService.UnzipArchives(); err != nil {

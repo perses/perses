@@ -17,7 +17,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
-	"path"
 	"testing"
 	"time"
 
@@ -58,7 +57,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     }
   },
   "database": {},
-  "schemas": {},
   "provisioning": {},
   "ephemeral_dashboard": {
     "enable": false,
@@ -73,7 +71,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       "disable_custom": false
     }
   },
-  "plugins": {}
+  "plugin": {}
 }`,
 		},
 		{
@@ -107,13 +105,6 @@ func TestJSONMarshalConfig(t *testing.T) {
       "case_sensitive": false
     }
   },
-  "schemas": {
-    "panels_path": "schemas/panels",
-    "queries_path": "schemas/queries",
-    "datasources_path": "schemas/datasources",
-    "variables_path": "schemas/variables",
-    "interval": "1h"
-  },
   "provisioning": {
     "interval": "1h"
   },
@@ -141,7 +132,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       ]
     }
   },
-  "plugins": {
+  "plugin": {
     "path": "plugins",
     "archive_path": "plugins-archive"
   }
@@ -199,13 +190,6 @@ func TestUnmarshalJSONConfig(t *testing.T) {
       "extension": "json"
     }
   },
-  "schemas": {
-    "panels_path": "cue/schemas/panels",
-    "queries_path": "cue/schemas/queries",
-    "datasources_path": "cue/schemas/datasources",
-    "variables_path": "cue/schemas/variables",
-    "interval": "5m"
-  },
   "frontend": {
     "important_dashboards": [
       {
@@ -223,7 +207,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "information": "# Hello World\n## File Database setup"
   },
-  "plugins": { 
+  "plugin": { 
     "path": "plugins",
     "archive_path": "plugins-archive"
 	},
@@ -267,13 +251,6 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						Extension: "json",
 					},
 				},
-				Schemas: Schemas{
-					PanelsPath:      path.Join("cue", DefaultPanelsPath),
-					QueriesPath:     path.Join("cue", DefaultQueriesPath),
-					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
-					VariablesPath:   path.Join("cue", DefaultVariablesPath),
-					Interval:        common.Duration(5 * time.Minute),
-				},
 				Frontend: Frontend{
 					ImportantDashboards: []dashboardSelector{
 						{
@@ -291,7 +268,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 					Information: "# Hello World\n## File Database setup",
 				},
-				Plugins: Plugins{
+				Plugin: Plugin{
 					Path:        "plugins",
 					ArchivePath: "plugins-archive",
 				},
@@ -350,13 +327,6 @@ provisioning:
   folders:
   - "dev/data"
 
-schemas:
-  panels_path: "cue/schemas/panels"
-  queries_path: "cue/schemas/queries"
-  datasources_path: "cue/schemas/datasources"
-  variables_path: "cue/schemas/variables"
-  interval: "5m"
-
 frontend:
   important_dashboards:
     - project: "perses"
@@ -372,7 +342,7 @@ frontend:
 
 ephemeral_dashboards_cleanup_interval: "2h"
 
-plugins:
+plugin:
   path: "custom/plugins"
   archive_path: "custom/plugins/archive"
 `,
@@ -421,13 +391,6 @@ plugins:
 						Extension: "json",
 					},
 				},
-				Schemas: Schemas{
-					PanelsPath:      path.Join("cue", DefaultPanelsPath),
-					QueriesPath:     path.Join("cue", DefaultQueriesPath),
-					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
-					VariablesPath:   path.Join("cue", DefaultVariablesPath),
-					Interval:        common.Duration(5 * time.Minute),
-				},
 				Frontend: Frontend{
 					ImportantDashboards: []dashboardSelector{
 						{
@@ -449,7 +412,7 @@ plugins:
 						Options:                defaultTimeRangeOptions,
 					},
 				},
-				Plugins: Plugins{
+				Plugin: Plugin{
 					Path:        "custom/plugins",
 					ArchivePath: "custom/plugins/archive",
 				},

@@ -19,6 +19,10 @@ Perses is configured via command-line flags and a configuration file
         The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
         Path under which to expose metrics. (default "/metrics")
+  -web.tls-cert-file string
+    	The path to the cert to use for the HTTPS server
+  -web.tls-key-file string
+    	The path to the key to use for the HTTPS server
 ```
 
 Example:
@@ -40,7 +44,7 @@ database:
     extension: "yaml" # The extension of the files read / stored. "yaml" or "json" are the only extension accepted. Yaml is the default one
 ```
 
-Note: to have the corresponding environment variable you just have to contact all previous key in the yaml and put it in
+Note: to have the corresponding environment variable, you have to append all previous keys in the YAML and put it in
 uppercase. Every environment variable for this config are prefixed by `PERSES`
 
 For example, the environment variable corresponding to the file extension of the file DB would be:
@@ -48,6 +52,21 @@ For example, the environment variable corresponding to the file extension of the
 ```bash
 PERSES_DATABASE_FILE_EXTENSION=yaml
 ```
+
+When you have a list of objects, you can use the index to specify the object you want to configure.
+For example, to configure the first provisioning folder, the environment variable would be:
+
+```bash
+PERSES_PROVISIONING_FOLDERS_0="/path/to/the/folder"
+```
+
+Another example, to configure the name of the globaldatasource discovery, the environment variable would be:
+
+```bash
+PERSES_GLOBAL_DATASOURCE_DISCOVERY_0_DISCOVERY_NAME="my-discovery"
+```
+
+```bash
 
 ### Definition
 
@@ -76,6 +95,7 @@ security: <Security config> # Optional
 database: <Database config> # Optional
 
 # The configuration to access the CUE schemas
+# This config is deprecated. It will be removed in the future. Please remove it from your config. 
 schemas: <Schemas config> # Optional
 
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
@@ -97,6 +117,9 @@ ephemeral_dashboard: < EphemeralDashboard config > # Optional
 
 # Any configuration related to the UI itself
 frontend: <Frontend config> # Optional
+
+# The configuration to access and load the runtime plugins 
+plugin: <Plugin config> # Optional
 ```
 
 ### Security config
@@ -459,31 +482,31 @@ A TLS config allows configuring TLS connections.
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
 ca: <string> # Optional
-ca_file: <filename> # Optional
+caFile: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
 cert: <string> # Optional
-cert_file: <filename> # Optional
+certFile: <filename> # Optional
 key: <secret> # Optional
-key_file: <filename> # Optional
+keyFile: <filename> # Optional
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-server_name: <string> # Optional
+serverName: <string> # Optional
 
 # Disable validation of the server certificate.
-insecure_skip_verify: <boolean> # Optional
+insecureSkipVerify: <boolean> # Optional
 
 # Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Prometheus will use Go default minimum version, which is TLS 1.2.
+# If unset, Perses will use Go default minimum version, which is TLS 1.2.
 # See MinVersion in https://pkg.go.dev/crypto/tls#Config.
 min_version: <string> # Optional
 # Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Prometheus will use Go default maximum version, which is TLS 1.3.
+# If unset, Perses will use Go default maximum version, which is TLS 1.3.
 # See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
 max_version: <string> # Optional
 ```
@@ -660,4 +683,48 @@ project: <string>
 
 # The dashboard name (dashboard.metadata.name)
 dashboard: <string>
+```
+
+
+### Plugin config
+
+```yaml
+# The path to the folder containing the plugins
+# The default value depends if Perses is running in a container or not.
+folder: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
+
+# The path to the folder containing the plugins archive. 
+# When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
+archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
+
+dev_environment: <PluginDevEnvironment config> # Optional
+```
+
+#### PluginDevEnvironment config
+
+```yaml
+# The URL of the development server hosting the plugin. 
+# It is usually created by the command `rsbuild dev`.
+url: <string> | default = http://localhost:3005 # Optional
+
+plugins: 
+  - <PluginInDevelopment config>
+```
+
+##### PluginInDevelopment config
+
+```yaml
+# The name of the plugin in development
+name: <string>
+
+# A way to disable the schema validation of the plugin in development.
+# It can be useful when you are developing a plugin, and you didn't define the schema yet.
+disable_schema: <bool> | default = false # Optional
+
+# The unique URL of the development server hosting this specific plugin.
+# If defined, it will override the URL defined in the `PluginDevEnvironment` config.
+url: <string> # Optional
+
+# The absolute path to the plugin in development.
+absolute_path: <string>
 ```

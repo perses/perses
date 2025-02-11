@@ -54,7 +54,9 @@ type Config struct {
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
 	// Schemas contain the configuration to get access to the CUE schemas
-	Schemas Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
+	// DEPRECATED.
+	// Please remove it from your config.
+	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	// GlobalDatasourceDiscovery is the configuration that helps to generate a list of global datasource based on the discovery chosen.
@@ -69,8 +71,8 @@ type Config struct {
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
-	// Plugins contains the config for runtime plugins.
-	Plugins Plugins `json:"plugins,omitempty" yaml:"plugins,omitempty"`
+	// Plugin contains the config for runtime plugins.
+	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
 }
 
 func (c *Config) Verify() error {
@@ -81,6 +83,9 @@ func (c *Config) Verify() error {
 			Enable:          true,
 			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
 		}
+	}
+	if c.Schemas != nil {
+		logrus.Warn("'schemas' is deprecated. Please remove it from your config")
 	}
 	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
 		c.APIPrefix = "/" + c.APIPrefix

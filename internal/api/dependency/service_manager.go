@@ -120,7 +120,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	pluginService := plugin.New(conf.Plugins)
+	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)

@@ -16,25 +16,22 @@ package databasefile
 import (
 	"fmt"
 	"os"
-	"path"
-
-	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
-
+	"path/filepath"
 	"strings"
-
-	"github.com/perses/perses/internal/api/interface/v1/globalrole"
-	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
-	"github.com/perses/perses/internal/api/interface/v1/role"
-	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -57,13 +54,13 @@ func isFolderExist(folder string) (bool, error) {
 func (d *DAO) generateProjectResourceQuery(kind v1.Kind, project string) string {
 	if len(project) == 0 {
 		// It's used when we query a list of object. It can happen that the project is empty.
-		return path.Join(d.Folder, v1.PluralKindMap[kind])
+		return filepath.Join(d.Folder, v1.PluralKindMap[kind])
 	}
-	return path.Join(d.Folder, v1.PluralKindMap[kind], project)
+	return filepath.Join(d.Folder, v1.PluralKindMap[kind], project)
 }
 
 func (d *DAO) generateResourceQuery(kind v1.Kind) string {
-	return path.Join(d.Folder, v1.PluralKindMap[kind])
+	return filepath.Join(d.Folder, v1.PluralKindMap[kind])
 }
 
 func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix string, isExist bool, err error) {

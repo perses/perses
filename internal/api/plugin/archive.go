@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/mholt/archives"
 	"github.com/perses/perses/internal/api/archive"
@@ -54,7 +54,7 @@ func (a *arch) unzip(archiveFileName string) error {
 		return nil
 	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
-	archiveFile := path.Join(a.folder, archiveFileName)
+	archiveFile := filepath.Join(a.folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile)
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {
@@ -81,8 +81,8 @@ func (a *arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo)
 	if f.IsDir() {
 		return nil
 	}
-	currentDir, _ := path.Split(f.NameInArchive)
-	if mkdirErr := os.MkdirAll(path.Join(a.targetFolder, currentDir), os.ModePerm); mkdirErr != nil {
+	currentDir, _ := filepath.Split(f.NameInArchive)
+	if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, currentDir), os.ModePerm); mkdirErr != nil {
 		return fmt.Errorf("unable to create directory %q: %w", currentDir, mkdirErr)
 	}
 	stream, openErr := f.Open()
@@ -98,7 +98,7 @@ func (a *arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo)
 	if err != nil {
 		return fmt.Errorf("unable to read the file %q: %w", f.NameInArchive, err)
 	}
-	if writeErr := os.WriteFile(path.Join(a.targetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
+	if writeErr := os.WriteFile(filepath.Join(a.targetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
 		return fmt.Errorf("unable to write the file %q: %w", f.NameInArchive, writeErr)
 	}
 	return nil

@@ -14,11 +14,11 @@
 import { FormEvent, ReactElement } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { useDeletePanelGroupDialog } from '../../context';
+import { useDeletePanelGroupDialog, useViewPanel } from '../../context';
 
 export const DeletePanelGroupDialog = (): ReactElement => {
   const { deletePanelGroupDialog, closeDeletePanelGroupDialog, deletePanelGroup } = useDeletePanelGroupDialog();
-
+  const { setViewPanel } = useViewPanel();
   const panelGroupId = deletePanelGroupDialog?.panelGroupId;
 
   const handleDelete = (e: FormEvent): void => {
@@ -28,6 +28,7 @@ export const DeletePanelGroupDialog = (): ReactElement => {
     }
     deletePanelGroup(panelGroupId);
     closeDeletePanelGroupDialog();
+    setViewPanel(undefined);
   };
 
   return (

@@ -25,7 +25,10 @@ export interface MultiQueryEditorProps {
   onChange: (queries: QueryDefinition[]) => void;
 }
 
-function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefinition {
+function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
+  defaultInitialQueryDefinition: QueryDefinition;
+  isLoading: boolean;
+} {
   // Build the default query plugin
   // This will be used only if the queries are empty, to open a starting query
 
@@ -34,7 +37,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
 
   // Then the default plugin kind
   // Use as default the plugin kind explicitly set as default or the first in the list
-  const { data: queryPlugins } = useListPluginMetadata(queryTypes);
+  const { data: queryPlugins, isLoading } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
 
@@ -45,10 +48,13 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
 
   // This default query definition is used if no query is provided initially or when we add a new query
   return {
-    kind: defaultQueryType,
-    spec: {
-      plugin: { kind: defaultQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
+    defaultInitialQueryDefinition: {
+      kind: defaultQueryType,
+      spec: {
+        plugin: { kind: defaultQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
+      },
     },
+    isLoading,
   };
 }
 
@@ -61,7 +67,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
  * @constructor
  */
 export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps): ReactElement {
-  const defaultInitialQueryDefinition = useDefaultQueryDefinition(queryTypes);
+  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
 
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
@@ -115,7 +121,11 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
   };
 
   // show one query input if queries is empty
-  const queryDefinitions: QueryDefinition[] = queries.length ? queries : [defaultInitialQueryDefinition];
+  const queryDefinitions: QueryDefinition[] = queries.length
+    ? queries
+    : !isLoading
+      ? [defaultInitialQueryDefinition]
+      : [];
 
   return (
     <>

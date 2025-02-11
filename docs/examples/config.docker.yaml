@@ -2,14 +2,4 @@ database:
   file:
     folder: "/perses"
     extension: "json"
-
-schemas:
-  panels_path: "/etc/perses/cue/schemas/panels"
-  queries_path: "/etc/perses/cue/schemas/queries"
-  datasources_path: "/etc/perses/cue/schemas/datasources"
-  variables_path: "/etc/perses/cue/schemas/variables"
-  interval: "6h"
-
-plugins:
-  path: "/etc/perses/plugins"
-  archive_path: "/etc/perses/plugins-archive"
+    

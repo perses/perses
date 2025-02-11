@@ -64,14 +64,7 @@ func DefaultConfig() apiConfig.Config {
 		EphemeralDashboard: apiConfig.EphemeralDashboard{
 			Enable: true,
 		},
-		Schemas: apiConfig.Schemas{
-			PanelsPath:      filepath.Join(projectPath, "cue", apiConfig.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, "cue", apiConfig.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, "cue", apiConfig.DefaultVariablesPath),
-			Interval:        0,
-		},
-		Plugins: apiConfig.Plugins{
+		Plugin: apiConfig.Plugin{
 			Path:        filepath.Join(projectPath, "plugins"),
 			ArchivePath: filepath.Join(projectPath, "plugins-archive"),
 		},

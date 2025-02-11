@@ -13,7 +13,7 @@
 
 import { FormEvent, ReactElement } from 'react';
 import { Dialog } from '@perses-dev/components';
-import { useDeletePanelDialog, DeletePanelDialogState } from '../../context';
+import { useDeletePanelDialog, DeletePanelDialogState, useViewPanel } from '../../context';
 
 export const DeletePanelDialog = (): ReactElement => {
   const { deletePanelDialog, closeDeletePanelDialog } = useDeletePanelDialog();
@@ -32,13 +32,16 @@ interface DeletePanelFormProps {
 
 const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps): ReactElement => {
   const { deletePanel, closeDeletePanelDialog } = useDeletePanelDialog();
+  const { setViewPanel } = useViewPanel();
 
   const handleDelete = (e: FormEvent): void => {
     e.preventDefault();
     const { panelGroupItemId } = deletePanelDialog;
     deletePanel(panelGroupItemId);
     closeDeletePanelDialog();
+    setViewPanel(undefined);
   };
+
   return (
     <form onSubmit={handleDelete}>
       <Dialog.Content>
