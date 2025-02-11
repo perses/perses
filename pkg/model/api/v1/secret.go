@@ -25,6 +25,8 @@ type SecretSpec struct {
 	BasicAuth *secret.BasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
+	// Oauth configuration for the targets.
+	OAuth *secret.OAuth `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	// TLSConfig to use to connect to the targets.
 	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
 }

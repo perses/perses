@@ -14,8 +14,10 @@
 package proxy
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -23,6 +25,9 @@ import (
 	"net/http/httputil"
 	"strings"
 	"time"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -286,7 +291,60 @@ func (h *httpProxy) setupAuthentication(req *http.Request) error {
 		}
 		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
 	}
+	oauth := h.secret.OAuth
+	if oauth != nil {
+		token, err := h.getToken(req.Context(), oauth)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	}
+
 	return nil
+}
+
+// getToken exchanges the client credentials for an access token,
+// from the OAuth 2.0 provider.
+func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2.Token, error) {
+	transport, err := h.prepareTransport()
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := http.Client{
+		Transport: transport,
+	}
+
+	// add our http client with tls config
+	newCtx := context.WithValue(ctx, oauth2.HTTPClient, httpClient)
+
+	clientSecret, err := oauth.GetClientSecret()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get client secret: %s", err)
+	}
+
+	// Create a new client credentials Config
+	conf := &clientcredentials.Config{
+		ClientID:       oauth.ClientID,
+		ClientSecret:   clientSecret,
+		TokenURL:       oauth.TokenURL,
+		Scopes:         oauth.Scopes,
+		EndpointParams: oauth.EndpointParams,
+		AuthStyle:      oauth2.AuthStyle(oauth.AuthStyle),
+	}
+
+	// Use the Token method to retrieve the token
+	token, err := conf.Token(newCtx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	if !token.Valid() {
+		// APIs like GitHub might return an invalid token without error
+		return nil, errors.New("invalid token received")
+	}
+
+	return token, err
 }
 
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
