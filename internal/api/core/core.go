@@ -47,7 +47,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		return nil, nil, fmt.Errorf("unable to initialize the service manager: %w", err)
 	}
 	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
-	persesFrontend := ui.NewPersesFrontend(conf)
+	persesFrontend := ui.NewPersesFrontend(conf, serviceManager.GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
 
 	// enable cleanup of the ephemeral dashboards once their ttl is reached

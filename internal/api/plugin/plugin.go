@@ -28,48 +28,63 @@ import (
 
 const pluginFileName = "plugin-modules.json"
 
+type Loaded struct {
+	// DevEnvironment is set in case the plugin is loaded from a dev server
+	DevEnvironment *config.PluginInDevelopment
+	// The module loaded.
+	Module v1.PluginModule
+	// The local path to the plugin folder.
+	LocalPath string
+}
+
 type Plugin interface {
 	Load() error
 	List() ([]byte, error)
 	UnzipArchives() error
+	GetLoadedPlugin(name string) (Loaded, bool)
 	Schema() schema.Schema
 	Migration() migrate.Migration
 }
 
 func New(plugin config.Plugin) Plugin {
-	sch := schema.New()
-	mig := migrate.New()
-	var dev *pluginDev
-	if plugin.DevEnvironment != nil {
-		dev = &pluginDev{
-			cfg: *plugin.DevEnvironment,
-			sch: sch,
-			mig: mig,
-		}
-	}
 	return &pluginFile{
 		path: plugin.Path,
 		archibal: &arch{
 			folder:       plugin.ArchivePath,
 			targetFolder: plugin.Path,
 		},
-		dev: dev,
-		sch: sch,
-		mig: mig,
+		sch:            schema.New(),
+		mig:            migrate.New(),
+		loaded:         make(map[string]Loaded),
+		devEnvironment: plugin.DevEnvironment,
 	}
 }
 
 type pluginFile struct {
-	path     string
+	// path is the local path where the plugins are stored.
+	path string
+	// loaded is a map that contains all the loaded plugin modules.
+	// The key is the name of the plugin used by the frontend to get access to the plugin files.
+	loaded map[string]Loaded
+	// archibal is the archive service used only to extract the plugin files from the archive.
 	archibal *arch
-	dev      *pluginDev
-	sch      schema.Schema
-	mig      migrate.Migration
+	// sch is the service used to load and provide the schema of the plugin.
+	// This service is used when validating any plugin / dashboards.
+	sch schema.Schema
+	// mig is the service used to load and provide the migration schema of the plugin.
+	// This service is used when migrating the plugin from Grafana to Perses.
+	mig            migrate.Migration
+	devEnvironment *config.PluginDevEnvironment
 }
 
 func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
 	return os.ReadFile(pluginFilePath)
+}
+
+func (p *pluginFile) GetLoadedPlugin(prefixURI string) (Loaded, bool) {
+	loaded, ok := p.loaded[prefixURI]
+	return loaded, ok
 }
 
 func (p *pluginFile) Schema() schema.Schema {
@@ -89,7 +104,6 @@ func (p *pluginFile) Load() error {
 	if err != nil {
 		return err
 	}
-	var pluginModuleList []v1.PluginModule
 	for _, file := range files {
 		if !file.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
@@ -123,23 +137,33 @@ func (p *pluginFile) Load() error {
 			},
 			Spec: npmPackageData.Perses,
 		}
-		if !IsSchemaRequired(pluginModule.Spec) {
-			logrus.Debugf("plugin %q does not require schema, so it will be skipped", pluginModule.Metadata.Name)
-			continue
+		pluginLoaded := Loaded{
+			DevEnvironment: nil,
+			Module:         pluginModule,
+			LocalPath:      pluginPath,
 		}
-		if pluginSchemaLoadErr := p.sch.Load(pluginPath, pluginModule); pluginSchemaLoadErr != nil {
-			logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
-			continue
+		if IsSchemaRequired(pluginModule.Spec) {
+			if pluginSchemaLoadErr := p.sch.Load(pluginPath, pluginModule); pluginSchemaLoadErr != nil {
+				logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
+				continue
+			}
+			if pluginMigrateLoadErr := p.mig.Load(pluginPath, pluginModule); pluginMigrateLoadErr != nil {
+				logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
+				continue
+			}
 		}
-		if pluginMigrateLoadErr := p.mig.Load(pluginPath, pluginModule); pluginMigrateLoadErr != nil {
-			logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
-			continue
-		}
-		pluginModuleList = append(pluginModuleList, pluginModule)
+		p.loaded[manifest.Name] = pluginLoaded
 	}
-	if p.dev != nil {
-		devPluginModuleList := p.dev.load()
-		pluginModuleList = mergePluginModules(pluginModuleList, devPluginModuleList)
+	if p.devEnvironment != nil {
+		p.loadDevPlugin()
+	}
+	return p.storeLoadedList()
+}
+
+func (p *pluginFile) storeLoadedList() error {
+	var pluginModuleList []v1.PluginModule
+	for _, l := range p.loaded {
+		pluginModuleList = append(pluginModuleList, l.Module)
 	}
 	if len(pluginModuleList) == 0 {
 		pluginModuleList = make([]v1.PluginModule, 0)
@@ -149,27 +173,4 @@ func (p *pluginFile) Load() error {
 		return marshalErr
 	}
 	return os.WriteFile(filepath.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
-}
-
-func mergePluginModules(prodModule, devModule []v1.PluginModule) []v1.PluginModule {
-	if len(devModule) == 0 {
-		return prodModule
-	}
-	if len(prodModule) == 0 {
-		return devModule
-	}
-	prodModuleMap := make(map[string]v1.PluginModule)
-	for _, module := range prodModule {
-		prodModuleMap[module.Metadata.Name] = module
-	}
-	// Modules from dev environment are overriding the one from the production environment.
-	// In production environment, we should not have any module from the dev environment.
-	for _, module := range devModule {
-		prodModuleMap[module.Metadata.Name] = module
-	}
-	var pluginModuleList []v1.PluginModule
-	for _, module := range prodModuleMap {
-		pluginModuleList = append(pluginModuleList, module)
-	}
-	return pluginModuleList
 }
