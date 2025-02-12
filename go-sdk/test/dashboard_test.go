@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,120 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dashboard
+package dac
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/perses/perses/go-sdk/common"
+	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/datasource"
-	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses/go-sdk/panel/table"
-	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
-	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
-	"github.com/perses/perses/go-sdk/prometheus/query"
-	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
-	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
-	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
-	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
+	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
+	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
+	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
+	staticlist "github.com/perses/plugins/staticlistvariable/sdk/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	filter    = "stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\""
-	memMetric = "container_memory_rss"
-	cpuMetric = "container_cpu_usage_seconds"
-	grouping  = "by (container)"
-)
-
-func buildMemoryPanel(grouping string) panelgroup.Option {
-	return panelgroup.AddPanel("Container memory",
-		timeseries.Chart(),
-		panel.AddQuery(
-			query.PromQL(fmt.Sprintf("max %s (%s{%s})", grouping, memMetric, filter)),
-		),
-	)
-}
-
-func buildCPUPanel(grouping string) panelgroup.Option {
-	return panelgroup.AddPanel("Container CPU",
-		timeseries.Chart(
-			timeseries.WithQuerySettings(
-				[]timeseries.QuerySettingsItem{
-					{
-						QueryIndex: 0,
-						ColorMode:  "fixed-single",
-						ColorValue: "#0be300",
-					},
-				},
-			),
-		),
-		panel.AddQuery(
-			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
-		),
-		panel.AddLink("http://localhost:3000/projects/perses/dashboards/hello?var-stack=$stack&var-prometheus=$prometheus&var-prometheus_namespace=$prometheus_namespace&var-namespace=$namespace&var-namespaceLabels=$namespaceLabels&var-pod=$pod&var-container=$container&var-containerLabels=$containerLabels"),
-	)
-}
-
-func buildTargetStatusPanel() panelgroup.Option {
-	return panelgroup.AddPanel("Target status",
-		table.Table(
-			table.WithCellSettings([]table.CellSettings{
-				{
-					Condition: table.Condition{
-						Kind: table.ValueConditionKind,
-						Spec: table.ValueConditionSpec{
-							Value: "1",
-						},
-					},
-					Text:            "UP",
-					BackgroundColor: "#00FF00",
-				},
-				{
-					Condition: table.Condition{
-						Kind: table.ValueConditionKind,
-						Spec: table.ValueConditionSpec{
-							Value: "0",
-						},
-					},
-					Text:            "DOWN",
-					BackgroundColor: "#FF0000",
-				},
-			}),
-			table.Transform(
-				[]common.Transform{
-					{
-						Kind: common.JoinByColumValueKind,
-						Spec: common.JoinByColumnValueSpec{
-							Columns: []string{"instance"},
-						},
-					},
-				},
-			),
-		),
-		panel.AddQuery(
-			query.PromQL(fmt.Sprintf("up{%s}", filter)),
-		),
-	)
-}
-
 func TestDashboardBuilder(t *testing.T) {
-	builder, buildErr := New("ContainersMonitoring",
-		Name("Containers monitoring"),
-		ProjectName("MyProject"),
+	builder, buildErr := dashboard.New("ContainersMonitoring",
+		dashboard.Name("Containers monitoring"),
+		dashboard.ProjectName("MyProject"),
 
 		// VARIABLES
-		AddVariable("stack",
+		dashboard.AddVariable("stack",
 			listVar.List(
 				labelValuesVar.PrometheusLabelValues("stack",
 					labelValuesVar.Matchers("thanos_build_info{}"),
@@ -134,37 +51,37 @@ func TestDashboardBuilder(t *testing.T) {
 				listVar.CapturingRegexp("(.+)"),
 			),
 		),
-		AddVariable("prometheus",
+		dashboard.AddVariable("prometheus",
 			txtVar.Text("platform", txtVar.Constant(true)),
 		),
-		AddVariable("prometheus_namespace",
+		dashboard.AddVariable("prometheus_namespace",
 			listVar.List(
 				staticlist.StaticList(staticlist.Values("observability", "monitoring")),
 				listVar.Description("to reduce the query scope thus improve performances"),
 			),
 		),
-		AddVariable("namespace", listVar.List(
+		dashboard.AddVariable("namespace", listVar.List(
 			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\"})", promqlVar.LabelName("namespace"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 		)),
-		AddVariable("namespaceLabels", listVar.List(
+		dashboard.AddVariable("namespaceLabels", listVar.List(
 			labelNamesVar.PrometheusLabelNames(
 				labelNamesVar.Matchers("kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
 		)),
-		AddVariable("pod", listVar.List(
+		dashboard.AddVariable("pod", listVar.List(
 			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})", promqlVar.LabelName("pod"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 		)),
-		AddVariable("container", listVar.List(
+		dashboard.AddVariable("container", listVar.List(
 			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 			listVar.CustomAllValue(".*"),
 		)),
-		AddVariable("containerLabels", listVar.List(
+		dashboard.AddVariable("containerLabels", listVar.List(
 			listVar.Description("simply the list of labels for the considered metric"),
 			listVar.Hidden(true),
 			labelNamesVar.PrometheusLabelNames(
@@ -175,14 +92,14 @@ func TestDashboardBuilder(t *testing.T) {
 		)),
 
 		// PANEL GROUPS
-		AddPanelGroup("Resource usage",
+		dashboard.AddPanelGroup("Resource usage",
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
 			buildMemoryPanel(""),
 			buildCPUPanel(""),
 		),
-		AddPanelGroup("Resource usage bis",
+		dashboard.AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
@@ -190,7 +107,7 @@ func TestDashboardBuilder(t *testing.T) {
 			buildCPUPanel(grouping),
 			buildMemoryPanel(grouping),
 		),
-		AddPanelGroup("Misc",
+		dashboard.AddPanelGroup("Misc",
 			panelgroup.PanelsPerLine(1),
 
 			// PANELS
@@ -198,7 +115,7 @@ func TestDashboardBuilder(t *testing.T) {
 		),
 
 		// DATASOURCES
-		AddDatasource("myPromDemo",
+		dashboard.AddDatasource("myPromDemo",
 			datasource.Default(true),
 			promDs.Prometheus(
 				promDs.DirectURL("http://localhost:9090"),
@@ -206,8 +123,8 @@ func TestDashboardBuilder(t *testing.T) {
 		),
 
 		// TIME
-		Duration(3*time.Hour),
-		RefreshInterval(30*time.Second),
+		dashboard.Duration(3*time.Hour),
+		dashboard.RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
@@ -223,12 +140,12 @@ func TestDashboardBuilder(t *testing.T) {
 }
 
 func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
-	builder, buildErr := New("ContainersMonitoring",
-		Name("Containers monitoring"),
-		ProjectName("MyProject"),
+	builder, buildErr := dashboard.New("ContainersMonitoring",
+		dashboard.Name("Containers monitoring"),
+		dashboard.ProjectName("MyProject"),
 
 		// VARIABLES
-		AddVariableGroup(
+		dashboard.AddVariableGroup(
 			variablegroup.AddVariable("stack",
 				listVar.List(
 					labelValuesVar.PrometheusLabelValues("stack",
@@ -281,14 +198,14 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		),
 
 		// PANEL GROUPS
-		AddPanelGroup("Resource usage",
+		dashboard.AddPanelGroup("Resource usage",
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
 			buildMemoryPanel(""),
 			buildCPUPanel(""),
 		),
-		AddPanelGroup("Resource usage bis",
+		dashboard.AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
@@ -296,7 +213,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			buildCPUPanel(grouping),
 			buildMemoryPanel(grouping),
 		),
-		AddPanelGroup("Misc",
+		dashboard.AddPanelGroup("Misc",
 			panelgroup.PanelsPerLine(1),
 
 			// PANELS
@@ -304,7 +221,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		),
 
 		// DATASOURCES
-		AddDatasource("myPromDemo",
+		dashboard.AddDatasource("myPromDemo",
 			datasource.Default(true),
 			promDs.Prometheus(
 				promDs.DirectURL("http://localhost:9090"),
@@ -312,8 +229,8 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		),
 
 		// TIME
-		Duration(3*time.Hour),
-		RefreshInterval(30*time.Second),
+		dashboard.Duration(3*time.Hour),
+		dashboard.RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)

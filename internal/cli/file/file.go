@@ -15,8 +15,10 @@ package file
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -24,6 +26,17 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
+
+func Exists(filePath string) (bool, error) {
+	_, osErr := os.Stat(filePath)
+	if osErr != nil {
+		if errors.Is(osErr, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, osErr
+	}
+	return true, nil
+}
 
 func Unmarshal(file string, obj interface{}) error {
 	data, isJSON, err := readAndDetect(file)

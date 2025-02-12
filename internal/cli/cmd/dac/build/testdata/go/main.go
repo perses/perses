@@ -21,15 +21,14 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses/go-sdk/prometheus/query"
-
-	timeSeriesPanel "github.com/perses/perses/go-sdk/panel/time-series"
-	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
-	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
-	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
-	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
+	"github.com/perses/plugins/prometheus/sdk/go/query"
+	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
+	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
+	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
+	timeSeriesPanel "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {
