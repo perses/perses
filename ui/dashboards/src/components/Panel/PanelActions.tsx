@@ -197,7 +197,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   return (
     <>
-      {/* move all icons except move/grab to overflow menu */}
+      {/* small panel width: move all icons except move/grab to overflow menu */}
       <ConditionalBox
         sx={(theme) => ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(0, HEADER_SMALL_WIDTH)]: { display: 'flex' },
@@ -210,7 +210,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {moveAction}
       </ConditionalBox>
 
-      {/* move edit icons to overflow menu */}
+      {/* medium panel width: move edit icons to overflow menu */}
       <ConditionalBox
         sx={(theme) => ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(HEADER_SMALL_WIDTH, HEADER_MEDIUM_WIDTH)]: {
@@ -223,7 +223,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {moveAction}
       </ConditionalBox>
 
-      {/* show all icons in panel header */}
+      {/* large panel width: show all icons in panel header */}
       <ConditionalBox
         sx={(theme) => ({
           // flip the logic here; if the browser (or jsdom) does not support container queries, always show all icons
