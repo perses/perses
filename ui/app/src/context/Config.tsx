@@ -13,7 +13,7 @@
 
 import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 import { marked } from 'marked';
-import * as DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify';
 import { DashboardSelector, DurationString } from '@perses-dev/core';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
@@ -95,7 +95,7 @@ export function useInformation(): string {
   const { config } = useConfigContext();
 
   const html = useMemo(
-    () => marked.parse(config.frontend.information ?? '', { gfm: true }),
+    () => marked.parse(config.frontend.information ?? '', { gfm: true, async: false }),
     [config.frontend.information]
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);

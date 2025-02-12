@@ -32,7 +32,6 @@
     "explore",
     "e2e",
     "internal-utils",
-    "panels-plugin",
     "plugin-system",
     "storybook"
   ],

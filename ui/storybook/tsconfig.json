@@ -8,7 +8,6 @@
       "@perses-dev/core": ["../core/src"],
       "@perses-dev/dashboards": ["../dashboards/src"],
       "@perses-dev/explore": ["../explore/src"],
-      "@perses-dev/panels-plugin": ["../panels-plugin/src"],
       "@perses-dev/plugin-system": ["../plugin-system/src"]
     }
   }
