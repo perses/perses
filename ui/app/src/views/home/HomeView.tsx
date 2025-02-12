@@ -23,6 +23,7 @@ import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
 import { ImportRoute } from '../../model/route';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
+import { useIsEphemeralDashboardEnabled } from '../../context/Config';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -54,6 +55,9 @@ function HomeView(): ReactElement {
   const handleAddDashboardDialogClose = (): void => {
     setIsAddDashboardDialogOpen(false);
   };
+
+  // Hide/Show button to make a dashbord ephemeral
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
@@ -90,6 +94,7 @@ function HomeView(): ReactElement {
               projects={userProjects}
               onClose={handleAddDashboardDialogClose}
               onSuccess={handleAddDashboardDialogSubmit}
+              isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
             />
           </Stack>
         </Stack>
@@ -98,7 +103,7 @@ function HomeView(): ReactElement {
         <Grid item xs={12} lg={8}>
           <Stack gap={2}>
             <ImportantDashboards />
-            <ProjectsAndDashboards />
+            <ProjectsAndDashboards isEphemeralDashboardEnabled={isEphemeralDashboardEnabled} />
           </Stack>
         </Grid>
         <Grid item xs={12} lg={4}>

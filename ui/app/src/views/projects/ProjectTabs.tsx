@@ -67,9 +67,10 @@ const variablesTabIndex = 'variables';
 interface TabButtonProps extends CRUDButtonProps {
   index: string;
   projectName: string;
+  isEphemeralDashboardEnabled: boolean;
 }
 
-function TabButton({ index, projectName, ...props }: TabButtonProps): ReactElement {
+function TabButton({ index, projectName, isEphemeralDashboardEnabled, ...props }: TabButtonProps): ReactElement {
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -197,6 +198,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
         </>
       );
@@ -516,11 +518,29 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
             />
           )}
         </MenuTabs>
-        {!isMobileSize && <TabButton index={value} projectName={projectName} />}
+        {!isMobileSize && (
+          <TabButton
+            index={value}
+            projectName={projectName}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+          />
+        )}
       </Stack>
-      {isMobileSize && <TabButton index={value} projectName={projectName} fullWidth sx={{ marginTop: 0.5 }} />}
+      {isMobileSize && (
+        <TabButton
+          index={value}
+          projectName={projectName}
+          fullWidth
+          sx={{ marginTop: 0.5 }}
+          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+        />
+      )}
       <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
+        <ProjectDashboards
+          projectName={projectName}
+          id="main-dashboard-list"
+          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+        />
       </TabPanel>
       {isEphemeralDashboardEnabled && hasEphemeralDashboards && (
         <TabPanel value={value} index={ephemeralDashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>

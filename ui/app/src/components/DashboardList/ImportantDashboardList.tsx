@@ -15,8 +15,13 @@ import { ReactElement } from 'react';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from './DashboardList';
 
-export function ImportantDashboardList(): ReactElement {
+interface ImportantDashboardListProps {
+  isEphemeralDashboardEnabled: boolean;
+}
+
+export function ImportantDashboardList(props: ImportantDashboardListProps): ReactElement {
   const { data, isLoading } = useImportantDashboardList();
+  const { isEphemeralDashboardEnabled } = props;
 
   return (
     <DashboardList
@@ -35,6 +40,7 @@ export function ImportantDashboardList(): ReactElement {
         },
         sorting: {},
       }}
+      isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
     />
   );
 }

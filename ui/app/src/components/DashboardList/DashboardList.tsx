@@ -41,6 +41,7 @@ import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties extends ListProperties {
   dashboardList: DashboardResource[];
+  isEphemeralDashboardEnabled: boolean;
 }
 
 /**
@@ -49,10 +50,11 @@ export interface DashboardListProperties extends ListProperties {
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashbord enabled in config file.
  */
 export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
-  const { dashboardList, hideToolbar, isLoading, initialState } = props;
+  const { dashboardList, hideToolbar, isLoading, initialState, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
 
@@ -233,6 +235,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
             name={getResourceDisplayName(targetedDashboard)}
             onSuccess={handleDashboardDuplication}
             onClose={() => setDuplicateDashboardDialogStateOpened(false)}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
           <DeleteResourceDialog
             open={isDeleteDashboardDialogStateOpened}

@@ -40,9 +40,10 @@ import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutat
 
 interface ProjectAccordionProps {
   row: ProjectWithDashboards;
+  isEphemeralDashboardEnabled: boolean;
 }
 
-function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
+function ProjectAccordion({ row, isEphemeralDashboardEnabled }: ProjectAccordionProps): ReactElement {
   const isReadonly = useIsReadonly();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -107,6 +108,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
                 },
               },
             }}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
         </AccordionDetails>
       </Accordion>
@@ -122,10 +124,11 @@ function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
 
 interface RenderDashboardListProps {
   projectRows: ProjectWithDashboards[];
+  isEphemeralDashboardEnabled: boolean;
 }
 
 function RenderDashboardList(props: RenderDashboardListProps): ReactElement {
-  const { projectRows } = props;
+  const { projectRows, isEphemeralDashboardEnabled } = props;
 
   if (projectRows.length === 0) {
     return (
@@ -136,7 +139,11 @@ function RenderDashboardList(props: RenderDashboardListProps): ReactElement {
   return (
     <Box>
       {projectRows.map((row) => (
-        <ProjectAccordion key={row.project.metadata.name} row={row} />
+        <ProjectAccordion
+          key={row.project.metadata.name}
+          row={row}
+          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+        />
       ))}
     </Box>
   );
@@ -144,6 +151,7 @@ function RenderDashboardList(props: RenderDashboardListProps): ReactElement {
 
 interface SearchableDashboardsProps {
   id?: string;
+  isEphemeralDashboardEnabled: boolean;
 }
 
 export function SearchableDashboards(props: SearchableDashboardsProps): ReactElement {
@@ -199,20 +207,29 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
         fullWidth
       />
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <RenderDashboardList projectRows={filteredProjectRows} />
+        <RenderDashboardList
+          projectRows={filteredProjectRows}
+          isEphemeralDashboardEnabled={props.isEphemeralDashboardEnabled}
+        />
       </ErrorBoundary>
     </Stack>
   );
 }
 
-export function ProjectsAndDashboards(): ReactElement {
+interface ProjectsAndDashboardsProps {
+  isEphemeralDashboardEnabled: boolean;
+}
+
+export function ProjectsAndDashboards(props: ProjectsAndDashboardsProps): ReactElement {
+  const { isEphemeralDashboardEnabled } = props;
+
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
         <h2>Projects & Dashboards</h2>
       </Stack>
-      <SearchableDashboards id="project-dashboard-list" />
+      <SearchableDashboards id="project-dashboard-list" isEphemeralDashboardEnabled={isEphemeralDashboardEnabled} />
     </Stack>
   );
 }

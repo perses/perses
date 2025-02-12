@@ -32,6 +32,7 @@ interface CreateDashboardProps {
   name?: string;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
+  isEphemeralDashboardEnabled: boolean;
 }
 
 /**
@@ -41,9 +42,10 @@ interface CreateDashboardProps {
  * If it contains only one element, it will be used as project value and will hide the project selection.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashbord enabled in config file.
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement => {
-  const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess } = props;
+  const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess, isEphemeralDashboardEnabled } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
   const action = mode === 'duplicate' ? 'Duplicate' : 'Create';
@@ -59,7 +61,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement
       <Dialog.Header>
         {action} Dashboard{name && ': ' + name}
       </Dialog.Header>
-      {mode === 'duplicate' && (
+      {isEphemeralDashboardEnabled && mode === 'duplicate' && (
         <Dialog.Content sx={{ width: '100%' }}>
           <FormControlLabel
             control={

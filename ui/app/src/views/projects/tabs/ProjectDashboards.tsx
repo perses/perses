@@ -19,9 +19,10 @@ import { DashboardList } from '../../../components/DashboardList/DashboardList';
 interface ProjectDashboardsProps extends CardProps {
   projectName: string;
   hideToolbar?: boolean;
+  isEphemeralDashboardEnabled: boolean;
 }
 
-export function ProjectDashboards({ projectName, hideToolbar, ...props }: ProjectDashboardsProps): ReactElement {
+export function ProjectDashboards({ projectName, hideToolbar, isEphemeralDashboardEnabled, ...props }: ProjectDashboardsProps): ReactElement {
   const { data, isLoading } = useDashboardList({ project: projectName });
 
   return (
@@ -39,6 +40,7 @@ export function ProjectDashboards({ projectName, hideToolbar, ...props }: Projec
             },
           },
         }}
+        isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
       />
     </Card>
   );
