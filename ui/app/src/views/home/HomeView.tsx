@@ -34,7 +34,7 @@ function HomeView(): ReactElement {
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const userProjects = useDashboardCreateAllowedProjects();
-  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled(); // Hide/Show button to make a dashbord ephemeral
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource): void => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector): void =>
