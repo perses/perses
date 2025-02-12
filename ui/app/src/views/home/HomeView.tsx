@@ -34,6 +34,7 @@ function HomeView(): ReactElement {
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const userProjects = useDashboardCreateAllowedProjects();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled(); // Hide/Show button to make a dashbord ephemeral
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource): void => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector): void =>
@@ -55,9 +56,6 @@ function HomeView(): ReactElement {
   const handleAddDashboardDialogClose = (): void => {
     setIsAddDashboardDialogOpen(false);
   };
-
-  // Hide/Show button to make a dashbord ephemeral
-  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
@@ -103,7 +101,7 @@ function HomeView(): ReactElement {
         <Grid item xs={12} lg={8}>
           <Stack gap={2}>
             <ImportantDashboards />
-            <ProjectsAndDashboards isEphemeralDashboardEnabled={isEphemeralDashboardEnabled} />
+            <ProjectsAndDashboards />
           </Stack>
         </Grid>
         <Grid item xs={12} lg={4}>

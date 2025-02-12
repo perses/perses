@@ -22,7 +22,12 @@ interface ProjectDashboardsProps extends CardProps {
   isEphemeralDashboardEnabled: boolean;
 }
 
-export function ProjectDashboards({ projectName, hideToolbar, isEphemeralDashboardEnabled, ...props }: ProjectDashboardsProps): ReactElement {
+export function ProjectDashboards({
+  projectName,
+  hideToolbar,
+  isEphemeralDashboardEnabled,
+  ...props
+}: ProjectDashboardsProps): ReactElement {
   const { data, isLoading } = useDashboardList({ project: projectName });
 
   return (
