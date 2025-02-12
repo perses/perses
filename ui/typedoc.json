@@ -1,5 +1,5 @@
 {
   "entryPointStrategy": "packages",
-  "entryPoints": ["components", "core", "dashboards", "explore", "panels-plugin", "plugin-system"],
+  "entryPoints": ["components", "core", "dashboards", "explore", "plugin-system"],
   "out": "typedoc"
 }
