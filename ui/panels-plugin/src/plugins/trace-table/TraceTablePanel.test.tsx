@@ -59,6 +59,7 @@ const TEST_TRACE_TABLE_PROPS: TraceTablePanelProps = {
     height: 500,
   },
   spec: {},
+  queryResults: [],
 };
 
 describe('TraceTablePanel', () => {
