@@ -79,7 +79,7 @@
             "name": "Just a text panel"
           },
           "plugin": {
-            "kind": "MarkdownChart",
+            "kind": "Markdown",
             "spec": {
               "text": "# Title\n\nLorem ipsum"
             }

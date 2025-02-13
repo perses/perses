@@ -45,7 +45,7 @@
             "name": "Purpose of the Dashboard"
           },
           "plugin": {
-            "kind": "MarkdownChart",
+            "kind": "Markdown",
             "spec": {
               "text": "This dashboard does have some purpose, let me reminder... uuuuh..."
             }
@@ -59,7 +59,7 @@
             "name": "Point of Contact"
           },
           "plugin": {
-            "kind": "MarkdownChart",
+            "kind": "Markdown",
             "spec": {
               "text": "<p>In case of issue with the dashboard, you're on your own mate</p>"
             }
