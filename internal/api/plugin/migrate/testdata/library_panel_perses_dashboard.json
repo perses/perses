@@ -19,7 +19,7 @@
             "name": "Point of Contact"
           },
           "plugin": {
-            "kind": "MarkdownChart",
+            "kind": "Markdown",
             "spec": {
               "text": "**Migration from Grafana not supported !**"
             }

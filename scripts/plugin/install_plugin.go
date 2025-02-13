@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/perses/common/async"
 	"github.com/sirupsen/logrus"
@@ -46,8 +47,17 @@ func downloadPlugin(plugin plugin) {
 		logrus.WithError(err).Errorf("unable to download plugin %s", pluginName)
 		return
 	}
+	if resp.StatusCode == http.StatusNotFound {
+		// First, let's close the previous body.
+		resp.Body.Close()
+		// Then try to download the plugin with the new tag name.
+		resp, err = http.Get(fmt.Sprintf("%s/%s/v%s/%s.tar.gz", githubURL, strings.ToLower(plugin.PluginName), plugin.Version, pluginName))
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to download plugin %s", pluginName)
+			return
+		}
+	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		logrus.Errorf("unable to download plugin %s, status code %d", pluginName, resp.StatusCode)
 		return
