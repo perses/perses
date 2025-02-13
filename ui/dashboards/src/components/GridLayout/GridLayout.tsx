@@ -20,7 +20,7 @@ import {
   usePanelGroup,
   usePanelGroupActions,
   PanelGroupItemLayout,
-  useViewPanel,
+  useViewPanelGroup,
   PanelGroupDefinition,
 } from '../../context';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
@@ -46,12 +46,12 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
 
-  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
+  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
   const { isEditMode } = useEditMode();
 
   const [gridColWidth, setGridColWidth] = useState(0);
 
-  const viewPanelItemId = useViewPanel();
+  const viewPanelItemId = useViewPanelGroup();
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
   const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 

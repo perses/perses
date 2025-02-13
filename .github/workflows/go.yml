@@ -48,7 +48,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -64,7 +64,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate files
         run: make generate
       - name: test
@@ -90,7 +90,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate files
         run: make generate
       - name: test
@@ -110,12 +110,12 @@ jobs:
       - name: generate files
         run: make assets-compress
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.2.0
+        uses: golangci/golangci-lint-action@v6.3.1
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
           args: --timeout 5m
-  cue-eval:
+  cue-def:
     name: cue
     runs-on: ubuntu-latest
     steps:
@@ -126,9 +126,9 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
-      - name: eval cue schema
-        run: make cue-eval
+          cue_version: "v0.12.0"
+      - name: check cue schema
+        run: make cue-def
       - name: download plugin
         run: make install-default-plugins
       - name: test cue schema
@@ -144,7 +144,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.11.0"
+          cue_version: "v0.12.0"
       - name: generate cue files
         run: make cue-gen
       - name: check for changes

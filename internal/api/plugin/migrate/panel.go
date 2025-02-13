@@ -24,7 +24,7 @@ import (
 
 var (
 	defaultPanelPlugin = common.Plugin{
-		Kind: "MarkdownChart",
+		Kind: "Markdown",
 		Spec: &struct {
 			Text string `json:"text"`
 		}{

@@ -101,11 +101,15 @@ spec: {
 	// visual
 	#lineWidth: *#panel.fieldConfig.defaults.custom.lineWidth | null
 	if #lineWidth != null {
-		visual: lineWidth: [// switch
-			if #lineWidth > 3 {3},       // line width can't go beyond 3 in Perses
-			if #lineWidth < 0.25 {0.25}, // line width can't go below 0.25 in Perses
-			#lineWidth,
-		][0]
+		if #lineWidth > 3 {
+			visual: lineWidth: 3 // line width can't go beyond 3 in Perses
+		}
+		if #lineWidth < 0.25 {
+			visual: lineWidth: 0.25 // line width can't go below 0.25 in Perses
+		}
+		if #lineWidth >= 0.25 && #lineWidth <= 3 {
+			visual: lineWidth: #lineWidth
+		}
 	}
 
 	#fillOpacity: *#panel.fieldConfig.defaults.custom.fillOpacity | null

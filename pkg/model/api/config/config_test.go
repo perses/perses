@@ -71,7 +71,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       "disable_custom": false
     }
   },
-  "plugins": {}
+  "plugin": {}
 }`,
 		},
 		{
@@ -132,7 +132,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       ]
     }
   },
-  "plugins": {
+  "plugin": {
     "path": "plugins",
     "archive_path": "plugins-archive"
   }
@@ -207,7 +207,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "information": "# Hello World\n## File Database setup"
   },
-  "plugins": { 
+  "plugin": { 
     "path": "plugins",
     "archive_path": "plugins-archive"
 	},
@@ -268,7 +268,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 					Information: "# Hello World\n## File Database setup",
 				},
-				Plugins: Plugins{
+				Plugin: Plugin{
 					Path:        "plugins",
 					ArchivePath: "plugins-archive",
 				},
@@ -342,7 +342,7 @@ frontend:
 
 ephemeral_dashboards_cleanup_interval: "2h"
 
-plugins:
+plugin:
   path: "custom/plugins"
   archive_path: "custom/plugins/archive"
 `,
@@ -412,7 +412,7 @@ plugins:
 						Options:                defaultTimeRangeOptions,
 					},
 				},
-				Plugins: Plugins{
+				Plugin: Plugin{
 					Path:        "custom/plugins",
 					ArchivePath: "custom/plugins/archive",
 				},

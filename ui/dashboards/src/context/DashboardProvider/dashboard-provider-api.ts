@@ -28,6 +28,7 @@ import { DeletePanelDialogState } from './delete-panel-slice';
 import { SaveChangesConfirmationDialogState } from './save-changes-dialog-slice';
 import { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
 import { EditJsonDialogState } from './edit-json-dialog-slice';
+import { ViewPanelSlice } from './view-panel-slice';
 
 const selectEditMode: ({ isEditMode, setEditMode }: DashboardStoreState) => {
   setEditMode: (isEditMode: boolean) => void;
@@ -318,13 +319,34 @@ export function useDashboardDuration(): DurationString {
   return useDashboardStore(selectDashboardDuration);
 }
 
-const selectViewPanel: (state: DashboardStoreState) => PanelGroupItemId | undefined = (state: DashboardStoreState) =>
-  state.getViewPanel();
+const selectViewPanel: (state: DashboardStoreState) => {
+  setViewPanel: DashboardStoreState['setViewPanel'];
+  getViewPanel: DashboardStoreState['getViewPanel'];
+  viewPanelId: DashboardStoreState['viewPanel']['panelGroupItemId'];
+} = (state: DashboardStoreState) => ({
+  setViewPanel: state.setViewPanel,
+  getViewPanel: state.getViewPanel,
+  viewPanelId: state.getViewPanel(),
+});
 /**
- * Gets the current panel viewed in max size ("full screen").
+ * Returns actions related to the ViewPanel.
  */
-export function useViewPanel(): PanelGroupItemId | undefined {
+export function useViewPanel(): {
+  setViewPanel: ViewPanelSlice['setViewPanel'];
+  getViewPanel: ViewPanelSlice['getViewPanel'];
+  viewPanelId: ViewPanelSlice['viewPanel']['panelGroupItemId'];
+} {
   return useDashboardStore(selectViewPanel);
+}
+
+const selectViewPanelGroup: (state: DashboardStoreState) => PanelGroupItemId | undefined = (
+  state: DashboardStoreState
+) => state.getViewPanel();
+/**
+ * Gets the Panel Group for the view panel.
+ */
+export function useViewPanelGroup(): PanelGroupItemId | undefined {
+  return useDashboardStore(selectViewPanelGroup);
 }
 
 const selectSaveChangesConfirmationDialog: ({

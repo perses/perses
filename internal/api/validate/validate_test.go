@@ -42,7 +42,7 @@ func TestDashboardSpec(t *testing.T) {
 
 	projectPath := testUtils.GetRepositoryPath()
 
-	pl := plugin.New(config.Plugins{
+	pl := plugin.New(config.Plugin{
 		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
 		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
 	})
@@ -92,7 +92,7 @@ func TestDatasource(t *testing.T) {
 
 	projectPath := testUtils.GetRepositoryPath()
 
-	pl := plugin.New(config.Plugins{
+	pl := plugin.New(config.Plugin{
 		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
 		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
 	})

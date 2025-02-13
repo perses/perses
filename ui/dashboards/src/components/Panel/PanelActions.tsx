@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, styled, Box, Popover } from '@mui/material';
+import { Stack, styled, Box, Popover, CircularProgress } from '@mui/material';
 import { PropsWithChildren, useMemo, useState } from 'react';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
@@ -21,6 +21,8 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
+import AlertIcon from 'mdi-material-ui/Alert';
+import { QueryData } from '@perses-dev/plugin-system';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_MIN_WIDTH,
@@ -41,9 +43,40 @@ export interface PanelActionsProps {
   };
   extra?: React.ReactNode;
   title: string;
+  queryResults: QueryData[];
 }
 
-export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHandlers, extra, title }) => {
+export const PanelActions: React.FC<PanelActionsProps> = ({
+  editHandlers,
+  readHandlers,
+  extra,
+  title,
+  queryResults,
+}) => {
+  const queryStateIndicator = useMemo(() => {
+    const hasData = queryResults.some((q) => q.data);
+    const isFetching = queryResults.some((q) => q.isFetching);
+    const queryErrors = queryResults.filter((q) => q.error);
+    if (isFetching && hasData) {
+      // If the panel has no data, the panel content will show the loading overlay.
+      // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
+      return <CircularProgress aria-label="loading" size="1.125rem" />;
+    } else if (queryErrors.length > 0) {
+      const errorTexts = queryErrors
+        .map((q) => q.error)
+        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .join('\n');
+
+      return (
+        <InfoTooltip description={errorTexts}>
+          <HeaderIconButton aria-label="panel errors" size="small">
+            <AlertIcon fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      );
+    }
+  }, [queryResults]);
+
   const readActions = useMemo(() => {
     if (readHandlers !== undefined) {
       return (
@@ -117,7 +150,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
       alignItems="center"
       sx={{ display: editHandlers !== undefined || readHandlers?.isPanelViewed ? 'flex' : 'var(--panel-hover, none)' }}
     >
-      {editHandlers === undefined && extra} {readActions}
+      {queryStateIndicator} {editHandlers === undefined && extra} {readActions}
       {editActions && (
         <>
           <Box
@@ -140,7 +173,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({ editHandlers, readHa
           </Box>
         </>
       )}
-      {editActions && (
+      {editActions && !readHandlers?.isPanelViewed && (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
           <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
             <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />

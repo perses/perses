@@ -14,7 +14,7 @@
 import { Box, CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import { Link } from '@perses-dev/core';
-import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import { ReactElement, ReactNode } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
@@ -30,6 +30,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   description?: string;
   links?: Link[];
   extra?: ReactNode;
+  queryResults: QueryData[];
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
 }
@@ -39,6 +40,7 @@ export function PanelHeader({
   title: rawTitle,
   description: rawDescription,
   links,
+  queryResults,
   readHandlers,
   editHandlers,
   sx,
@@ -93,7 +95,15 @@ export function PanelHeader({
           {links !== undefined && links.length > 0 && <PanelLinks links={links} />}
         </Stack>
       }
-      action={<PanelActions title={title} readHandlers={readHandlers} editHandlers={editHandlers} extra={extra} />}
+      action={
+        <PanelActions
+          title={title}
+          queryResults={queryResults}
+          readHandlers={readHandlers}
+          editHandlers={editHandlers}
+          extra={extra}
+        />
+      }
       sx={combineSx(
         (theme) => ({
           containerType: 'inline-size',

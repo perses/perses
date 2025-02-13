@@ -30,6 +30,7 @@ const FakeTimeSeriesPlugin: PanelPlugin<UnknownSpec> = {
     },
   ],
   createInitialOptions: () => ({}),
+  supportedQueryTypes: ['TimeSeriesQuery'],
 };
 
 const MOCK_TIME_SERIES_PANEL: MockPlugin = {

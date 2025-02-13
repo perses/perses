@@ -49,7 +49,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'lint'")
 	}
 	if len(o.pluginPath) > 0 {
-		pl := plugin.New(apiConfig.Plugins{
+		pl := plugin.New(apiConfig.Plugin{
 			Path: o.pluginPath,
 		})
 		if err := pl.Load(); err != nil {

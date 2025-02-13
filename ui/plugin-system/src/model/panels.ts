@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition, QueryPluginType } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
@@ -30,6 +30,11 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    * React components for custom tabs
    */
   panelOptionsEditorComponents?: Array<PanelOptionsEditorComponent<Spec>>;
+  /**
+   * Show a custom React component when the query is loading.
+   * Default: <LoadingOverlay />
+   */
+  LoadingComponent?: React.ComponentType<TPanelProps>;
   /**
    * List of query types supported by this panel.
    * @default [] (no query types supported) only relevant if hideQueryEditor is true
@@ -51,11 +56,17 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
 /**
  * The props provided by Perses to a panel plugin's PanelComponent.
  */
-export interface PanelProps<Spec> {
+export interface PanelProps<Spec, SupportedQueryTypes = QueryDataType> {
   spec: Spec;
   contentDimensions?: {
     width: number;
     height: number;
   };
   definition?: PanelDefinition;
+  queryResults: Array<PanelData<SupportedQueryTypes>>;
+}
+
+export interface PanelData<SupportedQueryTypes = QueryDataType> {
+  definition: QueryDefinition;
+  data: SupportedQueryTypes;
 }

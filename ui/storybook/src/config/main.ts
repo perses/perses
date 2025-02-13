@@ -61,11 +61,6 @@ const pkgConfig: PkgConfig[] = [
     title: 'Explore',
   },
   {
-    pkg: '@perses-dev/panels-plugin',
-    directory: path.resolve(uiRoot, 'panels-plugin/src'),
-    title: 'Panels Plugin',
-  },
-  {
     pkg: '@perses-dev/plugin-system',
     directory: path.resolve(uiRoot, 'plugin-system/src'),
     title: 'Plugin System',

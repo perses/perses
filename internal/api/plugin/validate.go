@@ -14,10 +14,9 @@
 package plugin
 
 import (
-	"errors"
-	"os"
 	"path/filepath"
 
+	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
@@ -29,7 +28,7 @@ import (
 // In case we are validating a plugin in its repository, then the various folders in parameter will have different values depending on the struct of the repository.
 func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder string) (bool, error) {
 	// check if the manifest file exists
-	exist, err := fileExists(filepath.Join(distFolder, ManifestFileName))
+	exist, err := file.Exists(filepath.Join(distFolder, ManifestFileName))
 	if !exist || err != nil {
 		return false, err
 	}
@@ -40,21 +39,10 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 	}
 	// check if the schema folder exists only if it requires schema
 	if IsSchemaRequired(npmPackageData.Perses) {
-		exist, err = fileExists(schemaFolder)
+		exist, err = file.Exists(schemaFolder)
 		if !exist || err != nil {
 			return false, err
 		}
-	}
-	return true, nil
-}
-
-func fileExists(filePath string) (bool, error) {
-	_, osErr := os.Stat(filePath)
-	if osErr != nil {
-		if errors.Is(osErr, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, osErr
 	}
 	return true, nil
 }

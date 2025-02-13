@@ -63,8 +63,6 @@ These packages are published to npm with the `@perses-dev` namespace.
 - [`core`](./core): Core functionality that's exposed to plugins and also
   consumed by the app.
 - [`dashboards`](./dashboards): Dashboard components and related utilities.
-- [`panels-plugin`](./panels-plugin): a plugin module with `Panel` plugins for
-  the core visualizations supported by Perses.
 - [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the
   definitions for the runtime available to plugins (e.g. the current time range state, the current variable
   state).

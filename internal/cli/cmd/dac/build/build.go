@@ -118,11 +118,18 @@ func (o *option) processFile(file string, extension string) error {
 	var cmd *exec.Cmd
 
 	if extension == goExtension {
-		cmd = exec.Command("go", "run", file, "--output", o.Output) // #nosec
+		// The command `go run` must be executed in the directory where the file is located.
+		// That's because, go is searching the go.mod file, first in the current directory, then in the parent directories.
+		// So when using multiple go submodules, to ensure it is the correct go.mod considered,
+		// we must be in the closest directory to the file.
+		folder := filepath.Dir(file)
+		extractedFile := filepath.Base(file)
+		cmd = exec.Command("go", "run", extractedFile, "--output", o.Output) // #nosec
+		cmd.Dir = folder
 	} else if extension == cueExtension {
 		// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
 		// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
-		//      However the cue code is (for now at least) not well packaged for such external reuse.
+		//      However, the cue code is (for now at least) not well packaged for such an external reuse.
 		//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
 		// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
 		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
