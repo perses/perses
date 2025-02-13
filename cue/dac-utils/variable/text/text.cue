@@ -31,7 +31,7 @@ varBuilder
 #value:    string
 #constant: bool | *false
 
-variable: v1Dashboard.#Variable & {
+variable: {
 	kind: #kind
 	spec: {
 		v1Dashboard.#TextVariableSpec & {

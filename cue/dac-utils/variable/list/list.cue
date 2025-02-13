@@ -36,7 +36,7 @@ varBuilder
 #pluginKind:       string
 #datasourceName:   string
 
-variable: v1Dashboard.#Variable & {
+variable: {
 	kind: #kind
 	spec: {
 		v1Dashboard.#ListVariableSpec & {

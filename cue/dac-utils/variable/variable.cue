@@ -14,6 +14,7 @@
 package variable
 
 import (
+	v1Dashboard "github.com/perses/perses/cuelang/model/api/v1/dashboard"
 	v1Variable "github.com/perses/perses/cuelang/model/api/v1/variable"
 )
 
@@ -22,3 +23,5 @@ import (
 #display?: v1Variable.#Display & {
 	hidden: bool | *false
 }
+
+variable: v1Dashboard.#Variable
