@@ -67,10 +67,9 @@ const variablesTabIndex = 'variables';
 interface TabButtonProps extends CRUDButtonProps {
   index: string;
   projectName: string;
-  isEphemeralDashboardEnabled: boolean;
 }
 
-function TabButton({ index, projectName, isEphemeralDashboardEnabled, ...props }: TabButtonProps): ReactElement {
+function TabButton({ index, projectName, ...props }: TabButtonProps): ReactElement {
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
@@ -88,6 +87,7 @@ function TabButton({ index, projectName, isEphemeralDashboardEnabled, ...props }
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
 
   const isReadonly = useIsReadonly();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector): void => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
@@ -518,29 +518,11 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
             />
           )}
         </MenuTabs>
-        {!isMobileSize && (
-          <TabButton
-            index={value}
-            projectName={projectName}
-            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-          />
-        )}
+        {!isMobileSize && <TabButton index={value} projectName={projectName} />}
       </Stack>
-      {isMobileSize && (
-        <TabButton
-          index={value}
-          projectName={projectName}
-          fullWidth
-          sx={{ marginTop: 0.5 }}
-          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-        />
-      )}
+      {isMobileSize && <TabButton index={value} projectName={projectName} fullWidth sx={{ marginTop: 0.5 }} />}
       <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <ProjectDashboards
-          projectName={projectName}
-          id="main-dashboard-list"
-          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-        />
+        <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
       {isEphemeralDashboardEnabled && hasEphemeralDashboards && (
         <TabPanel value={value} index={ephemeralDashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>

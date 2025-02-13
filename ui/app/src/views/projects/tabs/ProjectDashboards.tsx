@@ -15,20 +15,16 @@ import { Card, CardProps } from '@mui/material';
 import { ReactElement } from 'react';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
+import { useIsEphemeralDashboardEnabled } from '../../../context/Config';
 
 interface ProjectDashboardsProps extends CardProps {
   projectName: string;
   hideToolbar?: boolean;
-  isEphemeralDashboardEnabled: boolean;
 }
 
-export function ProjectDashboards({
-  projectName,
-  hideToolbar,
-  isEphemeralDashboardEnabled,
-  ...props
-}: ProjectDashboardsProps): ReactElement {
+export function ProjectDashboards({ projectName, hideToolbar, ...props }: ProjectDashboardsProps): ReactElement {
   const { data, isLoading } = useDashboardList({ project: projectName });
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   return (
     <Card {...props}>
