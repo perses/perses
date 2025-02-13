@@ -32,12 +32,17 @@ See the next section to get details about the `<secret_specification>`
 
 ## Secret specification
 
+NOTE: Basic Auth, Authorization and OAuth are mutually exclusive.
+Use one of the authenticators, do not combine multiple authenticators.
+
 ```yaml
 basicAuth: <Basic Auth specification> # Optional
 
 # The HTTP authorization credentials for the targets.
-# Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
 authorization: <Authorization specification> # Optional
+
+# The OAuth credentials used to connect to targets.
+oauth: <OAuth specification> # Optional
 
 # Config used to connect to the targets.
 tlsConfig: <TLS Config specification> # Optional
@@ -59,6 +64,28 @@ type: <string> | default = "Bearer" # Optional
 # The HTTP credentials like a Bearer token
 credentials: <string> # Optional
 credentialsFile: <filename> # Optional
+```
+
+### OAuth Config specification
+
+```yaml
+# ClientID is the application's ID.
+clientID: <string>
+# ClientSecret is the application's secret.
+clientSecret: <string>
+clientSecretFile: <filename> # Optional
+# TokenURL is the resource server's token endpoint URL. 
+# This is a constant specific to each server.
+tokenURL: <string> 
+# Scopes specifies optional requested permissions.
+scopes: 
+- <string> # Optional
+# EndpointParams specifies additional parameters for requests to the token endpoint.
+endpointParams: <map[string][]string> # Optional
+# AuthStyle optionally specifies how the endpoint wants the
+# client ID & client secret sent. The zero value means to
+# auto-detect.
+authStyle: <int> # Optional 
 ```
 
 ### TLS Config specification

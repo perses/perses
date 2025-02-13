@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/perses/perses/pkg/client/perseshttp"
@@ -33,34 +32,11 @@ import (
 
 const connectionTimeout = 30 * time.Second
 
-type PublicOAuth struct {
-	ClientID       secret.Hidden    `json:"client_id" yaml:"client_id"`
-	ClientSecret   secret.Hidden    `json:"client_secret" yaml:"client_secret"`
-	TokenURL       string           `json:"token_url" yaml:"token_url"`
-	Scopes         []string         `json:"scopes" yaml:"scopes"`
-	EndpointParams url.Values       `json:"endpoint_params" yaml:"endpoint_params"`
-	AuthStyle      oauth2.AuthStyle `json:"auth_style" yaml:"auth_style"`
-}
-
-func newPublicOauth(oauthConfig *OAuth) *PublicOAuth {
-	if oauthConfig == nil {
-		return nil
-	}
-	return &PublicOAuth{
-		ClientID:       secret.Hidden(oauthConfig.ClientID),
-		ClientSecret:   secret.Hidden(oauthConfig.ClientSecret),
-		TokenURL:       oauthConfig.TokenURL,
-		Scopes:         oauthConfig.Scopes,
-		EndpointParams: oauthConfig.EndpointParams,
-		AuthStyle:      oauthConfig.AuthStyle,
-	}
-}
-
 // PublicRestConfigClient is the struct that should be used when printing the config
 type PublicRestConfigClient struct {
 	URL        *common.URL             `json:"url" yaml:"url"`
 	NativeAuth *api.PublicAuth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
-	Oauth      *PublicOAuth            `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
+	Oauth      *secret.PublicOAuth     `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
 	BasicAuth  *secret.PublicBasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
@@ -73,40 +49,23 @@ func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient
 	if config == nil {
 		return nil
 	}
+
 	return &PublicRestConfigClient{
 		URL:           config.URL,
 		NativeAuth:    api.NewPublicAuth(config.NativeAuth),
 		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
-		Oauth:         newPublicOauth(config.OAuth),
+		Oauth:         secret.NewPublicOAuth(config.OAuth),
 		Authorization: secret.NewPublicAuthorization(config.Authorization),
 		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
 		Headers:       config.Headers,
 	}
 }
 
-type OAuth struct {
-	// ClientID is the application's ID.
-	ClientID string `json:"client_id" yaml:"client_id"`
-	// ClientSecret is the application's secret.
-	ClientSecret string `json:"client_secret" yaml:"client_secret"`
-	// TokenURL is the resource server's token endpoint
-	// URL. This is a constant specific to each server.
-	TokenURL string `json:"token_url" yaml:"token_url"`
-	// Scope specifies optional requested permissions.
-	Scopes []string `json:"scopes" yaml:"scopes"`
-	// EndpointParams specifies additional parameters for requests to the token endpoint.
-	EndpointParams url.Values `json:"endpoint_params" yaml:"endpoint_params"`
-	// AuthStyle optionally specifies how the endpoint wants the
-	// client ID & client secret sent. The zero value means to
-	// auto-detect.
-	AuthStyle oauth2.AuthStyle `json:"auth_style" yaml:"auth_style"`
-}
-
 // RestConfigClient defines all parameters that can be set to customize the RESTClient
 type RestConfigClient struct {
 	URL        *common.URL       `json:"url" yaml:"url"`
 	NativeAuth *api.Auth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
-	OAuth      *OAuth            `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OAuth      *secret.OAuth     `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
@@ -197,7 +156,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 			ClientSecret: config.OAuth.ClientSecret,
 			TokenURL:     config.OAuth.TokenURL,
 			Scopes:       config.OAuth.Scopes,
-			AuthStyle:    config.OAuth.AuthStyle,
+			AuthStyle:    oauth2.AuthStyle(config.OAuth.AuthStyle),
 		}
 
 		httpClient = oauthConfig.Client(ctx)
