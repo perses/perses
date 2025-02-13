@@ -115,7 +115,7 @@ jobs:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
           args: --timeout 5m
-  cue-def:
+  validate-cue-schemas:
     name: cue
     runs-on: ubuntu-latest
     steps:
@@ -128,13 +128,13 @@ jobs:
           enable_cue: true
           cue_version: "v0.12.0"
       - name: check cue schema
-        run: make cue-def
+        run: make cue-eval
       - name: download plugin
         run: make install-default-plugins
       - name: test cue schema
         run: make cue-test
-  check-cue-gen:
-    name: "check cue gen files"
+  check-cue-model-files:
+    name: "check that .cue model files are up to date"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -145,12 +145,12 @@ jobs:
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
-      - name: generate cue files
+      - name: generate .cue model files
         run: make cue-gen
       - name: check for changes
         run: |
           git add .
           if ! git diff --cached --exit-code; then
-            echo "CUE generated files are not up to date. Please run 'make cue-gen' and commit the changes."
+            echo "The generated .cue model files are not up to date. Please run 'make cue-gen' locally and commit the changes."
             exit 1
           fi
