@@ -35,14 +35,14 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     const originalPanel = dashboardPage.getPanel({ group: panelGroup, nth: 0 });
 
     // Duplicate the original panel
-    await originalPanel.duplicateButton.click();
+    await originalPanel.duplicateButton().then((x) => x.click());
     // Panels are referenced by index in this test because they will be renamed
     // later, so their names are not durable locators.
     const duplicateOne = dashboardPage.getPanel({ group: panelGroup, nth: 1 });
 
     // Duplicate the duplicate. Intentionally testing multiple duplicates to
     // catch some edge cases.
-    await duplicateOne.duplicateButton.click();
+    await duplicateOne.duplicateButton().then((x) => x.click());
     const duplicateTwo = dashboardPage.getPanel({ group: panelGroup, nth: 2 });
 
     await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(3);
@@ -108,7 +108,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
       const orignalPanelCount = await dashboardPage.getPanels(panelGroup).count();
 
       // Duplicate the original panel
-      await originalPanel.duplicateButton.click();
+      await originalPanel.duplicateButton().then((x) => x.click());
 
       // Wait for new panel to be added and loaded.
       await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(orignalPanelCount + 1);

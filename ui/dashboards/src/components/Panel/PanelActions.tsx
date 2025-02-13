@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled } from '@mui/material';
-import { PropsWithChildren, useMemo, useState } from 'react';
+import { isValidElement, PropsWithChildren, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
@@ -241,6 +241,12 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  // do not show overflow menu if there is no content (for example, edit actions are hidden)
+  const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
+  if (!hasContent) {
+    return undefined;
+  }
+
   const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
     setAnchorEl(event.currentTarget);
   };
@@ -250,7 +256,7 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'actions-popover' : undefined;
+  const id = open ? 'actions-menu' : undefined;
 
   return (
     <>
