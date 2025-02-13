@@ -50,7 +50,7 @@ export interface DashboardListProperties extends ListProperties {
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
- * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashbord enabled in config file.
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();

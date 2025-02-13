@@ -42,7 +42,7 @@ interface CreateDashboardProps {
  * If it contains only one element, it will be used as project value and will hide the project selection.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
- * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashbord enabled in config file.
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement => {
   const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess, isEphemeralDashboardEnabled } = props;
