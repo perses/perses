@@ -21,7 +21,7 @@
 
 package dashboard
 
-import "github.com/perses/perses/cue/model/api/v1/variable"
+import "github.com/perses/perses/cuelang/model/api/v1/variable"
 
 #TextVariableSpec: {
 	name: string @go(Name)

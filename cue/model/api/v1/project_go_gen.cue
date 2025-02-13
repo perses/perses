@@ -4,7 +4,7 @@
 
 package v1
 
-import "github.com/perses/perses/cue/model/api/v1/common"
+import "github.com/perses/perses/cuelang/model/api/v1/common"
 
 #ProjectSpec: {
 	display?: null | common.#Display @go(Display,*common.Display)

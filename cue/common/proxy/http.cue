@@ -14,7 +14,7 @@
 package proxy
 
 import (
-	"github.com/perses/perses/cue/common"
+	"github.com/perses/perses/cuelang/common"
 )
 
 #HTTPAllowedEndpoint: {
