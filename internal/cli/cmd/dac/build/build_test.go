@@ -93,7 +93,7 @@ func TestDacBuildCMD(t *testing.T) {
 		{
 			Title:           "nominal case with a cue directory",
 			Args:            []string{"-d", "valid"},
-			IsErrorExpected: true,
+			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built valid%sdac.cue at built%svalid%sdac_output.yaml\nSuccesfully built valid%sdac_2.cue at built%svalid%sdac_2_output.yaml\n", "%s", separator, -1),
 		},
 		{

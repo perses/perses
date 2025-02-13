@@ -16,9 +16,9 @@ package test
 import (
 	dashboardBuilder "github.com/perses/perses/cuelang/dac-utils/dashboard"
 	panelGroupsBuilder "github.com/perses/perses/cuelang/dac-utils/panelgroups"
-	panelBuilder "github.com/perses/perses/cuelang/dac-utils/prometheus/panel"
-	timeseriesChart "github.com/perses/perses/cuelang/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cuelang/schemas/queries/prometheus:model"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
 )
 
 #memoryPanel: this=panelBuilder & {
