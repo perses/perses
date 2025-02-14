@@ -231,7 +231,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
         })}
       >
-        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions} {editActions}{' '}
+        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions} {editActions}
         {moveAction}
       </ConditionalBox>
     </>
