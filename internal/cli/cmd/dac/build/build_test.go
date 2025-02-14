@@ -43,37 +43,7 @@ func TestDacBuildCMD(t *testing.T) {
 		dirNotFoundErrStr = fmt.Sprintf(linuxSpecificErrStr, unknownDirName)
 	}
 
-	testSuite := []cmdTest.Suite{
-		{
-			Title:           "nominal case with a single cue file",
-			Args:            []string{"-f", "testdata/cue/working_dac.cue"},
-			IsErrorExpected: false,
-			ExpectedMessage: strings.Replace("Succesfully built testdata/cue/working_dac.cue at built%stestdata%scue%sworking_dac_output.yaml\n", "%s", separator, -1),
-		},
-		{
-			Title:           "nominal case with a cue directory",
-			Args:            []string{"-d", "testdata/cue"},
-			IsErrorExpected: false,
-			ExpectedMessage: strings.Replace("Succesfully built testdata%scue%sworking_dac.cue at built%stestdata%scue%sworking_dac_output.yaml\nSuccesfully built testdata%scue%sworking_dac_2.cue at built%stestdata%scue%sworking_dac_2_output.yaml\n", "%s", separator, -1),
-		},
-		{
-			Title:           "print on stdout as json",
-			Args:            []string{"-f", "testdata/cue/working_dac_2.cue", "-m", "stdout", "-o", "json"},
-			IsErrorExpected: false,
-			ExpectedMessage: "{\n    \"success\": true\n}\n\n",
-		},
-		{
-			Title:           "invalid CUE definition",
-			Args:            []string{"-f", "testdata/invalid_cue/invalid_dac.cue"},
-			IsErrorExpected: true,
-			ExpectedMessage: strings.Replace("failed to build testdata/invalid_cue/invalid_dac.cue: success: reference \"fals\" not found:\n    .%stestdata%sinvalid_cue%sinvalid_dac.cue:16:10\n", "%s", separator, -1),
-		},
-		{
-			Title:           "invalid CUE definition in a folder",
-			Args:            []string{"-d", "testdata/invalid_cue"},
-			IsErrorExpected: true,
-			ExpectedMessage: `processing directory "testdata/invalid_cue" failed, see the message(s) above`,
-		},
+	testSuiteCommonAndGo := []cmdTest.Suite{
 		{
 			Title:           "file not found",
 			Args:            []string{"-f", unknownFileName},
@@ -104,13 +74,53 @@ func TestDacBuildCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata%sgo%smain.go at built%stestdata%sgo%smain_output.yaml\n", "%s", separator, -1),
 		},
+	}
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCommonAndGo)
+
+	// Change to the cue test directory to be able to resolve imports
+	err := os.Chdir(strings.Replace("testdata%scue", "%s", separator, -1))
+	if err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+
+	testSuiteCUE := []cmdTest.Suite{
+		{
+			Title:           "nominal case with a single cue file",
+			Args:            []string{"-f", "valid/dac.cue"},
+			IsErrorExpected: false,
+			ExpectedMessage: strings.Replace("Succesfully built valid/dac.cue at built%svalid%sdac_output.yaml\n", "%s", separator, -1),
+		},
+		{
+			Title:           "nominal case with a cue directory",
+			Args:            []string{"-d", "valid"},
+			IsErrorExpected: false,
+			ExpectedMessage: strings.Replace("Succesfully built valid%sdac.cue at built%svalid%sdac_output.yaml\nSuccesfully built valid%sdac_2.cue at built%svalid%sdac_2_output.yaml\n", "%s", separator, -1),
+		},
+		{
+			Title:           "print on stdout as json",
+			Args:            []string{"-f", "valid/dac_2.cue", "-m", "stdout", "-o", "json"},
+			IsErrorExpected: false,
+			ExpectedMessage: "{\n    \"success\": true\n}\n\n",
+		},
+		{
+			Title:           "invalid CUE definition",
+			Args:            []string{"-f", "invalid/dac.cue"},
+			IsErrorExpected: true,
+			ExpectedMessage: strings.Replace("failed to build invalid/dac.cue: success: reference \"fals\" not found:\n    .%sinvalid%sdac.cue:16:10\n", "%s", separator, -1),
+		},
+		{
+			Title:           "invalid CUE definition in a folder",
+			Args:            []string{"-d", "invalid"},
+			IsErrorExpected: true,
+			ExpectedMessage: `processing directory "invalid" failed, see the message(s) above`,
+		},
 		{
 			Title:           "nominal case with a custom output folder",
-			Args:            []string{"-f", "testdata/cue/working_dac.cue"},
+			Args:            []string{"-f", "valid/dac.cue"},
 			Config:          config.Config{Dac: config.Dac{OutputFolder: "test_output"}},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.Replace("Succesfully built testdata/cue/working_dac.cue at test_output%stestdata%scue%sworking_dac_output.yaml\n", "%s", separator, -1),
+			ExpectedMessage: strings.Replace("Succesfully built valid/dac.cue at test_output%svalid%sdac_output.yaml\n", "%s", separator, -1),
 		},
 	}
-	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCUE)
 }

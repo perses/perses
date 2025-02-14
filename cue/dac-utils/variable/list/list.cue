@@ -14,9 +14,9 @@
 package list
 
 import (
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
-	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
+	v1Dashboard "github.com/perses/perses/cuelang/model/api/v1/dashboard"
+	v1Variable "github.com/perses/perses/cuelang/model/api/v1/variable"
+	varBuilder "github.com/perses/perses/cuelang/dac-utils/variable"
 )
 
 // include the definitions of varBuilder at the root
@@ -36,7 +36,7 @@ varBuilder
 #pluginKind:       string
 #datasourceName:   string
 
-variable: v1Dashboard.#Variable & {
+variable: {
 	kind: #kind
 	spec: {
 		v1Dashboard.#ListVariableSpec & {

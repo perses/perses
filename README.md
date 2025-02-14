@@ -47,11 +47,8 @@ You can create your own project(s) and dashboard(s) there, no one else will be a
    * Two SDKs (in Golang and in Cuelang) are available to code dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
      Probably these SDKs are going to evolve depending on the feedbacks we might receive. Still it's likely to be about adding more
      util functions rather than breaking things.
-3. We are eager to change the current plugin architecture to make it potentially simpler and above all to be able to
+3. *Work is in progress* Change the current plugin architecture to make it potentially simpler and above all to be able to
    externalize the load and the implementation of a plugin.
-   * Changes are more on the frontend side. [cue/schemas](./cue/schemas) are kept in their current shape as there is no
-     point to remove the static validation of plugins on the backend side.
-   * *Work is in progress*
 
 ## What's next
 

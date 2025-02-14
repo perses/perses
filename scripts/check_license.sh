@@ -2,7 +2,7 @@
 
 set -e
 
-exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*" "*/storybook-static/*" "./plugins/*")
+exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*" "*/storybook-static/*" "./plugins/*" "*/cue.mod/*")
 exclude_files=("migrate.cue" "*_go_gen.cue")
 year=$(date +'%Y')
 

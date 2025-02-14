@@ -16,7 +16,7 @@
 package panelgroups
 
 import (
-	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panelgroup"
+	panelGroupBuilder "github.com/perses/perses/cuelang/dac-utils/panelgroup"
 )
 
 // expected user input
