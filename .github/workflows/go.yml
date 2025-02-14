@@ -53,7 +53,7 @@ jobs:
         run: make checkformat
       - name: check go.mod
         run: make checkunused
-  test:
+  test-file:
     name: "tests with file DB"
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +67,8 @@ jobs:
           cue_version: "v0.12.0"
       - name: generate files
         run: make generate
+      - name: Login to CUE's Central Registry to allow retrieving deps
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make integration-test
   test-mysql:
@@ -93,6 +95,8 @@ jobs:
           cue_version: "v0.12.0"
       - name: generate files
         run: make generate
+      - name: Login to CUE's Central Registry to allow retrieving deps
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make mysql-integration-test
   golangci:

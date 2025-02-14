@@ -23,7 +23,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
 	"github.com/perses/perses/internal/test"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
@@ -39,7 +39,7 @@ func TestNewFromSchema(t *testing.T) {
 	}{
 		{
 			name:   "PrometheusDatasource",
-			schema: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath, "prometheus"),
+			schema: filepath.Join(projectPath, config.DefaultPluginPath, "prometheus", "schemas", "datasource"),
 			expected: []*Node{
 				{
 					Type:          StringNodeType,
@@ -81,7 +81,7 @@ func TestNewFromSchema(t *testing.T) {
 		},
 		{
 			name:   "TempoDatasource",
-			schema: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath, "tempo"),
+			schema: filepath.Join(projectPath, config.DefaultPluginPath, "tempo", "schemas", "datasource"),
 			expected: []*Node{
 				{
 					Type:          StringNodeType,
@@ -151,7 +151,7 @@ func TestBuildPluginAndInjectProxy(t *testing.T) {
 	}{
 		{
 			name:   "PrometheusDatasource",
-			schema: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath, "prometheus"),
+			schema: filepath.Join(projectPath, config.DefaultPluginPath, "prometheus", "schemas", "datasource"),
 			proxy: http.Config{
 				URL: common.MustParseURL("http://localhost:9090"),
 			},
