@@ -87,6 +87,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
 
   const isReadonly = useIsReadonly();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector): void => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
@@ -197,6 +198,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
         </>
       );
