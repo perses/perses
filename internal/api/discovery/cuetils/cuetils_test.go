@@ -80,7 +80,7 @@ func TestNewFromSchema(t *testing.T) {
 		},
 		{
 			name:   "TempoDatasource",
-			schema: filepath.Join(projectPath, config.DefaultPluginPath, "tempo", "schemas", "datasource"),
+			schema: filepath.Join(projectPath, config.DefaultPluginPath, "Tempo", "schemas", "datasource"), // TODO "Tempo" to be changed to "tempo" when a new plugin version is out
 			expected: []*Node{
 				{
 					Type:          StringNodeType,
