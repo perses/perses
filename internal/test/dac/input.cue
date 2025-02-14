@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,20 +14,23 @@
 package test
 
 import (
-	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
-	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
-	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
-	labelNamesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelnames"
-	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
-	staticListVarBuilder "github.com/perses/perses/cue/dac-utils/variable/staticlist"
-	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	table "github.com/perses/perses/cue/schemas/panels/table:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
-	prometheusDs "github.com/perses/perses/cue/schemas/datasources/prometheus:model"
+	// perses core
+	dashboardBuilder "github.com/perses/perses/cuelang/dac-utils/dashboard"
+	panelGroupsBuilder "github.com/perses/perses/cuelang/dac-utils/panelgroups"
+	varGroupBuilder "github.com/perses/perses/cuelang/dac-utils/variable/group"
+	textVarBuilder "github.com/perses/perses/cuelang/dac-utils/variable/text"
+	// prometheus plugin
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	labelValuesVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/labelvalues"
+	labelNamesVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/labelnames"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
+	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
+	// other plugins
+	staticListVarBuilder "github.com/perses/plugins/staticlistvariable/sdk/cue:staticlist"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	table "github.com/perses/plugins/table/schemas:model"
 )
 
 #myVarsBuilder: varGroupBuilder & {
@@ -216,7 +219,7 @@ dashboardBuilder & {
 	}
 	#datasources: {myPromDemo: {
 		default: true
-		plugin: prometheusDs & {spec: {
+		plugin: promDs & {spec: {
 			directUrl: "http://localhost:9090"
 		}}
 	}}
