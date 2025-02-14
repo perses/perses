@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, styled, Box, Popover, CircularProgress } from '@mui/material';
-import { PropsWithChildren, useMemo, useState } from 'react';
-import { InfoTooltip, combineSx } from '@perses-dev/components';
+import { Stack, Box, Popover, CircularProgress, styled } from '@mui/material';
+import { isValidElement, PropsWithChildren, useMemo, useState } from 'react';
+import { InfoTooltip } from '@perses-dev/components';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,17 +21,26 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
-import AlertIcon from 'mdi-material-ui/Alert';
 import { QueryData } from '@perses-dev/plugin-system';
+import AlertIcon from 'mdi-material-ui/Alert';
+import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import { Link } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
-  HEADER_ACTIONS_MIN_WIDTH,
   HEADER_ACTIONS_CONTAINER_NAME,
+  HEADER_MEDIUM_WIDTH,
+  HEADER_SMALL_WIDTH,
   TOOLTIP_TEXT,
 } from '../../constants';
 import { HeaderIconButton } from './HeaderIconButton';
+import { PanelLinks } from './PanelLinks';
 
 export interface PanelActionsProps {
+  title: string;
+  description?: string;
+  descriptionTooltipId: string;
+  links?: Link[];
+  extra?: React.ReactNode;
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -41,18 +50,46 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
-  extra?: React.ReactNode;
-  title: string;
   queryResults: QueryData[];
 }
+
+const ConditionalBox = styled(Box)({
+  display: 'none',
+  alignItems: 'center',
+  flexGrow: 1,
+  justifyContent: 'flex-end',
+});
 
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
   readHandlers,
   extra,
   title,
+  description,
+  descriptionTooltipId,
+  links,
   queryResults,
 }) => {
+  const descriptionAction = useMemo(() => {
+    if (description && description.trim().length > 0) {
+      return (
+        <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
+          <HeaderIconButton aria-label="panel description" size="small">
+            <InformationOutlineIcon
+              aria-describedby="info-tooltip"
+              aria-hidden={false}
+              fontSize="inherit"
+              sx={{ color: (theme) => theme.palette.text.secondary }}
+            />
+          </HeaderIconButton>
+        </InfoTooltip>
+      );
+    }
+    return undefined;
+  }, [descriptionTooltipId, description]);
+  const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
+  const extraActions = editHandlers === undefined && extra;
+
   const queryStateIndicator = useMemo(() => {
     const hasData = queryResults.some((q) => q.data);
     const isFetching = queryResults.some((q) => q.isFetching);
@@ -143,58 +180,72 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [editHandlers, title]);
 
-  return (
-    <HeaderActionWrapper
-      direction="row"
-      spacing={0.25}
-      alignItems="center"
-      sx={{ display: editHandlers !== undefined || readHandlers?.isPanelViewed ? 'flex' : 'var(--panel-hover, none)' }}
-    >
-      {queryStateIndicator} {editHandlers === undefined && extra} {readActions}
-      {editActions && (
-        <>
-          <Box
-            sx={combineSx((theme) => ({
-              display: 'block',
-              [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_ACTIONS_MIN_WIDTH)]: {
-                display: 'none',
-              },
-            }))}
-          >
-            {editActions}
-          </Box>
-          <Box
-            sx={combineSx((theme) => ({
-              display: 'block',
-              [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).up(HEADER_ACTIONS_MIN_WIDTH)]: { display: 'none' },
-            }))}
-          >
-            <ShowAction title={title}>{editActions}</ShowAction>
-          </Box>
-        </>
-      )}
-      {editActions && !readHandlers?.isPanelViewed && (
+  const moveAction = useMemo(() => {
+    if (editActions && !readHandlers?.isPanelViewed) {
+      return (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
           <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
             <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
           </HeaderIconButton>
         </InfoTooltip>
-      )}
-    </HeaderActionWrapper>
+      );
+    }
+    return undefined;
+  }, [editActions, readHandlers, title]);
+
+  const divider = <Box sx={{ flexGrow: 1 }}></Box>;
+
+  return (
+    <>
+      {/* small panel width: move all icons except move/grab to overflow menu */}
+      <ConditionalBox
+        sx={(theme) => ({
+          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(0, HEADER_SMALL_WIDTH)]: { display: 'flex' },
+        })}
+      >
+        {divider}
+        <OverflowMenu title={title}>
+          {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+        </OverflowMenu>
+        {moveAction}
+      </ConditionalBox>
+
+      {/* medium panel width: move edit icons to overflow menu */}
+      <ConditionalBox
+        sx={(theme) => ({
+          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(HEADER_SMALL_WIDTH, HEADER_MEDIUM_WIDTH)]: {
+            display: 'flex',
+          },
+        })}
+      >
+        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions}
+        <OverflowMenu title={title}>{editActions}</OverflowMenu>
+        {moveAction}
+      </ConditionalBox>
+
+      {/* large panel width: show all icons in panel header */}
+      <ConditionalBox
+        sx={(theme) => ({
+          // flip the logic here; if the browser (or jsdom) does not support container queries, always show all icons
+          display: 'flex',
+          [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
+        })}
+      >
+        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions} {editActions}
+        {moveAction}
+      </ConditionalBox>
+    </>
   );
 };
 
-const HeaderActionWrapper = styled(Stack)(() => ({
-  // Adding back the negative margins from MUI's defaults for actions, so we
-  // avoid increasing the header size when actions are present while also being
-  // able to vertically center the actions.
-  // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/CardHeader/CardHeader.js#L56-L58
-  marginTop: -4,
-  marginBottom: -4,
-}));
-
-const ShowAction: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
+const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  // do not show overflow menu if there is no content (for example, edit actions are hidden)
+  const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
+  if (!hasContent) {
+    return undefined;
+  }
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
     setAnchorEl(event.currentTarget);
@@ -205,7 +256,7 @@ const ShowAction: React.FC<PropsWithChildren<{ title: string }>> = ({ children, 
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'actions-popover' : undefined;
+  const id = open ? 'actions-menu' : undefined;
 
   return (
     <>
@@ -228,9 +279,9 @@ const ShowAction: React.FC<PropsWithChildren<{ title: string }>> = ({ children, 
           horizontal: 'left',
         }}
       >
-        <Box sx={{ padding: '8px' }} onClick={handleClose}>
+        <Stack direction="row" alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
           {children}
-        </Box>
+        </Stack>
       </Popover>
     </>
   );

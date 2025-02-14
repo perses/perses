@@ -201,7 +201,7 @@ describe('Panel', () => {
     });
 
     renderPanel();
-    expect(screen.queryByLabelText('loading')).toBeTruthy();
+    expect(screen.queryAllByLabelText('loading').length).toBeGreaterThan(0);
   });
 
   it('does not show a loading indicator if 2/2 queries are loading', () => {
@@ -210,7 +210,7 @@ describe('Panel', () => {
     });
 
     renderPanel();
-    expect(screen.queryByLabelText('loading')).toBeFalsy();
+    expect(screen.queryAllByLabelText('loading')).toHaveLength(0);
   });
 
   it('shows query errors in the tooltip', () => {
@@ -219,6 +219,6 @@ describe('Panel', () => {
     });
 
     renderPanel();
-    expect(screen.queryByLabelText('panel errors')).toBeTruthy();
+    expect(screen.queryAllByLabelText('panel errors').length).toBeGreaterThan(0);
   });
 });

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 type resizePanelOptions = {
   width: number;
@@ -22,39 +22,30 @@ type resizePanelOptions = {
  * Panel on a dashboard page.
  */
 export class Panel {
+  readonly page: Page;
   readonly container: Locator;
   readonly parent: Locator;
 
-  readonly editButton: Locator;
-  readonly deleteButton: Locator;
-  readonly duplicateButton: Locator;
   readonly showActionsButton: Locator;
-
+  readonly actionsMenu: Locator;
   readonly resizeHandle: Locator;
 
   readonly figure: Locator;
   readonly canvas: Locator;
   readonly loader: Locator;
 
-  constructor(container: Locator) {
+  constructor(page: Page, container: Locator) {
+    this.page = page;
     this.container = container;
 
     // Useful for visual testing because the parent contains the height and
     // width setting.
     this.parent = this.container.locator('..');
 
-    this.deleteButton = this.container.getByRole('button', {
-      name: 'delete panel',
-    });
-    this.editButton = this.container.getByRole('button', {
-      name: 'edit panel',
-    });
-    this.duplicateButton = this.container.getByRole('button', {
-      name: 'duplicate panel',
-    });
     this.showActionsButton = this.container.getByRole('button', {
       name: 'show panel actions',
     });
+    this.actionsMenu = this.page.locator('[id=actions-menu]');
 
     // Need to look up to panel draggable parent first to get the resize handle.
     // The classname selector here is not ideal, but it's all that is available
@@ -84,12 +75,35 @@ export class Panel {
     await this.figure.scrollIntoViewIfNeeded();
   }
 
+  async locateButton(label: string): Promise<Locator> {
+    const hasActionsMenu = await this.showActionsButton.isVisible();
+    if (hasActionsMenu) {
+      await this.showActionsButton.click();
+      return this.actionsMenu.getByRole('button', { name: label });
+    }
+    return this.container.getByRole('button', { name: label });
+  }
+
+  async editButton(): Promise<Locator> {
+    return this.locateButton('edit panel');
+  }
+
+  async deleteButton(): Promise<Locator> {
+    return this.locateButton('delete panel');
+  }
+
+  async duplicateButton(): Promise<Locator> {
+    return this.locateButton('duplicate panel');
+  }
+
   async startEditing(): Promise<void> {
-    await this.editButton.click();
+    const editButton = await this.editButton();
+    await editButton.click();
   }
 
   async delete(): Promise<void> {
-    await this.deleteButton.click();
+    const deleteButton = await this.deleteButton();
+    await deleteButton.click();
   }
 
   /**
