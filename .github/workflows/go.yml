@@ -116,7 +116,7 @@ jobs:
           version: v1.62.2
           args: --timeout 5m
   validate-cue-schemas:
-    name: cue
+    name: validate CUE schemas
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -133,8 +133,8 @@ jobs:
         run: make install-default-plugins
       - name: test cue schema
         run: make cue-test
-  check-cue-model-files:
-    name: "check that .cue model files are up to date"
+  check-cue-gen:
+    name: "check generated CUE files"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
