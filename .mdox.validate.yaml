@@ -23,3 +23,9 @@ validators:
   # timeout
   - regex: 'github\.com'
     type: 'ignore'
+  # tiemout
+  - regex: 'slack\.cncf\.io'
+    type: 'ignore'
+  # tiemout
+  - regex: 'nodejs\.org'
+    type: 'ignore'
