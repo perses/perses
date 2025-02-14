@@ -14,6 +14,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/pkg/model/api/config"
 )
@@ -27,4 +29,6 @@ func main() {
 	if a.UnzipAll() != nil {
 		panic("unable to unzip all plugins")
 	}
+
+	fmt.Println("All plugins successfully extracted.")
 }
