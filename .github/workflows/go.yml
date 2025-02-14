@@ -67,6 +67,8 @@ jobs:
           cue_version: "v0.12.0"
       - name: generate files
         run: make generate
+      - name: extract plugin files
+        run: make extract-plugins
       - name: Login to CUE's Central Registry to allow retrieving deps
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
@@ -95,6 +97,8 @@ jobs:
           cue_version: "v0.12.0"
       - name: generate files
         run: make generate
+      - name: extract plugin files
+        run: make extract-plugins
       - name: Login to CUE's Central Registry to allow retrieving deps
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test

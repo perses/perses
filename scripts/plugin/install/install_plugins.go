@@ -23,16 +23,16 @@ import (
 	"strings"
 
 	"github.com/perses/common/async"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed plugin.yaml
+//go:embed plugins.yaml
 var pluginListData []byte
 
 const (
-	githubURL           = "https://github.com/perses/perses-plugins/releases/download"
-	pluginArchiveFolder = "plugins-archive"
+	githubURL = "https://github.com/perses/perses-plugins/releases/download"
 )
 
 type plugin struct {
@@ -63,7 +63,7 @@ func downloadPlugin(plugin plugin) {
 		return
 	}
 
-	out, err := os.Create(filepath.Join(pluginArchiveFolder, fmt.Sprintf("%s.tar.gz", pluginName)))
+	out, err := os.Create(filepath.Join(config.DefaultArchivePluginPath, fmt.Sprintf("%s.tar.gz", pluginName)))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to create file for plugin %s", pluginName)
 		return
@@ -81,13 +81,13 @@ func main() {
 		panic(err)
 	}
 	// create the plugin archive folder
-	if err := os.MkdirAll(pluginArchiveFolder, os.ModePerm); err != nil {
+	if err := os.MkdirAll(config.DefaultArchivePluginPath, os.ModePerm); err != nil {
 		panic(err)
 	}
 
 	var downloadToBeDone []async.Future[string]
 	for _, pl := range plugins {
-		if _, err := os.Stat(filepath.Join(pluginArchiveFolder, fmt.Sprintf("%s-%s.tar.gz", pl.PluginName, pl.Version))); err == nil {
+		if _, err := os.Stat(filepath.Join(config.DefaultArchivePluginPath, fmt.Sprintf("%s-%s.tar.gz", pl.PluginName, pl.Version))); err == nil {
 			fmt.Printf("Plugin %s already downloaded\n", pl.PluginName)
 			continue
 		}
