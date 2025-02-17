@@ -23,6 +23,7 @@ import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
 import { ImportRoute } from '../../model/route';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
+import { useIsEphemeralDashboardEnabled } from '../../context/Config';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -33,6 +34,7 @@ function HomeView(): ReactElement {
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const userProjects = useDashboardCreateAllowedProjects();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource): void => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector): void =>
@@ -90,6 +92,7 @@ function HomeView(): ReactElement {
               projects={userProjects}
               onClose={handleAddDashboardDialogClose}
               onSuccess={handleAddDashboardDialogSubmit}
+              isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
             />
           </Stack>
         </Stack>
