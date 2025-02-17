@@ -176,14 +176,11 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 		path = "/" + path
 	}
 
-	if cfg != nil {
-		return &httpProxy{
-			config: cfg,
-			path:   path,
-			secret: scrt,
-		}, nil
-	}
-	return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
+	return &httpProxy{
+		config: cfg,
+		path:   path,
+		secret: scrt,
+	}, nil
 }
 
 type httpProxy struct {

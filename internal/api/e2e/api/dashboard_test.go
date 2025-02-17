@@ -63,14 +63,14 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 
 		updatedDashboard := extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, dashboard.Metadata.Project, utils.PathDashboard, dashboard.Metadata.Name)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 		assert.True(t, dashboard.Metadata.Version+1 == updatedDashboard.Metadata.Version)
 
 		updatedDashboard = extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, dashboard.Metadata.Project, utils.PathDashboard, dashboard.Metadata.Name)).
@@ -78,7 +78,7 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 
 		assert.True(t, dashboard.Metadata.Version+2 == updatedDashboard.Metadata.Version)
 		return []api.Entity{project, entity}
@@ -126,7 +126,7 @@ func TestListDashboardWithOnlyMetadata(t *testing.T) {
 	})
 }
 
-func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
+func extractDashboardFromHTTPBody(body interface{}) *modelV1.Dashboard {
 	b := testUtils.JSONMarshalStrict(body)
 	dashboard := &modelV1.Dashboard{}
 	testUtils.JSONUnmarshal(b, dashboard)
