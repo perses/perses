@@ -11,16 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
-import { InfoTooltip, combineSx } from '@perses-dev/components';
+import { CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
+import { combineSx } from '@perses-dev/components';
 import { Link } from '@perses-dev/core';
 import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import { ReactElement, ReactNode } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
-import { PanelLinks } from './PanelLinks';
-import { HeaderIconButton } from './HeaderIconButton';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
@@ -77,32 +74,17 @@ export function PanelHeader({
           >
             {title}
           </Typography>
-          {/* Show the info tooltip when description is defined and is not all whitespace */}
-          {description !== undefined && description.trim().length > 0 && (
-            <Box sx={{ display: editHandlers === undefined ? 'var(--panel-hover, none)' : 'flex' }}>
-              <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
-                <HeaderIconButton aria-label="panel description" size="small">
-                  <InformationOutlineIcon
-                    aria-describedby="info-tooltip"
-                    aria-hidden={false}
-                    fontSize="inherit"
-                    sx={{ color: (theme) => theme.palette.text.secondary }}
-                  />
-                </HeaderIconButton>
-              </InfoTooltip>
-            </Box>
-          )}
-          {links !== undefined && links.length > 0 && <PanelLinks links={links} />}
+          <PanelActions
+            title={title}
+            description={description}
+            descriptionTooltipId={descriptionTooltipId}
+            links={links}
+            queryResults={queryResults}
+            readHandlers={readHandlers}
+            editHandlers={editHandlers}
+            extra={extra}
+          />
         </Stack>
-      }
-      action={
-        <PanelActions
-          title={title}
-          queryResults={queryResults}
-          readHandlers={readHandlers}
-          editHandlers={editHandlers}
-          extra={extra}
-        />
       }
       sx={combineSx(
         (theme) => ({
@@ -112,13 +94,6 @@ export function PanelHeader({
           borderBottom: `solid 1px ${theme.palette.divider}`,
           '.MuiCardHeader-content': {
             overflow: 'hidden',
-          },
-          '.MuiCardHeader-action': {
-            // Overriding the negative margins from MUI's defaults, so we
-            // can vertically center the icons. Moving these values to a wrapper
-            // inside the action in `HeaderActionWrapper` below.
-            // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/CardHeader/CardHeader.js#L56-L58
-            margin: 'auto',
           },
         }),
         sx

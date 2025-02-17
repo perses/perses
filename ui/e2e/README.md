@@ -28,6 +28,14 @@ Tests are run during local development using the configuration in `local.playwri
 - (Optional) Run the end-to-end tests in debug mode to walk through a test step by step to debug issues: `npm run e2e:debug`.
 - (Optional) Install [Playwright VS Code extension](https://playwright.dev/docs/getting-started-vscode). This extension has a lot of helpful tools for running tests, debugging, and creating selectors. Select `local.playwright.config.ts` as the profile to use when running locally.
 
+### Locally with UI
+
+Example for running a single test with UI:
+
+- `./scripts/api_backend_dev.sh --e2e`
+- `cd ui; npm start`
+- `cd ui/e2e; npx playwright test --config=src/config/local.playwright.config.ts --ui src/tests/statChartPanel.spec.ts`
+
 ### Locally with screenshots (maintainers only)
 
 _This option is limited to maintainers because it requires access to secrets in the Happo account._
