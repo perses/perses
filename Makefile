@@ -94,17 +94,17 @@ fmt-docs:
 	@echo ">> format markdown document"
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
 
-.PHONY: cue-def
-cue-def:
-	@echo ">> check CUE files"
-	$(CUE) def ./cue/...
+.PHONY: cue-eval
+cue-eval:
+	@echo ">> validate CUE schemas"
+	cd cue && $(CUE) eval ./...
 
 .PHONY: cue-gen
 cue-gen:
 	@echo ">> generate CUE definitions from golang datamodel"
 	$(CUE) get go github.com/perses/perses/pkg/model/api/v1
 	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
-	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cuelang/g' {} \;
 
 .PHONY: cue-test
 cue-test:
@@ -212,4 +212,9 @@ update-helm-readme:
 .PHONY: install-default-plugins
 install-default-plugins:
 	@echo ">> install default plugins"
-	$(GO) run ./scripts/plugin/install_plugin.go
+	$(GO) run ./scripts/plugin/install/install_plugins.go
+
+.PHONY: extract-plugins
+extract-plugins:
+	@echo ">> extract plugins"
+	$(GO) run ./scripts/plugin/extract/extract_plugins.go
