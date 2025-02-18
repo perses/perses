@@ -188,7 +188,7 @@ spec:
 
 func buildCUESchema(path string) (cue.Value, error) {
 	ctx := cuecontext.New()
-	schemaInstance, err := schema.LoadSchemaInstance(path, "model")
+	_, schemaInstance, err := schema.LoadModelSchema(path)
 	if err != nil {
 		return cue.Value{}, err
 	}
