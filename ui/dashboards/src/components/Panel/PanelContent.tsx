@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { usePlugin, PanelProps, QueryData, PanelPlugin } from '@perses-dev/plugin-system';
+import { usePlugin, PanelProps, QueryData, PanelPlugin as IPanelPlugin } from '@perses-dev/plugin-system';
 import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { LoadingOverlay } from '@perses-dev/components';
@@ -80,7 +80,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
 }
 
 interface PanelLoadingProps extends Pick<PanelContentProps, 'spec' | 'definition' | 'contentDimensions'> {
-  plugin?: PanelPlugin<UnknownSpec, PanelProps<UnknownSpec, QueryDataType>>;
+  plugin?: IPanelPlugin<UnknownSpec, PanelProps<UnknownSpec, QueryDataType>>;
 }
 
 function PanelLoading({ plugin, spec, definition, contentDimensions }: PanelLoadingProps): ReactElement {
