@@ -15,7 +15,6 @@ export const TOOLTIP_TEXT = {
   // Toolbar buttons
   addPanel: 'Add panel',
   addGroup: 'Add panel group',
-  downloadDashboard: 'Download JSON',
   editDatasources: 'Edit datasources',
   editJson: 'Edit JSON',
   editVariables: 'Edit variables',
