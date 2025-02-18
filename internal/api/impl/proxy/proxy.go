@@ -161,6 +161,10 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the http config")
 	}
+	if cfg == nil {
+		logrus.Error("unable to find the http config in the datasource")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
+	}
 	var scrt *v1.SecretSpec
 	if len(cfg.Secret) > 0 {
 		scrt, err = retrieveSecret(cfg.Secret)

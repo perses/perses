@@ -20,12 +20,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/dependency"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/utils"
+	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -64,6 +66,28 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 			Spec: pluginSpecAsMapInterface,
 		},
 	}
+}
+
+func newDashboard(t *testing.T, projectName string, dashboardName string, dtsName string) *v1.Dashboard {
+	dts := newDatasourceSpec(t)
+	entity := &v1.Dashboard{
+		Kind: v1.KindDashboard,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: dashboardName,
+			},
+			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+				Project: projectName,
+			},
+		},
+		Spec: v1.DashboardSpec{
+			Datasources: map[string]*v1.DatasourceSpec{
+				dtsName: &dts,
+			},
+		},
+	}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func newDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
@@ -118,6 +142,42 @@ func TestProxyProjectDatasource(t *testing.T) {
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
 			Expect().
 			Status(http.StatusOK)
-		return []api.Entity{dts}
+		return []api.Entity{project, dts}
+	})
+}
+
+func TestProxyLocalDatasource(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		dtsName := "myDTS"
+		dashboardName := "myDashboard"
+		projectName := "perses"
+		dashboard := newDashboard(t, projectName, dashboardName, dtsName)
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dashboard)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{project, dashboard}
+	})
+}
+
+func TestProxyLocalDatasourceWithRealDashboard(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		var dashboard v1.Dashboard
+		data := testUtils.ReadFile(filepath.Join("testdata", "dashboard.json"))
+		testUtils.JSONUnmarshal(data, &dashboard)
+		dtsName := "Victoria Metrics"
+		dashboardName := "myDashboard"
+		projectName := "perses"
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, &dashboard)
+
+		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{project, &dashboard}
 	})
 }
