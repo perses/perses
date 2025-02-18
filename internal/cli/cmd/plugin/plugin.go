@@ -16,7 +16,6 @@ package plugin
 import (
 	"github.com/perses/perses/internal/cli/cmd/plugin/build"
 	"github.com/perses/perses/internal/cli/cmd/plugin/lint"
-	"github.com/perses/perses/internal/cli/cmd/plugin/update"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,6 @@ func NewCMD() *cobra.Command {
 	}
 	cmd.AddCommand(build.NewCMD())
 	cmd.AddCommand(lint.NewCMD())
-	cmd.AddCommand(update.NewCMD())
 
 	return cmd
 }
