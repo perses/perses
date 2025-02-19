@@ -526,7 +526,7 @@ folders:
 
 ```yaml
 # The name of the discovery config. It is used for logging purposes only
-discovery_name: <string>
+name: <string>
 
 # Refresh interval to run the discovery
 refresh_interval: <duration> | default = 5m # Optional
