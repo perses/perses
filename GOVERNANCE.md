@@ -42,6 +42,7 @@ The current team members are:
 | Celian Garcia     | [celian-garcia](https://github.com/celian-garcia)   | Amadeus      |
 | Gabriel Bernal    | [jgbernalp](https://github.com/jgbernalp)           | Red Hat      |
 | Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus      |
+| Nicolas Takashi   | [nicolastakashi](https://github.com/nicolastakashi) | Coralogix    |
 | Steven Cobb       | [sjcobb](https://github.com/sjcobb)                 | Chronosphere |
 
 ## Maintainers
