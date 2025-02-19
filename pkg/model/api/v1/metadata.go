@@ -40,6 +40,7 @@ type Metadata struct {
 	// +kubebuilder:validation:Optional
 	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
 	Version   uint64    `json:"version" yaml:"version"`
+	Tags      []string  `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func (m *Metadata) CreateNow() {
