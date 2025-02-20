@@ -4,7 +4,7 @@
 
 package v1
 
-import "github.com/perses/perses/cuelang/model/api/v1/role"
+import "github.com/perses/perses/cue/model/api/v1/role"
 
 #RoleInterface: _
 

@@ -15,7 +15,7 @@ package group
 
 import (
 	"strings"
-	varBuilder "github.com/perses/perses/cuelang/dac-utils/variable"
+	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
 #input: [...varBuilder]

@@ -1,4 +1,4 @@
-module: "github.com/perses/perses/cuelang@v0"
+module: "github.com/perses/perses/cue@v0"
 language: {
 	version: "v0.12.0"
 }

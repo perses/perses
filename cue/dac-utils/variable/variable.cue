@@ -14,8 +14,8 @@
 package variable
 
 import (
-	v1Dashboard "github.com/perses/perses/cuelang/model/api/v1/dashboard"
-	v1Variable "github.com/perses/perses/cuelang/model/api/v1/variable"
+	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
+	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
 )
 
 #kind: string
