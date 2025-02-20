@@ -391,7 +391,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 
 		// => Error case: The client doesn't have the client credentials.
 		_, err = v1.NewWithClient(unauthenticatedClient).Project().List("")
-		assert.ErrorContains(t, err, "missing or malformed jwt StatusCode: 401")
+		assert.ErrorContains(t, err, "missing or malformed jwt StatusCode: 400")
 
 		return usersCreatedByTheSuite
 	})
@@ -461,7 +461,7 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 
 		// => Error case: The client doesn't have the client credentials.
 		_, err = v1.NewWithClient(unauthenticatedClient).Project().List("")
-		assert.ErrorContains(t, err, "missing or malformed jwt StatusCode: 401")
+		assert.ErrorContains(t, err, "missing or malformed jwt StatusCode: 400")
 
 		return usersCreatedByTheSuite
 	})
