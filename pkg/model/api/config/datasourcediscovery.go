@@ -78,7 +78,7 @@ func (d *KubernetesDiscovery) Verify() error {
 
 type GlobalDatasourceDiscovery struct {
 	// The name of the discovery config. It is used for logging purposes only
-	DiscoveryName string `json:"discovery_name" yaml:"discovery_name"`
+	Name string `json:"name" yaml:"name"`
 	// Refresh interval to re-query the endpoint.
 	RefreshInterval common.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
 	// HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
@@ -92,14 +92,14 @@ type GlobalDatasourceDiscovery struct {
 }
 
 func (g *GlobalDatasourceDiscovery) Verify() error {
-	if len(g.DiscoveryName) == 0 {
+	if len(g.Name) == 0 {
 		return fmt.Errorf("global datasource discovery name is empty")
 	}
 	if g.RefreshInterval == 0 {
 		g.RefreshInterval = defaultRefreshInterval
 	}
 	if g.HTTPDiscovery == nil && g.KubernetesDiscovery == nil {
-		return fmt.Errorf("no discovery has been defined for the global datasource discovery %q", g.DiscoveryName)
+		return fmt.Errorf("no discovery has been defined for the global datasource discovery %q", g.Name)
 	}
 	return nil
 }
