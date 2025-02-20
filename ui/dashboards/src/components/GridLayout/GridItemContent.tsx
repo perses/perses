@@ -76,6 +76,10 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       spec: query.spec.plugin.spec,
     };
   });
+  const pluginQueryOptions =
+    typeof plugin?.queryOptions === 'function'
+      ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
+      : plugin?.queryOptions;
 
   return (
     <Box
@@ -87,7 +91,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     >
       <DataQueriesProvider
         definitions={definitions}
-        options={{ suggestedStepMs, ...plugin?.queryOptions }}
+        options={{ suggestedStepMs, ...pluginQueryOptions }}
         queryOptions={{ enabled: inView }}
       >
         {inView && (
