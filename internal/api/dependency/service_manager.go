@@ -140,7 +140,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	roleService := roleImpl.NewService(dao.GetRole(), rbacService, schemasService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), rbacService, schemasService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
-	userService := userImpl.NewService(dao.GetUser())
+	userService := userImpl.NewService(dao.GetUser(), rbacService)
 	viewService := viewImpl.NewMetricsViewService()
 
 	svc := &service{

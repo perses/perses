@@ -19,7 +19,9 @@ import (
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/rbac"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 )
 
 // useNewIfPresent decides if we take the old or new string.
@@ -73,7 +75,8 @@ func newSpecIfChanged(old v1.UserSpec, uInfo externalUserInfo) (v1.UserSpec, boo
 }
 
 type service struct {
-	dao user.DAO
+	dao  user.DAO
+	rbac rbac.RBAC
 }
 
 func (s *service) getOrPrepareUserEntity(login string) (*v1.User, bool, error) {
@@ -109,6 +112,10 @@ func (s *service) syncUser(uInfo externalUserInfo) (*v1.User, error) {
 		err = s.dao.Create(entity)
 		if err != nil {
 			return nil, err
+		}
+		// Refreshing RBAC cache as the user's associated role may be updated, which can add or remove permissions.
+		if err := s.rbac.Refresh(); err != nil {
+			logrus.WithError(err).Error("failed to refresh RBAC cache")
 		}
 	} else if specHasChanged {
 		entity.Metadata.Update(entity.Metadata)

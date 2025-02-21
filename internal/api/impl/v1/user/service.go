@@ -20,22 +20,24 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
-	apiInterface "github.com/perses/perses/internal/api/interface"
-
 	"github.com/perses/perses/internal/api/crypto"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/rbac"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
 type service struct {
 	user.Service
-	dao user.DAO
+	dao  user.DAO
+	rbac rbac.RBAC
 }
 
-func NewService(dao user.DAO) user.Service {
+func NewService(dao user.DAO, rbac rbac.RBAC) user.Service {
 	return &service{
-		dao: dao,
+		dao:  dao,
+		rbac: rbac,
 	}
 }
 
@@ -63,6 +65,10 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	entity.Spec.NativeProvider.Password = string(hash)
 	if createErr := s.dao.Create(entity); createErr != nil {
 		return nil, createErr
+	}
+	// Refreshing RBAC cache as the user's associated role may be updated, which can add or remove permissions.
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return v1.NewPublicUser(entity), nil
 }
@@ -108,11 +114,23 @@ func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*
 		logrus.WithError(err).Errorf("unable to perform the update of the user %q", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	// Refreshing RBAC cache as the user's associated role may be updated, which can add or remove permissions.
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
 	return v1.NewPublicUser(entity), nil
 }
 
 func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Name)
+	err := s.dao.Delete(parameters.Name)
+	if err != nil {
+		return err
+	}
+	// Refreshing RBAC cache as the user's associated role may be updated, which can add or remove permissions.
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
+	return nil
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
