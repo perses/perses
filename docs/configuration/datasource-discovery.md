@@ -34,7 +34,7 @@ global_datasource_discovery:
 ```
 
 If you want more details about how to fine-tune the HTTP config (like adding oauth2 authentication), you can check
-the [complete configuration documentation](./configuration/configuration.md#httpsd-config).
+the [complete configuration documentation](../configuration/configuration.md#httpsd-config).
 
 ## Kubernetes Service Discovery
 
@@ -64,4 +64,4 @@ global_datasource_discovery:
 ```
 
 If you want more details about how to fine-tune the Kubernetes config, you can check
-the [complete configuration documentation](./configuration/configuration.md#kubernetessd-config).
+the [complete configuration documentation](../configuration/configuration.md#kubernetessd-config).

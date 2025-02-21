@@ -57,7 +57,7 @@ name: <string>
 
 ### More info about authorization
 
-Please look at the [documentation](../auth/authorization.md) to know more about permissions and role bindings.
+Please look at the [documentation](../concepts/authorization.md) to know more about permissions and role bindings.
 
 ## API definition
 
