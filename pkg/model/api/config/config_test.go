@@ -58,6 +58,24 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "database": {},
   "provisioning": {},
+  "datasource": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
+  "variable": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
   "ephemeral_dashboard": {
     "enable": false,
     "cleanup_interval": "0s"
@@ -107,6 +125,24 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "provisioning": {
     "interval": "1h"
+  },
+  "datasource": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
+  "variable": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
   },
   "ephemeral_dashboard": {
     "enable": false,

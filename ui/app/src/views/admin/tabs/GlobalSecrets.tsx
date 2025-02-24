@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { GlobalSecretResource, Secret } from '@perses-dev/core';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { SecretList } from '../../../components/secrets/SecretList';
 import {
   useCreateGlobalSecretMutation,
@@ -30,11 +29,6 @@ interface GlobalSecretsProps {
 
 export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
   const { id } = props;
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi]);
 
   const { data, isLoading } = useGlobalSecretList();
 

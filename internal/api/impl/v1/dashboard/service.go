@@ -25,24 +25,29 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
 type service struct {
 	dashboard.Service
-	dao           dashboard.DAO
-	globalVarDAO  globalvariable.DAO
-	projectVarDAO variable.DAO
-	sch           schema.Schema
+	dao                 dashboard.DAO
+	globalVarDAO        globalvariable.DAO
+	projectVarDAO       variable.DAO
+	sch                 schema.Schema
+	isDatasourceDisable bool
+	isVariableDisable   bool
 }
 
-func NewService(dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
 	return &service{
-		dao:           dao,
-		globalVarDAO:  globalVarDAO,
-		projectVarDAO: projectVarDAO,
-		sch:           sch,
+		dao:                 dao,
+		globalVarDAO:        globalVarDAO,
+		projectVarDAO:       projectVarDAO,
+		sch:                 sch,
+		isDatasourceDisable: cfg.Datasource.DisableLocal,
+		isVariableDisable:   cfg.Variable.DisableLocal,
 	}
 }
 
@@ -159,6 +164,16 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 
 	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if s.isDatasourceDisable {
+		if len(entity.Spec.Datasources) > 0 {
+			return apiInterface.HandleBadRequestError("local datasource cannot be used as it has been disabled in the configuration")
+		}
+	}
+	if s.isVariableDisable {
+		if len(entity.Spec.Variables) > 0 {
+			return apiInterface.HandleBadRequestError("local variable cannot be used as it has been disabled in the configuration")
+		}
 	}
 	return nil
 }

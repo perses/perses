@@ -51,6 +51,36 @@ export function useConfigContext(): ConfigContextType {
   return ctx;
 }
 
+export function useIsGlobalDatasourceEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.datasource.global.disable;
+}
+
+export function useIsProjectDatasourceEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.datasource.project.disable;
+}
+
+export function useIsLocalDatasourceEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.datasource.disable_local;
+}
+
+export function useIsGlobalVariableEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.variable.global.disable;
+}
+
+export function useIsProjectVariableEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.variable.project.disable;
+}
+
+export function useIsLocalVariableEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.variable.disable_local;
+}
+
 export function useIsExplorerEnabled(): boolean {
   const { config } = useConfigContext();
   return config.frontend.explorer.enable;

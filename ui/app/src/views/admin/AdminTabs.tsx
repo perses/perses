@@ -35,7 +35,12 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useIsAuthEnabled, useIsReadonly } from '../../context/Config';
+import {
+  useIsAuthEnabled,
+  useIsGlobalDatasourceEnabled,
+  useIsGlobalVariableEnabled,
+  useIsReadonly,
+} from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebinding-client';
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
@@ -376,6 +381,8 @@ interface AdminTabsProps {
 export function AdminTabs(props: AdminTabsProps): ReactElement {
   const { initialTab } = props;
   const isAuthEnabled = useIsAuthEnabled();
+  const isGlobalDatasourceEnabled = useIsGlobalDatasourceEnabled();
+  const isGlobalVariableEnabled = useIsGlobalVariableEnabled();
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
@@ -393,7 +400,8 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
     setValue(newTabIndex);
     navigate(`/admin/${newTabIndex}`);
   };
-
+  const marginTop = isMobileSize ? 1 : 2;
+  console.log(isGlobalDatasourceEnabled);
   return (
     <Box sx={{ width: '100%' }}>
       <Stack
@@ -410,22 +418,26 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
           allowScrollButtonsMobile
           aria-label="Admin tabs"
         >
-          <MenuTab
-            label="Global Variables"
-            icon={<CodeJsonIcon />}
-            iconPosition="start"
-            {...a11yProps(variablesTabIndex)}
-            value={variablesTabIndex}
-            disabled={!hasGlobalVariableReadPermission}
-          />
-          <MenuTab
-            label="Global Datasources"
-            icon={<DatabaseIcon />}
-            iconPosition="start"
-            {...a11yProps(datasourcesTabIndex)}
-            value={datasourcesTabIndex}
-            disabled={!hasGlobalDatasourceReadPermission}
-          />
+          {isGlobalVariableEnabled && (
+            <MenuTab
+              label="Global Variables"
+              icon={<CodeJsonIcon />}
+              iconPosition="start"
+              {...a11yProps(variablesTabIndex)}
+              value={variablesTabIndex}
+              disabled={!hasGlobalVariableReadPermission}
+            />
+          )}
+          {isGlobalDatasourceEnabled && (
+            <MenuTab
+              label="Global Datasources"
+              icon={<DatabaseIcon />}
+              iconPosition="start"
+              {...a11yProps(datasourcesTabIndex)}
+              value={datasourcesTabIndex}
+              disabled={!hasGlobalDatasourceReadPermission}
+            />
+          )}
           <MenuTab
             label="Global Secrets"
             icon={<KeyIcon />}
@@ -468,21 +480,25 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
         {!isMobileSize && <TabButton index={value} />}
       </Stack>
       {isMobileSize && <TabButton index={value} fullWidth sx={{ marginTop: 0.5 }} />}
-      <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <GlobalVariables id="global-variable-list" />
-      </TabPanel>
-      <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <GlobalDatasources id="global-datasource-list" />
-      </TabPanel>
-      <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+      {isGlobalVariableEnabled && (
+        <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: marginTop }}>
+          <GlobalVariables id="global-variable-list" />
+        </TabPanel>
+      )}
+      {isGlobalDatasourceEnabled && (
+        <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: marginTop }}>
+          <GlobalDatasources id="global-datasource-list" />
+        </TabPanel>
+      )}
+      <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: marginTop }}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
       {isAuthEnabled && (
         <>
-          <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: marginTop }}>
             <GlobalRoles id="global-role-list" />
           </TabPanel>
-          <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: marginTop }}>
             <GlobalRoleBindings id="global-rolebinding-list" />
           </TabPanel>
           <TabPanel value={value} index={usersTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
