@@ -99,12 +99,10 @@ kind: <string>
 spec: <Plugin specification>
 ```
 
-See the [Panel plugins](../plugins/panels.md) documentation to know more about the different panels supported by Perses.
-
 #### Query specification
 
 ```yaml
-# kind` is the type of the query. For the moment we only support `TimeSeriesQuery`.
+# kind` is the type of the query.
 kind: <string>
 spec:
   plugin: <Query Plugin specification>
@@ -119,9 +117,6 @@ kind: <string>
 # `spec` is the actual definition of the query. Each `kind` comes with its own `spec`.
 spec: <Plugin specification>
 ```
-
-Perses supports only Prometheus for the `TimeSeriesQuery` for the moment.
-Please look at the [Prometheus documentation](../plugins/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
 
 ### Layout specification
 

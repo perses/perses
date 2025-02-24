@@ -50,14 +50,4 @@ Generic placeholders are defined as follows:
     - [Choose a scope](./rolebinding.md#choose-a-scope)
     - [Specification](./rolebinding.md#rolebinding-specification)
     - [API definition](./rolebinding.md#api-definition)
-- Plugins
-    - [Panels](../plugins/panels.md)
-        - [BarChart](../plugins/panels.md#barchart)
-        - [GaugeChart](../plugins/panels.md#gaugechart)
-        - [Markdown](../plugins/panels.md#markdown)
-        - [StatChart](../plugins/panels.md#statchart)
-        - [TimeSeriesChart](../plugins/panels.md#timeserieschart)
-    - [Prometheus](../plugins/prometheus.md)
-        - [Datasource](../plugins/prometheus.md#datasource)
-        - [Query](../plugins/prometheus.md#query)
-        - [Variable](../plugins/prometheus.md#variable)
+

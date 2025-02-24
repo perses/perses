@@ -68,8 +68,7 @@ kind: <string>
 spec: <Plugin specification>
 ```
 
-We are supporting only prometheus as a datasource for the moment.
-Please look at the [documentation](../plugins/prometheus.md#datasource) to know the spec for the Prometheus datasource.
+Please refer to the plugin documentation to know the definition of the `spec` field.
 
 ### Selecting / Referencing a Datasource
 
