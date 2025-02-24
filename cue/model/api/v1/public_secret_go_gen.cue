@@ -4,7 +4,7 @@
 
 package v1
 
-import "github.com/perses/perses/cuelang/model/api/v1/secret"
+import "github.com/perses/perses/cue/model/api/v1/secret"
 
 #PublicSecretSpec: {
 	basicAuth?: null | secret.#PublicBasicAuth @go(BasicAuth,*secret.PublicBasicAuth)
