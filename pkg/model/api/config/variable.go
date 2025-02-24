@@ -15,11 +15,14 @@ package config
 
 type GlobalVariableConfig struct {
 	// Disable is used to disable the global variable feature.
-	// Note that is the global datasource is disabled, the global variable will also be disabled.
+	// Note that if the global datasource is disabled, the global variable will also be disabled.
 	Disable bool `json:"disable" yaml:"disable"`
 }
 
 type ProjectVariableConfig struct {
+	// Disable is used to disable the project variable feature.
+	// Note that if the global datasource and the project datasource are disabled,
+	// then the project variable will also be disabled.
 	Disable bool `json:"disable" yaml:"disable"`
 }
 

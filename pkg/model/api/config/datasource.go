@@ -13,6 +13,8 @@
 
 package config
 
+import "fmt"
+
 type GlobalDatasourceConfig struct {
 	// Disable is used to disable the global datasource feature.
 	// It will also remove the associated proxy.
@@ -22,6 +24,13 @@ type GlobalDatasourceConfig struct {
 	// Be careful: the data coming from the discovery will totally override what exists in the database.
 	// Note that this is an experimental feature. Behavior and config may change in the future.
 	Discovery []GlobalDatasourceDiscovery `json:"discovery,omitempty" yaml:"discovery,omitempty"`
+}
+
+func (c *GlobalDatasourceConfig) Verify() error {
+	if c.Disable && len(c.Discovery) > 0 {
+		return fmt.Errorf("the global datasource is disabled, you cannot use the discovery feature")
+	}
+	return nil
 }
 
 type ProjectDatasourceConfig struct {
