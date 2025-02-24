@@ -17,9 +17,9 @@
 package dashboard
 
 import (
-	"github.com/perses/perses/cuelang/model/api/v1"
-	v1Common "github.com/perses/perses/cuelang/model/api/v1/common"
-	v1Dashboard "github.com/perses/perses/cuelang/model/api/v1/dashboard"
+	"github.com/perses/perses/cue/model/api/v1"
+	v1Common "github.com/perses/perses/cue/model/api/v1/common"
+	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
 // expected user inputs
