@@ -31,6 +31,8 @@ export interface DashboardToolbarProps {
   dashboardTitleComponent?: JSX.Element;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
+  isVariableEnabled: boolean;
+  isDatasourceEnabled: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
   onSave?: OnSaveDashboard;
@@ -42,6 +44,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     dashboardTitleComponent,
     initialVariableIsSticky,
     isReadonly,
+    isVariableEnabled,
+    isDatasourceEnabled,
     onEditButtonClick,
     onCancelButtonClick,
     onSave,
@@ -78,8 +82,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
                 </Alert>
               )}
               <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
-                <EditVariablesButton />
-                <EditDatasourcesButton />
+                {isVariableEnabled && <EditVariablesButton />}
+                {isDatasourceEnabled && <EditDatasourcesButton />}
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>
