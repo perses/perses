@@ -37,7 +37,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/zitadel/oidc/v3 v3.35.0 // indirect
 	github.com/zitadel/schema v1.3.0 // indirect
-	golang.org/x/crypto v0.34.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.26.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
