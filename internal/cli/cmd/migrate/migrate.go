@@ -33,20 +33,47 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const persesAPIVersion = "perses.dev/v1alpha1"
+
 var inputRegexp = regexp.MustCompile("([a-zA-Z0-9_-]+)=(.+)")
+
+type kubeCustomResource struct {
+	APIVersion string                  `json:"apiVersion" yaml:"apiVersion"`
+	Kind       string                  `json:"kind" yaml:"kind"`
+	Metadata   modelV1.ProjectMetadata `json:"metadata" yaml:"metadata"`
+	Spec       modelV1.DashboardSpec   `json:"spec" yaml:"spec"`
+}
+
+func createCustomResource(dash *modelV1.Dashboard) *kubeCustomResource {
+	return &kubeCustomResource{
+		APIVersion: persesAPIVersion,
+		Kind:       "PersesDashboard",
+		Metadata:   dash.Metadata,
+		Spec:       dash.Spec,
+	}
+}
+
+type migrationFormat string
+
+const (
+	nativeFormat              migrationFormat = "native"
+	customResourceFormat      migrationFormat = "custom-resource"
+	customResourceShortFormat migrationFormat = "cr"
+)
 
 type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.OutputOption
-	writer     io.Writer
-	errWriter  io.Writer
-	rowInput   []string
-	input      map[string]string
-	pluginPath string
-	online     bool
-	mig        migrate.Migration
-	apiClient  api.ClientInterface
+	writer          io.Writer
+	errWriter       io.Writer
+	rowInput        []string
+	input           map[string]string
+	pluginPath      string
+	online          bool
+	mig             migrate.Migration
+	apiClient       api.ClientInterface
+	migrationFormat migrationFormat
 }
 
 func (o *option) Complete(args []string) error {
@@ -96,6 +123,9 @@ func (o *option) completeInput() {
 }
 
 func (o *option) Validate() error {
+	if o.migrationFormat != nativeFormat && o.migrationFormat != customResourceFormat && o.migrationFormat != customResourceShortFormat {
+		return fmt.Errorf("invalid value for flag --format: %s", o.migrationFormat)
+	}
 	return nil
 }
 
@@ -113,6 +143,10 @@ func (o *option) Execute() error {
 	}
 	if err != nil {
 		return err
+	}
+	if o.migrationFormat == customResourceFormat || o.migrationFormat == customResourceShortFormat {
+		customResource := createCustomResource(persesDashboard)
+		return output.Handle(o.writer, o.Output, customResource)
 	}
 	return output.Handle(o.writer, o.Output, persesDashboard)
 }
@@ -157,6 +191,7 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddOutputFlags(cmd, &o.OutputOption)
 	opt.MarkFileFlagAsMandatory(cmd)
+	cmd.Flags().StringVar((*string)(&o.migrationFormat), "format", string(nativeFormat), "The format of the migration. Can be 'native' or 'custom-resource' or shorter 'cr'.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
 	// When "online" flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.

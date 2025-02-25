@@ -28,7 +28,7 @@ extensible specification.
 The migration process is done in two parts:
 
 1. Step one: Import the Grafana Dashboard into a Golang structure and then migrate it to the Perses Golang structure.
-2. Step two: for each variables, panels and queries in the Grafana dashboard, we are executing a Cuelang script coming
+2. Step two: for each variable, panels and queries in the Grafana dashboard, we are executing a Cuelang script coming
    from the plugin itself, if, of course, the plugin is supported. This script will generate the piece of the Perses
    data-model for the corresponding plugin.
 
@@ -74,6 +74,8 @@ percli login http://localhost:8080
 ```bash
 percli migrate -f grafana-dashboard.json --online -o json > perses-dashboard.json
 ```
+
+Note: In case you would like to have the result as a K8s CustomResource, you can use the `--format` flag with the value `cr`.
 
 - As a tip, you may want to open the file and remove any reference to the previous datasource used in Grafana. This
   will allow the dashboard to use the default datasource. Do that only if you want to use the default datasource.
