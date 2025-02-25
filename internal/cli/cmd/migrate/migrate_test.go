@@ -14,12 +14,19 @@
 package migrate
 
 import (
+	"path/filepath"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/perses/perses/internal/test"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func TestMigrateCMD(t *testing.T) {
+	pathToGrafanaDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_grafana_dashboard.json")
+	pathToPersesDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_perses_dashboard.json")
+	var dashboard *modelV1.Dashboard
+	test.JSONUnmarshalFromFile(pathToPersesDashboard, &dashboard)
 	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
@@ -32,6 +39,18 @@ func TestMigrateCMD(t *testing.T) {
 			Args:            []string{"whatever", "-f", "file.json"},
 			IsErrorExpected: true,
 			ExpectedMessage: "no args are supported by the command 'migrate'",
+		},
+		{
+			Title:           "migrate with native format",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
+		},
+		{
+			Title:           "migrate with custom resource format",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(createCustomResource(dashboard))) + "\n",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

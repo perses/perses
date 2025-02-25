@@ -166,8 +166,7 @@ func TestProxyLocalDatasource(t *testing.T) {
 func TestProxyLocalDatasourceWithRealDashboard(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		var dashboard v1.Dashboard
-		data := testUtils.ReadFile(filepath.Join("testdata", "dashboard.json"))
-		testUtils.JSONUnmarshal(data, &dashboard)
+		testUtils.JSONUnmarshalFromFile(filepath.Join("testdata", "dashboard.json"), &dashboard)
 		dtsName := "Victoria Metrics"
 		dashboardName := "myDashboard"
 		projectName := "perses"

@@ -62,14 +62,14 @@ func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 
 		updatedEphemeralDashboard := extractEphemeralDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, ephemeralDashboard.Metadata.Project, utils.PathEphemeralDashboard, ephemeralDashboard.Metadata.Name)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 		assert.True(t, ephemeralDashboard.Metadata.Version+1 == updatedEphemeralDashboard.Metadata.Version)
 
 		updatedEphemeralDashboard = extractEphemeralDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, ephemeralDashboard.Metadata.Project, utils.PathEphemeralDashboard, ephemeralDashboard.Metadata.Name)).
@@ -77,7 +77,7 @@ func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			JSON().
-			Raw(), t)
+			Raw())
 
 		assert.True(t, ephemeralDashboard.Metadata.Version+2 == updatedEphemeralDashboard.Metadata.Version)
 		return []api.Entity{project, entity}
@@ -103,7 +103,7 @@ func TestListEphemeralDashboardInEmptyProject(t *testing.T) {
 	})
 }
 
-func extractEphemeralDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.EphemeralDashboard {
+func extractEphemeralDashboardFromHTTPBody(body interface{}) *modelV1.EphemeralDashboard {
 	b := testUtils.JSONMarshalStrict(body)
 	ephemeralDashboard := &modelV1.EphemeralDashboard{}
 	testUtils.JSONUnmarshal(b, ephemeralDashboard)
