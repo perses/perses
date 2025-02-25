@@ -12,11 +12,11 @@ data-model).
 *Note that we are not supporting any other Grafana resources like alerts, users, etc. We are only focusing on the
 dashboards.*
 
-The challenge around this process is actually to be able to translate the Grafana various plugin to the one supported by
+The challenge around this process is actually to be able to translate the Grafana various plugins to the ones supported by
 Perses. Since Perses is a very young project compared to Grafana, it is certain we are not supporting every possible
 plugin. However, we are working hard to support the most popular ones.
 
-If a plugin is not supported, it will be replaced by the Markdown panel in Perses with a not saying:
+If a plugin is not supported, it will be replaced by the Markdown panel in Perses with a note saying:
 `this panel is not supported`.
 
 ## How it works
@@ -75,7 +75,7 @@ percli login http://localhost:8080
 percli migrate -f grafana-dashboard.json --online -o json > perses-dashboard.json
 ```
 
-- As a tips, you may want to open the file and remove any reference to the previous datasource used in Grafana. This
+- As a tip, you may want to open the file and remove any reference to the previous datasource used in Grafana. This
   will allow the dashboard to use the default datasource. Do that only if you want to use the default datasource.
 
 For example:
@@ -99,7 +99,7 @@ You can transform it like this:
 }
 ```
 
-- You should check the unsupported migrations. For example for the variable, you will have a static variable like this:
+- You should check the unsupported migrations. For example, in case of a variable, you will get a static variable like this:
 
 ```json
 {
