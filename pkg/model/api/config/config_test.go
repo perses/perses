@@ -57,6 +57,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     }
   },
   "database": {},
+  "dashboard": {},
   "provisioning": {},
   "ephemeral_dashboard": {
     "enable": false,
@@ -105,6 +106,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       "case_sensitive": false
     }
   },
+  "dashboard": {},
   "provisioning": {
     "interval": "1h"
   },

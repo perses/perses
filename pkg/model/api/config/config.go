@@ -57,6 +57,8 @@ type Config struct {
 	// DEPRECATED.
 	// Please remove it from your config.
 	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
+	// Dashboard contains the configuration for the dashboard feature.
+	Dashboard DashboardConfig `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	// GlobalDatasourceDiscovery is the configuration that helps to generate a list of global datasource based on the discovery chosen.

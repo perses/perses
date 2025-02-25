@@ -54,6 +54,17 @@ func YAMLMarshalStrict(obj interface{}) []byte {
 	return data
 }
 
+func YAMLUnmarshal(src []byte, dst interface{}) {
+	if err := yaml.Unmarshal(src, dst); err != nil {
+		panic(err)
+	}
+}
+
+func YAMLUnmarshalFromFile(filepath string, dst interface{}) {
+	data := ReadFile(filepath)
+	YAMLUnmarshal(data, dst)
+}
+
 func GetRepositoryPath() string {
 	projectPathByte, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
 	if err != nil {
