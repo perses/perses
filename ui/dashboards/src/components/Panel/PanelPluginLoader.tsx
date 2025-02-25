@@ -21,10 +21,10 @@ interface PanelPluginProps extends PanelProps<UnknownSpec, QueryDataType> {
 }
 
 /**
- * PanelPlugin loads the panel plugin specified by the 'kind' prop from the plugin registry and
+ * PanelPluginLoader loads the panel plugin specified by the 'kind' prop from the plugin registry and
  * renders its PanelComponent.
  */
-export function PanelPlugin(props: PanelPluginProps): ReactElement {
+export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
   const { kind, spec, contentDimensions, definition, queryResults } = props;
   const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', kind, { throwOnError: true });
   const PanelComponent = plugin?.PanelComponent;

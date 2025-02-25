@@ -12,4 +12,4 @@
 // limitations under the License.
 
 export * from './Panel';
-export * from './PanelPlugin';
+export * from './PanelPluginLoader';
