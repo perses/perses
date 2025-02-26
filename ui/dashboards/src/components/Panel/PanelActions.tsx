@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled } from '@mui/material';
-import { isValidElement, PropsWithChildren, useMemo, useState } from 'react';
+import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
@@ -195,6 +195,14 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   const divider = <Box sx={{ flexGrow: 1 }}></Box>;
 
+  // if the panel is in non-editing, non-fullscreen mode, show certain icons only on hover
+  const OnHover = ({ children }: PropsWithChildren): ReactNode =>
+    editHandlers === undefined && !readHandlers?.isPanelViewed ? (
+      <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box>
+    ) : (
+      <>{children}</>
+    );
+
   return (
     <>
       {/* small panel width: move all icons except move/grab to overflow menu */}
@@ -218,7 +226,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           },
         })}
       >
-        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions}
+        <OnHover>{descriptionAction}</OnHover> {linksAction} {divider} {queryStateIndicator} {extraActions}
+        <OnHover>{readActions}</OnHover>
         <OverflowMenu title={title}>{editActions}</OverflowMenu>
         {moveAction}
       </ConditionalBox>
@@ -231,7 +240,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
         })}
       >
-        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions} {editActions}
+        <OnHover>{descriptionAction}</OnHover> {linksAction} {divider} {queryStateIndicator} {extraActions}
+        <OnHover>{readActions}</OnHover> {editActions}
         {moveAction}
       </ConditionalBox>
     </>

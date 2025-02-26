@@ -108,7 +108,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           height: '100%',
           display: 'flex',
           flexFlow: 'column nowrap',
-          ':hover': { '--panel-hover': 'true' },
+          ':hover': { '--panel-hover': 'block' },
         },
         sx
       )}
