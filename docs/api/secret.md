@@ -69,8 +69,8 @@ ca: <secret> # Optional
 caFile: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
-# At most one of cert and cert_file is allowed.
-# At most one of key and key_file is allowed.
+# At most one of cert and certFile is allowed.
+# At most one of key and keyFile is allowed.
 cert: <secret> # Optional
 certFile: <filename> # Optional
 key: <secret> # Optional
@@ -82,6 +82,16 @@ serverName: <string> # Optional
 
 # Disable validation of the server certificate.
 insecureSkipVerify: <boolean> | default = false # Optional
+# Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
+# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+# If unset, Perses will use Go default minimum version, which is TLS 1.2.
+# See MinVersion in https://pkg.go.dev/crypto/tls#Config.
+minVersion: <string> # Optional
+# Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
+# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+# If unset, Perses will use Go default maximum version, which is TLS 1.3.
+# See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
+maxVersion: <string> # Optional
 ```
 
 ### Example
