@@ -195,6 +195,7 @@ func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, err
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
 				Name: grafanaDashboard.UID,
+				Tags: grafanaDashboard.Tags,
 			},
 		},
 		Spec: v1.DashboardSpec{
