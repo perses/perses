@@ -119,7 +119,7 @@ defaultValue: <string> | <array of string> # Optional
 allowAllValue: <boolean> | default = false # Optional
 
 # Whether to allow multi-selection of values.
-allMultiple: <boolean> | default = false # Optional
+allowMultiple: <boolean> | default = false # Optional
 
 # It is a custom value that will be used if allowAllValue is true and if then `all` is selected
 customAllValue: <string> # Optional
