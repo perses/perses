@@ -14,6 +14,7 @@
 package plugin
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/perses/perses/internal/cli/file"
@@ -26,25 +27,31 @@ import (
 // distFolder is the folder where the result of the build of the frontend is stored.
 // In case the plugin is coming from the archive built in a previous stage, then all paths will have the same value.
 // In case we are validating a plugin in its repository, then the various folders in parameter will have different values depending on the struct of the repository.
-func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder string) (bool, error) {
+func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder string) error {
 	// check if the manifest file exists
 	exist, err := file.Exists(filepath.Join(distFolder, ManifestFileName))
-	if !exist || err != nil {
-		return false, err
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return fmt.Errorf("the manifest file %s is missing", filepath.Join(distFolder, ManifestFileName))
 	}
 	// check if the package.json file exists
 	npmPackageData, readErr := ReadPackage(frontendFolder)
 	if readErr != nil {
-		return false, err
+		return err
 	}
 	// check if the schema folder exists only if it requires schema
 	if IsSchemaRequired(npmPackageData.Perses) {
 		exist, err = file.Exists(schemaFolder)
-		if !exist || err != nil {
-			return false, err
+		if err != nil {
+			return err
+		}
+		if !exist {
+			return fmt.Errorf("the schema folder %s is missing", schemaFolder)
 		}
 	}
-	return true, nil
+	return nil
 }
 
 // IsSchemaRequired check if any plugins described in the module require a schema
