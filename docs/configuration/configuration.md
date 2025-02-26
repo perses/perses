@@ -94,6 +94,9 @@ security: <Security config> # Optional
 # Database configuration 
 database: <Database config> # Optional
 
+# Dashboard configuration
+dashboard: <Dashboard config> # Optional
+
 # The configuration to access the CUE schemas
 # This config is deprecated. It will be removed in the future. Please remove it from your config. 
 schemas: <Schemas config> # Optional
@@ -685,7 +688,6 @@ project: <string>
 dashboard: <string>
 ```
 
-
 ### Plugin config
 
 ```yaml
@@ -727,4 +729,34 @@ url: <string> # Optional
 
 # The absolute path to the plugin in development.
 absolute_path: <string>
+```
+
+
+### Dashboard config
+
+```yaml
+custom_lint_rules:
+  - <CustomLintRule config> # Optional
+```
+
+#### CustomLintRule config
+
+Refer to the associated [documentation](./custom-lint-rules.md) for more details.
+
+```yaml
+# The name of the custom lint rulea
+name: <string>
+
+# The target of the custom lint rule. It is a JSONPath expression.
+target: <string>
+
+# The assertion of the custom lint rule. It is a valid CEL expression. 
+# The value is the result of the target. The result of the assertion must be a boolean.
+assertion: <string>
+
+# The message to display when the assertion is false. 
+message: <string>
+
+# If set to true, the custom lint rule is disabled.
+disable: <bool> | default = false # Optional
 ```

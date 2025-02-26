@@ -37,8 +37,8 @@ type CustomLintRule struct {
 	celProgram cel.Program
 	// Message is displayed if the assertion fails.
 	Message string `json:"message" yaml:"message"`
-	// Disabled is a flag to disable the rule.
-	Disabled bool `json:"disabled" yaml:"disabled"`
+	// Disable is a flag to disable the rule.
+	Disable bool `json:"disable" yaml:"disable"`
 }
 
 func (c *CustomLintRule) Verify() error {

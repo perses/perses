@@ -39,7 +39,7 @@ func DashboardWithCustomRules(dash *modelV1.Dashboard, customRules []*config.Cus
 		return err
 	}
 	for _, rule := range customRules {
-		if rule.Disabled {
+		if rule.Disable {
 			continue
 		}
 		if evaluateErr := rule.Evaluate(jsonRaw); evaluateErr != nil {
