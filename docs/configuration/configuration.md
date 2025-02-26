@@ -482,22 +482,22 @@ A TLS config allows configuring TLS connections.
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
 ca: <string> # Optional
-caFile: <filename> # Optional
+ca_file: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
 cert: <string> # Optional
-certFile: <filename> # Optional
+cert_file: <filename> # Optional
 key: <secret> # Optional
-keyFile: <filename> # Optional
+key_file: <filename> # Optional
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-serverName: <string> # Optional
+server_name: <string> # Optional
 
 # Disable validation of the server certificate.
-insecureSkipVerify: <boolean> # Optional
+insecure_skip_verify: <boolean> # Optional
 
 # Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
