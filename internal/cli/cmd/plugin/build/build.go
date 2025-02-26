@@ -155,7 +155,7 @@ func NewCMD() *cobra.Command {
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
 	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip-npm-build", false, "")
-	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Path to the configuration file. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 
 	return cmd
 }

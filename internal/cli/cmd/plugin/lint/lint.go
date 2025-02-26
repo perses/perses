@@ -91,7 +91,7 @@ func NewCMD() *cobra.Command {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Path to the configuration file. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 
 	return cmd
 }
