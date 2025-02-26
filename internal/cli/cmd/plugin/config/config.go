@@ -24,7 +24,7 @@ type PluginConfig struct {
 	SchemasPath string `json:"schemas_path" yaml:"schemas_path"`
 }
 
-func (c *PluginConfig) Validate() error {
+func (c *PluginConfig) Verify() error {
 	if len(c.DistPath) == 0 {
 		c.DistPath = "dist"
 	}

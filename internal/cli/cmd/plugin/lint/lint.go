@@ -49,7 +49,7 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	if exist, err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil || !exist {
+	if err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil {
 		return fmt.Errorf("required files are missing: %w", err)
 	}
 	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
