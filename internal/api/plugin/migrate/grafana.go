@@ -166,9 +166,10 @@ func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
 }
 
 type SimplifiedDashboard struct {
-	UID        string  `json:"uid,omitempty"`
-	Title      string  `json:"title"`
-	Panels     []Panel `json:"panels"`
+	UID        string   `json:"uid,omitempty"`
+	Title      string   `json:"title"`
+	Tags       []string `json:"tags"`
+	Panels     []Panel  `json:"panels"`
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`
