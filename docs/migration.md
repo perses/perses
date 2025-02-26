@@ -1,39 +1,18 @@
 Migrate from Grafana
 ====================
 
-This documentation will guide you through the process of migrating from Grafana to Perses. For the moment, Grafana is
-the only supported source for migration. If you used another tool, and you want to migrate to Perses, please contact us.
-
-## Context
-
 Migrating from Grafana to Perses means to be able to translate the Grafana dashboards to Perses dashboards (in terms of
-data-model).
+data model). This documentation will guide you through the process of doing such migration.
 
-*Note that we are not supporting any other Grafana resources like alerts, users, etc. We are only focusing on the
-dashboards.*
+## ⚠️ Disclaimers
 
-The challenge around this process is actually to be able to translate the Grafana various plugins to the ones supported by
-Perses. Since Perses is a very young project compared to Grafana, it is certain we are not supporting every possible
-plugin. However, we are working hard to support the most popular ones.
+- As the title indicates, Grafana is the only supported source for migration currently. If you use another tool and would like to migrate to Perses, see the [contribution guide](https://github.com/perses/perses/blob/main/CONTRIBUTING.md) for how to raise your request.
 
-If a plugin is not supported, it will be replaced by the Markdown panel in Perses with a note saying:
-`this panel is not supported`.
+- Perses can't migrate Grafana resources like alerts, users, etc. Only the migration of dashboards is supported.
 
-## How it works
-
-As you might now, the Perses dashboard specification is written combining Golang and Cuelang.
-We rely on Cuelang when we need to describe a plugin (in the data-model). It allows us to have a dynamic and an
-extensible specification.
-
-The migration process is done in two parts:
-
-1. Step one: Import the Grafana Dashboard into a Golang structure and then migrate it to the Perses Golang structure.
-2. Step two: for each variable, panels and queries in the Grafana dashboard, we are executing a Cuelang script coming
-   from the plugin itself, if, of course, the plugin is supported. This script will generate the piece of the Perses
-   data-model for the corresponding plugin.
-
-If you need more information about how to write a migration script in Golang for a plugin, please refer to
-the [associated documentation](./plugins/cue.md#migration-from-grafana).
+- The challenge around the migration process is to be able to translate the various Grafana plugins to the ones supported by
+Perses. Since Perses is much younger project than Grafana, it is certain that it doesn't support every possible
+plugin. Therefore, the migration is in best-effort basis. However we are working hard to expand coverage!
 
 ## Prerequisites
 
@@ -127,3 +106,21 @@ You can transform it like this:
 ```bash
 percli apply -f perses-dashboard.json --project my-project
 ```
+
+## To go further
+
+### How it works
+
+As you might now, the Perses dashboard specification is written combining Golang and Cuelang.
+We rely on Cuelang for the data model of the plugins. It allows us to have a dynamic and
+extensible specification.
+
+The migration process is done in two parts:
+
+1. Import the Grafana Dashboard into a Golang structure and then migrate it to the Perses Golang structure.
+2. For each variable, panels and queries in the Grafana dashboard, we are executing a Cuelang script coming
+   from the plugin itself, if, of course, the plugin is supported. This script will generate the piece of the Perses
+   data model for the corresponding plugin.
+
+If you need more information about how to write a migration script in Golang for a plugin, please refer to
+the [associated documentation](./plugins/cue.md#migration-from-grafana).
