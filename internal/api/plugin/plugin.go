@@ -110,12 +110,8 @@ func (p *pluginFile) Load() error {
 			continue
 		}
 		pluginPath := filepath.Join(p.path, file.Name())
-		if valid, validErr := IsRequiredFileExists(pluginPath, pluginPath, pluginPath); !valid || validErr != nil {
-			if validErr != nil {
-				logrus.WithError(validErr).Error("unable to check if the plugin is valid")
-			} else {
-				logrus.Debugf("folder %q is not a valide plugin and is skept. Missing mandatory files", file.Name())
-			}
+		if validErr := IsRequiredFileExists(pluginPath, pluginPath, pluginPath); validErr != nil {
+			logrus.WithError(validErr).Errorf("folder %q is not a valid plugin and is skipped. Missing mandatory files", file.Name())
 			// We can ignore this folder, it's not a plugin, or the plugin is invalid.
 			continue
 		}

@@ -2,7 +2,7 @@
 
 ## Choose a scope
 
-There are different scopes in which you can define a variable, depending on how much you want it to be shared. More about scopes [here](../datasource-and-variable-scopes.md).
+There are different scopes in which you can define a variable, depending on how much you want it to be shared. More about scopes [here](../concepts/datasource-and-variable-scopes.md).
 
 ### Dashboard
 
@@ -115,7 +115,7 @@ defaultValue: <string> | <array of string> # Optional
 allowAllValue: <boolean> | default = false # Optional
 
 # Whether to allow multi-selection of values.
-allMultiple: <boolean> | default = false # Optional
+allowMultiple: <boolean> | default = false # Optional
 
 # It is a custom value that will be used if allowAllValue is true and if then `all` is selected
 customAllValue: <string> # Optional
@@ -155,9 +155,6 @@ kind: <string>
 # The actual definition of the variable. It will depend on the type defined in the previous field `kind`
 spec: <Plugin specification>
 ```
-
-We are supporting only prometheus for the variables for the moment.
-Please take a look at the [documentation](../plugins/prometheus.md#variable) to know the spec for the Prometheus variable.
 
 ## API Definition
 

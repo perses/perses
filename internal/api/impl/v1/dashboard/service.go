@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -35,14 +36,16 @@ type service struct {
 	globalVarDAO  globalvariable.DAO
 	projectVarDAO variable.DAO
 	sch           schema.Schema
+	customRules   []*config.CustomLintRule
 }
 
-func NewService(dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
+func NewService(customRules []*config.CustomLintRule, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
 	return &service{
 		dao:           dao,
 		globalVarDAO:  globalVarDAO,
 		projectVarDAO: projectVarDAO,
 		sch:           sch,
+		customRules:   customRules,
 	}
 }
 
@@ -158,6 +161,9 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 	}
 
 	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := validate.DashboardWithCustomRules(entity, s.customRules); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil

@@ -82,6 +82,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	authEndpoint, err := authendpoint.New(
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
+		serviceManager.GetRBAC(),
 		cfg.Security.Authentication.Providers,
 		cfg.Security.EnableAuth,
 	)

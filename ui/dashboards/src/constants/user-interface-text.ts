@@ -15,7 +15,6 @@ export const TOOLTIP_TEXT = {
   // Toolbar buttons
   addPanel: 'Add panel',
   addGroup: 'Add panel group',
-  downloadDashboard: 'Download JSON',
   editDatasources: 'Edit datasources',
   editJson: 'Edit JSON',
   editVariables: 'Edit variables',
@@ -49,6 +48,6 @@ export const ARIA_LABEL_TEXT = {
   editPanel: (panelName: string): string => `edit panel ${panelName}`,
   duplicatePanel: (panelName: string): string => `duplicate panel ${panelName}`,
   deletePanel: (panelName: string): string => `delete panel ${panelName}`,
-  showPanelActions: (panelName: string): string => `show panel actions for ${panelName} `,
+  showPanelActions: (panelName: string): string => `show panel actions for ${panelName}`,
   movePanel: (panelName: string): string => `move panel ${panelName}`,
 };

@@ -33,7 +33,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
 import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
-import { useIsReadonly } from '../../context/Config';
+import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
 import { useHasPermission } from '../../context/Authorization';
 import { DeleteResourceDialog } from '../../components/dialogs';
 import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
@@ -44,6 +44,7 @@ interface ProjectAccordionProps {
 
 function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
   const isReadonly = useIsReadonly();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
@@ -107,6 +108,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
                 },
               },
             }}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
         </AccordionDetails>
       </Accordion>

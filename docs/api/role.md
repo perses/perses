@@ -56,7 +56,7 @@ scopes:
 
 ### More info about authorization
 
-Please look at the [documentation](../auth/authorization.md) to know more about permissions and roles.
+Please look at the [documentation](../concepts/authorization.md) to know more about permissions and roles.
 
 ## API definition
 

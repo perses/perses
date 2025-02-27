@@ -28,7 +28,7 @@ import (
 // We want to keep only variables that are not only a number.
 // A number that represents a variable is not meaningful, and so we don't want to consider it.
 // It's also a way to avoid a collision in terms of variable syntax.
-// For example in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
+// For example, in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
 var variableNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
 func DashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
@@ -91,7 +91,7 @@ func validateVariableName(variable string) error {
 		return fmt.Errorf("variable name '%s' is not valid", variable)
 	}
 
-	// Checking if variable do not have builting variable prefix: __
+	// Checking if the variable does not have builtin variable prefix: __
 	isBuiltinVar := modelV1.IsBuiltinVariable(variable)
 	if isBuiltinVar {
 		return fmt.Errorf("variable name '%s' can not have builtin variable prefix: __", variable)

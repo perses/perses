@@ -262,10 +262,10 @@ export class DashboardPage {
       has: name ? this.page.getByRole('heading', { name }) : undefined,
     });
     if (nth !== undefined) {
-      return new Panel(panel.nth(nth));
+      return new Panel(this.page, panel.nth(nth));
     }
 
-    return new Panel(panel);
+    return new Panel(this.page, panel);
   }
 
   /**

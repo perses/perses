@@ -38,24 +38,21 @@ func TestMigrateEndpoint(t *testing.T) {
 	}{
 		{
 			title:                "grafana dashboard containing simple vars & panels",
-			initialDashboardPath: "internal/api/plugin/migrate/testdata/simple_grafana_dashboard.json",
-			resultDashboardPath:  "internal/api/plugin/migrate/testdata/simple_perses_dashboard.json",
+			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "simple_grafana_dashboard.json"),
+			resultDashboardPath:  filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "simple_perses_dashboard.json"),
 		},
 		{
 			title:                "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
-			initialDashboardPath: "internal/api/plugin/migrate/testdata/old_grafana_panels_grafana_dashboard.json",
-			resultDashboardPath:  "internal/api/plugin/migrate/testdata/old_grafana_panels_perses_dashboard.json",
+			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "old_grafana_panels_grafana_dashboard.json"),
+			resultDashboardPath:  filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "old_grafana_panels_perses_dashboard.json"),
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			rawGrafanaDashboard := testUtils.ReadFile(filepath.Join(testUtils.GetRepositoryPath(), test.initialDashboardPath))
-			rawPersesDashboard := testUtils.ReadFile(filepath.Join(testUtils.GetRepositoryPath(), test.resultDashboardPath))
-
 			var grafanaDashboard json.RawMessage
-			testUtils.JSONUnmarshal(rawGrafanaDashboard, &grafanaDashboard)
+			testUtils.JSONUnmarshalFromFile(test.initialDashboardPath, &grafanaDashboard)
 			var persesDashboard modelV1.Dashboard
-			testUtils.JSONUnmarshal(rawPersesDashboard, &persesDashboard)
+			testUtils.JSONUnmarshalFromFile(test.resultDashboardPath, &persesDashboard)
 
 			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 				entity := modelAPI.Migrate{
@@ -66,7 +63,7 @@ func TestMigrateEndpoint(t *testing.T) {
 					Expect().
 					Status(http.StatusOK).
 					JSON().
-					Equal(persesDashboard)
+					IsEqual(persesDashboard)
 				return []modelAPI.Entity{}
 			})
 		})

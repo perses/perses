@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 
 	"github.com/mholt/archives"
 	"github.com/perses/perses/internal/api/archive"
@@ -58,7 +59,7 @@ func (o *option) Validate() error {
 		return fmt.Errorf("archive format %q not managed", o.archiveFormat)
 	}
 	// Check if the required files are present
-	if exist, err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil || !exist {
+	if err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil {
 		return fmt.Errorf("required files are missing: %w", err)
 	}
 	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
@@ -108,7 +109,7 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 		list[license] = license
 	}
 	// add the package.json file required to get the type of the plugin.
-	list[path.Join(o.cfg.FrontendPath, plugin.PackageJSONFile)] = plugin.PackageJSONFile
+	list[filepath.Join(o.cfg.FrontendPath, plugin.PackageJSONFile)] = plugin.PackageJSONFile
 
 	// Add the dist content at the root of the archive (saying differently, dist folder should not appear in the archive)
 	distFiles, err := os.ReadDir(o.cfg.DistPath)
@@ -116,7 +117,7 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 		return nil, fmt.Errorf("unable to read 'dist' directory: %w", err)
 	}
 	for _, f := range distFiles {
-		list[path.Join(o.cfg.DistPath, f.Name())] = f.Name()
+		list[filepath.Join(o.cfg.DistPath, f.Name())] = f.Name()
 	}
 
 	// Do the same for the Cuelang schemas
@@ -125,7 +126,7 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 		return nil, fmt.Errorf("unable to read 'schema' directory: %w", err)
 	}
 	for _, f := range cueFiles {
-		list[path.Join(o.cfg.SchemasPath, f.Name())] = path.Join("schemas", f.Name())
+		list[filepath.Join(o.cfg.SchemasPath, f.Name())] = path.Join("schemas", f.Name())
 	}
 
 	// Add the cue.mod folder at the root of the archive
@@ -154,7 +155,7 @@ func NewCMD() *cobra.Command {
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
 	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip-npm-build", false, "")
-	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Path to the configuration file. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 
 	return cmd
 }
