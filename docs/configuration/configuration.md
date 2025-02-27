@@ -94,6 +94,9 @@ security: <Security config> # Optional
 # Database configuration 
 database: <Database config> # Optional
 
+# Dashboard configuration
+dashboard: <Dashboard config> # Optional
+
 # The configuration to access the CUE schemas
 # This config is deprecated. It will be removed in the future. Please remove it from your config. 
 schemas: <Schemas config> # Optional
@@ -482,22 +485,22 @@ A TLS config allows configuring TLS connections.
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
 ca: <string> # Optional
-caFile: <filename> # Optional
+ca_file: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
 cert: <string> # Optional
-certFile: <filename> # Optional
+cert_file: <filename> # Optional
 key: <secret> # Optional
-keyFile: <filename> # Optional
+key_file: <filename> # Optional
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-serverName: <string> # Optional
+server_name: <string> # Optional
 
 # Disable validation of the server certificate.
-insecureSkipVerify: <boolean> # Optional
+insecure_skip_verify: <boolean> # Optional
 
 # Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
@@ -723,7 +726,6 @@ project: <string>
 dashboard: <string>
 ```
 
-
 ### Plugin config
 
 ```yaml
@@ -765,4 +767,34 @@ url: <string> # Optional
 
 # The absolute path to the plugin in development.
 absolute_path: <string>
+```
+
+
+### Dashboard config
+
+```yaml
+custom_lint_rules:
+  - <CustomLintRule config> # Optional
+```
+
+#### CustomLintRule config
+
+Refer to the associated [documentation](./custom-lint-rules.md) for more details.
+
+```yaml
+# The name of the custom lint rulea
+name: <string>
+
+# The target of the custom lint rule. It is a JSONPath expression.
+target: <string>
+
+# The assertion of the custom lint rule. It is a valid CEL expression. 
+# The value is the result of the target. The result of the assertion must be a boolean.
+assertion: <string>
+
+# The message to display when the assertion is false. 
+message: <string>
+
+# If set to true, the custom lint rule is disabled.
+disable: <bool> | default = false # Optional
 ```

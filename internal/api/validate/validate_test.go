@@ -55,10 +55,8 @@ func TestDashboardSpec(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			persesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.dashboardFile))
-
 			var persesDashboard modelV1.Dashboard
-			testUtils.JSONUnmarshal(persesDashboardRaw, &persesDashboard)
+			testUtils.JSONUnmarshalFromFile(filepath.Join(testDataFolder, test.dashboardFile), &persesDashboard)
 
 			err := DashboardSpec(persesDashboard.Spec, pl.Schema())
 

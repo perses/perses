@@ -57,6 +57,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     }
   },
   "database": {},
+  "dashboard": {},
   "provisioning": {},
   "datasource": {
     "global": {
@@ -123,6 +124,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       "case_sensitive": false
     }
   },
+  "dashboard": {},
   "provisioning": {
     "interval": "1h"
   },

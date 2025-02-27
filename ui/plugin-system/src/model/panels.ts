@@ -45,7 +45,7 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    * Each {@link QueryPluginType} implementation can have its own options.
    * For example see {@link UseTimeSeriesQueryOptions} for time series queries.
    */
-  queryOptions?: QueryOptions;
+  queryOptions?: QueryOptions | ((spec: Spec) => QueryOptions);
   /**
    * If true, query editor will be hidden for panel plugin
    * @default false

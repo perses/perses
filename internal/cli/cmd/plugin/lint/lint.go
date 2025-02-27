@@ -49,7 +49,7 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	if exist, err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil || !exist {
+	if err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil {
 		return fmt.Errorf("required files are missing: %w", err)
 	}
 	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
@@ -91,7 +91,7 @@ func NewCMD() *cobra.Command {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVar(&o.cfgPath, "config", "perses_plugin_config.yaml", "Path to the configuration file")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Path to the configuration file. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 
 	return cmd
 }

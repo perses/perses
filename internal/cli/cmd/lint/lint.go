@@ -36,12 +36,14 @@ type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.DirectoryOption
-	writer     io.Writer
-	errWriter  io.Writer
-	pluginPath string
-	online     bool
-	sch        schema.Schema
-	apiClient  api.ClientInterface
+	writer         io.Writer
+	errWriter      io.Writer
+	pluginPath     string
+	customRulePath string
+	customRules    []*apiConfig.CustomLintRule
+	online         bool
+	sch            schema.Schema
+	apiClient      api.ClientInterface
 }
 
 func (o *option) Complete(args []string) error {
@@ -57,6 +59,11 @@ func (o *option) Complete(args []string) error {
 		}
 		o.sch = pl.Schema()
 	}
+	if len(o.customRulePath) > 0 {
+		if err := file.Unmarshal(o.customRulePath, &o.customRules); err != nil {
+			return err
+		}
+	}
 	if o.online {
 		// Finally, get the api client we will need later.
 		apiClient, err := config.Global.GetAPIClient()
@@ -64,6 +71,12 @@ func (o *option) Complete(args []string) error {
 			return err
 		}
 		o.apiClient = apiClient
+		// Get the config from the server to get the custom-rules
+		cfg, err := o.apiClient.Config()
+		if err != nil {
+			return err
+		}
+		o.customRules = cfg.Dashboard.CustomLintRules
 	}
 	return nil
 }
@@ -108,14 +121,18 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 	for _, object := range objects {
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
+			if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
+				return err
+			}
 			if o.online {
 				if err := o.apiClient.Validate().Dashboard(entity); err != nil {
 					return err
 				}
-			} else if err := validate.DashboardSpec(entity.Spec, o.sch); err != nil {
-				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
+			} else {
+				if err := validate.DashboardSpec(entity.Spec, o.sch); err != nil {
+					return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
+				}
 			}
-
 		case *modelV1.GlobalDatasource:
 			if o.online {
 				if err := o.apiClient.Validate().GlobalDatasource(entity); err != nil {
@@ -181,10 +198,13 @@ percli lint -f ./resources.json --online
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
+	cmd.Flags().StringVar(&o.customRulePath, "custom-rule.path", "", "Path to the custom rules.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
 	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the plugins with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")
+	// When "online" flag is used, the CLI  will use the custom-rule from the server.
+	cmd.MarkFlagsMutuallyExclusive("custom-rule.path", "online")
 	return cmd
 }

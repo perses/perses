@@ -38,6 +38,7 @@ type service struct {
 	sch                 schema.Schema
 	isDatasourceDisable bool
 	isVariableDisable   bool
+	customRules         []*config.CustomLintRule
 }
 
 func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
@@ -48,6 +49,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		sch:                 sch,
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
+		customRules:         cfg.Dashboard.CustomLintRules,
 	}
 }
 
@@ -163,6 +165,9 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 	}
 
 	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := validate.DashboardWithCustomRules(entity, s.customRules); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	if s.isDatasourceDisable {

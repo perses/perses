@@ -40,6 +40,11 @@ func JSONUnmarshal(src []byte, dst interface{}) {
 	}
 }
 
+func JSONUnmarshalFromFile(filepath string, dst interface{}) {
+	data := ReadFile(filepath)
+	JSONUnmarshal(data, dst)
+}
+
 // simple wrapper to yaml.Unmarshal for testing, to ensure the test gets aborted in case of error
 func YAMLMarshalStrict(obj interface{}) []byte {
 	data, err := yaml.Marshal(obj)
@@ -47,6 +52,17 @@ func YAMLMarshalStrict(obj interface{}) []byte {
 		panic(err)
 	}
 	return data
+}
+
+func YAMLUnmarshal(src []byte, dst interface{}) {
+	if err := yaml.Unmarshal(src, dst); err != nil {
+		panic(err)
+	}
+}
+
+func YAMLUnmarshalFromFile(filepath string, dst interface{}) {
+	data := ReadFile(filepath)
+	YAMLUnmarshal(data, dst)
 }
 
 func GetRepositoryPath() string {

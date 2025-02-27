@@ -55,6 +55,11 @@ export type PanelExtraProps = {
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
+ *
+ * Internal structure:
+ * <Panel>                  // renders an entire panel, incl. header and action buttons
+ *   <PanelContent>         // renders loading, error or panel based on the queries' status
+ *     <PanelPluginLoader>  // loads a panel plugin from the plugin registry and renders the PanelComponent with data from props.queryResults
  */
 export const Panel = memo(function Panel(props: PanelProps) {
   const {

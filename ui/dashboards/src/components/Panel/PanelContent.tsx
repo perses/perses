@@ -16,6 +16,7 @@ import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { LoadingOverlay } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
+import { PanelPluginLoader } from './PanelPluginLoader';
 
 export interface PanelContentProps extends Omit<PanelProps<UnknownSpec>, 'queryResults'> {
   panelPluginKind: string;
@@ -24,15 +25,12 @@ export interface PanelContentProps extends Omit<PanelProps<UnknownSpec>, 'queryR
 }
 
 /**
- * A small wrapper component that renders the appropriate PanelComponent from a Panel plugin based on the panel
- * definition's kind. Used so that an ErrorBoundary can be wrapped around this.
+ * Based on the status of the queries (loading, error or data available), this component renders a
+ * loading overlay, throws an error, or renders the panel content.
  */
 export function PanelContent(props: PanelContentProps): ReactElement {
   const { panelPluginKind, definition, queryResults, spec, contentDimensions } = props;
   const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { throwOnError: true });
-
-  const PanelComponent = plugin?.PanelComponent;
-  const supportedQueryTypes = plugin?.supportedQueryTypes || [];
 
   // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {
@@ -46,18 +44,6 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     );
   }
 
-  if (PanelComponent === undefined) {
-    throw new Error(`Missing PanelComponent from panel plugin for kind '${panelPluginKind}'`);
-  }
-
-  for (const queryResult of queryResults) {
-    if (!supportedQueryTypes.includes(queryResult.definition.kind)) {
-      throw new Error(
-        `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`
-      );
-    }
-  }
-
   // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.
   const queryResultsWithData = queryResults.flatMap((q) =>
@@ -65,7 +51,8 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   );
   if (queryResultsWithData.length > 0 || queryResults.length === 0) {
     return (
-      <PanelComponent
+      <PanelPluginLoader
+        kind={panelPluginKind}
         spec={spec}
         contentDimensions={contentDimensions}
         definition={definition}

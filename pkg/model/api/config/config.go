@@ -57,6 +57,8 @@ type Config struct {
 	// DEPRECATED.
 	// Please remove it from your config.
 	Schemas *Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
+	// Dashboard contains the configuration for the dashboard feature.
+	Dashboard DashboardConfig `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	// Datasource contains the configuration for the datasource.

@@ -13,7 +13,14 @@
 
 package config
 
-import "github.com/perses/common/config"
+import (
+	"github.com/perses/common/config"
+	"github.com/perses/perses/internal/cli/file"
+)
+
+const (
+	DefaultConfigFile = "perses_plugin_config.yaml"
+)
 
 type PluginConfig struct {
 	// DistPath is the path to the folder containing the files built by npm
@@ -24,7 +31,7 @@ type PluginConfig struct {
 	SchemasPath string `json:"schemas_path" yaml:"schemas_path"`
 }
 
-func (c *PluginConfig) Validate() error {
+func (c *PluginConfig) Verify() error {
 	if len(c.DistPath) == 0 {
 		c.DistPath = "dist"
 	}
@@ -35,9 +42,15 @@ func (c *PluginConfig) Validate() error {
 }
 
 func Resolve(configFile string) (PluginConfig, error) {
+	cfgPath := configFile
 	c := PluginConfig{}
+	if len(cfgPath) == 0 {
+		if exist, err := file.Exists(DefaultConfigFile); err == nil && exist {
+			cfgPath = DefaultConfigFile
+		}
+	}
 	return c, config.NewResolver[PluginConfig]().
-		SetConfigFile(configFile).
+		SetConfigFile(cfgPath).
 		SetEnvPrefix("PERSES_PLUGIN_CONFIG").
 		Resolve(&c).
 		Verify()
