@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,14 +23,29 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
+	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/cue/format"
+	"cuelang.org/go/cue/load"
 	"github.com/mholt/archives"
 	"github.com/perses/perses/internal/api/archive"
 	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+)
+
+const (
+	moduleBackupFile = "module.cue.bak"
+)
+
+var (
+	vendorDir  = filepath.Join("cue.mod", "pkg")
+	moduleFile = filepath.Join("cue.mod", "module.cue")
 )
 
 type option struct {
@@ -94,12 +109,71 @@ func (o *option) Execute() error {
 		return fmt.Errorf("unable to read manifest: %w", err)
 	}
 
-	// Then we need to create the archive.
-	// The archive contains the following file:
+	// Check if we need to vendor the dependencies:
+	// - Parse the module file into a CUE instance
+	ctx := cuecontext.New()
+	insts := load.Instances([]string{moduleFile}, nil)
+	module := ctx.BuildInstance(insts[0])
+	if err := module.Err(); err != nil {
+		return fmt.Errorf("failed to load plugin module file: %w", err)
+	}
+
+	// - if no `deps` are present, skip vendoring
+	deps := module.LookupPath(cue.ParsePath("deps"))
+	if deps.Err() != nil {
+		logrus.Debugf("`deps` not found, no CUE dependencies to vendor")
+	} else {
+		// Vendor the dependencies
+		if err := o.vendorCueDependencies(); err != nil {
+			return fmt.Errorf("failed to vendor CUE dependencies: %w", err)
+		}
+		// restore the original state on exit
+		defer func() {
+			if err := os.RemoveAll(vendorDir); err != nil {
+				logrus.Printf("failed to cleanup %s: %v", vendorDir, err)
+			}
+		}()
+
+		// Alter the module file to remove the deps section. To achieve this we iteratively copy its content
+		// into a new value except the `deps` field. That's the easier way we can do in the current state of
+		// the CUE lib.
+		if err := os.Rename(moduleFile, moduleBackupFile); err != nil {
+			return fmt.Errorf("failed to backup original module file: %v", err)
+		}
+		// restore the original state on exit
+		defer func() {
+			if err := os.Rename(moduleBackupFile, moduleFile); err != nil {
+				logrus.Printf("failed to restore original module file: %v", err)
+			}
+		}()
+
+		newModule := ctx.CompileString("{}")
+		iter, _ := module.Fields()
+		for iter.Next() {
+			if iter.Selector().String() == "deps" {
+				continue
+			}
+			newModule = newModule.FillPath(cue.MakePath(iter.Selector()), iter.Value())
+		}
+
+		cueBytes, err := format.Node(newModule.Syntax())
+		if err != nil {
+			return fmt.Errorf("Failed to format new module.cue: %v", err)
+		}
+
+		err = os.WriteFile(moduleFile, cueBytes, 0644) // nolint: gosec
+		if err != nil {
+			return fmt.Errorf("Failed to write module.cue: %v", err)
+		}
+	}
+
+	// Finally, we create the archive.
+	// The archive contains the following files:
 	// - package.json: required to get the type of the plugin and the name
 	// - mf-manifest.json and mf-stats.json: contains the plugin name
 	// - static: folder containing the UI part
 	// - schemas: folder containing the schema files
+	// - cue.mod: folder containing the CUE module & eventual vendored dependencies
 	files, err := o.computeArchiveFiles()
 	if err != nil {
 		return err
@@ -134,6 +208,93 @@ func (o *option) executeNPMBuild() error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("unable to build the frontend: %w, stderr: %s", err, stdoutBuffer.String())
 	}
+	return nil
+}
+
+// Home-made vendoring of CUE dependencies
+// ---
+// Full explanation:
+//
+// Following the move to CUE native dependency management, the deps of the plugin are no longer vendored under cue.mod/pkg.
+// Letting things in this state would imply that, at runtime, the Perses server should have access to an OCI registry - thus
+// either access to internet OR to a custom registry set up by users in their private network - to be able to evaluate a plugin
+// schema that imports packages - like the `common` package of Perses.
+//
+// As we consider this constraint a no-go in our case, We looked for solutions to that problem... After asking to CUE maintainers
+// it seems our long term solution would be https://github.com/cue-lang/cue/issues/3328. For the time being we thus have to
+// reproduce the vendoring structure of the "old modules" (https://cuelang.org/docs/concept/faq/new-modules-vs-old-modules/) with
+// custom code.
+//
+// More precisely the steps are:
+// - set the `CUE_CACHE_DIR` env var to a local temp folder
+// - evaluate the schemas to trigger the retrieval of dependencies
+// - move the dependencies to `cue.mod/pkg`
+// - remove the version in the name of the last directory generated from the module path (= rename `cue@vX.Y.Z` to `cue`)
+func (o *option) vendorCueDependencies() error {
+	// Define a temporary folder where to store the CUE dependencies
+	tempDir, err := os.MkdirTemp("", "cue_cache")
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory for CUE cache: %w", err)
+	}
+	defer os.RemoveAll(tempDir) // Ensure cleanup
+	if err := os.Setenv("CUE_CACHE_DIR", tempDir); err != nil {
+		return fmt.Errorf("failed to set CUE_CACHE_DIR: %w", err)
+	}
+
+	// Run `cue eval` in order to fetch the dependencies
+	// NB forcing `./` to be appended here to workaround this limitation: 'standard library import path "schemas" cannot be imported as a CUE package'
+	cmd := exec.Command("cue", "eval", strings.Join([]string{".", "schemas"}, string(os.PathSeparator))) // nolint: gosec
+	cmd.Stderr = o.errWriter
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("cue eval failed: %w", err)
+	}
+
+	// Move dependencies to cue.mod/pkg
+	err = os.Rename(filepath.Join(tempDir, "mod", "extract"), vendorDir)
+	if err != nil {
+		return fmt.Errorf("failed to move dependencies: %w", err)
+	}
+
+	// At this point the folder structure is like: cue.mod/pkg/github.com/perses/perses/cue@vX.Y.Z
+	// we need to change it to: cue.mod/pkg/github.com/perses/perses/cue in order to have the "old" modules
+	// resolution working.
+	// See https://cuelang.org/docs/concept/faq/new-modules-vs-old-modules/
+	//
+	// NB: Since "github.com/perses/perses/cue" may not be the only dependency, we walk through all
+	// directories under cue.mod/pkg
+	err = filepath.WalkDir(vendorDir, func(path string, d os.DirEntry, err error) error {
+		logrus.Debugf("Walking through %s", path)
+		if err != nil {
+			return fmt.Errorf("error walking through directory %s: %w", path, err)
+		}
+
+		if d.IsDir() {
+			// Rename the directory if it has a version in its name (e.g cue@vX.Y.Z)
+			parts := strings.Split(path, "@")
+			if len(parts) == 2 {
+				renamedDir := parts[0]
+
+				// Ensure we don't overwrite existing directories
+				if _, err := os.Stat(renamedDir); !os.IsNotExist(err) {
+					return fmt.Errorf("directory already exists: %s", renamedDir)
+				}
+
+				// Rename the directory
+				if err := os.Rename(path, renamedDir); err != nil {
+					return fmt.Errorf("failed to rename directory %s to %s: %w", path, renamedDir, err)
+				}
+
+				logrus.Debugf("Renamed %s to %s\n", path, renamedDir)
+				return filepath.SkipDir
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to walk through cue.mod/pkg: %w", err)
+	}
+
 	return nil
 }
 
