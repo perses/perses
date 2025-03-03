@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	cuelang.org/go v0.12.0
-	github.com/PaesslerAG/gval v1.2.2
+	github.com/PaesslerAG/gval v1.2.4
 	github.com/PaesslerAG/jsonpath v0.1.2-0.20240726212847-3a740cf7976f
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
