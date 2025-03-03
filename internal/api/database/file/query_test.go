@@ -14,6 +14,7 @@
 package databasefile
 
 import (
+	"path/filepath"
 	"testing"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -38,7 +39,7 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       "dashboards/perses",
+			expectedPath:       filepath.Join("dashboards", "perses"),
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -55,7 +56,7 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       "datasources/perses",
+			expectedPath:       filepath.Join("datasources", "perses"),
 			expectedNamePrefix: "meta",
 		},
 		{
@@ -64,7 +65,7 @@ func TestBuildQuery(t *testing.T) {
 				NamePrefix: "meta",
 				Project:    "perses",
 			},
-			expectedPath:       "folders/perses",
+			expectedPath:       filepath.Join("folders", "perses"),
 			expectedNamePrefix: "meta",
 		},
 		{
