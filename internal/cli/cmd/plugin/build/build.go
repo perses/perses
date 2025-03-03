@@ -34,13 +34,15 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
+	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 const (
-	moduleBackupFile = "module.cue.bak"
+	moduleFileBackup = "module.cue.bak"
+	vendorDirBackup  = "pkg.bak"
 )
 
 var (
@@ -123,26 +125,43 @@ func (o *option) Execute() error {
 	if deps.Err() != nil {
 		logrus.Debugf("`deps` not found, no CUE dependencies to vendor")
 	} else {
+		// Backup the original state of cue.mod/pkg if it exists*, and restore the original state on exit.
+		// *: even if a given plugin relies on new dependency management, it may also rely on other dependencies
+		// managed the old way. This is technically possible & supported by CUE, thus we want to handle this case.
+		if _, err := os.Stat(vendorDir); err == nil {
+			if err := file.CopyDir(vendorDir, vendorDirBackup); err != nil {
+				return fmt.Errorf("failed to backup original %s: %w", vendorDir, err)
+			}
+			defer func() {
+				if err := os.RemoveAll(vendorDir); err != nil {
+					logrus.Printf("failed to cleanup alterated %s: %v", vendorDir, err)
+				}
+				if err := os.Rename(vendorDirBackup, vendorDir); err != nil {
+					logrus.Printf("failed to restore original %s: %v", vendorDir, err)
+				}
+			}()
+		} else {
+			defer func() {
+				if err := os.RemoveAll(vendorDir); err != nil {
+					logrus.Printf("failed to cleanup %s: %v", vendorDir, err)
+				}
+			}()
+		}
+
 		// Vendor the dependencies
 		if err := o.vendorCueDependencies(); err != nil {
 			return fmt.Errorf("failed to vendor CUE dependencies: %w", err)
 		}
-		// restore the original state on exit
-		defer func() {
-			if err := os.RemoveAll(vendorDir); err != nil {
-				logrus.Printf("failed to cleanup %s: %v", vendorDir, err)
-			}
-		}()
 
 		// Alter the module file to remove the deps section. To achieve this we iteratively copy its content
 		// into a new value except the `deps` field. That's the easier way we can do in the current state of
 		// the CUE lib.
-		if err := os.Rename(moduleFile, moduleBackupFile); err != nil {
+		if err := os.Rename(moduleFile, moduleFileBackup); err != nil {
 			return fmt.Errorf("failed to backup original module file: %v", err)
 		}
 		// restore the original state on exit
 		defer func() {
-			if err := os.Rename(moduleBackupFile, moduleFile); err != nil {
+			if err := os.Rename(moduleFileBackup, moduleFile); err != nil {
 				logrus.Printf("failed to restore original module file: %v", err)
 			}
 		}()
@@ -250,8 +269,7 @@ func (o *option) vendorCueDependencies() error {
 	}
 
 	// Move dependencies to cue.mod/pkg
-	err = os.Rename(filepath.Join(tempDir, "mod", "extract"), vendorDir)
-	if err != nil {
+	if err := file.CopyDir(filepath.Join(tempDir, "mod", "extract"), vendorDir); err != nil {
 		return fmt.Errorf("failed to move dependencies: %w", err)
 	}
 
@@ -265,7 +283,7 @@ func (o *option) vendorCueDependencies() error {
 	err = filepath.WalkDir(vendorDir, func(path string, d os.DirEntry, err error) error {
 		logrus.Debugf("Walking through %s", path)
 		if err != nil {
-			return fmt.Errorf("error walking through directory %s: %w", path, err)
+			return fmt.Errorf("error walking through %s: %w", path, err)
 		}
 
 		if d.IsDir() {
