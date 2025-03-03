@@ -14,6 +14,7 @@
 package build
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -34,23 +35,30 @@ import (
 
 type option struct {
 	persesCMD.Option
-	skipNPMBuild  bool
-	archiveFormat archive.Format
-	cfg           config.PluginConfig
-	cfgPath       string
-	writer        io.Writer
-	errWriter     io.Writer
+	skipNPMBuild              bool
+	archiveFormat             archive.Format
+	cfg                       config.PluginConfig
+	cfgPath                   string
+	pluginPath                string
+	isSchemaRequired          bool
+	schemaPathFromPackageJSON string
+	writer                    io.Writer
+	errWriter                 io.Writer
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'build'")
 	}
-	cfg, err := config.Resolve(o.cfgPath)
+	cfg, err := config.Resolve(o.pluginPath, o.cfgPath)
 	if err != nil {
 		return fmt.Errorf("unable to resolve the configuration: %w", err)
 	}
 	o.cfg = cfg
+	// Overriding the path with the plugin path
+	o.cfg.DistPath = filepath.Join(o.pluginPath, o.cfg.DistPath)
+	o.cfg.FrontendPath = filepath.Join(o.pluginPath, o.cfg.FrontendPath)
+	o.cfg.SchemasPath = filepath.Join(o.pluginPath, o.cfg.SchemasPath)
 	return nil
 }
 
@@ -58,23 +66,28 @@ func (o *option) Validate() error {
 	if !archive.IsValidFormat(o.archiveFormat) {
 		return fmt.Errorf("archive format %q not managed", o.archiveFormat)
 	}
-	// Check if the required files are present
-	if err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil {
-		return fmt.Errorf("required files are missing: %w", err)
-	}
-	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
-		return errors.New("cue modules not found")
-	}
 	return nil
 }
 
 func (o *option) Execute() error {
 	// First step: run npm to build the frontend part.
-	if !o.skipNPMBuild {
-		if err := exec.Command("npm", "run", "build").Run(); err != nil {
-			return fmt.Errorf("unable to build the frontend: %w", err)
+	if err := o.executeNPMBuild(); err != nil {
+		return err
+	}
+	// Check if the required files are present
+	if err := plugin.IsRequiredFileExists(o.cfg.FrontendPath, o.cfg.SchemasPath, o.cfg.DistPath); err != nil {
+		return fmt.Errorf("required files are missing: %w", err)
+	}
+	npmPackageData, readErr := plugin.ReadPackage(o.cfg.FrontendPath)
+	if readErr != nil {
+		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
+	}
+	if o.isSchemaRequired = plugin.IsSchemaRequired(npmPackageData.Perses); o.isSchemaRequired {
+		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
+			return errors.New("cue modules not found")
 		}
 	}
+	o.schemaPathFromPackageJSON = npmPackageData.Perses.SchemasPath
 	// Get the plugin name from the manifest file
 	manifest, err := plugin.ReadManifest(o.cfg.DistPath)
 	if err != nil {
@@ -91,22 +104,49 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	if archiveBuildErr := archive.Build(manifest.Name, o.archiveFormat, files); archiveBuildErr != nil {
+	if archiveBuildErr := archive.Build(filepath.Join(o.pluginPath, manifest.Name), o.archiveFormat, files); archiveBuildErr != nil {
 		return fmt.Errorf("archive creation failed: %w", archiveBuildErr)
 	}
-	return output.HandleString(o.writer, fmt.Sprintf("Building %s successfully", manifest.Name))
+	return output.HandleString(o.writer, fmt.Sprintf("%s built successfully", manifest.Name))
+}
+
+func (o *option) executeNPMBuild() error {
+	if o.skipNPMBuild {
+		return nil
+	}
+	if _, err := os.Stat(filepath.Join(o.cfg.FrontendPath, "node_modules")); os.IsNotExist(err) {
+		// Then run `npm ci` to install the dependencies
+		cmd := exec.Command("npm", "ci")
+		cmd.Dir = o.cfg.FrontendPath
+		// to get a more comprehensive error message, we need to capture the stdout.
+		var stdoutBuffer bytes.Buffer
+		cmd.Stdout = &stdoutBuffer
+		cmd.Dir = o.cfg.FrontendPath
+		if execErr := cmd.Run(); execErr != nil {
+			return fmt.Errorf("unable to install the frontend dependencies: %w, stderr: %s", execErr, stdoutBuffer.String())
+		}
+	}
+	cmd := exec.Command("npm", "run", "build")
+	// to get a more comprehensive error message, we need to capture the stdout.
+	var stdoutBuffer bytes.Buffer
+	cmd.Stdout = &stdoutBuffer
+	cmd.Dir = o.cfg.FrontendPath
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("unable to build the frontend: %w, stderr: %s", err, stdoutBuffer.String())
+	}
+	return nil
 }
 
 func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 	list := make(map[string]string)
 	// add README and LICENSE if they are present as they are optional
 	const readme = "README.md"
-	if _, err := os.Stat(readme); err == nil {
-		list[readme] = readme
+	if _, err := os.Stat(filepath.Join(o.pluginPath, readme)); err == nil {
+		list[filepath.Join(o.pluginPath, readme)] = readme
 	}
 	const license = "LICENSE"
-	if _, err := os.Stat(license); err == nil {
-		list[license] = license
+	if _, err := os.Stat(filepath.Join(o.pluginPath, license)); err == nil {
+		list[filepath.Join(o.pluginPath, license)] = license
 	}
 	// add the package.json file required to get the type of the plugin.
 	list[filepath.Join(o.cfg.FrontendPath, plugin.PackageJSONFile)] = plugin.PackageJSONFile
@@ -121,16 +161,18 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 	}
 
 	// Do the same for the Cuelang schemas
-	cueFiles, err := os.ReadDir(o.cfg.SchemasPath)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read 'schema' directory: %w", err)
-	}
-	for _, f := range cueFiles {
-		list[filepath.Join(o.cfg.SchemasPath, f.Name())] = path.Join("schemas", f.Name())
-	}
+	if o.isSchemaRequired {
+		cueFiles, schemaReadErr := os.ReadDir(o.cfg.SchemasPath)
+		if schemaReadErr != nil {
+			return nil, fmt.Errorf("unable to read 'schema' directory: %w", schemaReadErr)
+		}
+		for _, f := range cueFiles {
+			list[filepath.Join(o.cfg.SchemasPath, f.Name())] = path.Join(o.schemaPathFromPackageJSON, f.Name())
+		}
 
-	// Add the cue.mod folder at the root of the archive
-	list["cue.mod"] = ""
+		// Add the cue.mod folder at the root of the archive
+		list[filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)] = plugin.CuelangModuleFolder
+	}
 
 	return archives.FilesFromDisk(context.Background(), nil, list)
 }
@@ -155,7 +197,8 @@ func NewCMD() *cobra.Command {
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
 	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip-npm-build", false, "")
-	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Path to the configuration file. By default, the command will look for a file named 'perses_plugin_config.yaml'")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag ---plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
+	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
 
 	return cmd
 }
