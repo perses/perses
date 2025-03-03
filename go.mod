@@ -13,7 +13,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/google/cel-go v0.23.2
+	github.com/google/cel-go v0.24.1
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser/v2 v2.7.0
 	github.com/gorilla/securecookie v1.1.2
