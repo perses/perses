@@ -219,7 +219,9 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "interval": "1h"
   },
-  "ephemeral_dashboards_cleanup_interval": "2h"
+  "ephemeral_dashboard": {
+    "cleanup_interval": "2h"
+  }
 }`,
 			result: Config{
 				Security: Security{
@@ -280,7 +282,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
+				EphemeralDashboard: EphemeralDashboard{
+					Enable:          false,
+					CleanupInterval: common.Duration(2 * time.Hour),
+				},
 			},
 		},
 	}
@@ -342,7 +347,9 @@ frontend:
     # Hello World
     ## File Database setup
 
-ephemeral_dashboards_cleanup_interval: "2h"
+
+ephemeral_dashboard:
+  cleanup_interval: "2h"
 
 plugin:
   path: "custom/plugins"
@@ -424,9 +431,8 @@ plugin:
 					},
 					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
 				EphemeralDashboard: EphemeralDashboard{
-					Enable:          true,
+					Enable:          false,
 					CleanupInterval: common.Duration(2 * time.Hour),
 				},
 			},
