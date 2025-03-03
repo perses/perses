@@ -42,3 +42,5 @@ dev/extra/tempo-data
 
 /plugins
 /plugins-archive
+
+/prometheus
