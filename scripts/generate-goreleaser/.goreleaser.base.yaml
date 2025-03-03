@@ -35,7 +35,8 @@ archives:
     builds:
       - "perses"
       - "percli"
-    format: "tar.gz"
+    formats:
+      - "tar.gz"
     files:
       - LICENSE
       - README.md
