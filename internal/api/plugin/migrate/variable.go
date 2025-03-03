@@ -103,13 +103,17 @@ func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 				Description: v.Description,
 				Hidden:      v.Hide > 0,
 			},
-			AllowAllValue:  v.IncludeAll,
-			AllowMultiple:  v.Multi,
-			CustomAllValue: v.AllValue,
-			DefaultValue:   v.getDefaultValue(),
-			Sort:           grafanaMappingSort(v.Sort),
+			AllowAllValue: v.IncludeAll,
+			AllowMultiple: v.Multi,
+			DefaultValue:  v.getDefaultValue(),
+			Sort:          grafanaMappingSort(v.Sort),
 		},
 		Name: v.Name,
+	}
+
+	// Only set CusomAllValue if IncludeAll is enabled for panel
+	if v.IncludeAll {
+		spec.CustomAllValue = v.AllValue
 	}
 
 	i := 0
