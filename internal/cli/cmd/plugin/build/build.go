@@ -41,13 +41,10 @@ import (
 )
 
 const (
-	moduleFileBackup = "module.cue.bak"
-	vendorDirBackup  = "pkg.bak"
-)
-
-var (
-	vendorDir  = filepath.Join("cue.mod", "pkg")
-	moduleFile = filepath.Join("cue.mod", "module.cue")
+	vendorDir        = "pkg"
+	vendorDirBackup  = vendorDir + ".bak"
+	moduleFile       = "module.cue"
+	moduleFileBackup = moduleFile + ".bak"
 )
 
 type option struct {
@@ -111,10 +108,16 @@ func (o *option) Execute() error {
 		return fmt.Errorf("unable to read manifest: %w", err)
 	}
 
-	// Check if we need to vendor the dependencies:
+	moduleFilePath := filepath.Join(o.pluginPath, plugin.CuelangModuleFolder, moduleFile)
+	moduleFileBackupPath := filepath.Join(o.pluginPath, moduleFileBackup)
+	vendorDirPath := filepath.Join(o.pluginPath, plugin.CuelangModuleFolder, vendorDir)
+	vendorDirBackupPath := filepath.Join(o.pluginPath, vendorDirBackup)
+
+	// Check if we need to vendor the dependencies
 	// - Parse the module file into a CUE instance
+	// TODO should skip if IsSchemaRequired is false
 	ctx := cuecontext.New()
-	insts := load.Instances([]string{moduleFile}, nil)
+	insts := load.Instances([]string{moduleFilePath}, nil)
 	module := ctx.BuildInstance(insts[0])
 	if err := module.Err(); err != nil {
 		return fmt.Errorf("failed to load plugin module file: %w", err)
@@ -128,40 +131,40 @@ func (o *option) Execute() error {
 		// Backup the original state of cue.mod/pkg if it exists*, and restore the original state on exit.
 		// *: even if a given plugin relies on new dependency management, it may also rely on other dependencies
 		// managed the old way. This is technically possible & supported by CUE, thus we want to handle this case.
-		if _, err := os.Stat(vendorDir); err == nil {
-			if err := file.CopyDir(vendorDir, vendorDirBackup); err != nil {
-				return fmt.Errorf("failed to backup original %s: %w", vendorDir, err)
+		if _, err := os.Stat(vendorDirPath); err == nil {
+			if err := file.CopyDir(vendorDirPath, vendorDirBackupPath); err != nil {
+				return fmt.Errorf("failed to backup original %s: %w", vendorDirPath, err)
 			}
 			defer func() {
-				if err := os.RemoveAll(vendorDir); err != nil {
-					logrus.Printf("failed to cleanup alterated %s: %v", vendorDir, err)
+				if err := os.RemoveAll(vendorDirPath); err != nil {
+					logrus.Printf("failed to cleanup alterated %s: %v", vendorDirPath, err)
 				}
-				if err := os.Rename(vendorDirBackup, vendorDir); err != nil {
-					logrus.Printf("failed to restore original %s: %v", vendorDir, err)
+				if err := os.Rename(vendorDirBackupPath, vendorDirPath); err != nil {
+					logrus.Printf("failed to restore original %s: %v", vendorDirPath, err)
 				}
 			}()
 		} else {
 			defer func() {
-				if err := os.RemoveAll(vendorDir); err != nil {
-					logrus.Printf("failed to cleanup %s: %v", vendorDir, err)
+				if err := os.RemoveAll(vendorDirPath); err != nil {
+					logrus.Printf("failed to cleanup %s: %v", vendorDirPath, err)
 				}
 			}()
 		}
 
 		// Vendor the dependencies
-		if err := o.vendorCueDependencies(); err != nil {
+		if err := o.vendorCueDependencies(vendorDirPath); err != nil {
 			return fmt.Errorf("failed to vendor CUE dependencies: %w", err)
 		}
 
 		// Alter the module file to remove the deps section. To achieve this we iteratively copy its content
 		// into a new value except the `deps` field. That's the easier way we can do in the current state of
 		// the CUE lib.
-		if err := os.Rename(moduleFile, moduleFileBackup); err != nil {
+		if err := os.Rename(moduleFilePath, moduleFileBackupPath); err != nil {
 			return fmt.Errorf("failed to backup original module file: %v", err)
 		}
 		// restore the original state on exit
 		defer func() {
-			if err := os.Rename(moduleFileBackup, moduleFile); err != nil {
+			if err := os.Rename(moduleFileBackupPath, moduleFilePath); err != nil {
 				logrus.Printf("failed to restore original module file: %v", err)
 			}
 		}()
@@ -180,7 +183,7 @@ func (o *option) Execute() error {
 			return fmt.Errorf("Failed to format new module.cue: %v", err)
 		}
 
-		err = os.WriteFile(moduleFile, cueBytes, 0644) // nolint: gosec
+		err = os.WriteFile(moduleFilePath, cueBytes, 0644) // nolint: gosec
 		if err != nil {
 			return fmt.Errorf("Failed to write module.cue: %v", err)
 		}
@@ -249,7 +252,7 @@ func (o *option) executeNPMBuild() error {
 // - evaluate the schemas to trigger the retrieval of dependencies
 // - move the dependencies to `cue.mod/pkg`
 // - remove the version in the name of the last directory generated from the module path (= rename `cue@vX.Y.Z` to `cue`)
-func (o *option) vendorCueDependencies() error {
+func (o *option) vendorCueDependencies(vendorDirPath string) error {
 	// Define a temporary folder where to store the CUE dependencies
 	tempDir, err := os.MkdirTemp("", "cue_cache")
 	if err != nil {
@@ -262,6 +265,7 @@ func (o *option) vendorCueDependencies() error {
 
 	// Run `cue eval` in order to fetch the dependencies
 	// NB forcing `./` to be appended here to workaround this limitation: 'standard library import path "schemas" cannot be imported as a CUE package'
+	// TODO mv to plugin path
 	cmd := exec.Command("cue", "eval", strings.Join([]string{".", "schemas"}, string(os.PathSeparator))) // nolint: gosec
 	cmd.Stderr = o.errWriter
 	if err := cmd.Run(); err != nil {
@@ -269,7 +273,7 @@ func (o *option) vendorCueDependencies() error {
 	}
 
 	// Move dependencies to cue.mod/pkg
-	if err := file.CopyDir(filepath.Join(tempDir, "mod", "extract"), vendorDir); err != nil {
+	if err := file.CopyDir(filepath.Join(tempDir, "mod", "extract"), vendorDirPath); err != nil {
 		return fmt.Errorf("failed to move dependencies: %w", err)
 	}
 
@@ -280,7 +284,7 @@ func (o *option) vendorCueDependencies() error {
 	//
 	// NB: Since "github.com/perses/perses/cue" may not be the only dependency, we walk through all
 	// directories under cue.mod/pkg
-	err = filepath.WalkDir(vendorDir, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(vendorDirPath, func(path string, d os.DirEntry, err error) error {
 		logrus.Debugf("Walking through %s", path)
 		if err != nil {
 			return fmt.Errorf("error walking through %s: %w", path, err)
