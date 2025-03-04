@@ -121,19 +121,16 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 	for _, object := range objects {
 		switch entity := object.(type) {
 		case *modelV1.Dashboard:
+			if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
+				return err
+			}
 			if o.online {
 				if err := o.apiClient.Validate().Dashboard(entity); err != nil {
-					return err
-				}
-				if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
 					return err
 				}
 			} else {
 				if err := validate.DashboardSpec(entity.Spec, o.sch); err != nil {
 					return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
-				}
-				if err := validate.DashboardWithCustomRules(entity, o.customRules); err != nil {
-					return err
 				}
 			}
 		case *modelV1.GlobalDatasource:

@@ -21,6 +21,10 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
+const (
+	CuelangModuleFolder = "cue.mod"
+)
+
 // IsRequiredFileExists checks if the required files to make a plugin valid, are present in the given folders.
 // frontendFolder is the folder where the frontend files are stored and special where the package.json is located.
 // schemaFolder is the folder where the schema files are stored.

@@ -151,11 +151,41 @@ export interface EphemeralDashboardConfig {
   cleanup_interval: string;
 }
 
+export interface GlobalVariableConfig {
+  disable: boolean;
+}
+
+export interface ProjectVariableConfig {
+  disable: boolean;
+}
+
+export interface VariableConfig {
+  global: GlobalVariableConfig;
+  project: ProjectVariableConfig;
+  disable_local: boolean;
+}
+
+export interface GlobalDatasourceConfig {
+  disable: boolean;
+}
+
+export interface ProjectDatasourceConfig {
+  disable: boolean;
+}
+
+export interface DatasourceConfig {
+  global: GlobalDatasourceConfig;
+  project: ProjectDatasourceConfig;
+  disable_local: boolean;
+}
+
 export interface ConfigModel {
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
   provisioning?: ProvisioningConfig;
+  datasource: DatasourceConfig;
+  variable: VariableConfig;
   ephemeral_dashboard: EphemeralDashboardConfig;
   frontend: FrontendConfig;
 }

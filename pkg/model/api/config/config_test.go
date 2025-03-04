@@ -59,6 +59,24 @@ func TestJSONMarshalConfig(t *testing.T) {
   "database": {},
   "dashboard": {},
   "provisioning": {},
+  "datasource": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
+  "variable": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
   "ephemeral_dashboard": {
     "enable": false,
     "cleanup_interval": "0s"
@@ -109,6 +127,24 @@ func TestJSONMarshalConfig(t *testing.T) {
   "dashboard": {},
   "provisioning": {
     "interval": "1h"
+  },
+  "datasource": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
+  },
+  "variable": {
+    "global": {
+      "disable": false
+    },
+    "project": {
+      "disable": false
+    },
+    "disable_local": false
   },
   "ephemeral_dashboard": {
     "enable": false,
@@ -219,7 +255,9 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "interval": "1h"
   },
-  "ephemeral_dashboards_cleanup_interval": "2h"
+  "ephemeral_dashboard": {
+    "cleanup_interval": "2h"
+  }
 }`,
 			result: Config{
 				Security: Security{
@@ -280,7 +318,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
+				EphemeralDashboard: EphemeralDashboard{
+					Enable:          false,
+					CleanupInterval: common.Duration(2 * time.Hour),
+				},
 			},
 		},
 	}
@@ -342,7 +383,9 @@ frontend:
     # Hello World
     ## File Database setup
 
-ephemeral_dashboards_cleanup_interval: "2h"
+
+ephemeral_dashboard:
+  cleanup_interval: "2h"
 
 plugin:
   path: "custom/plugins"
@@ -424,9 +467,8 @@ plugin:
 					},
 					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
 				EphemeralDashboard: EphemeralDashboard{
-					Enable:          true,
+					Enable:          false,
 					CleanupInterval: common.Duration(2 * time.Hour),
 				},
 			},

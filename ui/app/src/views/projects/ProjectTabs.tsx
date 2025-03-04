@@ -37,7 +37,13 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsAuthEnabled, useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
+import {
+  useIsAuthEnabled,
+  useIsEphemeralDashboardEnabled,
+  useIsProjectDatasourceEnabled,
+  useIsProjectVariableEnabled,
+  useIsReadonly,
+} from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
@@ -417,6 +423,8 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const { projectName, initialTab } = props;
   const { tab } = useParams();
   const isAuthEnabled = useIsAuthEnabled();
+  const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
+  const isProjectVariableEnabled = useIsProjectVariableEnabled();
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
@@ -473,22 +481,26 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
               disabled={!hasEphemeralDashboardReadPermission}
             />
           )}
-          <MenuTab
-            label="Variables"
-            icon={<CodeJsonIcon />}
-            iconPosition="start"
-            {...a11yProps(variablesTabIndex)}
-            value={variablesTabIndex}
-            disabled={!hasVariableReadPermission}
-          />
-          <MenuTab
-            label="Datasources"
-            icon={<DatabaseIcon />}
-            iconPosition="start"
-            {...a11yProps(datasourcesTabIndex)}
-            value={datasourcesTabIndex}
-            disabled={!hasDatasourceReadPermission}
-          />
+          {isProjectVariableEnabled && (
+            <MenuTab
+              label="Variables"
+              icon={<CodeJsonIcon />}
+              iconPosition="start"
+              {...a11yProps(variablesTabIndex)}
+              value={variablesTabIndex}
+              disabled={!hasVariableReadPermission}
+            />
+          )}
+          {isProjectDatasourceEnabled && (
+            <MenuTab
+              label="Datasources"
+              icon={<DatabaseIcon />}
+              iconPosition="start"
+              {...a11yProps(datasourcesTabIndex)}
+              value={datasourcesTabIndex}
+              disabled={!hasDatasourceReadPermission}
+            />
+          )}
           <MenuTab
             label="Secrets"
             icon={<KeyIcon />}
@@ -529,12 +541,16 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           <ProjectEphemeralDashboards projectName={projectName} id="project-ephemeral-dashboard-list" />
         </TabPanel>
       )}
-      <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <ProjectVariables projectName={projectName} id="project-variable-list" />
-      </TabPanel>
-      <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
-        <ProjectDatasources projectName={projectName} id="project-datasource-list" />
-      </TabPanel>
+      {isProjectVariableEnabled && (
+        <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <ProjectVariables projectName={projectName} id="project-variable-list" />
+        </TabPanel>
+      )}
+      {isProjectDatasourceEnabled && (
+        <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <ProjectDatasources projectName={projectName} id="project-datasource-list" />
+        </TabPanel>
+      )}
       <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>

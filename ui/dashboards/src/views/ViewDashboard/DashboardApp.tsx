@@ -38,6 +38,8 @@ export interface DashboardAppProps {
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
+  isVariableEnabled: boolean;
+  isDatasourceEnabled: boolean;
   isCreating?: boolean;
 }
 
@@ -50,6 +52,8 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     onDiscard,
     initialVariableIsSticky,
     isReadonly,
+    isVariableEnabled,
+    isDatasourceEnabled,
     isCreating,
   } = props;
 
@@ -115,6 +119,8 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         initialVariableIsSticky={initialVariableIsSticky}
         onSave={onSave}
         isReadonly={isReadonly}
+        isVariableEnabled={isVariableEnabled}
+        isDatasourceEnabled={isDatasourceEnabled}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />

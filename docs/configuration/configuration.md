@@ -105,11 +105,11 @@ schemas: <Schemas config> # Optional
 # Be careful: the data coming from the provisioning folder will totally override what exists in the database.
 provisioning: <Provisioning config> # Optional
 
-# If provided, Perses server will generate a list of global datasource based on the discovery chosen.
-# Be careful: the data coming from the discovery will totally override what exists in the database.
-# Note that this is an experimental feature. Behavior and config may change in the future.
-global_datasource_discovery:
-  - <GlobalDatasourceDiscovery config> # Optional
+# This configuration allows to fine tune the datasource feature. (To disable, or for discovery)
+datasource: <Datasource config> # Optional
+
+# This configuration allows to fine tune the variable feature
+variable: <Variable config> # Optional
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 # This config is deprecated. Please use the config ephemeral_dashboard instead.
@@ -525,7 +525,45 @@ folders:
   - <string>
 ```
 
-### GlobalDatasourceDiscovery config
+### Variable config
+
+```yaml
+global:
+  # It is used to disable the global variable feature.
+  # Note that if the global datasource is disabled, the global variable will also be disabled.
+  disable: <boolean> | default = false # Optional
+
+project:
+  # It is used to disable the project variable feature.
+  # Note that if the global datasource and the project datasource are disabled,
+  # then the project variable will also be disabled.
+  disable: <boolean> | default = false # Optional
+
+# When used is preventing the possibility to add a variable directly in the dashboard spec.
+disable_local: <boolean> | default = false # Optional
+```
+
+### Datasource config
+
+```yaml
+global:
+  # It is used to disable the global datasource feature.
+  # It will also remove the associated proxy.
+  # Also, since the global variable depends on the global datasource, it will also disable the global variable feature.
+  disable: <boolean> | default = false # Optional
+  discovery: <GlobalDatasourceDiscovery config> # Optional
+
+project:
+  # It is used to disable the project datasource feature.
+  # It will also remove the associated proxy.
+  disable: <boolean> | default = false # Optional
+
+# When used is preventing the possibility to add a datasource directly in the dashboard spec.
+# It will also disable the associated proxy.
+disable_local: <boolean> | default = false # Optional
+```
+
+#### GlobalDatasourceDiscovery config
 
 ```yaml
 # The name of the discovery config. It is used for logging purposes only
@@ -545,7 +583,7 @@ http_sd: <HTTPSD Config> # Optional
 kubernetes_sd: <KubernetesSD Config> # Optional
 ```
 
-#### HTTPSD Config
+##### HTTPSD Config
 
 ```yaml
 # URL of the HTTP server exposing the global datasource list to retrieve.
@@ -563,7 +601,7 @@ headers:
   <string>: <string> # Optional
 ```
 
-##### Oauth specification
+###### Oauth specification
 
 ```yaml
 # ClientID is the application's ID.
@@ -576,19 +614,19 @@ client_secret: <string>
 token_url: <string>
 ```
 
-##### Basic Auth specification
+###### Basic Auth specification
 
 See the [BasicAuth](../api/secret.md#basic-auth-specification) specification.
 
-##### Authorization specification
+###### Authorization specification
 
 See the [Authorization](../api/secret.md#authorization-specification) specification.
 
-##### TLS Config specification
+###### TLS Config specification
 
 See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
-#### KubernetesSD Config
+##### KubernetesSD Config
 
 ```yaml
 # The name of the datasource plugin that should be filled when creating datasources found.

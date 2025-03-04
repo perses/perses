@@ -14,6 +14,8 @@
 package config
 
 import (
+	"path/filepath"
+
 	"github.com/perses/common/config"
 	"github.com/perses/perses/internal/cli/file"
 )
@@ -41,13 +43,19 @@ func (c *PluginConfig) Verify() error {
 	return nil
 }
 
-func Resolve(configFile string) (PluginConfig, error) {
+func Resolve(pluginPath string, configFile string) (PluginConfig, error) {
 	cfgPath := configFile
 	c := PluginConfig{}
 	if len(cfgPath) == 0 {
-		if exist, err := file.Exists(DefaultConfigFile); err == nil && exist {
+		if exist, err := file.Exists(filepath.Join(pluginPath, DefaultConfigFile)); err == nil && exist {
 			cfgPath = DefaultConfigFile
 		}
+	}
+	if len(cfgPath) != 0 {
+		// We are appending the plugin path to the config file path only if the config file exists and has been found.
+		// Otherwise, if only the plugin path is provided,
+		// and the configFile is empty and the default one is not found, the config resolver will throw an error, which is not something we want in this case.
+		cfgPath = filepath.Join(pluginPath, cfgPath)
 	}
 	return c, config.NewResolver[PluginConfig]().
 		SetConfigFile(cfgPath).

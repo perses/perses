@@ -78,6 +78,27 @@ jobs:
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make integration-test
+  test-windows:
+    name: "tests with file DB on windows"
+    runs-on: windows-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.9.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.12.0"
+
+      - name: "install prometheus"
+        run: sh scripts/download-prometheus.sh
+      - name: "start prometheus"
+        run: sh scripts/run-prometheus.sh
+      - name: generate files
+        run: make generate
+      - name: test
+        run: make integration-test
   test-mysql:
     name: "tests with mysql"
     runs-on: ubuntu-latest
