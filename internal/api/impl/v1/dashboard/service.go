@@ -32,20 +32,24 @@ import (
 
 type service struct {
 	dashboard.Service
-	dao           dashboard.DAO
-	globalVarDAO  globalvariable.DAO
-	projectVarDAO variable.DAO
-	sch           schema.Schema
-	customRules   []*config.CustomLintRule
+	dao                 dashboard.DAO
+	globalVarDAO        globalvariable.DAO
+	projectVarDAO       variable.DAO
+	sch                 schema.Schema
+	isDatasourceDisable bool
+	isVariableDisable   bool
+	customRules         []*config.CustomLintRule
 }
 
-func NewService(customRules []*config.CustomLintRule, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
 	return &service{
-		dao:           dao,
-		globalVarDAO:  globalVarDAO,
-		projectVarDAO: projectVarDAO,
-		sch:           sch,
-		customRules:   customRules,
+		dao:                 dao,
+		globalVarDAO:        globalVarDAO,
+		projectVarDAO:       projectVarDAO,
+		sch:                 sch,
+		isDatasourceDisable: cfg.Datasource.DisableLocal,
+		isVariableDisable:   cfg.Variable.DisableLocal,
+		customRules:         cfg.Dashboard.CustomLintRules,
 	}
 }
 
@@ -165,6 +169,16 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 	}
 	if err := validate.DashboardWithCustomRules(entity, s.customRules); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if s.isDatasourceDisable {
+		if len(entity.Spec.Datasources) > 0 {
+			return apiInterface.HandleBadRequestError("local datasource cannot be used as it has been disabled in the configuration")
+		}
+	}
+	if s.isVariableDisable {
+		if len(entity.Spec.Variables) > 0 {
+			return apiInterface.HandleBadRequestError("local variable cannot be used as it has been disabled in the configuration")
+		}
 	}
 	return nil
 }

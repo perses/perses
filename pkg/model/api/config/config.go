@@ -61,10 +61,10 @@ type Config struct {
 	Dashboard DashboardConfig `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
-	// GlobalDatasourceDiscovery is the configuration that helps to generate a list of global datasource based on the discovery chosen.
-	// Be careful: the data coming from the discovery will totally override what exists in the database.
-	// Note that this is an experimental feature. Behavior and config may change in the future.
-	GlobalDatasourceDiscovery []GlobalDatasourceDiscovery `json:"global_datasource_discovery,omitempty" yaml:"global_datasource_discovery,omitempty"`
+	// Datasource contains the configuration for the datasource.
+	Datasource DatasourceConfig `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	// Variable contains the configuration for the variable.
+	Variable VariableConfig `json:"variable,omitempty" yaml:"variable,omitempty"`
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	// DEPRECATED.
 	// Please use the config EphemeralDashboard instead.
@@ -92,6 +92,12 @@ func (c *Config) Verify() error {
 	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
 		c.APIPrefix = "/" + c.APIPrefix
 	}
+	// As the global variable depends on the global datasource, we need to disable the global variable if the global datasource is disabled.
+	c.Variable.Global.Disable = c.Variable.Global.Disable || c.Datasource.Global.Disable
+	// The same logic applies for a project variable with an additional rules.
+	// Since a project variable can either depend on a global datasource or a project datasource,
+	// we need to disable the project variable if the global datasource is disabled and the project datasource is disabled.
+	c.Variable.Project.Disable = c.Variable.Project.Disable || (c.Datasource.Global.Disable && c.Datasource.Project.Disable)
 	return nil
 }
 

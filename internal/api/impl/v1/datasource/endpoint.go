@@ -24,22 +24,28 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type endpoint struct {
-	toolbox  toolbox.Toolbox[*v1.Datasource, *datasource.Query]
-	readonly bool
+	toolbox   toolbox.Toolbox[*v1.Datasource, *datasource.Query]
+	readonly  bool
+	isDisable bool
 }
 
-func NewEndpoint(service datasource.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(cfg config.DatasourceConfig, service datasource.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.Datasource, *v1.Datasource, *datasource.Query](service, rbacService, v1.KindDatasource, caseSensitive),
-		readonly: readonly,
+		toolbox:   toolbox.New[*v1.Datasource, *v1.Datasource, *datasource.Query](service, rbacService, v1.KindDatasource, caseSensitive),
+		readonly:  readonly,
+		isDisable: cfg.Project.Disable,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
+	if e.isDisable {
+		return
+	}
 	group := g.Group(fmt.Sprintf("/%s", utils.PathDatasource))
 	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", utils.PathProject, utils.ParamProject, utils.PathDatasource))
 	if !e.readonly {

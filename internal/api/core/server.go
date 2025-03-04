@@ -60,14 +60,14 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
-		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		datasource.NewEndpoint(cfg.Datasource, serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive, cfg.EphemeralDashboard.Enable),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly, caseSensitive),
-		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globaldatasource.NewEndpoint(cfg.Datasource, serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
-		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalvariable.NewEndpoint(cfg.Variable, serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		plugin.NewEndpoint(serviceManager.GetPlugin()),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly, caseSensitive),
@@ -75,7 +75,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
-		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetRBAC(), serviceManager.GetDashboard()),
 	}
 
@@ -98,7 +98,8 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
-		proxyEndpoint:  proxy.New(persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(), persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetRBAC()),
+		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
+			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetRBAC()),
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),

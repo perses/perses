@@ -27,10 +27,12 @@ more dynamic.
 To enable the HTTP service discovery, you need to add the following configuration to the Perses configuration file:
 
 ```yaml
-global_datasource_discovery:
-  - name: "my discovery"
-    http_sd:
-      url: "http://my-service.com/datasources"
+datasource:
+  global:
+    discovery:
+      - name: "my discovery"
+        http_sd:
+        url: "http://my-service.com/datasources"
 ```
 
 If you want more details about how to fine-tune the HTTP config (like adding oauth2 authentication), you can check
@@ -50,17 +52,19 @@ To enable the Kubernetes service discovery, you need to add the kubeSD config. H
 if you would like to discover the k8s services:
 
 ```yaml
-global_datasource_discovery:
-  - name: "my discovery"
-    kubernetes_sd:
-      datasource_plugin_kind: "PrometheusDatasource"
-      namespace: "my-namespace"
-      service_configuration:
-        enable: true
-        port_name: "http"
-        serviceType: "ClusterIP"
-      labels:
-        app: prometheus
+datasource:
+  global:
+    discovery:
+    - name: "my discovery"
+      kubernetes_sd:
+        datasource_plugin_kind: "PrometheusDatasource"
+        namespace: "my-namespace"
+        service_configuration:
+          enable: true
+          port_name: "http"
+          serviceType: "ClusterIP"
+        labels:
+          app: prometheus
 ```
 
 If you want more details about how to fine-tune the Kubernetes config, you can check

@@ -51,6 +51,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     onDiscard,
     initialVariableIsSticky,
     isReadonly,
+    isVariableEnabled,
+    isDatasourceEnabled,
     isEditing,
     isCreating,
     sx,
@@ -137,6 +139,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                   onDiscard={onDiscard}
                   initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
+                  isVariableEnabled={isVariableEnabled}
+                  isDatasourceEnabled={isDatasourceEnabled}
                   isCreating={isCreating}
                 />
               </ErrorBoundary>

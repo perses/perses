@@ -63,7 +63,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
-	if len(conf.GlobalDatasourceDiscovery) > 0 {
+	if len(conf.Datasource.Global.Discovery) > 0 {
 		datasourceDiscoveryTasks, sdErr := discovery.New(conf, serviceManager, persesDAO.IsCaseSensitive())
 		if sdErr != nil {
 			return nil, nil, fmt.Errorf("unable to instantiate the tasks for datasource discovery: %w", sdErr)
