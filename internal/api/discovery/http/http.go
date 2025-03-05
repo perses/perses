@@ -15,6 +15,7 @@ package httpsd
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/perses/common/async"
@@ -48,7 +49,7 @@ type discovery struct {
 	name       string
 }
 
-func (d *discovery) Execute(_ context.Context, _ context.Context) error {
+func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	var result []*v1.GlobalDatasource
 	err := d.restClient.Get().
 		Do().
@@ -60,4 +61,8 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 	}
 	d.svc.Apply(result)
 	return nil
+}
+
+func (d *discovery) String() string {
+	return fmt.Sprintf("datasource discovery %q", d.name)
 }
