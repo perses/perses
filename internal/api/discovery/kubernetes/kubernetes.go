@@ -89,7 +89,7 @@ type discovery struct {
 	name      string
 }
 
-func (d *discovery) Execute(_ context.Context, _ context.Context) error {
+func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	decodedSchema, err := d.decodeSchema()
 	if err != nil {
 		logrus.WithError(err).Error("failed to decode schema")
@@ -102,6 +102,10 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 	}
 	d.svc.Apply(result)
 	return nil
+}
+
+func (d *discovery) String() string {
+	return fmt.Sprintf("datasource discovery %q", d.name)
 }
 
 func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
