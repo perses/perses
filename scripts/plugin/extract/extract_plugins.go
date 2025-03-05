@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,17 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package variable
+package main
 
 import (
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	"fmt"
+
+	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
-#kind: string
-#name: string
-#display?: v1Variable.#Display & {
-	hidden: bool | *false
-}
+func main() {
+	a := plugin.Arch{
+		Folder:       config.DefaultArchivePluginPath,
+		TargetFolder: config.DefaultPluginPath,
+	}
 
-variable: v1Dashboard.#Variable
+	if a.UnzipAll() != nil {
+		panic("unable to unzip all plugins")
+	}
+
+	fmt.Println("All plugins successfully extracted.")
+}

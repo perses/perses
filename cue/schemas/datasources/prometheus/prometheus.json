@@ -1,7 +1,0 @@
-{
-  "kind": "PrometheusDatasource",
-  "spec": {
-    "directUrl": "http://localhost:9090",
-    "scrapeInterval": "15s"
-  }
-}

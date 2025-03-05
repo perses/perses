@@ -140,13 +140,11 @@ func TestNewFromSchema(t *testing.T) {
 			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
-				t.Error(err)
-				return
+				t.Fatal(err)
 			}
 			trees, err := NewFromSchema(ctx.BuildInstance(instance))
 			if err != nil {
-				t.Errorf("NewFromSchema() error = %v", err)
-				return
+				t.Fatalf("NewFromSchema() error = %v", err)
 			}
 			sortNodes(trees)
 			assert.Equal(t, tt.expected, trees)
@@ -195,19 +193,16 @@ spec:
 			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
-				t.Error(err)
-				return
+				t.Fatal(err)
 			}
 			trees, err := NewFromSchema(ctx.BuildInstance(instance))
 			if err != nil {
-				t.Errorf("NewFromSchema() error = %v", err)
-				return
+				t.Fatalf("NewFromSchema() error = %v", err)
 			}
 			sortNodes(trees)
 			plg, err := BuildPluginAndInjectProxy(trees, tt.proxy)
 			if err != nil {
-				t.Errorf("BuildPluginAndInjectProxy() error = %v", err)
-				return
+				t.Fatalf("BuildPluginAndInjectProxy() error = %v", err)
 			}
 			d, err := yaml.Marshal(plg)
 			if err != nil {

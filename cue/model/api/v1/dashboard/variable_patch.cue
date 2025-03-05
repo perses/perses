@@ -34,6 +34,6 @@ import "github.com/perses/perses/cue/model/api/v1/variable"
 }
 
 #Variable: {
-	kind:  variable.#Kind                        @go(Kind)
-	spec?: #TextVariableSpec | #ListVariableSpec @go(Spec)
+	kind:  variable.#Kind                       @go(Kind)
+	spec: #TextVariableSpec | #ListVariableSpec @go(Spec)
 }

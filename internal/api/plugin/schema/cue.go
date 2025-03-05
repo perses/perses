@@ -71,7 +71,7 @@ func LoadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) 
 
 	// check for errors on the instances
 	if buildInstance.Err != nil {
-		return nil, buildInstance.Err
+		return nil, fmt.Errorf("failed to load schema from %q: %w", schemaPath, buildInstance.Err)
 	}
 	return buildInstance, nil
 }
