@@ -134,12 +134,12 @@ func CopyDir(src, dst string) error {
 		if info.IsDir() {
 			return os.MkdirAll(targetPath, os.ModePerm)
 		}
-		return CopyFile(path, targetPath)
+		return Copy(path, targetPath)
 	})
 }
 
 // Copy a file
-func CopyFile(src, dst string) error {
+func Copy(src, dst string) error {
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return err
