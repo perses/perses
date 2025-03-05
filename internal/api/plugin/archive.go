@@ -25,15 +25,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Arch struct {
-	Folder       string
-	TargetFolder string
+type arch struct {
+	folder       string
+	targetFolder string
 }
 
-func (a *Arch) UnzipAll() error {
-	files, err := os.ReadDir(a.Folder)
+func (a *arch) unzipAll() error {
+	files, err := os.ReadDir(a.folder)
 	if err != nil {
-		return fmt.Errorf("unable to read directory %s: %w", a.Folder, err)
+		return fmt.Errorf("unable to read directory %s: %w", a.folder, err)
 	}
 	for _, file := range files {
 		if file.IsDir() {
@@ -48,13 +48,13 @@ func (a *Arch) UnzipAll() error {
 	return nil
 }
 
-func (a *Arch) unzip(archiveFileName string) error {
+func (a *arch) unzip(archiveFileName string) error {
 	if !archive.IsArchiveFile(archiveFileName) {
 		logrus.Debugf("skipping unarchive file %s", archiveFileName)
 		return nil
 	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
-	archiveFile := filepath.Join(a.Folder, archiveFileName)
+	archiveFile := filepath.Join(a.folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile)
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {
@@ -77,12 +77,12 @@ func (a *Arch) unzip(archiveFileName string) error {
 	return nil
 }
 
-func (a *Arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo) error {
+func (a *arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo) error {
 	if f.IsDir() {
 		return nil
 	}
 	currentDir, _ := filepath.Split(f.NameInArchive)
-	if mkdirErr := os.MkdirAll(filepath.Join(a.TargetFolder, currentDir), os.ModePerm); mkdirErr != nil {
+	if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, currentDir), os.ModePerm); mkdirErr != nil {
 		return fmt.Errorf("unable to create directory %q: %w", currentDir, mkdirErr)
 	}
 	stream, openErr := f.Open()
@@ -98,7 +98,7 @@ func (a *Arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo)
 	if err != nil {
 		return fmt.Errorf("unable to read the file %q: %w", f.NameInArchive, err)
 	}
-	if writeErr := os.WriteFile(filepath.Join(a.TargetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
+	if writeErr := os.WriteFile(filepath.Join(a.targetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
 		return fmt.Errorf("unable to write the file %q: %w", f.NameInArchive, writeErr)
 	}
 	return nil

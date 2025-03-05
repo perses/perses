@@ -49,9 +49,9 @@ type Plugin interface {
 func New(plugin config.Plugin) Plugin {
 	return &pluginFile{
 		path: plugin.Path,
-		archibal: &Arch{
-			Folder:       plugin.ArchivePath,
-			TargetFolder: plugin.Path,
+		archibal: &arch{
+			folder:       plugin.ArchivePath,
+			targetFolder: plugin.Path,
 		},
 		sch:            schema.New(),
 		mig:            migrate.New(),
@@ -67,7 +67,7 @@ type pluginFile struct {
 	// The key is the name of the plugin used by the frontend to get access to the plugin files.
 	loaded map[string]Loaded
 	// archibal is the archive service used only to extract the plugin files from the archive.
-	archibal *Arch
+	archibal *arch
 	// sch is the service used to load and provide the schema of the plugin.
 	// This service is used when validating any plugin / dashboards.
 	sch schema.Schema
@@ -96,7 +96,7 @@ func (p *pluginFile) Migration() migrate.Migration {
 }
 
 func (p *pluginFile) UnzipArchives() error {
-	return p.archibal.UnzipAll()
+	return p.archibal.unzipAll()
 }
 
 func (p *pluginFile) Load() error {

@@ -212,9 +212,4 @@ update-helm-readme:
 .PHONY: install-default-plugins
 install-default-plugins:
 	@echo ">> install default plugins"
-	$(GO) run ./scripts/plugin/install/install_plugins.go
-
-.PHONY: extract-plugins
-extract-plugins:
-	@echo ">> extract plugins"
-	$(GO) run ./scripts/plugin/extract/extract_plugins.go
+	$(GO) run ./scripts/plugin/install_plugin.go
