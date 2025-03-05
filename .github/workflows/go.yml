@@ -97,6 +97,8 @@ jobs:
         run: sh scripts/run-prometheus.sh
       - name: generate files
         run: make generate
+      - name: Login to CUE's Central Registry to allow retrieving deps
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make integration-test
   test-mysql:
