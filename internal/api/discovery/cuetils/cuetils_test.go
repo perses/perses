@@ -18,13 +18,13 @@ import (
 	"sort"
 	"testing"
 
-	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/model/api/config"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -38,7 +38,7 @@ func TestNewFromSchema(t *testing.T) {
 	}{
 		{
 			name:   "PrometheusDatasource",
-			schema: filepath.Join(projectPath, config.DefaultPluginPath, "prometheus", "schemas", "datasource"),
+			schema: "PrometheusDatasource",
 			expected: []*Node{
 				{
 					Type:          StringNodeType,
@@ -80,7 +80,7 @@ func TestNewFromSchema(t *testing.T) {
 		},
 		{
 			name:   "TempoDatasource",
-			schema: filepath.Join(projectPath, config.DefaultPluginPath, "Tempo", "schemas", "datasource"), // TODO "Tempo" to be changed to "tempo" when a new plugin version is out
+			schema: "TempoDatasource",
 			expected: []*Node{
 				{
 					Type:          StringNodeType,
@@ -122,13 +122,27 @@ func TestNewFromSchema(t *testing.T) {
 		},
 	}
 
+	cfg := apiConfig.Plugin{
+		Path:        filepath.Join(projectPath, apiConfig.DefaultPluginPath),
+		ArchivePath: filepath.Join(projectPath, apiConfig.DefaultArchivePluginPath),
+	}
+	pluginService := plugin.New(cfg)
+	if err := pluginService.UnzipArchives(); err != nil {
+		logrus.Fatal(err)
+	}
+	if err := pluginService.Load(); err != nil {
+		logrus.Fatal(err)
+	}
+	sch := pluginService.Schema()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v, err := buildCUESchema(tt.schema)
+			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
-			trees, err := NewFromSchema(v)
+			trees, err := NewFromSchema(ctx.BuildInstance(instance))
 			if err != nil {
 				t.Fatalf("NewFromSchema() error = %v", err)
 			}
@@ -148,7 +162,7 @@ func TestBuildPluginAndInjectProxy(t *testing.T) {
 	}{
 		{
 			name:   "PrometheusDatasource",
-			schema: filepath.Join(projectPath, config.DefaultPluginPath, "prometheus", "schemas", "datasource"),
+			schema: "PrometheusDatasource",
 			proxy: http.Config{
 				URL: common.MustParseURL("http://localhost:9090"),
 			},
@@ -162,37 +176,41 @@ spec:
 `,
 		},
 	}
+	cfg := apiConfig.Plugin{
+		Path:        filepath.Join(projectPath, apiConfig.DefaultPluginPath),
+		ArchivePath: filepath.Join(projectPath, apiConfig.DefaultArchivePluginPath),
+	}
+	pluginService := plugin.New(cfg)
+	if err := pluginService.UnzipArchives(); err != nil {
+		logrus.Fatal(err)
+	}
+	if err := pluginService.Load(); err != nil {
+		logrus.Fatal(err)
+	}
+	sch := pluginService.Schema()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v, err := buildCUESchema(tt.schema)
+			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
-			trees, err := NewFromSchema(v)
+			trees, err := NewFromSchema(ctx.BuildInstance(instance))
 			if err != nil {
 				t.Fatalf("NewFromSchema() error = %v", err)
 			}
 			sortNodes(trees)
-			plugin, err := BuildPluginAndInjectProxy(trees, tt.proxy)
+			plg, err := BuildPluginAndInjectProxy(trees, tt.proxy)
 			if err != nil {
 				t.Fatalf("BuildPluginAndInjectProxy() error = %v", err)
 			}
-			d, err := yaml.Marshal(plugin)
+			d, err := yaml.Marshal(plg)
 			if err != nil {
 				t.Errorf("yaml.Marshal() error = %v", err)
 			}
 			assert.Equal(t, tt.expectedYAMLResult, string(d))
 		})
 	}
-}
-
-func buildCUESchema(path string) (cue.Value, error) {
-	ctx := cuecontext.New()
-	_, schemaInstance, err := schema.LoadModelSchema(path)
-	if err != nil {
-		return cue.Value{}, err
-	}
-	return ctx.BuildInstance(schemaInstance), nil
 }
 
 func sortNodes(nodes []*Node) {
