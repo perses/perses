@@ -19,12 +19,8 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
-	"github.com/perses/perses/internal/api/plugin"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -84,20 +80,4 @@ func ReadFile(filepath string) []byte {
 		panic(err)
 	}
 	return fileContentBytes
-}
-
-func UnzipAndLoadSchema() plugin.Plugin {
-	projectPath := GetRepositoryPath()
-	cfg := apiConfig.Plugin{
-		Path:        filepath.Join(projectPath, apiConfig.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, apiConfig.DefaultArchivePluginPath),
-	}
-	pluginService := plugin.New(cfg)
-	if err := pluginService.UnzipArchives(); err != nil {
-		logrus.Fatal(err)
-	}
-	if err := pluginService.Load(); err != nil {
-		logrus.Fatal(err)
-	}
-	return pluginService
 }

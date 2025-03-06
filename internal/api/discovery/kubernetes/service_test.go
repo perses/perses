@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
@@ -46,19 +47,18 @@ metadata:
     updatedAt: 0001-01-01T00:00:00Z
     version: 0
 spec:
-  default: false
-  plugin:
-    kind: PrometheusDatasource
-    spec:
-      directUrl: ""
-      proxy:
-        kind: HTTPProxy
-          spec:
-          url: http://prometheus-prometheus.kube-monitoring.svc:9090
+    default: false
+    plugin:
+        kind: PrometheusDatasource
+        spec:
+            proxy:
+                kind: HTTPProxy
+                spec:
+                    url: http://prometheus-prometheus.kube-monitoring.svc:9090
 `,
 		},
 	}
-	sch := test.UnzipAndLoadSchema().Schema()
+	sch := plugin.StrictLoad().Schema()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var k8sSVC corev1.Service

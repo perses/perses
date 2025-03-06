@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
@@ -115,7 +116,7 @@ func TestNewFromSchema(t *testing.T) {
 			},
 		},
 	}
-	sch := test.UnzipAndLoadSchema().Schema()
+	sch := plugin.StrictLoad().Schema()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -149,7 +150,6 @@ func TestBuildPluginAndInjectProxy(t *testing.T) {
 			},
 			expectedYAMLResult: `kind: PrometheusDatasource
 spec:
-    directUrl: ""
     proxy:
         kind: HTTPProxy
         spec:
@@ -157,7 +157,7 @@ spec:
 `,
 		},
 	}
-	sch := test.UnzipAndLoadSchema().Schema()
+	sch := plugin.StrictLoad().Schema()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
