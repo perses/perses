@@ -1,5 +1,5 @@
-Loading plugins
-======================
+Plugin structure
+================
 
 In Perses, each plugin must be provided as an archive file containing the plugin's frontend and backend parts.
 
@@ -38,39 +38,3 @@ The archive must have the following structure:
 The CLI can help you to respect and verify this structure with the commands `percli plugin build` and
 `percli plugin validate`.
 Check the associated [documentation](../cli.md) for more details.
-
-## Backend side
-
-Before being able to use a plugin, it must be recognized and loaded by the Perses backend.
-
-When the Perses backend is starting, it will look at a specific folder that should contain any plugin archive file. This
-folder can be set using the following configuration:
-
-```yaml
-plugin:
-  archive_path: /path/to/archive/folder
-```
-
-By default, the plugin archive folder is set to `plugins-archive` or to `/etc/perses/plugins-archive` if it's running in
-a container.
-
-Perses will extract every archive contained in this folder and will put the data into another folder. This folder can be
-set using the following configuration:
-
-```yaml
-plugin:
-  path: /path/to/plugin/folder
-```
-
-By default, the plugin folder is set to `plugins` or to `/etc/perses/plugins` if it's running in a container.
-
-Finally, Perses will look at any folder contained in the plugin folder and will load in memory every schema contained.
-It will also generate a file `plugin-module.json` at the root of the plugin folder.
-This file contains the list of the plugins that can be used by the frontend.
-
-This file is used to serve the HTTP endpoint `/api/v1/plugins`. The frontend calls this endpoint to get the list of the
-plugins to be loaded.
-
-## Frontend side
-
-TODO
