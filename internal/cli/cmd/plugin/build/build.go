@@ -50,6 +50,7 @@ const (
 type option struct {
 	persesCMD.Option
 	skipNPMBuild              bool
+	skipNPMInstall            bool
 	archiveFormat             archive.Format
 	cfg                       config.PluginConfig
 	cfgPath                   string
@@ -94,7 +95,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	// First step: run npm to build the frontend part.
-	if err := o.executeNPMBuild(); err != nil {
+	if err := o.executeNPMSteps(); err != nil {
 		return err
 	}
 	// Check if the required files are present
@@ -143,8 +144,15 @@ func (o *option) Execute() error {
 	return output.HandleString(o.writer, fmt.Sprintf("%s built successfully", manifest.Name))
 }
 
-func (o *option) executeNPMBuild() error {
-	if o.skipNPMBuild {
+func (o *option) executeNPMSteps() error {
+	if err := o.executeNPMInstall(); err != nil {
+		return err
+	}
+	return o.executeNPMBuild()
+}
+
+func (o *option) executeNPMInstall() error {
+	if o.skipNPMInstall {
 		return nil
 	}
 	if _, err := os.Stat(filepath.Join(o.cfg.FrontendPath, "node_modules")); os.IsNotExist(err) {
@@ -160,6 +168,13 @@ func (o *option) executeNPMBuild() error {
 		if execErr := cmd.Run(); execErr != nil {
 			return fmt.Errorf("unable to install the frontend dependencies: %w, stdout: %s, stderr: %s", execErr, stdoutBuffer.String(), stderrBuffer.String())
 		}
+	}
+	return nil
+}
+
+func (o *option) executeNPMBuild() error {
+	if o.skipNPMBuild {
+		return nil
 	}
 	cmd := exec.Command("npm", "run", "build")
 	// to get a more comprehensive error message, we need to capture the stdout & stderr.
@@ -419,13 +434,24 @@ func NewCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "build",
 		Short: "Build the plugin.",
-		Long:  `Build the plugin by running "npm run build" and then by creating the archive containing every required files`,
+		Long: `The command will build the plugin by following these steps:
+- Run npm ci to install the frontend dependencies
+- Run npm run build to build the frontend
+- Vendor all cue dependencies if the plugin requires a schema
+- Create the archive with the following files:
+  - package.json: required to get the type of the plugin and the name
+  - mf-manifest.json and mf-stats.json: contains the plugin name
+  - static: folder containing the UI part
+  - schemas: folder containing the schema files
+  - cue.mod: folder containing the CUE module & eventual vendored dependencies
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
-	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip-npm-build", false, "")
+	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip.npm-build", false, "The command will run `npm run build` to ensure the frontend is built before creating the archive. If you want to skip this step, you can use this flag.")
+	cmd.Flags().BoolVar(&o.skipNPMInstall, "skip.npm-install", false, "The command will run `npm ci` if it doesn't find the node_modules folder. If you want to skip this step, you can use this flag.")
 	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag ---plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
 
