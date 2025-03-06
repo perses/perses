@@ -14,23 +14,17 @@
 package cuetils
 
 import (
-	"path/filepath"
 	"sort"
 	"testing"
 
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
 )
 
 func TestNewFromSchema(t *testing.T) {
-	projectPath := test.GetRepositoryPath()
 	tests := []struct {
 		name     string
 		schema   string
@@ -121,19 +115,7 @@ func TestNewFromSchema(t *testing.T) {
 			},
 		},
 	}
-
-	cfg := apiConfig.Plugin{
-		Path:        filepath.Join(projectPath, apiConfig.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, apiConfig.DefaultArchivePluginPath),
-	}
-	pluginService := plugin.New(cfg)
-	if err := pluginService.UnzipArchives(); err != nil {
-		logrus.Fatal(err)
-	}
-	if err := pluginService.Load(); err != nil {
-		logrus.Fatal(err)
-	}
-	sch := pluginService.Schema()
+	sch := test.UnzipAndLoadSchema().Schema()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -153,7 +135,6 @@ func TestNewFromSchema(t *testing.T) {
 }
 
 func TestBuildPluginAndInjectProxy(t *testing.T) {
-	projectPath := test.GetRepositoryPath()
 	tests := []struct {
 		name               string
 		schema             string
@@ -176,18 +157,7 @@ spec:
 `,
 		},
 	}
-	cfg := apiConfig.Plugin{
-		Path:        filepath.Join(projectPath, apiConfig.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, apiConfig.DefaultArchivePluginPath),
-	}
-	pluginService := plugin.New(cfg)
-	if err := pluginService.UnzipArchives(); err != nil {
-		logrus.Fatal(err)
-	}
-	if err := pluginService.Load(); err != nil {
-		logrus.Fatal(err)
-	}
-	sch := pluginService.Schema()
+	sch := test.UnzipAndLoadSchema().Schema()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
@@ -204,10 +174,7 @@ spec:
 			if err != nil {
 				t.Fatalf("BuildPluginAndInjectProxy() error = %v", err)
 			}
-			d, err := yaml.Marshal(plg)
-			if err != nil {
-				t.Errorf("yaml.Marshal() error = %v", err)
-			}
+			d := test.YAMLMarshalStrict(plg)
 			assert.Equal(t, tt.expectedYAMLResult, string(d))
 		})
 	}
