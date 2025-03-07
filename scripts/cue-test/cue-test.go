@@ -21,7 +21,6 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
-	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -80,16 +79,7 @@ func validateAllGlobalDatasources(sch schema.Schema) {
 }
 
 func main() {
-	cfg := config.Plugin{}
-	_ = cfg.Verify()
-	pluginService := plugin.New(cfg)
-	if err := pluginService.UnzipArchives(); err != nil {
-		logrus.Fatal(err)
-	}
-	if err := pluginService.Load(); err != nil {
-		logrus.Fatal(err)
-	}
-	sch := pluginService.Schema()
+	sch := plugin.StrictLoad().Schema()
 	validateAllDashboards(sch)
 	validateAllDatasources(sch)
 	validateAllGlobalDatasources(sch)

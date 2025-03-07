@@ -61,6 +61,7 @@ func (d *serviceDiscovery) discover(decodedSchema []*cuetils.Node) ([]*v1.Global
 func (d *serviceDiscovery) serviceToGlobalDatasource(svc corev1.Service, decodedSchema []*cuetils.Node) (*v1.GlobalDatasource, error) {
 	port := d.extractPort(svc)
 	if port == nil {
+		// we don't return any error, as the service doesn't match the configuration, so we have to drop it.
 		return nil, nil
 	}
 

@@ -20,7 +20,6 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	testUtils "github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -94,18 +93,7 @@ func TestMig_Migrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 	}
-	projectPath := testUtils.GetRepositoryPath()
-
-	pl := New(config.Plugin{
-		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
-	})
-	if err := pl.UnzipArchives(); err != nil {
-		t.Fatalf("failed to unzip archives: %s", err)
-	}
-	if err := pl.Load(); err != nil {
-		t.Fatalf("failed to load plugin: %s", err)
-	}
+	pl := StrictLoad()
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {

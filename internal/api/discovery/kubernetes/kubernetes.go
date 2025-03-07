@@ -16,6 +16,7 @@ package kubesd
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -34,11 +35,17 @@ import (
 )
 
 func buildLabelSelector(labels map[string]string) string {
-	var builder strings.Builder
+	var builder []string
 	for k, v := range labels {
-		builder.WriteString(fmt.Sprintf("%s=%s,", k, v))
+		if v == "" {
+			builder = append(builder, k)
+		} else {
+			builder = append(builder, fmt.Sprintf("%s=%s", k, v))
+		}
 	}
-	return builder.String()
+	// We sort the labels to have a deterministic order.
+	sort.Strings(builder)
+	return strings.Join(builder, ",")
 }
 
 type clientDiscovery interface {

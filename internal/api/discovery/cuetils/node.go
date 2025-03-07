@@ -61,7 +61,16 @@ func (n *Node) sort() {
 func (n *Node) setPrimitiveValue(result map[string]interface{}) error {
 	switch n.Type {
 	case StringNodeType:
-		result[n.FieldName] = n.ConcreteValue
+		// We consider that any empty string is a nil value.
+		// This is a choice that should work for the majority of the case in the context of datasource discovery,
+		// where the primary goal is to set the proxy configuration.
+		// It will avoid the following situation:
+		// You have a disjunction like #directURL | #proxy.
+		// And since #proxy will be set, #directURL should not be set with an empty string,
+		// as it is considered in Cuelang as a concrete value and not a nil one.
+		if len(n.ConcreteValue) > 0 {
+			result[n.FieldName] = n.ConcreteValue
+		}
 	case IntegerNodeType:
 		var i int64
 		var err error
@@ -117,7 +126,7 @@ type iteratorQueue struct {
 	parent    *Node
 }
 
-func (q *iteratorQueue) setPritiveValue(node *Node) error {
+func (q *iteratorQueue) setPrimitiveValue(node *Node) error {
 	switch q.value.Kind() {
 	case cue.BoolKind:
 		node.Type = BoolNodeType
@@ -170,7 +179,7 @@ func buildTree(queue []iteratorQueue) error {
 		// Easy case: it's a concrete value (a string, a boolean, a number).
 		// We can already create the associated Node
 		if value.IsConcrete() && value.Kind() != cue.StructKind && value.Kind() != cue.ListKind {
-			if setErr := el.setPritiveValue(node); setErr != nil {
+			if setErr := el.setPrimitiveValue(node); setErr != nil {
 				return setErr
 			}
 			continue
