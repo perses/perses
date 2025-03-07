@@ -178,7 +178,7 @@ func (o *option) Execute() error {
 		// Resolve the sdk dependency (= write an example file
 		// and run 'cue mod tidy')
 		exampleFilePath := "example.cue"
-		if err := os.WriteFile(exampleFilePath, []byte(exampleCUEDac), 0644); err != nil {
+		if err := os.WriteFile(exampleFilePath, []byte(exampleCUEDac), 0600); err != nil {
 			return fmt.Errorf("failed to create example.cue: %w", err)
 		}
 		logrus.Debugf("example.cue file created successfully")

@@ -31,7 +31,11 @@ func TestDacSetupCMD(t *testing.T) {
 		t.Fatalf("Failed to change directory to testdata: %v", err)
 	}
 	// change back to the original working directory on defer
-	defer os.Chdir(originalWD)
+	defer func() {
+		if err := os.Chdir(originalWD); err != nil {
+			t.Fatalf("Failed to change back to the original directory: %v", err)
+		}
+	}()
 
 	testSuite := []cmdTest.Suite{
 		// TODO add test for nominal case with CUE (need to deal with `cue login`...)
