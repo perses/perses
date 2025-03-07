@@ -94,7 +94,8 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
           case 'TempoTraceQuery':
             return isTraceQueryPluginLoading;
         }
-        throw new Error(`Unable to determine the query type: ${pluginKind}`);
+
+        return isTraceQueryPluginLoading || isTimeSeriesQueryLoading;
       };
 
       if (isLoading(pluginKind)) {
