@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, Popover, CircularProgress, styled } from '@mui/material';
-import { isValidElement, PropsWithChildren, useMemo, useState } from 'react';
+import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
+import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
@@ -195,6 +195,14 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   const divider = <Box sx={{ flexGrow: 1 }}></Box>;
 
+  // if the panel is in non-editing, non-fullscreen mode, show certain icons only on hover
+  const OnHover = ({ children }: PropsWithChildren): ReactNode =>
+    editHandlers === undefined && !readHandlers?.isPanelViewed ? (
+      <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box>
+    ) : (
+      <>{children}</>
+    );
+
   return (
     <>
       {/* small panel width: move all icons except move/grab to overflow menu */}
@@ -204,10 +212,12 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         })}
       >
         {divider}
-        <OverflowMenu title={title}>
-          {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
-        </OverflowMenu>
-        {moveAction}
+        <OnHover>
+          <OverflowMenu title={title}>
+            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+          </OverflowMenu>
+          {moveAction}
+        </OnHover>
       </ConditionalBox>
 
       {/* medium panel width: move edit icons to overflow menu */}
@@ -218,9 +228,15 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           },
         })}
       >
-        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions}
-        <OverflowMenu title={title}>{editActions}</OverflowMenu>
-        {moveAction}
+        <OnHover>
+          {descriptionAction} {linksAction}
+        </OnHover>
+        {divider} {queryStateIndicator}
+        <OnHover>
+          {extraActions} {readActions}
+          <OverflowMenu title={title}>{editActions}</OverflowMenu>
+          {moveAction}
+        </OnHover>
       </ConditionalBox>
 
       {/* large panel width: show all icons in panel header */}
@@ -231,15 +247,20 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
         })}
       >
-        {descriptionAction} {linksAction} {divider} {queryStateIndicator} {extraActions} {readActions} {editActions}
-        {moveAction}
+        <OnHover>
+          {descriptionAction} {linksAction}
+        </OnHover>
+        {divider} {queryStateIndicator}
+        <OnHover>
+          {extraActions} {readActions} {editActions} {moveAction}
+        </OnHover>
       </ConditionalBox>
     </>
   );
 };
 
 const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
 
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
@@ -248,14 +269,14 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
   }
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
-    setAnchorEl(event.currentTarget);
+    setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
   const handleClose = (): undefined => {
-    setAnchorEl(null);
+    setAnchorPosition(undefined);
   };
 
-  const open = Boolean(anchorEl);
+  const open = Boolean(anchorPosition);
   const id = open ? 'actions-menu' : undefined;
 
   return (
@@ -272,7 +293,8 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
       <Popover
         id={id}
         open={open}
-        anchorEl={anchorEl}
+        anchorReference="anchorPosition"
+        anchorPosition={anchorPosition}
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
