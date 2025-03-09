@@ -13,7 +13,7 @@
 
 import { IconButton, IconButtonProps, Menu, MenuItem, MenuProps } from '@mui/material';
 import DragIcon from 'mdi-material-ui/Drag';
-import { useState, MouseEvent, ReactElement } from 'react';
+import { useState, MouseEvent, ReactElement, forwardRef } from 'react';
 
 export function handleMoveUp<T>(element: T, elements: T[]): T[] {
   const index = elements.indexOf(element);
@@ -47,7 +47,10 @@ export interface DragButtonProps extends IconButtonProps {
   menuSx?: MenuProps['sx'];
 }
 
-export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx }: DragButtonProps): ReactElement {
+export const DragButton = forwardRef<HTMLButtonElement, DragButtonProps>(function DragButton(
+  { onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx, ...otherProps }: DragButtonProps,
+  ref
+): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -62,7 +65,15 @@ export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menu
 
   return (
     <>
-      <IconButton aria-label="move" aria-haspopup={true} aria-expanded={open} size="small" onClick={handleClick}>
+      <IconButton
+        {...otherProps}
+        ref={ref}
+        aria-label="move"
+        aria-haspopup={true}
+        aria-expanded={open}
+        size="small"
+        onClick={handleClick}
+      >
         <DragIcon />
       </IconButton>
       {(onMoveUp || onMoveDown || onMoveLeft || onMoveRight) && (
@@ -85,4 +96,4 @@ export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menu
       )}
     </>
   );
-}
+});
