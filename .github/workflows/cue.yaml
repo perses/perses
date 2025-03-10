@@ -13,6 +13,10 @@ on:
       - 'internal/cli/cmd/plugin/**'
       - 'internal/cli/cmd/dac/**'
       - 'internal/test/cue/**'
+      - 'go.mod'
+      - 'internal/**/go.mod'
+      - 'go-sdk/test/go.mod'
+      - 'scripts/plugin/**'
   merge_group:
 
 concurrency:
