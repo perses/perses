@@ -440,10 +440,18 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const handleModeChange = (v: number): void => {
     if (tabs[v]?.label === strDirect) {
       setPreviousSpecProxy(value);
-      onChange({ ...value, directUrl: previousSpecDirect.directUrl });
+
+      // Copy all settings (for example, scrapeInterval), except 'proxy'
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { proxy, ...newValue } = value;
+      onChange({ ...newValue, directUrl: previousSpecDirect.directUrl });
     } else if (tabs[v]?.label === strProxy) {
       setPreviousSpecDirect(value);
-      onChange({ ...value, proxy: previousSpecProxy.proxy });
+
+      // Copy all settings (for example, scrapeInterval), except 'directUrl'
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { directUrl, ...newValue } = value;
+      onChange({ ...newValue, proxy: previousSpecProxy.proxy });
     }
   };
 
