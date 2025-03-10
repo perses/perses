@@ -2,15 +2,22 @@
 
 ## 0.51.0-beta.0 / 2025-03-10
 
+This release is one of the biggest releases we ever made.
+On top of many features and improvements, we are introducing a new plugin architecture that allows you to develop external plugins and load them in Perses.
+As part of this change we are introducing a new repository `perses/plugins` containing all default plugins supported by Perses.
+
+We have also improved the documentation, highlighting features that were implemented some time ago already but not well advertised (like datasource discovery and ephemeral dashboards)
+
+Even if we already have tested this version and received constructive feedback from the community, we prefer to provide a beta version to ensure that everything is working as expected.
+We will continue to improve the documentation and the plugins in the coming weeks.
+
 - [FEATURE] By configuration, disable datasource and variable (#2673)
 - [FEATURE] Support Custom Lint rules to validate dashboard (#2684)
 - [FEATURE] Add OAuth secret type for Datasources (#2631)
 - [FEATURE] Add YAML and Custom Resource support when downloading dashboard formats (#2658)
 - [FEATURE] Label metrics in stat chart (#2574)
 - [FEATURE] Value mapping settings for Status History and Stat Chart (#2462)
-- [FEATURE] Configure Tempo data source in UI (#2522)
 - [ENHANCEMENT] Adds a way to skip the installation of the npm deps (#2720)
-- [ENHANCEMENT] rework `percli plugin build` to vendor CUE dependencies (#2695)
 - [ENHANCEMENT] CLI/Migrate: support CR as a migration format (#2682)
 - [ENHANCEMENT] Support conditional queryOptions for panels (#2662)
 - [ENHANCEMENT] Add Authorization and BasicAuth definitions to cue package (#2643)
@@ -46,7 +53,7 @@
 - [BUGFIX] Redirect to the desired page after login success (#2354)
 - [BUGFIX] DaC CUE SDK: Fix inconsistencies in mandatory vs optional attributes in dashboard lib (#2540)
 - [BUGFIX] `percli dac setup`: fix useless requirement of go CLI when using CUE (#2544)
-- [BREAKINGCHANGE] Changes the plugin architure to support remote plugins. (#2154) (#2511) (#2526) (#2545) (#2567) (#2578) (#2582) (#2593) (#2598) (#2606) (#2609) (#2613) (#2616) (#2626) (#2637) (#2660) (#2645) (#2690) (#2719)
+- [BREAKINGCHANGE] Changes the plugin architecture to support remote plugins. (#2154) (#2511) (#2526) (#2545) (#2567) (#2578) (#2582) (#2593) (#2598) (#2606) (#2609) (#2613) (#2616) (#2626) (#2637) (#2660) (#2645) (#2690) (#2695) (#2719)
 - [BREAKINGCHANGE] Rename field in the service discovery config and add a concept doc about SD (#2665)
 - [DOC] Fix typo in ListVariable spec (#2691)
 - [DOC] Fix doc about TLS config and the TLS secret spec (#2685)
