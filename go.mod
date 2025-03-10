@@ -9,7 +9,7 @@ require (
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
 	github.com/efficientgo/core v1.0.0-rc.3
-	github.com/gavv/httpexpect/v2 v2.16.0
+	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -176,7 +176,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.34.0 // indirect
+	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
