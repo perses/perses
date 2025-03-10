@@ -12,7 +12,7 @@
           "proxy": {
             "kind": "HTTPProxy",
             "spec": {
-              "url": "https://prometheus.demo.do.prometheus.io"
+              "url": "https://prometheus.demo.prometheus.io"
             }
           }
         }
@@ -29,7 +29,7 @@
       "plugin": {
         "kind": "PrometheusDatasource",
         "spec": {
-          "directUrl": "https://prometheus.demo.do.prometheus.io"
+          "directUrl": "https://prometheus.demo.prometheus.io"
         }
       }
     }
