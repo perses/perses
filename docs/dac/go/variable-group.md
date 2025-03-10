@@ -56,12 +56,12 @@ package main
 
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
-	labelnames "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
-	labelvalues "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
-	"github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
 	textvariable "github.com/perses/perses/go-sdk/variable/text-variable"
+	labelnames "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
+	labelvalues "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
+	"github.com/perses/plugins/prometheus/sdk/go/variable/promql"
 )
 
 func main() {

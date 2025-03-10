@@ -93,8 +93,8 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
-	"github.com/perses/perses/go-sdk/prometheus/query"
+	"github.com/perses/plugins/prometheus/sdk/go/query"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {
@@ -111,4 +111,5 @@ func main() {
 		),
 	)
 }
+
 ```

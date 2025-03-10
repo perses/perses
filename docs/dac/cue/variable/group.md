@@ -39,8 +39,8 @@ package myDaC
 import (
 	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
 	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
-	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
-	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	labelValuesVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/labelvalues"
 )
 
 {varGroupBuilder & {

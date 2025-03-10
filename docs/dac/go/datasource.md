@@ -49,15 +49,7 @@ Set if datasource is a default datasource.
 
 ## Datasource Plugin Options
 
-### Prometheus Datasource
-
-```golang
-import promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
-
-promDs.Prometheus(promDsOptions...)
-```
-
-Set Prometheus plugin for the datasource. More info at [Prometheus Datasource](./prometheus/datasource.md).
+See the related documentation for each datasource plugin.
 
 ## Example
 
@@ -67,12 +59,12 @@ package main
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	
-	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
 )
 
 func main() {
 	dashboard.New("ExampleDashboard",
-		dashboard.AddDatasource("prometheusDemo", promDs.Prometheus(promDs.DirectURL("https://prometheus.demo.do.prometheus.io/"))),
+		dashboard.AddDatasource("prometheusDemo", promDs.Prometheus(promDs.DirectURL("https://prometheus.demo.prometheus.io/"))),
 	)
 }
 ```

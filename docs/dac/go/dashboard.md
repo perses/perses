@@ -117,12 +117,11 @@ import (
 	"time"
 
 	"github.com/perses/perses/go-sdk/dashboard"
-	"github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/perses/go-sdk/panel/markdown"
-
-	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
-	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
+	"github.com/perses/plugins/markdown/sdk/go"
+	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
+	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 )
 
 func main() {
@@ -141,7 +140,7 @@ func main() {
 				listVar.DisplayName("PaaS"),
 			),
 		),
-		
+
 		// ROWS
 		dashboard.AddPanelGroup("Info",
 			panelgroup.PanelsPerLine(3),
@@ -156,4 +155,5 @@ func main() {
 		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("#####"))),
 	)
 }
+
 ```

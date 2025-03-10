@@ -5,7 +5,7 @@
 
 This section provides detailed information about the CUE SDK to develop dashboards as code in Perses.
 It's focusing on explaining how to use the different builders provided by the SDK, that you should rely on to simplify the coding.
-Besides, you can always manipulate directly the base datamodel of the Perses dashboard, but this is less convenient.
+Besides, you can always directly manipulate the base datamodel of the Perses dashboard, but this is less convenient.
 
 See the dedicated pages for each builder:
 
@@ -15,18 +15,12 @@ See the dedicated pages for each builder:
     - [Variable Group](./variable/group.md)
     - [List Variable](./variable/list.md)
     - [Text Variable](./variable/text.md)
-- Prometheus-related builders:
-    - [Filter](./prometheus/filter.md)
-    - [Panel](./prometheus/panel.md)
-    - [Label Names Variable](./prometheus/variable/labelnames.md)
-    - [Label Values Variable](./prometheus/variable/labelvalues.md)
-    - [PromQL Variable](./prometheus/variable/promql.md)
 
 See also some useful patterns for DaC with the CUE SDK in the below section.
 
 ## Useful patterns
 
-This section provides additional tips & tricks to help you developping dashboards as code:
+This section provides additional tips and tricks to help you develop dashboards as code:
 
 ### Declare intermediary objects for reusability
 
@@ -40,12 +34,12 @@ package myDaC
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
 	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
 	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
-	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
-	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
 )
 
 #myVarsBuilder: varGroupBuilder & {
@@ -105,7 +99,7 @@ Once your code is organized this way, you can even split the different definitio
 
 ### Multiple variable groups
 
-If you want 2 independant groups of variables on the same dashboard like "C depends on B that depends on A" and "F depends on E that depends on D", use 2 times the variable group builder independantly, then concat the lists.
+If you want two independent groups of variables on the same dashboard as "C depends on B that depends on A" and "F depends on E that depends on D", use 2 times the variable group builder independently, then concat the lists.
 
 Example:
 
@@ -114,14 +108,15 @@ package myDaC
 
 import (
 	"list"
+
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
 	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
 	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
-	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
-	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
 )
 
 #myCloudVarsBuilder: varGroupBuilder & {

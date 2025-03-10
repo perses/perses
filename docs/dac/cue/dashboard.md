@@ -35,12 +35,13 @@ package myDaC
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
 	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
 	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
 	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
-	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	promQLVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/promql"
+	promFilterBuilder "github.com/perses/plugins/prometheus/sdk/cue/filter"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
 )
 
 dashboardBuilder & {
@@ -89,5 +90,5 @@ dashboardBuilder & {
 }
 ```
 
-As you can see, other builders are used in conjunction with the dashboard builder to facilitate further the coding.
+As you can see, other builders are used in conjunction with the dashboard builder to facilitate further coding.
 Please refer to their respective documentation for more information about each.

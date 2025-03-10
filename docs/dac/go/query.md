@@ -21,15 +21,7 @@ None
 
 ## Query Plugin Options
 
-### Prometheus Query
-
-```golang
-import "github.com/perses/perses/go-sdk/prometheus/query"
-
-query.PromQL("max by (container) (container_memory_rss{})")
-```
-
-Set Prometheus Query plugin for the query. More info at [Prometheus Query](./prometheus/query.md).
+See the related documentation for each query plugin.
 
 ## Example
 
@@ -40,8 +32,8 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
-	"github.com/perses/perses/go-sdk/prometheus/query"
+	"github.com/perses/plugins/prometheus/sdk/go/query"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/gop"
 )
 
 func main() {
@@ -56,4 +48,5 @@ func main() {
 		),
 	)
 }
+
 ```
