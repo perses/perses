@@ -47,7 +47,7 @@
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "mdi-material-ui": "^7.9.2",
-    "notistack": "^2.0.5",
+    "notistack": "^3.0.2",
     "react-colorful": "^5.6.1",
     "react-error-boundary": "^3.1.4",
     "react-hook-form": "^7.51.3",
