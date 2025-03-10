@@ -106,15 +106,19 @@ cue-gen:
 	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
 	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
 
-.PHONY: cue-test
-cue-test:
-	@echo ">> test CUE schemas with json data"
-	$(GO) run ./scripts/cue-test/cue-test.go
+.PHONY: validate-data
+validate-data:
+	@echo ">> Validate all data in dev/data"
+	$(GO) run ./scripts/validate-data/validate-data.go
 
 .PHONY: test
 test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v ./...
+
+.PHONY: cue-test
+cue-test: generate
+	$(GO) test -tags=cue -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: integration-test
 integration-test: generate

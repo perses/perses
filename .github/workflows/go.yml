@@ -70,10 +70,6 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-      - name: generate files
-        run: make generate
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make integration-test
   test-windows:
@@ -88,15 +84,10 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-
       - name: "install prometheus"
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
         run: sh scripts/run-prometheus.sh
-      - name: generate files
-        run: make generate
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make integration-test
   test-mysql:
@@ -125,10 +116,6 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-      - name: generate files
-        run: make generate
-      - name: Login to CUE's Central Registry to allow retrieving deps
-        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -151,7 +138,7 @@ jobs:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
           args: --timeout 5m
-  validate-cue-schemas:
+  validate-dev-data:
     name: validate CUE schemas
     runs-on: ubuntu-latest
     steps:
@@ -161,14 +148,11 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-          enable_cue: true
-          cue_version: "v0.12.0"
-      - name: check cue schema
-        run: make cue-eval
+          enable_cue: false
       - name: download plugin
         run: make install-default-plugins
-      - name: test cue schema
-        run: make cue-test
+      - name: validate all data from dev/data
+        run: make validate-data
   check-cue-gen:
     name: "check generated CUE files"
     runs-on: ubuntu-latest

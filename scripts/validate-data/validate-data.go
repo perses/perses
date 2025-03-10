@@ -25,8 +25,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: probably doesn't make sense to keep this script in the repository. Probably we should move it to the perses/plugins repository
-
 func validateAllDashboards(sch schema.Schema) {
 	logrus.Info("validate all dashboards in dev/data")
 	data, err := os.ReadFile(filepath.Join("dev", "data", "9-dashboard.json"))
