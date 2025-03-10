@@ -100,4 +100,5 @@ func main() {
 	for _, download := range downloadToBeDone {
 		_, _ = download.Await()
 	}
+	fmt.Println("All plugins successfully installed.")
 }

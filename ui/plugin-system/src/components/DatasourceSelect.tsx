@@ -12,7 +12,19 @@
 // limitations under the License.
 
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
-import { Select, SelectProps, MenuItem, Stack, Divider, ListItemText, Chip, IconButton, Box } from '@mui/material';
+import {
+  Select,
+  SelectProps,
+  MenuItem,
+  Stack,
+  Divider,
+  ListItemText,
+  Chip,
+  IconButton,
+  Box,
+  OutlinedSelectProps,
+  BaseSelectProps,
+} from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { ReactElement, useMemo } from 'react';
 import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
@@ -21,7 +33,7 @@ import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../r
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
-export interface DatasourceSelectProps extends Omit<SelectProps<string>, OmittedMuiProps> {
+export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
   value: DatasourceSelector;
   onChange: (next: DatasourceSelector) => void;
   datasourcePluginKind: string;

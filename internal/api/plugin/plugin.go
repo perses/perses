@@ -20,6 +20,7 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -46,17 +47,37 @@ type Plugin interface {
 	Migration() migrate.Migration
 }
 
-func New(plugin config.Plugin) Plugin {
+// StrictLoad is a helper function that loads the plugin from the default path.
+// This function is used only for the tests.
+// It should not be used in production.
+// In case of error, the function will panic.
+func StrictLoad() Plugin {
+	projectPath := test.GetRepositoryPath()
+	cfg := config.Plugin{
+		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+	}
+	pluginService := New(cfg)
+	if err := pluginService.UnzipArchives(); err != nil {
+		logrus.Fatal(err)
+	}
+	if err := pluginService.Load(); err != nil {
+		logrus.Fatal(err)
+	}
+	return pluginService
+}
+
+func New(cfg config.Plugin) Plugin {
 	return &pluginFile{
-		path: plugin.Path,
+		path: cfg.Path,
 		archibal: &arch{
-			folder:       plugin.ArchivePath,
-			targetFolder: plugin.Path,
+			folder:       cfg.ArchivePath,
+			targetFolder: cfg.Path,
 		},
 		sch:            schema.New(),
 		mig:            migrate.New(),
 		loaded:         make(map[string]Loaded),
-		devEnvironment: plugin.DevEnvironment,
+		devEnvironment: cfg.DevEnvironment,
 	}
 }
 

@@ -1,0 +1,61 @@
+name: cue
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+    paths:
+      - '**.cue'
+      - 'internal/cli/cmd/plugin/**'
+      - 'internal/cli/cmd/dac/**'
+      - 'internal/test/cue/**'
+      - 'go.mod'
+      - 'internal/**/go.mod'
+      - 'go-sdk/test/go.mod'
+      - 'scripts/plugin/**'
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  validate-cue-schemas:
+    name: validate CUE schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.9.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.12.0"
+      - name: check cue schema
+        run: make cue-eval
+  test-cue:
+    name: "tests with cuelang"
+    runs-on: ubuntu-latest
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - '9090:9090'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.9.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.12.0"
+      - name: Login to CUE's Central Registry to allow retrieving deps
+        run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
+      - name: test
+        run: make cue-test

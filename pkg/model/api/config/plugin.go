@@ -39,6 +39,22 @@ func isRunningInContainer() bool {
 	return false
 }
 
+// isRunningInKubernetes checks if the application is running in a kubernetes cluster.
+// In this context, the function isRunningInContainer will always return false as the files `/run/.containerenv` and `/.dockerenv`
+// are not created in a kubernetes cluster.
+func isRunningInKubernetes() bool {
+	if _, err := os.Stat("/var/run/secrets/kubernetes.io"); err == nil {
+		return true
+	}
+	// In case the value automountServiceAccountToken is equal to false, then the directory `/var/run/secrets/kubernetes.io` will not be created.
+	// So another way to verify if the application is running in a kubernetes cluster is to check if the environment variable `KUBERNETES_SERVICE_HOST` is set.
+	// This variable is set only if the pod is running on a node as stamped in the documentation: https://kubernetes.io/docs/tutorials/services/connect-applications-service/#environment-variables.
+	if _, present := os.LookupEnv("KUBERNETES_SERVICE_HOST"); present {
+		return true
+	}
+	return false
+}
+
 type Plugin struct {
 	// Path is the path to the directory containing the runtime plugins
 	Path string `json:"path,omitempty" yaml:"path,omitempty"`
@@ -51,15 +67,16 @@ type Plugin struct {
 
 func (p *Plugin) Verify() error {
 	runningInContainer := isRunningInContainer()
+	runningInKubernetes := isRunningInKubernetes()
 	if len(p.Path) == 0 {
-		if runningInContainer {
+		if runningInContainer || runningInKubernetes {
 			p.Path = DefaultPluginPathInContainer
 		} else {
 			p.Path = DefaultPluginPath
 		}
 	}
 	if len(p.ArchivePath) == 0 {
-		if runningInContainer {
+		if runningInContainer || runningInKubernetes {
 			p.ArchivePath = DefaultArchivePluginPathInContainer
 		} else {
 			p.ArchivePath = DefaultArchivePluginPath

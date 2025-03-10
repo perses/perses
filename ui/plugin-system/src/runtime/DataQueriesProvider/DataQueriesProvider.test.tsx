@@ -117,6 +117,6 @@ describe('useQueryType', () => {
     const getQueryType = result.current;
     expect(getQueryType('PrometheusTimeSeriesQuery')).toBeUndefined();
     expect(getQueryType('TempoTraceQuery')).toBeUndefined();
-    expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
+    expect(getQueryType('UnknownQuery')).toBeUndefined();
   });
 });

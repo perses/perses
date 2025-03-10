@@ -16,6 +16,7 @@ package kubesd
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -34,11 +35,17 @@ import (
 )
 
 func buildLabelSelector(labels map[string]string) string {
-	var builder strings.Builder
+	var builder []string
 	for k, v := range labels {
-		builder.WriteString(fmt.Sprintf("%s=%s,", k, v))
+		if v == "" {
+			builder = append(builder, k)
+		} else {
+			builder = append(builder, fmt.Sprintf("%s=%s", k, v))
+		}
 	}
-	return builder.String()
+	// We sort the labels to have a deterministic order.
+	sort.Strings(builder)
+	return strings.Join(builder, ",")
 }
 
 type clientDiscovery interface {
@@ -90,7 +97,7 @@ type discovery struct {
 	name      string
 }
 
-func (d *discovery) Execute(_ context.Context, _ context.Context) error {
+func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 	decodedSchema, err := d.decodeSchema()
 	if err != nil {
 		logrus.WithError(err).Error("failed to decode schema")
@@ -103,6 +110,10 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 	}
 	d.svc.Apply(result)
 	return nil
+}
+
+func (d *discovery) String() string {
+	return fmt.Sprintf("datasource discovery %q", d.name)
 }
 
 func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {

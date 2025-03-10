@@ -53,7 +53,7 @@ jobs:
         run: make checkformat
       - name: check go.mod
         run: make checkunused
-  test:
+  test-file:
     name: "tests with file DB"
     runs-on: ubuntu-latest
     services:
@@ -70,8 +70,6 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-      - name: generate files
-        run: make generate
       - name: test
         run: make integration-test
   test-windows:
@@ -86,13 +84,10 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-
       - name: "install prometheus"
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
         run: sh scripts/run-prometheus.sh
-      - name: generate files
-        run: make generate
       - name: test
         run: make integration-test
   test-mysql:
@@ -121,8 +116,6 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
-      - name: generate files
-        run: make generate
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -145,8 +138,8 @@ jobs:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v1.62.2
           args: --timeout 5m
-  cue-def:
-    name: cue
+  validate-dev-data:
+    name: validate CUE schemas
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -155,16 +148,13 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-          enable_cue: true
-          cue_version: "v0.12.0"
-      - name: check cue schema
-        run: make cue-def
+          enable_cue: false
       - name: download plugin
         run: make install-default-plugins
-      - name: test cue schema
-        run: make cue-test
+      - name: validate all data from dev/data
+        run: make validate-data
   check-cue-gen:
-    name: "check cue gen files"
+    name: "check generated CUE files"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -175,12 +165,12 @@ jobs:
           enable_go: true
           enable_cue: true
           cue_version: "v0.12.0"
-      - name: generate cue files
+      - name: generate .cue model files
         run: make cue-gen
       - name: check for changes
         run: |
           git add .
           if ! git diff --cached --exit-code; then
-            echo "CUE generated files are not up to date. Please run 'make cue-gen' and commit the changes."
+            echo "The generated .cue model files are not up to date. Please run 'make cue-gen' locally and commit the changes."
             exit 1
           fi
