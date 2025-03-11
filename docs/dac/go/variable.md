@@ -209,49 +209,7 @@ Define if the list variable is hidden. A hidden variable is a variable that is n
 
 #### Variable Plugin Options
 
-##### Static list (List Variable)
-
-```golang
-import staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
-
-staticListOptions := []staticlist.Option{
-	staticlist.Values("abc", "def"),
-}
-staticlist.StaticList(staticListOptions...)
-```
-
-##### Prometheus PromQL (List Variable)
-
-```golang
-import promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
-
-var promqlVarOptions []promqlVar.Option
-promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{})", promqlVarOptions...)
-```
-
-Use a Prometheus query to populate the list variable. More info at [PromQL Variable](./prometheus/variable/promql.md).
-
-##### Prometheus Label Names (List Variable)
-
-```golang
-import labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
-
-var labelNamesVarOptions []labelNamesVar.Option
-labelNamesVar.PrometheusLabelNames(labelNamesVarOptions...)
-```
-
-Use label names from a Prometheus datasource to populate the list variable. More info at [Label Names Variable](./prometheus/variable/label-names.md).
-
-##### Prometheus Label Values (List Variable)
-
-```golang
-import labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
-
-var labelValuesVarOptions []labelValuesVar.Option
-labelValuesVar.PrometheusLabelValues("labelNames", labelNamesVarOptions...)
-```
-
-Use label values from a Prometheus datasource to populate the list variable. More info at [Label Values Variable](./prometheus/variable/label-values.md).
+See plugins DaC documentation at https://github.com/perses/plugins/tree/main/docs.
 
 ## Example
 
