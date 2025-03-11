@@ -13,7 +13,7 @@ See the dedicated pages for each builder:
 - [Panel Groups](./panelgroups.md)
 - Variable-related builders:
     - [Variable Group](./variable/group.md)
-    - [Static List Variable](./variable/staticlist.md)
+    - [List Variable](./variable/list.md)
     - [Text Variable](./variable/text.md)
 - Prometheus-related builders:
     - [Filter](./prometheus/filter.md)

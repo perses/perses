@@ -1,6 +1,10 @@
-# Static List Variable builder
+# List Variable builder
 
-The Static List Variable builder helps creating static list variables in the format expected by Perses.
+The List Variable builder helps creating list variables in the format expected by Perses.
+
+!!! warning
+	This lib is not meant for direct usage in DaC, as List variables are not standalone objects (they embed a plugin part).
+	This lib should be used by plugin developers to develop wrappers for their variable plugins - as it was done for official plugins.
 
 ## Usage
 
@@ -8,10 +12,10 @@ The Static List Variable builder helps creating static list variables in the for
 package myDaC
 
 import (
-	staticListVarBuilder "github.com/perses/perses/cue/dac-utils/variable/staticlist"
+	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
 )
 
-staticListVarBuilder & {} // input parameters expected
+listVarBuilder & {} // input parameters expected
 ```
 
 ## Parameters
@@ -19,7 +23,7 @@ staticListVarBuilder & {} // input parameters expected
 | Parameter          | Type                                                         | Mandatory/Optional | Default | Description                                                                                                                        |
 |--------------------|--------------------------------------------------------------|--------------------|---------|------------------------------------------------------------------------------------------------------------------------------------|
 | `#name`            | string                                                       | Mandatory          |         | The name of this variable.                                                                                                         |
-| `#values`          | [...(string \| { value: string, label?: string })]           | Mandatory          |         | The list of values of this variable.                                                                                               |
+| `#pluginKind`      | string                                                       | Mandatory          |         | The plugin kind of this variable.                                                                                                  |
 | `#display`         | [Display](../../../api/variable.md#display-specification)    | Optional           |         | Display object to tune the display name, description and visibility (show/hide).                                                   |
 | `#allowAllValue`   | boolean                                                      | Optional           | false   | Whether to append the "All" value to the list.                                                                                     |
 | `#allowMultiple`   | boolean                                                      | Optional           | false   | Whether to allow multi-selection of values.                                                                                        |
@@ -35,15 +39,30 @@ staticListVarBuilder & {} // input parameters expected
 
 ## Example
 
+Example of SDK definition for the Static List variable:
+
 ```cue
-package myDaC
+package myDaCLib
 
 import (
-	staticListVarBuilder "github.com/perses/perses/cue/dac-utils/variable/staticlist"
+	staticListVar "github.com/perses/plugins/staticlistvariable/schemas:model"
+	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
 )
 
-{staticListVarBuilder & {
-	#name:     "prometheus"
-	#values:   ["one", "two", {value: "three", label: "THREE" }]
-}}.variable
+// include the definitions of listVarBuilder at the root
+listVarBuilder
+
+// specify the constraints for this variable
+#pluginKind: staticListVar.kind
+#values: [...staticListVar.#value]
+
+variable: listVarBuilder.variable & {
+	spec: {
+		plugin: staticListVar & {
+			spec: {
+				values: #values
+			}
+		}
+	}
+}
 ```
