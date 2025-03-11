@@ -288,12 +288,8 @@ func (o *option) vendorCueDependencies() error {
 		return fmt.Errorf("failed to set CUE_CACHE_DIR: %w", err)
 	}
 
-	// Run `cue eval` to fetch the dependencies
-	// NB forcing `./` to be appended here to work around this limitation: 'standard library import path "schemas" cannot be imported as a CUE package'
-	// The '...' at the end is to evaluate all the schemas that can be contained in subdirectories.
-	// Note: To avoid loosing time for the next one that will think to be smart enough to replace the strings.Join by filepath, I can tell you already it won't work.
-	// Because that's exactly what I did and the tests immediately failed. So keep it like that, it works.
-	cmd := exec.Command("cue", "eval", strings.Join([]string{".", o.initialCFG.SchemasPath, "..."}, string(os.PathSeparator))) // nolint: gosec
+	// Run `cue mod tidy` to fetch the dependencies
+	cmd := exec.Command("cue", "mod", "tidy") // nolint: gosec
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	cmd.Dir = o.pluginPath // the command has to be run from the plugin path
