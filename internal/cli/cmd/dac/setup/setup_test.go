@@ -61,7 +61,7 @@ func TestDacSetupCMD(t *testing.T) {
 			Title:           "too-old Perses version submitted",
 			Args:            []string{"--version", "0.42.1"},
 			IsErrorExpected: true,
-			ExpectedMessage: "version should be at least v0.47.0 or higher",
+			ExpectedMessage: "version should be at least v0.51.0-beta.0 or higher",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
