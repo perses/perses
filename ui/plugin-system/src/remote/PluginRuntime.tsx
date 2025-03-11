@@ -49,11 +49,11 @@ export const pluginRuntime = init({
       },
     },
     '@tanstack/react-query': {
-      version: '4.36.1',
+      version: '5.64.2',
       lib: () => ReactQuery,
       shareConfig: {
         singleton: true,
-        requiredVersion: '^4.36.1',
+        requiredVersion: '^5.64.2',
       },
     },
     'react-hook-form': {
@@ -73,35 +73,35 @@ export const pluginRuntime = init({
       },
     },
     '@perses-dev/components': {
-      version: '0.50.0',
+      version: '0.51.0-beta.0',
       lib: () => require('@perses-dev/components'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.50.0',
+        requiredVersion: '^0.51.0-beta.0',
       },
     },
     '@perses-dev/plugin-system': {
-      version: '0.50.0',
+      version: '0.51.0-beta.0',
       lib: () => require('@perses-dev/plugin-system'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.50.0',
+        requiredVersion: '^0.51.0-beta.0',
       },
     },
     '@perses-dev/explore': {
-      version: '0.50.0',
+      version: '0.51.0-beta.0',
       lib: () => require('@perses-dev/explore'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.50.0',
+        requiredVersion: '^0.51.0-beta.0',
       },
     },
     '@perses-dev/dashboards': {
-      version: '0.50.0',
+      version: '0.51.0-beta.0',
       lib: () => require('@perses-dev/dashboards'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.50.0',
+        requiredVersion: '^0.51.0-beta.0',
       },
     },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK
