@@ -257,7 +257,7 @@ End-to-end and browser tests are written using [Playwright](https://playwright.d
 ### Visual testing
 
 - Visualization-heavy components (e.g. charts using `canvas`) should have visual tests using [Happo](https://happo.io/).
-- Visual tests can be generated during the execution of an end-to-end test with Playwright or by creating stories in Storybook. See the [e2e](./e2e) and [storybook](./storybook) readmes for additional guidance.
+- Visual tests can be generated during the execution of an end-to-end test with Playwright.
 
 ## Documentation
 
@@ -265,7 +265,6 @@ Code intended for use by library consumers should include documentation using th
 
 - jsdoc in comments explaining the purpose of components, classes, and functions.
 - jsdoc on types and their properties, especially types that define component props.
-- Stories using storybook for components. Stories autogenerate a significant portion of their documentation using jsdoc comments, so the prior items are important for this to work well.
 
 > ⚠️ Note: this is an aspirational guideline that should impact *new* development. There is a small amount of documentation for the current codebase, and we are slowly working on expanding it.
 

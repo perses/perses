@@ -15,7 +15,7 @@ import { GlobalDatasourceResource } from '@perses-dev/core';
 import { DatasourceStoreProviderProps } from '../context';
 import { getTestDashboard } from './dashboard-provider';
 
-export const prometheusDemoUrl = 'https://prometheus.demo.do.prometheus.io';
+export const prometheusDemoUrl = 'https://prometheus.demo.prometheus.io';
 export const prometheusDemo: GlobalDatasourceResource = {
   kind: 'GlobalDatasource',
   metadata: {

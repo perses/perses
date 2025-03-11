@@ -54,9 +54,6 @@
     "react-virtuoso": "^4.12.2",
     "zod": "^3.21.4"
   },
-  "devDependencies": {
-    "@perses-dev/storybook": "0.51.0-beta.0"
-  },
   "peerDependencies": {
     "@mui/material": "^6.1.10",
     "react": "^17.0.2 || ^18.0.0",
