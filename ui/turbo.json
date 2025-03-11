@@ -19,33 +19,6 @@
       "dependsOn": ["^build"],
       "cache": false
     },
-    // Splitting out storybook jobs with a prefix because they behave differently
-    // than our packages and this makes it easier to separate.
-    "storybook:start": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
-    "storybook:build": {
-      "dependsOn": [],
-      "outputs": ["storybook-static/**"],
-      "cache": false
-    },
-    "storybook:serve": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
-    "storybook:test": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
-    "storybook:serve-and-test": {
-      "dependsOn": [],
-      "outputs": [],
-      "cache": false
-    },
     "test": {
       "dependsOn": [],
       "outputs": []

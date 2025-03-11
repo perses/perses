@@ -14,17 +14,6 @@ If you are new to Perses, please review the rest of this README first before sta
 - Start the Perses app: `npm run start`
 - Open the app: http://localhost:3000/
 
-### Storybook
-
-- Change to the `ui` directory.
-- Install dependencies: `npm install`
-- Start the storybook: `npm run storybook`
-- Open the storybook: http://localhost:6006/
-
-### Perses app and storybook
-
-Follow the steps for "Perses app", but start using this script: `npm run start-with-storybook`.
-
 ### Run Jest tests
 
 - Change to the `ui` directory.
@@ -72,7 +61,6 @@ These packages are published to npm with the `@perses-dev` namespace.
 The following packages are internal tooling that assists with development of the Perses UI. These are not published and are not intended for use outside of the project.
 
 - [`e2e`](./e2e): End-to-end tests.
-- [`storybook`](./storybook): Storybook management and configuration.
 
 ## Development Environment
 
