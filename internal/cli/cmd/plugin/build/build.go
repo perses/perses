@@ -53,6 +53,7 @@ type option struct {
 	skipNPMInstall            bool
 	archiveFormat             archive.Format
 	cfg                       config.PluginConfig
+	initialCFG                config.PluginConfig
 	cfgPath                   string
 	pluginPath                string
 	isSchemaRequired          bool
@@ -74,6 +75,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("unable to resolve the configuration: %w", err)
 	}
 	o.cfg = cfg
+	o.initialCFG = cfg
 	// Overriding the path with the plugin path
 	o.cfg.DistPath = filepath.Join(o.pluginPath, o.cfg.DistPath)
 	o.cfg.FrontendPath = filepath.Join(o.pluginPath, o.cfg.FrontendPath)
@@ -120,10 +122,12 @@ func (o *option) Execute() error {
 
 	// If the schema is required, we need to prepare the CUE files for the archive
 	if o.isSchemaRequired {
-		if restoreInitialState, err := o.prepareCueFiles(); err != nil {
-			return fmt.Errorf("unable to prepare the CUE files for the archive: %w", err)
-		} else if restoreInitialState != nil {
+		restoreInitialState, cueErr := o.prepareCueFiles()
+		if restoreInitialState != nil {
 			defer restoreInitialState()
+		}
+		if cueErr != nil {
+			return fmt.Errorf("unable to prepare the CUE files for the archive: %w", cueErr)
 		}
 	}
 
@@ -133,7 +137,7 @@ func (o *option) Execute() error {
 	// - mf-manifest.json and mf-stats.json: contains the plugin name
 	// - static: folder containing the UI part
 	// - schemas: folder containing the schema files
-	// - cue.mod: folder containing the CUE module & eventual vendored dependencies
+	// - cue.mod: folder containing the CUE module and possible vendored dependencies
 	files, err := o.computeArchiveFiles()
 	if err != nil {
 		return err
@@ -190,7 +194,7 @@ func (o *option) executeNPMBuild() error {
 }
 
 // prepareCueFiles "prepares" the CUE files for the plugin packaging.
-// More precisely it does the necessary to rely on the "old" modules resolution, so that the plugin archive
+// More precisely, it does the necessary to rely on the "old" modules resolution, so that the plugin archive
 // is fully "self-contained" and schema evaluation doesn't need to fetch dependencies from an OCI registry.
 func (o *option) prepareCueFiles() (func(), error) {
 	// Check if we need to vendor the dependencies
@@ -214,21 +218,21 @@ func (o *option) prepareCueFiles() (func(), error) {
 	// managed the old way. This is technically possible & supported by CUE, thus we want to handle this case.
 	var restoreVendorDir func()
 	if _, err := os.Stat(o.vendorDirPath); err == nil {
-		if err := file.CopyDir(o.vendorDirPath, o.vendorDirBackupPath); err != nil {
-			return nil, fmt.Errorf("failed to backup original %s: %w", o.vendorDirPath, err)
+		if copyErr := file.CopyDir(o.vendorDirPath, o.vendorDirBackupPath); copyErr != nil {
+			return nil, fmt.Errorf("failed to backup original %s: %w", o.vendorDirPath, copyErr)
 		}
 		restoreVendorDir = func() {
-			if err := os.RemoveAll(o.vendorDirPath); err != nil {
-				logrus.WithError(err).Errorf("failed to cleanup alterated %s", o.vendorDirPath)
+			if removeErr := os.RemoveAll(o.vendorDirPath); removeErr != nil {
+				logrus.WithError(removeErr).Errorf("failed to cleanup alterated %s", o.vendorDirPath)
 			}
-			if err := os.Rename(o.vendorDirBackupPath, o.vendorDirPath); err != nil {
-				logrus.WithError(err).Errorf("failed to restore original %s", o.vendorDirPath)
+			if renameErr := os.Rename(o.vendorDirBackupPath, o.vendorDirPath); renameErr != nil {
+				logrus.WithError(renameErr).Errorf("failed to restore original %s", o.vendorDirPath)
 			}
 		}
 	} else {
 		restoreVendorDir = func() {
-			if err := os.RemoveAll(o.vendorDirPath); err != nil {
-				logrus.WithError(err).Errorf("failed to cleanup %s", o.vendorDirPath)
+			if removeErr := os.RemoveAll(o.vendorDirPath); removeErr != nil {
+				logrus.WithError(removeErr).Errorf("failed to cleanup %s", o.vendorDirPath)
 			}
 		}
 	}
@@ -260,11 +264,11 @@ func (o *option) prepareCueFiles() (func(), error) {
 //
 // Following the move to CUE native dependency management, the deps of the plugin are no longer vendored under cue.mod/pkg.
 // Letting things in this state would imply that, at runtime, the Perses server should have access to an OCI registry - thus
-// either access to internet OR to a custom registry set up by users in their private network - to be able to evaluate a plugin
+// either access to the internet OR to a custom registry set up by users in their private network - to be able to evaluate a plugin
 // schema that imports packages - like the `common` package of Perses.
 //
 // As we consider this constraint a no-go in our case, We looked for solutions to that problem... After asking to CUE maintainers
-// it seems our long term solution would be https://github.com/cue-lang/cue/issues/3328. For the time being we thus have to
+// it seems our long-term solution would be https://github.com/cue-lang/cue/issues/3328. For the time being we thus have to
 // reproduce the vendoring structure of the "old modules" (https://cuelang.org/docs/concept/faq/new-modules-vs-old-modules/) with
 // custom code.
 //
@@ -284,23 +288,26 @@ func (o *option) vendorCueDependencies() error {
 		return fmt.Errorf("failed to set CUE_CACHE_DIR: %w", err)
 	}
 
-	// Run `cue eval` in order to fetch the dependencies
-	// NB forcing `./` to be appended here to workaround this limitation: 'standard library import path "schemas" cannot be imported as a CUE package'
-	cmd := exec.Command("cue", "eval", strings.Join([]string{".", "schemas"}, string(os.PathSeparator))) // nolint: gosec
+	// Run `cue eval` to fetch the dependencies
+	// NB forcing `./` to be appended here to work around this limitation: 'standard library import path "schemas" cannot be imported as a CUE package'
+	// The '...' at the end is to evaluate all the schemas that can be contained in subdirectories.
+	// Note: To avoid loosing time for the next one that will think to be smart enough to replace the strings.Join by filepath, I can tell you already it won't work.
+	// Because that's exactly what I did and the tests immediately failed. So keep it like that, it works.
+	cmd := exec.Command("cue", "eval", strings.Join([]string{".", o.initialCFG.SchemasPath, "..."}, string(os.PathSeparator))) // nolint: gosec
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	cmd.Dir = o.pluginPath // the command has to be run from the plugin path
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("cue eval failed: %w, stderr: %s", err, stderr.String())
+	if cmdErr := cmd.Run(); cmdErr != nil {
+		return fmt.Errorf("cue eval failed: %w, stderr: %s", cmdErr, stderr.String())
 	}
 
 	// Move dependencies to cue.mod/pkg
 	// NB we copy with file.CopyDir instead of moving with os.Rename because the latter was causing issues on Windows when `pkg` already exists
-	if err := file.CopyDir(filepath.Join(tempDir, "mod", "extract"), o.vendorDirPath); err != nil {
-		return fmt.Errorf("failed to move dependencies: %w", err)
+	if copyErr := file.CopyDir(filepath.Join(tempDir, "mod", "extract"), o.vendorDirPath); copyErr != nil {
+		return fmt.Errorf("failed to move dependencies: %w", copyErr)
 	}
 
-	// At this point the folder structure is like: cue.mod/pkg/github.com/perses/perses/cue@vX.Y.Z
+	// At this point, the folder structure is like: cue.mod/pkg/github.com/perses/perses/cue@vX.Y.Z
 	// we need to change it to: cue.mod/pkg/github.com/perses/perses/cue in order to have the "old" modules
 	// resolution working.
 	// See https://cuelang.org/docs/concept/faq/new-modules-vs-old-modules/
@@ -320,13 +327,13 @@ func (o *option) vendorCueDependencies() error {
 				renamedDir := parts[0]
 
 				// Ensure we don't overwrite existing directories
-				if _, err := os.Stat(renamedDir); !os.IsNotExist(err) {
+				if _, osErr := os.Stat(renamedDir); !os.IsNotExist(osErr) {
 					return fmt.Errorf("directory already exists: %s", renamedDir)
 				}
 
 				// Rename the directory
-				if err := os.Rename(path, renamedDir); err != nil {
-					return fmt.Errorf("failed to rename directory %s to %s: %w", path, renamedDir, err)
+				if osErr := os.Rename(path, renamedDir); osErr != nil {
+					return fmt.Errorf("failed to rename directory %s to %s: %w", path, renamedDir, osErr)
 				}
 
 				logrus.Debugf("Renamed %s to %s\n", path, renamedDir)
