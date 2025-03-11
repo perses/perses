@@ -25,10 +25,16 @@ import (
 func TestPluginBuildCMD(t *testing.T) {
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "Build plugin",
+			Title:           "Build simple plugin",
 			Args:            []string{"--plugin.path", filepath.Join("testdata", "barchart")},
 			IsErrorExpected: false,
 			ExpectedMessage: "BarChart built successfully\n",
+		},
+		{
+			Title:           "Build complex plugin module",
+			Args:            []string{"--plugin.path", filepath.Join("testdata", "tempo")},
+			IsErrorExpected: false,
+			ExpectedMessage: "Tempo built successfully\n",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
