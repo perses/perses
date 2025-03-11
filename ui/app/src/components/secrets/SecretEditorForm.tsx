@@ -17,17 +17,23 @@ import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  Button,
   Box,
   BoxProps,
   Divider,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   IconButton,
+  InputLabel,
+  MenuItem,
   Radio,
   RadioGroup,
+  Select,
   Stack,
   Switch,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
@@ -38,8 +44,13 @@ import { FormEditorProps } from '../form-drawers';
 const noAuthIndex = 'noAuth';
 const basicAuthIndex = 'basicAuth';
 const authorizationIndex = 'authorization';
+const oauthIndex = 'oauth';
 
 type SecretEditorFormProps = FormEditorProps<Secret>;
+
+type EndpointParams = {
+  [key: string]: string[];
+};
 
 export function SecretEditorForm({
   initialValue,
@@ -56,6 +67,8 @@ export function SecretEditorForm({
     const result = { ...initialValue };
     if (result.spec.basicAuth?.password) result.spec.basicAuth.password = '';
     if (result.spec.authorization?.credentials) result.spec.authorization.credentials = '';
+    if (result.spec.oauth?.clientID) result.spec.oauth.clientID = '';
+    if (result.spec.oauth?.clientSecret) result.spec.oauth.clientSecret = '';
     if (result.spec.tlsConfig?.ca) result.spec.tlsConfig.ca = '';
     if (result.spec.tlsConfig?.cert) result.spec.tlsConfig.cert = '';
     if (result.spec.tlsConfig?.key) result.spec.tlsConfig.key = '';
@@ -103,28 +116,34 @@ export function SecretEditorForm({
       ? basicAuthIndex
       : initialSecretClean.spec.authorization
         ? authorizationIndex
-        : noAuthIndex
+        : initialSecretClean.spec.oauth
+          ? oauthIndex
+          : noAuthIndex
   );
 
   const handleTabChange = (event: SyntheticEvent, newValue: string): void => {
+    form.setValue('spec.authorization', undefined);
+    form.setValue('spec.basicAuth', undefined);
+    form.setValue('spec.oauth', undefined);
+
     if (newValue === basicAuthIndex) {
       form.setValue('spec.basicAuth', { username: '', password: '', passwordFile: '' });
     } else if (newValue === authorizationIndex) {
       form.setValue('spec.authorization', { type: '', credentials: '', credentialsFile: '' });
+    } else if (newValue === oauthIndex) {
+      form.setValue('spec.oauth', {
+        clientID: '',
+        clientSecret: '',
+        clientSecretFile: '',
+        tokenURL: '',
+        scopes: [],
+        endpointParams: {},
+        authStyle: 0,
+      });
     }
     form.trigger();
 
     setTabValue(newValue);
-
-    if (newValue === noAuthIndex) {
-      form.setValue('spec.authorization', undefined);
-      form.setValue('spec.basicAuth', undefined);
-    } else if (newValue === basicAuthIndex) {
-      form.setValue('spec.authorization', undefined);
-    } else if (newValue === authorizationIndex) {
-      form.setValue('spec.basicAuth', undefined);
-    }
-    form.trigger();
   };
 
   return (
@@ -203,6 +222,7 @@ export function SecretEditorForm({
                   control={<Radio />}
                   label="Custom Authorization"
                 />
+                <FormControlLabel disabled={isReadonly} value={oauthIndex} control={<Radio />} label="OAuth" />
               </RadioGroup>
             </FormControl>
           </Stack>
@@ -342,8 +362,344 @@ export function SecretEditorForm({
               </Stack>
             </Stack>
           </TabPanel>
-        </Box>
+          <TabPanel value={tabValue} index={oauthIndex}>
+            <Stack gap={2}>
+              <Controller
+                control={form.control}
+                name="spec.oauth.clientID"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Client ID"
+                    type="password"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
+                    }}
+                  />
+                )}
+              />
+              <Stack direction="row">
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.clientSecret"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Client Secret"
+                      type="password"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(event) => {
+                        field.onChange(event);
+                      }}
+                    />
+                  )}
+                />
+                <Divider orientation="vertical">OR</Divider>
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.clientSecretFile"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Client Secret File"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(event) => {
+                        field.onChange(event);
+                      }}
+                    />
+                  )}
+                />
+              </Stack>
+              <Stack direction="row">
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.tokenURL"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      label="Token URL"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(event) => {
+                        field.onChange(event);
+                      }}
+                    />
+                  )}
+                />
+              </Stack>
+              <Stack gap={2}>
+                <Typography variant="subtitle1">Scopes</Typography>
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.scopes"
+                  render={({ field }) => {
+                    const scopes = field.value || [];
 
+                    const addScope = (): void => {
+                      field.onChange([...scopes, '']);
+                    };
+
+                    const removeScope = (index: number): void => {
+                      const newScopes = scopes.filter((_, i) => i !== index);
+                      field.onChange(newScopes);
+                    };
+
+                    const updateScope = (index: number, value: string): void => {
+                      const newScopes = [...scopes];
+                      newScopes[index] = value;
+                      field.onChange(newScopes);
+                    };
+
+                    return (
+                      <Stack gap={2}>
+                        {scopes.map((scope, index) => (
+                          <Stack key={index} direction="row" gap={1} alignItems="center">
+                            <TextField
+                              fullWidth
+                              value={scope}
+                              placeholder="Enter scope"
+                              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                              InputProps={{
+                                readOnly: action === 'read',
+                              }}
+                              onChange={(e) => updateScope(index, e.target.value)}
+                            />
+                            {!isReadonly && (
+                              <IconButton onClick={() => removeScope(index)} size="small" sx={{ ml: 1 }}>
+                                <TrashIcon />
+                              </IconButton>
+                            )}
+                          </Stack>
+                        ))}
+                        {!isReadonly && (
+                          <Button
+                            startIcon={<PlusIcon />}
+                            onClick={addScope}
+                            variant="outlined"
+                            sx={{ width: 'fit-content' }}
+                          >
+                            Add Scope
+                          </Button>
+                        )}
+                      </Stack>
+                    );
+                  }}
+                />
+              </Stack>
+              <Stack gap={2}>
+                <Typography variant="subtitle1">Endpoint Params</Typography>
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.endpointParams"
+                  render={({ field }) => {
+                    const mapToEndpointParams = (
+                      map: Map<string, string[]> | EndpointParams | undefined
+                    ): EndpointParams => {
+                      if (map instanceof Map) {
+                        return Object.fromEntries(map);
+                      }
+                      return map || {};
+                    };
+
+                    const params: EndpointParams = mapToEndpointParams(field.value);
+
+                    const addParam = (): void => {
+                      const newParams: EndpointParams = {
+                        ...params,
+                        '': [''],
+                      };
+                      field.onChange(newParams);
+                    };
+
+                    const removeParam = (keyToRemove: string): void => {
+                      const newParams: EndpointParams = Object.entries(params)
+                        .filter(([key]) => key !== keyToRemove)
+                        .reduce(
+                          (acc, [key, value]) => ({
+                            ...acc,
+                            [key]: value,
+                          }),
+                          {}
+                        );
+                      field.onChange(newParams);
+                    };
+
+                    const updateParamKey = (oldKey: string, newKey: string): void => {
+                      const newParams: EndpointParams = Object.entries(params).reduce(
+                        (acc, [key, val]) => ({
+                          ...acc,
+                          [key === oldKey ? newKey : key]: val,
+                        }),
+                        {}
+                      );
+                      field.onChange(newParams);
+                    };
+
+                    const updateParamValue = (key: string, values: string[]): void => {
+                      const newParams: EndpointParams = {
+                        ...params,
+                        [key]: values,
+                      };
+                      field.onChange(newParams);
+                    };
+
+                    const addValueToParam = (key: string): void => {
+                      const currentValues = params[key] || [];
+                      updateParamValue(key, [...currentValues, '']);
+                    };
+
+                    const removeValueFromParam = (key: string, indexToRemove: number): void => {
+                      const currentValues = params[key] || [];
+                      updateParamValue(
+                        key,
+                        currentValues.filter((_, index) => index !== indexToRemove)
+                      );
+                    };
+
+                    const updateValue = (key: string, valueIndex: number, newValue: string): void => {
+                      const currentValues = [...(params[key] || [])];
+                      currentValues[valueIndex] = newValue;
+                      updateParamValue(key, currentValues);
+                    };
+
+                    return (
+                      <Stack gap={2}>
+                        {Object.entries(params).map(([key, values], paramIndex) => (
+                          <Stack key={paramIndex} gap={1}>
+                            <Stack direction="row" gap={1} alignItems="center">
+                              <TextField
+                                value={key}
+                                placeholder="Parameter name"
+                                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                                InputProps={{
+                                  readOnly: action === 'read',
+                                }}
+                                onChange={(e) => updateParamKey(key, e.target.value)}
+                              />
+                              {!isReadonly && (
+                                <IconButton onClick={() => removeParam(key)} size="small">
+                                  <TrashIcon />
+                                </IconButton>
+                              )}
+                            </Stack>
+                            <Stack gap={1} sx={{ pl: 3 }}>
+                              {values.map((value, valueIndex) => (
+                                <Stack key={valueIndex} direction="row" gap={1} alignItems="center">
+                                  <TextField
+                                    fullWidth
+                                    value={value}
+                                    placeholder="Parameter value"
+                                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                                    InputProps={{
+                                      readOnly: action === 'read',
+                                    }}
+                                    onChange={(e) => updateValue(key, valueIndex, e.target.value)}
+                                  />
+                                  {!isReadonly && values.length > 1 && (
+                                    <IconButton onClick={() => removeValueFromParam(key, valueIndex)} size="small">
+                                      <TrashIcon />
+                                    </IconButton>
+                                  )}
+                                </Stack>
+                              ))}
+                              {!isReadonly && (
+                                <Button
+                                  startIcon={<PlusIcon />}
+                                  onClick={() => addValueToParam(key)}
+                                  variant="outlined"
+                                  sx={{ width: 'fit-content' }}
+                                >
+                                  Add Value
+                                </Button>
+                              )}
+                            </Stack>
+                          </Stack>
+                        ))}
+                        {!isReadonly && (
+                          <Button
+                            startIcon={<PlusIcon />}
+                            onClick={addParam}
+                            variant="outlined"
+                            sx={{ width: 'fit-content' }}
+                          >
+                            Add Parameter
+                          </Button>
+                        )}
+                      </Stack>
+                    );
+                  }}
+                />
+              </Stack>
+              <Stack direction="row">
+                <Controller
+                  control={form.control}
+                  name="spec.oauth.authStyle"
+                  render={({ field, fieldState }) => (
+                    <Tooltip
+                      title={
+                        field.value === 0
+                          ? 'Automatically detect the best auth style to use based on the provider'
+                          : field.value === 1
+                            ? 'Send OAuth credentials as URL parameters'
+                            : field.value === 2
+                              ? 'Send OAuth credentials using HTTP Basic Authorization'
+                              : ''
+                      }
+                      placement="right"
+                    >
+                      <FormControl fullWidth error={!!fieldState.error}>
+                        <InputLabel id="auth-style-label" shrink={action === 'read' ? true : undefined}>
+                          Auth Style
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          labelId="auth-style-label"
+                          label="Auth Style"
+                          readOnly={action === 'read'}
+                          value={field.value ?? 0}
+                          onChange={(event) => {
+                            field.onChange(event.target.value === '' ? undefined : +event.target.value);
+                          }}
+                        >
+                          <MenuItem value={0}>Auto Detect</MenuItem>
+                          <MenuItem value={1}>In Params</MenuItem>
+                          <MenuItem value={2}>In Header</MenuItem>
+                        </Select>
+                        {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      </FormControl>
+                    </Tooltip>
+                  )}
+                />
+              </Stack>
+            </Stack>
+          </TabPanel>
+        </Box>
         <Stack gap={1}>
           <Stack direction="row" justifyContent="space-between">
             <Typography variant="h1">TLS Config</Typography>
