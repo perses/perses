@@ -58,11 +58,11 @@ func (s *SecretSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (s *SecretSpec) validate() error {
-	if s.BasicAuth == nil && s.Authorization == nil {
-		return fmt.Errorf("at most one of basicAuth and authorization must be configured")
+	if s.BasicAuth == nil && s.Authorization == nil && s.OAuth == nil {
+		return fmt.Errorf("at most one of basicAuth, authorization and oauth must be configured")
 	}
-	if s.BasicAuth != nil && s.Authorization != nil {
-		return fmt.Errorf("basicAuth and authorization are mutually exclusive, use one of them")
+	if s.BasicAuth != nil && s.Authorization != nil && s.OAuth != nil {
+		return fmt.Errorf("basicAuth, authorization and oauth are mutually exclusive, use one of them")
 	}
 	return nil
 }
