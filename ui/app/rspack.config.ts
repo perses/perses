@@ -11,24 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import path from 'path';
 import rspack from '@rspack/core';
 import refreshPlugin from '@rspack/plugin-react-refresh';
 import TerserPlugin from 'terser-webpack-plugin';
+import { defineConfig } from '@rspack/cli';
 
 const isDev = process.env.NODE_ENV === 'development';
-/**
- * @type {import('@rspack/cli').Configuration}
- */
-module.exports = {
-  context: __dirname,
+
+export default defineConfig({
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: './dist',
     publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
-  entry: path.resolve(__dirname, './src/bundle.ts'),
+  entry: './src/bundle.ts',
   resolve: {
     extensions: ['...', '.ts', '.tsx', '.jsx'],
   },
@@ -108,4 +105,4 @@ module.exports = {
     }),
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),
-};
+});
