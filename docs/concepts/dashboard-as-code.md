@@ -38,4 +38,4 @@ Additionally, 'as-code' means it's GitOps-friendly, allowing you to benefit from
 - Automated deployments
 - And more...
 
-Interested in this topic? Check out the [Getting Started](./getting-started.md) guide to learn more.
+Interested in this topic? Check out the [Getting Started](../dac/getting-started.md) guide to learn more.
