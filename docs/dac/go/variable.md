@@ -20,7 +20,7 @@ Need to provide the name of the varaible and a list of options.
 ### Name
 
 ```golang
-import "github.com/perses/perses/go-sdk/variable" 
+import "github.com/perses/perses/go-sdk/variable"
 
 variable.Name("My Super Variable")
 ```
@@ -30,12 +30,12 @@ Define the variable metadata name and the display name.
 ### Filter
 
 ```golang
-import "github.com/perses/perses/go-sdk/variable" 
+import "github.com/perses/perses/go-sdk/variable"
 
 variable.Filter(variables...)
 ```
 
-Mainly used by Mainly used by [variable group](./variable-group.md).. It will filter the current variable with the provided variables.
+Mainly used by [variable group](./variable-group.md). It will filter the current variable with the provided variables.
 The filter implementation is defined by the variable plugin builder.
 
 ## Spec Options
@@ -71,7 +71,8 @@ import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 txtVar.Constant(true)
 ```
 
-Define if the text variable is a constant. A constant variable is a variable that can't be changed by the user on the dashboard.
+Define if the text variable is a constant. A constant variable is a variable that can't be changed by the user on the
+dashboard.
 
 ##### Description
 
@@ -134,7 +135,8 @@ import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 listVar.AllowAllValue(true)
 ```
 
-Define if the "all" value is allowed. If set to true, the list variable will have an "all" option that will select all values for the variable.
+Define if the "all" value is allowed. If set to true, the list variable will have an "all" option that will select all
+values for the variable.
 
 ##### AllowMultiple
 
@@ -144,7 +146,8 @@ import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 listVar.AllowMultiple("This is a super description")
 ```
 
-Define if the list variable allows multiple values to be selected. If set to true, the list variable will allow multiple values to be selected by the user on the dashboard.
+Define if the list variable allows multiple values to be selected. If set to true, the list variable will allow multiple
+values to be selected by the user on the dashboard.
 
 ##### CustomAllValue
 
@@ -175,7 +178,8 @@ listVar.SortingBy(listVar.SortingAlphabeticalAsc)
 ```
 
 Define the sorting order of the list variable.
-The available options are: "none", "alphabetical-asc", "alphabetical-desc", "numerical-asc", "numerical-desc", "alphabetical-ci-asc" and "alphabetical-ci-desc".
+The available options are: "none", "alphabetical-asc", "alphabetical-desc", "numerical-asc", "numerical-desc", "
+alphabetical-ci-asc" and "alphabetical-ci-desc".
 
 ##### Description
 
@@ -205,11 +209,11 @@ import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 listVar.Hidden(true)
 ```
 
-Define if the list variable is hidden. A hidden variable is a variable that is not displayed on the dashboard.
+Define if the list variable is hidden. A hidden variable is a variable not displayed on the dashboard.
 
 #### Variable Plugin Options
 
-See plugins DaC documentation at https://github.com/perses/plugins/tree/main/docs.
+See the relative documentation for each variable plugin.
 
 ## Example
 
@@ -218,8 +222,8 @@ package main
 
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
-	labelvalues "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
+	labelvalues "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 )
 
 func main() {
@@ -235,4 +239,5 @@ func main() {
 		),
 	)
 }
+
 ```

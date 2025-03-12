@@ -63,5 +63,3 @@ panelGroupsBuilder & {
 	]
 }
 ```
-
-To build panels please refer to the [Prometheus Panel builder](prometheus/panel.md).
