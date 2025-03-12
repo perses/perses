@@ -294,7 +294,7 @@ func (o *option) vendorCueDependencies() error {
 	cmd.Stderr = &stderr
 	cmd.Dir = o.pluginPath // the command has to be run from the plugin path
 	if cmdErr := cmd.Run(); cmdErr != nil {
-		return fmt.Errorf("cue eval failed: %w, stderr: %s", cmdErr, stderr.String())
+		return fmt.Errorf("cue mod tidy failed: %w, stderr: %s", cmdErr, stderr.String())
 	}
 
 	// Move dependencies to cue.mod/pkg
