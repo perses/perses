@@ -23,23 +23,17 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/cue"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/internal/cli/sources"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"golang.org/x/mod/semver"
 )
 
 const (
-	cueLanguage      = "cue"
-	goLanguage       = "go"
-	cueSchemasPath   = "cue/"
-	minVersionForGo  = "v0.44.0"        // Release that introduced the Go SDK
-	minVersionForCue = "v0.51.0-beta.0" // Release that brought the move to CUE's new modules -> TODO change to stable v0.51.0 once released
-	exampleCUEDac    = `package mydac
-
-import "github.com/perses/perses/cue/dac-utils/dashboard@v0"
-
-test: dashboard & { #name: "myDashboardAsCode" }`
+	cueLanguage    = "cue"
+	goLanguage     = "go"
+	cueSchemasPath = "cue/"
 )
 
 func addOutputDirToGitignore() error {
@@ -79,38 +73,6 @@ func addOutputDirToGitignore() error {
 	return nil
 }
 
-func computeProperVersion(version string) (string, error) {
-	finalVersion := version
-
-	// If no version provided, let's try to get the version from the Perses server
-	if finalVersion == "" {
-		logrus.Debug("version flag not provided, retrieving version from Perses server..")
-		apiClient, err := config.Global.GetAPIClient()
-		if err != nil {
-			return "", fmt.Errorf("you need to either provide a version or be connected to a Perses server")
-		}
-
-		health, err := apiClient.V1().Health().Check()
-		if err != nil {
-			logrus.WithError(err).Debug("can't reach Perses server")
-			return "", fmt.Errorf("can't retrieve version from Perses server")
-		}
-		finalVersion = health.Version
-	}
-
-	// Add "v" prefix to the version if not present
-	if !strings.HasPrefix(finalVersion, "v") {
-		finalVersion = fmt.Sprintf("v%s", finalVersion)
-	}
-
-	// Final validation
-	if !semver.IsValid(finalVersion) {
-		return "", fmt.Errorf("invalid version: %s", finalVersion)
-	}
-
-	return finalVersion, nil
-}
-
 type option struct {
 	persesCMD.Option
 	writer    io.Writer
@@ -124,7 +86,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'setup'")
 	}
 
-	version, err := computeProperVersion(o.version)
+	version, err := sources.GetProperVersion(o.version)
 	if err != nil {
 		return err
 	}
@@ -136,19 +98,16 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
+	if err := sources.EnsureMinValidVersion(o.version); err != nil {
+		return err
+	}
 
 	switch o.language {
 	case cueLanguage:
-		if semver.Compare(o.version, minVersionForCue) == -1 {
-			return fmt.Errorf("version should be at least %s or higher", minVersionForCue)
-		}
 		if err := exec.Command("cue", "version").Run(); err != nil {
 			return fmt.Errorf("unable to use the required cue binary: %w", err)
 		}
 	case goLanguage:
-		if semver.Compare(o.version, minVersionForGo) == -1 {
-			return fmt.Errorf("version should be at least %s or higher", minVersionForGo)
-		}
 		if err := exec.Command("go", "version").Run(); err != nil {
 			return fmt.Errorf("unable to use the required go binary: %w", err)
 		}
@@ -169,34 +128,15 @@ func (o *option) Execute() error {
 
 	// Install dependencies
 	if o.language == cueLanguage {
-		// Check cue.mod exists
-		if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
-			return fmt.Errorf("unable to find the 'cue.mod' dir. Please run 'cue mod init'")
-		} else if err != nil {
-			return err
+		if err := cue.InstallCueDepsFromSources(cueSchemasPath, o.version); err != nil {
+			return fmt.Errorf("error installing the Perses CUE schemas as dependencies: %v", err)
 		}
-		// Resolve the sdk dependency (= write an example file
-		// and run 'cue mod tidy')
-		exampleFilePath := "example.cue"
-		if err := os.WriteFile(exampleFilePath, []byte(exampleCUEDac), 0600); err != nil {
-			return fmt.Errorf("failed to create example.cue: %w", err)
-		}
-		logrus.Debugf("example.cue file created successfully")
-		cmd := exec.Command("cue", "mod", "tidy")
-		cmd.Stdout = o.writer
-		cmd.Stderr = o.errWriter
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to run 'cue mod tidy': %w", err)
-		}
-		logrus.Debugf("'cue mod tidy' executed successfully")
 	} else if o.language == goLanguage {
-		// Check go.mod exists
 		if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
 			return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
 		} else if err != nil {
 			return err
 		}
-		// Resolve the sdk dependency
 		if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
 			return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
 		}
@@ -204,7 +144,7 @@ func (o *option) Execute() error {
 		return fmt.Errorf("language %q is not supported", o.language)
 	}
 
-	return output.HandleString(o.writer, fmt.Sprintf("DaC setup for %s finished successfully", o.language))
+	return output.HandleString(o.writer, "DaC setup finished")
 }
 
 func (o *option) SetWriter(writer io.Writer) {

@@ -8,7 +8,7 @@ Using this feature, a user can create a real, but temporary, dashboard, that can
 
 ## Why you might need it
 
-The Ephemeral Dashboard resource addresses the need of generating preview dashboards when working with [Dashboard-as-Code](../concepts/dashboard-as-code.md). 
+The Ephemeral Dashboard resource addresses the need of generating preview dashboards when working with [Dashboard-as-Code](../dac/introduction.md). 
 
 
 ## How it can be used

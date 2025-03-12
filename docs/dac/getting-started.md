@@ -1,14 +1,14 @@
 # Getting started with Dashboard-as-Code
 
 !!! info
-	See the introduction about the Dashboard-as-Code (DaC) topic [here](../concepts/dashboard-as-code.md).
+	See the introduction about the Dashboard-as-Code (DaC) topic [here](./introduction.md).
 
 ## Getting started with the CUE SDK
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.51.0`.
-- `cue`, the [CLI of Cuelang](https://cuelang.org/). ⚠️ The version should be at least `v0.12.0`.
+- `percli`, the [CLI of Perses](../cli.md).
+- `cue`, the [CLI of Cuelang](https://cuelang.org/).
 
 ### Repository setup
 
@@ -16,61 +16,40 @@ Create a new folder that will become your DaC repository, then follow the steps 
 
 #### 1. Initialize the CUE module
 
-You first have to initialize a CUE module in order to be able to import the SDK dependency afterwards:
-
-```bash
+```
 cue mod init <module name>
 ```
 
 See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-instances/) for more information about this step.
 
-#### 2. Install the Perses SDK
+#### 2. Retrieve the CUE sources from Perses
 
-First, log in to the Central Registry of CUE. This will allow to install the Perses SDK afterwards (as it consists of importing the `github.com/perses/perses/cue` CUE module). ⚠️ For now this login step is only possible using a Github account.
+Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentioned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
 
-```bash
-cue login
+```
+percli dac setup --version 0.47.1 # any version you'd like above v0.44.0
 ```
 
-Now you can run the setup command that percli provides in order to install the SDK:
-
-```bash
-percli dac setup
-```
-
-Check the helper of that command to see the different flags available (e.g to define the SDK version to install).
+You can omit the version flag if you are connected to a Perses server (it will retrieve its version). Otherwise, unless you have a specific case, better to pass the latest version available.
 
 ### Develop dashboards
 
-You are now fully ready to start developping dashboards as code with CUE!
+You are now fully ready to start developping dashboards as code!
 
 It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. For this have a look at:
 
 - The [official website](https://cuelang.org/) of Cuelang.
 - [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
-You should then have a look at the [CUE SDK documentation](../dac/cue/README.md) to better understand how to use it.
+You should then have a look at the [CUE SDK documentation](../dac/cue/README.md) to better understand how to use the framework.
 
 You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/test/dac/input.cue).
-
-For each [plugin](../concepts/plugins.md) you would like to use in your DaC, it is strongly recommended to import its module so that you benefit from its schema validation locally. Optionally the plugin could also provide additional helpers (kind-of SDK additional piece) to help using it. Check the list of available plugins & their corresponding module name at https://github.com/perses/plugins.
-
-!!! note
-	To resolve the dependencies added after the initial setup, use `cue mod tidy`.
-
-```cue
-package mydac
-
-import tsModel "github.com/perses/plugins/timeserieschart/schemas@v0:model"
-
-spec: tsModel.spec & { legend: position: "right" }
-```
 
 ## Getting started with the Go SDK
 
 ### Prerequisites
 
-- `percli`, the [CLI of Perses](../cli.md). ⚠️ The version should be at least `v0.44.0`.
+- `percli`, the [CLI of Perses](../cli.md).
 - `go`, the [programming language](https://go.dev/).
 
 ### Repository setup
@@ -79,9 +58,7 @@ Create a new folder that will become your DaC repository, then follow the steps 
 
 #### 1. Initialize the Go module
 
-You first have to initialize a Go module in order to be able to import the SDK dependency afterwards:
-
-```bash
+```
 go mod init <module name>
 ```
 
@@ -89,18 +66,19 @@ See the [Go documentation](https://go.dev/doc/tutorial/create-module) for more i
 
 #### 2. Install the Perses SDK
 
-
-Now you can run the setup command that percli provides in order to install the SDK:
-
-```bash
-percli dac setup --language go
+```
+go get github.com/perses/perses
 ```
 
-Check the helper of that command to see the different flags available (e.g to define the SDK version to install).
+If you need a specific version, you can specify it as follows:
+
+```
+go get github.com/perses/perses v0.43.0
+```
 
 ### Develop dashboards
 
-You are now fully ready to start developing dashboards as code with Go!
+You are now fully ready to start developing dashboards as code!
 
 It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
 
@@ -112,14 +90,6 @@ You can also check an example of DaC usage [here](https://github.com/perses/pers
 
 !!! warning
 	Do not log / print on the standard stdout! It would break the output of the `dac build` command.
-
-For each [plugin](../concepts/plugins.md) you would like to use in your DaC, you first have to check if it provides the corresponding piece of the Golang SDK* (it's always the case for official plugins). You will then have to import the corresponding dependency in order to be able to use it. Check the list of official plugins & their corresponding module name at https://github.com/perses/plugins.
-
-!!! warning
-	*As already mentionned in the [DaC introduction](../concepts/dashboard-as-code.md), outside of official plugins it is not guaranteed that all plugins would provide such piece of the Golang SDK. It's basically up to each plugin developer to provide a Go package to enable the DaC use case. This statement applies also to any other language we might have a SDK for in the future.
-
-!!! note
-	To resolve the dependencies added after the initial setup, use either `go mod tidy` or `go get ...`.
 
 Quick start example:
 
