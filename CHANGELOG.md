@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.50.2 / 2025-03-13
+
+- [FEATURE] add yaml and yaml custom resource to download formats (#2658)
+- [ENHANCEMENT] bump github.com/perses/common to v0.27.0 to support TLS server
+- [ENHANCEMENT] Allow npm install flags to be passed in `make build-ui` command (#2727)
+- [BUGFIX] Table: fix reorder columns button tooltip (#2722)
+- [BUGFIX] HTTPSettingsEditor: remove directUrl/proxy of previous value (#2739)
+- [BUGFIX] Fix the interface impl of the datasource discovery (#2714)
+- [BUGFIX] Refresh RBAC cache when adding or removing users. (#2670)
+- [BUGFIX] Dashboard copy: hide ephemeral option if disabled (#2633)
+- [BUGFIX] add id to avoid setState loops (#2600)
+- [BUGIFX] ListVariable: do not clear input value when selecting a value (#2672)
+
 ## 0.50.1 / 2025-01-23
 
 - [FEATURE] Label metrics in stat chart (#2574)
