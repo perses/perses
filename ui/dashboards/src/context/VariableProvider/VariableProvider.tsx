@@ -37,6 +37,7 @@ import {
   TextVariableDefinition,
   ListVariableDefinition,
 } from '@perses-dev/core';
+import { useShallow } from 'zustand/react/shallow';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -186,16 +187,19 @@ export function useVariableDefinitionActions(): {
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
 } {
   const store = useVariableDefinitionStoreCtx();
-  return useStore(store, (s) => {
-    return {
-      setVariableValue: s.setVariableValue,
-      setVariableLoading: s.setVariableLoading,
-      setVariableOptions: s.setVariableOptions,
-      setVariableDefinitions: s.setVariableDefinitions,
-      setVariableDefaultValues: s.setVariableDefaultValues,
-      getSavedVariablesStatus: s.getSavedVariablesStatus,
-    };
-  });
+  return useStore(
+    store,
+    useShallow((s) => {
+      return {
+        setVariableValue: s.setVariableValue,
+        setVariableLoading: s.setVariableLoading,
+        setVariableOptions: s.setVariableOptions,
+        setVariableDefinitions: s.setVariableDefinitions,
+        setVariableDefaultValues: s.setVariableDefaultValues,
+        getSavedVariablesStatus: s.getSavedVariablesStatus,
+      };
+    })
+  );
 }
 
 export function useVariableDefinitions(): VariableDefinition[] {
@@ -493,7 +497,9 @@ export function VariableProvider({
   externalVariableDefinitions = [],
   builtinVariableDefinitions = [],
 }: VariableProviderProps): ReactElement {
-  const [store] = useState(createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions }));
+  const [store] = useState(() =>
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions })
+  );
 
   return (
     <VariableDefinitionStoreContext.Provider value={store}>
@@ -510,7 +516,7 @@ export function VariableProviderWithQueryParams({
 }: VariableProviderProps): ReactElement {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
-  const [store] = useState(
+  const [store] = useState(() =>
     createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
   );
 
