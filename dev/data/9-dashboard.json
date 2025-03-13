@@ -2107,9 +2107,9 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
+                      "query": "up{job=\"prometheus\"}"
                     }
                   }
                 }
@@ -2141,9 +2141,9 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
+                      "query": "up{job=\"prometheus\"}"
                     }
                   }
                 }
@@ -2175,9 +2175,9 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
+                      "query": "up{job=\"prometheus\"}"
                     }
                   }
                 }
@@ -2209,9 +2209,9 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}",
+                      "query": "up{job=\"prometheus\"}",
                       "seriesNameFormat": "formatted series name example - {{job}} job - instance {{instance}}"
                     }
                   }
@@ -2247,9 +2247,9 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
+                      "query": "up{job=\"prometheus\"}"
                     }
                   }
                 }
@@ -2282,7 +2282,7 @@
                     "spec": {
                       "datasource": {
                         "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
+                        "name": "PrometheusLocal"
                       },
                       "query": "fake_graphite_query_with_nulls"
                     }
@@ -2406,7 +2406,11 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.prometheus.io:9100\"})"
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
+                      "query": "100 - ((go_memstats_alloc_bytes{job=\"prometheus\"} * 100) / go_memstats_alloc_bytes_total{job=\"prometheus\"})"
                     }
                   }
                 }
@@ -3430,6 +3434,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "prometheus_http_requests_total"
                     }
                   }
@@ -3459,6 +3467,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "prometheus_http_requests_total"
                     }
                   }
@@ -3496,6 +3508,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "prometheus_http_requests_total"
                     }
                   }
@@ -3528,6 +3544,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "prometheus_http_requests_total"
                     }
                   }
@@ -3621,6 +3641,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "up"
                     }
                   }
@@ -3667,6 +3691,10 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
+                      "datasource": {
+                        "kind": "PrometheusDatasource",
+                        "name": "PrometheusLocal"
+                      },
                       "query": "up"
                     }
                   }
