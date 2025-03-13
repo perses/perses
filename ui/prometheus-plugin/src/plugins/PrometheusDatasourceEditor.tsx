@@ -483,10 +483,18 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const handleModeChange = (v: number): void => {
     if (tabs[v]?.label === strDirect) {
       setPreviousSpecProxy(value);
-      onChange(previousSpecDirect);
+
+      // Copy all settings (for example, scrapeInterval), except 'proxy'
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { proxy, ...newValue } = value;
+      onChange({ ...newValue, directUrl: previousSpecDirect.directUrl });
     } else if (tabs[v]?.label === strProxy) {
       setPreviousSpecDirect(value);
-      onChange(previousSpecProxy);
+
+      // Copy all settings (for example, scrapeInterval), except 'directUrl'
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { directUrl, ...newValue } = value;
+      onChange({ ...newValue, proxy: previousSpecProxy.proxy });
     }
   };
 

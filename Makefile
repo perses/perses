@@ -153,7 +153,7 @@ build-api: generate
 
 .PHONY: build-ui
 build-ui:
-	cd ./ui && npm install && npm run build
+	cd ./ui && npm install $(NPM_INSTALL_FLAGS) && npm run build
 
 .PHONY: build-cli
 build-cli:

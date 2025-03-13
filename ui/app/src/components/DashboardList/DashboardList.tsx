@@ -41,6 +41,7 @@ import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties extends ListProperties {
   dashboardList: DashboardResource[];
+  isEphemeralDashboardEnabled: boolean;
 }
 
 /**
@@ -49,10 +50,11 @@ export interface DashboardListProperties extends ListProperties {
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
+ * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
-  const { dashboardList, hideToolbar, isLoading, initialState } = props;
+  const { dashboardList, hideToolbar, isLoading, initialState, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
 
@@ -66,17 +68,15 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const rows = useMemo(() => {
-    return dashboardList.map(
-      (dashboard) =>
-        ({
-          project: dashboard.metadata.project,
-          name: dashboard.metadata.name,
-          displayName: getResourceDisplayName(dashboard),
-          version: dashboard.metadata.version,
-          createdAt: dashboard.metadata.createdAt,
-          updatedAt: dashboard.metadata.updatedAt,
-        }) as Row
-    );
+    return dashboardList.map<Row>((dashboard, index) => ({
+      index,
+      project: dashboard.metadata.project,
+      name: dashboard.metadata.name,
+      displayName: getResourceDisplayName(dashboard),
+      version: dashboard.metadata.version ?? 0,
+      createdAt: dashboard.metadata.createdAt ?? '',
+      updatedAt: dashboard.metadata.updatedAt ?? '',
+    }));
   }, [dashboardList]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
@@ -235,6 +235,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
             name={getResourceDisplayName(targetedDashboard)}
             onSuccess={handleDashboardDuplication}
             onClose={() => setDuplicateDashboardDialogStateOpened(false)}
+            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
           />
           <DeleteResourceDialog
             open={isDeleteDashboardDialogStateOpened}

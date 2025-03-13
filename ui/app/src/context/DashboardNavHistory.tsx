@@ -25,7 +25,13 @@ const NavHistoryContext = createContext<DashboardNavHistoryItem[] | undefined>(u
 const NavHistoryDispatchContext = createContext<Dispatch<{ project: string; name: string }>>(() => undefined);
 
 export function NavHistoryProvider(props: { children: React.ReactNode }): ReactElement {
-  const initial = useMemo(() => JSON.parse(window.localStorage.getItem(PERSES_DASHBOARD_NAV_HISTORY_KEY) || '[]'), []);
+  const initial = useMemo(() => {
+    try {
+      return JSON.parse(window.localStorage.getItem(PERSES_DASHBOARD_NAV_HISTORY_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }, []);
   const [history, dispatch] = useReducer(historyReducer, initial);
 
   return (

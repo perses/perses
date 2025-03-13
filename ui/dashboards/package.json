@@ -42,6 +42,7 @@
     "use-immer": "^0.7.0",
     "use-query-params": "^2.1.1",
     "use-resize-observer": "^9.0.0",
+    "yaml": "^2.7.0",
     "zustand": "^4.3.3"
   },
   "devDependencies": {

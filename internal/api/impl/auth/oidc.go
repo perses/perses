@@ -23,8 +23,9 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
@@ -152,7 +153,7 @@ type oIDCEndpoint struct {
 	svc                    service
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, rbac rbac.RBAC) (route.Endpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -181,7 +182,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO)
 		slugID:                 provider.SlugID,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
-		svc:                    service{dao: dao},
+		svc:                    service{dao: dao, rbac: rbac},
 	}, nil
 }
 
