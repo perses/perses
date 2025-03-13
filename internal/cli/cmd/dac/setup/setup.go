@@ -39,7 +39,7 @@ const (
 
 import "github.com/perses/perses/cue/dac-utils/dashboard@v0"
 
-test: dashboard & { #name: "myDashboardAsCode" }`
+dashboard & { #name: "myDashboardAsCode", #project: "myProject" }`
 )
 
 func addOutputDirToGitignore() error {
