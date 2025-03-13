@@ -17,6 +17,10 @@ Perses is configured via command-line flags and a configuration file
         The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
         Path under which to expose metrics. (default "/metrics")
+  -web.tls-cert-file string
+    	The path to the cert to use for the HTTPS server
+  -web.tls-key-file string
+    	The path to the key to use for the HTTPS server
 ```
 
 Example:
