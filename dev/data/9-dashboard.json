@@ -272,7 +272,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}",
+                      "query": "node_load15{instance=~\"(demo.prometheus.io:9100)\",job='$job'}",
                       "seriesNameFormat": "Test {{job}} {{instance}}"
                     }
                   }
@@ -321,7 +321,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "node_load1{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}"
+                      "query": "node_load1{instance=~\"(demo.prometheus.io:9100)\",job='$job'}"
                     }
                   }
                 }
@@ -925,7 +925,7 @@
             "name": "instance",
             "allowMultiple": false,
             "allowAllValue": false,
-            "defaultValue": "demo.do.prometheus.io:9100",
+            "defaultValue": "demo.prometheus.io:9100",
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -2109,7 +2109,7 @@
                         "kind": "PrometheusDatasource",
                         "name": "PrometheusDemo"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
                     }
                   }
                 }
@@ -2143,7 +2143,7 @@
                         "kind": "PrometheusDatasource",
                         "name": "PrometheusDemo"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
                     }
                   }
                 }
@@ -2177,7 +2177,7 @@
                         "kind": "PrometheusDatasource",
                         "name": "PrometheusDemo"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
                     }
                   }
                 }
@@ -2211,7 +2211,7 @@
                         "kind": "PrometheusDatasource",
                         "name": "PrometheusDemo"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
+                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}",
                       "seriesNameFormat": "formatted series name example - {{job}} job - instance {{instance}}"
                     }
                   }
@@ -2249,7 +2249,7 @@
                         "kind": "PrometheusDatasource",
                         "name": "PrometheusDemo"
                       },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"grafana\",instance=\"demo.prometheus.io:3000\"}"
                     }
                   }
                 }
@@ -2406,7 +2406,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.do.prometheus.io:9100\"})"
+                      "query": "100 - ((node_memory_MemAvailable_bytes{env=\"demo\", instance=\"demo.prometheus.io:9100\"} * 100) / node_memory_MemTotal_bytes{env=\"demo\", instance=\"demo.prometheus.io:9100\"})"
                     }
                   }
                 }
@@ -2476,7 +2476,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
                       "seriesNameFormat": "{{mode}} mode "
                     }
                   }
@@ -2509,7 +2509,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
                       "seriesNameFormat": "{{mode}} mode "
                     }
                   }
@@ -2541,7 +2541,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) by (cpu)) * 100"
+                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.prometheus.io:9100\"}) by (cpu)) * 100"
                     }
                   }
                 }
@@ -2571,7 +2571,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) by (cpu)) * 100"
+                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.prometheus.io:9100\"}) by (cpu)) * 100"
                     }
                   }
                 }
