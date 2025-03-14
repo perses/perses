@@ -31,7 +31,7 @@ type TableCellPosition = {
 };
 
 export type VirtualizedTableProps<TableData> = Required<
-  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth'>
+  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth' | 'defaultColumnHeight'>
 > &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
@@ -49,6 +49,7 @@ export function VirtualizedTable<TableData>({
   height,
   density,
   defaultColumnWidth,
+  defaultColumnHeight,
   onRowClick,
   onRowMouseOver,
   onRowMouseOut,
@@ -155,6 +156,7 @@ export function VirtualizedTable<TableData>({
                           sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
                           nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
                           width={column.getSize() || defaultColumnWidth}
+                          defaultColumnHeight={defaultColumnHeight}
                           align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
@@ -214,6 +216,7 @@ export function VirtualizedTable<TableData>({
                     data-testid={cell.id}
                     title={description || cellConfig?.text || cellContent}
                     width={cell.column.getSize() || defaultColumnWidth}
+                    defaultColumnHeight={defaultColumnHeight}
                     align={cell.column.columnDef.meta?.align}
                     density={density}
                     focusState={getFocusState(position)}

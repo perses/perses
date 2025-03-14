@@ -50,6 +50,7 @@ export function Table<TableData>({
   cellConfigs,
   density = 'standard',
   defaultColumnWidth = DEFAULT_COLUMN_WIDTH,
+  defaultColumnHeight = 'auto',
   checkboxSelection,
   onRowSelectionChange,
   onSortingChange,
@@ -181,6 +182,7 @@ export function Table<TableData>({
       {...otherProps}
       density={density}
       defaultColumnWidth={defaultColumnWidth}
+      defaultColumnHeight={defaultColumnHeight}
       onRowClick={handleRowClick}
       rows={table.getRowModel().rows}
       columns={table.getAllFlatColumns()}

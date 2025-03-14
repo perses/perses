@@ -34,6 +34,7 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
 
 export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'align'> {
   density: TableDensity;
+  defaultColumnHeight?: 'auto' | number;
 
   // These values are used to adjust the spacing for the first/last columns.
   isLastColumn: boolean;
@@ -71,6 +72,7 @@ export function TableCell({
   density,
   variant,
   width,
+  defaultColumnHeight,
   focusState = 'none',
   onFocusTrigger,
   isFirstColumn,
@@ -148,7 +150,7 @@ export function TableCell({
       <Box
         id="original-cell"
         sx={{
-          ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
+          ...getTableCellLayout(theme, density, { isHeader, isLastColumn, isFirstColumn, defaultColumnHeight }),
           position: 'relative',
 
           // Text truncation. Currently enforced on all cells. We may control
