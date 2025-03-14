@@ -16,6 +16,7 @@ import { createStore, StoreApi, useStore } from 'zustand';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
+import { shallow } from 'zustand/shallow';
 import produce from 'immer';
 import {
   VariableContext,
@@ -186,16 +187,20 @@ export function useVariableDefinitionActions(): {
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
 } {
   const store = useVariableDefinitionStoreCtx();
-  return useStore(store, (s) => {
-    return {
-      setVariableValue: s.setVariableValue,
-      setVariableLoading: s.setVariableLoading,
-      setVariableOptions: s.setVariableOptions,
-      setVariableDefinitions: s.setVariableDefinitions,
-      setVariableDefaultValues: s.setVariableDefaultValues,
-      getSavedVariablesStatus: s.getSavedVariablesStatus,
-    };
-  });
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      return {
+        setVariableValue: s.setVariableValue,
+        setVariableLoading: s.setVariableLoading,
+        setVariableOptions: s.setVariableOptions,
+        setVariableDefinitions: s.setVariableDefinitions,
+        setVariableDefaultValues: s.setVariableDefaultValues,
+        getSavedVariablesStatus: s.getSavedVariablesStatus,
+      };
+    },
+    shallow
+  );
 }
 
 export function useVariableDefinitions(): VariableDefinition[] {
@@ -493,7 +498,9 @@ export function VariableProvider({
   externalVariableDefinitions = [],
   builtinVariableDefinitions = [],
 }: VariableProviderProps): ReactElement {
-  const [store] = useState(createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions }));
+  const [store] = useState(() =>
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions })
+  );
 
   return (
     <VariableDefinitionStoreContext.Provider value={store}>
@@ -510,7 +517,7 @@ export function VariableProviderWithQueryParams({
 }: VariableProviderProps): ReactElement {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
-  const [store] = useState(
+  const [store] = useState(() =>
     createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
   );
 
