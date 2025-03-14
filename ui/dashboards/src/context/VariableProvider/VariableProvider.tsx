@@ -17,7 +17,7 @@ import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
-import produce from 'immer';
+import { produce } from 'immer';
 import {
   VariableContext,
   VariableStateMap,
