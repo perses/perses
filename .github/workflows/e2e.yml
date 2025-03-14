@@ -19,6 +19,11 @@ jobs:
   e2e:
     name: end-to-end tests
     runs-on: ubuntu-latest
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - '9090:9090'
     steps:
       - name: checkout
         uses: actions/checkout@v4
