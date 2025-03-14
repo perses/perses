@@ -16,6 +16,9 @@ See the dedicated pages for each builder:
     - [List Variable](./variable/list.md)
     - [Text Variable](./variable/text.md)
 
+!!! note
+	The builders listed above are all about the Perses core model. To know more about the builder utilities for [plugins](../../concepts/plugins.md), please rely on their respective documentation. 
+
 See also some useful patterns for DaC with the CUE SDK in the below section.
 
 ## Useful patterns
