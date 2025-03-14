@@ -12,11 +12,35 @@
 // limitations under the License.
 
 import { memo, useEffect, useLayoutEffect, useRef } from 'react';
-import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
+import { ECharts, EChartsCoreOption, init, connect, use } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
+
+import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
+import {
+  DatasetComponent,
+  DataZoomComponent,
+  LegendComponent,
+  GridComponent,
+  TitleComponent,
+  TooltipComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
+
+// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot plugin).
+// This is a workaround for https://github.com/perses/plugins/issues/83.
+use([
+  DatasetComponent,
+  DataZoomComponent,
+  LegendComponent,
+  EChartsScatterChart,
+  GridComponent,
+  TitleComponent,
+  TooltipComponent,
+  CanvasRenderer,
+]);
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
 export interface MouseEventsParameters<T> {
