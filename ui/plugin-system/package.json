@@ -33,9 +33,9 @@
     "@perses-dev/core": "0.51.0-beta.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "immer": "^9.0.15",
+    "immer": "^10.1.1",
     "react-hook-form": "^7.46.1",
-    "use-immer": "^0.7.0",
+    "use-immer": "^0.11.0",
     "use-query-params": "^2.1.2",
     "zod": "^3.22.2"
   },
