@@ -16,6 +16,7 @@ import { createStore, StoreApi, useStore } from 'zustand';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
+import { shallow } from 'zustand/shallow';
 import produce from 'immer';
 import {
   VariableContext,
@@ -37,7 +38,6 @@ import {
   TextVariableDefinition,
   ListVariableDefinition,
 } from '@perses-dev/core';
-import { useShallow } from 'zustand/react/shallow';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -187,9 +187,9 @@ export function useVariableDefinitionActions(): {
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
 } {
   const store = useVariableDefinitionStoreCtx();
-  return useStore(
+  return useStoreWithEqualityFn(
     store,
-    useShallow((s) => {
+    (s) => {
       return {
         setVariableValue: s.setVariableValue,
         setVariableLoading: s.setVariableLoading,
@@ -198,7 +198,8 @@ export function useVariableDefinitionActions(): {
         setVariableDefaultValues: s.setVariableDefaultValues,
         getSavedVariablesStatus: s.getSavedVariablesStatus,
       };
-    })
+    },
+    shallow
   );
 }
 
