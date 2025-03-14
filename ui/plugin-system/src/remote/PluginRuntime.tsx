@@ -106,19 +106,19 @@ export const pluginRuntime = init({
     },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK
     'date-fns': {
-      version: '2.29.3',
+      version: '4.1.0',
       lib: () => require('date-fns'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^2.29.3',
+        requiredVersion: '^4.1.0',
       },
     },
     'date-fns-tz': {
-      version: '1.3.8',
+      version: '3.2.0',
       lib: () => require('date-fns-tz'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^1.3.8',
+        requiredVersion: '^3.2.0',
       },
     },
     lodash: {

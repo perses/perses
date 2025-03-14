@@ -14,7 +14,9 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@perses-dev/core": "0.51.0-beta.0"
+    "@perses-dev/core": "0.51.0-beta.0",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
     "@perses-dev/internal-utils": "0.51.0-beta.0",

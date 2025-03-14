@@ -13,6 +13,7 @@
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
+import { Duration } from 'date-fns';
 import buildURL from './url-builder';
 
 const resource = 'config';

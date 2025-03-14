@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 /**
  * Takes a generic date string and converts it to a date at that time in the
@@ -29,5 +29,5 @@ export function parseDateIntoTimeZone(date: string, timezoneId?: string): Date {
     throw new Error('Missing time zone');
   }
 
-  return zonedTimeToUtc(date, timezoneId);
+  return fromZonedTime(date, timezoneId);
 }

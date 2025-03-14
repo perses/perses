@@ -16,7 +16,7 @@ import { Box } from '@mui/material';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
@@ -195,7 +195,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     data.map((d, index) => {
       const values = d.values.map(([timestamp, value]) => {
         const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
-        return [isLocalTimeZone ? timestamp : utcToZonedTime(timestamp, timeZone), val];
+        return [isLocalTimeZone ? timestamp : toZonedTime(timestamp, timeZone), val];
       });
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
@@ -208,8 +208,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       series: updatedSeriesMapping,
       xAxis: {
         type: 'time',
-        min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
-        max: isLocalTimeZone ? timeScale.endMs : utcToZonedTime(timeScale.endMs, timeZone),
+        min: isLocalTimeZone ? timeScale.startMs : toZonedTime(timeScale.startMs, timeZone),
+        max: isLocalTimeZone ? timeScale.endMs : toZonedTime(timeScale.endMs, timeZone),
         axisLabel: {
           hideOverlap: true,
           formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),

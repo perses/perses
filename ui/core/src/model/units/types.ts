@@ -14,6 +14,7 @@
 // Common types needed across individual unit groups and the overall combined
 // units.
 
+import { Duration } from 'date-fns';
 import { AbsoluteTimeRange, DurationString } from '../time';
 import { FormatOptions } from './units';
 

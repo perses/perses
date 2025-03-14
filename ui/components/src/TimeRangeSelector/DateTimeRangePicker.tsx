@@ -14,7 +14,7 @@
 import { ReactElement, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeZone } from '../context';
 import { ErrorBoundary } from '../ErrorBoundary';

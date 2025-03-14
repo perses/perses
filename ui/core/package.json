@@ -29,7 +29,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^2.28.0",
+    "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "numbro": "^2.3.6",

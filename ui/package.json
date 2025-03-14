@@ -43,7 +43,7 @@
     "@types/react-dom": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
-    "concurrently": "^8.2.2",
+    "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^4.0.3",
     "eslint": "^8.57.1",
@@ -69,5 +69,5 @@
     "typescript": "5.4.5",
     "wait-on": "^7.0.1"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2"  
 }
