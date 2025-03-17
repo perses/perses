@@ -56,6 +56,19 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
+
+## Mapping specification
+
+```yaml
+# TODO
+```
+
+## Proxy specification
+
+```yaml
+# TODO
+```
+
 ## Thresholds specification
 
 ```yaml
@@ -71,4 +84,10 @@ steps:
 value: <int>
 color: <string> # Optional
 name: <string> # Optional
+```
+
+## Transform specification
+
+```yaml
+# TODO
 ```
