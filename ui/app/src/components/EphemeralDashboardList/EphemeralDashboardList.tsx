@@ -67,7 +67,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
     return add(
       ephemeralDashboard.metadata.updatedAt ? new Date(ephemeralDashboard.metadata.updatedAt) : new Date(),
       parseDurationString(ephemeralDashboard.spec.ttl)
-    ).toLocaleString();
+    ).toISOString();
   }, []);
 
   const rows = useMemo(() => {
