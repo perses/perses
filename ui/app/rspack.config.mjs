@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import rspack from '@rspack/core';
 import refreshPlugin from '@rspack/plugin-react-refresh';
 import TerserPlugin from 'terser-webpack-plugin';
 import { defineConfig } from '@rspack/cli';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
   output: {
-    path: './dist',
+    path: resolve(__dirname, './dist'),
     publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
   },
   mode: isDev ? 'development' : 'production',
