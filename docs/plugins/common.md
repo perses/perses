@@ -15,7 +15,7 @@ Calculation is defined as:
 The format spec is defined as:
 
 ```yaml
-<enum = <Time format> | <Percent format> | <Decimal format> | <Bytes format> | <Throughput format>>
+<anyOf = Time format | Percent format | Decimal format | Bytes format | Throughput format>
 ```
 
 ### Time format
@@ -60,7 +60,7 @@ shortValues: <boolean> | default = false # Optional
 
 ```yaml
 mode: <enum = "percent" | "absolute"> # Optional
-defaultColor: string # Optional
+defaultColor: <string> # Optional
 steps:
   - <Step specification> # Optional
 ```
