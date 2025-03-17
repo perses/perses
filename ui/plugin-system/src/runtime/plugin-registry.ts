@@ -71,14 +71,24 @@ export function usePlugins<T extends PluginType>(
   plugins: Array<{ kind: string }>
 ): Array<UseQueryResult<PluginImplementation<T>>> {
   const { getPlugin } = usePluginRegistry();
-  return useQueries({
-    queries: plugins.map((p) => {
+
+  // useQueries() does not support queries with duplicate keys, therefore we de-duplicate the plugin kinds before running useQueries()
+  // This resolves the following warning in the JS console: "[QueriesObserver]: Duplicate Queries found. This might result in unexpected behavior."
+  // https://github.com/TanStack/query/issues/8224#issuecomment-2523554831
+  // https://github.com/TanStack/query/issues/4187#issuecomment-1256336901
+  const kinds = [...new Set(plugins.map((p) => p.kind))];
+
+  const result: Array<UseQueryResult<PluginImplementation<T>>> = useQueries({
+    queries: kinds.map((kind) => {
       return {
-        queryKey: ['getPlugin', pluginType, p.kind],
-        queryFn: () => getPlugin(pluginType, p.kind),
+        queryKey: ['getPlugin', pluginType, kind],
+        queryFn: () => getPlugin(pluginType, kind),
       };
     }),
   });
+
+  // Re-assemble array in original order
+  return plugins.map((p) => result[kinds.indexOf(p.kind)]!);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
