@@ -15,7 +15,7 @@ Calculation is defined as:
 The format spec is defined as:
 
 ```yaml
-<enum = <Time format> | <Percent format> | <Decimal format> | <Bytes format> | <Throughput format>>
+<anyOf = Time format | Percent format | Decimal format | Bytes format | Throughput format>
 ```
 
 ### Time format
@@ -56,11 +56,50 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
+
+## Mapping specification
+
+```yaml
+# TODO
+```
+
+## Proxy specification
+
+### HTTP Proxy specification
+
+```yaml
+kind: "HTTPProxy"
+spec:
+  # URL is the url of datasource. It is not the url of the proxy.
+  url: <url>
+
+  # It is a tuple list of http methods and http endpoints that will be accessible.
+  # Leave it empty if you don't want to restrict the access to the datasource.
+  allowedEndpoints:
+    - <Allowed Endpoints specification> # Optional
+
+  # It can be used to provide additional headers that need to be forwarded when requesting the datasource
+  headers:
+    <string>: <string> # Optional
+
+  # This is the name of the secret that should be used for the proxy or discovery configuration
+  # It will contain any sensitive information such as password, token, certificate.
+  # Please read the documentation about secrets to understand how to create one
+  secret: <string> # Optional
+```
+
+#### Allowed Endpoints specification
+
+```yaml
+endpointPattern: <RegExp>
+method: <enum | possibleValue = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'>
+```
+
 ## Thresholds specification
 
 ```yaml
 mode: <enum = "percent" | "absolute"> # Optional
-defaultColor: string # Optional
+defaultColor: <string> # Optional
 steps:
   - <Step specification> # Optional
 ```
@@ -71,4 +110,10 @@ steps:
 value: <int>
 color: <string> # Optional
 name: <string> # Optional
+```
+
+## Transform specification
+
+```yaml
+# TODO
 ```
