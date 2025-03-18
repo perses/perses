@@ -27,6 +27,17 @@ describe('getTableCellLayout', () => {
       expect(getTableCellLayout(mockMuiTheme, density, opts)).toMatchSnapshot();
     });
   });
+
+  describe('computes cell height', () => {
+    test.each([
+      { name: 'using defaults', opts: {}, expected: 17.5 },
+      { name: 'using auto', opts: { defaultColumnHeight: 'auto' as const }, expected: 17.5 },
+      { name: 'ignoring header row', opts: { defaultColumnHeight: 50, isHeader: true }, expected: 17.5 },
+      { name: 'using a custom height', opts: { defaultColumnHeight: 50 }, expected: 50 },
+    ])('$name', ({ opts, expected }) => {
+      expect(getTableCellLayout(mockMuiTheme, 'standard', opts).height).toEqual(expected);
+    });
+  });
 });
 
 type MockTableData = {
