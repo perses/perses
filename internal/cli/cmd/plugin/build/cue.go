@@ -97,7 +97,7 @@ type cueVendor struct {
 // - Parse the module.cue file containing the dependencies
 // - if no `deps` are present, skip vendoring
 // - if there is already a vendor directory, skip vendoring
-// - Loop other the dependencies and for each:
+// - Loop over the dependencies and for each:
 //   - Look if the dependency is already present in the CUE cache
 //   - If not, download the dependency
 //   - Copy the dependency from the CUE cache to the vendor directory. During this process, we remove the version in the name of the last directory generated from the module path (= rename `cue@vX.Y.Z` to `cue`)
