@@ -22,3 +22,4 @@ export * from './transform-data';
 export * from './value-mapping';
 export * from './types';
 export * from './regexp';
+export * from './assign-ref';

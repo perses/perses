@@ -47,7 +47,7 @@ export interface PanelEditorSlice {
   /**
    * Opens the editor for adding a new Panel to a panel group.
    */
-  openAddPanel: (panelGroupId?: PanelGroupId) => void;
+  openAddPanel: (panelGroupId?: PanelGroupId, panelDefinition?: PanelEditorValues['panelDefinition']) => void;
 }
 
 export interface PanelEditorState {
@@ -163,7 +163,7 @@ export function createPanelEditorSlice(): StateCreator<
       });
     },
 
-    openAddPanel(panelGroupId): void {
+    openAddPanel(panelGroupId, panelDefinition): void {
       // If a panel group isn't supplied, add to the first group or create a group if there aren't any
       let newGroup: PanelGroupDefinition | undefined = undefined;
       panelGroupId ??= get().panelGroupOrder[0];
@@ -177,7 +177,7 @@ export function createPanelEditorSlice(): StateCreator<
         mode: 'create',
         initialValues: {
           groupId: panelGroupId,
-          panelDefinition: get().initialValues?.panelDefinition ?? createPanelDefinition(),
+          panelDefinition: panelDefinition ?? get().initialValues?.panelDefinition ?? createPanelDefinition(),
         },
         applyChanges: (next) => {
           const name = next.panelDefinition.spec.display.name;
