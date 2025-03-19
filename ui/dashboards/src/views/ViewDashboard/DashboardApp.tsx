@@ -41,6 +41,7 @@ export interface DashboardAppProps {
   isVariableEnabled: boolean;
   isDatasourceEnabled: boolean;
   isCreating?: boolean;
+  dashboardControlsComponent?: JSX.Element;
 }
 
 export const DashboardApp = (props: DashboardAppProps): ReactElement => {
@@ -55,6 +56,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     isVariableEnabled,
     isDatasourceEnabled,
     isCreating,
+    dashboardControlsComponent,
   } = props;
 
   const chartsTheme = useChartsTheme();
@@ -123,6 +125,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         isDatasourceEnabled={isDatasourceEnabled}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
+        dashboardControlsComponent={dashboardControlsComponent}
       />
       <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>

@@ -56,6 +56,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     isEditing,
     isCreating,
     sx,
+    dashboardControlsComponent,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -142,6 +143,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                   isVariableEnabled={isVariableEnabled}
                   isDatasourceEnabled={isDatasourceEnabled}
                   isCreating={isCreating}
+                  dashboardControlsComponent={dashboardControlsComponent}
                 />
               </ErrorBoundary>
             </Box>
