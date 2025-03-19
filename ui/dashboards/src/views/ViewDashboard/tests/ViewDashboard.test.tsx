@@ -15,7 +15,6 @@ import { screen, waitFor } from '@testing-library/dom';
 import { getMockPluginName, ValidationProvider } from '@perses-dev/plugin-system';
 import { renderHook } from '@testing-library/react';
 import { act, useRef } from 'react';
-import { StoreApi } from 'zustand';
 import { PanelDefinition } from '@perses-dev/core';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { ViewDashboard, ViewDashboardProps } from '../ViewDashboard';
@@ -46,7 +45,7 @@ describe('View Dashboard', () => {
   });
 
   it('should allow external access to the dashboardStoreState and trigger panel editor actions', async () => {
-    const dashboardStoreApiRef = renderHook(() => useRef<StoreApi<DashboardStoreState>>(null)).result.current;
+    const dashboardStoreApiRef = renderHook(() => useRef<DashboardStoreState>(null)).result.current;
 
     renderDashboard({ dashboardStoreApiRef });
 
@@ -67,7 +66,7 @@ describe('View Dashboard', () => {
 
     // Trigger the panel editor open action using the external store reference
     act(() => {
-      dashboardStoreApiRef.current?.getState().openAddPanel(undefined, panelDefinitionMock);
+      dashboardStoreApiRef.current?.openAddPanel(undefined, panelDefinitionMock);
     });
 
     // Verify that the panel editor is open and displays the expected content

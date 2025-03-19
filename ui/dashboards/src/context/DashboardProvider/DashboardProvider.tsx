@@ -76,7 +76,7 @@ export interface DashboardStoreProps {
 
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
-  dashboardStoreApiRef?: MutableRef<StoreApi<DashboardStoreState>>;
+  dashboardStoreApiRef?: MutableRef<DashboardStoreState>;
   children?: ReactNode;
 }
 
@@ -101,7 +101,7 @@ export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardP
   const [store] = useState(() => {
     const newStore = createDashboardStore(props);
 
-    assignRef(dashboardStoreApiRef, newStore);
+    assignRef(dashboardStoreApiRef, newStore.getState());
 
     return newStore;
   }); // prevent calling createDashboardStore every time it rerenders
