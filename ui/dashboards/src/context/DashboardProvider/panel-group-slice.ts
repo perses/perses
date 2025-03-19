@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { getPanelKeyFromRef, LayoutDefinition, PanelGroupId } from '@perses-dev/core';
-import { WritableDraft } from 'immer/dist/internal';
+
 import { Layout } from 'react-grid-layout';
 import { StateCreator } from 'zustand';
+import { WritableDraft } from 'immer';
 import { generateId, Middleware } from './common';
 
 /**

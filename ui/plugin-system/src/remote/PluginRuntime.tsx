@@ -170,11 +170,11 @@ export const pluginRuntime = init({
       },
     },
     immer: {
-      version: '9.0.15',
+      version: '10.1.1',
       lib: () => require('immer'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^9.0.15',
+        requiredVersion: '^10.1.1',
       },
     },
   },

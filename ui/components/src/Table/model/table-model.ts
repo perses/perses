@@ -24,6 +24,7 @@ import {
 import { CSSProperties } from 'react';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
+export const DEFAULT_COLUMN_HEIGHT = 40;
 
 export type TableDensity = 'compact' | 'standard' | 'comfortable';
 export type SortDirection = 'asc' | 'desc' | undefined;
@@ -82,6 +83,11 @@ export interface TableProps<TableData> {
    *  If there is not enough width for each column, the display can unreadable.
    */
   defaultColumnWidth?: 'auto' | number;
+
+  /**
+   *  When using "auto", the table will calculate the cell height based on the line height of the theme and the density setting of the table.
+   */
+  defaultColumnHeight?: 'auto' | number;
 
   /**
    * When `true`, the first column of the table will include checkboxes.
@@ -165,8 +171,10 @@ type TableCellLayout = NonNullable<Pick<React.CSSProperties, 'padding' | 'fontSi
 };
 
 type GetTableCellLayoutOpts = {
+  isHeader?: boolean;
   isLastColumn?: boolean;
   isFirstColumn?: boolean;
+  defaultColumnHeight?: 'auto' | number;
 };
 
 /**
@@ -176,7 +184,7 @@ type GetTableCellLayoutOpts = {
 export function getTableCellLayout(
   theme: Theme,
   density: TableDensity,
-  { isLastColumn, isFirstColumn }: GetTableCellLayoutOpts = {}
+  { isHeader, isLastColumn, isFirstColumn, defaultColumnHeight }: GetTableCellLayoutOpts = {}
 ): TableCellLayout {
   // Density Standard
   let paddingY = theme.spacing(1);
@@ -207,9 +215,14 @@ export function getTableCellLayout(
     fontSize = theme.typography.body1.fontSize;
   }
 
+  const height =
+    isHeader || !defaultColumnHeight || defaultColumnHeight === 'auto'
+      ? calculateTableCellHeight(lineHeight, paddingY)
+      : defaultColumnHeight;
+
   return {
     padding: `${paddingY} ${paddingRight} ${paddingY} ${paddingLeft}`,
-    height: calculateTableCellHeight(lineHeight, paddingY),
+    height: height,
     fontSize: fontSize,
     lineHeight: lineHeight,
   };
