@@ -44,6 +44,13 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { plugin } = panelDefinition.spec;
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
+  const { panelEditorSchema } = useValidationSchemas();
+  const form = useForm<PanelEditorValues>({
+    resolver: zodResolver(panelEditorSchema),
+    mode: 'onBlur',
+    defaultValues: initialValues,
+  });
+
   // Use common plugin editor logic even though we've split the inputs up in this form
   const pluginEditor = usePluginEditor({
     pluginTypes: ['Panel'],
@@ -62,13 +69,6 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
 
   const titleAction = getTitleAction(initialAction, true);
   const submitText = getSubmitText(initialAction, true);
-
-  const { panelEditorSchema } = useValidationSchemas();
-  const form = useForm<PanelEditorValues>({
-    resolver: zodResolver(panelEditorSchema),
-    mode: 'onBlur',
-    defaultValues: initialValues,
-  });
 
   const links = useWatch({ control: form.control, name: 'panelDefinition.spec.links' });
   useEffect(() => {
@@ -104,6 +104,10 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     setPanelDefinition(nextPanelDef);
   };
 
+  const watchedName = useWatch({ control: form.control, name: 'panelDefinition.spec.display.name' });
+  const watchedDescription = useWatch({ control: form.control, name: 'panelDefinition.spec.display.description' });
+  const watchedPluginKind = useWatch({ control: form.control, name: 'panelDefinition.spec.plugin.kind' });
+
   return (
     <FormProvider {...form}>
       <Box
@@ -138,7 +142,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   label="Name"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
-                  value={field.value ?? ''}
+                  value={watchedName ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setName(event.target.value);
@@ -184,7 +188,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   label="Description"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
-                  value={field.value ?? ''}
+                  value={watchedDescription ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setDescription(event.target.value);
@@ -207,7 +211,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   disabled={pluginEditor.isLoading}
                   error={!!pluginEditor.error || !!fieldState.error}
                   helperText={pluginEditor.error?.message ?? fieldState.error?.message}
-                  value={{ type: 'Panel', kind: field.value }}
+                  value={{ type: 'Panel', kind: watchedPluginKind }}
                   onChange={(event) => {
                     field.onChange(event.kind);
                     pluginEditor.onSelectionChange(event);
