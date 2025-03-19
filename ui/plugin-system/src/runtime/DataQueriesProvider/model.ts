@@ -62,7 +62,6 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
   const { data: timeSeriesQueryPlugins, isLoading: isTimeSeriesQueryLoading } = useListPluginMetadata([
     'TimeSeriesQuery',
   ]);
-
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
