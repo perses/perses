@@ -56,7 +56,15 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
+      - name: cache cue deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cue
+          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
+          restore-keys: |
+            ${{ runner.os }}-cue-
       - name: Login to CUE's Central Registry to allow retrieving deps
+        if: ${{ github.secret_source == 'Actions' }}
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: test
         run: make cue-test
