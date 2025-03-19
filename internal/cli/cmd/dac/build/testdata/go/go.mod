@@ -19,7 +19,7 @@ replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
 	github.com/perses/perses v0.50.1
-	github.com/perses/plugins/prometheus v0.0.0-20250211164300-9fe475c5d750
+	github.com/perses/plugins/prometheus v0.5.1
 	github.com/perses/plugins/timeserieschart v0.0.0-20250211161353-0a08d3cdcbd5
 )
 
