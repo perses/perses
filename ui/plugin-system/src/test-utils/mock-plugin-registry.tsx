@@ -67,6 +67,7 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
     pluginLoader,
     defaultPluginKinds: {
       TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+      Panel: 'TimeSeriesChart',
     },
   };
 }

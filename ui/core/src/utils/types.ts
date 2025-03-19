@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export type DispatchWithPromise<A> = (value: A) => Promise<void>;
+export type MutableRef<T> = React.RefCallback<T> | React.MutableRefObject<T | null> | null;
