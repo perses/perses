@@ -33,7 +33,7 @@ export interface TLSConfig {
   certFile?: string;
   keyFile?: string;
   serverName?: string;
-  insecureSkipVerify: boolean;
+  insecureSkipVerify?: boolean;
 }
 
 export interface SecretSpec {

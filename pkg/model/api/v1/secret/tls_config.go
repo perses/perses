@@ -29,7 +29,7 @@ type PublicTLSConfig struct {
 	CertFile           string `yaml:"certFile,omitempty" json:"certFile,omitempty"`
 	KeyFile            string `yaml:"keyFile,omitempty" json:"keyFile,omitempty"`
 	ServerName         string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify,omitempty" json:"insecureSkipVerify,omitempty"`
 	MinVersion         string `yaml:"minVersion,omitempty" json:"minVersion,omitempty"`
 	MaxVersion         string `yaml:"maxVersion,omitempty" json:"maxVersion,omitempty"`
 }
@@ -95,7 +95,7 @@ type TLSConfig struct {
 	// Used to verify the hostname for the targets.
 	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
 	// Disable target certificate validation.
-	InsecureSkipVerify bool `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
+	InsecureSkipVerify bool `yaml:"insecureSkipVerify,omitempty" json:"insecureSkipVerify,omitempty"`
 	// Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
 	// If unset, Perses will use Go default minimum version, which is TLS 1.2.
 	// See MinVersion in https://pkg.go.dev/crypto/tls#Config.
