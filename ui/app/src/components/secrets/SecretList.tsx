@@ -75,6 +75,7 @@ export function SecretList<T extends Secret>({
           version: secret.metadata.version,
           createdAt: secret.metadata.createdAt,
           updatedAt: secret.metadata.updatedAt,
+          noAuth: !secret.spec.basicAuth && !secret.spec.authorization,
         }) as Row
     );
   }, [data]);
@@ -170,13 +171,20 @@ export function SecretList<T extends Secret>({
         ),
       },
       {
+        field: 'noAuth',
+        headerName: 'No Authorization',
+        type: 'boolean',
+        flex: 3,
+        minWidth: 150,
+      },
+      {
         field: 'basicAuth',
         headerName: 'Basic Auth',
         type: 'boolean',
         flex: 3,
         minWidth: 150,
       },
-      { field: 'authorization', headerName: 'Authorization', type: 'boolean', flex: 3, minWidth: 150 },
+      { field: 'authorization', headerName: 'Custom Authorization', type: 'boolean', flex: 3, minWidth: 150 },
       { field: 'tlsConfig', headerName: 'TLS Config', type: 'boolean', flex: 3, minWidth: 150 },
       VERSION_COL_DEF,
       CREATED_AT_COL_DEF,
