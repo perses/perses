@@ -35,6 +35,7 @@ import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { FormEditorProps } from '../form-drawers';
 
+const noAuthIndex = 'noAuth';
 const basicAuthIndex = 'basicAuth';
 const authorizationIndex = 'authorization';
 
@@ -98,7 +99,11 @@ export function SecretEditorForm({
   }, [form.formState.isValid]);
 
   const [tabValue, setTabValue] = useState<string>(
-    initialSecretClean.spec.basicAuth ? basicAuthIndex : authorizationIndex
+    initialSecretClean.spec.basicAuth
+      ? basicAuthIndex
+      : initialSecretClean.spec.authorization
+        ? authorizationIndex
+        : noAuthIndex
   );
 
   const handleTabChange = (event: SyntheticEvent, newValue: string): void => {
@@ -111,7 +116,10 @@ export function SecretEditorForm({
 
     setTabValue(newValue);
 
-    if (newValue === basicAuthIndex) {
+    if (newValue === noAuthIndex) {
+      form.setValue('spec.authorization', undefined);
+      form.setValue('spec.basicAuth', undefined);
+    } else if (newValue === basicAuthIndex) {
       form.setValue('spec.authorization', undefined);
     } else if (newValue === authorizationIndex) {
       form.setValue('spec.basicAuth', undefined);
@@ -177,6 +185,12 @@ export function SecretEditorForm({
           >
             <FormControl>
               <RadioGroup row value={tabValue} onChange={handleTabChange} aria-labelledby="Secret Authorization Setup">
+                <FormControlLabel
+                  disabled={isReadonly}
+                  value={noAuthIndex}
+                  control={<Radio />}
+                  label="No Authorization"
+                />
                 <FormControlLabel
                   disabled={isReadonly}
                   value={basicAuthIndex}
