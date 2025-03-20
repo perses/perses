@@ -46,4 +46,9 @@ export class SecretEditor {
     await this.basicAuthPasswordInput.clear();
     await this.basicAuthPasswordInput.type(password);
   }
+
+  async clickRadioOption(tabKey: string): Promise<void> {
+    const radioOption = this.container.locator(`input[type="radio"][value="${tabKey}"]`);
+    await radioOption.check();
+  }
 }

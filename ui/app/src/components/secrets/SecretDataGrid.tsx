@@ -30,6 +30,7 @@ const MemoizedColumnHeaders = memo(GridColumnHeaders);
 
 export interface Row extends CommonRow {
   project: string;
+  noAuth: boolean;
   basicAuth: boolean;
   authorization: boolean;
   tlsConfig: boolean;
