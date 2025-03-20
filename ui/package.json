@@ -10,6 +10,7 @@
     "lint:fix": "turbo run lint -- --fix",
     "type-check": "turbo run type-check",
     "start": "turbo run start",
+    "watch": "npm run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
     "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
