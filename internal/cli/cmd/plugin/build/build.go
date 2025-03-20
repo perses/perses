@@ -125,7 +125,7 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	if archiveBuildErr := archive.Build(filepath.Join(o.pluginPath, manifest.Name), o.archiveFormat, files); archiveBuildErr != nil {
+	if archiveBuildErr := archive.Build(filepath.Join(o.pluginPath, fmt.Sprintf("%s-%s", manifest.Name, npmPackageData.Version)), o.archiveFormat, files); archiveBuildErr != nil {
 		return fmt.Errorf("archive creation failed: %w", archiveBuildErr)
 	}
 	return output.HandleString(o.writer, fmt.Sprintf("%s built successfully", manifest.Name))
