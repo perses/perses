@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
@@ -36,6 +37,8 @@ const (
 	goExtension  = ".go"
 	cueExtension = ".cue"
 )
+
+var folderToIgnore = []string{".git", ".github", ".idea", config.DefaultOutputFolder, "cue.mod"}
 
 type option struct {
 	persesCMD.Option
@@ -82,6 +85,9 @@ func (o *option) Execute() error {
 
 		// Process regular files only
 		if info.IsDir() {
+			if slices.Contains(folderToIgnore, info.Name()) {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
