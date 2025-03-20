@@ -44,13 +44,12 @@ type option struct {
 	opt.OutputOption
 	writer    io.Writer
 	errWriter io.Writer
+	args      []string
 	Mode      string
 }
 
 func (o *option) Complete(args []string) error {
-	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'build'")
-	}
+	o.args = args
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
 	}
@@ -124,7 +123,7 @@ func (o *option) processFile(file string, extension string) error {
 		// we must be in the closest directory to the file.
 		folder := filepath.Dir(file)
 		extractedFile := filepath.Base(file)
-		cmd = exec.Command("go", "run", extractedFile, "--output", o.Output) // #nosec
+		cmd = exec.Command("go", "run", extractedFile, "--output", o.Output, strings.Join(o.args, " ")) // #nosec
 		cmd.Dir = folder
 	} else if extension == cueExtension {
 		// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
@@ -218,6 +217,9 @@ percli dac build -d my_dashboards
 
 # build all the files under a given directory & deploy the resulting resources right away
 percli dac build -d my_dashboards && percli apply -d built
+
+# build a given file as JSON providing extra arguments to the Go program
+percli dac build -f main.go -ojson -- --arg1=value1 --arg2=value2
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
