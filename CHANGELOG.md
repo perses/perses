@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.50.3 / 2025-03-20
+
+- [ENHANCEMENT] allow insecureSkipVerify to be optional defaulting to false (#2803)
+- [ENHANCEMENT] Support min/max TLS version (#2619)
+- [ENHANCEMENT] Improve dashboard performance by reducing re-renders (#2770)
+- [ENHANCEMENT] make proxy authorization optional (#2802)
+- [ENHANCEMENT] Add OAuth secret type for Datasources (#2631)
+- [ENHANCEMENT] Update PanelEditorForm by using watched values (#2792)
+- [ENHANCEMENT] Add Authorization and BasicAuth definitions to cue package (#2643)
+- [BUGFIX] fix variable grafana migration (#2699)
+- [BUGFIX] Format expireAt with ISOString to fix EphemeralDashboard view crash (#2778)
+- [BUGFIX] Fix duplicate query keys in useQueries() (#2779)
+- [DOC] Fix doc about TLS config and the TLS secret spec (#2685)
+- [DOC] Fix typo in ListVariable spec (#2691)
+
 ## 0.50.2 / 2025-03-13
 
 - [FEATURE] add yaml and yaml custom resource to download formats (#2658)
@@ -477,10 +492,10 @@ It only contains a fix in the CI to release Perses.
 
 - [FEATURE] Add metadata validation for project, dashboard, datasource and variable on the UI (#1416)
 - [FEATURE] Display name is optional for variables (#1414)
-- [FEATURE] Add builtin variables ($__interval, $interval_ms and $__rate_interval) (#1379)
-- [FEATURE] Add $__range(_ms/_s) builtin variables + add support for curly bracket variables + fix prefixed variables by other variable name (#1376)
+- [FEATURE] Add builtin variables ($**interval, $interval_ms and $**rate_interval) (#1379)
+- [FEATURE] Add $\_\_range(\_ms/\_s) builtin variables + add support for curly bracket variables + fix prefixed variables by other variable name (#1376)
 - [FEATURE] Support secret CRUD on the API side (#1373)
-- [FEATURE] Add builtin variables ($__dashboard, $__project, $__from, $__to) (#1344)
+- [FEATURE] Add builtin variables ($**dashboard, $**project, $**from, $**to) (#1344)
 - [FEATURE] Add templating to issues (#1358)
 - [FEATURE] Global Datasource CRUD + DRY refactoring (#1339)
 - [FEATURE] Global Variables CRUD (#1328)
