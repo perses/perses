@@ -65,7 +65,7 @@ export function TimeRangeControls({
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
-  const showZoomoutRangeValue = useShowZoomoutRangeSetting(showCustomTimeRange);
+  const showZoomoutRangeValue = useShowZoomoutRangeSetting(showZoomoutTimeRange);
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
 
   // Convert height to a string, then use the string for styling
