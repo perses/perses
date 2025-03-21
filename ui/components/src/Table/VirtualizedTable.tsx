@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
-import { Box } from '@mui/material';
+import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { useRef, useMemo, ReactElement } from 'react';
 import { TableRow } from './TableRow';
@@ -24,6 +24,7 @@ import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
+import { TableFoot } from './TableFoot';
 
 type TableCellPosition = {
   row: number;
@@ -33,12 +34,13 @@ type TableCellPosition = {
 export type VirtualizedTableProps<TableData> = Required<
   Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth' | 'defaultColumnHeight'>
 > &
-  Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
+  Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
     rows: Array<Row<TableData>>;
     columns: Array<Column<TableData, unknown>>;
     headers: Array<HeaderGroup<TableData>>;
     cellConfigs?: TableCellConfigs;
+    rowCount: number;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -57,6 +59,9 @@ export function VirtualizedTable<TableData>({
   columns,
   headers,
   cellConfigs,
+  pagination,
+  onPaginationChange,
+  rowCount,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
@@ -95,6 +100,7 @@ export function VirtualizedTable<TableData>({
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
+      TableFoot,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       TableRow: ({ item, ...props }): ReactElement | null => {
         const index = props['data-index'];
@@ -122,6 +128,16 @@ export function VirtualizedTable<TableData>({
       TableBody,
     };
   }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
+
+  const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
+    if (!pagination || !onPaginationChange) return;
+    onPaginationChange({ ...pagination, pageIndex: newPage });
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    if (!pagination || !onPaginationChange) return;
+    onPaginationChange({ pageIndex: 0, pageSize: parseInt(event.target.value, 10) });
+  };
 
   return (
     <Box style={{ width, height }}>
@@ -176,6 +192,22 @@ export function VirtualizedTable<TableData>({
             </>
           );
         }}
+        fixedFooterContent={
+          pagination
+            ? (): ReactElement => (
+                <MuiTableRow sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
+                  <TablePagination
+                    colSpan={columns.length}
+                    count={rowCount}
+                    page={pagination.pageIndex}
+                    rowsPerPage={pagination.pageSize}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </MuiTableRow>
+              )
+            : undefined
+        }
         itemContent={(index) => {
           const row = rows[index];
           if (!row) {

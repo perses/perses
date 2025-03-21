@@ -21,6 +21,7 @@ import {
   Table as TanstackTable,
   SortingState,
   getSortedRowModel,
+  getPaginationRowModel,
 } from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { ReactElement, useCallback, useMemo } from 'react';
@@ -58,6 +59,8 @@ export function Table<TableData>({
   getRowId = DEFAULT_GET_ROW_ID,
   rowSelection = DEFAULT_ROW_SELECTION,
   sorting = DEFAULT_SORTING,
+  pagination,
+  onPaginationChange,
   rowSelectionVariant = 'standard',
   ...otherProps
 }: TableProps<TableData>): ReactElement {
@@ -156,6 +159,7 @@ export function Table<TableData>({
     getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
@@ -165,6 +169,7 @@ export function Table<TableData>({
     state: {
       rowSelection,
       sorting,
+      ...(pagination ? { pagination } : {}),
     },
   });
 
@@ -188,6 +193,9 @@ export function Table<TableData>({
       columns={table.getAllFlatColumns()}
       headers={table.getHeaderGroups()}
       cellConfigs={cellConfigs}
+      pagination={pagination}
+      onPaginationChange={onPaginationChange}
+      rowCount={table.getRowCount()}
     />
   );
 }
