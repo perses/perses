@@ -131,7 +131,7 @@ func (o *option) processFile(file string, extension string) error {
 		//      However, the cue code is (for now at least) not well packaged for such an external reuse.
 		//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
 		// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
-		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete", strings.Join(o.args, " ")) // #nosec
+		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
 	} else {
 		return output.HandleString(o.writer, fmt.Sprintf("skipping %q because it is neither a `cue` or `go` file", file))
 	}
@@ -218,7 +218,7 @@ percli dac build -d my_dashboards
 # build all the files under a given directory & deploy the resulting resources right away
 percli dac build -d my_dashboards && percli apply -d built
 
-# build a given file as JSON providing extra arguments to the Go program
+# build a given file as JSON providing extra arguments to the Go program (This is only applicable for Go files)
 percli dac build -f main.go -ojson -- --arg1=value1 --arg2=value2
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
