@@ -131,7 +131,7 @@ func (o *option) processFile(file string, extension string) error {
 		//      However, the cue code is (for now at least) not well packaged for such an external reuse.
 		//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
 		// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
-		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
+		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete", strings.Join(o.args, " ")) // #nosec
 	} else {
 		return output.HandleString(o.writer, fmt.Sprintf("skipping %q because it is neither a `cue` or `go` file", file))
 	}
