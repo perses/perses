@@ -13,7 +13,14 @@
 
 import { Box, MenuItem, Popover, Select } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
-import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  isRelativeTimeRange,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+  RelativeTimeRange,
+  parseDurationString,
+} from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { useTimeZone } from '../context';
 import { TimeOption } from '../model';
@@ -27,7 +34,7 @@ interface TimeRangeSelectorProps {
   value: TimeRangeValue;
   /**
    * The list of time options to display in the dropdown.
-   * The component will automatically add the last option as a custom absolute time range.
+   * The component will automatically add the last two options as a zoom out x2 and a custom absolute time range.
    */
   timeOptions: TimeOption[];
   /**
@@ -38,6 +45,11 @@ interface TimeRangeSelectorProps {
    * Custom line height for the select component.
    */
   height?: string;
+  /**
+   * Whether to show the zoom out time range option.
+   * Defaults to true.
+   */
+  showZoomoutTimeRange?: boolean;
   /**
    * Whether to show the custom time range option.
    * Defaults to true.
@@ -57,6 +69,7 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
+  showZoomoutTimeRange = true,
 }: TimeRangeSelectorProps): ReactElement {
   const { timeZone } = useTimeZone();
 
@@ -85,6 +98,38 @@ export function TimeRangeSelector({
   // by click events on each menu item.
   // This is a trick to get around the limitation of select with menu item that doesn't support objects as value...
   const [open, setOpen] = useState(false);
+
+  // Function to double current time range, adding 50% before current start and 50% after current end
+  const doubleTimeRange = (): AbsoluteTimeRange => {
+    if (Object.hasOwn(value, 'start')) {
+      // current range is absolute
+      const absVal = value as AbsoluteTimeRange;
+      const rangeExtension = (absVal.end.getTime() - absVal.start.getTime()) / 2;
+      const newStart = new Date(absVal.start.getTime() - rangeExtension);
+      const newEnd = new Date(absVal.end.getTime() + rangeExtension);
+      return { start: newStart, end: newEnd };
+    } else {
+      // current range is relative
+      const relVal = value as RelativeTimeRange;
+      const duration = parseDurationString(relVal.pastDuration);
+      const rangeExtension =
+        // eslint-disable-next-line prettier/prettier
+          ((duration.seconds ?? 0) +
+          (duration.minutes ?? 0) * 60 +
+          (duration.hours ?? 0) * 3600 +
+          (duration.days ?? 0) * 86400 +
+          (duration.weeks ?? 0) * 7 * 86400 +
+          (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom out
+          (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom out
+          // eslint-disable-next-line prettier/prettier
+          1000 / 2; // to milliseconds, then half it to be added before current start and after current end
+
+      const extendAfterEnd = typeof relVal.end !== 'undefined';
+      const newEnd = extendAfterEnd ? new Date(relVal.end!.getTime() + rangeExtension) : new Date();
+      const newStart = new Date(newEnd.getTime() - rangeExtension * (extendAfterEnd ? 1 : 2));
+      return { start: newStart, end: newEnd };
+    }
+  };
 
   return (
     <>
@@ -143,6 +188,16 @@ export function TimeRangeSelector({
               {item.display}
             </MenuItem>
           ))}
+          {showZoomoutTimeRange && (
+            <MenuItem
+              value="Zoom out x2"
+              onClick={() => {
+                onChange(doubleTimeRange());
+              }}
+            >
+              Zoom out x2
+            </MenuItem>
+          )}
           {showCustomTimeRange && (
             <MenuItem
               value={formatTimeRange(lastOption.value, timeZone)}
