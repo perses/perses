@@ -160,6 +160,9 @@ export function Table<TableData>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: pagination ? getPaginationRowModel() : undefined,
+    // without this setting, the getPaginationRowModel setting persists and it is not possible to switch from paginated to unpaginated
+    // can be removed once https://github.com/TanStack/table/pull/5974 is merged
+    manualPagination: !pagination,
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
