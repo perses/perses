@@ -17,6 +17,7 @@ import {
   CellContext,
   ColumnDef,
   CoreOptions,
+  PaginationState,
   RowData,
   RowSelectionState,
   SortingState,
@@ -142,6 +143,17 @@ export interface TableProps<TableData> {
    * Callback fired when the table sorting changes.
    */
   onSortingChange?: (sorting: SortingState) => void;
+
+  /**
+   * State of the pagination in the table.
+   * Default: undefined, i.e. pagination is disabled.
+   */
+  pagination?: PaginationState;
+
+  /**
+   * Callback fired when the table pagination changes.
+   */
+  onPaginationChange?: (pagination: PaginationState) => void;
 
   /**
    * Function used to determine the unique identifier used for each row. This
