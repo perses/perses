@@ -88,7 +88,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "time_range": {
       "disable_custom": false,
-	  "disable_zoomout": false
+      "disable_zoomout": false
     }
   },
   "plugin": {}
@@ -158,7 +158,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "time_range": {
       "disable_custom": false,
-	  "disable_zoomout": false,
+      "disable_zoomout": false,
       "options": [
         "5m",
         "15m",
