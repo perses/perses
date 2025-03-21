@@ -18,17 +18,20 @@ import { DurationString } from '@perses-dev/core';
 const DEFAULT_OPTIONS: DurationString[] = ['5m', '15m', '30m', '1h', '6h', '12h', '24h', '7d', '14d'];
 const defaultTimeRangeSettings: TimeRangeSettings = {
   showCustom: true,
+  showZoomout: true,
   options: DEFAULT_OPTIONS.map((duration) => buildRelativeTimeOption(duration)),
 };
 
 export interface TimeRangeSettingsProviderProps {
   showCustom?: boolean;
+  showZoomout?: boolean;
   options?: TimeOption[];
   children: ReactNode;
 }
 
 export interface TimeRangeSettings {
   showCustom: boolean;
+  showZoomout: boolean;
   options: TimeOption[];
 }
 
@@ -62,6 +65,18 @@ export function useShowCustomTimeRangeSetting(override?: boolean): boolean {
 }
 
 /**
+ * Get the current value of the showZoomout setting.
+ * @param override If set, the value of the provider will be overridden by this value.
+ */
+export function useShowZoomoutRangeSetting(override?: boolean): boolean {
+  const showZoomoutTimeRange = useTimeRangeSettings().showZoomout;
+  if (override !== undefined) {
+    return override;
+  }
+  return showZoomoutTimeRange;
+}
+
+/**
  * Get the current value of the options setting.
  * @param override If set, the value of the provider will be overridden by this value.
  */
@@ -80,9 +95,10 @@ export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps)
   const ctx = useMemo(() => {
     return {
       showCustom: props.showCustom === undefined ? defaultTimeRangeSettings.showCustom : props.showCustom,
+      showZoomout: props.showZoomout === undefined ? defaultTimeRangeSettings.showZoomout : props.showZoomout,
       options: props.options === undefined ? defaultTimeRangeSettings.options : props.options,
     };
-  }, [props.showCustom, props.options]);
+  }, [props.showCustom, props.showZoomout, props.options]);
 
   return <TimeRangeSettingsContext.Provider value={ctx}>{props.children}</TimeRangeSettingsContext.Provider>;
 }

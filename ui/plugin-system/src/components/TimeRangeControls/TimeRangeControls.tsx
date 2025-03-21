@@ -24,7 +24,12 @@ import {
 import { DurationString } from '@perses-dev/core';
 import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
-import { useTimeRange, useShowCustomTimeRangeSetting, useTimeRangeOptionsSetting } from '../../runtime';
+import {
+  useTimeRange,
+  useShowCustomTimeRangeSetting,
+  useTimeRangeOptionsSetting,
+  useShowZoomoutRangeSetting,
+} from '../../runtime';
 
 export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
@@ -44,6 +49,7 @@ interface TimeRangeControlsProps {
   showRefreshButton?: boolean;
   showRefreshInterval?: boolean;
   showCustomTimeRange?: boolean;
+  showZoomoutTimeRange?: boolean;
   timePresets?: TimeOption[];
 }
 
@@ -53,11 +59,13 @@ export function TimeRangeControls({
   showRefreshButton = true,
   showRefreshInterval = true,
   showCustomTimeRange,
+  showZoomoutTimeRange,
   timePresets,
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
+  const showZoomoutRangeValue = useShowZoomoutRangeSetting(showCustomTimeRange);
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
 
   // Convert height to a string, then use the string for styling
@@ -88,6 +96,7 @@ export function TimeRangeControls({
           onChange={setTimeRange}
           height={height}
           showCustomTimeRange={showCustomTimeRangeValue}
+          showZoomoutTimeRange={showZoomoutRangeValue}
         />
       )}
       {showRefreshButton && (
