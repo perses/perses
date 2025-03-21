@@ -116,7 +116,12 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
       >
         <Typography variant="h2">{titleAction} Panel</Typography>
         <Stack direction="row" spacing={1} marginLeft="auto">
-          <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
+          <Button
+            aria-label={`${submitText} panel`}
+            variant="contained"
+            disabled={!form.formState.isValid}
+            onClick={form.handleSubmit(processForm)}
+          >
             {submitText}
           </Button>
           <Button color="secondary" variant="outlined" onClick={handleCancel}>
