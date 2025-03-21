@@ -29,7 +29,9 @@ type PublicTLSConfig struct {
 	CertFile           string `yaml:"certFile,omitempty" json:"certFile,omitempty"`
 	KeyFile            string `yaml:"keyFile,omitempty" json:"keyFile,omitempty"`
 	ServerName         string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify,omitempty" json:"insecureSkipVerify,omitempty"`
+	MinVersion         string `yaml:"minVersion,omitempty" json:"minVersion,omitempty"`
+	MaxVersion         string `yaml:"maxVersion,omitempty" json:"maxVersion,omitempty"`
 }
 
 func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
@@ -45,12 +47,22 @@ func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
 		KeyFile:            t.KeyFile,
 		ServerName:         t.ServerName,
 		InsecureSkipVerify: t.InsecureSkipVerify,
+		MinVersion:         t.MinVersion,
+		MaxVersion:         t.MaxVersion,
 	}
 }
 
 func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
 	if cfg == nil {
-		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
+		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
+	}
+	minVersion := promConfig.TLSVersions["TLS12"]
+	maxVersion := promConfig.TLSVersions["TLS13"]
+	if len(cfg.MinVersion) == 0 {
+		minVersion = promConfig.TLSVersions[cfg.MinVersion]
+	}
+	if len(cfg.MaxVersion) == 0 {
+		maxVersion = promConfig.TLSVersions[cfg.MaxVersion]
 	}
 	preConfig := &promConfig.TLSConfig{
 		CA:                 cfg.CA,
@@ -61,8 +73,8 @@ func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
 		KeyFile:            cfg.KeyFile,
 		ServerName:         cfg.ServerName,
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
-		MinVersion:         promConfig.TLSVersions["TLS12"],
-		MaxVersion:         promConfig.TLSVersions["TLS13"],
+		MinVersion:         minVersion,
+		MaxVersion:         maxVersion,
 	}
 	return promConfig.NewTLSConfig(preConfig)
 }
@@ -83,5 +95,29 @@ type TLSConfig struct {
 	// Used to verify the hostname for the targets.
 	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
 	// Disable target certificate validation.
-	InsecureSkipVerify bool `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
+	InsecureSkipVerify bool `yaml:"insecureSkipVerify,omitempty" json:"insecureSkipVerify,omitempty"`
+	// Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+	// If unset, Perses will use Go default minimum version, which is TLS 1.2.
+	// See MinVersion in https://pkg.go.dev/crypto/tls#Config.
+	MinVersion string `yaml:"minVersion,omitempty" json:"minVersion,omitempty"`
+	// Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+	// If unset, Perses will use Go default maximum version, which is TLS 1.3.
+	// See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
+	MaxVersion string `yaml:"maxVersion,omitempty" json:"maxVersion,omitempty"`
+}
+
+// Verify checks if the TLSConfig is valid.
+// It also set the default value if needed
+// This method is called when Perses is loading the configuration.
+func (t *TLSConfig) Verify() error {
+	if t == nil {
+		return nil
+	}
+	if len(t.MinVersion) == 0 {
+		t.MinVersion = "TLS12"
+	}
+	if len(t.MaxVersion) == 0 {
+		t.MaxVersion = "TLS13"
+	}
+	return nil
 }

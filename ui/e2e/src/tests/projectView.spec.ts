@@ -91,6 +91,7 @@ test.describe('ProjectView', () => {
 
     await projectPage.addSecretButton.click();
     const secretEditor = projectPage.getSecretEditor();
+    await secretEditor.clickRadioOption('basicAuth');
     await secretEditor.setName('mysupersecret');
     await secretEditor.setBasicAuthUsername('mysuperusername');
     await secretEditor.setBasicAuthPassword('mysuperpassword');

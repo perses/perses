@@ -32,12 +32,17 @@ See the next section to get details about the `<secret_specification>`
 
 ## Secret specification
 
+NOTE: Basic Auth, Authorization and OAuth are mutually exclusive.
+Use one of the authenticators, do not combine multiple authenticators.
+
 ```yaml
 basicAuth: <Basic Auth specification> # Optional
 
 # The HTTP authorization credentials for the targets.
-# Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
 authorization: <Authorization specification> # Optional
+
+# The OAuth credentials used to connect to targets.
+oauth: <OAuth specification> # Optional
 
 # Config used to connect to the targets.
 tlsConfig: <TLS Config specification> # Optional
@@ -61,6 +66,28 @@ credentials: <string> # Optional
 credentialsFile: <filename> # Optional
 ```
 
+### OAuth Config specification
+
+```yaml
+# ClientID is the application's ID.
+clientID: <string>
+# ClientSecret is the application's secret.
+clientSecret: <string>
+clientSecretFile: <filename> # Optional
+# TokenURL is the resource server's token endpoint URL. 
+# This is a constant specific to each server.
+tokenURL: <string> 
+# Scopes specifies optional requested permissions.
+scopes: 
+- <string> # Optional
+# EndpointParams specifies additional parameters for requests to the token endpoint.
+endpointParams: <map[string][]string> # Optional
+# AuthStyle optionally specifies how the endpoint wants the
+# client ID & client secret sent. The zero value means to
+# auto-detect.
+authStyle: <int> # Optional 
+```
+
 ### TLS Config specification
 
 ```yaml
@@ -69,8 +96,8 @@ ca: <secret> # Optional
 caFile: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
-# At most one of cert and cert_file is allowed.
-# At most one of key and key_file is allowed.
+# At most one of cert and certFile is allowed.
+# At most one of key and keyFile is allowed.
 cert: <secret> # Optional
 certFile: <filename> # Optional
 key: <secret> # Optional
@@ -82,6 +109,16 @@ serverName: <string> # Optional
 
 # Disable validation of the server certificate.
 insecureSkipVerify: <boolean> | default = false # Optional
+# Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
+# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+# If unset, Perses will use Go default minimum version, which is TLS 1.2.
+# See MinVersion in https://pkg.go.dev/crypto/tls#Config.
+minVersion: <string> # Optional
+# Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
+# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
+# If unset, Perses will use Go default maximum version, which is TLS 1.3.
+# See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
+maxVersion: <string> # Optional
 ```
 
 ### Example

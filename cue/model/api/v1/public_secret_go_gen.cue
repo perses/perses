@@ -12,6 +12,9 @@ import "github.com/perses/perses/cue/model/api/v1/secret"
 	// The HTTP authorization credentials for the targets.
 	authorization?: null | secret.#PublicAuthorization @go(Authorization,*secret.PublicAuthorization)
 
+	// The Oauth configuration for the targets.
+	oauth?: null | secret.#PublicOAuth @go(OAuth,*secret.PublicOAuth)
+
 	// TLSConfig to use to connect to the targets.
 	tlsConfig?: null | secret.#PublicTLSConfig @go(TLSConfig,*secret.PublicTLSConfig)
 }

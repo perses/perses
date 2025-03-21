@@ -80,6 +80,20 @@ func (c *crypto) Encrypt(spec *modelV1.SecretSpec) error {
 		}
 		authorization.Credentials = encryptedCredentials
 	}
+	oauth := spec.OAuth
+	if oauth != nil {
+		encryptedClientID, err := c.encrypt(oauth.ClientID)
+		if err != nil {
+			return err
+		}
+		oauth.ClientID = encryptedClientID
+
+		encryptedClientSecret, err := c.encrypt(oauth.ClientSecret)
+		if err != nil {
+			return err
+		}
+		oauth.ClientSecret = encryptedClientSecret
+	}
 
 	tlsConfig := spec.TLSConfig
 	if tlsConfig != nil {
@@ -109,6 +123,21 @@ func (c *crypto) Decrypt(spec *modelV1.SecretSpec) error {
 			return err
 		}
 		authorization.Credentials = decryptedCredentials
+	}
+
+	oauth := spec.OAuth
+	if oauth != nil {
+		decryptedClientID, err := c.decrypt(oauth.ClientID)
+		if err != nil {
+			return err
+		}
+		oauth.ClientID = decryptedClientID
+
+		decryptedClientSecret, err := c.decrypt(oauth.ClientSecret)
+		if err != nil {
+			return err
+		}
+		oauth.ClientSecret = decryptedClientSecret
 	}
 
 	tlsConfig := spec.TLSConfig

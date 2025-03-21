@@ -24,7 +24,7 @@ import (
 
 // expected user inputs
 #name:     string
-#project?:  string
+#project?: string
 #display?: v1Common.#Display
 #panelGroups: [string]: {
 	layout: v1Dashboard.#Layout
