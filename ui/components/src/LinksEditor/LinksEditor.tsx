@@ -47,7 +47,11 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
           No links defined
         </Typography>
       )}
-      <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => append({ url: '' })}>
+      <IconButton
+        aria-label="Add link"
+        style={{ width: 'fit-content', height: 'fit-content' }}
+        onClick={() => append({ url: '' })}
+      >
         <PlusIcon />
       </IconButton>
     </Stack>
