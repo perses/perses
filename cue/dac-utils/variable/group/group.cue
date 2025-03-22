@@ -18,20 +18,34 @@ import (
 	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
+// The Variable Group builder takes care of generating a pattern that we often see in dashboards:
+// when you have e.g 3 variables A, B and C, it's quite common to "bind" them together so that B
+// depends on A, and C depends on B + A.
+// Parameters:
+// - (Mandatory) `#input`:          The list of variables to be "grouped".
+// - (Optional)  `#datasourceName`: Datasource to be used for all the variables of this group. Avoids the necessity to provide
+//                                  the datasource name for each variable when you want to use the same for all.
+//                                  /!\ variable plugins should rely on the same `#datasourceName` identifier for this to work.
+// Outputs:
+// - `variables`:   The final list of variables objects, ready to be passed to the dashboard.
+// - `queryParams`: A query string including all variables from the group, to be used in urls.
+
 #input: [...varBuilder]
 
 _datasourceName=#datasourceName?: string
 
-// For each variable, append previous variables as "dependencies" for it.
-// E.g considering 3 variables: cluster>namespace>pod, with each one depending
-// on the previous ones, the generated dependencies would be:
-// - cluster:   []
-// - namespace: [cluster]
-// - pod:       [cluster, namespace]
-// this dependencies information can be used later to generate the right filter(s)
 #input: [for i, _ in #input {
+	// For each variable, append previous variables as "dependencies" for it.
+	// E.g considering 3 variables: cluster>namespace>pod, with each one depending
+	// on the previous ones, the generated dependencies would be:
+	// - cluster:   []
+	// - namespace: [cluster]
+	// - pod:       [cluster, namespace]
+	// this dependencies information can be used later to generate the right filter(s)
 	#dependencies: [for i2, var in #input if i > i2 {var}]
-	#datasourceName: _datasourceName
+	if _datasourceName != _|_  {
+		#datasourceName: _datasourceName
+	}
 }]
 
 variables: [for i in #input {i.variable}]
