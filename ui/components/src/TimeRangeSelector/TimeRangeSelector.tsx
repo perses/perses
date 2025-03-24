@@ -126,7 +126,7 @@ export function TimeRangeSelector({
 
       const extendAfterEnd = typeof relVal.end !== 'undefined';
       const newEnd = extendAfterEnd ? new Date(relVal.end!.getTime() + rangeExtension) : new Date();
-      const newStart = new Date(newEnd.getTime() - rangeExtension * (extendAfterEnd ? 1 : 2));
+      const newStart = new Date(newEnd.getTime() - rangeExtension * 4);
       return { start: newStart, end: newEnd };
     }
   };
