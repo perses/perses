@@ -94,13 +94,8 @@ const StyledTooltip = styled(({ className, ...props }: MuiTooltipProps) => (
   <MuiTooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.background.tooltip,
-    color: theme.palette.text.primary,
     maxWidth: '300px',
     padding: theme.spacing(1),
     boxShadow: theme.shadows[1],
-  },
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.background.tooltip,
   },
 }));
