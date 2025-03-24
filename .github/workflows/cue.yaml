@@ -73,7 +73,7 @@ jobs:
     name: "publish module to Central Registry"
     needs: "validate-schemas"
     runs-on: ubuntu-latest
-    if: ${{ github.event.release.tag_name && startsWith(github.ref_name, 'v')}} 
+    if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
