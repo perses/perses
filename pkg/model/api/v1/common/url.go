@@ -114,3 +114,10 @@ func (u *URL) UnmarshalText(text []byte) error {
 	u.URL = urlp
 	return nil
 }
+
+func (u *URL) String() string {
+	if u == nil || u.URL == nil {
+		return ""
+	}
+	return u.URL.String()
+}
