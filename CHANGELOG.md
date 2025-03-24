@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.51.0-beta.1 / 2025-03-21
+
+This new beta version is mostly improving the CLI command around the plugin development.
+We saw issues when building plugins with the CLI specially when cuelang required downloading dependencies.
+We improved the way to handle this, and now the plugin build should be more reliable.
+
+We have also upgraded every plugin to the latest version.
+
+- [FEATURE] Publish CUE module to Central Registry (#2761)
+  [ENHANCEMENT] adding extra args support dac build (#2801)
+- [ENHANCEMENT] CLI/DAC: ignore a list of pre-defined folder when building dashboard (#2800)
+- [ENHANCEMENT] CLI/PLUGIN: build includes the version in the archive name (#2804)
+- [ENHANCEMENT] CLI/PLUGIN: Improve the way to vendor cue dependencies and rely on cue default caching (#2795)
+- [ENHANCEMENT] CLI/PLUGIN: Use cue mod tidy to download cue deps (#2752)
+- [ENHANCEMENT] Upgrade dependency version shared to the plugin (#2750)
+- [BUGFIX] CUE SDK: fix "cannot reference optional field" error (#2812)
+- [BUGFIX] Implement workaround to fix ScatterPlot plugin (#2760)
+- [BUGFIX] CLI: plugin build should consider all subfolder when getting the cue dependencies (#2748)
+- [BREAKINGCHANGE] Plugin: when extracting plugin archive, perses includes the archive name as at top folder (#2806)
+- [BREAKINGCHANGE] `percli dac setup`: rely on CUE's new modules for deps installation (#2724)
+- [DOC] Mention plugin builders in CUE SDK doc (#2769)
+- [DOC] Add HTTP Proxy documentation (#2788)
+- [DOC] Add (back) common package doc (#2781)
+- [DOC] Remove dac docs about prometheus (#2728)
+- [DOC] Referencing various materials talking about Perses (#2756)
+- [DOC] DaC: document the base List variable + Remove static list variable (moved to perses/plugins) (#2753)
+- [DOC] Update requirement when building perses (#2754)
+
 ## 0.51.0-beta.0 / 2025-03-10
 
 This release is one of the biggest releases we ever made.
