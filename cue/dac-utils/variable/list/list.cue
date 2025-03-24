@@ -34,7 +34,6 @@ varBuilder
 #capturingRegexp?: string
 #sort?:            v1Variable.#Sort
 #pluginKind:       string
-#datasourceName:   string
 
 variable: {
 	kind: #kind
