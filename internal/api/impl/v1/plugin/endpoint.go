@@ -20,22 +20,28 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 )
 
 type endpoint struct {
-	svc plugin.Plugin
+	svc       plugin.Plugin
+	enableDev bool
 }
 
-func NewEndpoint(svc plugin.Plugin) route.Endpoint {
+func NewEndpoint(svc plugin.Plugin, enableDev bool) route.Endpoint {
 	return &endpoint{
-		svc: svc,
+		svc:       svc,
+		enableDev: enableDev,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group("/plugins")
 	group.GET("", e.List, true)
+	if e.enableDev {
+		group.POST("", e.PushDevPlugin, true)
+	}
 }
 
 func (e *endpoint) List(ctx echo.Context) error {
@@ -45,4 +51,12 @@ func (e *endpoint) List(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 	return ctx.Blob(http.StatusOK, "application/json", d)
+}
+
+func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
+	var list []config.PluginInDevelopment
+	if err := ctx.Bind(&list); err != nil {
+		return apiinterface.HandleBadRequestError(err.Error())
+	}
+	return e.svc.LoadDevPlugin(list)
 }

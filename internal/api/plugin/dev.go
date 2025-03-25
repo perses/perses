@@ -14,27 +14,25 @@
 package plugin
 
 import (
+	"fmt"
+
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-func (p *pluginFile) loadDevPlugin() {
-	for _, plg := range p.devEnvironment.Plugins {
-		devURL := p.devEnvironment.URL
-		if plg.URL != nil {
-			devURL = plg.URL
-		}
+func (p *pluginFile) LoadDevPlugin(plugins []config.PluginInDevelopment) error {
+	for _, plg := range plugins {
+		devURL := plg.URL
 		manifest, err := ReadManifestFromNetwork(devURL, plg.Name)
 		if err != nil {
-			logrus.WithError(err).Error("failed to load plugin manifest")
-			continue
+			return apiinterface.HandleBadRequestError(fmt.Sprintf("error reading manifest: %s", err))
 		}
 		npmPackageData, readErr := ReadPackageFromNetwork(devURL, plg.Name)
 		if readErr != nil {
-			logrus.WithError(readErr).Error("failed to load plugin package")
-			continue
+			return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin package: %s", err))
 		}
 		pluginModule := v1.PluginModule{
 			Kind: v1.PluginModuleKind,
@@ -55,16 +53,17 @@ func (p *pluginFile) loadDevPlugin() {
 		}
 		if IsSchemaRequired(pluginModule.Spec) && !plg.DisableSchema {
 			if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
-				logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
-				continue
+				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
 			}
 			if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
-				logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
-				continue
+				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin migration: %s", pluginMigrateLoadErr))
 			}
 		} else {
 			logrus.Debugf("schema is disabled or not required for plugin %q", pluginModule.Metadata.Name)
 		}
+		p.mutex.Lock()
 		p.loaded[manifest.Name] = pluginLoaded
+		p.mutex.Unlock()
 	}
+	return p.storeLoadedList()
 }

@@ -62,7 +62,7 @@ type Plugin struct {
 	// When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
 	ArchivePath string `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
 	// DevEnvironment is the configuration to use when developing a plugin
-	DevEnvironment *PluginDevEnvironment `json:"dev_environment,omitempty" yaml:"dev_environment,omitempty"`
+	EnableDev bool `json:"enable_dev" yaml:"enable_dev"`
 }
 
 func (p *Plugin) Verify() error {
@@ -81,21 +81,6 @@ func (p *Plugin) Verify() error {
 		} else {
 			p.ArchivePath = DefaultArchivePluginPath
 		}
-	}
-	return nil
-}
-
-type PluginDevEnvironment struct {
-	URL     *common.URL           `json:"url,omitempty" yaml:"url,omitempty"`
-	Plugins []PluginInDevelopment `json:"plugins" yaml:"plugins"`
-}
-
-func (p *PluginDevEnvironment) Verify() error {
-	if p.URL == nil {
-		p.URL = common.MustParseURL("http://localhost:3005")
-	}
-	if len(p.Plugins) == 0 {
-		return errors.New("no plugins defined")
 	}
 	return nil
 }

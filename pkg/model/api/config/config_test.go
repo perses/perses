@@ -90,7 +90,9 @@ func TestJSONMarshalConfig(t *testing.T) {
       "disable_custom": false
     }
   },
-  "plugin": {}
+  "plugin": {
+    "enable_dev": false
+  }
 }`,
 		},
 		{
@@ -172,7 +174,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "plugin": {
     "path": "plugins",
-    "archive_path": "plugins-archive"
+    "archive_path": "plugins-archive",
+    "enable_dev": false
   }
 }`,
 		},

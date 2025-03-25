@@ -52,12 +52,5 @@ frontend:
     # Hello World
     ## File Database setup
 
-# Example of configuration for plugin development:
-#
-# plugin:
-#   dev_environment:
-#     url: "http://localhost:3005"
-#     plugins:
-#       - name: TimeSeriesChart
-#         absolute_path: "/Users/myuser/workspace/go/src/perses/plugins/timeserieschart"
-
+plugin:
+  enable_dev: true

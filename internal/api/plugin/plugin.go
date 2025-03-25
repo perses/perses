@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -40,6 +41,7 @@ type Loaded struct {
 
 type Plugin interface {
 	Load() error
+	LoadDevPlugin(plugins []config.PluginInDevelopment) error
 	List() ([]byte, error)
 	UnzipArchives() error
 	GetLoadedPlugin(name string) (Loaded, bool)
@@ -74,10 +76,9 @@ func New(cfg config.Plugin) Plugin {
 			folder:       cfg.ArchivePath,
 			targetFolder: cfg.Path,
 		},
-		sch:            schema.New(),
-		mig:            migrate.New(),
-		loaded:         make(map[string]Loaded),
-		devEnvironment: cfg.DevEnvironment,
+		sch:    schema.New(),
+		mig:    migrate.New(),
+		loaded: make(map[string]Loaded),
 	}
 }
 
@@ -94,8 +95,9 @@ type pluginFile struct {
 	sch schema.Schema
 	// mig is the service used to load and provide the migration schema of the plugin.
 	// This service is used when migrating the plugin from Grafana to Perses.
-	mig            migrate.Migration
-	devEnvironment *config.PluginDevEnvironment
+	mig migrate.Migration
+	// mutex will protect the loaded map.
+	mutex sync.RWMutex
 }
 
 func (p *pluginFile) List() ([]byte, error) {
@@ -104,6 +106,8 @@ func (p *pluginFile) List() ([]byte, error) {
 }
 
 func (p *pluginFile) GetLoadedPlugin(prefixURI string) (Loaded, bool) {
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
 	loaded, ok := p.loaded[prefixURI]
 	return loaded, ok
 }
@@ -169,15 +173,16 @@ func (p *pluginFile) Load() error {
 				continue
 			}
 		}
+		p.mutex.Lock()
 		p.loaded[manifest.Name] = pluginLoaded
-	}
-	if p.devEnvironment != nil {
-		p.loadDevPlugin()
+		p.mutex.Unlock()
 	}
 	return p.storeLoadedList()
 }
 
 func (p *pluginFile) storeLoadedList() error {
+	p.mutex.RLock()
+	defer p.mutex.RUnlock()
 	var pluginModuleList []v1.PluginModule
 	for _, l := range p.loaded {
 		pluginModuleList = append(pluginModuleList, l.Module)
