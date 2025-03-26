@@ -224,12 +224,7 @@ func (o *option) preparePlugin(pluginPath string) (*devserver, *apiConfig.Plugin
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get the absolute path for the plugin %q", pluginPath)
 	}
-	server := &devserver{
-		pluginPath:        pluginPath,
-		rsbuildScriptName: rsbuildCMD,
-		writer:            o.writer,
-		errWriter:         o.errWriter,
-	}
+	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter)
 	pluginInDevelopment := &apiConfig.PluginInDevelopment{
 		Name:         pluginName,
 		URL:          common.MustParseURL(fmt.Sprintf("http://localhost:%d", port)),

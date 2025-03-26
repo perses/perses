@@ -67,6 +67,8 @@ func TestPreparePlugin(t *testing.T) {
 			expectedDevServer: &devserver{
 				pluginPath:        filepath.Join("..", "build", "testdata", "barchart"),
 				rsbuildScriptName: "dev",
+				writer:            newPrefixedStream("BarChart", nil),
+				errWriter:         newPrefixedStream("BarChart", nil),
 			},
 			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
 				Name:         "BarChart",
@@ -80,6 +82,8 @@ func TestPreparePlugin(t *testing.T) {
 			expectedDevServer: &devserver{
 				pluginPath:        filepath.Join("..", "build", "testdata", "tempo"),
 				rsbuildScriptName: "dev",
+				writer:            newPrefixedStream("Tempo", nil),
+				errWriter:         newPrefixedStream("Tempo", nil),
 			},
 			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
 				Name:         "Tempo",

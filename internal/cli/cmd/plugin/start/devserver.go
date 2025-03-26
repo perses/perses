@@ -59,6 +59,15 @@ type devserver struct {
 	errWriter         io.Writer
 }
 
+func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errWriter io.Writer) *devserver {
+	return &devserver{
+		pluginPath:        pluginPath,
+		rsbuildScriptName: rsbuildScriptName,
+		writer:            newPrefixedStream(pluginName, writer),
+		errWriter:         newPrefixedStream(pluginName, errWriter),
+	}
+}
+
 func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
 	logrus.Infof("starting plugin %s", d.pluginPath)
 	cmd := exec.CommandContext(ctx, "npm", "run", d.rsbuildScriptName) // nolint: gosec
