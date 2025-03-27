@@ -191,7 +191,7 @@ func (o *option) Execute() error {
 	for _, task := range waitDevServerTasks {
 		taskhelper.Run(ctx, cancel, task)
 	}
-	taskhelper.WaitAll(time.Second*30, waitDevServerTasks)
+	taskhelper.WaitAll(time.Second*60, waitDevServerTasks)
 	// Register the plugin in development
 	if apiErr := o.apiClient.V1().Plugin().PushDevPlugin(pluginInDev); apiErr != nil {
 		logrus.WithError(apiErr).Error("failed to register the plugin in development")

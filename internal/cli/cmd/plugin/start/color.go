@@ -23,12 +23,16 @@ import (
 
 const goldenRatioConjugate = 0.618033988749895
 
+// generateColors generates n colors with a random hue and fixed saturation and value.
+// The hue is generated using the golden ratio to have a good distribution of colors.
+// If you want to learn more about it, please read the blog:
+// https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 func generateColors(n int) []*color.Color {
 	var result []*color.Color
-	h := rand.Float64() + goldenRatioConjugate
-	h = math.Mod(h, 1.0)
 	for i := 0; i < n; i++ {
-		r, g, b := gohsv.HSVtoRGB(rand.Float64()*360, 0.5, 0.95)
+		h := rand.Float64() + goldenRatioConjugate // nolint: gosec // We don't need a secure random number here.
+		h = math.Mod(h, 1.0)                       // Normalize the value to keep only the decimal value.
+		r, g, b := gohsv.HSVtoRGB(h*360, 0.5, 0.95)
 		result = append(result, color.RGB(int(r), int(g), int(b)))
 	}
 	return result

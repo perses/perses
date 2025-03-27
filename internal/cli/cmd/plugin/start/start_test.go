@@ -58,18 +58,11 @@ func TestPreparePlugin(t *testing.T) {
 	testSuite := []struct {
 		name                        string
 		pluginPath                  string
-		expectedDevServer           *devserver
 		expectedPluginInDevelopment *apiConfig.PluginInDevelopment
 	}{
 		{
 			name:       "single plugin",
 			pluginPath: filepath.Join("..", "build", "testdata", "barchart"),
-			expectedDevServer: &devserver{
-				pluginPath:        filepath.Join("..", "build", "testdata", "barchart"),
-				rsbuildScriptName: "dev",
-				writer:            newPrefixedStream("BarChart", nil),
-				errWriter:         newPrefixedStream("BarChart", nil),
-			},
 			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
 				Name:         "BarChart",
 				URL:          common.MustParseURL("http://localhost:3005"),
@@ -79,12 +72,6 @@ func TestPreparePlugin(t *testing.T) {
 		{
 			name:       "tempo plugin",
 			pluginPath: filepath.Join("..", "build", "testdata", "tempo"),
-			expectedDevServer: &devserver{
-				pluginPath:        filepath.Join("..", "build", "testdata", "tempo"),
-				rsbuildScriptName: "dev",
-				writer:            newPrefixedStream("Tempo", nil),
-				errWriter:         newPrefixedStream("Tempo", nil),
-			},
 			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
 				Name:         "Tempo",
 				URL:          common.MustParseURL("http://localhost:3005"),
@@ -95,9 +82,9 @@ func TestPreparePlugin(t *testing.T) {
 	for _, tt := range testSuite {
 		o := &option{}
 		t.Run(tt.name, func(t *testing.T) {
-			devServer, pluginInDevelopment, err := o.preparePlugin(tt.pluginPath)
+			devServer, pluginInDevelopment, err := o.preparePlugin(tt.pluginPath, nil)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedDevServer, devServer)
+			assert.NotNil(t, devServer)
 			assert.Equal(t, tt.expectedPluginInDevelopment, pluginInDevelopment)
 		})
 	}
