@@ -26,6 +26,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/plugin"
@@ -165,8 +166,9 @@ func (o *option) Validate() error {
 func (o *option) Execute() error {
 	var servers []*devserver
 	var pluginInDev []*apiConfig.PluginInDevelopment
-	for _, pluginName := range o.pluginList {
-		s, cfg, err := o.preparePlugin(pluginName)
+	colors := generateColors(len(o.pluginList))
+	for i, pluginName := range o.pluginList {
+		s, cfg, err := o.preparePlugin(pluginName, colors[i])
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to prepare plugin %q", pluginName)
 			continue
@@ -200,7 +202,7 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func (o *option) preparePlugin(pluginPath string) (*devserver, *apiConfig.PluginInDevelopment, error) {
+func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *apiConfig.PluginInDevelopment, error) {
 	// First, we need to find the command to start the dev server.
 	npmPackageData, readErr := plugin.ReadPackage(pluginPath)
 	if readErr != nil {
@@ -224,7 +226,7 @@ func (o *option) preparePlugin(pluginPath string) (*devserver, *apiConfig.Plugin
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get the absolute path for the plugin %q", pluginPath)
 	}
-	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter)
+	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter, c)
 	pluginInDevelopment := &apiConfig.PluginInDevelopment{
 		Name:         pluginName,
 		URL:          common.MustParseURL(fmt.Sprintf("http://localhost:%d", port)),

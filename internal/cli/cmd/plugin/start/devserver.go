@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
@@ -59,12 +60,12 @@ type devserver struct {
 	errWriter         io.Writer
 }
 
-func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errWriter io.Writer) *devserver {
+func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errWriter io.Writer, c *color.Color) *devserver {
 	return &devserver{
 		pluginPath:        pluginPath,
 		rsbuildScriptName: rsbuildScriptName,
-		writer:            newPrefixedStream(pluginName, writer),
-		errWriter:         newPrefixedStream(pluginName, errWriter),
+		writer:            newPrefixedStream(pluginName, writer, c),
+		errWriter:         newPrefixedStream(pluginName, errWriter, c),
 	}
 }
 

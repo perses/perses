@@ -18,19 +18,23 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 type prefixedStream struct {
 	prefix string
 	buff   *bytes.Buffer
 	writer io.Writer
+	color  func(a ...interface{}) string
 }
 
-func newPrefixedStream(prefix string, writer io.Writer) *prefixedStream {
+func newPrefixedStream(prefix string, writer io.Writer, c *color.Color) *prefixedStream {
 	return &prefixedStream{
 		prefix: prefix,
 		buff:   bytes.NewBuffer(nil),
 		writer: writer,
+		color:  c.SprintFunc(),
 	}
 }
 
@@ -70,7 +74,7 @@ func (p *prefixedStream) writePrefixLine() error {
 }
 
 func (p *prefixedStream) flush(line string) error {
-	prefixLine := fmt.Sprintf("%s %s", p.prefix, line)
+	prefixLine := fmt.Sprintf("[%s] %s", p.color(p.prefix), line)
 	_, err := p.writer.Write([]byte(prefixLine))
 	return err
 }

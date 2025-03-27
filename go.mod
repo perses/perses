@@ -9,6 +9,7 @@ require (
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
 	github.com/efficientgo/core v1.0.0-rc.3
+	github.com/fatih/color v1.18.0
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/go-sql-driver/mysql v1.9.1
@@ -30,6 +31,7 @@ require (
 	github.com/prometheus/common v0.63.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.17.0
+	github.com/redbo/gohsv v0.0.0-20191210185714-eac2cca0cae9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -89,7 +91,6 @@ require (
 	github.com/emicklei/proto v1.13.4 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
