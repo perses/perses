@@ -20,7 +20,7 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
-	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
@@ -54,7 +54,7 @@ func (e *endpoint) List(ctx echo.Context) error {
 }
 
 func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
-	var list []config.PluginInDevelopment
+	var list []v1.PluginInDevelopment
 	if err := ctx.Bind(&list); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}

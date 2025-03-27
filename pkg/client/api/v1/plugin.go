@@ -15,14 +15,13 @@ package v1
 
 import (
 	"github.com/perses/perses/pkg/client/perseshttp"
-	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 const pluginResource = "plugins"
 
 type PluginInterface interface {
-	PushDevPlugin([]*config.PluginInDevelopment) error
+	PushDevPlugin([]*v1.PluginInDevelopment) error
 	List() ([]v1.PluginModule, error)
 }
 
@@ -37,7 +36,7 @@ func newPlugin(client *perseshttp.RESTClient) PluginInterface {
 	}
 }
 
-func (c *plugin) PushDevPlugin(plugins []*config.PluginInDevelopment) error {
+func (c *plugin) PushDevPlugin(plugins []*v1.PluginInDevelopment) error {
 	return c.client.Post().
 		Resource(pluginResource).
 		Body(plugins).

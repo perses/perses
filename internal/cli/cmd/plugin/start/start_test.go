@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/perses/perses/internal/test"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 )
@@ -58,12 +58,12 @@ func TestPreparePlugin(t *testing.T) {
 	testSuite := []struct {
 		name                        string
 		pluginPath                  string
-		expectedPluginInDevelopment *apiConfig.PluginInDevelopment
+		expectedPluginInDevelopment *v1.PluginInDevelopment
 	}{
 		{
 			name:       "single plugin",
 			pluginPath: filepath.Join("..", "build", "testdata", "barchart"),
-			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
+			expectedPluginInDevelopment: &v1.PluginInDevelopment{
 				Name:         "BarChart",
 				URL:          common.MustParseURL("http://localhost:3005"),
 				AbsolutePath: filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "barchart"),
@@ -72,7 +72,7 @@ func TestPreparePlugin(t *testing.T) {
 		{
 			name:       "tempo plugin",
 			pluginPath: filepath.Join("..", "build", "testdata", "tempo"),
-			expectedPluginInDevelopment: &apiConfig.PluginInDevelopment{
+			expectedPluginInDevelopment: &v1.PluginInDevelopment{
 				Name:         "Tempo",
 				URL:          common.MustParseURL("http://localhost:3005"),
 				AbsolutePath: filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "tempo"),

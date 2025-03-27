@@ -17,13 +17,12 @@ import (
 	"fmt"
 
 	apiinterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-func (p *pluginFile) LoadDevPlugin(plugins []config.PluginInDevelopment) error {
+func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 	for _, plg := range plugins {
 		devURL := plg.URL
 		manifest, err := ReadManifestFromNetwork(devURL, plg.Name)
@@ -43,7 +42,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []config.PluginInDevelopment) error {
 			Spec: npmPackageData.Perses,
 		}
 		pluginLoaded := Loaded{
-			DevEnvironment: &config.PluginInDevelopment{
+			DevEnvironment: &v1.PluginInDevelopment{
 				Name:          plg.Name,
 				URL:           devURL,
 				DisableSchema: plg.DisableSchema,

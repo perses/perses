@@ -32,7 +32,7 @@ const pluginFileName = "plugin-modules.json"
 
 type Loaded struct {
 	// DevEnvironment is set in case the plugin is loaded from a dev server
-	DevEnvironment *config.PluginInDevelopment
+	DevEnvironment *v1.PluginInDevelopment
 	// The module loaded.
 	Module v1.PluginModule
 	// The local path to the plugin folder.
@@ -41,7 +41,7 @@ type Loaded struct {
 
 type Plugin interface {
 	Load() error
-	LoadDevPlugin(plugins []config.PluginInDevelopment) error
+	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
 	List() ([]byte, error)
 	UnzipArchives() error
 	GetLoadedPlugin(name string) (Loaded, bool)

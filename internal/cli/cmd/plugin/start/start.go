@@ -33,7 +33,7 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/api"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -98,7 +98,7 @@ func buildDevServerTasks(servers []*devserver) []taskhelper.Helper {
 	return tasks
 }
 
-func buildWaitDevServerTasks(pluginInDev []*apiConfig.PluginInDevelopment) []taskhelper.Helper {
+func buildWaitDevServerTasks(pluginInDev []*v1.PluginInDevelopment) []taskhelper.Helper {
 	var result []taskhelper.Helper
 	for _, plg := range pluginInDev {
 		w := &waiter{
@@ -165,7 +165,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	var servers []*devserver
-	var pluginInDev []*apiConfig.PluginInDevelopment
+	var pluginInDev []*v1.PluginInDevelopment
 	colors := generateColors(len(o.pluginList))
 	for i, pluginName := range o.pluginList {
 		s, cfg, err := o.preparePlugin(pluginName, colors[i])
@@ -202,7 +202,7 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *apiConfig.PluginInDevelopment, error) {
+func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *v1.PluginInDevelopment, error) {
 	// First, we need to find the command to start the dev server.
 	npmPackageData, readErr := plugin.ReadPackage(pluginPath)
 	if readErr != nil {
@@ -227,7 +227,7 @@ func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *
 		return nil, nil, fmt.Errorf("failed to get the absolute path for the plugin %q", pluginPath)
 	}
 	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter, c)
-	pluginInDevelopment := &apiConfig.PluginInDevelopment{
+	pluginInDevelopment := &v1.PluginInDevelopment{
 		Name:         pluginName,
 		URL:          common.MustParseURL(fmt.Sprintf("http://localhost:%d", port)),
 		AbsolutePath: abs,
