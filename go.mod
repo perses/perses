@@ -2,6 +2,8 @@ module github.com/perses/perses
 
 go 1.23.4
 
+toolchain go1.24.1
+
 require (
 	cuelang.org/go v0.12.0
 	github.com/PaesslerAG/gval v1.2.4
@@ -12,7 +14,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.0.5
 	github.com/go-sql-driver/mysql v1.9.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/cel-go v0.24.1
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser/v2 v2.7.0
