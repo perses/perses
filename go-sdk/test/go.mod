@@ -2,11 +2,13 @@ module dac-test
 
 go 1.23.4
 
+toolchain go1.24.1
+
 replace github.com/perses/perses => ../../ // Use current version
 
 require (
 	github.com/perses/perses v0.50.1
-	github.com/perses/plugins/prometheus v0.5.1
+	github.com/perses/plugins/prometheus v0.6.0
 	github.com/perses/plugins/staticlistvariable v0.0.0-20250211164300-9fe475c5d750
 	github.com/perses/plugins/table v0.0.0-20250211164300-9fe475c5d750
 	github.com/perses/plugins/timeserieschart v0.5.0
