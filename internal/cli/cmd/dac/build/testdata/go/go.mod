@@ -15,11 +15,13 @@ module dac
 
 go 1.23.4
 
+toolchain go1.24.1
+
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
 	github.com/perses/perses v0.50.1
-	github.com/perses/plugins/prometheus v0.5.1
+	github.com/perses/plugins/prometheus v0.6.0
 	github.com/perses/plugins/timeserieschart v0.5.0
 )
 
