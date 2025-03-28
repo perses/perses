@@ -13,3 +13,5 @@ import "github.com/perses/perses/cue/model/api/v1/plugin"
 	metadata: plugin.#ModuleMetadata @go(Metadata)
 	spec:     plugin.#ModuleSpec     @go(Spec)
 }
+
+#PluginInDevelopment: _

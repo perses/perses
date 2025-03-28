@@ -30,9 +30,11 @@ const (
 )
 
 type NPMPackage struct {
-	Author  string            `json:"author"`
-	Version string            `json:"version"`
-	Perses  plugin.ModuleSpec `json:"perses"`
+	Author     string            `json:"author"`
+	Version    string            `json:"version"`
+	Scripts    map[string]string `json:"scripts"`
+	Workspaces []string          `json:"workspaces"`
+	Perses     plugin.ModuleSpec `json:"perses"`
 }
 
 type BuildInfo struct {
