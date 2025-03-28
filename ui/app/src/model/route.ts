@@ -18,6 +18,7 @@ export const ConfigRoute = '/config';
 export const ImportRoute = '/import';
 export const ProjectRoute = '/projects';
 export const ExploreRoute = '/explore';
+export const PluginsRoute = '/plugins';
 
 const paths = [AdminRoute, SignInRoute, SignUpRoute, ConfigRoute, ImportRoute, ProjectRoute, ExploreRoute];
 const prefixPaths = [AdminRoute, ProjectRoute];
