@@ -36,6 +36,7 @@ export interface DashboardToolbarProps {
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
   onSave?: OnSaveDashboard;
+  dashboardControlsComponent?: JSX.Element;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => {
@@ -49,6 +50,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     onEditButtonClick,
     onCancelButtonClick,
     onSave,
+    dashboardControlsComponent,
   } = props;
 
   const { isEditMode } = useEditMode();
@@ -96,6 +98,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
             <>
               {isBiggerThanSm && (
                 <Stack direction="row" gap={1} ml="auto">
+                  {dashboardControlsComponent}
                   <EditButton onClick={onEditButtonClick} />
                 </Stack>
               )}
