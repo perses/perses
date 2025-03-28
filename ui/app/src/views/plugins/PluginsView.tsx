@@ -16,12 +16,14 @@ import Puzzle from 'mdi-material-ui/Puzzle';
 import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { PluginsList } from './PluginsList';
 function PluginsView(): ReactElement {
   const isMobileSize = useIsMobileSize();
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
       <AppBreadcrumbs rootPageName="Plugins" icon={<Puzzle fontSize="large" />} />
+      <PluginsList />
     </Stack>
   );
 }
