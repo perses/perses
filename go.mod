@@ -1,7 +1,6 @@
 module github.com/perses/perses
 
 go 1.23.7
-
 require (
 	cuelang.org/go v0.12.0
 	github.com/PaesslerAG/gval v1.2.4
@@ -15,7 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/cel-go v0.24.1
 	github.com/google/uuid v1.6.0
-	github.com/goreleaser/goreleaser/v2 v2.7.0
+	github.com/goreleaser/goreleaser/v2 v2.8.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/huandu/go-sqlbuilder v1.35.0
 	github.com/kylelemons/godebug v1.1.0
@@ -55,7 +54,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ProtonMail/go-crypto v1.1.4 // indirect
+	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/STARRY-S/zip v0.2.1 // indirect
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
@@ -73,11 +72,11 @@ require (
 	github.com/catppuccin/go v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/bubbles v0.20.0 // indirect
-	github.com/charmbracelet/bubbletea v1.2.1 // indirect
+	github.com/charmbracelet/bubbletea v1.3.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
-	github.com/charmbracelet/x/ansi v0.4.5 // indirect
+	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
-	github.com/charmbracelet/x/term v0.2.0 // indirect
+	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
 	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
@@ -112,7 +111,7 @@ require (
 	github.com/google/pprof v0.0.0-20241101162523-b92577c0c142 // indirect
 	github.com/goreleaser/chglog v0.6.2 // indirect
 	github.com/goreleaser/fileglob v1.3.0 // indirect
-	github.com/goreleaser/nfpm/v2 v2.41.2 // indirect
+	github.com/goreleaser/nfpm/v2 v2.41.3 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -126,7 +125,7 @@ require (
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/lib/pq v1.10.9 // indirect
@@ -144,7 +143,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
-	github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a // indirect
+	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
