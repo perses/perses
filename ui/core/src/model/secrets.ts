@@ -31,7 +31,7 @@ export interface OAuth {
   clientSecretFile?: string;
   tokenURL: string;
   scopes?: string[];
-  endpointParams?: Map<string, string[]>;
+  endpointParams?: Record<string, string[]>;
   authStyle?: 0 | 1 | 2;
 }
 

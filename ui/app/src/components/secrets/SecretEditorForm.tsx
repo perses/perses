@@ -48,9 +48,7 @@ const oauthIndex = 'oauth';
 
 type SecretEditorFormProps = FormEditorProps<Secret>;
 
-type EndpointParams = {
-  [key: string]: string[];
-};
+type EndpointParams = Record<string, string[]> | undefined;
 
 export function SecretEditorForm({
   initialValue,
@@ -82,7 +80,7 @@ export function SecretEditorForm({
 
   const form = useForm<SecretsEditorSchemaType>({
     resolver: zodResolver(secretsEditorSchema),
-    mode: 'onBlur',
+    mode: 'onChange',
     defaultValues: initialSecretClean,
   });
 
@@ -107,7 +105,9 @@ export function SecretEditorForm({
   // Form errors are removed only from latest input touched
   // This will remove errors for others inputs
   useEffect(() => {
-    form.clearErrors();
+    if (form.formState.isValid) {
+      form.clearErrors();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.formState.isValid]);
 
@@ -518,16 +518,7 @@ export function SecretEditorForm({
                   control={form.control}
                   name="spec.oauth.endpointParams"
                   render={({ field }) => {
-                    const mapToEndpointParams = (
-                      map: Map<string, string[]> | EndpointParams | undefined
-                    ): EndpointParams => {
-                      if (map instanceof Map) {
-                        return Object.fromEntries(map);
-                      }
-                      return map || {};
-                    };
-
-                    const params: EndpointParams = mapToEndpointParams(field.value);
+                    const params: EndpointParams = field.value || {};
 
                     const addParam = (): void => {
                       const newParams: EndpointParams = {

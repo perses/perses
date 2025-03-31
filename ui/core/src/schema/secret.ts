@@ -60,12 +60,12 @@ export const secretSpecSchema = z
       .optional(),
     oauth: z
       .object({
-        clientID: z.string(),
+        clientID: z.string().min(1),
         clientSecret: z.string().optional(),
         clientSecretFile: z.string().optional(),
-        tokenURL: z.string(),
-        scopes: z.array(z.string()).optional(),
-        endpointParams: z.map(z.string(), z.array(z.string())).optional(),
+        tokenURL: z.string().min(1),
+        scopes: z.array(z.string().nonempty()).default([]),
+        endpointParams: z.record(z.string().nonempty(), z.array(z.string())).default({}).optional(),
         authStyle: z.union([z.literal(0), z.literal(1), z.literal(2)]).optional(),
       })
       .superRefine((val, ctx) => {
