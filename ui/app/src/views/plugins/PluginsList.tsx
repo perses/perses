@@ -1,6 +1,17 @@
 import { useSnackbar } from '@perses-dev/components';
 import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { Box, Card, CardContent, Typography, Paper, useTheme, Divider } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Paper,
+  useTheme,
+  Divider,
+  Button,
+  Dialog,
+  DialogTitle,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ReactElement, useEffect, useState } from 'react';
 
@@ -8,6 +19,7 @@ export function PluginsList(): ReactElement {
   const [plugins, setPlugins] = useState<PluginModuleResource[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
   const { exceptionSnackbar } = useSnackbar();
   const theme = useTheme();
 
@@ -33,21 +45,82 @@ export function PluginsList(): ReactElement {
     fetchPlugins();
   }, []);
 
+  const handleOpenPluginDetails = (pluginModule: PluginModuleResource) => {
+    setSelectedPluginModule(pluginModule);
+  };
+
+  const handleClosePluginDetails = () => {
+    setSelectedPluginModule(null);
+  };
+
   const renderPluginDetails = (plugin: PluginModuleResource) => {
     if (!plugin?.spec?.plugins || plugin?.spec?.plugins.length === 0) {
       return <Typography variant="body2">No plugins available</Typography>;
     }
 
-    if (plugin?.spec?.plugins.length > 1) {
-      return <Typography variant="body2">{plugin?.spec?.plugins.length} plugins</Typography>;
+    if (plugin?.spec?.plugins.length === 1) {
+      const singlePlugin = plugin?.spec?.plugins[0];
+      return (
+        <Box>
+          <Typography variant="body2">
+            <strong>Plugin:</strong> {singlePlugin?.spec?.name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Kind: {singlePlugin?.kind}
+          </Typography>
+        </Box>
+      );
     }
 
-    const singlePlugin = plugin?.spec?.plugins[0];
+    return (
+      <Button
+        variant="outlined"
+        color="primary"
+        onClick={() => handleOpenPluginDetails(plugin)}
+        sx={{
+          width: '100%',
+          justifyContent: 'center',
+          mt: 1,
+        }}
+      >
+        View {plugin.spec.plugins.length} Plugins
+      </Button>
+    );
+  };
+
+  const PluginDetailsDialog = () => {
+    if (!selectedPluginModule) {
+      return null;
+    }
 
     return (
-      <>
-        <Typography variant="body2">Kind: {singlePlugin?.spec?.name}</Typography>
-      </>
+      <Dialog open={!!selectedPluginModule} onClose={handleClosePluginDetails} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Plugins for {selectedPluginModule.metadata.name}
+          <Typography variant="subtitle2" color="text.secondary">
+            Version {selectedPluginModule.metadata.version}
+          </Typography>
+        </DialogTitle>
+        <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+          {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
+            <Box
+              key={index}
+              sx={{
+                mb: 2,
+                p: 2,
+                bgcolor: 'background.paper',
+                borderRadius: 1,
+                boxShadow: 1,
+              }}
+            >
+              <Typography variant="h6">{pluginItem.spec.display.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Kind: {pluginItem.kind}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Dialog>
     );
   };
 
@@ -99,6 +172,7 @@ export function PluginsList(): ReactElement {
           </Grid>
         ))}
       </Grid>
+      <PluginDetailsDialog />
     </Box>
   );
 }
