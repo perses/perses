@@ -246,8 +246,30 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "start [PLUGIN_NAME]",
+		Use:   "start [PLUGIN_PATH...]",
 		Short: "Start the plugin",
+		Long: `
+The command is used to start a plugin in development mode.
+That means you can run the plugin in your local environment and see the effect of your changes in real time directly in the Perses UI.
+The command will discover which port is exposed, the exact name of the plugin and the absolute path required for the schemas.
+
+Once these information are collected, the command will execute the npm script defined in "package.json" that contains the command "rsbuild dev" to start any plugin dev server.
+When they are all ready, it will send the config to the Perses remote server.
+
+When Perses is receiving the dev config, it will contact every dev server listed to load the plugin and ensure the plugin is available in the UI.`,
+		Example: `
+# In case you are in a mono repo, you can start all the plugins by using the flag --all
+$ percli plugin start --all
+
+# You can also start a specific plugin by using its path
+$ percli plugin start ./plugins/my-plugin
+
+# You can start multiple plugins by using their path
+$ percli plugin start ./plugins/my-plugin ./plugins/my-other-plugin
+
+# You can as well start a plugin in the current path
+$ percli plugin start
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
