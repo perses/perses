@@ -1,6 +1,6 @@
 import { useSnackbar } from '@perses-dev/components';
 import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { Box, Card, CardContent, Typography, Paper, useTheme } from '@mui/material';
+import { Box, Card, CardContent, Typography, Paper, useTheme, Divider } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ReactElement, useEffect, useState } from 'react';
 
@@ -33,6 +33,24 @@ export function PluginsList(): ReactElement {
     fetchPlugins();
   }, []);
 
+  const renderPluginDetails = (plugin: PluginModuleResource) => {
+    if (!plugin?.spec?.plugins || plugin?.spec?.plugins.length === 0) {
+      return <Typography variant="body2">No plugins available</Typography>;
+    }
+
+    if (plugin?.spec?.plugins.length > 1) {
+      return <Typography variant="body2">{plugin?.spec?.plugins.length} plugins</Typography>;
+    }
+
+    const singlePlugin = plugin?.spec?.plugins[0];
+
+    return (
+      <>
+        <Typography variant="body2">Kind: {singlePlugin?.spec?.name}</Typography>
+      </>
+    );
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -48,12 +66,12 @@ export function PluginsList(): ReactElement {
   return (
     <Box>
       <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
-        <Typography variant="body1">Available plugins in this Perses instance</Typography>
+        <Typography variant="h3">Available plugins in this Perses instance:</Typography>
       </Paper>
 
       <Grid container spacing={3}>
-        {plugins.map((plugin) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={plugin.metadata.name}>
+        {plugins.map((pluginModule) => (
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={pluginModule.metadata.name}>
             <Card
               elevation={1}
               sx={{
@@ -61,7 +79,7 @@ export function PluginsList(): ReactElement {
                 display: 'flex',
                 flexDirection: 'column',
                 transition: 'transform 0.2s box-shadow 0.2s',
-                '&!hover': {
+                '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: theme.shadows[4],
                 },
@@ -69,23 +87,18 @@ export function PluginsList(): ReactElement {
             >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h3" component="div" gutterBottom>
-                  {plugin?.metadata?.name}
+                  {pluginModule?.metadata?.name}
                 </Typography>
                 <Typography color="text.secondary" sx={{ mb: 1 }}>
-                  Version {plugin.metadata.version}
+                  Version {pluginModule.metadata.version}
                 </Typography>
+                <Divider sx={{ my: 1.5 }} />
+                {renderPluginDetails(pluginModule)}
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
-      <ul>
-        {plugins.map((plugin) => (
-          <li key={plugin?.metadata?.name}>
-            <strong>{plugin?.metadata?.name}</strong>: {plugin?.metadata?.version}
-          </li>
-        ))}
-      </ul>
     </Box>
   );
 }
