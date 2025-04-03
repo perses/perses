@@ -61,12 +61,9 @@ export function PluginsList(): ReactElement {
     if (pluginModule?.spec?.plugins.length === 1) {
       const singlePlugin = pluginModule?.spec?.plugins[0];
       return (
-        <Box>
-          <Typography variant="caption" color="text.secondary">
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" color="text.secondary">
             <strong>Kind:</strong> {singlePlugin?.kind}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Plugin:</strong> {singlePlugin?.spec?.name}
           </Typography>
         </Box>
       );
@@ -74,8 +71,8 @@ export function PluginsList(): ReactElement {
 
     if (pluginModule?.spec?.plugins.length > 1) {
       return (
-        <Box sx={{ mt: 2 }}>
-          <Button color="info" onClick={() => handleOpenPluginDetails(pluginModule)}>
+        <Box>
+          <Button color="info" size="small" onClick={() => handleOpenPluginDetails(pluginModule)}>
             View {pluginModule.spec.plugins.length} Plugins
           </Button>
         </Box>
@@ -92,7 +89,7 @@ export function PluginsList(): ReactElement {
 
     return (
       <Dialog open={!!selectedPluginModule} onClose={handleClosePluginDetails} maxWidth="sm" fullWidth>
-        <DialogTitle>Plugins for {selectedPluginModule.metadata.name}</DialogTitle>
+        <DialogTitle>Plugins for {selectedPluginModule.metadata.name} Module</DialogTitle>
         <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
           {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
             <Box
@@ -105,8 +102,8 @@ export function PluginsList(): ReactElement {
                 boxShadow: 1,
               }}
             >
-              <Typography variant="h6">{pluginItem.spec.display.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="h3">{pluginItem.spec.name}</Typography>
+              <Typography variant="body1" color="text.secondary">
                 Kind: {pluginItem.kind}
               </Typography>
             </Box>
@@ -124,16 +121,16 @@ export function PluginsList(): ReactElement {
     return <div>Error: {error}</div>;
   }
   if (plugins.length === 0) {
-    return <div>No plugins found</div>;
+    return (
+      <Box>
+        <Typography>No plugins found 😢</Typography>
+      </Box>
+    );
   }
 
   // Render the list of plugins
   return (
-    <Box>
-      <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
-        <Typography variant="h3">Available plugins in this Perses instance:</Typography>
-      </Paper>
-
+    <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
         {plugins.map((pluginModule) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={pluginModule.metadata.name}>
@@ -151,14 +148,14 @@ export function PluginsList(): ReactElement {
               }}
             >
               <CardContent sx={{ flexGrow: 1 }}>
+                {/* <CardContent sx={{ mb: 0 }}> */}
                 <Typography variant="h3" component="div" gutterBottom>
                   {pluginModule?.metadata?.name}
                 </Typography>
-                <Typography color="text.secondary" sx={{ mb: 1 }}>
-                  Version {pluginModule.metadata.version}
-                </Typography>
+                <Typography color="text.secondary">Version {pluginModule.metadata.version}</Typography>
                 <Divider sx={{ my: 1.5 }} />
-                {renderPluginDetails(pluginModule)}
+                <Box sx={{ mt: 'auto' }}>{renderPluginDetails(pluginModule)}</Box>
+                {/* {renderPluginDetails(pluginModule)} */}
               </CardContent>
             </Card>
           </Grid>
