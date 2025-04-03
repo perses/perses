@@ -69,7 +69,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalvariable.NewEndpoint(cfg.Variable, serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
-		plugin.NewEndpoint(serviceManager.GetPlugin()),
+		plugin.NewEndpoint(serviceManager.GetPlugin(), cfg.Plugin.EnableDev),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
