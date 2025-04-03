@@ -1,5 +1,15 @@
 import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { Box, Dialog, DialogTitle, Typography } from '@mui/material';
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+} from '@mui/material';
 import { ReactElement } from 'react';
 
 interface PluginDetailsDialogProps {
@@ -15,25 +25,25 @@ export function PluginDetailsDialog({ selectedPluginModule, onClose }: PluginDet
   return (
     <Dialog open={!!selectedPluginModule} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Plugins for {selectedPluginModule.metadata.name} Module</DialogTitle>
-      <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-        {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
-          <Box
-            key={index}
-            sx={{
-              mb: 2,
-              p: 2,
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              boxShadow: 1,
-            }}
-          >
-            <Typography variant="h3">{pluginItem.spec.name}</Typography>
-            <Typography variant="body1" color="text.secondary">
-              Kind: {pluginItem.kind}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+      <DialogContent dividers sx={{ maxHeight: 400 }}>
+        <List>
+          {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
+            <div key={index}>
+              <ListItem>
+                <ListItemText
+                  primary={
+                    <Typography>
+                      <strong>{pluginItem.spec.name}</strong>
+                    </Typography>
+                  }
+                  secondary={<Typography color="text.secondary">Kind: {pluginItem.kind}</Typography>}
+                />
+              </ListItem>
+              <Divider component="li" />
+            </div>
+          ))}
+        </List>
+      </DialogContent>
     </Dialog>
   );
 }
