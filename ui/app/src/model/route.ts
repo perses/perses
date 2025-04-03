@@ -20,7 +20,16 @@ export const ProjectRoute = '/projects';
 export const ExploreRoute = '/explore';
 export const PluginsRoute = '/plugins';
 
-const paths = [AdminRoute, SignInRoute, SignUpRoute, ConfigRoute, ImportRoute, ProjectRoute, ExploreRoute];
+const paths = [
+  AdminRoute,
+  SignInRoute,
+  SignUpRoute,
+  ConfigRoute,
+  ImportRoute,
+  ProjectRoute,
+  ExploreRoute,
+  PluginsRoute,
+];
 const prefixPaths = [AdminRoute, ProjectRoute];
 
 export function getBasePathName(): string {

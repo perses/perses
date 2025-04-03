@@ -1,6 +1,6 @@
 import { useSnackbar } from '@perses-dev/components';
 import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { Box, Card, CardContent, Typography, Divider, Button } from '@mui/material';
+import { Box, Card, CardContent, Typography, Divider, Button, CircularProgress, Stack } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ReactElement, useEffect, useState } from 'react';
 import { PluginDetailsDialog } from './PluginDetailsDialog';
@@ -10,7 +10,6 @@ export function PluginsList(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
-  const { exceptionSnackbar } = useSnackbar();
 
   useEffect(() => {
     const fetchPlugins = async (): Promise<void> => {
@@ -28,7 +27,7 @@ export function PluginsList(): ReactElement {
           setError('An unknown error occurred');
         }
       } finally {
-        setIsLoading(false);
+        setIsLoading(true);
       }
     };
     fetchPlugins();
@@ -41,6 +40,14 @@ export function PluginsList(): ReactElement {
   const handleClosePluginDetails = (): void => {
     setSelectedPluginModule(null);
   };
+
+  if (isLoading) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
 
   return (
     <Box sx={{ p: 2 }}>
