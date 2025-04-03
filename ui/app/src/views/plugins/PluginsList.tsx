@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  CardActions,
   Typography,
   Paper,
   useTheme,
@@ -45,15 +46,15 @@ export function PluginsList(): ReactElement {
     fetchPlugins();
   }, []);
 
-  const handleOpenPluginDetails = (pluginModule: PluginModuleResource) => {
+  const handleOpenPluginDetails = (pluginModule: PluginModuleResource): void => {
     setSelectedPluginModule(pluginModule);
   };
 
-  const handleClosePluginDetails = () => {
+  const handleClosePluginDetails = (): void => {
     setSelectedPluginModule(null);
   };
 
-  const renderPluginDetails = (plugin: PluginModuleResource) => {
+  const renderPluginDetails = (plugin: PluginModuleResource): ReactElement | null => {
     if (!plugin?.spec?.plugins || plugin?.spec?.plugins.length === 0) {
       return <Typography variant="body2">No plugins available</Typography>;
     }
@@ -72,35 +73,17 @@ export function PluginsList(): ReactElement {
       );
     }
 
-    return (
-      <Button
-        variant="outlined"
-        color="primary"
-        onClick={() => handleOpenPluginDetails(plugin)}
-        sx={{
-          width: '100%',
-          justifyContent: 'center',
-          mt: 1,
-        }}
-      >
-        View {plugin.spec.plugins.length} Plugins
-      </Button>
-    );
+    return null;
   };
 
-  const PluginDetailsDialog = () => {
+  const PluginDetailsDialog: () => ReactElement | null = () => {
     if (!selectedPluginModule) {
       return null;
     }
 
     return (
       <Dialog open={!!selectedPluginModule} onClose={handleClosePluginDetails} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Plugins for {selectedPluginModule.metadata.name}
-          <Typography variant="subtitle2" color="text.secondary">
-            Version {selectedPluginModule.metadata.version}
-          </Typography>
-        </DialogTitle>
+        <DialogTitle>Plugins for {selectedPluginModule.metadata.name}</DialogTitle>
         <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
           {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
             <Box
@@ -139,7 +122,7 @@ export function PluginsList(): ReactElement {
   return (
     <Box>
       <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
-        <Typography variant="h3">Available plugins in this Perses instance:</Typography>
+        <Typography variant="h3">Available plugin modules in this Perses instance:</Typography>
       </Paper>
 
       <Grid container spacing={3}>
@@ -168,6 +151,13 @@ export function PluginsList(): ReactElement {
                 <Divider sx={{ my: 1.5 }} />
                 {renderPluginDetails(pluginModule)}
               </CardContent>
+              {pluginModule.spec.plugins.length > 1 && (
+                <CardActions>
+                  <Button color="primary" onClick={() => handleOpenPluginDetails(pluginModule)}>
+                    View {pluginModule.spec.plugins.length} Plugins
+                  </Button>
+                </CardActions>
+              )}
             </Card>
           </Grid>
         ))}
