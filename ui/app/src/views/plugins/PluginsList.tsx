@@ -127,7 +127,7 @@ export function PluginsList(): ReactElement {
 
       <Grid container spacing={3}>
         {plugins.map((pluginModule) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={pluginModule.metadata.name}>
+          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={pluginModule.metadata.name}>
             <Card
               elevation={1}
               sx={{
@@ -136,8 +136,8 @@ export function PluginsList(): ReactElement {
                 flexDirection: 'column',
                 transition: 'transform 0.2s box-shadow 0.2s',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.shadows[4],
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[2],
                 },
               }}
             >
