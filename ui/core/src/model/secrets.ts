@@ -25,6 +25,16 @@ export interface Authorization {
   credentialsFile?: string;
 }
 
+export interface OAuth {
+  clientID: string;
+  clientSecret?: string;
+  clientSecretFile?: string;
+  tokenURL: string;
+  scopes?: string[];
+  endpointParams?: Record<string, string[]>;
+  authStyle?: 0 | 1 | 2;
+}
+
 export interface TLSConfig {
   ca?: string;
   cert?: string;
@@ -39,6 +49,7 @@ export interface TLSConfig {
 export interface SecretSpec {
   basicAuth?: BasicAuth;
   authorization?: Authorization;
+  oauth?: OAuth;
   tlsConfig?: TLSConfig;
 }
 
