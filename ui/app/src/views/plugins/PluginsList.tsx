@@ -2,6 +2,7 @@ import { PluginModuleResource } from '@perses-dev/plugin-system';
 import { Box, Card, CardContent, Typography, Divider, Button, CircularProgress, Stack } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ReactElement, useEffect, useState } from 'react';
+import { useSnackbar } from '@perses-dev/components';
 import { PluginDetailsDialog } from './PluginDetailsDialog';
 
 export function PluginsList(): ReactElement {
@@ -9,6 +10,7 @@ export function PluginsList(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
+  const { exceptionSnackbar } = useSnackbar();
 
   useEffect(() => {
     const fetchPlugins = async (): Promise<void> => {
@@ -100,7 +102,4 @@ export function PluginsList(): ReactElement {
       <PluginDetailsDialog selectedPluginModule={selectedPluginModule} onClose={handleClosePluginDetails} />
     </Box>
   );
-}
-function exceptionSnackbar(error: string) {
-  throw new Error('Function not implemented.');
 }
