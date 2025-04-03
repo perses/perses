@@ -1,4 +1,3 @@
-import { useSnackbar } from '@perses-dev/components';
 import { PluginModuleResource } from '@perses-dev/plugin-system';
 import { Box, Card, CardContent, Typography, Divider, Button, CircularProgress, Stack } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -27,7 +26,7 @@ export function PluginsList(): ReactElement {
           setError('An unknown error occurred');
         }
       } finally {
-        setIsLoading(true);
+        setIsLoading(false);
       }
     };
     fetchPlugins();
@@ -47,6 +46,10 @@ export function PluginsList(): ReactElement {
         <CircularProgress />
       </Stack>
     );
+  }
+
+  if (error) {
+    exceptionSnackbar(error);
   }
 
   return (
@@ -97,4 +100,7 @@ export function PluginsList(): ReactElement {
       <PluginDetailsDialog selectedPluginModule={selectedPluginModule} onClose={handleClosePluginDetails} />
     </Box>
   );
+}
+function exceptionSnackbar(error: string) {
+  throw new Error('Function not implemented.');
 }
