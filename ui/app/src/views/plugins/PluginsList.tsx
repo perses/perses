@@ -75,7 +75,7 @@ export function PluginsList(): ReactElement {
     if (pluginModule?.spec?.plugins.length > 1) {
       return (
         <Box sx={{ mt: 2 }}>
-          <Button color="primary" onClick={() => handleOpenPluginDetails(pluginModule)}>
+          <Button color="info" onClick={() => handleOpenPluginDetails(pluginModule)}>
             View {pluginModule.spec.plugins.length} Plugins
           </Button>
         </Box>
