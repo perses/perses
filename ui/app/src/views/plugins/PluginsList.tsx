@@ -4,7 +4,6 @@ import {
   Box,
   Card,
   CardContent,
-  CardActions,
   Typography,
   Paper,
   useTheme,
@@ -54,21 +53,31 @@ export function PluginsList(): ReactElement {
     setSelectedPluginModule(null);
   };
 
-  const renderPluginDetails = (plugin: PluginModuleResource): ReactElement | null => {
-    if (!plugin?.spec?.plugins || plugin?.spec?.plugins.length === 0) {
+  const renderPluginDetails = (pluginModule: PluginModuleResource): ReactElement | null => {
+    if (!pluginModule?.spec?.plugins || pluginModule?.spec?.plugins.length === 0) {
       return <Typography variant="body2">No plugins available</Typography>;
     }
 
-    if (plugin?.spec?.plugins.length === 1) {
-      const singlePlugin = plugin?.spec?.plugins[0];
+    if (pluginModule?.spec?.plugins.length === 1) {
+      const singlePlugin = pluginModule?.spec?.plugins[0];
       return (
         <Box>
+          <Typography variant="caption" color="text.secondary">
+            <strong>Kind:</strong> {singlePlugin?.kind}
+          </Typography>
           <Typography variant="body2">
             <strong>Plugin:</strong> {singlePlugin?.spec?.name}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Kind: {singlePlugin?.kind}
-          </Typography>
+        </Box>
+      );
+    }
+
+    if (pluginModule?.spec?.plugins.length > 1) {
+      return (
+        <Box sx={{ mt: 2 }}>
+          <Button color="primary" onClick={() => handleOpenPluginDetails(pluginModule)}>
+            View {pluginModule.spec.plugins.length} Plugins
+          </Button>
         </Box>
       );
     }
@@ -122,7 +131,7 @@ export function PluginsList(): ReactElement {
   return (
     <Box>
       <Paper elevation={0} sx={{ p: 3, mb: 2 }}>
-        <Typography variant="h3">Available plugin modules in this Perses instance:</Typography>
+        <Typography variant="h3">Available plugins in this Perses instance:</Typography>
       </Paper>
 
       <Grid container spacing={3}>
@@ -151,13 +160,6 @@ export function PluginsList(): ReactElement {
                 <Divider sx={{ my: 1.5 }} />
                 {renderPluginDetails(pluginModule)}
               </CardContent>
-              {pluginModule.spec.plugins.length > 1 && (
-                <CardActions>
-                  <Button color="primary" onClick={() => handleOpenPluginDetails(pluginModule)}>
-                    View {pluginModule.spec.plugins.length} Plugins
-                  </Button>
-                </CardActions>
-              )}
             </Card>
           </Grid>
         ))}
