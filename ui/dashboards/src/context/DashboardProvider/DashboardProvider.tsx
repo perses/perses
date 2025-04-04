@@ -26,6 +26,8 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
   EphemeralDashboardResource,
+  MutableRef,
+  assignRef,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -74,6 +76,7 @@ export interface DashboardStoreProps {
 
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
+  dashboardStoreApiRef?: MutableRef<DashboardStoreState>;
   children?: ReactNode;
 }
 
@@ -87,7 +90,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
-export function DashboardProvider(props: DashboardProviderProps): ReactElement {
+export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardProviderProps): ReactElement {
   const createDashboardStore = useCallback(initStore, [props]);
 
   // load plugin to retrieve initial spec if default panel kind is defined
@@ -95,11 +98,18 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
 
-  const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
+  const [store] = useState(() => {
+    const newStore = createDashboardStore(props);
+
+    assignRef(dashboardStoreApiRef, newStore.getState());
+
+    return newStore;
+  }); // prevent calling createDashboardStore every time it rerenders
 
   useEffect(() => {
     if (plugin === undefined) return;
     const defaultPanelSpec = plugin.createInitialOptions ? plugin.createInitialOptions() : {};
+
     // set default panel kind, spec, and queries for add panel editor
     store.setState({
       initialValues: {

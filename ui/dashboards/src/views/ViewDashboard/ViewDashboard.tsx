@@ -26,6 +26,7 @@ import {
   DatasourceStoreProvider,
   VariableProviderProps,
   VariableProviderWithQueryParams,
+  DashboardProviderProps,
 } from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
@@ -35,6 +36,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
+  dashboardStoreApiRef?: DashboardProviderProps['dashboardStoreApiRef'];
 }
 
 /**
@@ -56,6 +58,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     isEditing,
     isCreating,
     sx,
+    dashboardControlsComponent,
+    dashboardStoreApiRef,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -107,6 +111,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
           dashboardResource,
           isEditMode: !!isEditing,
         }}
+        dashboardStoreApiRef={dashboardStoreApiRef}
       >
         <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
@@ -142,6 +147,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                   isVariableEnabled={isVariableEnabled}
                   isDatasourceEnabled={isDatasourceEnabled}
                   isCreating={isCreating}
+                  dashboardControlsComponent={dashboardControlsComponent}
                 />
               </ErrorBoundary>
             </Box>
