@@ -13,25 +13,30 @@
 
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import {
-  Select,
-  SelectProps,
-  MenuItem,
   Stack,
-  Divider,
   ListItemText,
   Chip,
   IconButton,
   Box,
   OutlinedSelectProps,
   BaseSelectProps,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { ReactElement, useMemo } from 'react';
-import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
+import { DatasourceSelectItem, DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
+
+type DataSourceOption = {
+  groupEditLink?: string;
+  groupLabel?: string;
+  value: string;
+} & Omit<DatasourceSelectItem, 'selector'> &
+  Omit<DatasourceSelectItem['selector'], 'kind'>;
 
 export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
   value: DatasourceSelector;
@@ -57,29 +62,32 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
     return { ...value, group };
   }, [value, data]);
 
-  // Convert the datasource list into menu items with name/group?/value strings that the Select input can work with
-  const menuItems = useMemo(() => {
-    return (data ?? []).map((itemGroup) => ({
-      group: itemGroup.group,
-      editLink: itemGroup.editLink,
-      items: itemGroup.items.map((item) => ({
+  const options = useMemo<DataSourceOption[]>(() => {
+    return (data || []).flatMap<DataSourceOption>((itemGroup) =>
+      itemGroup.items.map<DataSourceOption>((item) => ({
+        groupLabel: itemGroup.group,
+        groupEditLink: itemGroup.editLink,
         name: item.name,
         overriding: item.overriding,
         overridden: item.overridden,
         saved: item.saved ?? true,
         group: item.selector.group,
         value: selectorToOptionValue(item.selector),
-      })),
-    }));
+      }))
+    );
   }, [data]);
 
   // While loading available values, just use an empty string so MUI select doesn't warn about values out of range
-  const optionValue = isLoading ? '' : selectorToOptionValue(defaultValue);
+  const optionValue = isLoading ? null : options.find((option) => option.value === selectorToOptionValue(defaultValue));
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
-  const handleChange: SelectProps<string>['onChange'] = (e) => {
-    const next = optionValueToSelector(e.target.value);
-    onChange(next);
+  const handleChange = (selectedOption: DataSourceOption | null): void => {
+    if (selectedOption) {
+      const next = optionValueToSelector(selectedOption?.value || '');
+      onChange(next);
+    } else {
+      onChange({ kind: datasourcePluginKind });
+    }
   };
 
   // We use a fake action event when we click on the action of the chip (hijack the "delete" feature).
@@ -88,36 +96,35 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const fakeActionEvent = (): void => {};
 
-  // TODO:
-  //  - Does this need a loading indicator of some kind?
-  //  - The group's edit link is not clickable once selected.
-  //  - The group's edit link is disabled if datasource is overridden.
-  //    Ref: https://github.com/mui/material-ui/issues/36572
   return (
-    <Select {...others} value={optionValue} onChange={handleChange}>
-      {menuItems.map((menuItemGroup) => [
-        <Divider key={`${menuItemGroup.group}-divider`} />,
-        ...menuItemGroup.items.map((menuItem) => (
-          <MenuItem key={menuItem.value} value={menuItem.value} disabled={menuItem.overridden || !menuItem.saved}>
+    <Autocomplete<DataSourceOption>
+      options={options}
+      renderInput={(params) => <TextField {...params} label={others.label} placeholder="" />}
+      groupBy={(option) => option.groupLabel || 'No group'}
+      getOptionLabel={(option) => {
+        return option.name;
+      }}
+      onChange={(_, v) => handleChange(v)}
+      value={optionValue}
+      renderOption={(props, option) => {
+        console.log('renderOption', props, option);
+        return (
+          <li {...props} key={option.value}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
               <ListItemText>
-                <DatasourceName
-                  name={menuItem.name}
-                  overridden={menuItem.overridden}
-                  overriding={menuItem.overriding}
-                />
+                <DatasourceName name={option.name} overridden={option.overridden} overriding={option.overriding} />
               </ListItemText>
-              {!menuItem.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
+              {!option.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
               <ListItemText style={{ textAlign: 'right' }}>
-                {menuItemGroup.group && menuItemGroup.group.length > 0 && (
+                {option.groupLabel && option.groupLabel.length > 0 && (
                   <Chip
                     disabled={false}
-                    label={menuItemGroup.group}
+                    label={option.groupLabel}
                     size="small"
-                    onDelete={menuItemGroup.editLink ? fakeActionEvent : undefined}
+                    onDelete={option.groupEditLink ? fakeActionEvent : undefined}
                     deleteIcon={
-                      menuItemGroup.editLink ? (
-                        <IconButton href={menuItemGroup.editLink} target="_blank">
+                      option.groupEditLink ? (
+                        <IconButton href={option.groupEditLink} target="_blank">
                           <OpenInNewIcon fontSize="small" />
                         </IconButton>
                       ) : undefined
@@ -126,10 +133,10 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
                 )}
               </ListItemText>
             </Stack>
-          </MenuItem>
-        )),
-      ])}
-    </Select>
+          </li>
+        );
+      }}
+    />
   );
 }
 
@@ -177,3 +184,61 @@ function optionValueToSelector(optionValue: string): DatasourceSelector {
     name: name === '' ? undefined : name,
   };
 }
+
+/*
+
+  const options = useMemo<any>(() => {
+    return menuItems.flatMap((itemGroup) =>
+      itemGroup.items.map((item) => ({
+        groupLabel: itemGroup.group,
+        groupEditLink: itemGroup.editLink,
+        ...item,
+      })).map(opt => {
+        console.log(opt, 'opt');
+        return opt
+      })
+    );
+  }, [menuItems]);
+
+  return (
+    <Autocomplete<any>
+// options={options}
+// groupBy={(option) => option.groupLabel!}
+// getOptionLabel={(option) => {
+//   console.log('getOptionLabel', option);
+//   return option.name!;
+// }}
+value={optionValue}
+onChange={handleChange}
+renderInput={(params) => <TextField {...params} label="Select Datasource" />}
+renderOption={(props, option) => (
+  <li {...props} key={option.value}>
+    <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
+      <ListItemText>
+        <DatasourceName name={option.name} overridden={option.overridden} overriding={option.overriding} />
+      </ListItemText>
+      {!option.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
+      <ListItemText style={{ textAlign: 'right' }}>
+        {option.groupLabel && option.groupLabel.length > 0 && (
+          <Chip
+            disabled={false}
+            label={option.groupLabel}
+            size="small"
+            onDelete={option.groupEditLink ? fakeActionEvent : undefined}
+            deleteIcon={
+              option.groupEditLink ? (
+                <IconButton href={option.groupEditLink} target="_blank">
+                  <OpenInNewIcon fontSize="small" />
+                </IconButton>
+              ) : undefined
+            }
+          />
+        )}
+      </ListItemText>
+    </Stack>
+  </li>
+)}
+/>
+);
+
+*/
