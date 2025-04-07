@@ -66,8 +66,6 @@ Another example, to configure the name of the globaldatasource discovery, the en
 PERSES_GLOBAL_DATASOURCE_DISCOVERY_0_DISCOVERY_NAME="my-discovery"
 ```
 
-```bash
-
 ### Definition
 
 The file is written in YAML format, defined by the scheme described below. Brackets indicate that a parameter is optional.
