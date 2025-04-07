@@ -169,6 +169,8 @@ export const StatChart: FC<StatChartProps> = (props) => {
         <EChart
           sx={{
             width: '100%',
+          }}
+          style={{
             // ECharts rounds the height to the nearest integer by default.
             // This can cause unneccessary scrollbars when the total height of this chart exceeds the 'height' prop.
             height: Math.floor(height - seriesNameHeight - valueFontHeight),

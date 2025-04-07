@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { CSSProperties, memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect, use } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
@@ -128,6 +128,7 @@ export interface EChartsProps<T> {
   theme?: string | EChartsTheme;
   renderer?: 'canvas' | 'svg';
   sx?: SxProps<Theme>;
+  style?: CSSProperties;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
   syncGroup?: string;
@@ -139,6 +140,7 @@ export const EChart = memo(function EChart<T>({
   theme,
   renderer,
   sx,
+  style,
   onEvents,
   _instance,
   syncGroup,
@@ -226,9 +228,9 @@ export const EChart = memo(function EChart<T>({
       }
     );
     updateSize();
-  }, [sx]);
+  }, [sx, style]);
 
-  return <Box ref={containerRef} sx={sx}></Box>;
+  return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });
 
 // Validate event config and bind custom events
