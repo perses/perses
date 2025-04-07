@@ -107,7 +107,6 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
       onChange={(_, v) => handleChange(v)}
       value={optionValue}
       renderOption={(props, option) => {
-        console.log('renderOption', props, option);
         return (
           <li {...props} key={option.value}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
