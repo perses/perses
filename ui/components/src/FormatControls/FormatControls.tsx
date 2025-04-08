@@ -94,7 +94,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
   return (
     <>
       <OptionsEditorControl
-        label="Short values"
+        label="Abbreviate values"
         control={
           <Switch
             checked={hasShortValues ? shouldShortenValues(value.shortValues) : false}

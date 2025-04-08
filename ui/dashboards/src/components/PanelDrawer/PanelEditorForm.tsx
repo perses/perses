@@ -166,7 +166,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   {...field}
                   required
                   fullWidth
-                  label="Group"
+                  label="Panel group"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                   onChange={(event) => {
@@ -212,7 +212,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   pluginTypes={['Panel']}
                   required
                   fullWidth
-                  label="Type"
+                  label="Visualization type"
                   disabled={pluginEditor.isLoading}
                   error={!!pluginEditor.error || !!fieldState.error}
                   helperText={pluginEditor.error?.message ?? fieldState.error?.message}
@@ -251,7 +251,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
         </Grid>
       </Box>
       <DiscardChangesConfirmationDialog
-        description="You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered."
+        description="You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone."
         isOpen={isDiscardDialogOpened}
         onCancel={() => {
           setDiscardDialogOpened(false);
