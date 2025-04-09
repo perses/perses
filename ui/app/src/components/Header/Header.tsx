@@ -16,7 +16,6 @@ import { AppBar, Box, Button, Divider, Toolbar } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Compass from 'mdi-material-ui/Compass';
-
 import React from 'react';
 import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { AdminRoute, ConfigRoute } from '../../model/route';
