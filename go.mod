@@ -30,7 +30,7 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.63.0
 	github.com/prometheus/common/assets v0.2.0
-	github.com/prometheus/promu v0.17.0
+	github.com/prometheus/promu v0.18.0
 	github.com/redbo/gohsv v0.0.0-20191210185714-eac2cca0cae9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
