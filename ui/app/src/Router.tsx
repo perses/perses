@@ -26,7 +26,6 @@ import {
   SignInRoute,
   SignUpRoute,
   ExploreRoute,
-  PluginsRoute,
 } from './model/route';
 import {
   useIsAuthEnabled,
@@ -35,7 +34,6 @@ import {
   useIsSignUpDisable,
 } from './context/Config';
 import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
-import PluginsView from './views/plugins/PluginsView';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -98,14 +96,6 @@ function Router(): ReactElement {
             element={
               <RequireAuth>
                 <HomeView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={PluginsRoute}
-            element={
-              <RequireAuth>
-                <PluginsView />
               </RequireAuth>
             }
           />

@@ -16,10 +16,10 @@ import { AppBar, Box, Button, Divider, Toolbar } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Compass from 'mdi-material-ui/Compass';
-import Puzzle from 'mdi-material-ui/Puzzle';
+
 import React from 'react';
 import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
-import { AdminRoute, ConfigRoute, PluginsRoute } from '../../model/route';
+import { AdminRoute, ConfigRoute } from '../../model/route';
 import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
 import WhitePersesLogo from '../logo/WhitePersesLogo';
@@ -103,16 +103,6 @@ export default function Header(): JSX.Element {
                 to={ConfigRoute}
               >
                 <Cog sx={{ marginRight: 0.5 }} /> Config
-              </Button>
-              <Button
-                aria-label="Plugins"
-                aria-controls="menu-plugins-appbar"
-                aria-haspopup="true"
-                color="inherit"
-                component={RouterLink}
-                to={PluginsRoute}
-              >
-                <Puzzle sx={{ marginRight: 0.5 }} /> Plugins
               </Button>
               {IsExplorerEnabled && (
                 <Button

@@ -13,13 +13,14 @@
 
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
+import Puzzle from 'mdi-material-ui/Puzzle';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
-import { PluginsList } from '../plugins/PluginsList';
+import { PluginsList } from './PluginsList';
 
 function ConfigView(): ReactElement {
   const { config } = useConfigContext();
@@ -30,7 +31,8 @@ function ConfigView(): ReactElement {
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
-          <Typography variant="h2"> Server Configuration</Typography>
+          <Cog sx={{ marginRight: 0.5 }} />
+          <Typography variant="h2">Server Configuration</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <JSONEditor value={config} readOnly />
@@ -38,7 +40,8 @@ function ConfigView(): ReactElement {
       </Accordion>
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
-          <Typography variant="h2"> Installed Plugins</Typography>
+          <Puzzle sx={{ marginRight: 0.5 }} />
+          <Typography variant="h2">Installed Plugins</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <PluginsList />

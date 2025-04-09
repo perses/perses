@@ -18,7 +18,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Cog from 'mdi-material-ui/Cog';
 import Compass from 'mdi-material-ui/Compass';
-import { AdminRoute, ConfigRoute, ExploreRoute, PluginsRoute } from '../../model/route';
+import { AdminRoute, ConfigRoute, ExploreRoute } from '../../model/route';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
 
 export function ToolMenu(): ReactElement {
@@ -81,12 +81,6 @@ export function ToolMenu(): ReactElement {
             <Compass />
           </ListItemIcon>
           <Typography>Explore</Typography>
-        </MenuItem>
-        <MenuItem component={RouterLink} to={PluginsRoute}>
-          <ListItemIcon>
-            <Compass />
-          </ListItemIcon>
-          <Typography>Plugins</Typography>
         </MenuItem>
       </MUIMenu>
     </Box>
