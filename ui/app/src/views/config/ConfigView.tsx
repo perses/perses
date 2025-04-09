@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,42 +11,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
-import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
-import Puzzle from 'mdi-material-ui/Puzzle';
+import { ReactElement, useState } from 'react';
+import { Stack, Box } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
+import Puzzle from 'mdi-material-ui/Puzzle';
 import { JSONEditor } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { MenuTab, MenuTabs } from '../../components/tabs';
+
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { PluginsList } from './PluginsList';
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps): ReactElement | null {
+  const { children, value, index, ...other } = props;
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} {...other}>
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+    </div>
+  );
+}
+
 function ConfigView(): ReactElement {
   const { config } = useConfigContext();
   const isMobileSize = useIsMobileSize();
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number): void => {
+    setTabIndex(newValue);
+  };
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
-          <Cog sx={{ marginRight: 0.5 }} />
-          <Typography variant="h2">Server Configuration</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <JSONEditor value={config} readOnly />
-        </AccordionDetails>
-      </Accordion>
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
-          <Puzzle sx={{ marginRight: 0.5 }} />
-          <Typography variant="h2">Installed Plugins</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <PluginsList />
-        </AccordionDetails>
-      </Accordion>
+
+      <MenuTabs value={tabIndex} onChange={handleTabChange} aria-label="configuration tabs">
+        <MenuTab
+          iconPosition="start"
+          icon={<Cog />}
+          label="Server Configuration"
+          id="tab-0"
+          aria-controls="tabpanel-0"
+        />
+        <MenuTab
+          iconPosition="start"
+          icon={<Puzzle />}
+          label="Installed Plugins"
+          id="tab-1"
+          aria-controls="tabpanel-1"
+        />
+      </MenuTabs>
+
+      <TabPanel value={tabIndex} index={0}>
+        <JSONEditor value={config} readOnly />
+      </TabPanel>
+      <TabPanel value={tabIndex} index={1}>
+        <PluginsList />
+      </TabPanel>
     </Stack>
   );
 }
