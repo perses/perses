@@ -13,7 +13,7 @@
 
 import { Notice } from './notice';
 import { AbsoluteTimeRange } from './time';
-import { Labels, TimeSeriesValueTuple } from './time-series-queries';
+import { Labels, TimeSeriesValueTuple, TimeSeriesHistogramTuple } from './time-series-queries';
 
 export interface TimeScale {
   startMs: number;
@@ -32,7 +32,7 @@ export interface TimeSeriesData {
 export interface TimeSeries {
   name: string;
   values: TimeSeriesValueTuple[];
-  histograms?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  histograms?: TimeSeriesHistogramTuple[];
   formattedName?: string;
   labels?: Labels;
 }
