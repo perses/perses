@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from '@mui/material';
+import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { PluginsList } from '../plugins/PluginsList';
 
 function ConfigView(): ReactElement {
   const { config } = useConfigContext();
@@ -26,7 +28,22 @@ function ConfigView(): ReactElement {
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
-      <JSONEditor value={config} readOnly />
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
+          <Typography variant="h2"> Server Configuration</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <JSONEditor value={config} readOnly />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="config-header" aria-controls="config-content">
+          <Typography variant="h2"> Installed Plugins</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <PluginsList />
+        </AccordionDetails>
+      </Accordion>
     </Stack>
   );
 }
