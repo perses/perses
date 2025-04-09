@@ -63,7 +63,6 @@ export default function Header(): JSX.Element {
             alignItems: 'center',
             width: '100%',
             flexShrink: isMobileSize ? 2 : 1,
-            paddingRight: '12px',
           }}
         >
           <Button
@@ -125,7 +124,6 @@ export default function Header(): JSX.Element {
         <Box
           sx={{
             width: '100%',
-            marginLeft: '5px',
             flexShrink: isMobileSize ? 2 : 1,
             display: 'flex',
             justifyContent: 'end',
