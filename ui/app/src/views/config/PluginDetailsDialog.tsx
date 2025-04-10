@@ -12,8 +12,18 @@
 // limitations under the License.
 
 import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { Dialog, DialogContent, DialogTitle, Divider, List, ListItem, ListItemText, Typography } from '@mui/material';
-import { ReactElement } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { Fragment, ReactElement } from 'react';
 
 interface PluginDetailsDialogProps {
   selectedPluginModule: PluginModuleResource | null;
@@ -30,21 +40,22 @@ export function PluginDetailsDialog({ selectedPluginModule, onClose }: PluginDet
       <DialogTitle>Plugins for {selectedPluginModule.metadata.name} Module</DialogTitle>
       <DialogContent dividers sx={{ maxHeight: 400 }}>
         <List>
-          {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
-            <div key={index}>
-              <ListItem>
-                <ListItemText
-                  primary={
-                    <Typography>
-                      <strong>{pluginItem.spec.name}</strong>
-                    </Typography>
-                  }
-                  secondary={<Typography color="text.secondary">Kind: {pluginItem.kind}</Typography>}
-                />
-              </ListItem>
-              <Divider component="li" />
-            </div>
-          ))}
+          <Stack divider={<Divider flexItem orientation="horizontal" />}>
+            {selectedPluginModule.spec.plugins.map((pluginItem, index) => (
+              <Fragment key={index}>
+                <ListItem>
+                  <ListItemText
+                    primary={
+                      <Typography>
+                        <strong>{pluginItem.spec.name}</strong>
+                      </Typography>
+                    }
+                    secondary={<Typography color="text.secondary">Kind: {pluginItem.kind}</Typography>}
+                  />
+                </ListItem>
+              </Fragment>
+            ))}
+          </Stack>
         </List>
       </DialogContent>
     </Dialog>
