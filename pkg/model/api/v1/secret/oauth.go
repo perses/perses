@@ -103,7 +103,7 @@ func (o *OAuth) GetClientSecret() (string, error) {
 }
 
 func (o *OAuth) validate() error {
-	if len(o.ClientID) == 0 || len(o.ClientSecret) == 0 || len(o.ClientSecretFile) == 0 && len(o.TokenURL) == 0 {
+	if len(o.ClientID) == 0 || (len(o.ClientSecret) == 0 && len(o.ClientSecretFile) == 0) || len(o.TokenURL) == 0 {
 		return fmt.Errorf("when using oauth, clientID, clientSecret/clientSecretFile, and tokenURL cannot be empty")
 	}
 	if len(o.ClientSecret) > 0 && len(o.ClientSecretFile) > 0 {
