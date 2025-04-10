@@ -48,32 +48,39 @@ function ConfigView(): ReactElement {
   };
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
-
-      <MenuTabs value={tabIndex} onChange={handleTabChange} aria-label="configuration tabs">
-        <MenuTab
-          iconPosition="start"
-          icon={<Cog />}
-          label="Server Configuration"
-          id="tab-0"
-          aria-controls="tabpanel-0"
-        />
-        <MenuTab
-          iconPosition="start"
-          icon={<Puzzle />}
-          label="Installed Plugins"
-          id="tab-1"
-          aria-controls="tabpanel-1"
-        />
-      </MenuTabs>
-
-      <TabPanel value={tabIndex} index={0}>
-        <JSONEditor value={config} readOnly />
-      </TabPanel>
-      <TabPanel value={tabIndex} index={1}>
-        <PluginsList />
-      </TabPanel>
+      <Stack>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
+          <MenuTabs value={tabIndex} onChange={handleTabChange} aria-label="configuration tabs">
+            <MenuTab
+              iconPosition="start"
+              icon={<Cog />}
+              label="Server Configuration"
+              id="tab-0"
+              aria-controls="tabpanel-0"
+            />
+            <MenuTab
+              iconPosition="start"
+              icon={<Puzzle />}
+              label="Installed Plugins"
+              id="tab-1"
+              aria-controls="tabpanel-1"
+            />
+          </MenuTabs>
+        </Stack>
+        <TabPanel value={tabIndex} index={0}>
+          <JSONEditor value={config} readOnly />
+        </TabPanel>
+        <TabPanel value={tabIndex} index={1}>
+          <PluginsList />
+        </TabPanel>
+      </Stack>
     </Stack>
   );
 }
