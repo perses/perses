@@ -49,7 +49,7 @@ export function PluginsList(): ReactElement {
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={pluginModule.metadata.name}>
             <Card elevation={2} sx={{ height: '100%' }}>
               <CardContent>
-                <Typography variant="h3" component="div" gutterBottom>
+                <Typography variant="h3" gutterBottom>
                   {pluginModule?.metadata?.name}
                 </Typography>
                 <Typography>Version {pluginModule.metadata.version}</Typography>
