@@ -17,7 +17,7 @@ import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
-import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
+import { ScatterChart as EChartsScatterChart, CustomChart as EChartsCustomChart } from 'echarts/charts';
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -29,13 +29,14 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
 
-// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot plugin).
+// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot + custom plugin).
 // This is a workaround for https://github.com/perses/plugins/issues/83.
 use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
   EChartsScatterChart,
+  EChartsCustomChart,
   GridComponent,
   TitleComponent,
   TooltipComponent,
