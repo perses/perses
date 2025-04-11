@@ -110,6 +110,7 @@ func TestCORSCustomConfig(t *testing.T) {
 		AllowMethods: []string{"OPTIONS", "GET"},
 	}
 	withServer(t, config, func(expect *httpexpect.Expect) {
+		// Test with a valid origin.
 		resp := sendPreflightRequest(expect, "https://github.com")
 		resp.Status(http.StatusNoContent)
 		resp.Header("Access-Control-Allow-Origin").IsEqual("https://github.com")
@@ -118,6 +119,12 @@ func TestCORSCustomConfig(t *testing.T) {
 		resp = sendRequest(expect, "https://github.com")
 		resp.Status(http.StatusOK)
 		resp.Header("Access-Control-Allow-Origin").IsEqual("https://github.com")
+
+		// Test with an invalid origin.
+		resp = sendPreflightRequest(expect, "https://google.com")
+		resp.Status(http.StatusNoContent)
+		resp.Header("Access-Control-Allow-Origin").IsEmpty()
+		resp.Header("Access-Control-Allow-Methods").IsEmpty()
 
 		resp = sendRequest(expect, "https://google.com")
 		resp.Status(http.StatusOK)
