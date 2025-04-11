@@ -129,6 +129,16 @@ type Cookie struct {
 	Secure bool `json:"secure" yaml:"secure"`
 }
 
+type CORSConfig struct {
+	Enable           bool     `json:"enable" yaml:"enable"`
+	AllowOrigins     []string `json:"allow_origins,omitempty" yaml:"allow_origins,omitempty"`
+	AllowMethods     []string `json:"allow_methods,omitempty" yaml:"allow_methods,omitempty"`
+	AllowHeaders     []string `json:"allow_headers,omitempty" yaml:"allow_headers,omitempty"`
+	AllowCredentials bool     `json:"allow_credentials,omitempty" yaml:"allow_credentials,omitempty"`
+	ExposeHeaders    []string `json:"expose_headers,omitempty" yaml:"expose_headers,omitempty"`
+	MaxAge           int      `json:"max_age,omitempty" yaml:"max_age,omitempty"`
+}
+
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
@@ -149,6 +159,8 @@ type Security struct {
 	Authorization AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// Authentication contains configuration regarding management of access/refresh token
 	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
+	// Configuration for the CORS middleware.
+	CORS CORSConfig `json:"cors,omitempty" yaml:"cors"`
 }
 
 func (s *Security) Verify() error {

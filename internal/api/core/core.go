@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
@@ -103,6 +104,16 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 	if len(conf.APIPrefix) > 0 {
 		runner.HTTPServerBuilder().PreMiddleware(middleware.HandleAPIPrefix(conf.APIPrefix))
+	}
+	if conf.Security.CORS.Enable {
+		runner.HTTPServerBuilder().Middleware(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+			AllowOrigins:     conf.Security.CORS.AllowOrigins,
+			AllowMethods:     conf.Security.CORS.AllowMethods,
+			AllowHeaders:     conf.Security.CORS.AllowHeaders,
+			AllowCredentials: conf.Security.CORS.AllowCredentials,
+			ExposeHeaders:    conf.Security.CORS.ExposeHeaders,
+			MaxAge:           conf.Security.CORS.MaxAge,
+		}))
 	}
 	return runner, persistenceManager, nil
 }

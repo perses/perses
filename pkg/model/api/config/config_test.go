@@ -54,6 +54,9 @@ func TestJSONMarshalConfig(t *testing.T) {
       "providers": {
         "enable_native": false
       }
+    },
+    "cors": {
+      "enable": false
     }
   },
   "database": {},
@@ -117,6 +120,9 @@ func TestJSONMarshalConfig(t *testing.T) {
       "providers": {
         "enable_native": false
       }
+    },
+    "cors": {
+      "enable": false
     }
   },
   "database": {
@@ -223,6 +229,15 @@ func TestUnmarshalJSONConfig(t *testing.T) {
           ]
         }
       ]
+    },
+    "cors": {
+      "enable": true,
+      "allow_origins": ["https://github.com"],
+      "allow_methods": ["GET", "POST"],
+      "allow_headers": ["X-Custom-Header"],
+      "allow_credentials": true,
+      "expose_headers": ["Content-Encoding"],
+      "max_age": 60
     }
   },
   "database": {
@@ -286,6 +301,15 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 								},
 							},
 						},
+					},
+					CORS: CORSConfig{
+						Enable:           true,
+						AllowOrigins:     []string{"https://github.com"},
+						AllowMethods:     []string{"GET", "POST"},
+						AllowHeaders:     []string{"X-Custom-Header"},
+						AllowCredentials: true,
+						ExposeHeaders:    []string{"Content-Encoding"},
+						MaxAge:           60,
 					},
 				},
 				Database: Database{
@@ -363,6 +387,19 @@ security:
           - create
         scopes:
           - Project
+  cors:
+    enable: true
+    allow_origins:
+      - https://github.com
+    allow_methods:
+      - GET
+      - POST
+    allow_headers:
+      - X-Custom-Header
+    allow_credentials: true
+    expose_headers:
+      - Content-Encoding
+    max_age: 60
 
 database:
   file:
@@ -431,6 +468,15 @@ plugin:
 						Providers: AuthProviders{
 							EnableNative: true,
 						},
+					},
+					CORS: CORSConfig{
+						Enable:           true,
+						AllowOrigins:     []string{"https://github.com"},
+						AllowMethods:     []string{"GET", "POST"},
+						AllowHeaders:     []string{"X-Custom-Header"},
+						AllowCredentials: true,
+						ExposeHeaders:    []string{"Content-Encoding"},
+						MaxAge:           60,
 					},
 				},
 				Database: Database{
