@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -55,16 +55,14 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
   const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
-  // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
-  const isGridDisplayed = useMemo(() => {
-    if (viewPanelItemId === undefined) {
-      return true;
-    }
+  useEffect(() => {
     if (hasViewPanel) {
       setIsOpen(true);
     }
-    return hasViewPanel;
-  }, [hasViewPanel, viewPanelItemId]);
+  }, [hasViewPanel]);
+
+  // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
+  const isGridDisplayed = viewPanelItemId === undefined || hasViewPanel;
 
   // Item layout is override if there is a panel in view mode
   const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
