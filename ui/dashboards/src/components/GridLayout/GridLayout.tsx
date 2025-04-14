@@ -55,13 +55,13 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
   const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
-  // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
   useEffect(() => {
     if (hasViewPanel) {
       setIsOpen(true);
     }
   }, [hasViewPanel]);
 
+  // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
   const isGridDisplayed = viewPanelItemId === undefined || hasViewPanel;
 
   // Item layout is override if there is a panel in view mode
