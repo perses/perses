@@ -44,7 +44,7 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
         ))
       ) : (
         <Typography variant="subtitle1" mb={2} fontStyle="italic">
-          No links defined
+          Add reference links to related dashboards or external resources. No links have been added yet.
         </Typography>
       )}
       <IconButton

@@ -101,7 +101,7 @@ export function VariableEditor(props: {
           closeDiscardChangesConfirmationDialog();
         },
         description:
-          'You have unapplied changes. Are you sure you want to discard these changes? Changes cannot be recovered.',
+          'You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone.',
       });
     } else {
       props.onCancel();

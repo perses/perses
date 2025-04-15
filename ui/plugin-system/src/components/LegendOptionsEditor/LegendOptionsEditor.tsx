@@ -153,7 +153,7 @@ export function LegendOptionsEditor({
         }
       />
       <OptionsEditorControl
-        label="Mode"
+        label="Display"
         control={
           <SettingsAutocomplete
             value={{
@@ -186,7 +186,7 @@ export function LegendOptionsEditor({
       />
       {showValuesEditor && (
         <OptionsEditorControl
-          label="Values"
+          label="Table values"
           control={
             // For some reason, the inferred option type doesn't always seem to work
             // quite right when `multiple` is true. Explicitly setting the generics
