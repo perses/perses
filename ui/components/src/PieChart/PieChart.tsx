@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { use } from 'echarts/core';
+import { use, EChartsCoreOption } from 'echarts/core';
 import { PieChart as EChartsPieChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -39,22 +39,18 @@ export interface PieChartProps {
   width: number;
   height: number;
   data: PieChartData[] | null;
+  label?: string;
   legend?: LegendComponentOption;
 }
 
 export function PieChart(props: PieChartProps): ReactElement {
-  const { width, height, data } = props;
+  const { width, height, data, label } = props;
   const chartsTheme = useChartsTheme();
 
-  const option = {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center',
-    },
+  const option: EChartsCoreOption = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)',
+      formatter: label ? '{a} <br/>{b} : {c} ({d}%)' : '{b} : {c} ({d}%)',
     },
     axisLabel: {
       overflow: 'truncate',
@@ -62,7 +58,7 @@ export function PieChart(props: PieChartProps): ReactElement {
     },
     series: [
       {
-        name: 'Access From',
+        name: label ?? '-',
         type: 'pie',
         radius: '55%',
         label: false,
