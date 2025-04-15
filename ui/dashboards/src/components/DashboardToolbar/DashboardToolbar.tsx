@@ -99,7 +99,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
               {isBiggerThanSm && (
                 <Stack direction="row" gap={1} ml="auto">
                   {dashboardControlsComponent}
-                  <EditButton onClick={onEditButtonClick} />
+                  {!isReadonly && <EditButton onClick={onEditButtonClick} />}
                 </Stack>
               )}
             </>
