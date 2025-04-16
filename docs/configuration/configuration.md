@@ -712,6 +712,8 @@ time_range: <TimeRange config> # Optional
 options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] # Optional
 # Allow you to disable the custom time range (absolute time range)
 disable_custom:  <bool> | default = false # Optional
+# Allow you to disable the zoomout action (extends current time range x2)
+disable_zoomout:  <bool> | default = false # Optional
 ```
 
 #### Dashboard Selector config
