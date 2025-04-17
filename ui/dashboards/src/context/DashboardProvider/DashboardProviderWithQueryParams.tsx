@@ -15,7 +15,11 @@ import { StringParam, useQueryParam } from 'use-query-params';
 import { ReactElement } from 'react';
 import { DashboardProvider, DashboardProviderProps } from './DashboardProvider';
 
-export function DashboardProviderWithQueryParams({ children, initialState }: DashboardProviderProps): ReactElement {
+export function DashboardProviderWithQueryParams({
+  children,
+  initialState,
+  dashboardStoreApiRef,
+}: DashboardProviderProps): ReactElement {
   const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', StringParam);
 
   return (
@@ -25,6 +29,7 @@ export function DashboardProviderWithQueryParams({ children, initialState }: Das
         setViewPanelRef: setViewPanelRef,
         ...initialState,
       }}
+      dashboardStoreApiRef={dashboardStoreApiRef}
     >
       {children}
     </DashboardProvider>
