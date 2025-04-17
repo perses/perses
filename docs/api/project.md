@@ -5,6 +5,8 @@ variables and datasources.
 
 **You need to own a project if you want to create a dashboard**
 
+## Project specification
+
 Creating a project is as simple as providing its name:
 
 ```yaml
