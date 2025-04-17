@@ -11,69 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Common types
- */
-export interface TraceAttribute {
-  key: string;
-  value: TraceAttributeValue;
-}
-
-export type TraceAttributeValue =
-  | { stringValue: string }
-  | { intValue: string }
-  | { boolValue: boolean }
-  | { arrayValue: { values: TraceAttributeValue[] } };
-
-/**
- * An entire trace
- */
-export interface Trace {
-  rootSpan: Span;
-}
-
-export interface TraceResource {
-  serviceName: string;
-  attributes: TraceAttribute[];
-}
-
-export interface TraceScope {
-  name: string;
-}
-
-export interface Span {
-  resource: TraceResource;
-  scope: TraceScope;
-  parentSpan?: Span;
-  /** child spans, sorted by startTime */
-  childSpans: Span[];
-
-  traceId: string;
-  spanId: string;
-  parentSpanId?: string;
-  name: string;
-  kind: string;
-  startTimeUnixMs: number;
-  endTimeUnixMs: number;
-  attributes: TraceAttribute[];
-  events: SpanEvent[];
-  status?: SpanStatus;
-}
-
-export interface SpanEvent {
-  timeUnixMs: number;
-  name: string;
-  attributes: TraceAttribute[];
-}
-
-export interface SpanStatus {
-  code?: typeof SpanStatusUnset | typeof SpanStatusOk | typeof SpanStatusError;
-  message?: string;
-}
-
-export const SpanStatusUnset = 'STATUS_CODE_UNSET';
-export const SpanStatusOk = 'STATUS_CODE_OK';
-export const SpanStatusError = 'STATUS_CODE_ERROR';
+import { TracesData } from './otlp/trace/v1/trace';
 
 /**
  * Partial trace information returned by search endpoint
@@ -101,7 +39,7 @@ export interface ServiceStats {
  * If the query contains a TraceQL query, the 'searchResult' attribute will contain the search results.
  */
 export interface TraceData {
-  trace?: Trace;
+  trace?: TracesData;
   searchResult?: TraceSearchResult[];
 
   metadata?: TraceMetaData;
