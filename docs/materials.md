@@ -5,6 +5,8 @@ This is a list of presentations, papers, poadcasts, and other materials related 
 
 ## Presentations
 
+- [Limitless Possibilities, Consistent Design: Crafting Dashboards with Perses DAC](https://www.youtube.com/watch?v=7h70Olo5Uzk),
+  with **Nicolas Takashi** and **Antoine Thebaud**, _Perses Maintainers_, KubeCon + CloudNativeCon Europe 2025.
 - [How to manage thousands of dashboards easily](https://www.youtube.com/watch?v=-2itamJhMXw&t=1s),
   with **Antoine Thebaud**, _Perses Maintainer_, Open Source Observability Day 2024.
 - [Meet the New Kid in the Sandbox – Integrating Visualization With Prometheus](https://www.youtube.com/watch?v=BGWqCxf6vCE),
