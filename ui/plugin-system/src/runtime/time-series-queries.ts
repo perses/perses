@@ -23,10 +23,11 @@ import {
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
-import { VariableStateMap, useAllVariableValues } from './variables';
+import { useAllVariableValues } from './variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
+import { filterVariableStateMap, getVariableValuesKey } from './utils';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
@@ -34,22 +35,6 @@ export interface UseTimeSeriesQueryOptions {
 }
 
 export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
-
-/**
- * Returns a serialized string of the current state of variable values.
- */
-function getVariableValuesKey(v: VariableStateMap): string {
-  return Object.values(v)
-    .map((v) => JSON.stringify(v.value))
-    .join(',');
-}
-
-function filterVariableStateMap(v: VariableStateMap, names?: string[]): VariableStateMap {
-  if (!names) {
-    return v;
-  }
-  return Object.fromEntries(Object.entries(v).filter(([name]) => names.includes(name)));
-}
 
 function getQueryOptions({
   plugin,
@@ -155,6 +140,7 @@ export function useTimeSeriesQueries(
             // Keep suggested step changes out of the query key, so we don´t have to run again query when it changes
             suggestedStepMs: options?.suggestedStepMs,
           };
+          console.log('running query');
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
