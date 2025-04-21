@@ -140,7 +140,6 @@ export function useTimeSeriesQueries(
             // Keep suggested step changes out of the query key, so we don´t have to run again query when it changes
             suggestedStepMs: options?.suggestedStepMs,
           };
-          console.log('running query');
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
