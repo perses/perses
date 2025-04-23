@@ -89,9 +89,8 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
-  if (!isTooltipPinned) {
-    transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
-  }
+
+  transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
   return (
     <Portal container={containerElement}>
