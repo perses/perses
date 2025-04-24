@@ -64,7 +64,6 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off

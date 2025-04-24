@@ -69,7 +69,6 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = legacyGetNearbySeriesData({
