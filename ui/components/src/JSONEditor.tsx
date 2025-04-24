@@ -31,10 +31,6 @@ export function JSONEditor<T>(props: JSONEditorProps<T>): ReactElement {
   const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
   const [lastProcessedValue, setLastProcessedValue] = useState<string>(value);
 
-  useEffect(() => {
-    setValue(JSON.stringify(props.value, null, 2));
-  }, [props.value]);
-
   return (
     <CodeMirror
       {...props}
@@ -44,6 +40,10 @@ export function JSONEditor<T>(props: JSONEditorProps<T>): ReactElement {
       value={value}
       onChange={(newValue) => {
         setValue(newValue);
+        // Trigger the provided onChange callback in real-time
+        if (props.onChange) {
+          props.onChange(newValue);
+        }
       }}
       onBlur={() => {
         // Don't trigger the provided onChange if the last processed value is equal to the current value.
