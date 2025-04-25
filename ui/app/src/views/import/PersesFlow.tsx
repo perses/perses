@@ -66,7 +66,6 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
                   label="Project name"
                 />
               )}
-            
             />
             <Button
               variant="contained"
