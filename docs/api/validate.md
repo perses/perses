@@ -1,4 +1,4 @@
-# Migrate
+# Validate
 
 The Perses server provides an API endpoint to validate various resources.
 
