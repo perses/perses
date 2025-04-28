@@ -153,7 +153,9 @@ export function LegendOptionsEditor({
         }
       />
       <OptionsEditorControl
+        // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
         label="Display"
+        // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
         control={
           <SettingsAutocomplete
             value={{
@@ -186,7 +188,9 @@ export function LegendOptionsEditor({
       />
       {showValuesEditor && (
         <OptionsEditorControl
+          // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
           label="Table values"
+          // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
           control={
             // For some reason, the inferred option type doesn't always seem to work
             // quite right when `multiple` is true. Explicitly setting the generics

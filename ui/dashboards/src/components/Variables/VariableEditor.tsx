@@ -101,7 +101,9 @@ export function VariableEditor(props: {
           closeDiscardChangesConfirmationDialog();
         },
         description:
+          // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
           'You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone.',
+        // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
       });
     } else {
       props.onCancel();

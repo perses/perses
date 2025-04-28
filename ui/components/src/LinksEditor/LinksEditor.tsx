@@ -44,7 +44,9 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
         ))
       ) : (
         <Typography variant="subtitle1" mb={2} fontStyle="italic">
+          {/* LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260] */}
           Add reference links to related dashboards or external resources. No links have been added yet.
+          {/* LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260] */}
         </Typography>
       )}
       <IconButton

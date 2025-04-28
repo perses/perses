@@ -32,7 +32,9 @@ test.describe('Dashboard: Panel Editor', () => {
     // clicking "Cancel" should do nothing and keep current changes
     await discardChangesConfirmationDialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(dashboardPage.panelEditor).toBeVisible();
-    await expect(dashboardPage.panelEditor.getByLabel(/^Type/)).toContainText('Markdown');
+    // LOGZ.IO CHANGE START:: Selector fix for panel editor - Type button [APPZ-400]
+    await expect(dashboardPage.panelEditor.getByLabel(/^Visualization type/)).toContainText('Markdown');
+    // LOGZ.IO CHANGE END:: Selector fix for panel editor - Type button [APPZ-400]
 
     // clicking "Discard Changes" should discard changes
     await panelEditor.cancelButton.click();

@@ -34,7 +34,7 @@ describe('FormatControls', () => {
   };
 
   const getShortValuesSwitch = (): HTMLElement => {
-    return screen.getByRole('checkbox', { name: 'Short values' });
+    return screen.getByRole('checkbox', { name: 'Abbreviate values' });
   };
 
   it('can change the unit by clicking', () => {
