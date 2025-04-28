@@ -17,7 +17,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { FormatOptions, TimeSeries } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { TimeChartSeriesMapping } from '../model';
-import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
+import { CursorCoordinates, useMousePosition } from './tooltip-model';
 import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
 import { TooltipHeader } from './TooltipHeader';

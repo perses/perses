@@ -22,7 +22,6 @@ import { TooltipHeader } from './TooltipHeader';
 import { legacyGetNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
-  FALLBACK_CHART_WIDTH,
   TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MAX_WIDTH,
