@@ -51,6 +51,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     emptyDashboardProps,
     onSave,
     onDiscard,
+    onDashboardChange,
     initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,
@@ -142,6 +143,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                   emptyDashboardProps={emptyDashboardProps}
                   onSave={onSave}
                   onDiscard={onDiscard}
+                  onDashboardChange={onDashboardChange}
                   initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
                   isVariableEnabled={isVariableEnabled}

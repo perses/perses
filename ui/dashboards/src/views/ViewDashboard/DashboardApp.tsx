@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement, useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
@@ -35,6 +35,7 @@ export interface DashboardAppProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
   dashboardTitleComponent?: JSX.Element;
   onSave?: OnSaveDashboard;
+  onDashboardChange?: (dashboard: DashboardResource) => void;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
@@ -57,6 +58,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     isDatasourceEnabled,
     isCreating,
     dashboardControlsComponent,
+    onDashboardChange,
   } = props;
 
   const chartsTheme = useChartsTheme();
@@ -82,6 +84,10 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
       onDiscard(dashboard as unknown as DashboardResource);
     }
   };
+
+  useEffect(() => {
+    onDashboardChange?.(dashboard as unknown as DashboardResource);
+  }, [dashboard, onDashboardChange, originalDashboard]);
 
   const onEditButtonClick = (): void => {
     setEditMode(true);
