@@ -7,16 +7,16 @@ package secret
 // PublicTLSConfig is the public struct of TLSConfig.
 // It's used when the API returns a response to a request
 #PublicTLSConfig: {
-	ca?:                #Hidden @go(CA)
-	cert?:              #Hidden @go(Cert)
-	key?:               #Hidden @go(Key)
-	caFile?:            string  @go(CAFile)
-	certFile?:          string  @go(CertFile)
-	keyFile?:           string  @go(KeyFile)
-	serverName?:        string  @go(ServerName)
-	insecureSkipVerify: bool    @go(InsecureSkipVerify)
-	minVersion?:        string  @go(MinVersion)
-	maxVersion?:        string  @go(MaxVersion)
+	ca?:                 #Hidden @go(CA)
+	cert?:               #Hidden @go(Cert)
+	key?:                #Hidden @go(Key)
+	caFile?:             string  @go(CAFile)
+	certFile?:           string  @go(CertFile)
+	keyFile?:            string  @go(KeyFile)
+	serverName?:         string  @go(ServerName)
+	insecureSkipVerify?: bool    @go(InsecureSkipVerify)
+	minVersion?:         string  @go(MinVersion)
+	maxVersion?:         string  @go(MaxVersion)
 }
 
 #TLSConfig: {
@@ -42,7 +42,7 @@ package secret
 	serverName?: string @go(ServerName)
 
 	// Disable target certificate validation.
-	insecureSkipVerify: bool @go(InsecureSkipVerify)
+	insecureSkipVerify?: bool @go(InsecureSkipVerify)
 
 	// Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
 	// If unset, Perses will use Go default minimum version, which is TLS 1.2.

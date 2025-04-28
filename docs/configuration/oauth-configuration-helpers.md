@@ -33,17 +33,18 @@ there.
 #### Azure AD
 
 ```yaml
-authentication:
-  providers:
-    oidc:
-      - slug_id: azure
-        name: "Azure AD"
-        client_id: "<your client ID>"
-        client_secret: "<your client Secret>"
-        issuer: "https://login.microsoftonline.com/<your tenant ID>/v2.0"
-        scopes: ["openid", "profile", "email", "User.read"] # For Auth code / Device code
-        client_credentials:
-          scopes: ["https://graph.microsoft.com/.default"] # For Client Credentials
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: azure
+          name: "Azure AD"
+          client_id: "<your client ID>"
+          client_secret: "<your client Secret>"
+          issuer: "https://login.microsoftonline.com/<your tenant ID>/v2.0"
+          scopes: [ "openid", "profile", "email", "User.read" ] # For Auth code / Device code
+          client_credentials:
+            scopes: [ "https://graph.microsoft.com/.default" ] # For Client Credentials
 ```
 
 !!! tip

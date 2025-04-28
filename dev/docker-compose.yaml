@@ -26,6 +26,23 @@ services:
       - "9090:9090"
     profiles: [prometheus]
 
+  # Generate fake metrics
+  avalanche:
+    image: quay.io/prometheuscommunity/avalanche:latest
+    command:
+      - "--gauge-metric-count=5"
+      - "--counter-metric-count=5"
+      - "--histogram-metric-count=5"
+      - "--histogram-metric-bucket-count=5"
+      - "--native-histogram-metric-count=5"
+      - "--summary-metric-count=5"
+      - "--summary-metric-objective-count=5"
+      - "--label-count=5"
+      - "--series-count=100"
+    ports:
+      - "9001:9001"
+    profiles: [avalanche]
+
   # Tempo runs as user 10001, and docker compose creates the volume as root.
   # As such, we need to chown the volume in order for Tempo to start correctly.
   init:

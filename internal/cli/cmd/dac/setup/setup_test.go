@@ -38,7 +38,12 @@ func TestDacSetupCMD(t *testing.T) {
 	}()
 
 	testSuite := []cmdTest.Suite{
-		// TODO add test for nominal case with CUE (need to deal with `cue login`...)
+		{
+			Title:           "Nominal case with CUE",
+			Args:            []string{"--version", "v0.51.0-beta.1"},
+			IsErrorExpected: false,
+			ExpectedMessage: "DaC setup for cue finished successfully\n",
+		},
 		{
 			Title:           "Nominal case with Go",
 			Args:            []string{"--language", "go", "--version", "v0.50.0"},

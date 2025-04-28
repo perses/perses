@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { CSSProperties, memo, useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect, use } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
-import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
+import { ScatterChart as EChartsScatterChart, CustomChart as EChartsCustomChart } from 'echarts/charts';
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -29,13 +29,14 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
 
-// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot plugin).
+// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot + custom plugin).
 // This is a workaround for https://github.com/perses/plugins/issues/83.
 use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
   EChartsScatterChart,
+  EChartsCustomChart,
   GridComponent,
   TitleComponent,
   TooltipComponent,
@@ -128,6 +129,7 @@ export interface EChartsProps<T> {
   theme?: string | EChartsTheme;
   renderer?: 'canvas' | 'svg';
   sx?: SxProps<Theme>;
+  style?: CSSProperties;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
   syncGroup?: string;
@@ -139,6 +141,7 @@ export const EChart = memo(function EChart<T>({
   theme,
   renderer,
   sx,
+  style,
   onEvents,
   _instance,
   syncGroup,
@@ -226,9 +229,9 @@ export const EChart = memo(function EChart<T>({
       }
     );
     updateSize();
-  }, [sx]);
+  }, [sx, style]);
 
-  return <Box ref={containerRef} sx={sx}></Box>;
+  return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });
 
 // Validate event config and bind custom events

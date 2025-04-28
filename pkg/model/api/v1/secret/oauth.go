@@ -50,7 +50,7 @@ type OAuth struct {
 	ClientID string `json:"clientID" yaml:"clientID"`
 	// ClientSecret is the application's secret.
 	ClientSecret     string `json:"clientSecret" yaml:"clientSecret"`
-	ClientSecretFile string `json:"clientSecretfile" yaml:"clientSecretFile"`
+	ClientSecretFile string `json:"clientSecretFile" yaml:"clientSecretFile"`
 	// TokenURL is the resource server's token endpoint
 	// URL. This is a constant specific to each server.
 	TokenURL string `json:"tokenURL" yaml:"tokenURL"`
@@ -94,7 +94,7 @@ func (o *OAuth) GetClientSecret() (string, error) {
 	if len(o.ClientSecretFile) > 0 {
 		clientSecret, err := os.ReadFile(o.ClientSecretFile)
 		if err != nil {
-			return "", fmt.Errorf("failed to read client_secret_file: %w", err)
+			return "", fmt.Errorf("failed to read clientSecretFile: %w", err)
 		}
 		return string(clientSecret), nil
 	}
@@ -103,11 +103,11 @@ func (o *OAuth) GetClientSecret() (string, error) {
 }
 
 func (o *OAuth) validate() error {
-	if len(o.ClientID) == 0 || len(o.ClientSecret) == 0 || len(o.ClientSecretFile) == 0 && len(o.TokenURL) == 0 {
-		return fmt.Errorf("when using oauth, client_id, client_secret/client_secret_file, and token_url cannot be empty")
+	if len(o.ClientID) == 0 || (len(o.ClientSecret) == 0 && len(o.ClientSecretFile) == 0) || len(o.TokenURL) == 0 {
+		return fmt.Errorf("when using oauth, clientID, clientSecret/clientSecretFile, and tokenURL cannot be empty")
 	}
 	if len(o.ClientSecret) > 0 && len(o.ClientSecretFile) > 0 {
-		return fmt.Errorf("at most one of oauth client_secret & client_secret_file must be configured")
+		return fmt.Errorf("at most one of oauth clientSecret & clientSecretFile must be configured")
 	}
 	return nil
 }

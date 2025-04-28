@@ -19,6 +19,12 @@ export type TimeSeriesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinitio
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
 
+export type BucketTuple = [number, string, string, string]; // [bucket, upperBound, lowerBound, count]
+
+export type HistogramValue = { count: number; sum: string; buckets?: BucketTuple[] };
+
+export type TimeSeriesHistogramTuple = [unixTimeSeconds: UnixTimeMs, value: HistogramValue];
+
 export function isTimeSeriesValueTuple(data: TimeSeriesValueTuple): data is TimeSeriesValueTuple {
   if (data.length !== 2) return false;
   return true;

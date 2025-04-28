@@ -54,6 +54,7 @@ func (a *arch) unzip(archiveFileName string) error {
 		return nil
 	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
+	archiveName := archive.ExtractArchiveName(archiveFileName)
 	archiveFile := filepath.Join(a.folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile)
 	defer func() {
@@ -70,36 +71,38 @@ func (a *arch) unzip(archiveFileName string) error {
 		return nil
 	}
 	if ex, ok := format.(archives.Extractor); ok {
-		if extractErr := ex.Extract(context.Background(), newStream, a.extractArchiveFileHandler); extractErr != nil {
-			return fmt.Errorf("unable to extract the archive file")
+		if extractErr := ex.Extract(context.Background(), newStream, a.extractArchiveFileHandler(archiveName)); extractErr != nil {
+			return fmt.Errorf("unable to extract the archive file: %w", extractErr)
 		}
 	}
 	return nil
 }
 
-func (a *arch) extractArchiveFileHandler(_ context.Context, f archives.FileInfo) error {
-	if f.IsDir() {
+func (a *arch) extractArchiveFileHandler(archiveName string) archives.FileHandler {
+	return func(_ context.Context, f archives.FileInfo) error {
+		if f.IsDir() {
+			return nil
+		}
+		currentDir, _ := filepath.Split(f.NameInArchive)
+		if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, archiveName, currentDir), os.ModePerm); mkdirErr != nil {
+			return fmt.Errorf("unable to create directory %q: %w", currentDir, mkdirErr)
+		}
+		stream, openErr := f.Open()
+		if openErr != nil {
+			return fmt.Errorf("unable to open archive file %q: %w", f.NameInArchive, openErr)
+		}
+		defer func() {
+			if closeErr := stream.Close(); closeErr != nil {
+				logrus.WithError(closeErr).Error("unable to close archive file stream")
+			}
+		}()
+		respBytes, err := io.ReadAll(stream)
+		if err != nil {
+			return fmt.Errorf("unable to read the file %q: %w", f.NameInArchive, err)
+		}
+		if writeErr := os.WriteFile(filepath.Join(a.targetFolder, archiveName, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
+			return fmt.Errorf("unable to write the file %q: %w", f.NameInArchive, writeErr)
+		}
 		return nil
 	}
-	currentDir, _ := filepath.Split(f.NameInArchive)
-	if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, currentDir), os.ModePerm); mkdirErr != nil {
-		return fmt.Errorf("unable to create directory %q: %w", currentDir, mkdirErr)
-	}
-	stream, openErr := f.Open()
-	if openErr != nil {
-		return fmt.Errorf("unable to open archive file %q: %w", f.NameInArchive, openErr)
-	}
-	defer func() {
-		if closeErr := stream.Close(); closeErr != nil {
-			logrus.WithError(closeErr).Error("unable to close archive file stream")
-		}
-	}()
-	respBytes, err := io.ReadAll(stream)
-	if err != nil {
-		return fmt.Errorf("unable to read the file %q: %w", f.NameInArchive, err)
-	}
-	if writeErr := os.WriteFile(filepath.Join(a.targetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
-		return fmt.Errorf("unable to write the file %q: %w", f.NameInArchive, writeErr)
-	}
-	return nil
 }

@@ -56,11 +56,6 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context);
           return data;
         },
-
-        // The data returned by getTraceData() contains circular dependencies (a span has a reference to the parent span, and the parent span has an array of child spans)
-        // Therefore structuralSharing must be turned off, otherwise the query is stuck in the 'fetching' state on re-fetch.
-        // Ref: https://github.com/TanStack/query/issues/6954#issuecomment-1962321426
-        structuralSharing: false,
       };
     }),
   });

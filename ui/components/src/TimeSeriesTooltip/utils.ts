@@ -18,7 +18,6 @@ import {
   TOOLTIP_MAX_WIDTH,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MIN_WIDTH,
-  TOOLTIP_ADJUST_Y_POS_MULTIPLIER,
   TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_PADDING,
 } from './tooltip-model';
@@ -28,7 +27,6 @@ import {
  */
 export function assembleTransform(
   mousePos: CursorData['coords'],
-  chartWidth: number,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
   tooltipWidth: number,
@@ -47,40 +45,43 @@ export function assembleTransform(
 
   if (mousePos.plotCanvas.x === undefined) return undefined;
 
-  // By default, tooltip is located in a Portal attached to the body.
-  // Using page coordinates instead of viewport ensures the tooltip is
-  // absolutely positioned correctly as the user scrolls
-  let x = mousePos.page.x;
+  let x = mousePos.page.x + cursorPaddingX; // Default to right side of the cursor
   let y = mousePos.page.y + cursorPaddingY;
 
-  // If containerElement is defined, tooltip is attached to the containerElement instead.
-  let containerRect;
+  // If containerElement is defined, adjust coordinates relative to the container
   if (containerElement) {
-    // get the container's position relative to viewport
-    containerRect = containerElement.getBoundingClientRect();
-    // calculate the mouse position relative to container
+    const containerRect = containerElement.getBoundingClientRect();
     x = x - containerRect.left + containerElement.scrollLeft;
     y = y - containerRect.top + containerElement.scrollTop;
-  }
 
-  if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
-    // adjust so tooltip does not get cut off at bottom of chart
-    // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
-    y = y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
-
-    // If y is now above of the top of containerElement, set y close to 0 so tooltip does not get cut off
-    if (containerRect && y < containerRect.top) {
-      y = TOOLTIP_PADDING / 2; // leaves room for some padding around tooltip
+    // Ensure tooltip does not go out of the container's bottom
+    const containerBottom = containerRect.top + containerElement.scrollHeight;
+    if (y + tooltipHeight > containerBottom) {
+      y = Math.max(containerBottom - tooltipHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+    }
+  } else {
+    // Ensure tooltip does not go out of the screen on the bottom
+    if (y + tooltipHeight > window.innerHeight + window.scrollY) {
+      y = Math.max(window.innerHeight + window.scrollY - tooltipHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
     }
   }
 
-  // use tooltip width to determine when to repos from right to left
-  const xPosAdjustThreshold = chartWidth - tooltipWidth * 0.9;
+  // Ensure tooltip does not go out of the screen on the right
+  if (x + tooltipWidth > window.innerWidth) {
+    x = mousePos.page.x - tooltipWidth - cursorPaddingX; // Move to the left of the cursor
+  }
 
-  // reposition so tooltip is never too close to right side of chart or left side of browser window
-  return mousePos.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
-    ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
-    : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
+  // Ensure tooltip does not go out of the screen on the left
+  if (x < cursorPaddingX) {
+    x = cursorPaddingX;
+  }
+
+  // Ensure tooltip does not go out of the screen on the top
+  if (y < TOOLTIP_PADDING / 2) {
+    y = TOOLTIP_PADDING / 2;
+  }
+
+  return `translate3d(${x}px, ${y}px, 0)`;
 }
 
 /**

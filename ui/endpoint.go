@@ -30,6 +30,7 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -125,7 +126,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	return nil
 }
 
-func proxyPrepareRequest(c echo.Context, devEnvironment *config.PluginInDevelopment) error {
+func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment) error {
 	req := c.Request()
 	// We have to modify the HOST of the request to match the host of the targetURL
 	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.

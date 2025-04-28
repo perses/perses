@@ -331,13 +331,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
                 name: 'NewSecret',
                 project: projectName,
               },
-              spec: {
-                basicAuth: {
-                  username: '',
-                  password: '',
-                  passwordFile: '',
-                },
-              },
+              spec: {},
             }}
             isOpen={isSecretDrawerOpened}
             action="create"

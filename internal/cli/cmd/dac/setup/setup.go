@@ -231,7 +231,7 @@ It mainly consists in retrieving the Perses libraries to start coding dashboards
 percli dac setup
 
 # DaC setup when you are not connected to a server, you need to provide the Perses version to consider for dependencies retrieval
-percli dac setup --version 0.47.1 # any version you'd like above v0.44.0
+percli dac setup --version 0.47.1
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
