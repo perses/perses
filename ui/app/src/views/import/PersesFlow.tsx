@@ -55,19 +55,11 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
           <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Project name"
-                  onBlur={(event) => {
-                    setProjectName(event.target.value);
-                  }}
-                />
-              )}
-              options={data.map((project) => {
-                return project.metadata.name;
-              })}
+              options={data.map((project) => project.metadata.name)}
+              onInputChange={(event, value) => {
+                setProjectName(value);
+              }}
+              renderInput={(params) => <TextField {...params} required label="Project name" />}
             />
             <Button
               variant="contained"

@@ -20,8 +20,7 @@ Perses is first and foremost a dashboard tool that you can use to display a vari
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-| ![img.png](https://github.com/perses/perses/assets/5657041/3bd8ae57-da7b-4447-9478-cefe19d61a71) | ![img.png](https://github.com/perses/perses/assets/5657041/ba46beab-c8fb-4583-bc2f-71c9893f7906) |
-|:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
+![img.png](https://perses.dev/assets/images/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 
@@ -31,24 +30,22 @@ Beyond its core usage, Perses aims to achieve several broader goals:
 - **GitOps-friendly**. SDKs, CI/CD libraries, static validation, native CLI.. Perses provides everything you need for a great Dashboard-as-Code experience.
 - **Kubernetes-native mode**. Dashboard definitions will be deployable into and readable from individual application namespaces using Custom Resource Definitions (CRDs). For more information on that topic you can take a look at the [Perses Operator](https://github.com/perses/perses-operator).
 
+Want to learn more? Check the [documentation website](https://perses.dev).
+
 ## Try it
 
-We are providing an online demo available at **https://demo.perses.dev**.
-You can create your own project(s) and dashboard(s) there, no one else will be able to modify them!
+We are providing an online demo available at **https://demo.perses.dev**, where you can check existing dashboards or create your own resources.
 
 ## Status
 
 1. Perses as an application can now **be used**.
-   * The data model reached a stable point, and we are providing multiple panel types that should cover most of the use cases
-     when using Prometheus.
+   * The data model reached a stable point, and we are providing multiple panel types that should cover most of the monitoring & tracing use cases.
    * Authentication and authorization are available.
 2. On the GitOps aspect:
    * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/cli.md)
-   * Two SDKs (in Golang and in Cuelang) are available to code dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
-     Probably these SDKs are going to evolve depending on the feedbacks we might receive. Still it's likely to be about adding more
-     util functions rather than breaking things.
-3. *Work is in progress* Change the current plugin architecture to make it potentially simpler and above all to be able to
-   externalize the load and the implementation of a plugin.
+   * Two SDKs (in Golang and in Cuelang) are available for coding dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
+     These SDKs will likely evolve based on the feedback we receive. However, changes are expected to focus on adding utility functions rather than introducing breaking changes.
+3. *Coming soon!* A revamped plugin architecture will enable the externalization of both plugin loading and implementation.
 
 ## What's next
 

@@ -94,7 +94,9 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
   return (
     <>
       <OptionsEditorControl
+        // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
         label="Abbreviate values"
+        // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
         control={
           <Switch
             checked={hasShortValues ? shouldShortenValues(value.shortValues) : false}

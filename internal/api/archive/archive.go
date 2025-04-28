@@ -32,6 +32,15 @@ const (
 
 var supportedArchiveFormat = []Format{TARgz, TAR, ZIP}
 
+func ExtractArchiveName(archiveName string) string {
+	for _, format := range supportedArchiveFormat {
+		if strings.HasSuffix(archiveName, string(format)) {
+			return strings.TrimSuffix(archiveName, "."+string(format))
+		}
+	}
+	return archiveName
+}
+
 func IsArchiveFile(filename string) bool {
 	for _, format := range supportedArchiveFormat {
 		if strings.HasSuffix(filename, string(format)) {

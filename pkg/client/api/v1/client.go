@@ -31,6 +31,7 @@ type ClientInterface interface {
 	GlobalSecret() GlobalSecretInterface
 	GlobalVariable() GlobalVariableInterface
 	Health() HealthInterface
+	Plugin() PluginInterface
 	Project() ProjectInterface
 	Role(project string) RoleInterface
 	RoleBinding(project string) RoleBindingInterface
@@ -92,6 +93,10 @@ func (c *client) GlobalVariable() GlobalVariableInterface {
 
 func (c *client) Health() HealthInterface {
 	return newHealth(c.restClient)
+}
+
+func (c *client) Plugin() PluginInterface {
+	return newPlugin(c.restClient)
 }
 
 func (c *client) Project() ProjectInterface {
