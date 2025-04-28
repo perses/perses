@@ -59,13 +59,7 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
               onInputChange={(event, value) => {
                 setProjectName(value);
               }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Project name"
-                />
-              )}
+              renderInput={(params) => <TextField {...params} required label="Project name" />}
             />
             <Button
               variant="contained"
