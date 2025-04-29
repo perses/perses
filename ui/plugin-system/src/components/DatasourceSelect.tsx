@@ -48,6 +48,8 @@ type DataSourceOption = {
 } & Omit<DatasourceSelectItem, 'selector'> &
   Omit<DatasourceSelectItem['selector'], 'kind'>;
 
+const emptyDatasourceOption: DataSourceOption = { name: '', value: '' };
+
 export type DatasourceSelectValue<T = DatasourceSelector> = T | VariableName;
 
 export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
@@ -66,7 +68,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   const variables = useVariableValues();
 
-  const defaultValue = useMemo(() => {
+  const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
     if (isVariableDatasource(value)) {
       return value;
     }
@@ -112,8 +114,10 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
     return [...datasourceOptions, ...variableOptions];
   }, [data, variables]);
 
-  // While loading available values, just use an empty string so MUI select doesn't warn about values out of range
-  const optionValue = isLoading ? null : options.find((option) => option.value === selectorToOptionValue(defaultValue));
+  // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
+  const optionValue = isLoading
+    ? emptyDatasourceOption
+    : options.find((option) => option.value === selectorToOptionValue(defaultValue));
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
   const handleChange = (selectedOption: DataSourceOption | null): void => {
