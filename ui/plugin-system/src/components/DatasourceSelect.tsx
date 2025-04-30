@@ -13,29 +13,48 @@
 
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import {
-  Select,
-  SelectProps,
-  MenuItem,
   Stack,
-  Divider,
   ListItemText,
   Chip,
   IconButton,
   Box,
   OutlinedSelectProps,
   BaseSelectProps,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, VariableName } from '@perses-dev/core';
 import { ReactElement, useMemo } from 'react';
-import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
+import {
+  DatasourceSelectItem,
+  DatasourceSelectItemGroup,
+  DatasourceSelectItemSelector,
+  useListDatasourceSelectItems,
+  useVariableValues,
+  VariableStateMap,
+} from '../runtime';
+import { parseVariables } from '../utils';
 
+const DATASOURCE_VARIABLE_VALUE_PREFIX = '__DATASOURCE_VARIABLE_VALUE__';
+const VARIABLE_IDENTIFIER = '$';
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
+type DataSourceOption = {
+  groupEditLink?: string;
+  groupLabel?: string;
+  value: string;
+} & Omit<DatasourceSelectItem, 'selector'> &
+  Omit<DatasourceSelectItem['selector'], 'kind'>;
+
+const emptyDatasourceOption: DataSourceOption = { name: '', value: '' };
+
+export type DatasourceSelectValue<T = DatasourceSelector> = T | VariableName;
+
 export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
-  value: DatasourceSelector;
-  onChange: (next: DatasourceSelector) => void;
+  value: DatasourceSelectValue;
+  onChange: (next: DatasourceSelectValue) => void;
   datasourcePluginKind: string;
   project?: string;
 }
@@ -47,8 +66,13 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
-  // Rebuild the group of the value if not provided
-  const defaultValue = useMemo(() => {
+  const variables = useVariableValues();
+
+  const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
+    if (isVariableDatasource(value)) {
+      return value;
+    }
+
     const group = (data ?? [])
       .flatMap((itemGroup) => itemGroup.items)
       .find((item) => {
@@ -57,29 +81,52 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
     return { ...value, group };
   }, [value, data]);
 
-  // Convert the datasource list into menu items with name/group?/value strings that the Select input can work with
-  const menuItems = useMemo(() => {
-    return (data ?? []).map((itemGroup) => ({
-      group: itemGroup.group,
-      editLink: itemGroup.editLink,
-      items: itemGroup.items.map((item) => ({
+  const options = useMemo<DataSourceOption[]>(() => {
+    const datasourceOptions = (data || []).flatMap<DataSourceOption>((itemGroup) =>
+      itemGroup.items.map<DataSourceOption>((item) => ({
+        groupLabel: itemGroup.group,
+        groupEditLink: itemGroup.editLink,
         name: item.name,
         overriding: item.overriding,
         overridden: item.overridden,
         saved: item.saved ?? true,
         group: item.selector.group,
         value: selectorToOptionValue(item.selector),
-      })),
-    }));
-  }, [data]);
+      }))
+    );
 
-  // While loading available values, just use an empty string so MUI select doesn't warn about values out of range
-  const optionValue = isLoading ? '' : selectorToOptionValue(defaultValue);
+    const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
+
+    const variableOptions = Object.entries(variables).flatMap<DataSourceOption>(([name, variable]) => {
+      if (Array.isArray(variable.value)) return [];
+
+      const associatedDatasource = datasourceOptionsMap.get(variable.value ?? '');
+      if (!associatedDatasource) return [];
+
+      return {
+        groupLabel: 'Variables',
+        name: `${VARIABLE_IDENTIFIER}${name}`,
+        saved: true,
+        value: `${DATASOURCE_VARIABLE_VALUE_PREFIX}${VARIABLE_IDENTIFIER}${name}`,
+      };
+    });
+
+    return [...datasourceOptions, ...variableOptions];
+  }, [data, variables]);
+
+  // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
+  const optionValue = isLoading
+    ? emptyDatasourceOption
+    : options.find((option) => option.value === selectorToOptionValue(defaultValue));
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
-  const handleChange: SelectProps<string>['onChange'] = (e) => {
-    const next = optionValueToSelector(e.target.value);
-    onChange(next);
+  const handleChange = (selectedOption: DataSourceOption | null): void => {
+    if (selectedOption) {
+      const next = optionValueToSelector(selectedOption?.value || '');
+      onChange(next);
+    } else {
+      onChange({ kind: datasourcePluginKind });
+    }
   };
 
   // We use a fake action event when we click on the action of the chip (hijack the "delete" feature).
@@ -88,36 +135,34 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const fakeActionEvent = (): void => {};
 
-  // TODO:
-  //  - Does this need a loading indicator of some kind?
-  //  - The group's edit link is not clickable once selected.
-  //  - The group's edit link is disabled if datasource is overridden.
-  //    Ref: https://github.com/mui/material-ui/issues/36572
   return (
-    <Select {...others} value={optionValue} onChange={handleChange}>
-      {menuItems.map((menuItemGroup) => [
-        <Divider key={`${menuItemGroup.group}-divider`} />,
-        ...menuItemGroup.items.map((menuItem) => (
-          <MenuItem key={menuItem.value} value={menuItem.value} disabled={menuItem.overridden || !menuItem.saved}>
+    <Autocomplete<DataSourceOption>
+      options={options}
+      renderInput={(params) => <TextField {...params} label={others.label} placeholder="" />}
+      groupBy={(option) => option.groupLabel || 'No group'}
+      getOptionLabel={(option) => {
+        return option.name;
+      }}
+      onChange={(_, v) => handleChange(v)}
+      value={optionValue}
+      renderOption={(props, option) => {
+        return (
+          <li {...props} key={option.value}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
               <ListItemText>
-                <DatasourceName
-                  name={menuItem.name}
-                  overridden={menuItem.overridden}
-                  overriding={menuItem.overriding}
-                />
+                <DatasourceName name={option.name} overridden={option.overridden} overriding={option.overriding} />
               </ListItemText>
-              {!menuItem.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
+              {!option.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
               <ListItemText style={{ textAlign: 'right' }}>
-                {menuItemGroup.group && menuItemGroup.group.length > 0 && (
+                {option.groupLabel && option.groupLabel.length > 0 && (
                   <Chip
                     disabled={false}
-                    label={menuItemGroup.group}
+                    label={option.groupLabel}
                     size="small"
-                    onDelete={menuItemGroup.editLink ? fakeActionEvent : undefined}
+                    onDelete={option.groupEditLink ? fakeActionEvent : undefined}
                     deleteIcon={
-                      menuItemGroup.editLink ? (
-                        <IconButton href={menuItemGroup.editLink} target="_blank">
+                      option.groupEditLink ? (
+                        <IconButton href={option.groupEditLink} target="_blank">
                           <OpenInNewIcon fontSize="small" />
                         </IconButton>
                       ) : undefined
@@ -126,10 +171,10 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
                 )}
               </ListItemText>
             </Stack>
-          </MenuItem>
-        )),
-      ])}
-    </Select>
+          </li>
+        );
+      }}
+    />
   );
 }
 
@@ -156,7 +201,10 @@ const OPTION_VALUE_DELIMITER = '_____';
  * returns a string value like `{kind}_____{group}_____{name}` that can be used as a Select input value.
  * @param selector
  */
-function selectorToOptionValue(selector: DatasourceSelectItemSelector): string {
+function selectorToOptionValue(selector: DatasourceSelectItemSelector | VariableName): string {
+  if (isVariableDatasource(selector)) {
+    return `${DATASOURCE_VARIABLE_VALUE_PREFIX}${selector}`;
+  }
   return [selector.kind, selector.group ?? '', selector.name ?? ''].join(OPTION_VALUE_DELIMITER);
 }
 
@@ -165,7 +213,11 @@ function selectorToOptionValue(selector: DatasourceSelectItemSelector): string {
  * returns a DatasourceSelector to be used by the query data model.
  * @param optionValue
  */
-function optionValueToSelector(optionValue: string): DatasourceSelector {
+function optionValueToSelector(optionValue: string): DatasourceSelectValue {
+  if (optionValue.startsWith(DATASOURCE_VARIABLE_VALUE_PREFIX)) {
+    return optionValue.split(DATASOURCE_VARIABLE_VALUE_PREFIX)[1]!;
+  }
+
   const words = optionValue.split(OPTION_VALUE_DELIMITER);
   const kind = words[0];
   const name = words[2];
@@ -177,3 +229,54 @@ function optionValueToSelector(optionValue: string): DatasourceSelector {
     name: name === '' ? undefined : name,
   };
 }
+
+export function isVariableDatasource(value: DatasourceSelectValue | undefined): value is VariableName {
+  return typeof value === 'string' && value.startsWith(VARIABLE_IDENTIFIER);
+}
+
+export const datasourceSelectValueToSelector = (
+  value: DatasourceSelectValue | undefined,
+  variables: VariableStateMap,
+  datasourceSelectItemGroups: DatasourceSelectItemGroup[] | undefined
+): DatasourceSelector | undefined => {
+  if (!isVariableDatasource(value)) {
+    return value;
+  }
+
+  const [variableName] = parseVariables(value);
+  const variable = variables[variableName ?? ''];
+
+  // If the variable is not defined or if its value is an array, we cannot determine a selector and return undefined
+  if (!variable || Array.isArray(variable.value)) {
+    return undefined;
+  }
+
+  const associatedDatasource = (datasourceSelectItemGroups || [])
+    .flatMap((itemGroup) => itemGroup.items)
+    .find((datasource) => datasource.name === variable.value);
+
+  // If the variable value is not a datasource, we cannot determine a selector and return undefined
+  if (associatedDatasource === undefined) {
+    return undefined;
+  }
+
+  const datasourceSelector: DatasourceSelector = {
+    kind: associatedDatasource.selector.kind,
+    name: associatedDatasource.selector.name,
+  };
+
+  return datasourceSelector;
+};
+
+export const useDatasourceSelectValueToSelector = (
+  value: DatasourceSelectValue,
+  datasourcePluginKind: string
+): DatasourceSelector => {
+  const { data } = useListDatasourceSelectItems(datasourcePluginKind);
+  const variables = useVariableValues();
+  if (!isVariableDatasource(value)) {
+    return value;
+  }
+
+  return datasourceSelectValueToSelector(value, variables, data) ?? { kind: datasourcePluginKind };
+};

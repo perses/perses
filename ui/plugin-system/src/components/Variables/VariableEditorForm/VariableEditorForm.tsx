@@ -112,7 +112,10 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     setPreviewSpec(form.getValues() as ListVariableDefinition);
   };
 
-  const kind = useWatch<VariableDefinition, 'spec.plugin.kind'>({ control: control, name: 'spec.plugin.kind' });
+  const plugin = useWatch<VariableDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
+  const kind = plugin?.kind;
+  const pluginSpec = plugin?.spec;
+
   const _allowAllValue = useWatch<VariableDefinition, 'spec.allowAllValue'>({
     control: control,
     name: 'spec.allowAllValue',
@@ -155,24 +158,26 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
             <Controller
               control={control}
               name="spec.plugin"
-              render={({ field }) => (
-                <PluginEditor
-                  width="100%"
-                  pluginTypes={['Variable']}
-                  pluginKindLabel="Source"
-                  value={{
-                    selection: {
-                      type: 'Variable',
-                      kind: field.value?.kind ?? 'StaticListVariable',
-                    },
-                    spec: field.value?.spec ?? { values: [] },
-                  }}
-                  isReadonly={action === 'read'}
-                  onChange={(v) => {
-                    field.onChange({ kind: v.selection.kind, spec: v.spec });
-                  }}
-                />
-              )}
+              render={({ field }) => {
+                return (
+                  <PluginEditor
+                    width="100%"
+                    pluginTypes={['Variable']}
+                    pluginKindLabel="Source"
+                    value={{
+                      selection: {
+                        type: 'Variable',
+                        kind: kind ?? 'StaticListVariable',
+                      },
+                      spec: pluginSpec ?? { values: [] },
+                    }}
+                    isReadonly={action === 'read'}
+                    onChange={(v) => {
+                      field.onChange({ kind: v.selection.kind, spec: v.spec });
+                    }}
+                  />
+                );
+              }}
             />
           </ErrorBoundary>
         </Stack>

@@ -23,10 +23,11 @@ import {
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
-import { VariableStateMap, useAllVariableValues } from './variables';
+import { useAllVariableValues } from './variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
+import { filterVariableStateMap, getVariableValuesKey } from './utils';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
@@ -34,22 +35,6 @@ export interface UseTimeSeriesQueryOptions {
 }
 
 export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
-
-/**
- * Returns a serialized string of the current state of variable values.
- */
-function getVariableValuesKey(v: VariableStateMap): string {
-  return Object.values(v)
-    .map((v) => JSON.stringify(v.value))
-    .join(',');
-}
-
-function filterVariableStateMap(v: VariableStateMap, names?: string[]): VariableStateMap {
-  if (!names) {
-    return v;
-  }
-  return Object.fromEntries(Object.entries(v).filter(([name]) => names.includes(name)));
-}
 
 function getQueryOptions({
   plugin,

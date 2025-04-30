@@ -18,7 +18,7 @@ import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, Plu
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>>;
-  listPluginMetadata(pluginTypes: string[]): Promise<PluginMetadataWithModule[]>;
+  listPluginMetadata(pluginTypes: PluginType[]): Promise<PluginMetadataWithModule[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
 
@@ -101,7 +101,7 @@ type UseListPluginMetadataOptions = Omit<
  * Gets a list of plugin metadata for the specified plugin type and returns it, along with loading/error state.
  */
 export function useListPluginMetadata(
-  pluginTypes: string[],
+  pluginTypes: PluginType[],
   options?: UseListPluginMetadataOptions
 ): UseQueryResult<PluginMetadataWithModule[]> {
   const { listPluginMetadata } = usePluginRegistry();
