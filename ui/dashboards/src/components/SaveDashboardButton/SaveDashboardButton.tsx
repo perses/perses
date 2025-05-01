@@ -15,6 +15,7 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
+import { useDashboardTimeZone } from '@perses-dev/components';
 import {
   OnSaveDashboard,
   useDashboard,
@@ -41,23 +42,30 @@ export const SaveDashboardButton = ({
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
+  const { timeZone: currentTimeZone } = useDashboardTimeZone();
 
   const onSaveButtonClick = (): void => {
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
+    const isSavedTimeZoneModified = dashboard.spec.timeZone !== currentTimeZone;
+
     // Save dashboard
     // - if active timeRange from plugin-system is relative and different from currently saved
     // - or if the saved variables are different from currently saved
-    if (isSavedDurationModified || isSavedVariableModified) {
+    // - or if the saved timeZone are different from currently saved
+    if (isSavedDurationModified || isSavedVariableModified || isSavedTimeZoneModified) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
+        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables, isSavedTimeZone) => {
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
             dashboard.spec.duration = timeRange.pastDuration;
           }
           if (saveDefaultVariables === true) {
             const variables = setVariableDefaultValues();
             dashboard.spec.variables = variables;
+          }
+          if (isSavedTimeZone) {
+            dashboard.spec.timeZone = currentTimeZone;
           }
           setDashboard(dashboard);
           saveDashboard();
@@ -67,6 +75,7 @@ export const SaveDashboardButton = ({
         },
         isSavedDurationModified,
         isSavedVariableModified,
+        isSavedTimeZoneModified,
       });
     } else {
       saveDashboard();
