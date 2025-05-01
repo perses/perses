@@ -16,7 +16,7 @@ import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { AbsoluteTimeRange } from '@perses-dev/core';
-import { useTimeZone } from '../context';
+import { useDashboardTimeZone } from '../context';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ErrorAlert } from '../ErrorAlert';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
@@ -41,7 +41,7 @@ type AbsoluteTimeRangeInputValue = {
  * @constructor
  */
 export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps): ReactElement => {
-  const { formatWithUserTimeZone } = useTimeZone();
+  const { formatWithUserTimeZone } = useDashboardTimeZone();
 
   // Time range values as dates that can be used as a time range.
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);

@@ -27,7 +27,7 @@ import { TimeScale } from '@perses-dev/core';
 import { EChartsCoreOption } from 'echarts';
 import { FC } from 'react';
 import { useChartsTheme } from '../context/ChartsProvider';
-import { useTimeZone } from '../context/TimeZoneProvider';
+import { useDashboardTimeZone } from '../context/DashboardTimeZoneProvider';
 import { EChart } from '../EChart';
 import { getFormattedStatusHistoryAxisLabel } from './get-formatted-axis-label';
 import { generateTooltipHTML } from './StatusHistoryTooltip';
@@ -66,7 +66,7 @@ export interface StatusHistoryChartProps {
 
 export const StatusHistoryChart: FC<StatusHistoryChartProps> = (props) => {
   const { height, data, xAxisCategories, yAxisCategories, timeScale, colors } = props;
-  const { timeZone } = useTimeZone();
+  const { timeZone } = useDashboardTimeZone();
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
 
