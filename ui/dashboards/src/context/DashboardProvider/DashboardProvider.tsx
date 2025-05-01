@@ -60,6 +60,7 @@ export interface DashboardStoreState
   metadata: ProjectMetadata;
   duration: DurationString;
   refreshInterval: DurationString;
+  timeZone: string;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   ttl?: DurationString;
@@ -70,6 +71,8 @@ export interface DashboardStoreProps {
   isEditMode?: boolean;
   viewPanelRef?: string;
   setViewPanelRef?: (viewPanelRef: string | undefined) => void;
+  timeZone: string;
+  setTimeZone: (timeZone: string) => void;
 }
 
 export interface DashboardProviderProps {
@@ -117,7 +120,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
 function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
-    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
+    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef, timeZone },
   } = props;
 
   const {
@@ -160,6 +163,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           display,
           duration,
           refreshInterval,
+          timeZone,
           datasources,
           ttl,
           isEditMode: !!isEditMode,
@@ -179,6 +183,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+              state.timeZone = timeZone;
               state.datasources = datasources;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });

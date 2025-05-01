@@ -15,16 +15,19 @@ import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
-import { Dialog } from '@perses-dev/components';
+import { Dialog, useDashboardTimeZone } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = (): ReactElement => {
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
   const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;
+  const isSavedTimeZoneModified = dialog?.isSavedTimeZoneModified ?? true;
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
+  const [saveDefaultTimeZone, setSaveDefaultTimeZone] = useState(isSavedTimeZoneModified);
 
+  const { timeZone } = useDashboardTimeZone();
   const { getSavedVariablesStatus } = useVariableDefinitionActions();
   const { modifiedVariableNames } = getSavedVariablesStatus();
 
@@ -40,6 +43,8 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
   const saveVariablesText = `Save current variable values as new default (${
     modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
   })`;
+
+  const saveTimeZoneText = `Save time zone as "${timeZone}" time`;
 
   return (
     <Dialog open={isOpen}>
@@ -70,13 +75,23 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
                 }
                 label={saveVariablesText}
               />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!isSavedTimeZoneModified}
+                    checked={saveDefaultTimeZone && isSavedTimeZoneModified}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeZone(e.target.checked)}
+                  />
+                }
+                label={saveTimeZoneText}
+              />
             </FormGroup>
           </Dialog.Content>
 
           <Dialog.Actions>
             <Dialog.PrimaryButton
               onClick={() => {
-                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables);
+                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables, saveDefaultTimeZone);
               }}
             >
               Save Changes
