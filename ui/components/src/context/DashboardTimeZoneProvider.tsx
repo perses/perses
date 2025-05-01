@@ -12,29 +12,46 @@
 // limitations under the License.
 
 import React, { createContext, ReactElement, useContext } from 'react';
-import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
+import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '@perses-dev/components/src/utils';
 
-export const TimeZoneContext = createContext<string | undefined>(undefined);
+type DashboardTimeZoneContextType = {
+  timeZone: string;
+  setTimeZone?: (timeZone: string) => void;
+};
 
-export interface TimeZoneProviderProps {
+export const DashboardTimeZoneContext = createContext<DashboardTimeZoneContextType | undefined>(undefined);
+
+export interface DashboardTimeZoneProviderProps {
   timeZone?: string;
+  setTimeZone?: (timeZone: string) => void;
   children?: React.ReactNode;
 }
 
-export function TimeZoneProvider(props: TimeZoneProviderProps): ReactElement {
-  const { children, timeZone } = props;
-  return <TimeZoneContext.Provider value={timeZone}>{children}</TimeZoneContext.Provider>;
+export function DashboardTimeZoneProvider(props: DashboardTimeZoneProviderProps): ReactElement {
+  const { timeZone = 'local', setTimeZone } = props;
+  return (
+    <DashboardTimeZoneContext.Provider value={{ timeZone, setTimeZone }}>
+      {props.children}
+    </DashboardTimeZoneContext.Provider>
+  );
 }
 
-export function useTimeZone(): {
+export function useDashboardTimeZone(): {
   timeZone: string;
+  setTimeZone: (timeZone: string) => void;
   formatWithUserTimeZone: (date: Date, formatString: string) => string;
   dateFormatOptionsWithUserTimeZone: (dateFormatOptions: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions;
 } {
-  const timeZone = useContext(TimeZoneContext);
+  const timeZoneContext = useContext(DashboardTimeZoneContext);
+  if (!timeZoneContext) {
+    throw new Error('useDashboardTimeZone must be used within a DashboardTimeZoneProvider');
+  }
+
+  const { timeZone, setTimeZone } = timeZoneContext;
+
   return {
-    // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
-    timeZone: timeZone ?? 'local',
+    timeZone: timeZone,
+    setTimeZone: (timeZone: string) => setTimeZone?.(timeZone),
     formatWithUserTimeZone(date: Date, formatString: string): string {
       return formatWithTimeZone(date, formatString, timeZone);
     },
