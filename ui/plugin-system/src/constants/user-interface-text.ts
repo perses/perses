@@ -18,4 +18,5 @@ export const TOOLTIP_TEXT = {
   // Time range controls buttons
   refresh: 'Refresh',
   refreshInterval: 'Auto refresh interval',
+  timezone: 'Timezone',
 };

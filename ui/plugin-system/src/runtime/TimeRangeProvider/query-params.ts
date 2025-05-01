@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { useQueryParams, QueryParamConfig } from 'use-query-params';
+import { useQueryParams, QueryParamConfig, StringParam } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
 import {
   TimeRangeValue,
@@ -198,5 +198,26 @@ export function useSetRefreshIntervalParams(
   return {
     refreshInterval: initialRefreshInterval,
     setRefreshInterval: setRefreshInterval,
+  };
+}
+
+export function useSetInitialDashboardTimeZone(initialTimeZone: string): {
+  timeZone: string;
+  setTimeZone: (timeZone: string) => void;
+} {
+  const [query, setQuery] = useQueryParams({ timeZone: StringParam }, { updateType: 'replaceIn' });
+  const { timeZone } = query;
+
+  useEffect(() => {
+    if (!timeZone) {
+      setQuery({ timeZone: initialTimeZone });
+    }
+  }, [setQuery, timeZone, initialTimeZone]);
+
+  const setTimeZone = useCallback((timeZone: string) => setQuery({ timeZone }), [setQuery]);
+
+  return {
+    timeZone: timeZone ? timeZone : initialTimeZone,
+    setTimeZone: setTimeZone,
   };
 }
