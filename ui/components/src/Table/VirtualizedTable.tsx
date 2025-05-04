@@ -25,6 +25,7 @@ import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { TableFoot } from './TableFoot';
+import { replaceCellVariables } from './services/url-template.service';
 
 type TableCellPosition = {
   row: number;
@@ -229,6 +230,11 @@ export function VirtualizedTable<TableData>({
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
 
+                const cellURLTemplate = cell.column.columnDef.meta?.linkConfig?.urlTemplate;
+                const openInNewTab = cell.column.columnDef.meta?.linkConfig?.openInNewTab;
+
+                const link = replaceCellVariables(cellURLTemplate, cell.column.id, cellContent, row.original);
+
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;
                 if (typeof cellDescriptionDef === 'function') {
@@ -258,6 +264,8 @@ export function VirtualizedTable<TableData>({
                     description={description}
                     color={cellConfig?.textColor ?? undefined}
                     backgroundColor={cellConfig?.backgroundColor ?? undefined}
+                    link={link}
+                    openInNewTab={openInNewTab}
                   >
                     {cellConfig?.text || cellContent}
                   </TableCell>

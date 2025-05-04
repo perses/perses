@@ -11,8 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
-import { ReactElement, useEffect, useRef } from 'react';
+import {
+  TableCell as MuiTableCell,
+  styled,
+  TableCellProps as MuiTableCellProps,
+  Box,
+  useTheme,
+  Link,
+} from '@mui/material';
+import { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
@@ -65,6 +72,8 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   onFocusTrigger?: (e: React.MouseEvent<HTMLTableCellElement> | React.KeyboardEvent<HTMLTableCellElement>) => void;
   color?: string;
   backgroundColor?: string;
+  link?: string;
+  openInNewTab?: boolean;
 }
 
 export function TableCell({
@@ -81,6 +90,8 @@ export function TableCell({
   align,
   color,
   backgroundColor,
+  link,
+  openInNewTab,
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
@@ -115,6 +126,35 @@ export function TableCell({
     // tabindex and focuses to the right cell.
     onFocusTrigger?.(e);
   };
+
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+  }, []);
+
+  const cellContent = useMemo(() => {
+    if (!link) return children;
+
+    return (
+      <Link
+        href={link}
+        target={openInNewTab ? '_blank' : undefined}
+        rel={openInNewTab ? 'noopener noreferrer' : undefined}
+        underline="hover"
+        color="primary"
+        onClick={handleLinkClick}
+        sx={{
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          whiteSpace: 'inherit',
+          overflow: 'inherit',
+          textOverflow: 'inherit',
+        }}
+      >
+        {children}
+      </Link>
+    );
+  }, [link, openInNewTab, children, handleLinkClick]);
 
   return (
     <StyledMuiTableCell
@@ -172,7 +212,7 @@ export function TableCell({
         aria-label={description}
         textAlign={align}
       >
-        {children}
+        {cellContent}
       </Box>
     </StyledMuiTableCell>
   );
