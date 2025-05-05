@@ -87,7 +87,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		return apiinterface.NotFoundError
 	}
 	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName)
-	if !isLoaded {
+	if !isLoaded || !loaded.Module.Status.IsLoaded {
 		logrus.Errorf("unable to find the plugin %s", pluginName)
 		return apiinterface.NotFoundError
 	}
