@@ -14,8 +14,9 @@ npx create-react-app perses-embedded-panel --template typescript
 
 # Install perses dependencies
 npm i --save @perses-dev/components \
-  @perses-dev/plugin-system @perses-dev/panels-plugin \
-  @tanstack/react-query @perses-dev/dashboards \
+  @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
+  @perses-dev/prometheus-plugin @perses-dev/dashboards \
+  @tanstack/react-query \
   @mui/material \
   @emotion/styled @hookform/resolvers
 ```
@@ -41,20 +42,21 @@ import {
   PluginRegistry,
   TimeRangeProvider,
 } from "@perses-dev/plugin-system";
-import { TimeSeriesChart } from "@perses-dev/panels-plugin";
 import { ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   DatasourceStoreProvider,
+  Panel,
   VariableProvider,
 } from "@perses-dev/dashboards";
-import panelsResource from "@perses-dev/panels-plugin/plugin.json";
 import {
   DashboardResource,
   GlobalDatasourceResource,
   DatasourceResource,
 } from "@perses-dev/core";
 import { DatasourceApi } from "@perses-dev/dashboards";
+import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
+import * as timeseriesChartPlugin from "@perses-dev/timeseries-chart-plugin";
 
 const fakeDatasource: GlobalDatasourceResource = {
   kind: "GlobalDatasource",
@@ -64,6 +66,7 @@ const fakeDatasource: GlobalDatasourceResource = {
     plugin: {
       kind: "PrometheusDatasource",
       spec: {
+        // Update to your actual datasource url
         directUrl: "https://prometheus.demo.do.prometheus.io",
       },
     },
@@ -103,8 +106,12 @@ function App() {
   const chartsTheme = generateChartsTheme(muiTheme, {});
   const pluginLoader = dynamicImportPluginLoader([
     {
-      resource: panelsResource as PluginModuleResource,
-      importPlugin: () => import("@perses-dev/panels-plugin"),
+      resource: prometheusPlugin.getPluginModule(),
+      importPlugin: () => Promise.resolve(prometheusPlugin),
+    },
+    {
+      resource: timeseriesChartPlugin.getPluginModule(),
+      importPlugin: () => Promise.resolve(timeseriesChartPlugin),
     },
   ]);
 
@@ -149,15 +156,23 @@ function App() {
                         },
                       ]}
                     >
-                      <TimeSeriesChart.PanelComponent
-                        contentDimensions={{
-                          width: 1200,
-                          height: 400,
+                      <Panel
+                        panelOptions={{
+                          hideHeader: true,
                         }}
-                        spec={{
-                          legend: {
-                            position: "bottom",
-                            size: "medium",
+                        definition={{
+                          kind: "Panel",
+                          spec: {
+                            display: { name: "Example Panel" },
+                            plugin: {
+                              kind: "TimeSeriesChart",
+                              spec: {
+                                legend: {
+                                  position: "bottom",
+                                  size: "medium",
+                                },
+                              },
+                            },
                           },
                         }}
                       />
