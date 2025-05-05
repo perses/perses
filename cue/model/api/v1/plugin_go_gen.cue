@@ -9,9 +9,10 @@ import "github.com/perses/perses/cue/model/api/v1/plugin"
 #PluginModuleKind: "PluginModule"
 
 #PluginModule: {
-	kind:     string                 @go(Kind)
-	metadata: plugin.#ModuleMetadata @go(Metadata)
-	spec:     plugin.#ModuleSpec     @go(Spec)
+	kind:     string                      @go(Kind)
+	metadata: plugin.#ModuleMetadata      @go(Metadata)
+	spec:     plugin.#ModuleSpec          @go(Spec)
+	status?:  null | plugin.#ModuleStatus @go(Status,*plugin.ModuleStatus)
 }
 
 #PluginInDevelopment: _

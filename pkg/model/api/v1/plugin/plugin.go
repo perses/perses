@@ -76,6 +76,12 @@ func (p *Plugin) validate() error {
 	return nil
 }
 
+type ModuleStatus struct {
+	IsLoaded bool   `json:"isLoaded" yaml:"isLoaded"`
+	InDev    bool   `json:"inDev" yaml:"inDev"`
+	Error    string `json:"error,omitempty" yaml:"error,omitempty"`
+}
+
 type ModuleSpec struct {
 	SchemasPath string   `json:"schemasPath" yaml:"schemasPath"`
 	Plugins     []Plugin `json:"plugins" yaml:"plugins"`
