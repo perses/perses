@@ -56,6 +56,7 @@ describe('legacyCheckforNearbySeries', () => {
       x: 1654007895000,
       y: 0.0524463040446356,
       formattedY: '0.05',
+      isSelected: false,
     },
   ];
 

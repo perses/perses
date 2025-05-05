@@ -18,11 +18,13 @@ import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
+  allowActions?: boolean;
+  onSelected?: (seriesIdx: number) => void;
   wrapLabels?: boolean;
 }
 
 export function TooltipContent(props: TooltipContentProps): ReactElement | null {
-  const { series, wrapLabels } = props;
+  const { series, wrapLabels, onSelected, allowActions } = props;
 
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
@@ -36,27 +38,34 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
   return (
     <Box
       sx={(theme) => ({
-        display: 'table',
         padding: theme.spacing(0.5, 2),
+        maxHeight: '300px',
+        overflow: 'auto',
+        borderBottom: allowActions ? `1px solid ${theme.palette.divider}` : undefined,
       })}
     >
-      {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
-        if (datumIdx === null || seriesIdx === null) return null;
-        const key = seriesIdx.toString() + datumIdx.toString();
+      {sortedFocusedSeries.map(
+        ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor, isSelected, metadata }) => {
+          if (datumIdx === null || seriesIdx === null) return null;
+          const key = seriesIdx.toString() + datumIdx.toString();
 
-        return (
-          <SeriesInfo
-            key={key}
-            seriesName={seriesName}
-            y={y}
-            formattedY={formattedY}
-            markerColor={markerColor}
-            totalSeries={sortedFocusedSeries.length}
-            wrapLabels={wrapLabels}
-            emphasizeText={isClosestToCursor}
-          />
-        );
-      })}
+          return (
+            <SeriesInfo
+              key={key}
+              seriesName={seriesName}
+              y={y}
+              formattedY={formattedY}
+              markerColor={markerColor}
+              totalSeries={sortedFocusedSeries.length}
+              wrapLabels={wrapLabels}
+              emphasizeText={isClosestToCursor}
+              isSelected={isSelected}
+              isSelectable={metadata?.isSelectable ?? true}
+              onSelected={onSelected ? (): void => onSelected(seriesIdx) : undefined}
+            />
+          );
+        }
+      )}
     </Box>
   );
 }

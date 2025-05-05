@@ -33,7 +33,7 @@ export function SeriesLabelsStack(props: SeriesLabelsStackProps): ReactElement {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'left',
-          color: theme.palette.common.white,
+          color: theme.palette.text.primary,
           fontSize: '11px',
         })}
       >
@@ -43,7 +43,7 @@ export function SeriesLabelsStack(props: SeriesLabelsStackProps): ReactElement {
           <Box
             component="span"
             sx={(theme) => ({
-              color: theme.palette.common.white,
+              color: theme.palette.text.primary,
               fontWeight: 700,
               paddingLeft: '2px',
             })}
@@ -59,7 +59,7 @@ export function SeriesLabelsStack(props: SeriesLabelsStackProps): ReactElement {
       />
       <Box
         sx={(theme) => ({
-          color: theme.palette.common.white,
+          color: theme.palette.text.primary,
         })}
       >
         {metricLabels.map((label) => {
@@ -73,7 +73,7 @@ export function SeriesLabelsStack(props: SeriesLabelsStackProps): ReactElement {
                 <Typography sx={{ fontSize: '11px' }}>{formattedName}</Typography>
                 <Typography
                   sx={(theme) => ({
-                    color: theme.palette.common.white,
+                    color: theme.palette.text.primary,
                     fontWeight: 700,
                     fontSize: '11px',
                   })}

@@ -14,7 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
-import { PIN_TOOLTIP_HELP_TEXT, UNPIN_TOOLTIP_HELP_TEXT } from './tooltip-model';
+import { NearbySeriesArray } from './nearby-series';
 
 describe('TooltipHeader', () => {
   const renderComponent = (props: TooltipHeaderProps): void => {
@@ -22,7 +22,7 @@ describe('TooltipHeader', () => {
   };
 
   const testSeriesTimeMs = 1671803580000;
-  const testNearbySeries = [
+  const testNearbySeries: NearbySeriesArray = [
     {
       seriesIdx: 0,
       datumIdx: 14,
@@ -34,6 +34,7 @@ describe('TooltipHeader', () => {
       formattedY: '29%',
       markerColor: '#56B4E9',
       isClosestToCursor: true,
+      isSelected: false,
     },
   ];
 
@@ -48,19 +49,6 @@ describe('TooltipHeader', () => {
     renderComponent(tooltipContent);
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('13:53:00')).toBeInTheDocument();
-    expect(screen.getByText(PIN_TOOLTIP_HELP_TEXT)).toBeInTheDocument();
-  });
-
-  it('should display with unpin text', () => {
-    const tooltipContent: TooltipHeaderProps = {
-      nearbySeries: testNearbySeries,
-      isTooltipPinned: true,
-      totalSeries: 5,
-      showAllSeries: false,
-      enablePinning: true,
-    };
-    renderComponent(tooltipContent);
-    expect(screen.getByText(UNPIN_TOOLTIP_HELP_TEXT)).toBeInTheDocument();
   });
 
   it('should not display show all toggle when only 1 total series', () => {
@@ -73,17 +61,5 @@ describe('TooltipHeader', () => {
     };
     renderComponent(tooltipContent);
     expect(screen.queryByText('Show All?')).not.toBeInTheDocument();
-  });
-
-  it('should not display pin tooltip text and icon', () => {
-    const tooltipContent: TooltipHeaderProps = {
-      nearbySeries: testNearbySeries,
-      isTooltipPinned: false,
-      totalSeries: 6,
-      showAllSeries: false,
-      enablePinning: false,
-    };
-    renderComponent(tooltipContent);
-    expect(screen.queryByText(PIN_TOOLTIP_HELP_TEXT)).not.toBeInTheDocument();
   });
 });

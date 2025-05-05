@@ -13,12 +13,13 @@
 
 import React, { createContext, ReactElement, useContext, useMemo, useState } from 'react';
 import { PersesChartsTheme } from '../model';
-import { CursorCoordinates } from '../TimeSeriesTooltip';
+import { CursorCoordinates, PointAction } from '../TimeSeriesTooltip';
 
 export interface ChartsProviderProps {
   chartsTheme: PersesChartsTheme;
   enablePinning?: boolean;
   children?: React.ReactNode;
+  pointActions?: PointAction[];
 }
 
 export interface SharedChartsState {
@@ -26,10 +27,11 @@ export interface SharedChartsState {
   enablePinning: boolean;
   lastTooltipPinnedCoords: CursorCoordinates | null;
   setLastTooltipPinnedCoords: (lastTooltipPinnedCoords: CursorCoordinates | null) => void;
+  pointActions: PointAction[];
 }
 
 export function ChartsProvider(props: ChartsProviderProps): ReactElement {
-  const { children, chartsTheme, enablePinning = false } = props;
+  const { children, chartsTheme, enablePinning = false, pointActions = [] } = props;
 
   const [lastTooltipPinnedCoords, setLastTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
 
@@ -39,8 +41,9 @@ export function ChartsProvider(props: ChartsProviderProps): ReactElement {
       enablePinning,
       lastTooltipPinnedCoords,
       setLastTooltipPinnedCoords,
+      pointActions,
     };
-  }, [chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords]);
+  }, [chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords, pointActions]);
 
   return <ChartsThemeContext.Provider value={ctx}>{children}</ChartsThemeContext.Provider>;
 }

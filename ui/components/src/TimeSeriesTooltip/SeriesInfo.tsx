@@ -23,12 +23,25 @@ export interface SeriesInfoProps {
   formattedY: string;
   markerColor: string;
   totalSeries: number;
+  isSelected?: boolean;
+  isSelectable?: boolean;
   emphasizeText?: boolean;
   wrapLabels?: boolean;
+  onSelected?: () => void;
 }
 
 export function SeriesInfo(props: SeriesInfoProps): ReactElement {
-  const { seriesName, formattedY, markerColor, totalSeries, emphasizeText = false, wrapLabels = true } = props;
+  const {
+    seriesName,
+    formattedY,
+    markerColor,
+    totalSeries,
+    emphasizeText = false,
+    wrapLabels = true,
+    isSelected,
+    isSelectable,
+    onSelected,
+  } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
   // ex with metric name: node_load15{env="demo",job="node"}
@@ -58,18 +71,24 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
 
   return (
     <Box
-      sx={{
-        display: 'table-row',
+      onClick={isSelectable ? onSelected : undefined}
+      sx={(theme) => ({
+        display: 'flex',
+        justifyContent: 'space-between',
+        padding: theme.spacing(0.5, 1),
+        borderRadius: 1,
         paddingTop: 0.5,
-      }}
+        background: isSelected ? theme.palette.grey['100'] : undefined,
+        cursor: onSelected && isSelectable ? 'pointer' : 'default',
+        transition: 'background 0.2s ease-in-out',
+
+        ':hover': {
+          background: isSelectable && onSelected ? theme.palette.grey['200'] : undefined,
+        },
+      })}
     >
-      <Box
-        sx={{
-          display: 'table-cell',
-          maxWidth: '520px',
-        }}
-      >
-        <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.5 }} />
+      <Box sx={{ maxWidth: '520px' }}>
+        <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.25 }} />
         <Box
           component="span"
           sx={(theme) => ({
@@ -78,7 +97,7 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
             minWidth: 150,
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
-            color: theme.palette.common.white,
+            color: theme.palette.text.primary,
             fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',
@@ -90,7 +109,6 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
       </Box>
       <Box
         sx={(theme) => ({
-          display: 'table-cell',
           paddingLeft: 1.5,
           textAlign: 'right',
           verticalAlign: 'top',

@@ -14,14 +14,15 @@
 import { memo, MutableRefObject, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { FormatOptions, TimeSeries } from '@perses-dev/core';
+import { FormatOptions, TimeSeries, TimeSeriesMetadata } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { TimeChartSeriesMapping } from '../model';
-import { CursorCoordinates, useMousePosition } from './tooltip-model';
+import { CursorCoordinates, PointAction, useMousePosition } from './tooltip-model';
 import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
 import { TooltipHeader } from './TooltipHeader';
 import { TooltipContent } from './TooltipContent';
+import { TooltipActions } from './TooltipActions';
 
 export interface TimeChartTooltipProps {
   chartRef: MutableRefObject<EChartsInstance | undefined>;
@@ -37,6 +38,8 @@ export interface TimeChartTooltipProps {
   onUnpinClick?: () => void;
   format?: FormatOptions;
   wrapLabels?: boolean;
+  pointActions?: PointAction[];
+  seriesMetadata?: TimeSeriesMetadata[];
 }
 
 export const TimeChartTooltip = memo(function TimeChartTooltip({
@@ -49,8 +52,11 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   format,
   onUnpinClick,
   pinnedPos,
+  pointActions = [],
+  seriesMetadata,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
+  const [selectedSeriesIdx, setSelectedSeriesIdx] = useState<number | null>(null);
   const transform = useRef<string | undefined>();
 
   const mousePos = useMousePosition();
@@ -76,16 +82,39 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     mousePos,
     data,
     seriesMapping,
+    seriesMetadata,
     pinnedPos,
     chart,
     format,
     showAllSeries,
+    selectedSeriesIdx,
   });
+
+  const hasPointMenuItems = pointActions.length > 0;
+
+  if (hasPointMenuItems && !isTooltipPinned) {
+    const hasOneSeries = nearbySeries.length === 1;
+    const firstSeriesClosestToCursor = nearbySeries.find((series) => series.isClosestToCursor);
+    let nextSelectedSeriesIdx: number | null = hasOneSeries ? 0 : null;
+
+    if (firstSeriesClosestToCursor) {
+      nextSelectedSeriesIdx =
+        (firstSeriesClosestToCursor.metadata?.isSelectable ?? true) ? firstSeriesClosestToCursor.seriesIdx : null;
+    }
+
+    if (nextSelectedSeriesIdx !== selectedSeriesIdx) {
+      setSelectedSeriesIdx(nextSelectedSeriesIdx);
+    }
+  }
+
+  const selectedSeries = nearbySeries.find((series) => series.isSelected);
+
   if (nearbySeries.length === 0) {
     return null;
   }
 
   const totalSeries = data.length;
+  const allowActions = enablePinning && pointActions.length > 0;
 
   return (
     <Portal container={containerElement}>
@@ -96,7 +125,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
           transform: transform.current,
         }}
       >
-        <Stack spacing={0.5}>
+        <Stack spacing={0}>
           <TooltipHeader
             nearbySeries={nearbySeries}
             totalSeries={totalSeries}
@@ -106,7 +135,24 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
             onShowAllClick={(checked) => setShowAllSeries(checked)}
             onUnpinClick={onUnpinClick}
           />
-          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
+          <TooltipContent
+            onSelected={
+              hasPointMenuItems
+                ? (seriesIdx): void => setSelectedSeriesIdx((prev) => (prev === seriesIdx ? null : seriesIdx))
+                : undefined
+            }
+            series={nearbySeries}
+            wrapLabels={wrapLabels}
+            allowActions={allowActions}
+          />
+          {allowActions && (
+            <TooltipActions
+              selectedSeries={selectedSeries}
+              actions={pointActions}
+              onUnpinClick={onUnpinClick}
+              isPinned={isTooltipPinned}
+            />
+          )}
         </Stack>
       </Box>
     </Portal>

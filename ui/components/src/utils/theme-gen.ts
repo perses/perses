@@ -18,7 +18,7 @@ import { EChartsTheme, PersesChartsTheme } from '../model';
 const DEFAULT_TEXT_COLOR = '#222';
 
 // avoid component override type errors since only palette and typography are used
-type MuiTheme = Omit<Theme, 'components'>;
+export type MuiTheme = Omit<Theme, 'components'>;
 
 export function generateChartsTheme(
   muiTheme: MuiTheme,

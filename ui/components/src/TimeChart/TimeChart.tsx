@@ -17,7 +17,7 @@ import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { toZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries, TimeSeriesMetadata } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -85,6 +85,7 @@ export interface TimeChartProps {
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
+  seriesMetadata?: TimeSeriesMetadata[];
 }
 
 export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function TimeChart(
@@ -103,10 +104,12 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     onDataZoom,
     onDoubleClick,
     __experimentalEChartsOptionsOverride,
+    seriesMetadata,
   },
   ref
 ) {
-  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
+  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords, pointActions } =
+    useChartsContext();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -423,10 +426,12 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             chartRef={chartRef}
             data={data}
             seriesMapping={seriesMapping}
+            seriesMetadata={seriesMetadata}
             wrapLabels={tooltipConfig.wrapLabels}
             enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
             format={format}
+            pointActions={pointActions}
             onUnpinClick={() => {
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
