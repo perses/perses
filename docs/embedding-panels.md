@@ -9,16 +9,18 @@ We are working actively on reducing this amount of required dependencies/provide
 ## Getting started (npm example)
 
 ```bash
-# For example you can use the create-react-app command line or reuse the code of your app
-npx create-react-app perses-embedded-panel --template typescript
+# Create new React app or modify an existing app using the dependencies below
+# Example: https://react.dev/learn/build-a-react-app-from-scratch
 
-# Install perses dependencies
+# Install Perses dependencies
+# Note: React 19 is not supported yet
 npm i --save @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
   @perses-dev/prometheus-plugin @perses-dev/dashboards \
   @tanstack/react-query \
   @mui/material \
-  @emotion/styled @hookform/resolvers
+  @emotion/styled @hookform/resolvers \
+  react@18 react-dom@18
 ```
 
 ## Minimal code
