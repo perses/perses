@@ -135,49 +135,73 @@ func (p *pluginFile) Load() error {
 			continue
 		}
 		pluginPath := filepath.Join(p.path, file.Name())
-		if validErr := IsRequiredFileExists(pluginPath, pluginPath, pluginPath); validErr != nil {
-			logrus.WithError(validErr).Errorf("folder %q is not a valid plugin and is skipped. Missing mandatory files", file.Name())
-			// We can ignore this folder, it's not a plugin, or the plugin is invalid.
+		pluginModule := p.loadSinglePlugin(file, pluginPath)
+		if pluginModule == nil {
+			// the plugin is not valid, we can skip it
 			continue
-		}
-		manifest, readErr := ReadManifest(pluginPath)
-		if readErr != nil {
-			logrus.WithError(readErr).Error("unable to read plugin manifest")
-			continue
-		}
-		npmPackageData, readErr := ReadPackage(pluginPath)
-		if readErr != nil {
-			logrus.WithError(readErr).Error("unable to read plugin package.json")
-			continue
-		}
-		pluginModule := v1.PluginModule{
-			Kind: v1.PluginModuleKind,
-			Metadata: plugin.ModuleMetadata{
-				Name:    manifest.Name,
-				Version: manifest.Metadata.BuildInfo.Version,
-			},
-			Spec: npmPackageData.Perses,
 		}
 		pluginLoaded := Loaded{
 			DevEnvironment: nil,
-			Module:         pluginModule,
+			Module:         *pluginModule,
 			LocalPath:      pluginPath,
 		}
-		if IsSchemaRequired(pluginModule.Spec) {
-			if pluginSchemaLoadErr := p.sch.Load(pluginPath, pluginModule); pluginSchemaLoadErr != nil {
-				logrus.WithError(pluginSchemaLoadErr).Error("unable to load plugin schema")
-				continue
-			}
-			if pluginMigrateLoadErr := p.mig.Load(pluginPath, pluginModule); pluginMigrateLoadErr != nil {
-				logrus.WithError(pluginMigrateLoadErr).Error("unable to load plugin migration")
-				continue
-			}
-		}
 		p.mutex.Lock()
-		p.loaded[manifest.Name] = pluginLoaded
+		p.loaded[pluginModule.Metadata.Name] = pluginLoaded
 		p.mutex.Unlock()
 	}
 	return p.storeLoadedList()
+}
+
+func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.PluginModule {
+	if validErr := IsRequiredFileExists(pluginPath, pluginPath, pluginPath); validErr != nil {
+		logrus.WithError(validErr).Errorf("folder %q is not a valid plugin and is skipped. Missing mandatory files", file.Name())
+		// We can ignore this folder, it's not a plugin, or the plugin is invalid.
+		return nil
+	}
+	manifest, readErr := ReadManifest(pluginPath)
+	if readErr != nil {
+		logrus.WithError(readErr).Error("unable to read plugin manifest")
+		return nil
+	}
+
+	pluginStatus := &plugin.ModuleStatus{
+		IsLoaded: true,
+		InDev:    false,
+	}
+
+	pluginModule := &v1.PluginModule{
+		Kind: v1.PluginModuleKind,
+		Metadata: plugin.ModuleMetadata{
+			Name:    manifest.Name,
+			Version: manifest.Metadata.BuildInfo.Version,
+		},
+		Status: pluginStatus,
+	}
+
+	npmPackageData, readErr := ReadPackage(pluginPath)
+	if readErr != nil {
+		pluginStatus.IsLoaded = false
+		pluginStatus.Error = "unable to read plugin package.json"
+		logrus.WithError(readErr).Error(pluginStatus.Error)
+		return pluginModule
+	}
+	pluginModule.Spec = npmPackageData.Perses
+
+	if IsSchemaRequired(pluginModule.Spec) {
+		if pluginSchemaLoadErr := p.sch.Load(pluginPath, *pluginModule); pluginSchemaLoadErr != nil {
+			pluginStatus.IsLoaded = false
+			pluginStatus.Error = "unable to load plugin schema"
+			logrus.WithError(pluginSchemaLoadErr).Error(pluginStatus.Error)
+			return pluginModule
+		}
+		if pluginMigrateLoadErr := p.mig.Load(pluginPath, *pluginModule); pluginMigrateLoadErr != nil {
+			pluginStatus.IsLoaded = false
+			pluginStatus.Error = "unable to load plugin migration"
+			logrus.WithError(pluginMigrateLoadErr).Error(pluginStatus.Error)
+			return pluginModule
+		}
+	}
+	return pluginModule
 }
 
 func (p *pluginFile) storeLoadedList() error {
