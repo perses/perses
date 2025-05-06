@@ -159,7 +159,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 			}
 			return apiinterface.HandleError(err)
 		}
-		defer assetFile.Close()
+		defer assetFile.Close() //nolint:errcheck
 		data, err := io.ReadAll(assetFile)
 		if err != nil {
 			logrus.WithError(err).Error("Error reading React index.html")
@@ -218,7 +218,7 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		logrus.WithError(err).Error("Unable to open the React index.html")
 		return apiinterface.HandleError(err)
 	}
-	defer fileOpened.Close()
+	defer fileOpened.Close() //nolint:errcheck
 	idx, err := io.ReadAll(fileOpened)
 	if err != nil {
 		logrus.WithError(err).Error("Error reading React index.html")

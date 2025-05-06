@@ -102,7 +102,7 @@ type pluginFile struct {
 
 func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
-	return os.ReadFile(pluginFilePath)
+	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
 func (p *pluginFile) GetLoadedPlugin(prefixURI string) (Loaded, bool) {
