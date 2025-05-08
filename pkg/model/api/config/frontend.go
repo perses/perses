@@ -36,9 +36,9 @@ type Explorer struct {
 }
 
 type TimeRange struct {
-	DisableCustomTimeRange  bool              `json:"disable_custom" yaml:"disable_custom"`
-	DisableZoomTimeRange    bool              `json:"disable_zoom" yaml:"disable_zoom"`
-	Options                 []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
+	DisableCustomTimeRange bool              `json:"disable_custom" yaml:"disable_custom"`
+	DisableZoomTimeRange   bool              `json:"disable_zoom" yaml:"disable_zoom"`
+	Options                []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func (t *TimeRange) Verify() error {

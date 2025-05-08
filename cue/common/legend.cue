@@ -20,6 +20,6 @@ package common
 }
 
 #legendWithValues: {
-    #legend
-    values?: [...#calculation]
+	#legend
+	values?: [...#calculation]
 }
