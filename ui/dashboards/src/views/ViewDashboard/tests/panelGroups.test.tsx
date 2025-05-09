@@ -14,6 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
+import { DashboardTimeZoneProvider } from '@perses-dev/components';
 import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
@@ -21,27 +22,29 @@ import { DashboardApp } from '../DashboardApp';
 describe('Panel Groups', () => {
   const renderDashboard = (): void => {
     renderWithContext(
-      <DatasourceStoreProvider {...defaultDatasourceProps}>
-        <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
-          <VariableProvider>
-            <DashboardProvider
-              initialState={{
-                dashboardResource: getTestDashboard(),
-                isEditMode: true,
-                timeZone: 'local',
-                setTimeZone: () => undefined,
-              }}
-            >
-              <DashboardApp
-                dashboardResource={getTestDashboard()}
-                isReadonly={false}
-                isVariableEnabled={true}
-                isDatasourceEnabled={true}
-              />
-            </DashboardProvider>
-          </VariableProvider>
-        </TimeRangeProvider>
-      </DatasourceStoreProvider>
+      <DashboardTimeZoneProvider>
+        <DatasourceStoreProvider {...defaultDatasourceProps}>
+          <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
+            <VariableProvider>
+              <DashboardProvider
+                initialState={{
+                  dashboardResource: getTestDashboard(),
+                  isEditMode: true,
+                  timeZone: 'local',
+                  setTimeZone: () => undefined,
+                }}
+              >
+                <DashboardApp
+                  dashboardResource={getTestDashboard()}
+                  isReadonly={false}
+                  isVariableEnabled={true}
+                  isDatasourceEnabled={true}
+                />
+              </DashboardProvider>
+            </VariableProvider>
+          </TimeRangeProvider>
+        </DatasourceStoreProvider>
+      </DashboardTimeZoneProvider>
     );
   };
 
