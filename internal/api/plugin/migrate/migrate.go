@@ -108,7 +108,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema,
 // isPackageMigrate is a function that checks if a cuelang file belongs to the package migrate.
 // For that, we are opening the file and checking if the string "package migrate" is present.
 func isPackageMigrate(file string) (bool, error) {
-	data, err := os.ReadFile(file)
+	data, err := os.ReadFile(file) //nolint: gosec
 	if err != nil {
 		return false, err
 	}
@@ -116,7 +116,7 @@ func isPackageMigrate(file string) (bool, error) {
 }
 
 func getPluginKind(migrateFile string) (plugin.Kind, error) {
-	data, err := os.ReadFile(migrateFile)
+	data, err := os.ReadFile(migrateFile) //nolint: gosec
 	if err != nil {
 		return "", err
 	}

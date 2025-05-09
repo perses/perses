@@ -75,7 +75,7 @@ func ReadPackageFromNetwork(url *common.URL, pluginName string) (*NPMPackage, er
 }
 
 func readFile[T any](filePath string, result *T) error {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func readFileFromNetwork[T any](url *common.URL, pluginName string, fileName str
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err

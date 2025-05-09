@@ -27,7 +27,7 @@ interface TimeRangeSelectorProps {
   value: TimeRangeValue;
   /**
    * The list of time options to display in the dropdown.
-   * The component will automatically add the last option as a custom absolute time range.
+   * The component will automatically add the last two options as a zoom out x2 and a custom absolute time range.
    */
   timeOptions: TimeOption[];
   /**

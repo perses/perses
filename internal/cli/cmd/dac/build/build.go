@@ -122,7 +122,7 @@ func (o *option) Execute() error {
 func (o *option) processFile(file string, extension string) error {
 	var cmd *exec.Cmd
 
-	if extension == goExtension {
+	if extension == goExtension { //nolint: staticcheck
 		// The command `go run` must be executed in the directory where the file is located.
 		// That's because, go is searching the go.mod file, first in the current directory, then in the parent directories.
 		// So when using multiple go submodules, to ensure it is the correct go.mod considered,
@@ -160,7 +160,7 @@ func (o *option) processFile(file string, extension string) error {
 	// Otherwise, create an output file under the output directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
-	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), 0750)
 	if err != nil {
 		return fmt.Errorf("error creating the output folder: %v", err)
 	}

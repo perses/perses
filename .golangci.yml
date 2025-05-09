@@ -1,4 +1,11 @@
+version: "2"
 linters:
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+
   enable:
     - goconst
     - unconvert

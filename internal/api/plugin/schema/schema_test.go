@@ -28,7 +28,7 @@ import (
 )
 
 func loadPluginFromJSON(testDataPath string, t *testing.T) common.Plugin {
-	data, readErr := os.ReadFile(testDataPath)
+	data, readErr := os.ReadFile(testDataPath) //nolint: gosec
 	if readErr != nil {
 		t.Fatal(readErr)
 	}
@@ -43,7 +43,7 @@ func loadPluginFromJSON(testDataPath string, t *testing.T) common.Plugin {
 }
 
 func loadQueriesFromJSON(testDataPath string, t *testing.T) []v1.Query {
-	data, readErr := os.ReadFile(testDataPath)
+	data, readErr := os.ReadFile(testDataPath) //nolint: gosec
 	if readErr != nil {
 		t.Fatal(readErr)
 	}

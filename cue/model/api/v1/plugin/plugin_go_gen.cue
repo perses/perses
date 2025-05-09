@@ -32,6 +32,12 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 
 #Plugin: _
 
+#ModuleStatus: {
+	isLoaded: bool   @go(IsLoaded)
+	inDev:    bool   @go(InDev)
+	error?:   string @go(Error)
+}
+
 #ModuleSpec: _
 
 #ModuleMetadata: {

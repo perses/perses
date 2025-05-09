@@ -56,7 +56,7 @@ func (a *arch) unzip(archiveFileName string) error {
 	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveName := archive.ExtractArchiveName(archiveFileName)
 	archiveFile := filepath.Join(a.folder, archiveFileName)
-	stream, archiveOpenErr := os.Open(archiveFile)
+	stream, archiveOpenErr := os.Open(archiveFile) //nolint: gosec
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {
 			logrus.WithError(closeErr).Error("unable to close archive file stream")
@@ -84,7 +84,7 @@ func (a *arch) extractArchiveFileHandler(archiveName string) archives.FileHandle
 			return nil
 		}
 		currentDir, _ := filepath.Split(f.NameInArchive)
-		if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, archiveName, currentDir), os.ModePerm); mkdirErr != nil {
+		if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, archiveName, currentDir), 0750); mkdirErr != nil {
 			return fmt.Errorf("unable to create directory %q: %w", currentDir, mkdirErr)
 		}
 		stream, openErr := f.Open()
