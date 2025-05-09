@@ -17,7 +17,7 @@ import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { toZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -53,7 +53,7 @@ import {
   ZoomEventData,
 } from '../utils';
 import { CursorCoordinates, TimeChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
-import { useTimeZone } from '../context/TimeZoneProvider';
+import { useDashboardTimeZone } from '../context/DashboardTimeZoneProvider';
 
 use([
   EChartsLineChart,
@@ -107,6 +107,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   ref
 ) {
   const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
+  const { timeZone } = useDashboardTimeZone();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -114,7 +115,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const { timeZone } = useTimeZone();
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
@@ -132,6 +132,19 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   } else {
     timeScale = timeScaleProp;
   }
+
+  const toolTipData = useMemo(
+    () =>
+      timeZone !== 'local'
+        ? data.map((d) => {
+            const values = d.values.map(([timestamp, value]) => {
+              return [toZonedTime(timestamp, timeZone).getTime(), value] as TimeSeriesValueTuple;
+            });
+            return { ...d, values };
+          })
+        : data,
+    [data, timeZone]
+  );
 
   useImperativeHandle(ref, () => {
     return {
@@ -195,7 +208,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     data.map((d, index) => {
       const values = d.values.map(([timestamp, value]) => {
         const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
-        return [isLocalTimeZone ? timestamp : toZonedTime(timestamp, timeZone), val];
+        return [isLocalTimeZone ? timestamp : toZonedTime(timestamp, timeZone).getTime(), val];
       });
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
@@ -208,8 +221,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       series: updatedSeriesMapping,
       xAxis: {
         type: 'time',
-        min: isLocalTimeZone ? timeScale.startMs : toZonedTime(timeScale.startMs, timeZone),
-        max: isLocalTimeZone ? timeScale.endMs : toZonedTime(timeScale.endMs, timeZone),
+        min: isLocalTimeZone ? timeScale.startMs : toZonedTime(timeScale.startMs, timeZone).getTime(),
+        max: isLocalTimeZone ? timeScale.endMs : toZonedTime(timeScale.endMs, timeZone).getTime(),
         axisLabel: {
           hideOverlap: true,
           formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
@@ -421,7 +434,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           <TimeChartTooltip
             containerId={chartsTheme.tooltipPortalContainerId}
             chartRef={chartRef}
-            data={data}
+            data={toolTipData}
             seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
             enablePinning={isPinningEnabled}
