@@ -20,7 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QueryParamProvider } from 'use-query-params';
 import React, { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
-import { SnackbarProvider } from '@perses-dev/components';
+import { DashboardTimeZoneProvider, SnackbarProvider } from '@perses-dev/components';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
 import { TimeRangeControls } from './TimeRangeControls';
@@ -85,7 +85,7 @@ describe('TimeRangeControls', () => {
 
   const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
-      <>
+      <DashboardTimeZoneProvider>
         {testURLParams ? (
           <TimeRangeProviderWithQueryParams
             initialRefreshInterval={testDefaultRefreshInterval}
@@ -98,7 +98,7 @@ describe('TimeRangeControls', () => {
             <TimeRangeControls />
           </TimeRangeProvider>
         )}
-      </>,
+      </DashboardTimeZoneProvider>,
       undefined,
       history
     );

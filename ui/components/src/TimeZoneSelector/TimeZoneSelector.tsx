@@ -30,15 +30,15 @@ import { ToolbarIconButton } from '../ToolbarIconButton';
 import { InfoTooltip } from '../InfoTooltip';
 import { TimeZoneOption } from '../model/timeZoneOption';
 
-interface TimeZoneSelectorProps {
-  height?: string;
+export interface TimeZoneSelectorProps {
+  heightPx?: string;
   timeZoneOptions: TimeZoneOption[];
   value: string;
-  onChange?: (timeZone: string) => void;
+  onChange?: (timeZone: TimeZoneOption) => void;
 }
 
 export function TimeZoneSelector({
-  height,
+  heightPx = '34px',
   timeZoneOptions: defaultTimeZoneOptions,
   onChange,
   value = 'local',
@@ -64,7 +64,7 @@ export function TimeZoneSelector({
     setOpen(false);
     setTimeZoneOptions(defaultTimeZoneOptions);
     setSearchValue('');
-    onChange?.(timeZone.value);
+    onChange?.(timeZone);
   }
 
   function handleOnClickAway(): void {
@@ -79,9 +79,10 @@ export function TimeZoneSelector({
         <Box sx={{ position: 'relative' }}>
           <InfoTooltip description={value === 'local' ? 'Local browser time' : 'Time zone'}>
             <ToolbarIconButton
+              data-testid="current-timezone"
               aria-label="Timezone"
               onClick={() => setOpen(!open)}
-              sx={(theme) => ({ height, paddingLeft: theme.spacing(1) })}
+              sx={(theme) => ({ height: heightPx, paddingLeft: theme.spacing(1) })}
             >
               {value === 'local' ? localTimeZone : value}
               <EarthIcon sx={(theme) => ({ marginLeft: theme.spacing(0.5) })} />
@@ -102,6 +103,7 @@ export function TimeZoneSelector({
           })}
         >
           <Input
+            data-testid="search-timezone"
             sx={(theme) => ({
               height: 45,
               padding: theme.spacing(1),

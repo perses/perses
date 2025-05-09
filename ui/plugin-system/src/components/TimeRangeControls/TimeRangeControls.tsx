@@ -19,13 +19,10 @@ import {
   TimeOption,
   ToolbarIconButton,
   TimeRangeSelector,
-  TimeZoneSelector,
   buildRelativeTimeOption,
-  useDashboardTimeZone,
 } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
 import { ReactElement, useCallback } from 'react';
-import { getTimeZoneOptions } from '@perses-dev/components/dist/model/timeZoneOption';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useTimeRange, useShowCustomTimeRangeSetting, useTimeRangeOptionsSetting } from '../../runtime';
 
@@ -59,8 +56,6 @@ export function TimeRangeControls({
   timePresets,
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
-  const { timeZone, setTimeZone } = useDashboardTimeZone();
-  const timeZoneOptions = getTimeZoneOptions();
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
@@ -82,13 +77,6 @@ export function TimeRangeControls({
       setRefreshInterval(duration);
     },
     [setRefreshInterval]
-  );
-
-  const handleTimeZoneChange = useCallback(
-    (value: string) => {
-      setTimeZone(value);
-    },
-    [setTimeZone]
   );
 
   return (
@@ -119,12 +107,6 @@ export function TimeRangeControls({
           />
         </InfoTooltip>
       )}
-      <TimeZoneSelector
-        timeZoneOptions={timeZoneOptions}
-        value={timeZone}
-        onChange={handleTimeZoneChange}
-        height={height}
-      />
     </Stack>
   );
 }

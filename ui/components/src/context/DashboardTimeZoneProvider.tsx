@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { createContext, ReactElement, useContext } from 'react';
-import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '@perses-dev/components/src/utils';
+import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
 type DashboardTimeZoneContextType = {
   timeZone: string;
