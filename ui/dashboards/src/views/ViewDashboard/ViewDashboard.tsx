@@ -66,7 +66,6 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { timeZone, setTimeZone } = useSetInitialDashboardTimeZone(dashboardTimeZone);
-  console.log('timeZone', timeZone);
   const { data } = usePluginBuiltinVariableDefinitions();
 
   const builtinVariables = useMemo(() => {
