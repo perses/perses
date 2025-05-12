@@ -48,3 +48,4 @@ jobs:
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Publish the module
         run: cue mod publish ${{ github.ref_name }}
+        working-directory: cue
