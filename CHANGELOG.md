@@ -1,5 +1,47 @@
 # Changelog
 
+## 0.51.0-rc.0 / 2025-05-12
+
+We are finally reaching the release candidate for the 0.51.0 version.
+We are reaching a confident level of stability, and we should not expect any major changes before the final release.
+
+In this new release, we are introducing new features and enhancements, including:
+
+- A new plugin list page in the UI, allowing users to view and manage installed plugins.
+- The ability to configure CORS settings for the application.
+- Improvements to the CLI, including a command to list installed plugins and enhancements to the plugin development process.
+- The addition of zoom in/zoom out buttons.
+
+- [FEATURE] Add zoom in/zoom out buttons (#2810)
+- [FEATURE] CLI: list the plugins (#2889)
+- [FEATURE] Allows configuring CORS (#2861)
+- [FEATURE] Implement plugin list display page (#2842)
+- [FEATURE] Table: add optional pagination (#2811)
+- [ENHANCEMENT] Plugin: add a status to know if the plugin is loaded and in dev (#2898)
+- [ENHANCEMENT] Enable Datasource Variables (#2876)
+- [ENHANCEMENT] Remove the `cue login` step (#2867)
+- [ENHANCEMENT] Add histograms typing (#2858)
+- [ENHANCEMENT] Add OAuth auth type to Secret UI (#2838)
+- [ENHANCEMENT] use singleton and lazy initialization for plugin runtime (#2833)
+- [ENHANCEMENT] Add kubebuilder annotation to common.URL (#2891)
+- [BUGFIX] Config: hide secret in the datasource discovery (#2888)
+- [BUGFIX] Adjust mousemove listener to fix navigator undef error (#2886)
+- [BUGFIX] timeseries tooltip: new assembleTransform logic for tooltip position (#2878)
+- [BUGFIX] Dashboard import: fix wrong form reset + UX improvements (#2881)
+- [BUGFIX] Fix improper state update in `GridLayout` useMemo (#2846)
+- [BUGFIX] Read clientSecretFile when configuring rest client with oauth (#2863)
+- [BUGFIX] Fix OAuth struct parse errors + typo in json (#2862)
+- [BUGFIX] StatChart: remove unnecessary scrollbars due to rounding (#2839)
+- [BUGFIX] `dac preview`: fix nil pointer error for brand new dashboards (#2817)
+- [BREAKINGCHANGE] CLI/PLUGIN: implement start command and deep review of how to load a dev plugin (#2831)
+- [BREAKINGCHANGE] core: switch the trace data model to OpenTelemetry (OTLP) (#2873)
+- [DOC] Update embedding panels guide with the latest recommendations (#2899)
+- [DOC] Document some of the not-resource-related API endpoints (#2874)
+- [DOC] Add kubecon pres to the list of materials (#2872)
+- [DOC] Remove duplicated section (#2837)
+- [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
+- [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
+
 ## 0.51.0-beta.1 / 2025-03-21
 
 This new beta version is mostly improving the CLI command around the plugin development.
