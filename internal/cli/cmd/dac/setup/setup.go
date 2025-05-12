@@ -59,7 +59,7 @@ func addOutputDirToGitignore() error {
 	if err != nil {
 		return fmt.Errorf("error opening %s: %v", gitignorePath, err)
 	}
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	// Check & skip if the output dir is already listed
 	scanner := bufio.NewScanner(file)
@@ -71,7 +71,7 @@ func addOutputDirToGitignore() error {
 	}
 
 	// Append the output folder to the list
-	if _, writeErr := file.WriteString(fmt.Sprintf("\n%s\n%s\n", comment, config.Global.Dac.OutputFolder)); writeErr != nil {
+	if _, writeErr := fmt.Fprintf(file, "\n%s\n%s\n", comment, config.Global.Dac.OutputFolder); writeErr != nil {
 		return fmt.Errorf("error appending to %s: %v", gitignorePath, writeErr)
 	}
 
@@ -168,7 +168,7 @@ func (o *option) Execute() error {
 	}
 
 	// Install dependencies
-	if o.language == cueLanguage {
+	if o.language == cueLanguage { //nolint: staticcheck
 		// Check cue.mod exists
 		if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
 			return fmt.Errorf("unable to find the 'cue.mod' dir. Please run 'cue mod init'")
@@ -231,7 +231,7 @@ It mainly consists in retrieving the Perses libraries to start coding dashboards
 percli dac setup
 
 # DaC setup when you are not connected to a server, you need to provide the Perses version to consider for dependencies retrieval
-percli dac setup --version 0.47.1 # any version you'd like above v0.44.0
+percli dac setup --version 0.47.1
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)

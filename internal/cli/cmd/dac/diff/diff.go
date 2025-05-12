@@ -98,7 +98,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	// Create the output folder (+ any parent folder if applicable) where to store the diff files
-	err := os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
+	err := os.MkdirAll(config.Global.Dac.OutputFolder, 0750)
 	if err != nil {
 		return fmt.Errorf("error creating the output folder: %v", err)
 	}

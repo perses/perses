@@ -23,9 +23,12 @@ validators:
   # timeout
   - regex: 'github\.com'
     type: 'ignore'
-  # tiemout
+  # timeout
   - regex: 'slack\.cncf\.io'
     type: 'ignore'
-  # tiemout
+  # timeout
   - regex: 'nodejs\.org'
+    type: 'ignore'
+  # timeout
+  - regex: 'youtube\.com'
     type: 'ignore'

@@ -47,6 +47,9 @@ func NewURL(u *URL, paths ...string) *URL {
 	return result
 }
 
+// +kubebuilder:validation:Schemaless
+// +kubebuilder:validation:Type=string
+// +kubebuilder:validation:Format=uri
 type URL struct {
 	*url.URL `json:"-" yaml:"-"`
 }
@@ -113,4 +116,11 @@ func (u *URL) UnmarshalText(text []byte) error {
 	}
 	u.URL = urlp
 	return nil
+}
+
+func (u *URL) String() string {
+	if u == nil || u.URL == nil {
+		return ""
+	}
+	return u.URL.String()
 }

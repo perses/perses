@@ -23,6 +23,7 @@ export * from './kind';
 export * from './layout';
 export * from './legend';
 export * from './notice';
+export * from './otlp';
 export * from './panels';
 export * from './project';
 export * from './query';

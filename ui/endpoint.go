@@ -30,6 +30,7 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -86,7 +87,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		return apiinterface.NotFoundError
 	}
 	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName)
-	if !isLoaded {
+	if !isLoaded || !loaded.Module.Status.IsLoaded {
 		logrus.Errorf("unable to find the plugin %s", pluginName)
 		return apiinterface.NotFoundError
 	}
@@ -125,7 +126,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	return nil
 }
 
-func proxyPrepareRequest(c echo.Context, devEnvironment *config.PluginInDevelopment) error {
+func proxyPrepareRequest(c echo.Context, devEnvironment *v1.PluginInDevelopment) error {
 	req := c.Request()
 	// We have to modify the HOST of the request to match the host of the targetURL
 	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
@@ -158,7 +159,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 			}
 			return apiinterface.HandleError(err)
 		}
-		defer assetFile.Close()
+		defer assetFile.Close() //nolint:errcheck
 		data, err := io.ReadAll(assetFile)
 		if err != nil {
 			logrus.WithError(err).Error("Error reading React index.html")
@@ -217,7 +218,7 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		logrus.WithError(err).Error("Unable to open the React index.html")
 		return apiinterface.HandleError(err)
 	}
-	defer fileOpened.Close()
+	defer fileOpened.Close() //nolint:errcheck
 	idx, err := io.ReadAll(fileOpened)
 	if err != nil {
 		logrus.WithError(err).Error("Error reading React index.html")

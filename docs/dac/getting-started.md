@@ -26,12 +26,6 @@ See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-in
 
 #### 2. Install the Perses SDK
 
-First, log in to the Central Registry of CUE. This will allow to install the Perses SDK afterwards (as it consists of importing the `github.com/perses/perses/cue` CUE module). ⚠️ For now this login step is only possible using a Github account.
-
-```bash
-cue login
-```
-
 Now you can run the setup command that percli provides in order to install the SDK:
 
 ```bash

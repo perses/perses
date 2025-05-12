@@ -33,6 +33,7 @@ export interface Row extends CommonRow {
   noAuth: boolean;
   basicAuth: boolean;
   authorization: boolean;
+  oauth: boolean;
   tlsConfig: boolean;
 }
 

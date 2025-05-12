@@ -73,7 +73,7 @@ func (v *TextVariableSpec) validate() error {
 	if _, err := strconv.Atoi(v.Name); err == nil {
 		return fmt.Errorf("variable name cannot contain only digits. That's not a meaningful name for a variable")
 	}
-	return v.TextSpec.Validate()
+	return v.Validate()
 }
 
 type ListVariableSpec struct {
@@ -118,7 +118,7 @@ func (v *ListVariableSpec) validate() error {
 	if err := common.ValidateID(v.Name); err != nil {
 		return err
 	}
-	return v.ListSpec.Validate()
+	return v.Validate()
 }
 
 type Variable struct {

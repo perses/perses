@@ -35,15 +35,16 @@ Upon death of a member, they leave the team automatically.
 
 The current team members are:
 
-| Team Member       | GitHub ID                                           | Affiliation  |
-|-------------------|-----------------------------------------------------|--------------|
-| Antoine Thebaud   | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus      |
-| Augustin Husson   | [nexucis](https://github.com/Nexucis)               | Amadeus      |
-| Celian Garcia     | [celian-garcia](https://github.com/celian-garcia)   | Amadeus      |
-| Gabriel Bernal    | [jgbernalp](https://github.com/jgbernalp)           | Red Hat      |
-| Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus      |
-| Nicolas Takashi   | [nicolastakashi](https://github.com/nicolastakashi) | Coralogix    |
-| Steven Cobb       | [sjcobb](https://github.com/sjcobb)                 | Chronosphere |
+| Team Member                   | GitHub ID                                           | Affiliation  |
+|-------------------------------|-----------------------------------------------------|--------------|
+| Akshay Iyyadurai Balasundaram | [ibakshay](https://github.com/ibakshay)             | SAP          |
+| Antoine Thebaud               | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus      |
+| Augustin Husson               | [nexucis](https://github.com/Nexucis)               | Amadeus      |
+| Celian Garcia                 | [celian-garcia](https://github.com/celian-garcia)   | Amadeus      |
+| Gabriel Bernal                | [jgbernalp](https://github.com/jgbernalp)           | Red Hat      |
+| Guillaume Ladorme             | [gladorme](https://github.com/Gladorme)             | Amadeus      |
+| Nicolas Takashi               | [nicolastakashi](https://github.com/nicolastakashi) | Coralogix    |
+| Steven Cobb                   | [sjcobb](https://github.com/sjcobb)                 | Chronosphere |
 
 ## Maintainers
 

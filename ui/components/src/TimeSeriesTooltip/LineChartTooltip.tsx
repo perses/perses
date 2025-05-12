@@ -22,7 +22,6 @@ import { TooltipHeader } from './TooltipHeader';
 import { legacyGetNearbySeriesData } from './nearby-series';
 import {
   CursorCoordinates,
-  FALLBACK_CHART_WIDTH,
   TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MAX_WIDTH,
@@ -69,7 +68,6 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = legacyGetNearbySeriesData({
@@ -89,9 +87,8 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
-  if (!isTooltipPinned) {
-    transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
-  }
+
+  transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
   return (
     <Portal container={containerElement}>

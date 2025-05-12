@@ -3550,36 +3550,36 @@
             "items": [
               {
                 "x": 0,
-                "y": 9,
-                "width": 11,
-                "height": 8,
+                "y": 10,
+                "width": 12,
+                "height": 10,
                 "content": {
                   "$ref": "#/spec/panels/bottomlist"
                 }
               },
               {
-                "x": 11,
-                "y": 9,
-                "width": 13,
-                "height": 8,
+                "x": 12,
+                "y": 10,
+                "width": 12,
+                "height": 10,
                 "content": {
                   "$ref": "#/spec/panels/rightlist"
                 }
               },
               {
-                "x": 11,
+                "x": 0,
                 "y": 0,
-                "width": 13,
-                "height": 9,
+                "width": 12,
+                "height": 10,
                 "content": {
                   "$ref": "#/spec/panels/righttable"
                 }
               },
               {
-                "x": 0,
+                "x": 12,
                 "y": 0,
-                "width": 11,
-                "height": 9,
+                "width": 12,
+                "height": 10,
                 "content": {
                   "$ref": "#/spec/panels/bottomtable"
                 }

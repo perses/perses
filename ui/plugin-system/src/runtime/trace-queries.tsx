@@ -13,10 +13,13 @@
 
 import { getUnixTime } from 'date-fns';
 import { QueryDefinition, UnknownSpec, AbsoluteTimeRange, TraceData } from '@perses-dev/core';
-import { useQueries, UseQueryResult } from '@tanstack/react-query';
+import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+import { TraceQueryContext, TraceQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePluginRegistry } from './plugin-registry';
+import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
+import { useAllVariableValues } from './variables';
+import { filterVariableStateMap, getVariableValuesKey } from './utils';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
@@ -35,33 +38,74 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number;
  */
 export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQueryResult<TraceData>> {
   const { getPlugin } = usePluginRegistry();
-  const datasourceStore = useDatasourceStore();
-  const { absoluteTimeRange } = useTimeRange();
+  const context = useTraceQueryContext();
 
-  const context = {
-    datasourceStore,
-    absoluteTimeRange,
-  };
+  const pluginLoaderResponse = usePlugins(
+    'TraceQuery',
+    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+  );
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
   return useQueries({
-    queries: definitions.map((definition) => {
-      const queryKey = [definition, datasourceStore, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
+    queries: definitions.map((definition, idx) => {
+      const plugin = pluginLoaderResponse[idx]?.data;
+      const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
       const traceQueryKind = definition?.spec?.plugin?.kind;
       return {
+        enabled: queryEnabled,
         queryKey: queryKey,
         queryFn: async (): Promise<TraceData> => {
           const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context);
           return data;
         },
-
-        // The data returned by getTraceData() contains circular dependencies (a span has a reference to the parent span, and the parent span has an array of child spans)
-        // Therefore structuralSharing must be turned off, otherwise the query is stuck in the 'fetching' state on re-fetch.
-        // Ref: https://github.com/TanStack/query/issues/6954#issuecomment-1962321426
-        structuralSharing: false,
       };
     }),
   });
+}
+
+function getQueryOptions({
+  plugin,
+  definition,
+  context,
+}: {
+  plugin?: TraceQueryPlugin;
+  definition: TraceQueryDefinition;
+  context: TraceQueryContext;
+}): {
+  queryKey: QueryKey;
+  queryEnabled: boolean;
+} {
+  const { datasourceStore, variableState, absoluteTimeRange } = context;
+
+  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
+  const variableDependencies = dependencies?.variables;
+
+  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+  const queryKey = [definition, datasourceStore, absoluteTimeRange, variablesValueKey] as const;
+
+  let waitToLoad = false;
+  if (variableDependencies) {
+    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
+  }
+
+  const queryEnabled = plugin !== undefined && !waitToLoad;
+  return {
+    queryKey,
+    queryEnabled,
+  };
+}
+
+function useTraceQueryContext(): TraceQueryContext {
+  const { absoluteTimeRange } = useTimeRange();
+  const variableState = useAllVariableValues();
+  const datasourceStore = useDatasourceStore();
+
+  return {
+    variableState,
+    datasourceStore,
+    absoluteTimeRange,
+  };
 }

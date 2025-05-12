@@ -58,6 +58,36 @@ export const secretSpecSchema = z
         }
       })
       .optional(),
+    oauth: z
+      .object({
+        clientID: z.string().min(1),
+        clientSecret: z.string().optional(),
+        clientSecretFile: z.string().optional(),
+        tokenURL: z.string().min(1),
+        scopes: z.array(z.string().nonempty()).default([]),
+        endpointParams: z.record(z.string().nonempty(), z.array(z.string())).default({}).optional(),
+        authStyle: z.union([z.literal(0), z.literal(1), z.literal(2)]).optional(),
+      })
+      .superRefine((val, ctx) => {
+        if (
+          val.clientSecret &&
+          val.clientSecret.length > 0 &&
+          val.clientSecretFile &&
+          val.clientSecretFile.length > 0
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Only one of the fields must be defined',
+            path: ['clientSecret'],
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Only one of the fields must be defined',
+            path: ['clientSecretFile'],
+          });
+        }
+      })
+      .optional(),
     tlsConfig: z
       .object({
         ca: z.string().optional(),
@@ -112,7 +142,7 @@ export const secretSpecSchema = z
       .optional(),
   })
   .superRefine((val, ctx) => {
-    if (val.basicAuth && val.authorization) {
+    if (val.basicAuth && val.authorization && val.oauth) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Only one of the fields must be defined',
@@ -122,6 +152,11 @@ export const secretSpecSchema = z
         code: z.ZodIssueCode.custom,
         message: 'Only one of the fields must be defined',
         path: ['authorization'],
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Only one of the fields must be defined',
+        path: ['oauth'],
       });
     }
   });

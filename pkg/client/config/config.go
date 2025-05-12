@@ -151,9 +151,13 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		roundTripper = transport.New(config.URL, roundTripper, *config.NativeAuth)
 	}
 	if config.OAuth != nil {
+		clientSecret, clientSecretErr := config.OAuth.GetClientSecret()
+		if clientSecretErr != nil {
+			return nil, clientSecretErr
+		}
 		oauthConfig := &clientcredentials.Config{
 			ClientID:     config.OAuth.ClientID,
-			ClientSecret: config.OAuth.ClientSecret,
+			ClientSecret: clientSecret,
 			TokenURL:     config.OAuth.TokenURL,
 			Scopes:       config.OAuth.Scopes,
 			AuthStyle:    oauth2.AuthStyle(config.OAuth.AuthStyle),

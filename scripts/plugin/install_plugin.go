@@ -49,7 +49,7 @@ func downloadPlugin(plugin plugin) {
 	}
 	if resp.StatusCode == http.StatusNotFound {
 		// First, let's close the previous body.
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		// Then try to download the plugin with the new tag name.
 		resp, err = http.Get(fmt.Sprintf("%s/%s/v%s/%s.tar.gz", githubURL, strings.ToLower(plugin.PluginName), plugin.Version, pluginName))
 		if err != nil {
@@ -57,7 +57,7 @@ func downloadPlugin(plugin plugin) {
 			return
 		}
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 	if resp.StatusCode != http.StatusOK {
 		logrus.Errorf("unable to download plugin %s, status code %d", pluginName, resp.StatusCode)
 		return
@@ -68,7 +68,7 @@ func downloadPlugin(plugin plugin) {
 		logrus.WithError(err).Errorf("unable to create file for plugin %s", pluginName)
 		return
 	}
-	defer out.Close()
+	defer out.Close() //nolint:errcheck
 
 	if _, copyErr := io.Copy(out, resp.Body); copyErr != nil {
 		logrus.WithError(copyErr).Errorf("unable to copy plugin %s", pluginName)
@@ -81,7 +81,7 @@ func main() {
 		panic(err)
 	}
 	// create the plugin archive folder
-	if err := os.MkdirAll(pluginArchiveFolder, os.ModePerm); err != nil {
+	if err := os.MkdirAll(pluginArchiveFolder, 0750); err != nil {
 		panic(err)
 	}
 

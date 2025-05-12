@@ -43,7 +43,7 @@ _datasourceName=#datasourceName?: string
 	// - pod:       [cluster, namespace]
 	// this dependencies information can be used later to generate the right filter(s)
 	#dependencies: [for i2, var in #input if i > i2 {var}]
-	if _datasourceName != _|_  {
+	if _datasourceName != _|_ {
 		#datasourceName: _datasourceName
 	}
 }]
