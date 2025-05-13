@@ -80,7 +80,7 @@ export function EditVariablesButton({
       </InfoTooltip>
       <Drawer
         isOpen={isVariableEditorOpen}
-        onClose={closeVariableEditor}
+        onClose={() => {}} /* LOGZ.IO CHANGE:: Disable close on click outside [APPZ-332] */
         PaperProps={{ sx: { width: '50%' } }}
         data-testid="variable-editor"
       >
