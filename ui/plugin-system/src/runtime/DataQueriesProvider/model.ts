@@ -63,12 +63,14 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
     'TimeSeriesQuery',
   ]);
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
+  const { data: profileQueryPlugins, isLoading: isProfileQueryPluginLoading } = useListPluginMetadata(['ProfileQuery']);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
   const queryTypeMap = useMemo(() => {
     const map: Record<string, string[]> = {
       TimeSeriesQuery: [],
       TraceQuery: [],
+      ProfileQuery: [],
     };
 
     if (timeSeriesQueryPlugins) {
@@ -82,8 +84,14 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
         map[plugin.kind]?.push(plugin.spec.name);
       });
     }
+
+    if (profileQueryPlugins) {
+      profileQueryPlugins.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
     return map;
-  }, [timeSeriesQueryPlugins, traceQueryPlugins]);
+  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins]);
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
@@ -93,9 +101,11 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
             return isTimeSeriesQueryLoading;
           case 'TempoTraceQuery':
             return isTraceQueryPluginLoading;
+          case 'PyroscopeProfileQuery':
+            return isProfileQueryPluginLoading;
         }
 
-        return isTraceQueryPluginLoading || isTimeSeriesQueryLoading;
+        return isTraceQueryPluginLoading || isTimeSeriesQueryLoading || isProfileQueryPluginLoading;
       };
 
       if (isLoading(pluginKind)) {
@@ -110,7 +120,7 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
       throw new Error(`Unable to determine the query type: ${pluginKind}`);
     },
-    [queryTypeMap, isTimeSeriesQueryLoading, isTraceQueryPluginLoading]
+    [queryTypeMap, isTimeSeriesQueryLoading, isTraceQueryPluginLoading, isProfileQueryPluginLoading]
   );
 
   return getQueryType;
