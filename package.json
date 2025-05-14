@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@perses-dev/core": "^0.51.0-beta.1"
+  }
+}
