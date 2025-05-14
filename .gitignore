@@ -45,3 +45,5 @@ dev/extra/tempo-data
 /plugins-archive
 
 /prometheus
+
+!.gitkeep
