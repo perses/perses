@@ -28,7 +28,7 @@ const (
 	KindPanel           Kind = "Panel"
 	KindTimeSeriesQuery Kind = "TimeSeriesQuery"
 	KindTraceQuery      Kind = "TraceQuery"
-	KindProfileQuery	Kind = "ProfileQuery"
+	KindProfileQuery    Kind = "ProfileQuery"
 	KindQuery           Kind = "Query"
 	KindExplore         Kind = "Explore"
 )
