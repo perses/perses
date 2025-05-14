@@ -156,16 +156,18 @@ func (c *crypto) encrypt(stringToEncrypt string) (string, error) {
 		return "", nil
 	}
 	plainText := []byte(stringToEncrypt)
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
+
+	gcm, err := cipher.NewGCM(c.block)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gcm: %w", err)
 	}
 
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", fmt.Errorf("failed to create nonce: %w", err)
+	}
 
+	cipherText := gcm.Seal(nonce, nonce, plainText, nil)
 	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
@@ -175,19 +177,25 @@ func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
 	}
 	cipherText, err := base64.URLEncoding.DecodeString(stringToDecrypt)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to decode ciphertext: %w", err)
 	}
-	if len(cipherText) < aes.BlockSize {
+
+	gcm, err := cipher.NewGCM(c.block)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gcm: %w", err)
+	}
+
+	if len(cipherText) < gcm.NonceSize() {
 		return "", fmt.Errorf("ciphertext too short")
 	}
-	iv := cipherText[:aes.BlockSize]
-	cipherText = cipherText[aes.BlockSize:]
 
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBDecrypter(c.block, iv) //nolint: staticcheck
+	nonce := cipherText[:gcm.NonceSize()]
+	cipherText = cipherText[gcm.NonceSize():]
 
-	// XORKeyStream can work in-place if the two arguments are the same.
-	stream.XORKeyStream(cipherText, cipherText)
+	plainText, err := gcm.Open(nil, nonce, cipherText, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to decrypt: %w", err)
+	}
 
-	return string(cipherText), nil
+	return string(plainText), nil
 }
