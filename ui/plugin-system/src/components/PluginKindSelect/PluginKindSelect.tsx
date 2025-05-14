@@ -26,7 +26,7 @@ export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'o
 /**
  * Displays a MUI Select input for selecting a plugin's kind from a list of all the available plugins of some specific
  * plugin types. (e.g. "Show a list of all the Panel plugins", or "Show a list of all the Variable plugins", or "Show
- * a list of all the TimeSeriesQuery, TraceQuery, and LogQuery plugins").
+ * a list of all the TimeSeriesQuery, TraceQuery, ProfileQuery, and LogQuery plugins").
  * The value of the select is the kind of the plugin, but you can also listen to the `onPluginTypeChange` event to know
  * when the user changes the plugin type (it fires at start for the default value.)
  */
