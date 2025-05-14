@@ -1,0 +1,47 @@
+import { HTTPSettingsEditor } from '@perses-dev/plugin-system';
+import React, { ReactElement } from 'react';
+import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+
+export interface {{ .PluginPascalName }}EditorProps {
+  value: {{ .PluginPascalName }}Spec;
+  onChange: (next: {{ .PluginPascalName }}Spec) => void;
+  isReadonly?: boolean;
+}
+
+export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}EditorProps): ReactElement {
+  const { value, onChange, isReadonly } = props;
+
+  const initialSpecDirect: {{ .PluginPascalName }}Spec = {
+    directUrl: '',
+  };
+
+  const initialSpecProxy: {{ .PluginPascalName }}Spec = {
+    proxy: {
+      kind: 'HTTPProxy',
+      spec: {
+        allowedEndpoints: [
+          // list of standard endpoints, adjust based on your API
+          {
+            endpointPattern: '/api/data',
+            method: 'GET',
+          },
+          {
+            endpointPattern: '/api/search',
+            method: 'GET',
+          },
+        ],
+        url: '',
+      },
+    },
+  };
+
+  return (
+    <HTTPSettingsEditor
+      value={value}
+      onChange={onChange}
+      isReadonly={isReadonly}
+      initialSpecDirect={initialSpecDirect}
+      initialSpecProxy={initialSpecProxy}
+    />
+  );
+}

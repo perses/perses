@@ -1,0 +1,11 @@
+{{define "persesPlugin"}}
+{
+    "kind": "{{ .Kind }}",
+    "spec": {
+        "display": {
+            "name": "{{ .Spec.Display.Name }}"
+        },
+        "name": "{{ .Spec.Name }}"
+    }
+}
+{{end}}

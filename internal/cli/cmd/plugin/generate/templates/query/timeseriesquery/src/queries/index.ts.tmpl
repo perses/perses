@@ -1,0 +1,2 @@
+{{ range $index, $item := .PersesQueryPlugins }}export * from "./{{ $item.Spec.Name }}/{{ $item.PluginPascalName }}";
+{{ end }}

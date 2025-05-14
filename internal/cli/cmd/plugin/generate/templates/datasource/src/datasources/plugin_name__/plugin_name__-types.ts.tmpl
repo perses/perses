@@ -1,0 +1,27 @@
+import { HTTPProxy, RequestHeaders } from '@perses-dev/core';
+import { DatasourceClient } from '@perses-dev/plugin-system';
+
+export interface {{ .PluginPascalName }}Spec {
+  directUrl?: string;
+  proxy?: HTTPProxy;
+}
+
+interface QueryRequestParameters {
+  query: string;
+  start: string;
+  end: string;
+}
+
+interface {{ .PluginPascalName }}ClientOptions {
+  datasourceUrl: string;
+  headers?: RequestHeaders;
+}
+
+export interface {{ .PluginPascalName }}Response {
+  data: any;
+};
+
+export interface {{ .PluginPascalName }}Client extends DatasourceClient {
+  options: {{ .PluginPascalName }}ClientOptions;
+  query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<{{ .PluginPascalName }}Response>;
+}
