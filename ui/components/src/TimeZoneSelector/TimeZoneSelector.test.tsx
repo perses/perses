@@ -13,10 +13,12 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { getTimeZoneOffset } from '../model/timeZoneOption';
 import { TimeZoneSelector, TimeZoneSelectorProps } from './TimeZoneSelector';
 
 describe('TimeZoneSelector', () => {
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const localTimeZoneOffset = getTimeZoneOffset(localTimeZone)?.value;
   const mockOnChange = jest.fn();
   const timeZoneSelectorProps: TimeZoneSelectorProps = {
     timeZoneOptions: [
@@ -33,7 +35,7 @@ describe('TimeZoneSelector', () => {
 
   it('should display the local timezone as default', () => {
     renderComponent(timeZoneSelectorProps);
-    expect(screen.getByTestId('current-timezone')).toHaveTextContent(localTimeZone);
+    expect(screen.getByTestId('current-timezone')).toHaveTextContent(localTimeZoneOffset ?? '');
   });
 
   it('should display the list of timezones', () => {
