@@ -18,6 +18,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -120,15 +121,15 @@ func replacePaths(outputRelativePath string, o *generateOptions) string {
 func getPluginPath(pluginName string, pluginType string) (string, error) {
 	switch pluginType {
 	case "Datasource":
-		return filepath.Join("datasources", pluginName), nil
+		return path.Join("datasources", pluginName), nil
 	case "TimeSeriesQuery":
-		return filepath.Join("queries", "timeseriesquery", pluginName), nil
+		return path.Join("queries", "timeseriesquery", pluginName), nil
 	case "Variable":
-		return filepath.Join("variables", pluginName), nil
+		return path.Join("variables", pluginName), nil
 	case "Panel":
-		return filepath.Join("panels", pluginName), nil
+		return path.Join("panels", pluginName), nil
 	case "Explore":
-		return filepath.Join("explore", pluginName), nil
+		return path.Join("explore", pluginName), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
@@ -137,15 +138,15 @@ func getPluginPath(pluginName string, pluginType string) (string, error) {
 func getTemplatePath(pluginType string) (string, error) {
 	switch pluginType {
 	case "Datasource":
-		return filepath.Join("templates", "datasource"), nil
+		return path.Join("templates", "datasource"), nil
 	case "TimeSeriesQuery":
-		return filepath.Join("templates", "query", "timeseriesquery"), nil
+		return path.Join("templates", "query", "timeseriesquery"), nil
 	case "Variable":
-		return filepath.Join("templates", "variable"), nil
+		return path.Join("templates", "variable"), nil
 	case "Panel":
-		return filepath.Join("templates", "panel"), nil
+		return path.Join("templates", "panel"), nil
 	case "Explore":
-		return filepath.Join("templates", "explore"), nil
+		return path.Join("templates", "explore"), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
@@ -154,8 +155,8 @@ func getTemplatePath(pluginType string) (string, error) {
 func (o *generateOptions) Execute() error {
 	var err error
 
-	moduleDir := filepath.Join("templates", "module")
-	blocksDir := filepath.Join("templates", "blocks")
+	moduleDir := path.Join("templates", "module")
+	blocksDir := path.Join("templates", "blocks")
 
 	isModuleGeneration := false
 
@@ -214,14 +215,14 @@ func (o *generateOptions) Execute() error {
 		},
 	}))
 
-	path, err := getPluginPath(o.pluginName, o.pluginType)
+	pluginPath, err := getPluginPath(o.pluginName, o.pluginType)
 	if err != nil {
 		return fmt.Errorf("could not get plugin path %q: %w", o.pluginName, err)
 	}
 
 	exposedModules = append(exposedModules, ExposedModule{
 		ID:   o.pluginName,
-		Path: path,
+		Path: pluginPath,
 	})
 
 	for _, p := range persesPlugins {
@@ -291,7 +292,7 @@ func (o *generateOptions) Execute() error {
 		// Replace paths to create files with plugin names
 		outputRelativePath = replacePaths(outputRelativePath, o)
 
-		outputFullPath := filepath.Clean(filepath.Join(o.outputDir, outputRelativePath))
+		outputFullPath := filepath.Clean(path.Join(o.outputDir, outputRelativePath))
 
 		outputDir := filepath.Dir(outputFullPath)
 		if err := os.MkdirAll(outputDir, 0750); err != nil {
