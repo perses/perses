@@ -12,9 +12,16 @@
 // limitations under the License.
 
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
-import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import {
+  ErrorBoundary,
+  ErrorAlert,
+  TimeZoneSelector,
+  useDashboardTimeZone,
+  getTimeZoneOptions,
+  TimeZoneOption,
+} from '@perses-dev/components';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
@@ -56,6 +63,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
 
+  const { timeZone, setTimeZone } = useDashboardTimeZone();
+  const timeZoneOptions = getTimeZoneOptions();
+
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
   ) : (
@@ -64,74 +74,80 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
 
   const testId = 'dashboard-toolbar';
 
+  const handleTimeZoneChange = useCallback(
+    (timeZoneOption: TimeZoneOption) => {
+      setTimeZone(timeZoneOption.value);
+    },
+    [setTimeZone]
+  );
+
   return (
-    <>
-      <Stack data-testid={testId}>
-        <Box
-          px={2}
-          py={1.5}
-          display="flex"
-          sx={{ backgroundColor: (theme) => theme.palette.primary.main + (isEditMode ? '30' : '0') }}
-        >
-          {dashboardTitle}
-          {isEditMode ? (
-            <Stack direction="row" gap={1} ml="auto">
-              {isReadonly && (
-                <Alert severity="warning" sx={{ backgroundColor: 'transparent', padding: 0 }}>
-                  Dashboard managed via code only. Download JSON and commit changes to save.
-                </Alert>
-              )}
-              <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
-                {isVariableEnabled && <EditVariablesButton />}
-                {isDatasourceEnabled && <EditDatasourcesButton />}
-                <AddPanelButton />
-                <AddGroupButton />
-              </Stack>
-              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
-              <Button variant="outlined" onClick={onCancelButtonClick}>
-                Cancel
-              </Button>
+    <Stack data-testid={testId}>
+      <Box
+        px={2}
+        py={1.5}
+        display="flex"
+        sx={{ backgroundColor: (theme) => theme.palette.primary.main + (isEditMode ? '30' : '0') }}
+      >
+        {dashboardTitle}
+        {isEditMode ? (
+          <Stack direction="row" gap={1} ml="auto">
+            {isReadonly && (
+              <Alert severity="warning" sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                Dashboard managed via code only. Download JSON and commit changes to save.
+              </Alert>
+            )}
+            <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
+              {isVariableEnabled && <EditVariablesButton />}
+              {isDatasourceEnabled && <EditDatasourcesButton />}
+              <AddPanelButton />
+              <AddGroupButton />
             </Stack>
-          ) : (
-            <>
-              {isBiggerThanSm && (
-                <Stack direction="row" gap={1} ml="auto">
-                  <EditButton onClick={onEditButtonClick} />
-                </Stack>
-              )}
-            </>
-          )}
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            width: '100%',
-            alignItems: 'start',
-            padding: (theme) => theme.spacing(1, 2, 0, 2),
-            flexDirection: isBiggerThanMd ? 'row' : 'column',
-            flexWrap: 'nowrap',
-            gap: 1,
-          }}
-        >
-          <Box width="100%">
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardStickyToolbar
-                initialVariableIsSticky={initialVariableIsSticky}
-                sx={{
-                  backgroundColor: ({ palette }) => palette.background.default,
-                }}
-              />
-            </ErrorBoundary>
-          </Box>
-          <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
-            <Stack direction="row" spacing={1} mt={1} ml={1}>
-              <TimeRangeControls />
-              <DownloadButton />
-              <EditJsonButton isReadonly={!isEditMode} />
-            </Stack>
+            <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
+            <Button variant="outlined" onClick={onCancelButtonClick}>
+              Cancel
+            </Button>
           </Stack>
+        ) : (
+          <>
+            {isBiggerThanSm && (
+              <Stack direction="row" gap={1} ml="auto">
+                <EditButton onClick={onEditButtonClick} />
+              </Stack>
+            )}
+          </>
+        )}
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'start',
+          padding: (theme) => theme.spacing(1, 2, 0, 2),
+          flexDirection: isBiggerThanMd ? 'row' : 'column',
+          flexWrap: 'nowrap',
+          gap: 1,
+        }}
+      >
+        <Box width="100%">
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <DashboardStickyToolbar
+              initialVariableIsSticky={initialVariableIsSticky}
+              sx={{
+                backgroundColor: ({ palette }) => palette.background.default,
+              }}
+            />
+          </ErrorBoundary>
         </Box>
-      </Stack>
-    </>
+        <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
+          <Stack direction="row" spacing={1} mt={1} ml={1}>
+            <TimeRangeControls />
+            <TimeZoneSelector timeZoneOptions={timeZoneOptions} value={timeZone} onChange={handleTimeZoneChange} />
+            <DownloadButton />
+            <EditJsonButton isReadonly={!isEditMode} />
+          </Stack>
+        </Stack>
+      </Box>
+    </Stack>
   );
 };

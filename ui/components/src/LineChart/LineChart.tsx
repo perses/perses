@@ -38,7 +38,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model';
-import { useChartsTheme, useTimeZone } from '../context';
+import { useChartsTheme, useDashboardTimeZone } from '../context';
 import { CursorCoordinates, LineChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import {
   clearHighlightedSeries,
@@ -100,7 +100,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
-  const { timeZone } = useTimeZone();
+  const { timeZone } = useDashboardTimeZone();
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
