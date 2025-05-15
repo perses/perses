@@ -33,9 +33,9 @@ func TestPluginListCMD(t *testing.T) {
 			Args:            []string{},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
-			ExpectedMessage: `   NAME   | VERSION | TYPE  | LOADED | FROM DEV  
-----------+---------+-------+--------+-----------
-  plugin1 | v0.1.0  | Panel | true   | false     
+			ExpectedMessage: `  NAME   │ VERSION │ TYPE  │ LOADED │ FROM DEV 
+─────────┼─────────┼───────┼────────┼──────────
+ plugin1 │ v0.1.0  │ Panel │ true   │ false    
 `,
 		},
 	}
