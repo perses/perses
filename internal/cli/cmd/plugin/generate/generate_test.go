@@ -15,6 +15,7 @@ package generate
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
@@ -35,6 +36,16 @@ func removeTestFiles() {
 			}
 		}
 	}
+}
+
+func getFileList(filePaths []string) string {
+	listString := ""
+
+	for _, fp := range filePaths {
+		listString += "- " + filepath.FromSlash(fp) + "\n"
+	}
+
+	return listString
 }
 
 func TestPluginGenerateCMD(t *testing.T) {
@@ -62,30 +73,31 @@ func TestPluginGenerateCMD(t *testing.T) {
 			},
 			IsErrorExpected: false,
 			ExpectedMessage: `module MyPluginModule created successfully, plugin MyTestDatasource generated successfully
-- .gitignore
-- README.md
-- cue.mod/module.cue
-- go.mod
-- go.sum
-- jest.config.ts
-- package.json
-- rsbuild.config.ts
-- src/bootstrap.tsx
-- src/env.d.ts
-- src/getPluginModule.ts
-- src/index-federation.ts
-- src/index.ts
-- src/setup-tests.ts
-- tsconfig.build.json
-- tsconfig.json
-- schemas/datasources/my-test-datasource/my-test-datasource.cue
-- schemas/datasources/my-test-datasource/my-test-datasource.json
-- src/datasources/index.ts
-- src/datasources/my-test-datasource/index.ts
-- src/datasources/my-test-datasource/my-test-datasource-types.ts
-- src/datasources/my-test-datasource/MyTestDatasource.tsx
-- src/datasources/my-test-datasource/MyTestDatasourceEditor.tsx
-`,
+` + getFileList([]string{
+				".gitignore",
+				"README.md",
+				"cue.mod/module.cue",
+				"go.mod",
+				"go.sum",
+				"jest.config.ts",
+				"package.json",
+				"rsbuild.config.ts",
+				"src/bootstrap.tsx",
+				"src/env.d.ts",
+				"src/getPluginModule.ts",
+				"src/index-federation.ts",
+				"src/index.ts",
+				"src/setup-tests.ts",
+				"tsconfig.build.json",
+				"tsconfig.json",
+				"schemas/datasources/my-test-datasource/my-test-datasource.cue",
+				"schemas/datasources/my-test-datasource/my-test-datasource.json",
+				"src/datasources/index.ts",
+				"src/datasources/my-test-datasource/index.ts",
+				"src/datasources/my-test-datasource/my-test-datasource-types.ts",
+				"src/datasources/my-test-datasource/MyTestDatasource.tsx",
+				"src/datasources/my-test-datasource/MyTestDatasourceEditor.tsx",
+			}),
 		},
 		{
 			Title: "Build a plugin in an existing module",
@@ -96,29 +108,28 @@ func TestPluginGenerateCMD(t *testing.T) {
 			},
 			IsErrorExpected: false,
 			ExpectedMessage: `plugin MyTestPanel generated successfully
-- .gitignore
-- README.md
-- cue.mod/module.cue
-- go.mod
-- go.sum
-- jest.config.ts
-- package.json
-- rsbuild.config.ts
-- src/bootstrap.tsx
-- src/env.d.ts
-- src/getPluginModule.ts
-- src/index-federation.ts
-- src/index.ts
-- src/setup-tests.ts
-- tsconfig.build.json
-- tsconfig.json
-- src/panels/index.ts
-- src/panels/my-test-panel/index.ts
-- src/panels/my-test-panel/my-test-panel-types.ts
-- src/panels/my-test-panel/MyTestPanel.tsx
-- src/panels/my-test-panel/MyTestPanelComponent.tsx
-- src/panels/my-test-panel/MyTestPanelSettingsEditor.tsx
-`,
+` + getFileList([]string{".gitignore",
+				"README.md",
+				"cue.mod/module.cue",
+				"go.mod",
+				"go.sum",
+				"jest.config.ts",
+				"package.json",
+				"rsbuild.config.ts",
+				"src/bootstrap.tsx",
+				"src/env.d.ts",
+				"src/getPluginModule.ts",
+				"src/index-federation.ts",
+				"src/index.ts",
+				"src/setup-tests.ts",
+				"tsconfig.build.json",
+				"tsconfig.json",
+				"src/panels/index.ts",
+				"src/panels/my-test-panel/index.ts",
+				"src/panels/my-test-panel/my-test-panel-types.ts",
+				"src/panels/my-test-panel/MyTestPanel.tsx",
+				"src/panels/my-test-panel/MyTestPanelComponent.tsx",
+				"src/panels/my-test-panel/MyTestPanelSettingsEditor.tsx"}),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
