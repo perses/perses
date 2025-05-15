@@ -36,7 +36,6 @@ export * from './OptionsEditorLayout';
 export * from './Overlay';
 export * from './SettingsAutocomplete';
 export * from './SortSelector';
-export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
 export * from './TimeChart';
