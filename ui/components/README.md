@@ -14,4 +14,3 @@ For detailed examples of how to use certain components, see individual docs for:
 
 - [LineChart.md](./src/LineChart/LineChart.md)
 - [GaugeChart.md](./src/GaugeChart/GaugeChart.md)
-- [BarChart.md](./src/BarChart/BarChart.md)
