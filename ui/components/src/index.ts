@@ -51,6 +51,5 @@ export * from './test-utils';
 export * from './theme';
 export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
-export * from './PieChart';
 export * from './StatusHistoryChart';
 export * from './ValueMappingEditor';
