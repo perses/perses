@@ -28,4 +28,4 @@ A plugin is made of two parts:
   validation. Please refer to [CUE in Perses](../plugins/cue.md) for more details.
 - The "frontend" part, a.k.a. all the frontend code responsible for bringing the plugin to life in the Perses UI.
 
-see [Plugin creation](../plugins/creation.md) for more details on how to generate and integrate a plugin.
+See [Plugin creation](../plugins/creation.md) for more details on how to generate and integrate a plugin.

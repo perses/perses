@@ -22,8 +22,8 @@ and can be used together. For example, the Prometheus plugin module has a dataso
 
 Perses plugins are built using the following architecture:
 
-- **Backend**: The backend is responsible for validating the plugin data model using Cuelang schemas. It is also responsible
-  for migrating the data model from a Grafana plugin to the Perses version.
+- **Backend**: The backend is responsible for validating the plugin data model using Cuelang schemas. Optionally, it is also responsible
+  for migrating the data model from a Grafana plugin to its Perses equivalent.
 - **Frontend**: The frontend is responsible for rendering the plugin using React components. It is also responsible for
   communicating with the backend to fetch data and send queries. The frontend is built using `rsbuild` and is served using
   remote module federation.
@@ -91,16 +91,18 @@ Check the [CLI documentation](../cli.md) for more details.
 
 1. Create a new plugin module and plugin using the `percli plugin generate` command. This will create a new folder with the required structure and files.
 2. Optionally, add more plugins to the module using the `percli plugin generate` command. This will edit and add the necessary files, keeping the required plugin module structure.
-3. Implement the plugin:
+3. Install the required dependencies using `npm install`.
+4. Implement the plugin:
    - For a Datasource plugin:
      - Edit the datasource client to connect it to your datasource.
      - Edit the Cuelang schema file in the `schemas/datasources/<plugin-name>` folder. This file will be used to validate the plugin data model when a datasource is stored.
      - Edit the JSON example of the schema in the same folder.
-     - If migration is required, create a `schemas/datasources/<plugin-name>/migrate` folder and add the migration Cuelang schema file.
+     - To enable Grafana migration, create a `schemas/datasources/<plugin-name>/migrate` folder and define the migration logic as a Cuelang schema file.
    - For a Query plugin:
      - Edit the Cuelang schema file in the `schemas/queries/<plugin-name>` folder. This file will be used to validate the plugin data model when a dashboard is stored.
      - Edit the JSON example of the schema in the same folder.
      - If migration is required, create a `schemas/queries/<plugin-name>/migrate` folder and add the migration Cuelang schema file.
+     - Implement your query as a React component located in the `queries/<plugin-name>` folder.
    - For a Variable plugin:
      - Edit the Cuelang schema file in the `schemas/variables/<plugin-name>` folder. This file will be used to validate the plugin data model when a variable is stored.
      - Edit the JSON example of the schema in the same folder.
@@ -108,15 +110,18 @@ Check the [CLI documentation](../cli.md) for more details.
    - For a Panel plugin:
      - Implement your panel as a React component located in the `panels/<plugin-name>` folder.
    - For a Explore plugin:
-     - Implement your explore panel as a React component located in the `explore/<plugin-name>` folder.
-4. Test your plugin using the `percli plugin start` command. This will start a local server that will serve your plugin and allow you to test it in the Perses UI.
-5. Build your plugin using the `percli plugin build` command. This will create an archive file containing your plugin ready for distribution.
+     - Edit the Cuelang schema file in the `schemas/<plugin-name>` folder. This file will be used to validate the plugin data model when a dashboard is stored.
+     - Edit the JSON example of the schema in the same folder.
+     - To enable Grafana migration, create a `schemas/<plugin-name>/migrate` folder and define the migration logic as a Cuelang schema file.
+     - Implement your panel as a React component located in the `panels/<plugin-name>` folder.
+5. Test your plugin using the `percli plugin start` command. This will start a local server that will serve your plugin and allow you to test it in the Perses UI.
+6. Build your plugin using the `percli plugin build` command. This will create an archive file containing your plugin ready for distribution.
 
 ## Types of integrations
 
 There are two main types of integrations:
 
-- **Install in a Perses server**: After creating a plugin you can install it in a Perses server, so its avaiable in the Perses UI. When running from Perses UI the plugin is loaded using module federation.
+- **Install in a Perses server**: After creating a plugin you can install it in a Perses server, so its available in the Perses UI. When running from Perses UI the plugin is loaded using [module federation](https://rspack.dev/guide/features/module-federation).
 - **Embed in a React application**: You can also embed a plugin and parts of the Perses UI in your own React application. This is useful if you want to create a custom dashboard or application that uses Perses plugins. See the [Embedding documentation](../embedding-panels.md) for more details.
 
 ## Examples
