@@ -1,0 +1,64 @@
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import { DATASOURCE_KIND } from './constants';
+
+type {{ .PluginPascalName }}EditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
+
+export function {{ .PluginPascalName}}Editor(props: {{ .PluginPascalName }}EditorProps): ReactElement {
+  const { onChange, value } = props;
+  const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
+
+  const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
+
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
+    if (isPrometheusDatasourceSelector(next)) {
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
+          draft.datasource = nextDatasource;
+        })
+      );
+      return;
+    }
+
+    throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selector');
+  };
+
+  return (
+    <Stack spacing={2}>
+      <FormControl margin="dense" fullWidth={false}>
+        <InputLabel id={datasourceSelectLabelID} shrink>
+          {{ .PluginPascalName }} Datasource
+        </InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind={DATASOURCE_KIND}
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId={datasourceSelectLabelID}
+          label="{{ .PluginPascalName }} Datasource"
+          notched
+        />
+      </FormControl>
+      <PromQLEditor
+        completeConfig={{"{{ remote: { url: promURL } }}"}}
+        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
+        datasource={selectedDatasource}
+        onChange={handleQueryChange}
+        onBlur={handleQueryBlur}
+      />
+      <Stack direction="row" spacing={2}>
+        <TextField
+          fullWidth
+          label="Legend"
+          placeholder="Example: '{{"{{instance}}"}}' will generate series names like 'webserver-123', 'webserver-456'..."
+          helperText="Text to be displayed in the legend and the tooltip. Use {{"{{label_name}}"}} to interpolate label values."
+          value={format ?? ''}
+          onChange={(e) => handleFormatChange(e.target.value)}
+          onBlur={handleFormatBlur}
+        />
+      </Stack>
+    </Stack>
+  );
+}

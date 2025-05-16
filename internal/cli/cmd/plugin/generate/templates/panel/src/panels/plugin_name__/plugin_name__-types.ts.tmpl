@@ -1,0 +1,18 @@
+import { TimeSeriesData, ThresholdOptions } from "@perses-dev/core";
+import { LegendSpecOptions } from '@perses-dev/plugin-system';
+
+export type QueryData = TimeSeriesData; // Shape of the data returned by a query plugin
+
+export type {{ .PluginPascalName }}Props = PanelProps<{{ .PluginPascalName }}Options, QueryData>;
+
+export interface QuerySettingsOptions {
+  queryIndex: number;
+  colorValue: string;
+}
+
+export interface {{ .PluginPascalName }}Options {
+  legend?: LegendSpecOptions;
+  thresholds?: ThresholdOptions;
+  querySettings?: QuerySettingsOptions;
+}
+

@@ -1,0 +1,105 @@
+import { Box, Stack } from "@mui/material";
+import {
+  ErrorAlert,
+  ErrorBoundary,
+  LoadingOverlay,
+  NoDataOverlay,
+} from "@perses-dev/components";
+import { QueryDefinition } from "@perses-dev/core";
+import { Panel } from "@perses-dev/dashboards";
+import { useExplorerManagerContext } from "@perses-dev/explore";
+import {
+  DataQueriesProvider,
+  MultiQueryEditor,
+  useDataQueries,
+} from "@perses-dev/plugin-system";
+import { ReactElement } from "react";
+
+interface {{ .PluginPascalName }}QueryParams {
+  queries?: QueryDefinition[];
+}
+
+interface SearchResultsPanelProps {
+  queries: QueryDefinition[];
+}
+
+// TODO: change to the type of query you want to support for explore
+const QUERY_TYPE = "MyQuery";
+
+function SearchResultsPanel({
+  queries,
+}: SearchResultsPanelProps): ReactElement {
+  const { isFetching, isLoading, queryResults } = useDataQueries(QUERY_TYPE);
+
+  // no query executed, show empty panel
+  if (queryResults.length === 0) {
+    return <></>;
+  }
+
+  if (isLoading || isFetching) {
+    return <LoadingOverlay />;
+  }
+
+  const queryError = queryResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
+  const dataFound = queryResults.some(
+    (result) => (result.data?.searchResult ?? []).length > 0
+  );
+  if (!dataFound) {
+    return <NoDataOverlay resource="{{ .PluginPascalName }}" />;
+  }
+
+  // TODO: add panels or other components to explore the data
+
+  return (
+    <Panel
+      panelOptions={{ "{{ hideHeader: true }}" }}
+      definition={{ "{{" }}
+        kind: "Panel",
+        spec: {
+          queries,
+          display: { name: "" },
+          plugin: { kind: "TimeSeriesChart", spec: {} },
+        },
+      {{ "}}" }}
+    />
+  );
+}
+
+export function {{ .PluginPascalName }}(): ReactElement {
+  const {
+    data: { queries = [] },
+    setData,
+  } = useExplorerManagerContext<{{ .PluginPascalName }}QueryParams>();
+
+  // map QueryDefinition to Definition<UnknownSpec>
+  const definitions = queries.length
+    ? queries.map((query: QueryDefinition) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      })
+    : [];
+
+  return (
+    <Stack gap={2} sx={{ "{{ width: '100%' }}" }}>
+      <MultiQueryEditor
+        queryTypes={["TraceQuery"]}
+        onChange={(newQueries) => setData({ queries: newQueries })}
+        queries={queries}
+      />
+
+      <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
+        <DataQueriesProvider definitions={definitions}>
+          <Box height={700}>
+            <SearchResultsPanel queries={queries} />
+          </Box>
+        </DataQueriesProvider>
+      </ErrorBoundary>
+    </Stack>
+  );
+}

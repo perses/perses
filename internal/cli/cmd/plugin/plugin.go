@@ -15,6 +15,7 @@ package plugin
 
 import (
 	"github.com/perses/perses/internal/cli/cmd/plugin/build"
+	"github.com/perses/perses/internal/cli/cmd/plugin/generate"
 	"github.com/perses/perses/internal/cli/cmd/plugin/lint"
 	"github.com/perses/perses/internal/cli/cmd/plugin/list"
 	"github.com/perses/perses/internal/cli/cmd/plugin/start"
@@ -26,6 +27,7 @@ func NewCMD() *cobra.Command {
 		Use:   "plugin",
 		Short: "Commands related to plugins development",
 	}
+	cmd.AddCommand(generate.NewCMD())
 	cmd.AddCommand(build.NewCMD())
 	cmd.AddCommand(lint.NewCMD())
 	cmd.AddCommand(list.NewCMD())
