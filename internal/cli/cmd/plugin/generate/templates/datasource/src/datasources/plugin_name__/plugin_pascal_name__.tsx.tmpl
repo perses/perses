@@ -20,8 +20,6 @@ const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPasc
       datasourceUrl,
     },
     query: async (params, queryOptions) => {
-      const { datasourceUrl, headers = {} } = queryOptions;
-
       let url = `${datasourceUrl}/api/search`;
       if (params) {
         url += '?' + new URLSearchParams(params);

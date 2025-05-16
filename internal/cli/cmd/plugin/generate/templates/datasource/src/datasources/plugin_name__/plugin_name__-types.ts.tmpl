@@ -6,7 +6,7 @@ export interface {{ .PluginPascalName }}Spec {
   proxy?: HTTPProxy;
 }
 
-interface QueryRequestParameters {
+interface QueryRequestParameters extends Record<string, string> {
   query: string;
   start: string;
   end: string;

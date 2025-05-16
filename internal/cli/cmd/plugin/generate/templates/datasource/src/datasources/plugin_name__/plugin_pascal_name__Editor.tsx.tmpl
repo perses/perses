@@ -20,11 +20,7 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
       kind: 'HTTPProxy',
       spec: {
         allowedEndpoints: [
-          // list of standard endpoints, adjust based on your API
-          {
-            endpointPattern: '/api/data',
-            method: 'GET',
-          },
+          // Adjust based on your API
           {
             endpointPattern: '/api/search',
             method: 'GET',
