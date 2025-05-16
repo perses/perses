@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './AlignSelector';
-export * from './BarChart';
 export * from './ColorPicker';
 export * from './ContentWithLegend';
 export * from './controls';
