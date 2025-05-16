@@ -15,7 +15,7 @@
 - name: "StaticListVariable"
   version: "0.3.0"
 - name: "StatusHistoryChart"
-  version: "0.6.0"
+  version: "0.7.0"
 - name: "Table"
   version: "0.6.0"
 - name: "Tempo"
