@@ -15,7 +15,6 @@
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "sideEffects": [
-    "./dist/GaugeChart/GaugeChart.js",
     "./dist/LineChart/LineChart.js"
   ],
   "scripts": {
