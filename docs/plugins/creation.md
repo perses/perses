@@ -89,33 +89,60 @@ Check the [CLI documentation](../cli.md) for more details.
 
 ## Steps to create a plugin
 
-1. Create a new plugin module and plugin using the `percli plugin generate` command. This will create a new folder with the required structure and files.
-2. Optionally, add more plugins to the module using the `percli plugin generate` command. This will edit and add the necessary files, keeping the required plugin module structure.
-3. Install the required dependencies using `npm install`.
-4. Implement the plugin:
-   - For a Datasource plugin:
-     - Edit the datasource client to connect it to your datasource.
-     - Edit the Cuelang schema file in the `schemas/datasources/<plugin-name>` folder. This file will be used to validate the plugin data model when a datasource is stored.
-     - Edit the JSON example of the schema in the same folder.
-     - To enable Grafana migration, create a `schemas/datasources/<plugin-name>/migrate` folder and define the migration logic as a Cuelang schema file.
-   - For a Query plugin:
-     - Edit the Cuelang schema file in the `schemas/queries/<plugin-name>` folder. This file will be used to validate the plugin data model when a dashboard is stored.
-     - Edit the JSON example of the schema in the same folder.
-     - If migration is required, create a `schemas/queries/<plugin-name>/migrate` folder and add the migration Cuelang schema file.
-     - Implement your query as a React component located in the `queries/<plugin-name>` folder.
-   - For a Variable plugin:
-     - Edit the Cuelang schema file in the `schemas/variables/<plugin-name>` folder. This file will be used to validate the plugin data model when a variable is stored.
-     - Edit the JSON example of the schema in the same folder.
-     - If migration is required, create a `schemas/variables/<plugin-name>/migrate` folder and add the migration Cuelang schema file.
-   - For a Panel plugin:
-     - Implement your panel as a React component located in the `panels/<plugin-name>` folder.
-   - For a Explore plugin:
-     - Edit the Cuelang schema file in the `schemas/<plugin-name>` folder. This file will be used to validate the plugin data model when a dashboard is stored.
-     - Edit the JSON example of the schema in the same folder.
-     - To enable Grafana migration, create a `schemas/<plugin-name>/migrate` folder and define the migration logic as a Cuelang schema file.
-     - Implement your panel as a React component located in the `panels/<plugin-name>` folder.
-5. Test your plugin using the `percli plugin start` command. This will start a local server that will serve your plugin and allow you to test it in the Perses UI.
-6. Build your plugin using the `percli plugin build` command. This will create an archive file containing your plugin ready for distribution.
+### Setup
+
+- Create a new plugin module and plugin using the `percli plugin generate` command. This will create a new folder with the required structure and files.
+  - Optionally, add more plugins to the module using the same command. This will edit and add the necessary files, keeping the required plugin module structure.
+- Install the required dependencies using `npm install`.
+
+### Implement
+
+The implementation is mostly similar across all plugin types.
+
+!!! info
+	For more info on the Cuelang part (model & migrate files), please refer to [CUE in Perses](./cue.md).
+
+#### Datasource plugin
+
+- Edit the datasource client to connect it to your datasource.
+- Edit the CUE schema file in the `schemas/datasources/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+  - Edit the JSON example of the schema in the same folder.
+- To enable Grafana migration, create a `schemas/datasources/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
+- Implement your datasource as a React component located in the `src/datasources/<plugin-name>` folder.
+
+#### Query plugin
+
+- Edit the CUE schema file in the `schemas/queries/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+  - Edit the JSON example of the schema in the same folder.
+- To enable Grafana migration, create a `schemas/queries/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
+- Implement your query as a React component located in the `src/queries/<plugin-name>` folder.
+
+#### Variable plugin
+
+- Edit the CUE schema file in the `schemas/variables/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+  - Edit the JSON example of the schema in the same folder.
+- To enable Grafana migration, create a `schemas/variables/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
+- Implement your variable as a React component located in the `src/variables/<plugin-name>` folder.
+
+#### Panel plugin
+
+- Edit the CUE schema file in the `schemas/panels/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+  - Edit the JSON example of the schema in the same folder.
+- To enable Grafana migration, create a `schemas/panels/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
+- Implement your panel as a React component located in the `src/panels/<plugin-name>` folder.
+
+#### Explore plugin
+
+- _There's no CUE part in the case of Explore plugins._
+- Implement your Explore plugin as a React component located in the `src/explore` folder.
+
+### Test
+
+Test your plugin using the `percli plugin start` command. This will start a local server that will serve your plugin and allow you to test it in the Perses UI.
+
+### Build
+
+Build your plugin using the `percli plugin build` command. This will create an archive file containing your plugin ready for distribution.
 
 ## Types of integrations
 
