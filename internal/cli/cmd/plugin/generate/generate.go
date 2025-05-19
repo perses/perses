@@ -121,15 +121,15 @@ func replacePaths(outputRelativePath string, o *generateOptions) string {
 func getPluginPath(pluginName string, pluginType string) (string, error) {
 	switch pluginType {
 	case "Datasource":
-		return path.Join("datasources", pluginName), nil
+		return path.Join("src", "datasources", pluginName), nil
 	case "TimeSeriesQuery":
-		return path.Join("queries", "timeseriesquery", pluginName), nil
+		return path.Join("src", "queries", pluginName), nil
 	case "Variable":
-		return path.Join("variables", pluginName), nil
+		return path.Join("src", "variables", pluginName), nil
 	case "Panel":
-		return path.Join("panels", pluginName), nil
+		return path.Join("src", "panels", pluginName), nil
 	case "Explore":
-		return path.Join("explore", pluginName), nil
+		return path.Join("src", "explore", pluginName), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
@@ -193,7 +193,7 @@ func (o *generateOptions) Execute() error {
 		if p.Spec.Name != o.pluginName {
 			persesPlugins = append(persesPlugins, toGeneratedPlugin(p))
 
-			path, err := getPluginPath(o.pluginName, o.pluginType)
+			path, err := getPluginPath(p.Spec.Name, string(p.Kind))
 			if err != nil {
 				return fmt.Errorf("could not get existing plugin path %q: %w", o.pluginName, err)
 			}
@@ -242,6 +242,7 @@ func (o *generateOptions) Execute() error {
 
 	data := map[string]interface{}{
 		"ModuleName":              GetSlug(o.pluginModuleName),
+		"ModulePascalName":        GetPascalCase(o.pluginModuleName),
 		"ModuleOrg":               GetSlug(o.pluginModuleOrg),
 		"PluginName":              o.pluginName,
 		"PluginPascalName":        o.pluginPascalName,
@@ -284,8 +285,8 @@ func (o *generateOptions) Execute() error {
 	for _, relTemplatePath := range allTemplateFiles {
 		outputRelativePath := strings.TrimSuffix(relTemplatePath, tmplExt)
 
-		// Skip blocks templates from generating files
-		if filepath.Ext(outputRelativePath) == "" {
+		// Skip blocks templates from generating files, excluding the LICENSE file
+		if filepath.Ext(outputRelativePath) == "" && !strings.HasSuffix(outputRelativePath, "LICENSE") {
 			continue
 		}
 

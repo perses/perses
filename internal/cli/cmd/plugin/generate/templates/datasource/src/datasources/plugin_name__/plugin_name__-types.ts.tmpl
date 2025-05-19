@@ -18,6 +18,9 @@ interface {{ .PluginPascalName }}ClientOptions {
 }
 
 export interface {{ .PluginPascalName }}Response {
+  status: string;
+  warnings?: string[];
+  // TODO: adjust this type to match your datasource response shape
   data: any;
 };
 

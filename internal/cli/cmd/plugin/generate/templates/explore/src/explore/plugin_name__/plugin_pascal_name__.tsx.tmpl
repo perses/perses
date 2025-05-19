@@ -54,19 +54,7 @@ function SearchResultsPanel({
 
   // TODO: add panels or other components to explore the data
 
-  return (
-    <Panel
-      panelOptions={{ "{{ hideHeader: true }}" }}
-      definition={{ "{{" }}
-        kind: "Panel",
-        spec: {
-          queries,
-          display: { name: "" },
-          plugin: { kind: "TimeSeriesChart", spec: {} },
-        },
-      {{ "}}" }}
-    />
-  );
+  return <div>Explore goes here!</div>;
 }
 
 export function {{ .PluginPascalName }}(): ReactElement {

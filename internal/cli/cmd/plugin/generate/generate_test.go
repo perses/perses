@@ -30,9 +30,11 @@ func removeTestFiles() {
 			panic(err)
 		}
 		for _, entry := range dirEntries {
-			err := os.RemoveAll(testFolder + "/" + entry.Name())
-			if err != nil {
-				panic(err)
+			if entry.Name() != ".gitkeep" {
+				err := os.RemoveAll(testFolder + "/" + entry.Name())
+				if err != nil {
+					panic(err)
+				}
 			}
 		}
 	}
@@ -74,7 +76,10 @@ func TestPluginGenerateCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: `module MyPluginModule created successfully, plugin MyTestDatasource generated successfully
 ` + getFileList([]string{
+				".cjs.swcrc",
 				".gitignore",
+				".swcrc",
+				"LICENSE",
 				"README.md",
 				"cue.mod/module.cue",
 				"go.mod",
@@ -108,7 +113,11 @@ func TestPluginGenerateCMD(t *testing.T) {
 			},
 			IsErrorExpected: false,
 			ExpectedMessage: `plugin MyTestPanel generated successfully
-` + getFileList([]string{".gitignore",
+` + getFileList([]string{
+				".cjs.swcrc",
+				".gitignore",
+				".swcrc",
+				"LICENSE",
 				"README.md",
 				"cue.mod/module.cue",
 				"go.mod",
@@ -124,6 +133,8 @@ func TestPluginGenerateCMD(t *testing.T) {
 				"src/setup-tests.ts",
 				"tsconfig.build.json",
 				"tsconfig.json",
+				"schemas/panels/my-test-panel/my-test-panel.cue",
+				"schemas/panels/my-test-panel/my-test-panel.json",
 				"src/panels/index.ts",
 				"src/panels/my-test-panel/index.ts",
 				"src/panels/my-test-panel/my-test-panel-types.ts",

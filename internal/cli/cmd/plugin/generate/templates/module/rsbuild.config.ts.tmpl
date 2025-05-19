@@ -1,18 +1,18 @@
-import { pluginModuleFederation } from "@module-federation/rsbuild-plugin";
+import { ModuleFederationOptions, pluginModuleFederation } from "@module-federation/rsbuild-plugin";
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
 export const assetPrefix = "/plugins/{{.ModuleName}}/";
 
 // Expose the components that will be used in the UI, either Perses UI or embedded.
-const exposedModules = [
+const exposedModules: ModuleFederationOptions["exposes"] = [
   {{- range $index, $item := .ExposedModules }}
       {{- template "exposedModule" $item -}}
   {{- end }}
 ];
 
 export default defineConfig({
-  server: { port: 3009 },
+  server: { port: 3119 },
   dev: { assetPrefix },
   source: { entry: { main: "./src/index-federation.ts" } },
   output: {
@@ -20,7 +20,7 @@ export default defineConfig({
     copy: [
       { from: "package.json" },
       { from: "README.md" },
-      { from: "../LICENSE", to: "./LICENSE", toType: "file" },
+      { from: "LICENSE", to: "./LICENSE", toType: "file" },
     ],
     distPath: {
       root: "dist",
@@ -32,7 +32,7 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      name: "{{.ModuleName}}",
+      name: "{{ .ModulePascalName }}",
       exposes: exposedModules,
       shared: {
         react: { requiredVersion: "18.2.0", singleton: true },

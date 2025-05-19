@@ -1,4 +1,4 @@
-import { Notice, TimeSeriesData, TimeSeries } from '@perses-dev/core';
+import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { {{ .PluginPascalName }}Spec, DatasourceQueryResponse } from './{{ .PluginName }}-types';
 import { DEFAULT_DATASOURCE } from './constants';
@@ -37,23 +37,9 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spe
 
   const response = await client.query({ query });
 
-  // Custom display for response header warnings, configurable error responses display coming next
-  const notices: Notice[] = [];
-  if (response.status === 'success') {
-    const warnings = response.warnings ?? [];
-    const warningMessage = warnings[0] ?? '';
-    if (warningMessage !== '') {
-      notices.push({
-        type: 'warning',
-        message: warningMessage,
-      });
-    }
-  }
-
   const chartData: TimeSeriesData = {
     series: buildTimeSeries(response),
     metadata: {
-      notices,
       executedQueryString: query,
     },
   };

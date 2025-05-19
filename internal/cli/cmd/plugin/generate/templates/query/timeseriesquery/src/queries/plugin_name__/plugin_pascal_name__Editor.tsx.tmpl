@@ -1,64 +1,42 @@
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps, isVariableDatasource, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
-import { DATASOURCE_KIND } from './constants';
+import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
 
 type {{ .PluginPascalName }}EditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
 
-export function {{ .PluginPascalName}}Editor(props: {{ .PluginPascalName }}EditorProps): ReactElement {
+export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}EditorProps): ReactElement {
   const { onChange, value } = props;
-  const { datasource } = value;
-  const selectedDatasource = datasource ?? DEFAULT_PROM;
+  const {datasource} = value;
+  const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
 
-  const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
-
-  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
-    if (isPrometheusDatasourceSelector(next)) {
-      onChange(
-        produce(value, (draft) => {
-          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
-          const nextDatasource = isDefaultPromSelector(next) ? undefined : next;
-          draft.datasource = nextDatasource;
-        })
-      );
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
+    if(!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
+      onChange({ ...value, datasource: newDatasourceSelection });
       return;
     }
 
-    throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selector');
+    throw new Error('Got unexpected non {{ .PluginPascalName }} datasource selection');
+  };
+
+  const handleQueryBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const newQuery = event.target.value;
+    if (newQuery !== value.query) {
+      onChange({ ...value, query: newQuery });
+    }
   };
 
   return (
-    <Stack spacing={2}>
-      <FormControl margin="dense" fullWidth={false}>
-        <InputLabel id={datasourceSelectLabelID} shrink>
-          {{ .PluginPascalName }} Datasource
-        </InputLabel>
-        <DatasourceSelect
+    <div>
+      <label>{{ .PluginPascalName }} Datasource</label>
+      <DatasourceSelect
           datasourcePluginKind={DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          labelId={datasourceSelectLabelID}
           label="{{ .PluginPascalName }} Datasource"
           notched
         />
-      </FormControl>
-      <PromQLEditor
-        completeConfig={{"{{ remote: { url: promURL } }}"}}
-        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
-        datasource={selectedDatasource}
-        onChange={handleQueryChange}
-        onBlur={handleQueryBlur}
-      />
-      <Stack direction="row" spacing={2}>
-        <TextField
-          fullWidth
-          label="Legend"
-          placeholder="Example: '{{"{{instance}}"}}' will generate series names like 'webserver-123', 'webserver-456'..."
-          helperText="Text to be displayed in the legend and the tooltip. Use {{"{{label_name}}"}} to interpolate label values."
-          value={format ?? ''}
-          onChange={(e) => handleFormatChange(e.target.value)}
-          onBlur={handleFormatBlur}
-        />
-      </Stack>
-    </Stack>
+      <input onBlur={handleQueryBlur} value={value.query} />
+    </div>
   );
 }
