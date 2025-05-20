@@ -2,7 +2,7 @@ import { ModuleFederationOptions, pluginModuleFederation } from "@module-federat
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
-export const assetPrefix = "/plugins/{{.ModuleName}}/";
+export const assetPrefix = "/plugins/{{.ModulePascalName}}/";
 
 // Expose the components that will be used in the UI, either Perses UI or embedded.
 const exposedModules: ModuleFederationOptions["exposes"] = [
