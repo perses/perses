@@ -90,7 +90,7 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		return generateIDErr
 	}
 	filePath := d.buildPath(key)
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
@@ -136,7 +136,7 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 
 	for _, file := range files {
 		// now read all files and append them to the final result
-		data, readErr := os.ReadFile(file)
+		data, readErr := os.ReadFile(file) //nolint: gosec
 		if readErr != nil {
 			return nil, readErr
 		}
@@ -205,7 +205,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	}
 	for _, file := range files {
 		// now read all files and append them to the final result
-		data, readErr := os.ReadFile(file)
+		data, readErr := os.ReadFile(file) //nolint: gosec
 		if readErr != nil {
 			return readErr
 		}
@@ -287,7 +287,7 @@ func (d *DAO) GetLatestUpdateTime(_ []modelV1.Kind) (*string, error) {
 
 func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 	filePath := d.buildPath(key)
-	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
 		return err
 	}
 	data, err := d.marshal(entity)

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package conf
+package list
 
 import (
 	"testing"
@@ -20,36 +20,22 @@ import (
 	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 )
 
-func TestConfigCMD(t *testing.T) {
+func TestPluginListCMD(t *testing.T) {
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "empty args",
-			Args:            []string{},
-			IsErrorExpected: false,
-			ExpectedMessage: `dac:
-    output_folder: built
-
-`,
-		},
-		{
-			Title:           "not connected to any API",
-			Args:            []string{"--online"},
+			Title:           "use args",
+			Args:            []string{"whatever"},
 			IsErrorExpected: true,
-			ExpectedMessage: "you are not connected to any API",
+			ExpectedMessage: "no args are supported by the command 'list'",
 		},
 		{
-			Title:           "remote config",
-			Args:            []string{"--online"},
-			IsErrorExpected: false,
+			Title:           "list plugins",
+			Args:            []string{},
 			APIClient:       fakeapi.New(),
-			ExpectedMessage: `security:
-    readonly: false
-    cookie:
-        secure: false
-    enable_auth: true
-    cors:
-        enable: false
-
+			IsErrorExpected: false,
+			ExpectedMessage: `   NAME   | VERSION | TYPE  | LOADED | FROM DEV  
+----------+---------+-------+--------+-----------
+  plugin1 | v0.1.0  | Panel | true   | false     
 `,
 		},
 	}

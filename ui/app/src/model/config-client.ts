@@ -137,6 +137,7 @@ export interface ExplorerConfig {
 
 export interface TimeRangeConfig {
   disable_custom: boolean;
+  disable_zoom: boolean;
   options: DurationString[];
 }
 

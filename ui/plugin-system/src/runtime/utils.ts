@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,11 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+import { VariableStateMap } from './variables';
 
-#datasourceSelector: {
-	datasource?: {
-		kind:  string
-		name?: string
-	}
+export function filterVariableStateMap(v: VariableStateMap, names?: string[]): VariableStateMap {
+  if (!names) {
+    return v;
+  }
+  return Object.fromEntries(Object.entries(v).filter(([name]) => names.includes(name)));
+}
+
+/**
+ * Returns a serialized string of the current state of variable values.
+ */
+export function getVariableValuesKey(v: VariableStateMap): string {
+  return Object.values(v)
+    .map((v) => JSON.stringify(v.value))
+    .join(',');
 }

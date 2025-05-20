@@ -93,24 +93,7 @@ type ZREventProperties = {
   zrByTouch?: boolean;
 };
 
-export type ZRRawMouseEvent = (MouseEvent | PointerEvent) & ZREventProperties;
-
-type ZRBrowser = {
-  ie: RegExpMatchArray | null;
-  edge: RegExpMatchArray | null;
-};
-
-export const browser: ZRBrowser = {
-  // IE 11 Trident/7.0; rv:11.0
-  ie: navigator.userAgent.match(/MSIE\s([\d.]+)/) || navigator.userAgent.match(/Trident\/.+?rv:(([\d.]+))/),
-  // IE 12 and 12+
-  edge: navigator.userAgent.match(/Edge?\/([\d.]+)/),
-};
-
-export const pointerEventsSupported =
-  'onpointerdown' in window && (browser.edge || (browser.ie && browser.ie[1] && +browser.ie[1] >= 11));
-
-export const trackingEventName = pointerEventsSupported ? 'pointermove' : 'mousemove';
+export type ZRRawMouseEvent = MouseEvent & ZREventProperties;
 
 export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
@@ -127,24 +110,21 @@ export const useMousePosition = (): CursorData['coords'] => {
           y: e.clientY,
         },
         plotCanvas: {
-          // Always use zrender mousemove coords since they handle browser inconsistencies for us
+          // Default to zrender mousemove coords since they handle browser inconsistencies for us
           // ex: Firefox and Chrome have slightly different implementations of offsetX and offsetY
           // more info: https://github.com/ecomfe/zrender/blob/5.5.0/src/core/event.ts#L46-L120
-          x: e.zrX,
-          y: e.zrY,
+          // Fallback to offsetX and offsetY to ensure tooltip works correctly in Edge
+          x: e.zrX ?? e.offsetX,
+          y: e.zrY ?? e.offsetY,
         },
         // necessary to check whether cursor target matches correct chart canvas (since each chart has its own mousemove listener)
         target: e.target,
       });
     };
-
-    // Devices that both enabled touch and mouse don't trigger touch events correctly
-    // which leads to missing zrender mousemove coordinates
-    // {@link https://github.com/ecomfe/zrender/blob/ae8cfaae186e6c1bf66b5dc431b2cdda5e67dacf/src/dom/HandlerProxy.ts#L423-L428 }
-    window.addEventListener(trackingEventName, setFromEvent);
+    window.addEventListener('mousemove', setFromEvent);
 
     return (): void => {
-      window.removeEventListener(trackingEventName, setFromEvent);
+      window.removeEventListener('mousemove', setFromEvent);
     };
   }, []);
 

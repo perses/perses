@@ -151,9 +151,12 @@ encryption_key: <secret> # Optional
 
 # The path to the file containing the secret key.
 encryption_key_file: <filename> # Optional
+
+# Configuration for CORS (cross-origin resource sharing).
+cors: <CORS config> # Optional
 ```
 
-### Cookie config
+#### Cookie config
 
 ```yaml
 # Set the same_site cookie attribute and prevents the browser from sending the cookie along with cross-site requests.
@@ -349,6 +352,40 @@ actions:
 # Resource kinds that are concerned by the permission
 scopes:
   - <enum= kind | "*">
+```
+
+#### CORS config
+
+```yaml
+# Enable CORS middleware.
+# See also: https://fetch.spec.whatwg.org/#cors-protocol
+enable: <boolean> | default = false # Optional
+
+# Configure the value of the Access-Control-Allow-Origin response header.
+# The wildcard characters '*' (0+ chars) and '?' (1 char) are supported.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
+allow_origins: <string[]> | default = ["*"] # Optional
+
+# Configure the value of the Access-Control-Allow-Methods response header.
+# If left empty, the header will be filled from the `Allow` header specified
+# in the request.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
+allow_methods: <string[]> | default = [] # Optional
+
+# Configure the value of the Access-Control-Allow-Headers response header. 
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
+allow_headers: <string[]> | default = [] # Optional
+
+# Configure the value of the Access-Control-Allow-Credentials response header.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
+allow_credentials: <boolean> | default = false # Optional
+
+# Configure the value of Access-Control-Expose-Headers response header.
+# See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Header
+expose_headers: <string[]> | default = [] # Optional
+
+# Configure how long (in seconds) the results of a preflight request can be cached.
+max_age: <intger> | default = 0 # Optional
 ```
 
 ### Database config
@@ -712,6 +749,8 @@ time_range: <TimeRange config> # Optional
 options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] # Optional
 # Allow you to disable the custom time range (absolute time range)
 disable_custom:  <bool> | default = false # Optional
+# Allow you to disable the zoom actions (extend or half current time range)
+disable_zoom:  <bool> | default = false # Optional
 ```
 
 #### Dashboard Selector config

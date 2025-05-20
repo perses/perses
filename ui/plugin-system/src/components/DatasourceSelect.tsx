@@ -23,10 +23,20 @@ import {
   Autocomplete,
   TextField,
 } from '@mui/material';
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, VariableName } from '@perses-dev/core';
 import { ReactElement, useMemo } from 'react';
-import { DatasourceSelectItem, DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
+import {
+  DatasourceSelectItem,
+  DatasourceSelectItemGroup,
+  DatasourceSelectItemSelector,
+  useListDatasourceSelectItems,
+  useVariableValues,
+  VariableStateMap,
+} from '../runtime';
+import { parseVariables } from '../utils';
 
+const DATASOURCE_VARIABLE_VALUE_PREFIX = '__DATASOURCE_VARIABLE_VALUE__';
+const VARIABLE_IDENTIFIER = '$';
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
@@ -38,9 +48,13 @@ type DataSourceOption = {
 } & Omit<DatasourceSelectItem, 'selector'> &
   Omit<DatasourceSelectItem['selector'], 'kind'>;
 
+const emptyDatasourceOption: DataSourceOption = { name: '', value: '' };
+
+export type DatasourceSelectValue<T = DatasourceSelector> = T | VariableName;
+
 export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
-  value: DatasourceSelector;
-  onChange: (next: DatasourceSelector) => void;
+  value: DatasourceSelectValue;
+  onChange: (next: DatasourceSelectValue) => void;
   datasourcePluginKind: string;
   project?: string;
 }
@@ -52,8 +66,13 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
-  // Rebuild the group of the value if not provided
-  const defaultValue = useMemo(() => {
+  const variables = useVariableValues();
+
+  const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
+    if (isVariableDatasource(value)) {
+      return value;
+    }
+
     const group = (data ?? [])
       .flatMap((itemGroup) => itemGroup.items)
       .find((item) => {
@@ -63,7 +82,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   }, [value, data]);
 
   const options = useMemo<DataSourceOption[]>(() => {
-    return (data || []).flatMap<DataSourceOption>((itemGroup) =>
+    const datasourceOptions = (data || []).flatMap<DataSourceOption>((itemGroup) =>
       itemGroup.items.map<DataSourceOption>((item) => ({
         groupLabel: itemGroup.group,
         groupEditLink: itemGroup.editLink,
@@ -75,10 +94,30 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
         value: selectorToOptionValue(item.selector),
       }))
     );
-  }, [data]);
 
-  // While loading available values, just use an empty string so MUI select doesn't warn about values out of range
-  const optionValue = isLoading ? null : options.find((option) => option.value === selectorToOptionValue(defaultValue));
+    const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
+
+    const variableOptions = Object.entries(variables).flatMap<DataSourceOption>(([name, variable]) => {
+      if (Array.isArray(variable.value)) return [];
+
+      const associatedDatasource = datasourceOptionsMap.get(variable.value ?? '');
+      if (!associatedDatasource) return [];
+
+      return {
+        groupLabel: 'Variables',
+        name: `${VARIABLE_IDENTIFIER}${name}`,
+        saved: true,
+        value: `${DATASOURCE_VARIABLE_VALUE_PREFIX}${VARIABLE_IDENTIFIER}${name}`,
+      };
+    });
+
+    return [...datasourceOptions, ...variableOptions];
+  }, [data, variables]);
+
+  // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
+  const optionValue = isLoading
+    ? emptyDatasourceOption
+    : options.find((option) => option.value === selectorToOptionValue(defaultValue));
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
   const handleChange = (selectedOption: DataSourceOption | null): void => {
@@ -162,7 +201,10 @@ const OPTION_VALUE_DELIMITER = '_____';
  * returns a string value like `{kind}_____{group}_____{name}` that can be used as a Select input value.
  * @param selector
  */
-function selectorToOptionValue(selector: DatasourceSelectItemSelector): string {
+function selectorToOptionValue(selector: DatasourceSelectItemSelector | VariableName): string {
+  if (isVariableDatasource(selector)) {
+    return `${DATASOURCE_VARIABLE_VALUE_PREFIX}${selector}`;
+  }
   return [selector.kind, selector.group ?? '', selector.name ?? ''].join(OPTION_VALUE_DELIMITER);
 }
 
@@ -171,7 +213,11 @@ function selectorToOptionValue(selector: DatasourceSelectItemSelector): string {
  * returns a DatasourceSelector to be used by the query data model.
  * @param optionValue
  */
-function optionValueToSelector(optionValue: string): DatasourceSelector {
+function optionValueToSelector(optionValue: string): DatasourceSelectValue {
+  if (optionValue.startsWith(DATASOURCE_VARIABLE_VALUE_PREFIX)) {
+    return optionValue.split(DATASOURCE_VARIABLE_VALUE_PREFIX)[1]!;
+  }
+
   const words = optionValue.split(OPTION_VALUE_DELIMITER);
   const kind = words[0];
   const name = words[2];
@@ -183,3 +229,54 @@ function optionValueToSelector(optionValue: string): DatasourceSelector {
     name: name === '' ? undefined : name,
   };
 }
+
+export function isVariableDatasource(value: DatasourceSelectValue | undefined): value is VariableName {
+  return typeof value === 'string' && value.startsWith(VARIABLE_IDENTIFIER);
+}
+
+export const datasourceSelectValueToSelector = (
+  value: DatasourceSelectValue | undefined,
+  variables: VariableStateMap,
+  datasourceSelectItemGroups: DatasourceSelectItemGroup[] | undefined
+): DatasourceSelector | undefined => {
+  if (!isVariableDatasource(value)) {
+    return value;
+  }
+
+  const [variableName] = parseVariables(value);
+  const variable = variables[variableName ?? ''];
+
+  // If the variable is not defined or if its value is an array, we cannot determine a selector and return undefined
+  if (!variable || Array.isArray(variable.value)) {
+    return undefined;
+  }
+
+  const associatedDatasource = (datasourceSelectItemGroups || [])
+    .flatMap((itemGroup) => itemGroup.items)
+    .find((datasource) => datasource.name === variable.value);
+
+  // If the variable value is not a datasource, we cannot determine a selector and return undefined
+  if (associatedDatasource === undefined) {
+    return undefined;
+  }
+
+  const datasourceSelector: DatasourceSelector = {
+    kind: associatedDatasource.selector.kind,
+    name: associatedDatasource.selector.name,
+  };
+
+  return datasourceSelector;
+};
+
+export const useDatasourceSelectValueToSelector = (
+  value: DatasourceSelectValue,
+  datasourcePluginKind: string
+): DatasourceSelector => {
+  const { data } = useListDatasourceSelectItems(datasourcePluginKind);
+  const variables = useVariableValues();
+  if (!isVariableDatasource(value)) {
+    return value;
+  }
+
+  return datasourceSelectValueToSelector(value, variables, data) ?? { kind: datasourcePluginKind };
+};

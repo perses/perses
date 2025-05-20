@@ -19,7 +19,7 @@ export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
   pluginResourcesByNameAndKind: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
-  pluginMetadataByKind: Map<string, PluginMetadataWithModule[]>;
+  pluginMetadataByKind: Map<PluginType, PluginMetadataWithModule[]>;
 }
 
 /**
@@ -35,7 +35,7 @@ export function usePluginIndexes(
 
     // Create the two indexes from the installed plugins
     const pluginResourcesByNameAndKind = new Map<string, PluginModuleResource>();
-    const pluginMetadataByKind = new Map<string, PluginMetadataWithModule[]>();
+    const pluginMetadataByKind = new Map<PluginType, PluginMetadataWithModule[]>();
 
     for (const resource of installedPlugins) {
       for (const pluginMetadata of resource.spec.plugins) {
