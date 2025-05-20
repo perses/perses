@@ -100,7 +100,7 @@ Check the [CLI documentation](../cli.md) for more details.
 The implementation is mostly similar across all plugin types.
 
 !!! info
-	For more info on the Cuelang part (model & migrate files), please refer to [CUE in Perses](./cue.md).
+For more info on the Cuelang part (model & migrate files), please refer to [CUE in Perses](./cue.md).
 
 #### Datasource plugin
 
@@ -153,4 +153,4 @@ There are two main types of integrations:
 
 ## Examples
 
-See the [Examples repository](http://github.com/perses/plugin-examples) or the core [Perses plugins repository](http://github.com/perses/plugins)
+See the [Examples repository](https://github.com/perses/examples-plugin) or the core [Perses plugins repository](http://github.com/perses/plugins)
