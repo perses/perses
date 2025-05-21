@@ -53,7 +53,6 @@ export * from './RefreshIntervalPicker';
 <<<<<<< HEAD
 =======
 export * from './PieChart';
-export * from './FlameChart';
 export * from './StatusHistoryChart';
 >>>>>>> 0b4c773f ([FEATURE] Add ProfileQuery)
 export * from './ValueMappingEditor';

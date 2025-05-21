@@ -13,7 +13,7 @@
 
 /**
  * A stackTrace
- * Every function has his stackTrace.
+ * It corresponds to a function called during a program execution.
  * Children of a function are functions called by the parent function during its execution.
  */
 export interface StackTrace {
