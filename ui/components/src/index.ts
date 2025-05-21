@@ -50,9 +50,4 @@ export * from './test-utils';
 export * from './theme';
 export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
-<<<<<<< HEAD
-=======
-export * from './PieChart';
-export * from './StatusHistoryChart';
->>>>>>> 0b4c773f ([FEATURE] Add ProfileQuery)
 export * from './ValueMappingEditor';
