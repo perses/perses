@@ -22,8 +22,10 @@ variable plugin to be actually usable, and vice versa.
 For instance, the native support for Prometheus is essentially a comprehensive package that includes all three types of
 plugins.
 
-Also, any plugin is made of two parts:
+A plugin is made of two parts:
 
 - The "backend" part, which is the CUE schema that defines the model for the plugin and is used by Perses' backend for
   validation. Please refer to [CUE in Perses](../plugins/cue.md) for more details.
 - The "frontend" part, a.k.a. all the frontend code responsible for bringing the plugin to life in the Perses UI.
+
+See [Plugin creation](../plugins/creation.md) for more details on how to generate and integrate a plugin.

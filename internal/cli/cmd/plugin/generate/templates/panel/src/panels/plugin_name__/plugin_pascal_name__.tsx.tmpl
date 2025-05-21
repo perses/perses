@@ -1,0 +1,11 @@
+import { {{ .PluginPascalName }}Component } from "./{{ .PluginPascalName }}Component";
+import { {{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
+import { PanelPlugin } from "@perses-dev/plugin-system";
+import { {{ .PluginPascalName }}SettingsEditor } from "./{{ .PluginPascalName }}SettingsEditor";
+
+export const {{ .PluginPascalName }}: PanelPlugin<{{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props> = {
+  PanelComponent: {{ .PluginPascalName }}Component,
+  panelOptionsEditorComponents: [{ label: 'Settings', content: {{ .PluginPascalName }}SettingsEditor }],
+  supportedQueryTypes: ['TimeSeriesQuery'],
+  createInitialOptions: () => ({}),
+};
