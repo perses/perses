@@ -1,5 +1,5 @@
 import { DatasourceSelect, DatasourceSelectProps, isVariableDatasource, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
 
@@ -9,6 +9,7 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
   const { onChange, value } = props;
   const {datasource} = value;
   const selectedDatasource = datasource ?? DEFAULT_DATASOURCE;
+  const [localQuery, setLocalQuery] = useState(value.query);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (newDatasourceSelection) => {
     if(!isVariableDatasource(newDatasourceSelection) && newDatasourceSelection.kind === DATASOURCE_KIND) {
@@ -26,6 +27,10 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
     }
   };
 
+  useEffect(() => {
+    setLocalQuery(value.query);
+  }, [value.query]);
+
   return (
     <div>
       <label>{{ .PluginPascalName }} Datasource</label>
@@ -36,7 +41,11 @@ export function {{ .PluginPascalName }}Editor(props: {{ .PluginPascalName }}Edit
           label="{{ .PluginPascalName }} Datasource"
           notched
         />
-      <input onBlur={handleQueryBlur} value={value.query} />
+      <input 
+        onBlur={handleQueryBlur} 
+        onChange={(e) => setLocalQuery(e.target.value)} 
+        placeholder='query' 
+        value={localQuery} />
     </div>
   );
 }
