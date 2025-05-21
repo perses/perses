@@ -1,6 +1,5 @@
 How to load a plugin
 ====================
-
 Before being able to use a plugin, it must be recognized and loaded by the Perses backend.
 
 When the Perses backend is starting, it will look at a specific folder that should contain any plugin archive file. This
@@ -11,7 +10,7 @@ plugin:
   archive_path: /path/to/archive/folder
 ```
 
-Note: to know how to build a plugin archive, please refer to the [plugin structure documentation](../plugins/structure.md).
+Note: to know how to build a plugin archive, please refer to the [plugin creation documentation](../plugins/creation.md).
 
 By default, the plugin archive folder is set to `plugins-archive` or to `/etc/perses/plugins-archive` if it's running in
 a container.

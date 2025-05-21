@@ -19,13 +19,13 @@ These 2 SDKs come with different pros & cons:
 
 |                             | CUE | Go |
 |-----------------------------|-----|----|
-| IDE Support                 | 🟡 | 🟢 |
-| Native plugins integration* | 🟢 | 🔴 |
-| Validation                  | 🟢 | 🟡 |
-| Dependency management       | 🟡 | 🟢 |
-| Integration possibilities   | 🔴 | 🟢 |
-| Ramp-up effort              | 🔴 | 🟢 |
-| Popularity                  | 🔴 | 🟢 |
+| IDE Support                 | 🟡  | 🟢 |
+| Native plugins integration* | 🟢  | 🔴 |
+| Validation                  | 🟢  | 🟡 |
+| Dependency management       | 🟡  | 🟢 |
+| Integration possibilities   | 🔴  | 🟢 |
+| Ramp-up effort              | 🔴  | 🟢 |
+| Popularity                  | 🔴  | 🟢 |
 
 \* *CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK. However, the Golang SDK may not support all the plugins: it's basically up to each plugin developer to provide a Go package to enable the DaC use case. This statement applies also to any other language we might have a SDK for in the future.*
 

@@ -84,6 +84,8 @@ type ModuleStatus struct {
 
 type ModuleSpec struct {
 	SchemasPath string   `json:"schemasPath" yaml:"schemasPath"`
+	ModuleName  string   `json:"moduleName,omitempty" yaml:"moduleName,omitempty"`
+	ModuleOrg   string   `json:"moduleOrg,omitempty" yaml:"moduleOrg,omitempty"`
 	Plugins     []Plugin `json:"plugins" yaml:"plugins"`
 }
 
