@@ -201,7 +201,7 @@ const OPTION_VALUE_DELIMITER = '_____';
  * returns a string value like `{kind}_____{group}_____{name}` that can be used as a Select input value.
  * @param selector
  */
-function selectorToOptionValue(selector: DatasourceSelectItemSelector | VariableName): string {
+export function selectorToOptionValue(selector: DatasourceSelectItemSelector | VariableName): string {
   if (isVariableDatasource(selector)) {
     return `${DATASOURCE_VARIABLE_VALUE_PREFIX}${selector}`;
   }
@@ -213,7 +213,7 @@ function selectorToOptionValue(selector: DatasourceSelectItemSelector | Variable
  * returns a DatasourceSelector to be used by the query data model.
  * @param optionValue
  */
-function optionValueToSelector(optionValue: string): DatasourceSelectValue {
+export function optionValueToSelector(optionValue: string): DatasourceSelectValue {
   if (optionValue.startsWith(DATASOURCE_VARIABLE_VALUE_PREFIX)) {
     return optionValue.split(DATASOURCE_VARIABLE_VALUE_PREFIX)[1]!;
   }

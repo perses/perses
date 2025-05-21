@@ -56,7 +56,6 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
-
 ## Mapping specification
 
 ```yaml

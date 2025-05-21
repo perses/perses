@@ -1,0 +1,1 @@
+export { getPluginModule } from "./getPluginModule";

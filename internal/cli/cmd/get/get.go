@@ -100,8 +100,7 @@ func (o *option) Execute() error {
 		return output.Handle(o.writer, o.Output, resourceList)
 	}
 	data := o.resourceService.BuildMatrix(resourceList)
-	output.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
-	return nil
+	return output.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
 }
 
 func (o *option) SetWriter(writer io.Writer) {

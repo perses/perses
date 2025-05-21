@@ -97,8 +97,7 @@ func (o *option) Execute() error {
 			fmt.Sprintf("%t", status.InDev),
 		})
 	}
-	output.HandlerTable(o.writer, columnHeader, matrix)
-	return nil
+	return output.HandlerTable(o.writer, columnHeader, matrix)
 }
 
 func (o *option) SetWriter(writer io.Writer) {

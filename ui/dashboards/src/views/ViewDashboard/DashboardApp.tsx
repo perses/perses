@@ -133,7 +133,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
             }}
           />
         </ErrorBoundary>
-        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
+        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false} enableSyncGrouping={false}>
           <PanelDrawer />
         </ChartsProvider>
         <PanelGroupDialog />

@@ -1,7 +1,9 @@
 # Authorization
 
-Perses uses a Role-based access control (RBAC) system to regulate access to resources based on user roles.  
-The RBAC API includes four kinds of resources: `GlobalRole`, `Role`, `GlobalRoleBinding`, and `RoleBinding`.  
+Perses uses a Role-based access control (RBAC) system to regulate access to resources based on user roles.
+
+The RBAC API includes four kinds of resources: `GlobalRole`, `Role`, `GlobalRoleBinding`, and `RoleBinding`.
+
 The RBAC implementation in Perses is heavily inspired by Kubernetes' RBAC model.
 
 ## Role and GlobalRole

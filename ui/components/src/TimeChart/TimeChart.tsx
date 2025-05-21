@@ -106,7 +106,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
+  const { chartsTheme, enablePinning, enableSyncGrouping, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } =
+    useChartsContext();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -444,7 +445,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
         _instance={chartRef}
-        syncGroup={syncGroup}
+        syncGroup={enableSyncGrouping ? syncGroup : undefined}
       />
     </Box>
   );

@@ -33,6 +33,11 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
+  // Initialize Proxy mode by default, if neither direct nor proxy mode is selected.
+  if (!value.directUrl && !value.proxy) {
+    Object.assign(value, initialSpecProxy);
+  }
+
   // utilitary function used for headers when renaming a property
   // -> TODO it would be cleaner to manipulate headers as an intermediary list instead, to avoid doing this.
   const buildNewHeaders = (
@@ -427,8 +432,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const directModeId = tabs.findIndex((tab) => tab.label === strDirect);
   const proxyModeId = tabs.findIndex((tab) => tab.label === strProxy);
 
-  // In "update datasource" case, set defaultTab to the mode that this datasource is currently relying on.
-  // Otherwise (create datasource), set defaultTab to Direct access.
+  // Set defaultTab to the mode that this datasource is currently relying on.
   const defaultTab = value.proxy ? proxyModeId : directModeId;
 
   // For better user experience, save previous states in mind for both mode.

@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"gopkg.in/yaml.v3"
 )
 
@@ -62,12 +64,15 @@ func HandleString(writer io.Writer, msg string) error {
 	return err
 }
 
-func HandlerTable(writer io.Writer, column []string, data [][]string) {
-	table := tablewriter.NewWriter(writer)
-	table.SetHeader(column)
-	table.SetBorder(false)
-	table.AppendBulk(data)
-	table.Render()
+func HandlerTable(writer io.Writer, column []string, data [][]string) error {
+	table := tablewriter.NewTable(writer, tablewriter.WithRenderer(
+		renderer.NewBlueprint(tw.Rendition{Borders: tw.BorderNone}),
+	))
+	table.Header(column)
+	if err := table.Bulk(data); err != nil {
+		return fmt.Errorf("unable to render table: %w", err)
+	}
+	return table.Render()
 }
 
 // FormatArrayMessage format an array to a list
