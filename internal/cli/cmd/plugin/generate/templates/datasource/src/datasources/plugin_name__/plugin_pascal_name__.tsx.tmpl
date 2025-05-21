@@ -32,9 +32,10 @@ const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPasc
       const response = await fetch(url, init);
 
       try {
+        const body = await response.json();
         return {
           status: response.ok ? 'success' : 'error',
-          data: await response.json()
+          data: body.data,
         };
       } catch (e) {
         console.error('Invalid response from server', e);
@@ -44,7 +45,7 @@ const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPasc
   };
 };
 
-export const {{ .PluginPascalName }}Datasource: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client> = {
+export const {{ .PluginPascalName }}: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client> = {
   createClient,
   OptionsEditorComponent: {{ .PluginPascalName }}Editor,
   createInitialOptions: () => ({ directUrl: '' }),
