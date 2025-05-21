@@ -101,11 +101,11 @@ func (o *generateOptions) Validate() error {
 		return fmt.Errorf("plugin.type %q is not valid, possible values are: %s", o.pluginType, strings.Join(availablePluginTypes, ", "))
 	}
 
-	o.pluginName = GetSlug(o.pluginName)
+	o.pluginName = GetKebabCase(o.pluginName)
 	o.pluginPascalName = GetPascalCase(o.pluginName)
 
 	if o.pluginDisplayName == "" {
-		o.pluginDisplayName = o.pluginName
+		o.pluginDisplayName = o.pluginPascalName
 	}
 
 	return nil
@@ -119,17 +119,18 @@ func replacePaths(outputRelativePath string, o *generateOptions) string {
 }
 
 func getPluginPath(pluginName string, pluginType string) (string, error) {
+	pluginSlug := GetKebabCase(pluginName)
 	switch pluginType {
 	case "Datasource":
-		return path.Join("src", "datasources", pluginName), nil
+		return path.Join("src", "datasources", pluginSlug), nil
 	case "TimeSeriesQuery":
-		return path.Join("src", "queries", pluginName), nil
+		return path.Join("src", "queries", pluginSlug), nil
 	case "Variable":
-		return path.Join("src", "variables", pluginName), nil
+		return path.Join("src", "variables", pluginSlug), nil
 	case "Panel":
-		return path.Join("src", "panels", pluginName), nil
+		return path.Join("src", "panels", pluginSlug), nil
 	case "Explore":
-		return path.Join("src", "explore", pluginName), nil
+		return path.Join("src", "explore", pluginSlug), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
@@ -190,7 +191,7 @@ func (o *generateOptions) Execute() error {
 
 	// merge existing plugins and exposed modules with the one being generated
 	for _, p := range currentPlugins {
-		if p.Spec.Name != o.pluginName {
+		if GetKebabCase(p.Spec.Name) != GetKebabCase(o.pluginName) {
 			persesPlugins = append(persesPlugins, toGeneratedPlugin(p))
 
 			path, err := getPluginPath(p.Spec.Name, string(p.Kind))
@@ -199,7 +200,7 @@ func (o *generateOptions) Execute() error {
 			}
 
 			exposedModules = append(exposedModules, ExposedModule{
-				ID:   p.Spec.Name,
+				ID:   GetPascalCase(p.Spec.Name),
 				Path: path,
 			})
 		}
@@ -221,7 +222,7 @@ func (o *generateOptions) Execute() error {
 	}
 
 	exposedModules = append(exposedModules, ExposedModule{
-		ID:   o.pluginName,
+		ID:   GetPascalCase(o.pluginName),
 		Path: pluginPath,
 	})
 
@@ -241,10 +242,10 @@ func (o *generateOptions) Execute() error {
 	}
 
 	data := map[string]interface{}{
-		"ModuleName":              GetSlug(o.pluginModuleName),
+		"ModuleName":              GetKebabCase(o.pluginModuleName),
 		"ModulePascalName":        GetPascalCase(o.pluginModuleName),
-		"ModuleOrg":               GetSlug(o.pluginModuleOrg),
-		"PluginName":              o.pluginName,
+		"ModuleOrg":               GetKebabCase(o.pluginModuleOrg),
+		"PluginName":              GetKebabCase(o.pluginName),
 		"PluginPascalName":        o.pluginPascalName,
 		"ExposedModules":          exposedModules,
 		"PersesPlugins":           persesPlugins,

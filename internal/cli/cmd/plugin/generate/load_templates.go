@@ -23,9 +23,6 @@ import (
 	"unicode"
 
 	"text/template"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 //go:embed templates/**/*
@@ -103,7 +100,7 @@ func applyCamelCaseToHyphen(s string) string {
 	return builder.String()
 }
 
-func GetSlug(name string) string {
+func GetKebabCase(name string) string {
 	if name == "" {
 		return ""
 	}
@@ -118,6 +115,25 @@ func GetSlug(name string) string {
 }
 
 func GetPascalCase(name string) string {
-	caser := cases.Title(language.English)
-	return strings.ReplaceAll(strings.ReplaceAll(caser.String(name), "-", " "), " ", "")
+	if name == "" {
+		return ""
+	}
+
+	split := func(r rune) bool {
+		return r == ' ' || r == '_' || r == '-'
+	}
+
+	words := strings.FieldsFunc(name, split)
+	var sb strings.Builder
+
+	for _, word := range words {
+		if len(word) == 0 {
+			continue
+		}
+		runes := []rune(word)
+		runes[0] = unicode.ToUpper(runes[0])
+		sb.WriteString(string(runes))
+	}
+
+	return sb.String()
 }

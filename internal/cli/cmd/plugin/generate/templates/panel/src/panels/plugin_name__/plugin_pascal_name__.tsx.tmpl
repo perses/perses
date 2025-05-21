@@ -6,5 +6,6 @@ import { {{ .PluginPascalName }}SettingsEditor } from "./{{ .PluginPascalName }}
 export const {{ .PluginPascalName }}: PanelPlugin<{{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props> = {
   PanelComponent: {{ .PluginPascalName }}Component,
   panelOptionsEditorComponents: [{ label: 'Settings', content: {{ .PluginPascalName }}SettingsEditor }],
+  supportedQueryTypes: ['TimeSeriesQuery'],
   createInitialOptions: () => ({}),
 };
