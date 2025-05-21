@@ -18,13 +18,22 @@ import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
+  wrapLabels?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   allowActions?: boolean;
   onSelected?: (seriesIdx: number) => void;
-  wrapLabels?: boolean;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }
 
 export function TooltipContent(props: TooltipContentProps): ReactElement | null {
-  const { series, wrapLabels, onSelected, allowActions } = props;
+  const {
+    series,
+    wrapLabels,
+    // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+    onSelected,
+    allowActions,
+    // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
+  } = props;
 
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
@@ -39,9 +48,11 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
     <Box
       sx={(theme) => ({
         padding: theme.spacing(0.5, 2),
+        // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
         maxHeight: '300px',
         overflow: 'auto',
         borderBottom: allowActions ? `1px solid ${theme.palette.divider}` : undefined,
+        // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
       })}
     >
       {sortedFocusedSeries.map(
@@ -59,9 +70,11 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
               totalSeries={sortedFocusedSeries.length}
               wrapLabels={wrapLabels}
               emphasizeText={isClosestToCursor}
+              // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
               isSelected={isSelected}
               isSelectable={metadata?.isSelectable ?? true}
               onSelected={onSelected ? (): void => onSelected(seriesIdx) : undefined}
+              // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
             />
           );
         }

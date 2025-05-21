@@ -34,7 +34,7 @@ describe('TooltipHeader', () => {
       formattedY: '29%',
       markerColor: '#56B4E9',
       isClosestToCursor: true,
-      isSelected: false,
+      isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
     },
   ];
 

@@ -52,7 +52,7 @@ export interface TimeSeriesMetadata {
    *
    * Default is `true`
    */
-  isSelectable?: boolean;
+  isSelectable?: boolean; // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
 
   [key: string]: unknown;
 }

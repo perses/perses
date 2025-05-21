@@ -144,7 +144,11 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
             }}
           />
         </ErrorBoundary>
-        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
+        <ChartsProvider
+          chartsTheme={chartsTheme}
+          enablePinning={false}
+          enableSyncGrouping={false} // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
+        >
           <PanelDrawer />
         </ChartsProvider>
         <PanelGroupDialog />

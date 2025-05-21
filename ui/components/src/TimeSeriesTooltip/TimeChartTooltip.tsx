@@ -38,8 +38,10 @@ export interface TimeChartTooltipProps {
   onUnpinClick?: () => void;
   format?: FormatOptions;
   wrapLabels?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   pointActions?: PointAction[];
   seriesMetadata?: TimeSeriesMetadata[];
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
 }
 
 export const TimeChartTooltip = memo(function TimeChartTooltip({
@@ -52,11 +54,13 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   format,
   onUnpinClick,
   pinnedPos,
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   pointActions = [],
   seriesMetadata,
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const [selectedSeriesIdx, setSelectedSeriesIdx] = useState<number | null>(null);
+  const [selectedSeriesIdx, setSelectedSeriesIdx] = useState<number | null>(null); // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
   const transform = useRef<string | undefined>();
 
   const mousePos = useMousePosition();
@@ -82,14 +86,17 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     mousePos,
     data,
     seriesMapping,
-    seriesMetadata,
     pinnedPos,
     chart,
     format,
     showAllSeries,
+    // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+    seriesMetadata,
     selectedSeriesIdx,
+    // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
   });
 
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   const hasPointMenuItems = pointActions.length > 0;
 
   if (hasPointMenuItems && !isTooltipPinned) {
@@ -108,13 +115,14 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   }
 
   const selectedSeries = nearbySeries.find((series) => series.isSelected);
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 
   if (nearbySeries.length === 0) {
     return null;
   }
 
   const totalSeries = data.length;
-  const allowActions = enablePinning && pointActions.length > 0;
+  const allowActions = enablePinning && pointActions.length > 0; // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
 
   return (
     <Portal container={containerElement}>
@@ -135,6 +143,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
             onShowAllClick={(checked) => setShowAllSeries(checked)}
             onUnpinClick={onUnpinClick}
           />
+          {/* LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377] */}
           <TooltipContent
             onSelected={
               hasPointMenuItems
@@ -153,6 +162,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
               isPinned={isTooltipPinned}
             />
           )}
+          {/* LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377] */}
         </Stack>
       </Box>
     </Portal>

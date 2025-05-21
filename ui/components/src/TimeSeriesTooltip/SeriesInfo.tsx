@@ -23,11 +23,13 @@ export interface SeriesInfoProps {
   formattedY: string;
   markerColor: string;
   totalSeries: number;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   isSelected?: boolean;
   isSelectable?: boolean;
+  onSelected?: () => void;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
   emphasizeText?: boolean;
   wrapLabels?: boolean;
-  onSelected?: () => void;
 }
 
 export function SeriesInfo(props: SeriesInfoProps): ReactElement {
@@ -38,9 +40,11 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
     totalSeries,
     emphasizeText = false,
     wrapLabels = true,
+    // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
     isSelected,
     isSelectable,
     onSelected,
+    // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
   } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
@@ -70,6 +74,7 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
   const formattedSeriesInfo = seriesName.replace(/[,]/g, ', ');
 
   return (
+    // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
     <Box
       onClick={isSelectable ? onSelected : undefined}
       sx={(theme) => ({
@@ -89,6 +94,7 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
     >
       <Box sx={{ maxWidth: '520px' }}>
         <SeriesMarker markerColor={markerColor} sx={{ marginTop: 0.25 }} />
+        {/* LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377] */}
         <Box
           component="span"
           sx={(theme) => ({
@@ -97,7 +103,7 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
             minWidth: 150,
             maxWidth: TOOLTIP_LABELS_MAX_WIDTH,
             overflow: 'hidden',
-            color: theme.palette.text.primary,
+            color: theme.palette.text.primary, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
             fontWeight: emphasizeText ? theme.typography.fontWeightBold : theme.typography.fontWeightRegular,
             textOverflow: 'ellipsis',
             whiteSpace: wrapLabels ? 'normal' : 'nowrap',

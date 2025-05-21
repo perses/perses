@@ -33,8 +33,10 @@ export interface NearbySeriesInfo {
   y: number;
   formattedY: string;
   isClosestToCursor: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   isSelected: boolean;
   metadata?: TimeSeriesMetadata;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
@@ -49,9 +51,11 @@ export function checkforNearbyTimeSeries(
   pointInGrid: number[],
   yBuffer: number,
   chart: EChartsInstance,
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   seriesMetadata?: TimeSeriesMetadata[],
   format?: FormatOptions,
   selectedSeriesIdx?: number | null
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -83,7 +87,7 @@ export function checkforNearbyTimeSeries(
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentSeries = seriesMapping[seriesIdx];
-    const currentMetadata = seriesMetadata?.[seriesIdx];
+    const currentMetadata = seriesMetadata?.[seriesIdx]; // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
 
     if (!currentSeries) break;
 
@@ -115,7 +119,7 @@ export function checkforNearbyTimeSeries(
                 baseValue: yValue,
                 percentage: percentRangeToCheck,
               });
-              const isSelected = selectedSeriesIdx === seriesIdx;
+              const isSelected = selectedSeriesIdx === seriesIdx; // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
               if (isClosestToCursor) {
                 // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
                 emphasizedSeriesIndexes.push(seriesIdx);
@@ -159,8 +163,10 @@ export function checkforNearbyTimeSeries(
                 formattedY: formattedY,
                 markerColor: markerColor.toString(),
                 isClosestToCursor,
+                // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
                 metadata: currentMetadata,
                 isSelected,
+                // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
               });
               nearbySeriesIndexes.push(seriesIdx);
             }
@@ -254,7 +260,7 @@ export function legacyCheckforNearbySeries(
                 formattedY: formattedY,
                 markerColor: markerColor.toString(),
                 isClosestToCursor,
-                isSelected: false,
+                isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
               });
               nearbySeriesIndexes.push(seriesIdx);
             }
@@ -306,8 +312,10 @@ export function getNearbySeriesData({
   chart,
   format,
   showAllSeries = false,
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   seriesMetadata,
   selectedSeriesIdx,
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
@@ -316,8 +324,10 @@ export function getNearbySeriesData({
   chart?: EChartsInstance;
   format?: FormatOptions;
   showAllSeries?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   seriesMetadata?: TimeSeriesMetadata[];
   selectedSeriesIdx?: number | null;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
 
@@ -359,9 +369,11 @@ export function getNearbySeriesData({
       pointInGrid,
       yBuffer,
       chart,
+      // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
       seriesMetadata,
       format,
       selectedSeriesIdx
+      // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
     );
   }
 

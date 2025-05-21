@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
 import { Box, Icon, MenuItem, Stack, Typography } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
 import {
@@ -109,3 +110,4 @@ export const TooltipActions: React.FC<TooltipActionProps> = ({ actions, selected
     </Box>
   );
 };
+// LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]

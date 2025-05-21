@@ -130,12 +130,13 @@ export const useMousePosition = (): CursorData['coords'] => {
 
   return coords;
 };
-
+// LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
 export type PointAction = {
   label: string;
   onClick: (point: NearbySeriesInfo) => void;
   icon?: React.JSX.Element;
 };
+// LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 
 export type TooltipConfig = {
   wrapLabels: boolean;
@@ -148,6 +149,7 @@ export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
   enablePinning: true,
 };
 
+// LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
 export const DRILLDOWN_HELP_TEXT = 'Click To Drilldown';
-
 export const SELECT_SERIES_HELP_TEXT = 'Select a series to drilldown';
+// LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]

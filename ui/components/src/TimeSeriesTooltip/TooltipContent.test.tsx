@@ -34,7 +34,7 @@ describe('TooltipContent', () => {
           formattedY: '0.1',
           markerColor: 'hsla(19838016,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
       ],
       wrapLabels: true,
@@ -57,7 +57,7 @@ describe('TooltipContent', () => {
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
         {
           seriesIdx: 1,
@@ -69,7 +69,7 @@ describe('TooltipContent', () => {
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
       ],
       wrapLabels: true,
@@ -98,7 +98,7 @@ describe('TooltipContent', () => {
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
         {
           seriesIdx: 1,
@@ -110,7 +110,7 @@ describe('TooltipContent', () => {
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
       ],
       wrapLabels: true,
@@ -139,7 +139,7 @@ describe('TooltipContent', () => {
           formattedY: '84.64M',
           markerColor: 'hsla(1887856572,50%,50%,0.8)',
           isClosestToCursor: true,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
         {
           seriesIdx: 1,
@@ -151,7 +151,7 @@ describe('TooltipContent', () => {
           formattedY: '33.77M',
           markerColor: 'hsla(158479636,50%,50%,0.8)',
           isClosestToCursor: false,
-          isSelected: false,
+          isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
         },
       ],
       wrapLabels: true,

@@ -49,8 +49,10 @@ export const TooltipHeader = memo(function TooltipHeader({
         <Typography
           variant="caption"
           sx={(theme) => ({
+            // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
             color: theme.palette.text.primary,
             fontSize: 12,
+            // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
           })}
         >
           {formattedDate}
@@ -71,11 +73,13 @@ export const TooltipHeader = memo(function TooltipHeader({
         width: '100%',
         maxWidth: TOOLTIP_MAX_WIDTH,
         padding: theme.spacing(1.5, 2, 0.5, 2),
-        backgroundColor: theme.palette.common.white ?? TOOLTIP_BG_COLOR_FALLBACK,
-        position: 'sticky',
-        borderBottom: `1px solid ${theme.palette.divider}`,
         top: 0,
         left: 0,
+        // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+        backgroundColor: theme.palette.common.white ?? TOOLTIP_BG_COLOR_FALLBACK,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        position: 'sticky',
+        // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
       })}
     >
       <Box
@@ -105,6 +109,7 @@ export const TooltipHeader = memo(function TooltipHeader({
           )}
           {enablePinning && (
             <Stack direction="row" alignItems="center">
+              {/* LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377] */}
               {isTooltipPinned && (
                 <IconButton
                   size="small"
@@ -117,6 +122,7 @@ export const TooltipHeader = memo(function TooltipHeader({
                   <Close sx={{ fontSize: 14 }} />
                 </IconButton>
               )}
+              {/* LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377] */}
             </Stack>
           )}
         </Stack>
