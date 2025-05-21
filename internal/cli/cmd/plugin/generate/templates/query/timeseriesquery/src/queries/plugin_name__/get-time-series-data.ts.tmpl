@@ -35,10 +35,18 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spe
     spec.datasource ?? DEFAULT_DATASOURCE
   );
 
-  const response = await client.query({ query });
+  const { start, end } = context.timeRange;
+
+  const response = await client.query({ 
+    start: start.getTime().toString(),
+    end: end.getTime().toString(),
+    query,
+  });
 
   const chartData: TimeSeriesData = {
     series: buildTimeSeries(response),
+    timeRange: { start, end },
+    stepMs: 30 * 1000,
     metadata: {
       executedQueryString: query,
     },
