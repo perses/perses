@@ -54,6 +54,7 @@ func New(security config.Security) (Crypto, JWT, error) {
 			accessTokenTTL:  time.Duration(security.Authentication.AccessTokenTTL),
 			refreshTokenTTL: time.Duration(security.Authentication.RefreshTokenTTL),
 			cookieConfig:    security.Cookie,
+			kubernetes:      security.Authorization.Kubernetes,
 		}, nil
 }
 

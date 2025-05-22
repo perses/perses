@@ -39,6 +39,8 @@ type File struct {
 	Extension FileExtension `json:"extension" yaml:"extension"`
 	// +kubebuilder:validation:Optional
 	CaseSensitive bool `json:"case_sensitive" yaml:"case_sensitive"`
+	// +kubebuilder:validation:Optional
+	HashFileName bool `json:"hash_file_name" yaml:"hash_file_name"`
 }
 
 func (f *File) Verify() error {

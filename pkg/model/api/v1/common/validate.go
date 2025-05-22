@@ -32,6 +32,7 @@ func ValidateID(name string) error {
 	}
 
 	if !idRegexp.MatchString(name) {
+		// Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
 		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, idRegexp.String())
 	}
 

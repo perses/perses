@@ -86,6 +86,7 @@ type endpoint struct {
 	jwt             crypto.JWT
 	tokenManagement tokenManagement
 	isAuthEnable    bool
+	providers       config.AuthProviders
 }
 
 func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
@@ -93,11 +94,21 @@ func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProv
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
 		isAuthEnable:    isAuthEnable,
+		providers:       providers,
 	}
 
 	// Register the native provider if enabled
 	if providers.EnableNative {
 		ep.endpoints = append(ep.endpoints, newNativeEndpoint(dao, jwt))
+	}
+
+	// Register the k8s authentication if enabled
+	if providers.KubernetesProvider.Enabled {
+		kubernetesEp, err := newKubernetesEndpoint(providers.KubernetesProvider, jwt, dao, rbac)
+		if err != nil {
+			return nil, err
+		}
+		ep.endpoints = append(ep.endpoints, kubernetesEp)
 	}
 
 	// Register the OIDC providers if any
@@ -147,6 +158,14 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 		refreshToken = refreshTokenCookie.Value
 	}
 	if len(refreshToken) == 0 {
+		if e.providers.KubernetesProvider.Enabled {
+
+			authnHeader := crypto.GetAuthnHeaderFromLocation(ctx, e.providers.KubernetesProvider.Kubeconfig)
+
+			if len(authnHeader) > 0 {
+				return ctx.Redirect(307, fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindKubernetes, utils.PathLogin))
+			}
+		}
 		return apiinterface.HandleBadRequestError("no refresh token has been found")
 	}
 	claims, err := e.jwt.ValidateRefreshToken(refreshToken)

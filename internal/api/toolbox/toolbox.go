@@ -88,7 +88,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 		return nil
 	}
 	if role.IsGlobalScope(*scope) {
-		if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
 		}
 		return nil
@@ -100,7 +100,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 		// In this particular context, the user would like to get every resource to every project he has access to.
 		return nil
 	}
-	if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
 	}
 	return nil
@@ -118,7 +118,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		return err
 	}
 	if role.IsGlobalScope(*scope) {
-		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(ctx, claims.Subject, action, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
@@ -128,7 +128,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	if *scope == role.ProjectScope {
 		// Create is still a "Global" only permission
 		if action == role.CreateAction {
-			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+			if ok := t.rbac.HasPermission(ctx, claims.Subject, action, rbac.GlobalProject, *scope); !ok {
 				return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 			}
 			return nil
@@ -140,7 +140,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		// Retrieving project name from payload if project name not provided in the url
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
-	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(ctx, claims.Subject, action, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 	}
 	return nil

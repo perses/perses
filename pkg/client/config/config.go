@@ -32,6 +32,8 @@ import (
 
 const connectionTimeout = 30 * time.Second
 
+// TODO update pkg/client/api with new kubernetes authentication options. Unclear if this is needed,
+// Maybe for the perses operator?
 // PublicRestConfigClient is the struct that should be used when printing the config
 type PublicRestConfigClient struct {
 	URL        *common.URL             `json:"url" yaml:"url"`

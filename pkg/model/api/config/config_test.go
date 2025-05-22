@@ -130,7 +130,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     "file": {
       "folder": "./local_db",
       "extension": "yaml",
-      "case_sensitive": false
+      "case_sensitive": false,
+      "hash_file_name": false
     }
   },
   "dashboard": {},
