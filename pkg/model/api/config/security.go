@@ -186,8 +186,17 @@ func (s *Security) Verify() error {
 
 	if s.EnableAuth && !s.Authentication.Providers.EnableNative &&
 		len(s.Authentication.Providers.OIDC) == 0 &&
-		len(s.Authentication.Providers.OAuth) == 0 {
+		len(s.Authentication.Providers.OAuth) == 0 && !s.Authentication.Providers.KubernetesProvider.Enabled {
 		return errors.New("impossible to enable auth if no provider is setup")
+	}
+
+	if s.Authentication.Providers.KubernetesProvider.Enabled && (s.Authentication.Providers.EnableNative || len(s.Authentication.Providers.OAuth) > 0 || len(s.Authentication.Providers.OIDC) > 0) {
+		return errors.New("cannot enabled k8s authn alongside other authn providers")
+	}
+
+	if (s.Authorization.Kubernetes && !s.Authentication.Providers.KubernetesProvider.Enabled) ||
+		(!s.Authorization.Kubernetes && s.Authentication.Providers.KubernetesProvider.Enabled) {
+		return errors.New("k8s authz must be enabled alongside k8s authn")
 	}
 	return nil
 }

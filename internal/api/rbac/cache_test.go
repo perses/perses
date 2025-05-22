@@ -205,7 +205,7 @@ func TestCacheHasPermission(t *testing.T) {
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
-			assert.Equal(t, test.expectedResult, test.cache.hasPermission(test.user, test.reqAction, test.reqProject, test.reqScope))
+			assert.Equal(t, test.expectedResult, test.cache.hasPermission(nil, test.user, test.reqAction, test.reqProject, test.reqScope))
 		})
 	}
 }
@@ -256,12 +256,12 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 		mockCache := generateMockCache(bench.userCount, bench.projectCountByUser)
 		b.Run(fmt.Sprintf("HasPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				mockCache.hasPermission("user0", role.CreateAction, "project0", role.DashboardScope)
+				mockCache.hasPermission(nil, "user0", role.CreateAction, "project0", role.DashboardScope)
 			}
 		})
 		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				mockCache.hasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
+				mockCache.hasPermission(nil, fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
 			}
 		})
 	}

@@ -20,6 +20,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -119,10 +120,23 @@ func (p *OAuthProvider) Verify() error {
 	return nil
 }
 
+type KubernetesProvider struct {
+	Enabled    bool   `json:"enabled" yaml:"enabled"`
+	Kubeconfig string `json:"kubeconfig,omitempty" yaml:"kubeconfig,omitempty"`
+}
+
+func (p *KubernetesProvider) Verify() error {
+	if p.Kubeconfig != "" {
+		logrus.Warnln("kubeconfig present, this functionality should not be used in production")
+	}
+	return nil
+}
+
 type AuthProviders struct {
-	EnableNative bool            `json:"enable_native" yaml:"enable_native"`
-	OAuth        []OAuthProvider `json:"oauth,omitempty" yaml:"oauth,omitempty"`
-	OIDC         []OIDCProvider  `json:"oidc,omitempty" yaml:"oidc,omitempty"`
+	EnableNative       bool               `json:"enable_native" yaml:"enable_native"`
+	KubernetesProvider KubernetesProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	OAuth              []OAuthProvider    `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OIDC               []OIDCProvider     `json:"oidc,omitempty" yaml:"oidc,omitempty"`
 }
 
 func (p *AuthProviders) Verify() error {

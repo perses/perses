@@ -84,6 +84,7 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
+	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
@@ -97,6 +98,8 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
+	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
+
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
@@ -105,6 +108,7 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (m *Metadata) validate() error {
+	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
 	return common.ValidateID(m.Name)
 }
 

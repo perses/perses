@@ -95,6 +95,7 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 			Folder:        conf.File.Folder,
 			Extension:     conf.File.Extension,
 			CaseSensitive: conf.File.CaseSensitive,
+			HashFileName:  conf.File.HashFileName,
 		}
 	} else if conf.SQL != nil {
 		c := conf.SQL

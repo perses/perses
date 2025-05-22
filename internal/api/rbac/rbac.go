@@ -14,6 +14,7 @@
 package rbac
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -26,15 +27,23 @@ import (
 type RBAC interface {
 	IsEnabled() bool
 	// GetUserProjects return the list of the project the user has access to in the context of the role and the scope requested.
-	GetUserProjects(user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string
-	HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
-	GetPermissions(user string) map[string][]*v1Role.Permission
+	GetUserProjects(ctx echo.Context, user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string
+	HasPermission(ctx echo.Context, user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	GetPermissions(ctx echo.Context, user string) map[string][]*v1Role.Permission
 	Refresh() error
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (RBAC, error) {
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
+	}
+
+	if conf.Security.Authentication.Providers.KubernetesProvider.Enabled {
+		return createK8sImpl(
+			conf.Security.Authentication.Providers.KubernetesProvider.Kubeconfig,
+			userDAO,
+			conf.Security.Authorization.GuestPermissions,
+		), nil
 	}
 
 	impl := &cacheImpl{

@@ -62,7 +62,7 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	}
 	persesContext := apiInterface.NewPersesContext(ctx)
 	// Get the list of the project the user has access to, depending on the current scope.
-	projects := t.rbac.GetUserProjects(persesContext.GetUsername(), role.ReadAction, *scope)
+	projects := t.rbac.GetUserProjects(ctx, persesContext.GetUsername(), role.ReadAction, *scope)
 
 	// If there is no project associated to the user, then we should just return an empty list.
 	if len(projects) == 0 {
@@ -133,21 +133,30 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext ap
 		result := make([]K, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			build, ok := buildMap[project]
+			if ok {
+				result = append(result, build)
+			}
 		}
 		return result, nil
 	case []api.Entity:
 		result := make([]api.Entity, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			build, ok := buildMap[project]
+			if ok {
+				result = append(result, build)
+			}
 		}
 		return result, nil
 	case []json.RawMessage:
 		result := make([]json.RawMessage, 0, len(typedList))
 		buildMap := buildRawMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			build, ok := buildMap[project]
+			if ok {
+				result = append(result, build)
+			}
 		}
 		return result, nil
 	}

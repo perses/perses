@@ -15,8 +15,8 @@
 /* eslint @typescript-eslint/explicit-function-return-type: 0 */
 /* typescript-eslint/explicit-module-boundary-types: 0 */
 
-import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import { Alert, AlertTitle, alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import {
   AmazonLoginButton,
   AppleLoginButton,
@@ -40,15 +40,17 @@ import {
   ZaloLoginButton,
 } from 'react-social-login-buttons';
 import * as React from 'react';
+
 import Gitlab from 'mdi-material-ui/Gitlab';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
+import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../context/DarkMode';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
-import { useConfigContext } from '../../context/Config';
-import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth-client';
+import { useConfigContext, useIsK8sAuth } from '../../context/Config';
+import { buildRedirectQueryString, useIsAccessTokenExist, useRedirectQueryParam } from '../../model/auth-client';
 
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.
@@ -137,7 +139,17 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   }));
   const socialProviders = [...oidcProviders, ...oauthProviders];
   const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
+  const isK8sAuth = useIsK8sAuth();
   const path = useRedirectQueryParam();
+  const isAuthenticated = useIsAccessTokenExist(true);
+  const redirectPath = useRedirectQueryParam();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isK8sAuth && isAuthenticated) {
+      navigate(redirectPath);
+    }
+  }, [isAuthenticated, isK8sAuth, redirectPath, navigate]);
 
   return (
     <Stack
@@ -178,6 +190,11 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
             </SocialButton>
           );
         })}
+        {isK8sAuth && (
+          <Alert severity="error" variant="outlined">
+            <AlertTitle>Missing Authorization Token</AlertTitle>Check Deployment Configuration
+          </Alert>
+        )}
       </Stack>
     </Stack>
   );

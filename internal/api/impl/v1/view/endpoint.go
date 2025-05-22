@@ -58,7 +58,7 @@ func (e *endpoint) view(ctx echo.Context) error {
 			return apiInterface.HandleUnauthorizedError("missing claims")
 		}
 
-		if ok := e.rbac.HasPermission(claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
+		if ok := e.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
 			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
 		}
 	}

@@ -43,11 +43,11 @@ type testRBAC struct {
 	allow bool
 }
 
-func (t *testRBAC) GetPermissions(_ string) map[string][]*role.Permission {
+func (t *testRBAC) GetPermissions(_ echo.Context, _ string) map[string][]*role.Permission {
 	return map[string][]*role.Permission{}
 }
 
-func (t *testRBAC) HasPermission(_ string, _ role.Action, _ string, _ role.Scope) bool {
+func (t *testRBAC) HasPermission(_ echo.Context, _ string, _ role.Action, _ string, _ role.Scope) bool {
 	return t.allow
 }
 
@@ -59,7 +59,7 @@ func (t *testRBAC) Refresh() error {
 	panic("unimplemented")
 }
 
-func (t *testRBAC) GetUserProjects(_ string, _ role.Action, _ role.Scope) []string {
+func (t *testRBAC) GetUserProjects(_ echo.Context, _ string, _ role.Action, _ role.Scope) []string {
 	panic("unimplemented")
 }
 

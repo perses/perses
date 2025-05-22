@@ -82,6 +82,7 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
+// TODO: Update to show user from kube when logged in as a kube user
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
