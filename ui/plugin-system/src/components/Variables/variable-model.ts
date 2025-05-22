@@ -51,11 +51,15 @@ export function useListVariablePluginValues(definition: ListVariableDefinition):
   const capturingRegexp =
     definition.spec.capturingRegexp !== undefined ? new RegExp(definition.spec.capturingRegexp, 'g') : undefined;
 
-  let dependsOnVariables: string[] | undefined;
+  // LOGZ.IO CHANGE START:: Support variables from variables [APPZ-507]
+  let dependsOnVariables: string[] = Object.keys(allVariables); // Default to all variables
   if (variablePlugin?.dependsOn) {
     const dependencies = variablePlugin.dependsOn(spec, variablePluginCtx);
-    dependsOnVariables = dependencies.variables;
+    dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
   }
+  // Exclude self variable to avoid circular dependency
+  dependsOnVariables = dependsOnVariables.filter((v) => v !== definition.spec.name);
+  // LOGZ.IO CHANGE END:: Support variables from variables [APPZ-507]
 
   const variables = useAllVariableValues(dependsOnVariables);
 
