@@ -37,7 +37,6 @@ export * from './SettingsAutocomplete';
 export * from './SortSelector';
 export * from './Table';
 export * from './ThresholdsEditor';
-export * from './TimeChart';
 export * from './TimeRangeSelector';
 export * from './TimeSeriesTooltip';
 export * from './ToolbarIconButton';
