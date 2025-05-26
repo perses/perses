@@ -8,7 +8,7 @@ require (
 	cuelang.org/go v0.12.1
 	github.com/PaesslerAG/gval v1.2.4
 	github.com/PaesslerAG/jsonpath v0.1.2-0.20240726212847-3a740cf7976f
-	github.com/brunoga/deep v1.2.4
+	github.com/brunoga/deep v1.2.5
 	github.com/charmbracelet/huh v0.7.0
 	github.com/efficientgo/core v1.0.0-rc.3
 	github.com/fatih/color v1.18.0
