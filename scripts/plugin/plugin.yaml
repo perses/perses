@@ -21,7 +21,7 @@
 - name: "Tempo"
   version: "0.51.0-beta.2"
 - name: "TimeSeriesChart"
-  version: "0.6.0"
+  version: "0.7.0"
 - name: "TimeSeriesTable"
   version: "0.6.0"
 - name: "TraceTable"
