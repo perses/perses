@@ -1,22 +1,21 @@
 # Changelog
 
-## 0.51.0-rc.0 / 2025-05-12
+## 0.51.0 / 2025-05-27
 
-We are finally reaching the release candidate for the 0.51.0 version.
-We are reaching a confident level of stability, and we should not expect any major changes before the final release.
-
-In this new release, we are introducing new features and enhancements, including:
-
-- A new plugin list page in the UI, allowing users to view and manage installed plugins.
-- The ability to configure CORS settings for the application.
-- Improvements to the CLI, including a command to list installed plugins and enhancements to the plugin development process.
-- The addition of zoom in/zoom out buttons.
-
+- [FEATURE] By configuration, disable datasource and variable (#2673)
+- [FEATURE] Support Custom Lint rules to validate dashboard (#2684)
+- [FEATURE] Label metrics in stat chart (#2574)
+- [FEATURE] Value mapping settings for Status History and Stat Chart (#2462)
+- [FEATURE] add percli plugin generate command and plugin documentation (#2918)
+- [FEATURE] Publish CUE module to Central Registry (#2761)
 - [FEATURE] Add zoom in/zoom out buttons (#2810)
 - [FEATURE] CLI: list the plugins (#2889)
 - [FEATURE] Allows configuring CORS (#2861)
 - [FEATURE] Implement plugin list display page (#2842)
 - [FEATURE] Table: add optional pagination (#2811)
+- [ENHANCEMENT] pass rest of options from queryOptions (#2948)
+- [ENHANCEMENT] data source settings editor: use proxy mode by default (#2915)
+- [ENHANCEMENT] Invalid content type when it is not JSON (#2920)
 - [ENHANCEMENT] Plugin: add a status to know if the plugin is loaded and in dev (#2898)
 - [ENHANCEMENT] Enable Datasource Variables (#2876)
 - [ENHANCEMENT] Remove the `cue login` step (#2867)
@@ -24,76 +23,17 @@ In this new release, we are introducing new features and enhancements, including
 - [ENHANCEMENT] Add OAuth auth type to Secret UI (#2838)
 - [ENHANCEMENT] use singleton and lazy initialization for plugin runtime (#2833)
 - [ENHANCEMENT] Add kubebuilder annotation to common.URL (#2891)
-- [BUGFIX] Config: hide secret in the datasource discovery (#2888)
-- [BUGFIX] Adjust mousemove listener to fix navigator undef error (#2886)
-- [BUGFIX] timeseries tooltip: new assembleTransform logic for tooltip position (#2878)
-- [BUGFIX] Dashboard import: fix wrong form reset + UX improvements (#2881)
-- [BUGFIX] Fix improper state update in `GridLayout` useMemo (#2846)
-- [BUGFIX] Read clientSecretFile when configuring rest client with oauth (#2863)
-- [BUGFIX] Fix OAuth struct parse errors + typo in json (#2862)
-- [BUGFIX] StatChart: remove unnecessary scrollbars due to rounding (#2839)
-- [BUGFIX] `dac preview`: fix nil pointer error for brand new dashboards (#2817)
-- [BREAKINGCHANGE] CLI/PLUGIN: implement start command and deep review of how to load a dev plugin (#2831)
-- [BREAKINGCHANGE] core: switch the trace data model to OpenTelemetry (OTLP) (#2873)
-- [DOC] Update embedding panels guide with the latest recommendations (#2899)
-- [DOC] Document some of the not-resource-related API endpoints (#2874)
-- [DOC] Add kubecon pres to the list of materials (#2872)
-- [DOC] Remove duplicated section (#2837)
-- [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
-- [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
-
-## 0.51.0-beta.1 / 2025-03-21
-
-This new beta version is mostly improving the CLI command around the plugin development.
-We saw issues when building plugins with the CLI specially when cuelang required downloading dependencies.
-We improved the way to handle this, and now the plugin build should be more reliable.
-
-We have also upgraded every plugin to the latest version.
-
-- [FEATURE] Publish CUE module to Central Registry (#2761)
-  [ENHANCEMENT] adding extra args support dac build (#2801)
+- [ENHANCEMENT] adding extra args support dac build (#2801)
 - [ENHANCEMENT] CLI/DAC: ignore a list of pre-defined folder when building dashboard (#2800)
 - [ENHANCEMENT] CLI/PLUGIN: build includes the version in the archive name (#2804)
 - [ENHANCEMENT] CLI/PLUGIN: Improve the way to vendor cue dependencies and rely on cue default caching (#2795)
 - [ENHANCEMENT] CLI/PLUGIN: Use cue mod tidy to download cue deps (#2752)
 - [ENHANCEMENT] Upgrade dependency version shared to the plugin (#2750)
-- [BUGFIX] CUE SDK: fix "cannot reference optional field" error (#2812)
-- [BUGFIX] Implement workaround to fix ScatterPlot plugin (#2760)
-- [BUGFIX] CLI: plugin build should consider all subfolder when getting the cue dependencies (#2748)
-- [BREAKINGCHANGE] Plugin: when extracting plugin archive, perses includes the archive name as at top folder (#2806)
-- [BREAKINGCHANGE] `percli dac setup`: rely on CUE's new modules for deps installation (#2724)
-- [DOC] Mention plugin builders in CUE SDK doc (#2769)
-- [DOC] Add HTTP Proxy documentation (#2788)
-- [DOC] Add (back) common package doc (#2781)
-- [DOC] Remove dac docs about prometheus (#2728)
-- [DOC] Referencing various materials talking about Perses (#2756)
-- [DOC] DaC: document the base List variable + Remove static list variable (moved to perses/plugins) (#2753)
-- [DOC] Update requirement when building perses (#2754)
-
-## 0.51.0-beta.0 / 2025-03-10
-
-This release is one of the biggest releases we ever made.
-On top of many features and improvements, we are introducing a new plugin architecture that allows you to develop external plugins and load them in Perses.
-As part of this change we are introducing a new repository `perses/plugins` containing all default plugins supported by Perses.
-
-We have also improved the documentation, highlighting features that were implemented some time ago already but not well advertised (like datasource discovery and ephemeral dashboards)
-
-Even if we already have tested this version and received constructive feedback from the community, we prefer to provide a beta version to ensure that everything is working as expected.
-We will continue to improve the documentation and the plugins in the coming weeks.
-
-- [FEATURE] By configuration, disable datasource and variable (#2673)
-- [FEATURE] Support Custom Lint rules to validate dashboard (#2684)
-- [FEATURE] Add OAuth secret type for Datasources (#2631)
-- [FEATURE] Add YAML and Custom Resource support when downloading dashboard formats (#2658)
-- [FEATURE] Label metrics in stat chart (#2574)
-- [FEATURE] Value mapping settings for Status History and Stat Chart (#2462)
 - [ENHANCEMENT] Adds a way to skip the installation of the npm deps (#2720)
 - [ENHANCEMENT] CLI/Migrate: support CR as a migration format (#2682)
 - [ENHANCEMENT] Support conditional queryOptions for panels (#2662)
-- [ENHANCEMENT] Add Authorization and BasicAuth definitions to cue package (#2643)
 - [ENHANCEMENT] Move icons to the overflow menu based on panel size (#2635)
 - [ENHANCEMENT] Unify loading and error handling for all panels, pass data as props to panels (#2549)
-- [ENHANCEMENT] Support min/max TLS version (#2619)
 - [ENHANCEMENT] Disable schema validation by config for plugin in development (#2617)
 - [ENHANCEMENT] Deprecate the schema config (#2614)
 - [ENHANCEMENT] schemas are required for specific plugin kind (#2608)
@@ -103,19 +43,25 @@ We will continue to improve the documentation and the plugins in the coming week
 - [ENHANCEMENT] `percli dac diff`: add output + avoid early return when processing a directory (#2500)
 - [ENHANCEMENT] DaC CUE SDK: accurate constraints for duration attributes (#2525)
 - [ENHANCEMENT] DaC CUE SDK: add datasource param to the var group builder (#2524)
-- [BUGFIX] HTTPSettingsEditor: remove directUrl/proxy of previous value (#2739)
-- [BUGFIX] Table: fix reorder columns button tooltip (#2722)
+- [BUGFIX] Config: hide secret in the datasource discovery (#2888)
+- [BUGFIX] Adjust mousemove listener to fix navigator undef error (#2886)
+- [BUGFIX] timeseries tooltip: new assembleTransform logic for tooltip position (#2878)
+- [BUGFIX] Dashboard import: fix wrong form reset + UX improvements (#2881)
+- [BUGFIX] Fix improper state update in `GridLayout` useMemo (#2846)
+- [BUGFIX] Read clientSecretFile when configuring rest client with oauth (#2863)
+- [BUGFIX] Fix OAuth struct parse errors + typo in json (#2862)
+- [BUGFIX] StatChart: remove unnecessary scrollbars due to rounding (#2839)
+- [BUGFIX] `dac preview`: fix nil pointer error for brand new dashboards (#2817)
+- [BUGFIX] Shared Tooltip In Edit Panel Overflowing (#2935)
+- [BUGFIX] CUE SDK: fix "cannot reference optional field" error (#2812)
+- [BUGFIX] Implement workaround to fix ScatterPlot plugin (#2760)
+- [BUGFIX] CLI: plugin build should consider all subfolder when getting the cue dependencies (#2748)
 - [BUGFIX] Discovery: Fix label selector builder and empty value in cuelang (#2723)
-- [BUGFIX] Discovery: Fix the interface impl of the datasource discovery (#2714)
-- [BUGFIX] ListVariable: do not clear input value when selecting a value (#2672)
 - [BUGFIX] Support custom query editors (#2698)
-- [BUGFIX] Refresh RBAC cache when adding or removing users. (#2670)
-- [BUGFIX] Dashboard copy: hide ephemeral option if disabled (#2633)
 - [BUGFIX] Dashboard edit mode - Expanded panel - delete & drag (#2625)
 - [BUGFIX] CUE lib: Add missing model files (#2612)
 - [BUGFIX] Uses pkg filepath instead of path when manipulating file access (#2611)
 - [BUGFIX] Wait until plugins are loaded to avoid invalid default queries for explore components (#2607)
-- [BUGFIX] Add id to avoid setState loops (#2600)
 - [BUGFIX] Inject API prefix in all UI assets (#2576)
 - [BUGFIX] Login from percli (method not allowed) (#2577)
 - [BUGFIX] ListVariable: fix autocomplete when 'All' is selected (#2554)
@@ -127,8 +73,23 @@ We will continue to improve the documentation and the plugins in the coming week
 - [BUGFIX] `percli dac setup`: fix useless requirement of go CLI when using CUE (#2544)
 - [BREAKINGCHANGE] Changes the plugin architecture to support remote plugins. (#2154) (#2511) (#2526) (#2545) (#2567) (#2578) (#2582) (#2593) (#2598) (#2606) (#2609) (#2613) (#2616) (#2626) (#2637) (#2660) (#2645) (#2690) (#2695) (#2719)
 - [BREAKINGCHANGE] Rename field in the service discovery config and add a concept doc about SD (#2665)
-- [DOC] Fix typo in ListVariable spec (#2691)
-- [DOC] Fix doc about TLS config and the TLS secret spec (#2685)
+- [BREAKINGCHANGE] CLI/PLUGIN: implement start command and deep review of how to load a dev plugin (#2831)
+- [BREAKINGCHANGE] core: switch the trace data model to OpenTelemetry (OTLP) (#2873)
+- [BREAKINGCHANGE] Plugin: when extracting plugin archive, perses includes the archive name as at top folder (#2806)
+- [BREAKINGCHANGE] `percli dac setup`: rely on CUE's new modules for deps installation (#2724)
+- [DOC] Update embedding panels guide with the latest recommendations (#2899)
+- [DOC] Document some of the not-resource-related API endpoints (#2874)
+- [DOC] Add kubecon pres to the list of materials (#2872)
+- [DOC] Remove duplicated section (#2837)
+- [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
+- [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
+- [DOC] Mention plugin builders in CUE SDK doc (#2769)
+- [DOC] Add HTTP Proxy documentation (#2788)
+- [DOC] Add (back) common package doc (#2781)
+- [DOC] Remove dac docs about prometheus (#2728)
+- [DOC] Referencing various materials talking about Perses (#2756)
+- [DOC] DaC: document the base List variable + Remove static list variable (moved to perses/plugins) (#2753)
+- [DOC] Update requirement when building perses (#2754)
 - [DOC] Add documentation about how to migrate from Grafana (#2680) (#2687)
 - [DOC] add documentation about the proxy (#2657)
 - [DOC] Add doc explaining how the backend is loading the plugins (#2649) (#2721)
