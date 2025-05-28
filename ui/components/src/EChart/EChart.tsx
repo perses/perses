@@ -17,7 +17,12 @@ import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
-import { ScatterChart as EChartsScatterChart, CustomChart as EChartsCustomChart } from 'echarts/charts';
+import {
+  GaugeChart as EChartsGaugeChart,
+  PieChart as EChartsPieChart,
+  ScatterChart as EChartsScatterChart,
+  CustomChart as EChartsCustomChart,
+} from 'echarts/charts';
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -35,6 +40,8 @@ use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
+  EChartsGaugeChart,
+  EChartsPieChart,
   EChartsScatterChart,
   EChartsCustomChart,
   GridComponent,
