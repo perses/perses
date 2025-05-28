@@ -22,6 +22,7 @@ import {
   PieChart as EChartsPieChart,
   ScatterChart as EChartsScatterChart,
   CustomChart as EChartsCustomChart,
+  HeatmapChart as EChartsHeatmapChart,
 } from 'echarts/charts';
 import {
   DatasetComponent,
@@ -30,6 +31,7 @@ import {
   GridComponent,
   TitleComponent,
   TooltipComponent,
+  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
@@ -44,10 +46,12 @@ use([
   EChartsPieChart,
   EChartsScatterChart,
   EChartsCustomChart,
+  EChartsHeatmapChart,
   GridComponent,
   TitleComponent,
   TooltipComponent,
   CanvasRenderer,
+  VisualMapComponent,
 ]);
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
