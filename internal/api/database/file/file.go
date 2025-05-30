@@ -16,6 +16,7 @@ package databasefile
 import (
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -44,6 +45,7 @@ type DAO struct {
 	Folder        string
 	Extension     config.FileExtension
 	CaseSensitive bool
+	HashFileName  bool
 }
 
 func (d *DAO) Init() error {
@@ -298,7 +300,15 @@ func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 }
 
 func (d *DAO) buildPath(key string) string {
-	return filepath.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
+	processedKey := key
+	if d.HashFileName {
+		h := fnv.New32a()
+		_, err := h.Write([]byte(key))
+		if err == nil {
+			processedKey = fmt.Sprintf("%d", h.Sum32())
+		}
+	}
+	return filepath.Join(d.Folder, fmt.Sprintf("%s.%s", processedKey, d.Extension))
 }
 
 func (d *DAO) unmarshal(data []byte, entity interface{}) error {

@@ -143,3 +143,8 @@ export function useIsExternalProviderEnabled(): boolean {
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
 }
+
+export function useIsK8sAuth(): boolean {
+  const { config } = useConfigContext();
+  return config?.security?.authentication?.providers?.kubernetes?.enabled;
+}

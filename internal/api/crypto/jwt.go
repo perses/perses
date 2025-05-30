@@ -86,6 +86,7 @@ type jwtImpl struct {
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	cookieConfig    config.Cookie
+	kubernetes      bool
 }
 
 func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
@@ -176,6 +177,11 @@ func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 }
 
 func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
+	authorizationHeader := "Authorization"
+	if j.kubernetes {
+		authorizationHeader = "Perses-Authorization"
+	}
+
 	jwtMiddlewareConfig := echojwt.Config{
 		Skipper: skipper,
 		BeforeFunc: func(c echo.Context) {
@@ -191,13 +197,15 @@ func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
 				return
 			}
-			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
+
+			c.Request().Header.Set(authorizationHeader, fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
 		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
 			return new(JWTCustomClaims)
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
 		SigningKey:    j.accessKey,
+		TokenLookup:   fmt.Sprintf("header:%s:Bearer ", authorizationHeader),
 	}
 	return echojwt.WithConfig(jwtMiddlewareConfig)
 }

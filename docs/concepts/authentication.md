@@ -81,7 +81,7 @@ sequenceDiagram
     participant br as Perses Frontend
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>br: Login with OIDC provider (e.g Azure AD)
     activate br
     br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
@@ -142,7 +142,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>pc: EXEC: percli login
     activate pc
     pc->>rp: GET /api/config
@@ -227,7 +227,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     ro->>pc: EXEC: percli login --provider <slug_id> --client-id <client_id> --client-secret <client_secret>
     activate pc
     pc->>rp: GET /api/config
@@ -261,4 +261,257 @@ sequenceDiagram
     deactivate rp
     pc->>ro: PRINT: Projects list
     deactivate pc
+```
+
+### => Login from external OIDC provider with interactive flow, through WEB UI, Authorize using Kubernetes. (`authorization_code`)
+
+Perses can login to a Kubernetes cluster which has OIDC enabled on the API Server [link](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens).
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    participant br as Perses Frontend
+    participant rp as Perses Backend
+    participant op as External Identity Provider
+    participant k8s as Kubernetes
+
+    hu->>br: Login with OIDC provider (e.g Azure AD)
+    activate br
+    br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
+    activate rp
+    rp->>br: 302: redirect to Provider
+    deactivate rp
+    br->>op: /oauth/authorize
+    activate op
+    op->>br: 302: redirect to Perses
+    deactivate op
+    br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/callback?code=...
+    activate rp
+    rp->>op: GET /oauth/token
+    activate op
+    op->>rp: 200: id_token & access_token
+    deactivate op
+    rp->>op: GET /api/userinfo<br/> (endpoint from .well-known URL)
+    activate op
+    op->>rp: 200: User Info
+    deactivate op
+    Note right of rp: User Info + id token are<br/> used to sync user in database
+    rp->>rp: Create or Update user in DB
+    Note right of rp: A new session is created<br /> with a new signed access_token+refresh_token
+    rp->>br: 200: save session in cookie
+    deactivate rp
+    br->>hu: Home Page
+    deactivate br
+    hu->>br: Click on Projects
+    activate br
+    br->>rp: GET /api/v1/projects
+    activate rp
+    rp->>k8s: TokenReview token: id_token
+    activate k8s
+    k8s->>op: Verify token
+    activate op
+    op->>op: Verify Token
+    op->>k8s: 200: ok
+    deactivate op
+    k8s->>rp: 200 authenticated: true
+    deactivate k8s
+    rp->>k8s: SubjectAccessReview
+    activate k8s
+    k8s->>k8s: Verify Access
+    k8s->>rp: 200 allowed: true
+    deactivate k8s
+    rp->>br: 200: projects list
+    deactivate rp
+    br->>hu: Projects Page
+    deactivate br
+```
+
+## Kubernetes provider
+
+The Kubernetes Provider is designed to be utilized in conjunction with the [Perses Operator](https://github.com/perses/perses-operator) inside of a Kubernetes cluster.
+When this feature is enabled, Perses expects a `Authorization` header to be included in any request
+to the backend, in the form of `bearer TOKEN_AAABBBAA`. A typical deployment will use an
+Authentication proxy in-front of the Perses deployment to add the token to each request. The Perses
+deployment must have a ServiceAccount assigned to it with at least "create" permissions for the
+`TokenReview` and `SubjectAccessReview` resources, such as through assigning the
+`system:auth-delegator` ClusterRole.
+
+While enabled certain features, such as User, Role, and RoleBinding management, will not appear in
+the UI, as these functionalities should be completed by the Kubernetes the service is running inside.
+User permission authorization is cached for 5 minutes.
+
+### => Authorize an embedded frontend UI by forwarding the Authorization header. (`device_code`)
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    participant br as Embedded Frontend
+    participant rp as Perses Backend
+    participant k8s as Kubernetes
+    participant ap as External Authorization Provider
+
+    hu->>ap: Auhorization Request
+    activate ap
+    ap->>hu: 200 token
+    deactivate ap
+    hu->>br: Click on Projects
+    activate br
+    br->>rp: GET /api/v1/projects
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 User.Info: john
+    deactivate k8s
+    rp->>k8s: SubjectAccessReview
+    activate k8s
+    k8s->>k8s: Verify Access
+    k8s->>rp: 200 authorizer.DecisionAllow
+    deactivate k8s
+    rp->>br: 200: projects list
+    deactivate rp
+    br->>hu: Projects Page
+    deactivate br
+```
+
+### => Authorize Perses Operator to create a dashboard. (`device_code`)
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    participant k8s as Kubernetes
+    participant po as Perses Operator
+    participant rp as Perses Backend
+
+    hu->>k8s: kubectl create PersesDashboard
+    activate k8s
+    k8s->>po: Reconcile PersesDashboard
+    deactivate k8s
+    activate po
+    po->>rp: POST /api/v1/projects <br /> token: Service Account Token
+    deactivate po
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 User.Info: service-account
+    deactivate k8s
+    rp->>k8s: SubjectAccessReview
+    activate k8s
+    k8s->>k8s: Verify Access
+    k8s->>rp: 200 authorizer.DecisionAllow
+    deactivate k8s
+    rp->>po: 201: dashboard created
+    deactivate rp
+    activate po
+    po->>k8s: patch PersesDashboard <br /> status: reconciled
+    deactivate po
+```
+
+### => Authorize WEB UI (`device_code`)
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    participant br as Perses Frontend
+    participant rp as Perses Backend
+    participant k8s as Kubernetes
+    participant ap as External Authorization Provider
+
+    hu->>ap: Auhorization Request
+    activate ap
+    ap->>hu: 200 token
+    deactivate ap
+    hu->>br: Navigate to /
+    activate br
+    br->>rp: POST /api/auth/refresh
+    activate rp
+    rp->>br: 307 Redirect /api/auth/providers/kubernetes/login
+    deactivate rp
+    br->>rp: POST /api/auth/providers/kubernetes/login
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 User.Info: john
+    deactivate k8s
+    rp->>br: 200: save session in cookie
+    deactivate rp
+    br->>hu: Home Page
+    deactivate br
+    hu->>br: Click on Projects
+    activate br
+    br->>rp: GET /api/v1/projects
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 User.Info: john
+    deactivate k8s
+    rp->>k8s: SubjectAccessReview
+    activate k8s
+    k8s->>k8s: Verify Access
+    k8s->>rp: 200 authorizer.DecisionAllow
+    deactivate k8s
+    rp->>br: 200: projects list
+    deactivate rp
+    br->>hu: Projects Page
+    deactivate br
+```
+
+### => Authorize percli to create a dashboard. (`device_code`)
+
+TODO: Finish implementing this flow and update sequence diagram when finished
+
+```mermaid
+sequenceDiagram
+    actor hu as John
+    participant k as kubectl
+    participant pc as percli
+    participant rp as Perses Backend
+    participant k8s as Kubernetes
+    participant ap as External Authorization Provider
+
+    hu->>ap: Auhorization Request
+    activate ap
+    ap->>hu: 200 token
+    deactivate ap
+    hu->>k: kubectl config set-credentials ...
+    hu->>pc: EXEC: percli login perses.dev/demo --provider k8s
+    activate pc
+    pc->>k: GET kubeconfig token
+    activate k
+    k->>pc: token
+    deactivate k
+    pc->>rp: GET /api/auth/providers/k8s/token
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 authenticated: true
+    deactivate k8s
+    rp->>pc: 200 ok
+    deactivate rp
+    pc->>hu: login ok
+    deactivate pc
+
+    hu->>pc: EXEC: percli get projects
+    activate pc
+    pc->>rp: GET /api/v1/projects
+    activate rp
+    rp->>k8s: TokenReview token: Authorization Header
+    activate k8s
+    k8s->>k8s: Verify token
+    k8s->>rp: 200 authenticated: true
+    deactivate k8s
+    rp->>k8s: SubjectAccessReview
+    activate k8s
+    k8s->>k8s: Verify Access
+    k8s->>rp: 200 allowed: true
+    deactivate k8s
+    rp->>pc: 200: Projects list
+    deactivate rp
+    pc->>hu: PRINT: Projects list
+    deactivate pc
+
 ```

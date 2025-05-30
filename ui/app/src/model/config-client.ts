@@ -30,6 +30,7 @@ export interface DatabaseFile {
   folder: string;
   extension: 'yaml' | 'json';
   case_sensitive: boolean;
+  hash_file_name: boolean;
 }
 
 export interface TLSConfig {
@@ -109,10 +110,16 @@ export interface OauthProvider {
   user_infos_url: string;
 }
 
+export interface KubernetesProvider {
+  enabled: boolean;
+  kubeconfig: string;
+}
+
 export interface AuthProviders {
   enable_native: boolean;
   oauth: OauthProvider[];
   oidc: OIDCProvider[];
+  kubernetes: KubernetesProvider;
 }
 
 export interface AuthenticationConfig {

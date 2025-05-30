@@ -29,6 +29,7 @@ type AuthorizationConfig struct {
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	Kubernetes       bool               `json:"kubernetes,omitempty" yaml:"kubernetes,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
