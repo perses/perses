@@ -31,14 +31,14 @@ export interface PanelSpecEditorProps {
 export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | null {
   const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
-  const { data: plugin, isPending, error } = usePlugin('Panel', kind);
+  const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
   if (error) {
     return <ErrorAlert error={error} />;
   }
 
   // TODO: Proper loading indicator
-  if (isPending) {
+  if (isLoading) {
     return null;
   }
 

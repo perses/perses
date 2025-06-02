@@ -28,8 +28,8 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
   }
   const suggestedStepMs = useSuggestedStepMs(width);
 
-  const { data: plugin, isPending } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
-  if (isPending) {
+  const { data: plugin, isLoading } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
+  if (isLoading) {
     return null;
   }
 
