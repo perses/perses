@@ -2,7 +2,7 @@
 
 The Variable Group builder takes care of generating a pattern that we often see in dashboards: when you have e.g 3 variables A, B and C, it's quite common to "bind" them together so that B depends on A, and C depends on B + A.
 
-## Usage	
+## Usage
 
 ```cue
 package myDaC
