@@ -37,7 +37,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	schemaInstance, err := LoadSchemaInstance(schemaPath, "model")
 	if err != nil {
 		return "", nil, err
@@ -85,7 +85,7 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
 		return err
 	}
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	pluginValue := ctx.CompileBytes(pluginData)
 	finalValue := pluginValue.Unify(ctx.BuildInstance(schema))
 	if validateErr := finalValue.Validate(cueValidationOptions...); validateErr != nil {
