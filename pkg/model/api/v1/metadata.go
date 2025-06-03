@@ -38,8 +38,9 @@ type Metadata struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=date-time
 	// +kubebuilder:validation:Optional
-	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
-	Version   uint64    `json:"version" yaml:"version"`
+	UpdatedAt            time.Time `json:"updatedAt" yaml:"updatedAt"`
+	Version              uint64    `json:"version" yaml:"version"`
+	ignoreNameValidation bool
 }
 
 func (m *Metadata) CreateNow() {
@@ -84,9 +85,10 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
-	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
-	if err := (&tmp).validate(); err != nil {
-		return err
+	if !m.ignoreNameValidation {
+		if err := (&tmp).validate(); err != nil {
+			return err
+		}
 	}
 	*m = tmp
 	return nil
@@ -98,18 +100,26 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
-	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
-
-	if err := (&tmp).validate(); err != nil {
-		return err
+	if !m.ignoreNameValidation {
+		if err := (&tmp).validate(); err != nil {
+			return err
+		}
 	}
 	*m = tmp
 	return nil
 }
 
 func (m *Metadata) validate() error {
-	// TODO: Currently fails with special characters of kubernetes usernames, such as the : in kube:admin
+	if m.ignoreNameValidation {
+		return nil
+	}
 	return common.ValidateID(m.Name)
+}
+
+func (m *Metadata) SetIgnoreValidateName(newIgnoreValidateName bool) {
+	// In specific circumstances, validating the name of an object is not necessary. This should only
+	// be enabled with a file based database when the "HashFileName" is active
+	m.ignoreNameValidation = newIgnoreValidateName
 }
 
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata

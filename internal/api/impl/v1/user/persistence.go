@@ -16,6 +16,8 @@ package user
 import (
 	"encoding/json"
 
+	databaseImpl "github.com/perses/perses/internal/api/database"
+	databaseFile "github.com/perses/perses/internal/api/database/file"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/pkg/model/api"
@@ -51,8 +53,18 @@ func (d *dao) Delete(name string) error {
 
 func (d *dao) Get(name string) (*v1.User, error) {
 	entity := &v1.User{}
+	metadata := v1.NewMetadata(name)
 
-	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
+	if databaseDAO, ok := (d.client).(*databaseImpl.DAO); ok {
+		if databaseFileDAO, ok := (databaseDAO.Client).(*databaseFile.DAO); ok {
+			if databaseFileDAO.HashFileName {
+				metadata.SetIgnoreValidateName(true)
+				entity.Metadata.SetIgnoreValidateName(true)
+			}
+		}
+	}
+
+	return entity, d.client.Get(d.kind, metadata, entity)
 }
 
 func (d *dao) List(q *user.Query) ([]*v1.User, error) {

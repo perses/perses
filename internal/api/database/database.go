@@ -32,38 +32,38 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type dao struct {
+type DAO struct {
 	databaseModel.DAO
-	client databaseModel.DAO
+	Client databaseModel.DAO
 }
 
-func (d *dao) Close() error {
-	return d.client.Close()
+func (d *DAO) Close() error {
+	return d.Client.Close()
 }
 
-func (d *dao) Init() error {
-	return d.client.Init()
+func (d *DAO) Init() error {
+	return d.Client.Init()
 }
-func (d *dao) IsCaseSensitive() bool {
-	return d.client.IsCaseSensitive()
+func (d *DAO) IsCaseSensitive() bool {
+	return d.Client.IsCaseSensitive()
 }
-func (d *dao) Create(entity modelAPI.Entity) error {
-	return d.client.Create(entity)
+func (d *DAO) Create(entity modelAPI.Entity) error {
+	return d.Client.Create(entity)
 }
-func (d *dao) Upsert(entity modelAPI.Entity) error {
-	return d.client.Upsert(entity)
+func (d *DAO) Upsert(entity modelAPI.Entity) error {
+	return d.Client.Upsert(entity)
 }
-func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	return d.client.Get(kind, metadata, entity)
+func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
+	return d.Client.Get(kind, metadata, entity)
 }
-func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
-	return d.client.Query(query, slice)
+func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
+	return d.Client.Query(query, slice)
 }
-func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
-	return d.client.RawQuery(query)
+func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
+	return d.Client.RawQuery(query)
 }
-func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
-	raws, err := d.client.RawQuery(query)
+func (d *DAO) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
+	raws, err := d.Client.RawQuery(query)
 	if err != nil {
 		return nil, err
 	}
@@ -75,17 +75,17 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 	}
 	return result, nil
 }
-func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	return d.client.Delete(kind, metadata)
+func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
+	return d.Client.Delete(kind, metadata)
 }
-func (d *dao) DeleteByQuery(query databaseModel.Query) error {
-	return d.client.DeleteByQuery(query)
+func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
+	return d.Client.DeleteByQuery(query)
 }
-func (d *dao) HealthCheck() bool {
-	return d.client.HealthCheck()
+func (d *DAO) HealthCheck() bool {
+	return d.Client.HealthCheck()
 }
-func (d *dao) GetLatestUpdateTime(kind []modelV1.Kind) (*string, error) {
-	return d.client.GetLatestUpdateTime(kind)
+func (d *DAO) GetLatestUpdateTime(kind []modelV1.Kind) (*string, error) {
+	return d.Client.GetLatestUpdateTime(kind)
 }
 
 func New(conf config.Database) (databaseModel.DAO, error) {
@@ -153,5 +153,5 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 	} else {
 		return nil, fmt.Errorf("no dao defined")
 	}
-	return &dao{client: client}, nil
+	return &DAO{Client: client}, nil
 }
