@@ -27,7 +27,6 @@ export * from './FormEditor';
 export * from './InfoTooltip';
 export * from './JSONEditor';
 export * from './Legend';
-export * from './LineChart';
 export * from './LinksEditor';
 export * from './ModeSelector';
 export * from './OptionsEditorLayout';

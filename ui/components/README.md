@@ -7,9 +7,5 @@ This [package](https://www.npmjs.com/package/@perses-dev/components) includes in
 To import components from the components package use the syntax below:
 
 ```typescript
-import { LineChart } from "@perses-dev/components";
+import { ContentWithLegend } from "@perses-dev/components";
 ```
-
-For detailed examples of how to use certain components, see individual docs for:
-
-- [LineChart.md](./src/LineChart/LineChart.md)
