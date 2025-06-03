@@ -70,6 +70,25 @@ Open the Perses UI at http://localhost:8080.
 You are presented with the home page, in light mode.
 For fun, you can optionally flip the switch in the top right corner to enable dark mode.
 
+# Building your own container image
+
+If you want to build your own container image, you can use [`Dockerfile.dev`](../../Dockerfile.dev).
+This container will include the Perses binary, percli, Perses UI and it will download the core [plugins](https://github.com/perses/plugins) at build time.
+
+To build your own container image, and run it you can use the following commands:
+
+```shell
+# podman command.
+$ podman build -t perses-test -f Dockerfile.dev .
+$ podman run --name perses --rm -p 127.0.0.1:8080:8080 perses-test
+```
+
+```shell
+# docker command.
+$ docker build -t perses-test -f Dockerfile.dev .
+$ docker run --name perses --rm -p 127.0.0.1:8080:8080 perses-test
+```
+
 ## What's next?
 
 Explore the online [Perses documentation](https://perses.dev/)

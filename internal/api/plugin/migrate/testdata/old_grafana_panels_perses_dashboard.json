@@ -23,14 +23,9 @@
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
-            "kind": "StaticListVariable",
+            "kind": "DatasourceVariable",
             "spec": {
-              "values": [
-                "grafana",
-                "migration",
-                "not",
-                "supported"
-              ]
+              "datasourcePluginKind": "prometheus"
             }
           },
           "name": "datasource"

@@ -17,7 +17,13 @@ import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
-import { ScatterChart as EChartsScatterChart, CustomChart as EChartsCustomChart } from 'echarts/charts';
+import {
+  GaugeChart as EChartsGaugeChart,
+  PieChart as EChartsPieChart,
+  ScatterChart as EChartsScatterChart,
+  CustomChart as EChartsCustomChart,
+  HeatmapChart as EChartsHeatmapChart,
+} from 'echarts/charts';
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -25,6 +31,7 @@ import {
   GridComponent,
   TitleComponent,
   TooltipComponent,
+  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
@@ -35,12 +42,16 @@ use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
+  EChartsGaugeChart,
+  EChartsPieChart,
   EChartsScatterChart,
   EChartsCustomChart,
+  EChartsHeatmapChart,
   GridComponent,
   TitleComponent,
   TooltipComponent,
   CanvasRenderer,
+  VisualMapComponent,
 ]);
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events

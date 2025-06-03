@@ -17,7 +17,7 @@ import (
 	"os"
 )
 
-const (
+var (
 	DefaultPluginPath                   = "plugins"
 	DefaultPluginPathInContainer        = "/etc/perses/plugins"
 	DefaultArchivePluginPath            = "plugins-archive"
