@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getUnixTime } from 'date-fns';
-import { QueryDefinition, UnknownSpec, AbsoluteTimeRange, ProfileData } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec, ProfileData } from '@perses-dev/core';
 import { useQueries, UseQueryResult } from '@tanstack/react-query';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
