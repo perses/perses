@@ -77,7 +77,7 @@ type JWT interface {
 }
 
 type JwtImpl struct {
-	AccessKey       []byte
+	accessKey       []byte
 	refreshKey      []byte
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
@@ -87,7 +87,7 @@ type JwtImpl struct {
 
 func (j *JwtImpl) SignedAccessToken(login string) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(j.accessTokenTTL), j.AccessKey)
+	return signedToken(login, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
 func (j *JwtImpl) SignedRefreshToken(login string) (string, error) {
@@ -187,5 +187,5 @@ func (j JwtImpl) GetJWT() JWT {
 }
 
 func (j *JwtImpl) GetAccessKey() string {
-	return string(j.AccessKey)
+	return string(j.accessKey)
 }

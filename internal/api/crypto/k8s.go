@@ -36,7 +36,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// GetProfile implements [Security]
 type K8sSecurity struct {
 	jwt           JWT
 	Authenticator authenticator.Request
@@ -62,7 +61,6 @@ func (auth *K8sSecurity) GetJWT() JWT {
 	return auth.jwt
 }
 
-// GetUser implements [Security]
 func (auth *K8sSecurity) GetK8sUser(ctx echo.Context) (k8suser.Info, error) {
 	req := ctx.Request().Clone(ctx.Request().Context())
 
@@ -78,7 +76,7 @@ func (auth *K8sSecurity) GetK8sUser(ctx echo.Context) (k8suser.Info, error) {
 	return res.User, nil
 }
 
-func GetKubernetesAuth(security config.Security, jwt JwtImpl) *K8sSecurity {
+func GetKubernetesSecurity(security config.Security, jwt JwtImpl) *K8sSecurity {
 	if !security.Authentication.Providers.KubernetesProvider.Enabled {
 		return nil
 	}

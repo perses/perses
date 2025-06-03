@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/securecookie"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
 
@@ -52,7 +51,6 @@ func (u *kubernetesUserInfo) GetProviderContext() v1.OAuthProvider {
 }
 
 type kubernetesEndpoint struct {
-	secureCookie    *securecookie.SecureCookie
 	security        crypto.K8sSecurity
 	tokenManagement tokenManagement
 	svc             service
@@ -64,13 +62,7 @@ func newKubernetesEndpoint(security crypto.Security, dao user.DAO, rbac rbacv1.R
 		return nil, fmt.Errorf("invalid security config")
 	}
 
-	// As the cookie is used only at login time, we don't need a persistent value here.
-	// (same reason as newOIDCEndpoint)
-	key := securecookie.GenerateRandomKey(16)
-	secureCookie := securecookie.New(key, key)
-
 	return &kubernetesEndpoint{
-		secureCookie:    secureCookie,
 		security:        *k8sSecurity,
 		tokenManagement: tokenManagement{jwt: k8sSecurity.GetJWT()},
 		svc:             service{dao: dao, rbac: rbac},
@@ -79,11 +71,11 @@ func newKubernetesEndpoint(security crypto.Security, dao user.DAO, rbac rbacv1.R
 
 func (e *kubernetesEndpoint) CollectRoutes(g *route.Group) {
 	// Add routes for the "Authorization Code" flow
-	g.POST(fmt.Sprintf("/%s/%s", utils.AuthKindKubernetes, utils.PathLogin), e.authn, true)
+	g.POST(fmt.Sprintf("/%s/%s", utils.AuthKindKubernetes, utils.PathLogin), e.loginAndSync, true)
 }
 
-// authn performs user synchronization with the k8s apiserver and generates access and refresh tokens
-func (e *kubernetesEndpoint) authn(ctx echo.Context) error {
+// loginAndSync performs user synchronization with the k8s apiserver and generates access and refresh tokens
+func (e *kubernetesEndpoint) loginAndSync(ctx echo.Context) error {
 	k8sUser, err := e.security.GetK8sUser(ctx)
 	if err != nil {
 		return err
@@ -104,6 +96,9 @@ func (e *kubernetesEndpoint) authn(ctx echo.Context) error {
 
 	username := user.GetMetadata().GetName()
 
+	// Set cookie for the frontend to use to determine username that shows up. Cookie and JWT
+	// have no purpose for the k8s mode other than a consistent way to tell the frontend which user
+	// is logged in
 	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")

@@ -23,9 +23,9 @@ type Security interface {
 	GetUser(ctx echo.Context) string
 }
 
-func GetAuthentication(security config.Security, jwt JwtImpl) Security {
+func GetSecurity(security config.Security, jwt JwtImpl) Security {
 	if security.Authentication.Providers.KubernetesProvider.Enabled {
-		return GetKubernetesAuth(security, jwt)
+		return GetKubernetesSecurity(security, jwt)
 	}
 	return jwt
 }

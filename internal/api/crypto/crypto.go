@@ -48,8 +48,8 @@ func New(security config.Security) (Crypto, Security, error) {
 			key:   key,
 			block: aesBlock,
 		},
-		GetAuthentication(security, JwtImpl{
-			AccessKey:       key,
+		GetSecurity(security, JwtImpl{
+			accessKey:       key,
 			refreshKey:      append(key, []byte("-refresh")...),
 			accessTokenTTL:  time.Duration(security.Authentication.AccessTokenTTL),
 			refreshTokenTTL: time.Duration(security.Authentication.RefreshTokenTTL),
