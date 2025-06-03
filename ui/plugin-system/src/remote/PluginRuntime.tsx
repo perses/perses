@@ -53,11 +53,11 @@ const getPluginRuntime = (): FederationHost => {
           },
         },
         '@tanstack/react-query': {
-          version: '5.64.2',
+          version: '4.39.1',
           lib: () => ReactQuery,
           shareConfig: {
             singleton: true,
-            requiredVersion: '^5.64.2',
+            requiredVersion: '^4.39.1',
           },
         },
         'react-hook-form': {
