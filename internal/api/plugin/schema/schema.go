@@ -133,7 +133,7 @@ func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
 		switch schema.Kind {
 		case plugin.KindDatasource:
 			s.datasources[schema.Name] = schema.Instance
-		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery:
+		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
 			s.queries[schema.Name] = schema.Instance
 		case plugin.KindVariable:
 			s.variables[schema.Name] = schema.Instance
