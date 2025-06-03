@@ -14,18 +14,14 @@
 package crypto
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/pkg/model/api/config"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -77,7 +73,6 @@ type JWT interface {
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
-	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 	GetAccessKey() string
 }
 
@@ -175,37 +170,6 @@ func (j *JwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 		return nil, err
 	}
 	return parsedToken.Claims.(*JWTCustomClaims), nil
-}
-
-func (j *JwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
-	authorizationHeader := "Authorization"
-
-	jwtMiddlewareConfig := echojwt.Config{
-		Skipper: skipper,
-		BeforeFunc: func(c echo.Context) {
-			// Merge the JWT cookies if they exist to create the token,
-			// and then set the header Authorization with the complete token.
-			payloadCookie, err := c.Cookie(CookieKeyJWTPayload)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTPayload)
-				return
-			}
-			signatureCookie, err := c.Cookie(CookieKeyJWTSignature)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
-				return
-			}
-
-			c.Request().Header.Set(authorizationHeader, fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
-		},
-		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return new(JWTCustomClaims)
-		},
-		SigningMethod: jwt.SigningMethodHS512.Name,
-		SigningKey:    j.AccessKey,
-		TokenLookup:   fmt.Sprintf("header:%s:Bearer ", authorizationHeader),
-	}
-	return echojwt.WithConfig(jwtMiddlewareConfig)
 }
 
 // GetUser implements [Security]

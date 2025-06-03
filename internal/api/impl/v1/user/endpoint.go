@@ -18,6 +18,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -94,7 +95,8 @@ func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	if user == "" {
 		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
 	}
-	if user != parameters.Name {
+	nameParam, err := url.PathUnescape(parameters.Name)
+	if err != nil || user != nameParam {
 		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
 	permissions := e.rbac.GetPermissions(ctx, user)

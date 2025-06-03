@@ -48,11 +48,11 @@ import (
 
 type api struct {
 	echoUtils.Register
-	apiV1Endpoints []route.Endpoint
-	apiEndpoints   []route.Endpoint
-	proxyEndpoint  route.Endpoint
-	jwtMiddleware  echo.MiddlewareFunc
-	apiPrefix      string
+	apiV1Endpoints           []route.Endpoint
+	apiEndpoints             []route.Endpoint
+	proxyEndpoint            route.Endpoint
+	authenticationMiddleware echo.MiddlewareFunc
+	apiPrefix                string
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
@@ -100,10 +100,8 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
 			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetRBAC(), serviceManager.GetSecurity()),
-		jwtMiddleware: serviceManager.GetJWT().Middleware(func(_ echo.Context) bool {
-			return !cfg.Security.EnableAuth
-		}),
-		apiPrefix: cfg.APIPrefix,
+		authenticationMiddleware: serviceManager.GetAuthenticationMiddleware(),
+		apiPrefix:                cfg.APIPrefix,
 	}
 }
 
@@ -143,7 +141,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 		for _, rte := range el.group.Routes {
 			var mdws []echo.MiddlewareFunc
 			if !rte.IsAnonymous {
-				mdws = append(mdws, a.jwtMiddleware)
+				mdws = append(mdws, a.authenticationMiddleware)
 			}
 			mdws = append(mdws, rte.Middlewares...)
 			rte.Register(group, mdws...)
