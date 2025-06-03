@@ -107,10 +107,11 @@ type endpoint struct {
 	globalDTS    globaldatasource.DAO
 	crypto       crypto.Crypto
 	rbac         rbac.RBAC
+	security     crypto.Security
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
-	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, rbac rbac.RBAC) route.Endpoint {
+	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, rbac rbac.RBAC, security crypto.Security) route.Endpoint {
 	return &endpoint{
 		cfg:          cfg,
 		dashboard:    dashboardDAO,
@@ -120,6 +121,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		globalDTS:    globalDtsDAO,
 		crypto:       crypto,
 		rbac:         rbac,
+		security:     security,
 	}
 }
 
@@ -139,20 +141,20 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
+	user := e.security.GetUser(ctx)
+	if user == "" {
 		// If we're running without authentication, claims can be nil - just let requests through.
 		return nil
 	}
 
 	if role.IsGlobalScope(scope) {
-		if ok := e.rbac.HasPermission(ctx, claims.Subject, action, rbac.GlobalProject, scope); !ok {
+		if ok := e.rbac.HasPermission(ctx, user, action, rbac.GlobalProject, scope); !ok {
 			return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
 		}
 		return nil
 	}
 
-	if ok := e.rbac.HasPermission(ctx, claims.Subject, action, projectName, scope); !ok {
+	if ok := e.rbac.HasPermission(ctx, user, action, projectName, scope); !ok {
 		return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
 	}
 

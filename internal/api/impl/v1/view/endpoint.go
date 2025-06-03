@@ -32,12 +32,14 @@ type endpoint struct {
 	dashboardService dashboard.Service
 	service          view.Service
 	rbac             rbac.RBAC
+	security         crypto.Security
 }
 
-func NewEndpoint(service view.Service, rbac rbac.RBAC, dashboardService dashboard.Service) route.Endpoint {
+func NewEndpoint(service view.Service, rbac rbac.RBAC, security crypto.Security, dashboardService dashboard.Service) route.Endpoint {
 	return &endpoint{
 		service:          service,
 		rbac:             rbac,
+		security:         security,
 		dashboardService: dashboardService,
 	}
 }
@@ -53,17 +55,17 @@ func (e *endpoint) view(ctx echo.Context) error {
 	}
 
 	if e.rbac.IsEnabled() {
-		claims := crypto.ExtractJWTClaims(ctx)
-		if claims == nil {
+		user := e.security.GetUser(ctx)
+		if user == "" {
 			return apiInterface.HandleUnauthorizedError("missing claims")
 		}
 
-		if ok := e.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
+		if ok := e.rbac.HasPermission(ctx, user, role.ReadAction, view.Project, role.DashboardScope); !ok {
 			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
 		}
 	}
 
-	if _, err := e.dashboardService.Get(apiInterface.NewPersesContext(ctx), apiInterface.Parameters{
+	if _, err := e.dashboardService.Get(apiInterface.NewPersesContext(ctx, e.security), apiInterface.Parameters{
 		Project: view.Project,
 		Name:    view.Dashboard,
 	}); err != nil {

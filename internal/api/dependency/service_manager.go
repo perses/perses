@@ -79,6 +79,7 @@ type ServiceManager interface {
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
+	GetSecurity() crypto.Security
 	GetUser() user.Service
 	GetVariable() variable.Service
 	GetView() view.Service
@@ -106,17 +107,18 @@ type service struct {
 	role               role.Service
 	roleBinding        rolebinding.Service
 	secret             secret.Service
+	security           crypto.Security
 	user               user.Service
 	variable           variable.Service
 	view               view.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
-	cryptoService, jwtService, err := crypto.New(conf.Security)
+	cryptoService, securityService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
 	}
-	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
+	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), securityService, conf)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +155,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		globalSecret:       globalSecret,
 		globalVariable:     globalVariableService,
 		health:             healthService,
-		jwt:                jwtService,
+		jwt:                securityService.GetJWT(),
 		migrate:            migrateService,
 		plugin:             pluginService,
 		project:            projectService,
@@ -162,6 +164,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		roleBinding:        roleBindingService,
 		schema:             schemaService,
 		secret:             secretService,
+		security:           securityService,
 		user:               userService,
 		variable:           variableService,
 		view:               viewService,
@@ -231,6 +234,10 @@ func (s *service) GetProject() project.Service {
 
 func (s *service) GetSchema() schema.Schema {
 	return s.schema
+}
+
+func (s *service) GetSecurity() crypto.Security {
+	return s.security
 }
 
 func (s *service) GetRBAC() rbac.RBAC {

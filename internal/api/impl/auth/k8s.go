@@ -14,7 +14,6 @@
 package auth
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -29,12 +28,8 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
-	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 type kubernetesUserInfo struct {
@@ -57,47 +52,28 @@ func (u *kubernetesUserInfo) GetProviderContext() v1.OAuthProvider {
 }
 
 type kubernetesEndpoint struct {
-	kubernetesAuthenticator *rbacv1.KubernetesAuthenticator
-	secureCookie            *securecookie.SecureCookie
-	jwt                     crypto.JWT
-	tokenManagement         tokenManagement
-	svc                     service
-	kubeconfig              *rest.Config
+	secureCookie    *securecookie.SecureCookie
+	security        crypto.K8sSecurity
+	tokenManagement tokenManagement
+	svc             service
 }
 
-func newKubernetesEndpoint(provider config.KubernetesProvider, jwt crypto.JWT, dao user.DAO, rbac rbacv1.RBAC) (route.Endpoint, error) {
+func newKubernetesEndpoint(security crypto.Security, dao user.DAO, rbac rbacv1.RBAC) (route.Endpoint, error) {
+	k8sSecurity, ok := security.(*crypto.K8sSecurity)
+	if !ok {
+		return nil, fmt.Errorf("invalid security config")
+	}
+
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
 	secureCookie := securecookie.New(key, key)
 
-	kubeconfig, err := crypto.InitKubeConfig(provider.Kubeconfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load kubeconfig: %w", err)
-	}
-
-	kubeClient, err := kubernetes.NewForConfig(kubeconfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to instantiate Kubernetes client: %w", err)
-	}
-
-	tokenClient := kubeClient.AuthenticationV1()
-	kubernetesAuthenticator, err := rbacv1.NewKubernetesAuthenticator(
-		tokenClient,
-		"",
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return &kubernetesEndpoint{
-		kubernetesAuthenticator: kubernetesAuthenticator,
-		secureCookie:            secureCookie,
-		jwt:                     jwt,
-		tokenManagement:         tokenManagement{jwt: jwt},
-		svc:                     service{dao: dao, rbac: rbac},
-		kubeconfig:              kubeconfig,
+		secureCookie:    secureCookie,
+		security:        *k8sSecurity,
+		tokenManagement: tokenManagement{jwt: k8sSecurity.GetJWT()},
+		svc:             service{dao: dao, rbac: rbac},
 	}, nil
 }
 
@@ -108,21 +84,14 @@ func (e *kubernetesEndpoint) CollectRoutes(g *route.Group) {
 
 // authn performs user synchronization with the k8s apiserver and generates access and refresh tokens
 func (e *kubernetesEndpoint) authn(ctx echo.Context) error {
-	req := ctx.Request()
-
-	req.Header.Set("Authorization", crypto.GetAuthnHeaderFromClient(ctx, e.kubeconfig))
-	res, ok, err := e.kubernetesAuthenticator.RequestAuthenticator.AuthenticateRequest(req)
+	k8sUser, err := e.security.GetK8sUser(ctx)
 	if err != nil {
-		e.logWithError(err)
 		return err
-	}
-	if !ok {
-		return errors.New("idk")
 	}
 
 	user, err := e.svc.syncUser(&kubernetesUserInfo{
 		externalUserInfoProfile: externalUserInfoProfile{
-			Name: res.User.GetName(),
+			Name: k8sUser.GetName(),
 		},
 	})
 	if err != nil {

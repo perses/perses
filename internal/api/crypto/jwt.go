@@ -78,28 +78,29 @@ type JWT interface {
 	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
+	GetAccessKey() string
 }
 
-type jwtImpl struct {
-	accessKey       []byte
+type JwtImpl struct {
+	AccessKey       []byte
 	refreshKey      []byte
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	cookieConfig    config.Cookie
-	kubernetes      bool
+	Kubernetes      bool
 }
 
-func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
+func (j *JwtImpl) SignedAccessToken(login string) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(j.accessTokenTTL), j.accessKey)
+	return signedToken(login, now, now.Add(j.accessTokenTTL), j.AccessKey)
 }
 
-func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
+func (j *JwtImpl) SignedRefreshToken(login string) (string, error) {
 	now := time.Now()
 	return signedToken(login, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
-func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
+func (j *JwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
 	tokenSplit := strings.Split(accessToken, ".")
 	headerPayloadCookie := &http.Cookie{
@@ -125,7 +126,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 	return headerPayloadCookie, signatureCookie
 }
 
-func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
+func (j *JwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    "",
@@ -143,7 +144,7 @@ func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
 	return headerPayloadCookie, signatureCookie
 }
 
-func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
+func (j *JwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	return &http.Cookie{
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
@@ -156,7 +157,7 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
+func (j *JwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	return &http.Cookie{
 		Name:     CookieKeyRefreshToken,
 		Value:    "",
@@ -166,7 +167,7 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
+func (j *JwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(_ *jwt.Token) (interface{}, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
@@ -176,11 +177,8 @@ func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 	return parsedToken.Claims.(*JWTCustomClaims), nil
 }
 
-func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
+func (j *JwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	authorizationHeader := "Authorization"
-	if j.kubernetes {
-		authorizationHeader = "Perses-Authorization"
-	}
 
 	jwtMiddlewareConfig := echojwt.Config{
 		Skipper: skipper,
@@ -204,8 +202,26 @@ func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			return new(JWTCustomClaims)
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
-		SigningKey:    j.accessKey,
+		SigningKey:    j.AccessKey,
 		TokenLookup:   fmt.Sprintf("header:%s:Bearer ", authorizationHeader),
 	}
 	return echojwt.WithConfig(jwtMiddlewareConfig)
+}
+
+// GetUser implements [Security]
+func (j JwtImpl) GetUser(ctx echo.Context) string {
+	claims := ExtractJWTClaims(ctx)
+	if claims == nil {
+		return ""
+	}
+	return claims.Subject
+}
+
+// GetJWT implements [Security]
+func (j JwtImpl) GetJWT() JWT {
+	return &j
+}
+
+func (j *JwtImpl) GetAccessKey() string {
+	return string(j.AccessKey)
 }

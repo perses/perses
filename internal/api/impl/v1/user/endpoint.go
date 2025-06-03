@@ -21,7 +21,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
@@ -33,15 +33,17 @@ import (
 type endpoint struct {
 	toolbox       toolbox.Toolbox[*v1.User, *user.Query]
 	rbac          rbac.RBAC
+	security      crypto.Security
 	readonly      bool
 	disableSignUp bool
 	caseSensitive bool
 }
 
-func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(service user.Service, rbacService rbac.RBAC, securityService crypto.Security, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, rbacService, v1.KindUser, caseSensitive),
+		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, rbacService, securityService, v1.KindUser, caseSensitive),
 		rbac:          rbacService,
+		security:      securityService,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
 		caseSensitive: caseSensitive,
@@ -88,13 +90,13 @@ func (e *endpoint) List(ctx echo.Context) error {
 
 func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	parameters := toolbox.ExtractParameters(ctx, e.caseSensitive)
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
+	user := e.security.GetUser(ctx)
+	if user == "" {
 		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
 	}
-	if claims.Subject != parameters.Name {
+	if user != parameters.Name {
 		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
-	permissions := e.rbac.GetPermissions(ctx, claims.Subject)
+	permissions := e.rbac.GetPermissions(ctx, user)
 	return ctx.JSON(http.StatusOK, permissions)
 }

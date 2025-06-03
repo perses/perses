@@ -61,10 +61,11 @@ type Toolbox[T api.Entity, K databaseModel.Query] interface {
 	List(ctx echo.Context, q K) error
 }
 
-func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], rbac rbac.RBAC, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
+func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], rbac rbac.RBAC, security crypto.Security, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
 	return &toolbox[T, K, V]{
 		service:       service,
 		rbac:          rbac,
+		security:      security,
 		kind:          kind,
 		caseSensitive: caseSensitive,
 	}
@@ -74,6 +75,7 @@ type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 	Toolbox[T, V]
 	service       apiInterface.Service[T, K, V]
 	rbac          rbac.RBAC
+	security      crypto.Security
 	kind          v1.Kind
 	caseSensitive bool
 }
@@ -82,13 +84,13 @@ type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 // Use the generic checkPermission for any other purpose
 func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiInterface.Parameters, scope *role.Scope) error {
 	projectName := parameters.Project
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
+	user := t.security.GetUser(ctx)
+	if user == "" {
 		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
 		return nil
 	}
 	if role.IsGlobalScope(*scope) {
-		if ok := t.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(ctx, user, role.ReadAction, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
 		}
 		return nil
@@ -100,7 +102,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 		// In this particular context, the user would like to get every resource to every project he has access to.
 		return nil
 	}
-	if ok := t.rbac.HasPermission(ctx, claims.Subject, role.ReadAction, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(ctx, user, role.ReadAction, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
 	}
 	return nil
@@ -108,8 +110,8 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 
 func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
 	projectName := parameters.Project
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
+	user := t.security.GetUser(ctx)
+	if user == "" {
 		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
 		return nil
 	}
@@ -118,7 +120,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		return err
 	}
 	if role.IsGlobalScope(*scope) {
-		if ok := t.rbac.HasPermission(ctx, claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(ctx, user, action, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
@@ -128,7 +130,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	if *scope == role.ProjectScope {
 		// Create is still a "Global" only permission
 		if action == role.CreateAction {
-			if ok := t.rbac.HasPermission(ctx, claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+			if ok := t.rbac.HasPermission(ctx, user, action, rbac.GlobalProject, *scope); !ok {
 				return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 			}
 			return nil
@@ -140,7 +142,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		// Retrieving project name from payload if project name not provided in the url
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
-	if ok := t.rbac.HasPermission(ctx, claims.Subject, action, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(ctx, user, action, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 	}
 	return nil
@@ -154,7 +156,7 @@ func (t *toolbox[T, K, V]) Create(ctx echo.Context, entity T) error {
 	if err := t.checkPermission(ctx, entity, parameters, role.CreateAction); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx), entity)
+	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx, t.security), entity)
 	if err != nil {
 		return err
 	}
@@ -169,7 +171,7 @@ func (t *toolbox[T, K, V]) Update(ctx echo.Context, entity T) error {
 	if err := t.checkPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx), entity, parameters)
+	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx, t.security), entity, parameters)
 	if err != nil {
 		return err
 	}
@@ -181,7 +183,7 @@ func (t *toolbox[T, K, V]) Delete(ctx echo.Context) error {
 	if err := t.checkPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
 	}
-	if err := t.service.Delete(apiInterface.NewPersesContext(ctx), parameters); err != nil {
+	if err := t.service.Delete(apiInterface.NewPersesContext(ctx, t.security), parameters); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -192,7 +194,7 @@ func (t *toolbox[T, K, V]) Get(ctx echo.Context) error {
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
-	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx), parameters)
+	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx, t.security), parameters)
 	if err != nil {
 		return err
 	}

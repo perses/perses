@@ -53,6 +53,7 @@ import (
     "fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/rbac"
@@ -66,9 +67,9 @@ type Endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service {{ $package }}.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) *Endpoint {
+func NewEndpoint(service {{ $package }}.Service, rbacService rbac.RBAC, securityService crypto.Security, readonly bool, caseSensitive bool) *Endpoint {
 	return &Endpoint{
-		toolbox: toolbox.New(service, rbacService, v1.Kind{{ $kind }}, caseSensitive),
+		toolbox: toolbox.New(service, rbacService, securityService, v1.Kind{{ $kind }}, caseSensitive),
 		readonly: readonly,
 	}
 }

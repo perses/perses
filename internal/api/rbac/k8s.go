@@ -15,44 +15,25 @@ package rbac
 
 import (
 	"context"
-	"errors"
 	"slices"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	k8suser "k8s.io/apiserver/pkg/authentication/user"
 
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apiserver/pkg/apis/apiserver"
-	"k8s.io/apiserver/pkg/authentication/authenticator"
-	"k8s.io/apiserver/pkg/authentication/authenticatorfactory"
 
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 
-	"k8s.io/apiserver/pkg/authorization/authorizerfactory"
-	"k8s.io/apiserver/pkg/server/dynamiccertificates"
-	"k8s.io/apiserver/pkg/server/options"
 	"k8s.io/client-go/kubernetes"
-	authenticationclient "k8s.io/client-go/kubernetes/typed/authentication/v1"
-	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	"k8s.io/client-go/rest"
 )
 
-type KubernetesAuthenticator struct {
-	DynamicClientCA      *dynamiccertificates.DynamicFileCAContent
-	RequestAuthenticator authenticator.Request
-}
-
-type k8sImpl struct {
+type K8sImpl struct {
 	userDAO          user.DAO
 	guestPermissions []*v1Role.Permission
-	authorizer       authorizer.Authorizer
-	authenticator    *KubernetesAuthenticator
+	Security         *crypto.K8sSecurity
 	kubeClient       *kubernetes.Clientset
-	kubeconfig       *rest.Config
 }
 
 type K8sAction string
@@ -87,53 +68,31 @@ var K8sScopesToCheck = [2]K8sScope{
 	K8sDatasourceScope,
 }
 
-func createK8sImpl(kcLocation string, userDAO user.DAO, guestPermissions []*v1Role.Permission) *k8sImpl {
-	kubeconfig, err := crypto.InitKubeConfig(kcLocation)
+func createK8sImpl(security crypto.Security, userDAO user.DAO, guestPermissions []*v1Role.Permission) *K8sImpl {
+	k8sSecurity, ok := security.(*crypto.K8sSecurity)
+	if !ok {
+		return nil
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(k8sSecurity.Kubeconfig)
 	if err != nil {
 		return nil
 	}
 
-	// Since the Authenticator will need to make a lot of requests to check all permissions, raise the
-	// default limits
-	kubeconfig.QPS = 500
-	kubeconfig.Burst = 1000
-
-	kubeClient, err := kubernetes.NewForConfig(kubeconfig)
-	if err != nil {
-		return nil
-	}
-
-	sarClient := kubeClient.AuthorizationV1()
-	authorizer, err := newAuthorizer(sarClient)
-	if err != nil {
-		return nil
-	}
-
-	tokenClient := kubeClient.AuthenticationV1()
-	kubernetesAuthenticator, err := NewKubernetesAuthenticator(
-		tokenClient,
-		"",
-	)
-	if err != nil {
-		return nil
-	}
-
-	return &k8sImpl{
+	return &K8sImpl{
 		userDAO:          userDAO,
 		guestPermissions: guestPermissions,
-		authorizer:       authorizer,
-		authenticator:    kubernetesAuthenticator,
 		kubeClient:       kubeClient,
-		kubeconfig:       kubeconfig,
+		Security:         k8sSecurity,
 	}
 }
 
-func (r *k8sImpl) IsEnabled() bool {
+func (r K8sImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *k8sImpl) GetUserProjects(ctx echo.Context, _ string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
-	user, err := r.getUser(ctx)
+func (r K8sImpl) GetUserProjects(ctx echo.Context, _ string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+	user, err := r.Security.GetK8sUser(ctx)
 	if err != nil {
 		return []string{}
 	}
@@ -144,7 +103,7 @@ func (r *k8sImpl) GetUserProjects(ctx echo.Context, _ string, requestAction v1Ro
 
 	for _, namespace := range namespaces {
 		attributes := authorizer.AttributesRecord{
-			User:            *user,
+			User:            user,
 			Verb:            string(action),
 			Namespace:       namespace,
 			APIGroup:        "perses.dev",
@@ -155,7 +114,7 @@ func (r *k8sImpl) GetUserProjects(ctx echo.Context, _ string, requestAction v1Ro
 			ResourceRequest: false,
 		}
 
-		authorized, _, _ := r.authorizer.Authorize(ctx.Request().Context(), attributes)
+		authorized, _, _ := r.Security.Authorizer.Authorize(ctx.Request().Context(), attributes)
 		if authorized == authorizer.DecisionAllow {
 			permittedNamespaces = append(permittedNamespaces, namespace)
 		}
@@ -164,8 +123,8 @@ func (r *k8sImpl) GetUserProjects(ctx echo.Context, _ string, requestAction v1Ro
 	return permittedNamespaces
 }
 
-func (r *k8sImpl) HasPermission(ctx echo.Context, _ string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
-	user, err := r.getUser(ctx)
+func (r K8sImpl) HasPermission(ctx echo.Context, _ string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+	user, err := r.Security.GetK8sUser(ctx)
 	if err != nil {
 		return false
 	}
@@ -181,7 +140,7 @@ func (r *k8sImpl) HasPermission(ctx echo.Context, _ string, requestAction v1Role
 	// Try checking the specific project for access
 	// If the namespace doesn't exist in k8s, the authorizer will return the "*" permissions
 	attributes := authorizer.AttributesRecord{
-		User:            *user,
+		User:            user,
 		Verb:            string(action),
 		Namespace:       requestProject,
 		APIGroup:        "perses.dev",
@@ -192,13 +151,13 @@ func (r *k8sImpl) HasPermission(ctx echo.Context, _ string, requestAction v1Role
 		ResourceRequest: false,
 	}
 
-	authorized, _, _ := r.authorizer.Authorize(ctx.Request().Context(), attributes)
+	authorized, _, _ := r.Security.Authorizer.Authorize(ctx.Request().Context(), attributes)
 
 	return authorized == authorizer.DecisionAllow
 }
 
-func (r *k8sImpl) GetPermissions(ctx echo.Context, _ string) map[string][]*v1Role.Permission {
-	user, err := r.getUser(ctx)
+func (r K8sImpl) GetPermissions(ctx echo.Context, _ string) map[string][]*v1Role.Permission {
+	user, err := r.Security.GetK8sUser(ctx)
 	if err != nil {
 		return nil
 	}
@@ -241,7 +200,7 @@ scope:
 		action:
 			for _, k8sAction := range actionsToCheck {
 				attributes := authorizer.AttributesRecord{
-					User:            *user,
+					User:            user,
 					Verb:            string(k8sAction),
 					Namespace:       k8sProject,
 					APIGroup:        "perses.dev",
@@ -252,7 +211,7 @@ scope:
 					ResourceRequest: false,
 				}
 
-				authorized, _, err := r.authorizer.Authorize(ctx.Request().Context(), attributes)
+				authorized, _, err := r.Security.Authorizer.Authorize(ctx.Request().Context(), attributes)
 				if err != nil {
 					// If the request errors, then assume the rest of the requests will also error and break
 					// out early
@@ -310,61 +269,11 @@ scope:
 	return userPermissions
 }
 
-func (r *k8sImpl) Refresh() error {
+func (r K8sImpl) Refresh() error {
 	return nil
 }
 
-// NewSarAuthorizer creates an authorizer compatible with the kubelet's needs
-func newAuthorizer(client authorizationclient.AuthorizationV1Interface) (authorizer.Authorizer, error) {
-	if client == nil {
-		return nil, errors.New("no client provided, cannot use webhook authorization")
-	}
-	authorizerConfig := authorizerfactory.DelegatingAuthorizerConfig{
-		SubjectAccessReviewClient: client,
-		AllowCacheTTL:             5 * time.Minute,
-		DenyCacheTTL:              30 * time.Second,
-		WebhookRetryBackoff:       options.DefaultAuthWebhookRetryBackoff(),
-	}
-	return authorizerConfig.New()
-}
-
-// NewKubernetesAuthenticator creates an authenticator compatible with the kubelets needs
-func NewKubernetesAuthenticator(client authenticationclient.AuthenticationV1Interface, clientCAFile string) (*KubernetesAuthenticator, error) {
-	if client == nil {
-		return nil, errors.New("tokenAccessReview client not provided, cannot use webhook authentication")
-	}
-
-	var (
-		p   *dynamiccertificates.DynamicFileCAContent
-		err error
-	)
-
-	authenticatorConfig := authenticatorfactory.DelegatingAuthenticatorConfig{
-		Anonymous: &apiserver.AnonymousAuthConfig{
-			Enabled: false, // always require authentication
-		},
-		CacheTTL:                2 * time.Minute,
-		TokenAccessReviewClient: client,
-		WebhookRetryBackoff:     options.DefaultAuthWebhookRetryBackoff(),
-	}
-
-	if len(clientCAFile) > 0 {
-
-		p, err = dynamiccertificates.NewDynamicCAContentFromFile("client-ca", clientCAFile)
-		if err != nil {
-			return nil, err
-		}
-		authenticatorConfig.ClientCertificateCAContentProvider = p
-	}
-
-	authenticator, _, err := authenticatorConfig.New()
-	if err != nil {
-		return nil, err
-	}
-	return &KubernetesAuthenticator{RequestAuthenticator: authenticator, DynamicClientCA: p}, nil
-}
-
-func (r *k8sImpl) getNamespaceList() []string {
+func (r K8sImpl) getNamespaceList() []string {
 	k8sNamespaces, err := r.kubeClient.CoreV1().Namespaces().
 		List(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -378,19 +287,6 @@ func (r *k8sImpl) getNamespaceList() []string {
 	}
 
 	return namespaces
-}
-
-func (r *k8sImpl) getUser(ctx echo.Context) (*k8suser.Info, error) {
-	ctx.Request().Header.Set("Authorization", crypto.GetAuthnHeaderFromClient(ctx, r.kubeconfig))
-
-	res, ok, err := r.authenticator.RequestAuthenticator.AuthenticateRequest(ctx.Request())
-	if !ok {
-		return nil, errors.New("unable to authenticate with token")
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &res.User, nil
 }
 
 func getK8sAction(action v1Role.Action) K8sAction {

@@ -15,6 +15,7 @@ package rbac
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -33,14 +34,14 @@ type RBAC interface {
 	Refresh() error
 }
 
-func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (RBAC, error) {
+func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, security crypto.Security, conf config.Config) (RBAC, error) {
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
 
 	if conf.Security.Authentication.Providers.KubernetesProvider.Enabled {
 		return createK8sImpl(
-			conf.Security.Authentication.Providers.KubernetesProvider.Kubeconfig,
+			security,
 			userDAO,
 			conf.Security.Authorization.GuestPermissions,
 		), nil

@@ -89,22 +89,22 @@ type endpoint struct {
 	providers       config.AuthProviders
 }
 
-func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+func New(dao user.DAO, security crypto.Security, rbac rbac.RBAC, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
 	ep := &endpoint{
-		jwt:             jwt,
-		tokenManagement: tokenManagement{jwt: jwt},
+		jwt:             security.GetJWT(),
+		tokenManagement: tokenManagement{jwt: security.GetJWT()},
 		isAuthEnable:    isAuthEnable,
 		providers:       providers,
 	}
 
 	// Register the native provider if enabled
 	if providers.EnableNative {
-		ep.endpoints = append(ep.endpoints, newNativeEndpoint(dao, jwt))
+		ep.endpoints = append(ep.endpoints, newNativeEndpoint(dao, security.GetJWT()))
 	}
 
 	// Register the k8s authentication if enabled
 	if providers.KubernetesProvider.Enabled {
-		kubernetesEp, err := newKubernetesEndpoint(providers.KubernetesProvider, jwt, dao, rbac)
+		kubernetesEp, err := newKubernetesEndpoint(security, dao, rbac)
 		if err != nil {
 			return nil, err
 		}
@@ -113,7 +113,7 @@ func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProv
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, rbac)
+		oidcEp, err := newOIDCEndpoint(provider, security.GetJWT(), dao, rbac)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +122,7 @@ func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProv
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, rbac)
+		oauthEp, err := newOAuthEndpoint(provider, security.GetJWT(), dao, rbac)
 		if err != nil {
 			return nil, err
 		}

@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
@@ -32,9 +33,9 @@ type endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service dashboard.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(service dashboard.Service, rbacService rbac.RBAC, securityService crypto.Security, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, rbacService, v1.KindDashboard, caseSensitive),
+		toolbox:  toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, rbacService, securityService, v1.KindDashboard, caseSensitive),
 		readonly: readonly,
 	}
 }

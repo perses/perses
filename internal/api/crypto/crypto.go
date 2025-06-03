@@ -34,7 +34,7 @@ type Crypto interface {
 	Decrypt(spec *modelV1.SecretSpec) error
 }
 
-func New(security config.Security) (Crypto, JWT, error) {
+func New(security config.Security) (Crypto, Security, error) {
 	key, err := hex.DecodeString(string(security.EncryptionKey))
 	if err != nil {
 		return nil, nil, err
@@ -48,14 +48,15 @@ func New(security config.Security) (Crypto, JWT, error) {
 			key:   key,
 			block: aesBlock,
 		},
-		&jwtImpl{
-			accessKey:       key,
+		GetAuthentication(security, JwtImpl{
+			AccessKey:       key,
 			refreshKey:      append(key, []byte("-refresh")...),
 			accessTokenTTL:  time.Duration(security.Authentication.AccessTokenTTL),
 			refreshTokenTTL: time.Duration(security.Authentication.RefreshTokenTTL),
 			cookieConfig:    security.Cookie,
-			kubernetes:      security.Authorization.Kubernetes,
-		}, nil
+			Kubernetes:      security.Authorization.Kubernetes,
+		}),
+		nil
 }
 
 type crypto struct {
