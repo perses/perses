@@ -28,7 +28,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^0.8.9",
+    "@module-federation/enhanced": "^0.14.3",
     "@perses-dev/components": "0.51.0-rc.0",
     "@perses-dev/core": "0.51.0-rc.0",
     "date-fns": "^4.1.0",
