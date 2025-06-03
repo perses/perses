@@ -20,14 +20,6 @@ import { useTimeRange } from './TimeRangeProvider';
 export type ProfileQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'ProfileQuery', PluginSpec>;
 export const PROFILE_QUERY_KEY = 'ProfileQuery';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
-  const { start, end } = timeRange;
-  return {
-    start: Math.ceil(getUnixTime(start)),
-    end: Math.ceil(getUnixTime(end)),
-  };
-}
-
 /**
  * Run a profile query using a ProfileQuery plugin and return the results
  * @param definitions: dashboard defintion for a profile query
