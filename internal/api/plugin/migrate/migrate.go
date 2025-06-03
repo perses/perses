@@ -130,7 +130,7 @@ func getPluginKind(migrateFile string) (plugin.Kind, error) {
 }
 
 func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
 		cue.ParsePath(defID),
@@ -293,7 +293,7 @@ func (m *mig) Load(pluginPath string, module v1.PluginModule) error {
 }
 
 func (m *mig) loadPanel(schemaPath string, panelInstance *build.Instance) {
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	panelSchema := ctx.BuildInstance(panelInstance)
 	kindValue := panelSchema.LookupPath(cue.ParsePath(grafanaType))
 	kind := kindValue.Kind()
