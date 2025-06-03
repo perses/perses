@@ -132,7 +132,6 @@ export function useTimeSeriesQueries(
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        ...queryOptions,
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         queryFn: async (): Promise<TimeSeriesData> => {
