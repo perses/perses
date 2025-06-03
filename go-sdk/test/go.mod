@@ -11,7 +11,7 @@ require (
 	github.com/perses/plugins/prometheus v0.6.0
 	github.com/perses/plugins/staticlistvariable v0.3.1
 	github.com/perses/plugins/table v0.6.0
-	github.com/perses/plugins/timeserieschart v0.6.0
+	github.com/perses/plugins/timeserieschart v0.8.0
 	github.com/stretchr/testify v1.10.0
 )
 
