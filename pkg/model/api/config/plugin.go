@@ -17,6 +17,9 @@ import (
 	"os"
 )
 
+// These constants are actually defined as variables to allow overriding them at build time using the -ldflags option.
+// It is useful for the Linux distribution that has different conventions for the location of the data files.
+// See https://github.com/perses/perses/issues/2947 for more context.
 var (
 	DefaultPluginPath                   = "plugins"
 	DefaultPluginPathInContainer        = "/etc/perses/plugins"
