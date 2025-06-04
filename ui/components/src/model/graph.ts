@@ -39,8 +39,6 @@ export type TimeChartLegendItems = LegendItem[];
 
 export type TimeSeriesOption = LineSeriesOption | BarSeriesOption;
 
-// [DEPRECATED] used for legacy LineChart 'category' axis.
-// May delete in future when embed users migrate to TimeChart.
 export type EChartsDataFormat = {
   timeSeries: LegacyTimeSeries[];
   xAxis: number[];
@@ -53,8 +51,7 @@ export type EChartsDataFormat = {
 // want to support focusing by other attributes (e.g. index, name) in the future,
 // and starting with an object will make adding them a non-breaking change.
 export type ChartInstanceFocusOpts = {
-  id?: string; // LineChart uses id
-  name?: string; // TimeChart uses name
+  name?: string; // e.g the TimeSeriesChart plugin uses name
 };
 
 export type ChartInstance = {
