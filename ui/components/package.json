@@ -42,6 +42,7 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
+    "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "mdi-material-ui": "^7.9.2",
@@ -49,8 +50,7 @@
     "react-colorful": "^5.6.1",
     "react-error-boundary": "^3.1.4",
     "react-hook-form": "^7.51.3",
-    "react-virtuoso": "^4.12.2",
-    "zod": "^3.21.4"
+    "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
     "@mui/material": "^6.1.10",
