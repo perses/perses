@@ -26,7 +26,7 @@ func TestPluginListCMD(t *testing.T) {
 			Title:           "use args",
 			Args:            []string{"whatever"},
 			IsErrorExpected: true,
-			ExpectedMessage: "no args are supported by the command 'list'",
+			ExpectedMessage: "no args are supported by the command 'plugin list'",
 		},
 		{
 			Title:           "list plugins",
