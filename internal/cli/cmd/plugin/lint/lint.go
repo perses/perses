@@ -67,7 +67,7 @@ func (o *option) Execute() error {
 	}
 	if plugin.IsSchemaRequired(npmPackageData.Perses) {
 		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
-			return errors.New("cue modules not found")
+			return errors.New("cue module not found")
 		}
 		// There is a possibility the schema path set in package.json differ from the one set in the configuration.
 		// In this case, we will use the one set in the configuration.
