@@ -30,7 +30,6 @@ export interface DatabaseFile {
   folder: string;
   extension: 'yaml' | 'json';
   case_sensitive: boolean;
-  hash_file_name: boolean;
 }
 
 export interface TLSConfig {

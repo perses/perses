@@ -16,7 +16,6 @@ package databasefile
 import (
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -30,12 +29,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
+	switch m := metadata.(type) {
+	case *modelV1.ProjectMetadata:
+		return filepath.Join(modelV1.PluralKindMap[kind], m.Project, m.Name), nil
+	case *modelV1.Metadata:
+		return filepath.Join(modelV1.PluralKindMap[kind], m.Name), nil
+	}
+	return "", fmt.Errorf("metadata %T not managed", metadata)
+}
+
 type DAO struct {
 	databaseModel.DAO
 	Folder        string
 	Extension     config.FileExtension
 	CaseSensitive bool
-	HashFileName  bool
 }
 
 func (d *DAO) Init() error {
@@ -56,7 +64,7 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 	// Also, it will avoid an issue with the permission when activated.
 	// See https://github.com/perses/perses/issues/1721 for more details.
 	entity.GetMetadata().Flatten(d.CaseSensitive)
-	key, generateIDErr := d.generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if generateIDErr != nil {
 		return generateIDErr
 	}
@@ -69,7 +77,7 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 }
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
 	entity.GetMetadata().Flatten(d.CaseSensitive)
-	key, generateIDErr := d.generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
+	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if generateIDErr != nil {
 		return generateIDErr
 	}
@@ -77,7 +85,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 }
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	metadata.Flatten(d.CaseSensitive)
-	key, generateIDErr := d.generateID(kind, metadata)
+	key, generateIDErr := generateID(kind, metadata)
 	if generateIDErr != nil {
 		return generateIDErr
 	}
@@ -227,7 +235,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	return nil
 }
 func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	key, generateIDErr := d.generateID(kind, metadata)
+	key, generateIDErr := generateID(kind, metadata)
 	if generateIDErr != nil {
 		return generateIDErr
 	}
@@ -328,23 +336,4 @@ func (d *DAO) visit(rootPath string, prefix string) ([]string, error) {
 	})
 
 	return result, err
-}
-
-func (d *DAO) generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
-	processedName := metadata.GetName()
-	if d.HashFileName {
-		h := fnv.New32a()
-		_, err := h.Write([]byte(processedName))
-		if err == nil {
-			processedName = fmt.Sprintf("%d", h.Sum32())
-		}
-	}
-
-	switch m := metadata.(type) {
-	case *modelV1.ProjectMetadata:
-		return filepath.Join(modelV1.PluralKindMap[kind], m.Project, processedName), nil
-	case *modelV1.Metadata:
-		return filepath.Join(modelV1.PluralKindMap[kind], processedName), nil
-	}
-	return "", fmt.Errorf("metadata %T not managed", metadata)
 }

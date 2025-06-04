@@ -198,5 +198,9 @@ func (s *Security) Verify() error {
 		(!s.Authorization.Kubernetes && s.Authentication.Providers.KubernetesProvider.Enabled) {
 		return errors.New("k8s authz must be enabled alongside k8s authn")
 	}
+
+	if s.Authorization.Kubernetes && !s.Authentication.DisableSignUp {
+		return errors.New("cannot enable k8s auth with signups enabled")
+	}
 	return nil
 }

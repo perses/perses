@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Code generated. DO NOT EDIT
-
 package globalrole
 
 import (
@@ -20,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
@@ -29,19 +28,31 @@ import (
 )
 
 type endpoint struct {
-	toolbox  toolbox.Toolbox[*v1.GlobalRole, *globalrole.Query]
-	readonly bool
+	toolbox    toolbox.Toolbox[*v1.GlobalRole, *globalrole.Query]
+	readonly   bool
+	localUsers bool
 }
 
 func NewEndpoint(service globalrole.Service, rbacService rbac.RBAC, securityService crypto.Security, readonly bool, caseSensitive bool) route.Endpoint {
+	localUsers := true
+	if _, ok := rbacService.(rbac.K8sImpl); ok {
+		localUsers = false
+	}
+
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.GlobalRole, *v1.GlobalRole, *globalrole.Query](service, rbacService, securityService, v1.KindGlobalRole, caseSensitive),
-		readonly: readonly,
+		toolbox:    toolbox.New[*v1.GlobalRole, *v1.GlobalRole, *globalrole.Query](service, rbacService, securityService, v1.KindGlobalRole, caseSensitive),
+		readonly:   readonly,
+		localUsers: localUsers,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathGlobalRole))
+
+	if e.localUsers {
+		group.ANY("", e.disabled, true)
+		return
+	}
 
 	if !e.readonly {
 		group.POST("", e.Create, false)
@@ -73,4 +84,8 @@ func (e *endpoint) Get(ctx echo.Context) error {
 func (e *endpoint) List(ctx echo.Context) error {
 	q := &globalrole.Query{}
 	return e.toolbox.List(ctx, q)
+}
+
+func (e *endpoint) disabled(ctx echo.Context) error {
+	return apiinterface.HandleForbiddenError("endpoint is disabled when perses doesn't manage users")
 }

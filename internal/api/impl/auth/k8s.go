@@ -27,28 +27,8 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
-
-type kubernetesUserInfo struct {
-	externalUserInfoProfile
-}
-
-// GetLogin implements [externalUserInfo]
-func (u *kubernetesUserInfo) GetLogin() string {
-	return u.Name
-}
-
-// GetProfile implements [externalUserInfo]
-func (u *kubernetesUserInfo) GetProfile() externalUserInfoProfile {
-	return u.externalUserInfoProfile
-}
-
-// GetProviderContext implements [externalUserInfo]
-func (u *kubernetesUserInfo) GetProviderContext() v1.OAuthProvider {
-	return v1.OAuthProvider{}
-}
 
 type kubernetesEndpoint struct {
 	security        crypto.K8sSecurity
@@ -81,20 +61,11 @@ func (e *kubernetesEndpoint) loginAndSync(ctx echo.Context) error {
 		return err
 	}
 
-	user, err := e.svc.syncUser(&kubernetesUserInfo{
-		externalUserInfoProfile: externalUserInfoProfile{
-			Name: k8sUser.GetName(),
-		},
-	})
-	if err != nil {
-		return err
-	}
-
 	setCookie := func(cookie *http.Cookie) {
 		http.SetCookie(ctx.Response(), cookie)
 	}
 
-	username := user.GetMetadata().GetName()
+	username := k8sUser.GetName()
 
 	// Set cookie for the frontend to use to determine username that shows up. Cookie and JWT
 	// have no purpose for the k8s mode other than a consistent way to tell the frontend which user

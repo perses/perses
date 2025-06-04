@@ -40,6 +40,7 @@ import { useCreateVariableMutation } from '../../model/variable-client';
 import {
   useIsAuthEnabled,
   useIsEphemeralDashboardEnabled,
+  useIsK8sAuth,
   useIsProjectDatasourceEnabled,
   useIsProjectVariableEnabled,
   useIsReadonly,
@@ -417,6 +418,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const { projectName, initialTab } = props;
   const { tab } = useParams();
   const isAuthEnabled = useIsAuthEnabled();
+  const isK8sAuth = useIsK8sAuth();
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const isProjectVariableEnabled = useIsProjectVariableEnabled();
 
@@ -503,7 +505,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
             value={secretsTabIndex}
             disabled={!hasSecretReadPermission}
           />
-          {isAuthEnabled && (
+          {isAuthEnabled && !isK8sAuth && (
             <MenuTab
               label="Roles"
               icon={<ShieldIcon />}
@@ -513,7 +515,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
               disabled={!hasRoleReadPermission}
             />
           )}
-          {isAuthEnabled && (
+          {isAuthEnabled && !isK8sAuth && (
             <MenuTab
               label="Role Bindings"
               icon={<ShieldAccountIcon />}
@@ -548,7 +550,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
       <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
-      {isAuthEnabled && (
+      {isAuthEnabled && !isK8sAuth && (
         <>
           <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <ProjectRoles projectName={projectName} id="project-role-list" />

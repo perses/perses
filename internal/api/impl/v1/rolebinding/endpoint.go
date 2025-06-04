@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Code generated. DO NOT EDIT
-
 package rolebinding
 
 import (
@@ -20,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
@@ -29,19 +28,32 @@ import (
 )
 
 type endpoint struct {
-	toolbox  toolbox.Toolbox[*v1.RoleBinding, *rolebinding.Query]
-	readonly bool
+	toolbox    toolbox.Toolbox[*v1.RoleBinding, *rolebinding.Query]
+	readonly   bool
+	localUsers bool
 }
 
 func NewEndpoint(service rolebinding.Service, rbacService rbac.RBAC, securityService crypto.Security, readonly bool, caseSensitive bool) route.Endpoint {
+	localUsers := true
+	if _, ok := rbacService.(rbac.K8sImpl); ok {
+		localUsers = false
+	}
+
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.RoleBinding, *v1.RoleBinding, *rolebinding.Query](service, rbacService, securityService, v1.KindRoleBinding, caseSensitive),
-		readonly: readonly,
+		toolbox:    toolbox.New[*v1.RoleBinding, *v1.RoleBinding, *rolebinding.Query](service, rbacService, securityService, v1.KindRoleBinding, caseSensitive),
+		readonly:   readonly,
+		localUsers: localUsers,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathRoleBinding))
+
+	if e.localUsers {
+		group.ANY("", e.disabled, true)
+		return
+	}
+
 	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", utils.PathProject, utils.ParamProject, utils.PathRoleBinding))
 	if !e.readonly {
 		group.POST("", e.Create, false)
@@ -75,4 +87,8 @@ func (e *endpoint) Get(ctx echo.Context) error {
 func (e *endpoint) List(ctx echo.Context) error {
 	q := &rolebinding.Query{}
 	return e.toolbox.List(ctx, q)
+}
+
+func (e *endpoint) disabled(ctx echo.Context) error {
+	return apiinterface.HandleForbiddenError("endpoint is disabled when perses doesn't manage users")
 }

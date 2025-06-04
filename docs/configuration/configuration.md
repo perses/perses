@@ -433,9 +433,6 @@ extension: <string> | default = yaml # Optional
 # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
 case_sensitive: <string> | default = false # Optional
 
-# Whether the database hashes to sanitize file names from characters which aren't safe for
-# file names
-hash_file_name: <string> | default = false # Optional
 ```
 
 #### Database SQL config

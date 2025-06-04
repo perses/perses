@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Code generated. DO NOT EDIT
-
 package user
 
 import (
@@ -38,9 +36,15 @@ type endpoint struct {
 	readonly      bool
 	disableSignUp bool
 	caseSensitive bool
+	localUsers    bool
 }
 
 func NewEndpoint(service user.Service, rbacService rbac.RBAC, securityService crypto.Security, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
+	localUsers := true
+	if _, ok := rbacService.(rbac.K8sImpl); ok {
+		localUsers = false
+	}
+
 	return &endpoint{
 		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, rbacService, securityService, v1.KindUser, caseSensitive),
 		rbac:          rbacService,
@@ -48,11 +52,19 @@ func NewEndpoint(service user.Service, rbacService rbac.RBAC, securityService cr
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
 		caseSensitive: caseSensitive,
+		localUsers:    localUsers,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathUser))
+
+	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
+
+	if e.localUsers {
+		group.ANY("", e.disabled, true)
+		return
+	}
 
 	if !e.readonly {
 		if !e.disableSignUp {
@@ -63,7 +75,6 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	}
 	group.GET("", e.List, false)
 	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
-	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
 }
 
 func (e *endpoint) Create(ctx echo.Context) error {
@@ -101,4 +112,8 @@ func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	}
 	permissions := e.rbac.GetPermissions(ctx, user)
 	return ctx.JSON(http.StatusOK, permissions)
+}
+
+func (e *endpoint) disabled(ctx echo.Context) error {
+	return apiinterface.HandleForbiddenError("endpoint is disabled when perses doesn't manage users")
 }
