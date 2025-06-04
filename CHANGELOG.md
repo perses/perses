@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.51.0-rc.1 / 2025-06-04
+
+- [FEATURE] add percli plugin generate command and plugin documentation (#2918)
+- [ENHANCEMENT] Make plugin path default variable. (#2953)
+- [ENHANCEMENT] pass rest of options from queryOptions (#2948)
+- [ENHANCEMENT] data source settings editor: use proxy mode by default (#2915)
+- [ENHANCEMENT] Invalid content type when it is not JSON (#2920)
+- [BUGFIX] ListVariable Infinite Re-render (#2939)
+- [BUGFIX] Fix missing Echart extensions & cleanup GaugeChart (#2925)
+- [DOC] Update doc about how to load a plugin in dev environment (#2958)
+
 ## 0.51.0-rc.0 / 2025-05-12
 
 We are finally reaching the release candidate for the 0.51.0 version.
