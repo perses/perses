@@ -73,7 +73,7 @@ type JWT interface {
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
-	GetAccessKey() string
+	GetAccessKey() []byte
 }
 
 type JwtImpl struct {
@@ -186,6 +186,6 @@ func (j JwtImpl) GetJWT() JWT {
 	return &j
 }
 
-func (j *JwtImpl) GetAccessKey() string {
-	return string(j.accessKey)
+func (j *JwtImpl) GetAccessKey() []byte {
+	return j.accessKey
 }
