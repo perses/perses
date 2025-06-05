@@ -72,7 +72,7 @@ For fun, you can optionally flip the switch in the top right corner to enable da
 
 # Building your own container image
 
-If you want to build your own container image, you can use [`Dockerfile.dev`](../../Dockerfile.dev).
+If you want to build your own container image, you can use [`Dockerfile.dev`](https://github.com/perses/perses/blob/main/Dockerfile.dev).
 This container will include the Perses binary, percli, Perses UI and it will download the core [plugins](https://github.com/perses/plugins) at build time.
 
 To build your own container image, and run it you can use the following commands:
