@@ -27,6 +27,7 @@ readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
 authentication:
+  disable_sign_up: true
   providers:
     enable_native: true
 authorization:
@@ -71,6 +72,7 @@ readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
 authentication:
+  disable_sign_up: true
   providers:
     enable_native: true
     kubernetes:
@@ -116,6 +118,7 @@ readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
 authentication:
+  disable_sign_up: true
   providers:
     kubernetes:
       enabled: true
