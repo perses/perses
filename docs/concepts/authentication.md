@@ -356,7 +356,7 @@ sequenceDiagram
     deactivate ap
     hu->>br: Click on Projects
     activate br
-    br->>rp: GET /api/v1/projects
+    br->>rp: GET /api/v1/projects <br> Authorization: token
     activate rp
     rp->>k8s: TokenReview token: Authorization Header
     activate k8s
@@ -414,21 +414,23 @@ sequenceDiagram
 sequenceDiagram
     actor hu as John
     participant br as Perses Frontend
+    participant ap as Authorization Proxy
     participant rp as Perses Backend
     participant k8s as Kubernetes
-    participant ap as External Authorization Provider
 
-    hu->>ap: Auhorization Request
-    activate ap
-    ap->>hu: 200 token
-    deactivate ap
     hu->>br: Navigate to /
     activate br
-    br->>rp: POST /api/auth/refresh
+    br->>ap: POST /api/auth/refresh
+    activate ap
+    ap->>rp: POST /api/auth/refresh <br> Authorization: token
+    deactivate ap
     activate rp
     rp->>br: 307 Redirect /api/auth/providers/kubernetes/login
     deactivate rp
-    br->>rp: POST /api/auth/providers/kubernetes/login
+    br->>ap: POST /api/auth/providers/kubernetes/login
+    activate ap
+    ap->>rp: POST /api/auth/providers/kubernetes/login <br> Authorization: token
+    deactivate ap
     activate rp
     rp->>k8s: TokenReview token: Authorization Header
     activate k8s
@@ -441,7 +443,10 @@ sequenceDiagram
     deactivate br
     hu->>br: Click on Projects
     activate br
-    br->>rp: GET /api/v1/projects
+    br->>ap: GET /api/v1/projects
+    activate ap
+    ap->>rp: GET /api/v1/projects <br> Authorization: token
+    deactivate ap
     activate rp
     rp->>k8s: TokenReview token: Authorization Header
     activate k8s
@@ -459,7 +464,7 @@ sequenceDiagram
     deactivate br
 ```
 
-### => Authorize percli to create a dashboard. (`device_code`)
+### => Authorize percli to list dashboards. (`device_code`)
 
 TODO: Finish implementing this flow and update sequence diagram when finished
 
@@ -477,27 +482,18 @@ sequenceDiagram
     ap->>hu: 200 token
     deactivate ap
     hu->>k: kubectl config set-credentials ...
-    hu->>pc: EXEC: percli login perses.dev/demo --provider k8s
+    hu->>pc: EXEC: percli login perses.dev/demo --kubeconfig
     activate pc
     pc->>k: GET kubeconfig token
     activate k
     k->>pc: token
     deactivate k
-    pc->>rp: GET /api/auth/providers/k8s/token
-    activate rp
-    rp->>k8s: TokenReview token: Authorization Header
-    activate k8s
-    k8s->>k8s: Verify token
-    k8s->>rp: 200 authenticated: true
-    deactivate k8s
-    rp->>pc: 200 ok
-    deactivate rp
     pc->>hu: login ok
     deactivate pc
 
-    hu->>pc: EXEC: percli get projects
+    hu->>pc: EXEC: percli get dashboards
     activate pc
-    pc->>rp: GET /api/v1/projects
+    pc->>rp: GET /api/v1/dashboards
     activate rp
     rp->>k8s: TokenReview token: Authorization Header
     activate k8s
@@ -509,9 +505,9 @@ sequenceDiagram
     k8s->>k8s: Verify Access
     k8s->>rp: 200 allowed: true
     deactivate k8s
-    rp->>pc: 200: Projects list
+    rp->>pc: 200: Dashboards list
     deactivate rp
-    pc->>hu: PRINT: Projects list
+    pc->>hu: PRINT: Dashboards list
     deactivate pc
 
 ```
