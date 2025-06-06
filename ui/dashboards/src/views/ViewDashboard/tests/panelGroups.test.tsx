@@ -28,8 +28,6 @@ describe('Panel Groups', () => {
               initialState={{
                 dashboardResource: getTestDashboard(),
                 isEditMode: true,
-                timeZone: 'local',
-                setTimeZone: () => undefined,
               }}
             >
               <DashboardApp
