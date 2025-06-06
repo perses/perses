@@ -25,6 +25,7 @@ coverage.txt
 
 /internal/api/e2e/api/test/
 /internal/api/shared/database/file/test
+/internal/cli/cmd/plugin/generate/test/*
 /pkg/client/api/v1/test/
 
 EXTRACTED_CHANGELOG.md
@@ -44,3 +45,5 @@ dev/extra/tempo-data
 /plugins-archive
 
 /prometheus
+
+!.gitkeep

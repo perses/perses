@@ -120,7 +120,7 @@ func TestNewFromSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+			ctx := cuecontext.New()
 			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)
@@ -160,7 +160,7 @@ spec:
 	sch := plugin.StrictLoad().Schema()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+			ctx := cuecontext.New()
 			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)

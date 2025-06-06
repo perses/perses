@@ -749,6 +749,8 @@ time_range: <TimeRange config> # Optional
 options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] # Optional
 # Allow you to disable the custom time range (absolute time range)
 disable_custom:  <bool> | default = false # Optional
+# Allow you to disable the zoom actions (extend or half current time range)
+disable_zoom:  <bool> | default = false # Optional
 ```
 
 #### Dashboard Selector config
@@ -803,7 +805,6 @@ url: <string> # Optional
 # The absolute path to the plugin in development.
 absolute_path: <string>
 ```
-
 
 ### Dashboard config
 

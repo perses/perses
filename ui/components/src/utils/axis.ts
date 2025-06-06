@@ -31,14 +31,3 @@ export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOpt
   };
   return [merge(AXIS_DEFAULT, axis)];
 }
-
-/**
- * Calculate date range, used as a fallback when xAxis time range not passed as prop
- */
-export function getDateRange(data: number[]): number {
-  const defaultRange = 3600000; // hour in ms
-  if (data.length === 0) return defaultRange;
-  const lastDatum = data[data.length - 1];
-  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
-  return lastDatum - data[0];
-}

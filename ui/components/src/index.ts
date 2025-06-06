@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './AlignSelector';
-export * from './BarChart';
 export * from './ColorPicker';
 export * from './ContentWithLegend';
 export * from './controls';
@@ -25,21 +24,17 @@ export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './FontSizeSelector';
 export * from './FormEditor';
-export * from './GaugeChart';
 export * from './InfoTooltip';
 export * from './JSONEditor';
 export * from './Legend';
-export * from './LineChart';
 export * from './LinksEditor';
 export * from './ModeSelector';
 export * from './OptionsEditorLayout';
 export * from './Overlay';
 export * from './SettingsAutocomplete';
 export * from './SortSelector';
-export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
-export * from './TimeChart';
 export * from './TimeRangeSelector';
 export * from './TimeZoneSelector';
 export * from './TimeSeriesTooltip';
@@ -53,6 +48,4 @@ export * from './test-utils';
 export * from './theme';
 export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
-export * from './PieChart';
-export * from './StatusHistoryChart';
 export * from './ValueMappingEditor';

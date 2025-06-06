@@ -30,7 +30,7 @@ export interface PanelContentProps extends Omit<PanelProps<UnknownSpec>, 'queryR
  */
 export function PanelContent(props: PanelContentProps): ReactElement {
   const { panelPluginKind, definition, queryResults, spec, contentDimensions } = props;
-  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { throwOnError: true });
+  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { useErrorBoundary: true });
 
   // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {

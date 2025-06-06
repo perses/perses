@@ -136,7 +136,7 @@ func readConfig(filePath string) (*Config, error) {
 		return nil, err
 	}
 
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
 		return nil, err
 	}

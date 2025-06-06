@@ -11,23 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeSeriesData, TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
 import {
-  useQuery,
-  useQueries,
-  useQueryClient,
   Query,
   QueryCache,
   QueryKey,
   QueryObserverOptions,
+  useQueries,
+  useQuery,
+  useQueryClient,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
-import { useAllVariableValues } from './variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
@@ -132,6 +132,7 @@ export function useTimeSeriesQueries(
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
+        ...(queryOptions as QueryObserverOptions<TimeSeriesData>),
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         queryFn: async (): Promise<TimeSeriesData> => {

@@ -124,7 +124,7 @@ func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 			continue
 		}
 		if !variableMigrationIsEmpty {
-			spec.ListSpec.Plugin = *plugin
+			spec.Plugin = *plugin
 			break
 		}
 	}

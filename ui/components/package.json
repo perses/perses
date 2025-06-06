@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.51.0-beta.0",
+  "version": "0.51.0-rc.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -14,11 +14,6 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
-  "sideEffects": [
-    "./dist/GaugeChart/GaugeChart.js",
-    "./dist/LineChart/LineChart.js",
-    "./dist/StatChart/StatChart.js"
-  ],
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -38,12 +33,13 @@
     "@codemirror/lang-json": "^6.0.1",
     "@fontsource/lato": "^4.5.10",
     "@mui/x-date-pickers": "^7.23.1",
-    "@perses-dev/core": "0.51.0-beta.0",
+    "@perses-dev/core": "0.51.0-rc.0",
     "@tanstack/react-table": "^8.20.5",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
+    "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "mdi-material-ui": "^7.9.2",
@@ -51,8 +47,7 @@
     "react-colorful": "^5.6.1",
     "react-error-boundary": "^3.1.4",
     "react-hook-form": "^7.51.3",
-    "react-virtuoso": "^4.12.2",
-    "zod": "^3.21.4"
+    "react-virtuoso": "^4.12.2"
   },
   "peerDependencies": {
     "@mui/material": "^6.1.10",

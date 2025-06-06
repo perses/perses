@@ -19,4 +19,6 @@ export const TOOLTIP_TEXT = {
   refresh: 'Refresh',
   refreshInterval: 'Auto refresh interval',
   timezone: 'Timezone',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
 };

@@ -17,7 +17,14 @@ import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
-import { ScatterChart as EChartsScatterChart, CustomChart as EChartsCustomChart } from 'echarts/charts';
+import {
+  LineChart as EChartsLineChart,
+  GaugeChart as EChartsGaugeChart,
+  PieChart as EChartsPieChart,
+  ScatterChart as EChartsScatterChart,
+  CustomChart as EChartsCustomChart,
+  HeatmapChart as EChartsHeatmapChart,
+} from 'echarts/charts';
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -25,22 +32,36 @@ import {
   GridComponent,
   TitleComponent,
   TooltipComponent,
+  VisualMapComponent,
+  ToolboxComponent,
+  MarkPointComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsTheme } from '../model';
 
-// Loading the ECharts extensions should happen in the respective plugin (in this case, the scatterplot + custom plugin).
+// Loading the ECharts extensions should happen in the respective plugins.
 // This is a workaround for https://github.com/perses/plugins/issues/83.
 use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
+  EChartsLineChart,
+  EChartsGaugeChart,
+  EChartsPieChart,
   EChartsScatterChart,
   EChartsCustomChart,
+  EChartsHeatmapChart,
   GridComponent,
   TitleComponent,
+  ToolboxComponent,
   TooltipComponent,
   CanvasRenderer,
+  VisualMapComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  MarkPointComponent,
 ]);
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events

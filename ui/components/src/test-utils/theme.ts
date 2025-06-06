@@ -41,6 +41,7 @@ export const testChartsTheme: PersesChartsTheme = generateChartsTheme(createMuiT
 export const mockChartsContext: SharedChartsState = {
   chartsTheme: testChartsTheme,
   enablePinning: false,
+  enableSyncGrouping: true,
   lastTooltipPinnedCoords: null,
   setLastTooltipPinnedCoords: () => null,
 };

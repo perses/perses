@@ -18,9 +18,6 @@ import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } f
 export interface ZoomEventData {
   start: number;
   end: number;
-  // TODO: remove startIndex and endIndex once LineChart is deprecated
-  startIndex?: number;
-  endIndex?: number;
 }
 
 /**

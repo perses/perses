@@ -59,7 +59,7 @@ func (o *option) Complete(args []string) error {
 
 	// Complete the output only if it has been set by the user
 	// NB: In the case of the `get` command, the default output format is/should be a table, not json
-	// or yaml, hence why we need to skip OutputOption.Complete() if the output flag is not set.
+	// or YAML, hence why we need to skip OutputOption.Complete() if the output flag is not set.
 	if len(o.Output) > 0 {
 		if outputErr := o.OutputOption.Complete(); outputErr != nil {
 			return outputErr
@@ -100,8 +100,7 @@ func (o *option) Execute() error {
 		return output.Handle(o.writer, o.Output, resourceList)
 	}
 	data := o.resourceService.BuildMatrix(resourceList)
-	output.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
-	return nil
+	return output.HandlerTable(o.writer, o.resourceService.GetColumHeader(), data)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
