@@ -40,8 +40,9 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
 
   const saveTimeRangeText = `Save current time range as new default ${currentTimeRangeText}`;
 
-  const saveVariablesText = `Save current variable values as new default (${modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
-    })`;
+  const saveVariablesText = `Save current variable values as new default (${
+    modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
+  })`;
 
   const saveTimeZoneText = `Save time zone as "${timeZone}" time`;
 
