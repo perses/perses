@@ -61,6 +61,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+  const initialTimeZone = spec.timeZone ?? 'local';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
@@ -111,6 +112,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
         <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
+          initialTimeZone={initialTimeZone}
         >
           <VariableProviderWithQueryParams
             initialVariableDefinitions={spec.variables}

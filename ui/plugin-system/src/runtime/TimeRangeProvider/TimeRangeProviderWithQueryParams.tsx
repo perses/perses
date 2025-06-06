@@ -13,29 +13,34 @@
 
 import { DurationString, TimeRangeValue } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
+import { TimeZoneProvider } from '@perses-dev/components';
 import { TimeRangeProvider } from './TimeRangeProvider';
-import { useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
+import { useSetInitialTimeZone, useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
 
 export interface TimeRangeFromQueryProps {
   initialTimeRange: TimeRangeValue;
   initialRefreshInterval?: DurationString;
   children?: React.ReactNode;
+  initialTimeZone?: string;
 }
 
 export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps): ReactElement {
-  const { initialTimeRange, initialRefreshInterval, children } = props;
+  const { initialTimeRange, initialRefreshInterval, children, initialTimeZone = 'local' } = props;
 
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);
 
+  const { timeZone, setTimeZone } = useSetInitialTimeZone(initialTimeZone);
   return (
-    <TimeRangeProvider
-      timeRange={timeRange}
-      refreshInterval={refreshInterval}
-      setTimeRange={setTimeRange}
-      setRefreshInterval={setRefreshInterval}
-    >
-      {children}
-    </TimeRangeProvider>
+    <TimeZoneProvider timeZone={timeZone} setTimeZone={setTimeZone}>
+      <TimeRangeProvider
+        timeRange={timeRange}
+        refreshInterval={refreshInterval}
+        setTimeRange={setTimeRange}
+        setRefreshInterval={setRefreshInterval}
+      >
+        {children}
+      </TimeRangeProvider>
+    </TimeZoneProvider>
   );
 }

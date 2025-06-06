@@ -14,32 +14,40 @@
 import React, { createContext, ReactElement, useContext } from 'react';
 import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
-export const TimeZoneContext = createContext<string | undefined>(undefined);
+type TimeZoneContextType = {
+  timeZone: string;
+  setTimeZone: (timeZone: string) => void;
+};
+
+export const TimeZoneContext = createContext<TimeZoneContextType | undefined>(undefined);
 
 export interface TimeZoneProviderProps {
-  timeZone?: string;
-  children?: React.ReactNode;
+  timeZone: string;
+  setTimeZone: (timeZone: string) => void;
+  children: React.ReactNode;
 }
 
 export function TimeZoneProvider(props: TimeZoneProviderProps): ReactElement {
-  const { children, timeZone } = props;
-  return <TimeZoneContext.Provider value={timeZone}>{children}</TimeZoneContext.Provider>;
+  const { timeZone, setTimeZone } = props;
+  return <TimeZoneContext.Provider value={{ timeZone, setTimeZone }}>{props.children}</TimeZoneContext.Provider>;
 }
 
 export function useTimeZone(): {
   timeZone: string;
+  setTimeZone: (timeZone: string) => void;
   formatWithUserTimeZone: (date: Date, formatString: string) => string;
   dateFormatOptionsWithUserTimeZone: (dateFormatOptions: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions;
 } {
-  const timeZone = useContext(TimeZoneContext);
+  const timeZoneContext = useContext(TimeZoneContext);
+
   return {
-    // fallback to "local" timezone if TimeZoneProvider is not present in the React tree
-    timeZone: timeZone ?? 'local',
+    timeZone: timeZoneContext?.timeZone ?? 'local',
+    setTimeZone: (timeZone: string) => timeZoneContext?.setTimeZone(timeZone),
     formatWithUserTimeZone(date: Date, formatString: string): string {
-      return formatWithTimeZone(date, formatString, timeZone);
+      return formatWithTimeZone(date, formatString, timeZoneContext?.timeZone);
     },
     dateFormatOptionsWithUserTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
-      return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZone);
+      return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZoneContext?.timeZone);
     },
   };
 }
