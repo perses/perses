@@ -13,9 +13,9 @@
 
 import { DurationString, TimeRangeValue } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
-import { DashboardTimeZoneProvider } from '@perses-dev/components';
+import { TimeZoneProvider } from '@perses-dev/components';
 import { TimeRangeProvider } from './TimeRangeProvider';
-import { useSetInitialDashboardTimeZone, useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
+import { useSetInitialTimeZone, useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
 
 export interface TimeRangeFromQueryProps {
   initialTimeRange: TimeRangeValue;
@@ -30,9 +30,9 @@ export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps)
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);
 
-  const { timeZone, setTimeZone } = useSetInitialDashboardTimeZone(initialTimeZone);
+  const { timeZone, setTimeZone } = useSetInitialTimeZone(initialTimeZone);
   return (
-    <DashboardTimeZoneProvider timeZone={timeZone} setTimeZone={setTimeZone}>
+    <TimeZoneProvider timeZone={timeZone} setTimeZone={setTimeZone}>
       <TimeRangeProvider
         timeRange={timeRange}
         refreshInterval={refreshInterval}
@@ -41,6 +41,6 @@ export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps)
       >
         {children}
       </TimeRangeProvider>
-    </DashboardTimeZoneProvider>
+    </TimeZoneProvider>
   );
 }

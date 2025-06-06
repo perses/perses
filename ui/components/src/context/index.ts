@@ -13,4 +13,4 @@
 
 export * from './ChartsProvider';
 export * from './SnackbarProvider';
-export * from './DashboardTimeZoneProvider';
+export * from './TimeZoneProvider';

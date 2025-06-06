@@ -16,7 +16,7 @@ import {
   ErrorBoundary,
   ErrorAlert,
   TimeZoneSelector,
-  useDashboardTimeZone,
+  useTimeZone,
   getTimeZoneOptions,
   TimeZoneOption,
 } from '@perses-dev/components';
@@ -63,7 +63,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
 
-  const { timeZone, setTimeZone } = useDashboardTimeZone();
+  const { timeZone, setTimeZone } = useTimeZone();
   const timeZoneOptions = getTimeZoneOptions();
 
   const dashboardTitle = dashboardTitleComponent ? (
