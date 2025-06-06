@@ -14,18 +14,14 @@
 package crypto
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/pkg/model/api/config"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -77,28 +73,29 @@ type JWT interface {
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
-	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
+	GetAccessKey() []byte
 }
 
-type jwtImpl struct {
+type JwtImpl struct {
 	accessKey       []byte
 	refreshKey      []byte
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	cookieConfig    config.Cookie
+	Kubernetes      bool
 }
 
-func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
+func (j *JwtImpl) SignedAccessToken(login string) (string, error) {
 	now := time.Now()
 	return signedToken(login, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
-func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
+func (j *JwtImpl) SignedRefreshToken(login string) (string, error) {
 	now := time.Now()
 	return signedToken(login, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
-func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
+func (j *JwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
 	tokenSplit := strings.Split(accessToken, ".")
 	headerPayloadCookie := &http.Cookie{
@@ -124,7 +121,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 	return headerPayloadCookie, signatureCookie
 }
 
-func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
+func (j *JwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    "",
@@ -142,7 +139,7 @@ func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
 	return headerPayloadCookie, signatureCookie
 }
 
-func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
+func (j *JwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	return &http.Cookie{
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
@@ -155,7 +152,7 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
+func (j *JwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	return &http.Cookie{
 		Name:     CookieKeyRefreshToken,
 		Value:    "",
@@ -165,7 +162,7 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
+func (j *JwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(_ *jwt.Token) (interface{}, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
@@ -175,29 +172,20 @@ func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 	return parsedToken.Claims.(*JWTCustomClaims), nil
 }
 
-func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
-	jwtMiddlewareConfig := echojwt.Config{
-		Skipper: skipper,
-		BeforeFunc: func(c echo.Context) {
-			// Merge the JWT cookies if they exist to create the token,
-			// and then set the header Authorization with the complete token.
-			payloadCookie, err := c.Cookie(CookieKeyJWTPayload)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTPayload)
-				return
-			}
-			signatureCookie, err := c.Cookie(CookieKeyJWTSignature)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
-				return
-			}
-			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
-		},
-		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return new(JWTCustomClaims)
-		},
-		SigningMethod: jwt.SigningMethodHS512.Name,
-		SigningKey:    j.accessKey,
+// GetUser implements [Security]
+func (j JwtImpl) GetUser(ctx echo.Context) string {
+	claims := ExtractJWTClaims(ctx)
+	if claims == nil {
+		return ""
 	}
-	return echojwt.WithConfig(jwtMiddlewareConfig)
+	return claims.Subject
+}
+
+// GetJWT implements [Security]
+func (j JwtImpl) GetJWT() JWT {
+	return &j
+}
+
+func (j *JwtImpl) GetAccessKey() []byte {
+	return j.accessKey
 }

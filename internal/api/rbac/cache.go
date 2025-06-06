@@ -16,6 +16,7 @@ package rbac
 import (
 	"sync"
 
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -28,7 +29,7 @@ type cache struct {
 	permissions usersPermissions
 }
 
-func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (c *cache) hasPermission(_ echo.Context, user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	usrPermissions, ok := c.permissions[user]
 	if !ok {
 		return false
@@ -65,7 +66,7 @@ func (r *cacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *cacheImpl) GetUserProjects(user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+func (r *cacheImpl) GetUserProjects(_ echo.Context, user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
 	if permissionListHasPermission(r.guestPermissions, requestAction, requestScope) {
 		return []string{GlobalProject}
 	}
@@ -84,7 +85,7 @@ func (r *cacheImpl) GetUserProjects(user string, requestAction v1Role.Action, re
 	return projects
 }
 
-func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (r *cacheImpl) HasPermission(ctx echo.Context, user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// Checking default permissions
 	if ok := permissionListHasPermission(r.guestPermissions, requestAction, requestScope); ok {
 		return true
@@ -92,10 +93,10 @@ func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requ
 	// Checking cached permissions
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
-	return r.cache.hasPermission(user, requestAction, requestProject, requestScope)
+	return r.cache.hasPermission(ctx, user, requestAction, requestProject, requestScope)
 }
 
-func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission {
+func (r *cacheImpl) GetPermissions(ctx echo.Context, user string) map[string][]*v1Role.Permission {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 	userPermissions := make(map[string][]*v1Role.Permission)
