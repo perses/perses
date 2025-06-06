@@ -7,23 +7,23 @@ source: {
 }
 deps: {
 	"github.com/perses/perses/cue@v0": {
-		v:       "v0.51.0-preview"
+		v:       "v0.0.2-test"
 		default: true
 	}
 	"github.com/perses/plugins/prometheus@v0": {
-		v:       "v0.51.0-beta.2"
+		v:       "v0.0.1"
 		default: true
 	}
 	"github.com/perses/plugins/staticlistvariable@v0": {
-		v:       "v0.3.0"
+		v:       "v0.0.1"
 		default: true
 	}
 	"github.com/perses/plugins/table@v0": {
-		v:       "v0.6.0"
+		v:       "v0.0.1"
 		default: true
 	}
 	"github.com/perses/plugins/timeserieschart@v0": {
-		v:       "v0.6.0"
+		v:       "v0.0.1"
 		default: true
 	}
 }

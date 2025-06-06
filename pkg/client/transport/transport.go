@@ -81,7 +81,7 @@ func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if req.Body != nil {
 		defer func() {
 			if !reqBodyClosed {
-				_ = req.Body.Close()
+				req.Body.Close()
 			}
 		}()
 	}

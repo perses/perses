@@ -87,7 +87,7 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		return apiinterface.NotFoundError
 	}
 	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName)
-	if !isLoaded || !loaded.Module.Status.IsLoaded {
+	if !isLoaded {
 		logrus.Errorf("unable to find the plugin %s", pluginName)
 		return apiinterface.NotFoundError
 	}
@@ -159,7 +159,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 			}
 			return apiinterface.HandleError(err)
 		}
-		defer assetFile.Close() //nolint:errcheck
+		defer assetFile.Close()
 		data, err := io.ReadAll(assetFile)
 		if err != nil {
 			logrus.WithError(err).Error("Error reading React index.html")
@@ -218,7 +218,7 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		logrus.WithError(err).Error("Unable to open the React index.html")
 		return apiinterface.HandleError(err)
 	}
-	defer fileOpened.Close() //nolint:errcheck
+	defer fileOpened.Close()
 	idx, err := io.ReadAll(fileOpened)
 	if err != nil {
 		logrus.WithError(err).Error("Error reading React index.html")

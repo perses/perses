@@ -40,10 +40,6 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 				Version: manifest.Metadata.BuildInfo.Version,
 			},
 			Spec: npmPackageData.Perses,
-			Status: &plugin.ModuleStatus{
-				IsLoaded: true,
-				InDev:    true,
-			},
 		}
 		pluginLoaded := Loaded{
 			DevEnvironment: &v1.PluginInDevelopment{

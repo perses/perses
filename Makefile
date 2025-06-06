@@ -116,6 +116,10 @@ test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v ./...
 
+.PHONY: cue-test
+cue-test: generate
+	$(GO) test -tags=cue -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+
 .PHONY: integration-test
 integration-test: generate
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...

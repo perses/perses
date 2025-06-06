@@ -70,7 +70,7 @@ func extractPluginName(data []byte) (string, error) {
 func getServerPortAndExactPluginName(pluginPath string) (int, string, error) {
 	// todo we should support all format supported by rsbuild: https://rsbuild.dev/guide/basic/configure-rsbuild#configuration-file
 	configPath := filepath.Join(pluginPath, "rsbuild.config.ts")
-	data, err := os.ReadFile(configPath) //nolint: gosec
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return 0, "", err
 	}

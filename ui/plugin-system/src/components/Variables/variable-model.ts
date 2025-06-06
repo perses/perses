@@ -51,13 +51,11 @@ export function useListVariablePluginValues(definition: ListVariableDefinition):
   const capturingRegexp =
     definition.spec.capturingRegexp !== undefined ? new RegExp(definition.spec.capturingRegexp, 'g') : undefined;
 
-  let dependsOnVariables: string[] = Object.keys(allVariables); // Default to all variables
+  let dependsOnVariables: string[] | undefined;
   if (variablePlugin?.dependsOn) {
     const dependencies = variablePlugin.dependsOn(spec, variablePluginCtx);
-    dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
+    dependsOnVariables = dependencies.variables;
   }
-  // Exclude self variable to avoid circular dependency
-  dependsOnVariables = dependsOnVariables.filter((v) => v !== definition.spec.name);
 
   const variables = useAllVariableValues(dependsOnVariables);
 

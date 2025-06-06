@@ -804,6 +804,7 @@ url: <string> # Optional
 absolute_path: <string>
 ```
 
+
 ### Dashboard config
 
 ```yaml

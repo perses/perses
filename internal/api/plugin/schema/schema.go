@@ -80,7 +80,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 }
 
 func isPackageModel(file string) (bool, error) {
-	data, err := os.ReadFile(file) //nolint: gosec
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return false, err
 	}

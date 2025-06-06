@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	defer f.Close() //nolint:errcheck
+	defer f.Close()
 	entry, err := changelog.ReadEntry(f, *version)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to get the entry in the changelog for the version %q", *version)

@@ -36,21 +36,19 @@ func init() {
 func executeDashboardBuilder(builder dashboard.Builder, outputFormat string, writer io.Writer, errWriter io.Writer) {
 	var err error
 	var output []byte
-
-	switch outputFormat {
-	case YAMLOutput:
+	if outputFormat == YAMLOutput {
 		output, err = yaml.Marshal(builder.Dashboard)
-	case JSONOutput:
+	} else if outputFormat == JSONOutput {
 		output, err = json.Marshal(builder.Dashboard)
-	default:
+	} else {
 		err = fmt.Errorf("--output must be %q or %q", JSONOutput, YAMLOutput)
 	}
 
 	if err != nil {
-		_, _ = fmt.Fprint(errWriter, err)
+		fmt.Fprint(errWriter, err)
 		os.Exit(-1)
 	}
-	_, _ = fmt.Fprint(writer, string(output))
+	fmt.Fprint(writer, string(output))
 }
 
 func NewExec() Exec {
@@ -68,7 +66,7 @@ type Exec struct {
 // BuildDashboard is a helper to print the result of a dashboard builder in stdout and errors to stderr
 func (b *Exec) BuildDashboard(builder dashboard.Builder, err error) {
 	if err != nil {
-		_, _ = fmt.Fprint(os.Stderr, err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(-1)
 	}
 	executeDashboardBuilder(builder, b.outputFormat, os.Stdout, os.Stderr)

@@ -9,18 +9,15 @@ We are working actively on reducing this amount of required dependencies/provide
 ## Getting started (npm example)
 
 ```bash
-# Create new React app or modify an existing app using the dependencies below
-# Example: https://react.dev/learn/build-a-react-app-from-scratch
+# For example you can use the create-react-app command line or reuse the code of your app
+npx create-react-app perses-embedded-panel --template typescript
 
-# Install Perses dependencies
-# Note: React 19 is not supported yet
+# Install perses dependencies
 npm i --save @perses-dev/components \
-  @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
-  @perses-dev/prometheus-plugin @perses-dev/dashboards \
-  @tanstack/react-query \
+  @perses-dev/plugin-system @perses-dev/panels-plugin \
+  @tanstack/react-query @perses-dev/dashboards \
   @mui/material \
-  @emotion/styled @hookform/resolvers \
-  react@18 react-dom@18
+  @emotion/styled @hookform/resolvers
 ```
 
 ## Minimal code
@@ -44,21 +41,20 @@ import {
   PluginRegistry,
   TimeRangeProvider,
 } from "@perses-dev/plugin-system";
+import { TimeSeriesChart } from "@perses-dev/panels-plugin";
 import { ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   DatasourceStoreProvider,
-  Panel,
   VariableProvider,
 } from "@perses-dev/dashboards";
+import panelsResource from "@perses-dev/panels-plugin/plugin.json";
 import {
   DashboardResource,
   GlobalDatasourceResource,
   DatasourceResource,
 } from "@perses-dev/core";
 import { DatasourceApi } from "@perses-dev/dashboards";
-import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
-import * as timeseriesChartPlugin from "@perses-dev/timeseries-chart-plugin";
 
 const fakeDatasource: GlobalDatasourceResource = {
   kind: "GlobalDatasource",
@@ -68,7 +64,6 @@ const fakeDatasource: GlobalDatasourceResource = {
     plugin: {
       kind: "PrometheusDatasource",
       spec: {
-        // Update to your actual datasource url
         directUrl: "https://prometheus.demo.do.prometheus.io",
       },
     },
@@ -108,12 +103,8 @@ function App() {
   const chartsTheme = generateChartsTheme(muiTheme, {});
   const pluginLoader = dynamicImportPluginLoader([
     {
-      resource: prometheusPlugin.getPluginModule(),
-      importPlugin: () => Promise.resolve(prometheusPlugin),
-    },
-    {
-      resource: timeseriesChartPlugin.getPluginModule(),
-      importPlugin: () => Promise.resolve(timeseriesChartPlugin),
+      resource: panelsResource as PluginModuleResource,
+      importPlugin: () => import("@perses-dev/panels-plugin"),
     },
   ]);
 
@@ -158,23 +149,15 @@ function App() {
                         },
                       ]}
                     >
-                      <Panel
-                        panelOptions={{
-                          hideHeader: true,
+                      <TimeSeriesChart.PanelComponent
+                        contentDimensions={{
+                          width: 1200,
+                          height: 400,
                         }}
-                        definition={{
-                          kind: "Panel",
-                          spec: {
-                            display: { name: "Example Panel" },
-                            plugin: {
-                              kind: "TimeSeriesChart",
-                              spec: {
-                                legend: {
-                                  position: "bottom",
-                                  size: "medium",
-                                },
-                              },
-                            },
+                        spec={{
+                          legend: {
+                            position: "bottom",
+                            size: "medium",
                           },
                         }}
                       />

@@ -21,8 +21,6 @@ import {
   Input,
   InputAdornment,
   Divider,
-  useTheme,
-  useMediaQuery,
 } from '@mui/material';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import EarthIcon from 'mdi-material-ui/Earth';
@@ -30,7 +28,7 @@ import MagnifyIcon from 'mdi-material-ui/Magnify';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 import { InfoTooltip } from '../InfoTooltip';
-import { getTimeZoneOffset, TimeZoneOption } from '../model/timeZoneOption';
+import { TimeZoneOption } from '../model/timeZoneOption';
 
 export interface TimeZoneSelectorProps {
   heightPx?: string;
@@ -45,7 +43,6 @@ export function TimeZoneSelector({
   onChange,
   value = 'local',
 }: TimeZoneSelectorProps): ReactElement {
-  const isMobile = useMediaQuery(useTheme().breakpoints.down('md'));
   const [open, setOpen] = useState(false);
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [searchValue, setSearchValue] = useState('');
@@ -80,23 +77,14 @@ export function TimeZoneSelector({
     <ClickAwayListener onClickAway={handleOnClickAway}>
       <Box>
         <Box sx={{ position: 'relative' }}>
-          <InfoTooltip description={value === 'local' ? localTimeZone : value}>
+          <InfoTooltip description={value === 'local' ? 'Local browser time' : 'Time zone'}>
             <ToolbarIconButton
               data-testid="current-timezone"
               aria-label="Timezone"
               onClick={() => setOpen(!open)}
-              sx={(theme) => ({
-                height: heightPx,
-                paddingLeft: isMobile ? 0 : theme.spacing(1),
-                // Hide the timezone text on mobile
-                '& .timezone-text': {
-                  display: isMobile ? 'none' : 'inline',
-                },
-              })}
+              sx={(theme) => ({ height: heightPx, paddingLeft: theme.spacing(1) })}
             >
-              <span className="timezone-text">
-                {value === 'local' ? getTimeZoneOffset(localTimeZone)?.value : getTimeZoneOffset(value)?.value}
-              </span>
+              {value === 'local' ? localTimeZone : value}
               <EarthIcon sx={(theme) => ({ marginLeft: theme.spacing(0.5) })} />
             </ToolbarIconButton>
           </InfoTooltip>
@@ -106,7 +94,7 @@ export function TimeZoneSelector({
             width: 350,
             height: 355,
             position: 'absolute',
-            top: isMobile ? 160 : 110,
+            top: 110,
             right: 10,
             zIndex: 1,
             boxShadow: 3,

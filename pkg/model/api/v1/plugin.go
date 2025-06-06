@@ -27,7 +27,6 @@ type PluginModule struct {
 	Kind     string                `json:"kind" yaml:"kind"`
 	Metadata plugin.ModuleMetadata `json:"metadata" yaml:"metadata"`
 	Spec     plugin.ModuleSpec     `json:"spec" yaml:"spec"`
-	Status   *plugin.ModuleStatus  `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type PluginInDevelopment struct {

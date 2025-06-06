@@ -43,14 +43,6 @@ func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parame
 	}
 }
 
-func isJSONContentType(ctx echo.Context) bool {
-	contentType := ctx.Request().Header.Get(echo.HeaderContentType)
-	if len(contentType) == 0 {
-		return false
-	}
-	return strings.Contains(contentType, echo.MIMEApplicationJSON)
-}
-
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox[T api.Entity, K databaseModel.Query] interface {
@@ -214,9 +206,6 @@ func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
 }
 
 func (t *toolbox[T, K, V]) bind(ctx echo.Context, entity api.Entity) error {
-	if !isJSONContentType(ctx) {
-		return apiInterface.UnsupportedMediaType
-	}
 	if err := ctx.Bind(entity); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}

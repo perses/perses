@@ -8,6 +8,15 @@ on:
     tags:
       - v*
   pull_request:
+    paths:
+      - '**.cue'
+      - 'internal/cli/cmd/plugin/**'
+      - 'internal/cli/cmd/dac/**'
+      - 'internal/test/cue/**'
+      - 'go.mod'
+      - 'internal/**/go.mod'
+      - 'go-sdk/test/go.mod'
+      - 'scripts/plugin/**'
   merge_group:
 
 concurrency:
@@ -30,6 +39,33 @@ jobs:
       - name: check cue schema
         run: make cue-eval
 
+  test:
+    name: "tests with cuelang"
+    runs-on: ubuntu-latest
+    services:
+      prometheus:
+        image: prom/prometheus
+        ports:
+          - '9090:9090'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.9.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
+          cue_version: "v0.12.0"
+      - name: cache cue deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cue
+          key: ${{ runner.os }}-cue-${{ hashFiles('**/module.cue') }}
+          restore-keys: |
+            ${{ runner.os }}-cue-
+      - name: test
+        run: make cue-test
+
   publish-module:
     name: "publish module to Central Registry"
     needs: "validate-schemas"
@@ -48,4 +84,3 @@ jobs:
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Publish the module
         run: cue mod publish ${{ github.ref_name }}
-        working-directory: cue

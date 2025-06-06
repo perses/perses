@@ -86,11 +86,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
               </Link>
             </Stack>
             {hasPermission && (
-              <IconButton
-                component="div"
-                onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event)}
-                disabled={isReadonly}
-              >
+              <IconButton onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event)} disabled={isReadonly}>
                 <DeleteOutline />
               </IconButton>
             )}

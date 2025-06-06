@@ -134,7 +134,7 @@ func parseAndFormatEntry(entry string) (kind, string) {
 	}
 	// extract catalog entry and remove it to get a cleaner message
 	catalogKind, catalogEntry := parseCatalogEntry(newEntry)
-	if catalogKind == KindToBeIgnored { // nolint: staticcheck
+	if catalogKind == KindToBeIgnored {
 		return KindToBeIgnored, ""
 	} else if catalogKind == kindUnknown {
 		// list of exception that would make the commit ignored
@@ -179,7 +179,7 @@ func newChangelog(entries []string) *changelog {
 
 func injectEntries(buffer *bytes.Buffer, entries []string, catalogEntry string) {
 	for _, entry := range entries {
-		buffer.WriteString(fmt.Sprintf("- %s %s\n", formatChangelogCategory(catalogEntry), entry)) //nolint: staticcheck
+		buffer.WriteString(fmt.Sprintf("- %s %s\n", formatChangelogCategory(catalogEntry), entry))
 	}
 }
 

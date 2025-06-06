@@ -122,6 +122,6 @@ func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
 		logrus.WithError(err).Error("failed to get datasource schema")
 		return nil, nil
 	}
-	ctx := cuecontext.New()
+	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	return cuetils.NewFromSchema(ctx.BuildInstance(sch))
 }

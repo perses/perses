@@ -14,7 +14,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -26,16 +25,6 @@ const defaultRefreshInterval = common.Duration(time.Minute * 5)
 
 type HTTPDiscovery struct {
 	config.RestConfigClient `json:",inline" yaml:",inline"`
-}
-
-func (d HTTPDiscovery) MarshalYAML() (interface{}, error) {
-	cfg := config.NewPublicRestConfigClient(&d.RestConfigClient)
-	return cfg, nil
-}
-
-func (d HTTPDiscovery) MarshalJSON() ([]byte, error) {
-	cfg := config.NewPublicRestConfigClient(&d.RestConfigClient)
-	return json.Marshal(cfg)
 }
 
 type KubeServiceDiscovery struct {

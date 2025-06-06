@@ -20,7 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QueryParamProvider } from 'use-query-params';
 import React, { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
-import { SnackbarProvider } from '@perses-dev/components';
+import { DashboardTimeZoneProvider, SnackbarProvider } from '@perses-dev/components';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
 import { TimeRangeControls } from './TimeRangeControls';
@@ -85,18 +85,20 @@ describe('TimeRangeControls', () => {
 
   const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
-      testURLParams ? (
-        <TimeRangeProviderWithQueryParams
-          initialRefreshInterval={testDefaultRefreshInterval}
-          initialTimeRange={testDefaultTimeRange}
-        >
-          <TimeRangeControls />
-        </TimeRangeProviderWithQueryParams>
-      ) : (
-        <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
-          <TimeRangeControls />
-        </TimeRangeProvider>
-      ),
+      <DashboardTimeZoneProvider>
+        {testURLParams ? (
+          <TimeRangeProviderWithQueryParams
+            initialRefreshInterval={testDefaultRefreshInterval}
+            initialTimeRange={testDefaultTimeRange}
+          >
+            <TimeRangeControls />
+          </TimeRangeProviderWithQueryParams>
+        ) : (
+          <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
+            <TimeRangeControls />
+          </TimeRangeProvider>
+        )}
+      </DashboardTimeZoneProvider>,
       undefined,
       history
     );
@@ -118,19 +120,19 @@ describe('TimeRangeControls', () => {
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
-    expect(history.location.search).toEqual('?start=5m&refresh=0s&timeZone=local');
+    expect(history.location.search).toEqual('?start=5m&refresh=0s');
 
     // pick another option from TimeRangeSelector dropdown
     const secondSelected = screen.getByText('Last 12 hours');
     userEvent.click(secondSelected);
-    expect(history.location.search).toEqual('?start=12h&refresh=0s&timeZone=local');
+    expect(history.location.search).toEqual('?start=12h&refresh=0s');
 
     const refreshButton = screen.getByLabelText(/refresh interval/i, { selector: '[role="combobox"]' });
     userEvent.click(refreshButton);
 
     const firstRefreshSelected = screen.getByRole('option', { name: '5s' });
     userEvent.click(firstRefreshSelected);
-    expect(history.location.search).toEqual('?start=12h&refresh=5s&timeZone=local');
+    expect(history.location.search).toEqual('?start=12h&refresh=5s');
 
     // back button should return to previous page selected
     act(() => {

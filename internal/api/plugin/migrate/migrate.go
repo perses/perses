@@ -108,7 +108,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema,
 // isPackageMigrate is a function that checks if a cuelang file belongs to the package migrate.
 // For that, we are opening the file and checking if the string "package migrate" is present.
 func isPackageMigrate(file string) (bool, error) {
-	data, err := os.ReadFile(file) //nolint: gosec
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return false, err
 	}
@@ -116,7 +116,7 @@ func isPackageMigrate(file string) (bool, error) {
 }
 
 func getPluginKind(migrateFile string) (plugin.Kind, error) {
-	data, err := os.ReadFile(migrateFile) //nolint: gosec
+	data, err := os.ReadFile(migrateFile)
 	if err != nil {
 		return "", err
 	}
@@ -130,7 +130,7 @@ func getPluginKind(migrateFile string) (plugin.Kind, error) {
 }
 
 func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
-	ctx := cuecontext.New()
+	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
 		cue.ParsePath(defID),
@@ -293,7 +293,7 @@ func (m *mig) Load(pluginPath string, module v1.PluginModule) error {
 }
 
 func (m *mig) loadPanel(schemaPath string, panelInstance *build.Instance) {
-	ctx := cuecontext.New()
+	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	panelSchema := ctx.BuildInstance(panelInstance)
 	kindValue := panelSchema.LookupPath(cue.ParsePath(grafanaType))
 	kind := kindValue.Kind()

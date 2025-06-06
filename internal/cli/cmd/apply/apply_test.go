@@ -88,7 +88,7 @@ object "Project" "perses" has been applied
 			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: strings.ReplaceAll(`resource "game" from file "..%s..%stest%ssample_resources%sunknown_resource.json" not supported by the command`, "%s", separator),
+			ExpectedMessage: strings.Replace(`resource "game" from file "..%s..%stest%ssample_resources%sunknown_resource.json" not supported by the command`, "%s", separator, -1),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

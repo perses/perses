@@ -15,7 +15,7 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useTimeZone } from '@perses-dev/components';
+import { useDashboardTimeZone } from '@perses-dev/components';
 import {
   OnSaveDashboard,
   useDashboard,
@@ -42,7 +42,7 @@ export const SaveDashboardButton = ({
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
-  const { timeZone: currentTimeZone } = useTimeZone();
+  const { timeZone: currentTimeZone } = useDashboardTimeZone();
 
   const onSaveButtonClick = (): void => {
     const isSavedDurationModified =

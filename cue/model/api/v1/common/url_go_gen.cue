@@ -4,7 +4,4 @@
 
 package common
 
-// +kubebuilder:validation:Schemaless
-// +kubebuilder:validation:Type=string
-// +kubebuilder:validation:Format=uri
 #URL: _

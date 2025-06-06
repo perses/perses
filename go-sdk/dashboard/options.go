@@ -24,6 +24,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	v1Dashboard "github.com/perses/perses/pkg/model/api/v1/dashboard"
 )
 
 func Name(name string) Option {
@@ -76,7 +77,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			builder.Dashboard.Spec.Panels = make(map[string]*v1.Panel)
 		}
 
-		gridLayoutSpec := dashboard.GridLayoutSpec{
+		gridLayoutSpec := v1Dashboard.GridLayoutSpec{
 			Display: &dashboard.GridLayoutDisplay{
 				Title: r.Title,
 			},
@@ -91,7 +92,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
 			x := (len(gridLayoutSpec.Items) * r.PanelsWidth) % 24
 			y := (len(gridLayoutSpec.Items) * r.PanelsWidth) / 24 * r.PanelsHeight
-			gridLayoutSpec.Items = append(gridLayoutSpec.Items, dashboard.GridItem{
+			gridLayoutSpec.Items = append(gridLayoutSpec.Items, v1Dashboard.GridItem{
 				X:      x,
 				Y:      y,
 				Width:  r.PanelsWidth,
@@ -103,7 +104,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			builder.Dashboard.Spec.Panels[panelRef] = &r.Panels[i]
 		}
 
-		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{
+		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, v1Dashboard.Layout{
 			Kind: "Grid",
 			Spec: gridLayoutSpec,
 		})
@@ -121,7 +122,7 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 		if builder.Dashboard.Spec.Datasources == nil {
 			builder.Dashboard.Spec.Datasources = make(map[string]*v1.DatasourceSpec)
 		}
-		builder.Dashboard.Spec.Datasources[name] = &ds.Spec
+		builder.Dashboard.Spec.Datasources[name] = &ds.Datasource.Spec
 		return nil
 	}
 }

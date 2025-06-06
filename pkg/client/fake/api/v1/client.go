@@ -53,10 +53,6 @@ func (c *client) Health() v1.HealthInterface {
 	return &health{}
 }
 
-func (c *client) Plugin() v1.PluginInterface {
-	return &plugin{}
-}
-
 func (c *client) Project() v1.ProjectInterface {
 	return &project{}
 }

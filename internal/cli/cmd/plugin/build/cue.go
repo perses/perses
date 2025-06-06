@@ -61,7 +61,7 @@ type cueDep struct {
 func (d *cueDep) generateModulePath() error {
 	p := d.moduleName
 	if filepath.Separator != '/' {
-		p = strings.ReplaceAll(d.moduleName, "/", string(filepath.Separator))
+		p = strings.Replace(d.moduleName, "/", string(filepath.Separator), -1)
 	}
 	parts := strings.Split(p, "@")
 	if len(parts) != 2 {
@@ -143,7 +143,7 @@ func (c *cueVendor) vendorCueDependencies() (func(), error) {
 		}
 		// At this point, all dependencies have been downloaded. So we can copy the content of the CUE cache to the vendor directory.
 		// First, we need to create the dependency folder in the vendor directory.
-		if mkdirErr := os.MkdirAll(filepath.Join(c.vendorDirPath, dep.modulePathWithoutVersion), 0750); mkdirErr != nil {
+		if mkdirErr := os.MkdirAll(filepath.Join(c.vendorDirPath, dep.modulePathWithoutVersion), 0777); mkdirErr != nil {
 			return cleanUpFunc, fmt.Errorf("failed to create directory %s: %w", dep.modulePathWithoutVersion, mkdirErr)
 		}
 		// Then, we copy the content of the CUE cache to the target directory created above.

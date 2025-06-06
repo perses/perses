@@ -16,7 +16,6 @@ package test
 import (
 	"bytes"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/perses/perses/internal/cli/config"
@@ -26,13 +25,12 @@ import (
 )
 
 type Suite struct {
-	Title                string
-	Args                 []string
-	APIClient            api.ClientInterface
-	Config               config.Config
-	ExpectedMessage      string
-	ExpectedRegexMessage string
-	IsErrorExpected      bool
+	Title           string
+	Args            []string
+	APIClient       api.ClientInterface
+	Config          config.Config
+	ExpectedMessage string
+	IsErrorExpected bool
 }
 
 func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite) {
@@ -55,12 +53,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			err := cmd.Execute()
 			if test.IsErrorExpected {
 				if assert.NotNil(t, err) {
-					if len(test.ExpectedRegexMessage) > 0 {
-						matched, _ := regexp.MatchString(test.ExpectedRegexMessage, err.Error())
-						assert.True(t, matched, "Expected error message to match regex: %s", test.ExpectedRegexMessage)
-					} else {
-						assert.Equal(t, test.ExpectedMessage, err.Error())
-					}
+					assert.Equal(t, test.ExpectedMessage, err.Error())
 				}
 			} else if assert.Nil(t, err) {
 				assert.Equal(t, test.ExpectedMessage, buffer.String())

@@ -53,11 +53,11 @@ const getPluginRuntime = (): FederationHost => {
           },
         },
         '@tanstack/react-query': {
-          version: '4.39.1',
+          version: '5.64.2',
           lib: () => ReactQuery,
           shareConfig: {
             singleton: true,
-            requiredVersion: '^4.39.1',
+            requiredVersion: '^5.64.2',
           },
         },
         'react-hook-form': {
@@ -81,7 +81,7 @@ const getPluginRuntime = (): FederationHost => {
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-beta.0',
           },
         },
         '@perses-dev/plugin-system': {
@@ -89,7 +89,7 @@ const getPluginRuntime = (): FederationHost => {
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-beta.0',
           },
         },
         '@perses-dev/explore': {
@@ -97,7 +97,7 @@ const getPluginRuntime = (): FederationHost => {
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-beta.0',
           },
         },
         '@perses-dev/dashboards': {
@@ -105,7 +105,7 @@ const getPluginRuntime = (): FederationHost => {
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-beta.0',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK

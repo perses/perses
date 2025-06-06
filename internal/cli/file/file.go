@@ -132,7 +132,7 @@ func CopyDir(src, dst string) error {
 		targetPath := filepath.Join(dst, relPath)
 
 		if info.IsDir() {
-			return os.MkdirAll(targetPath, 0750)
+			return os.MkdirAll(targetPath, os.ModePerm)
 		}
 		return Copy(path, targetPath)
 	})
@@ -140,17 +140,17 @@ func CopyDir(src, dst string) error {
 
 // Copy a file
 func Copy(src, dst string) error {
-	srcFile, err := os.Open(src) //nolint: gosec
+	srcFile, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close() //nolint: errcheck
+	defer srcFile.Close()
 
-	dstFile, err := os.Create(dst) //nolint: gosec
+	dstFile, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close() //nolint: errcheck
+	defer dstFile.Close()
 
 	_, err = io.Copy(dstFile, srcFile)
 	return err

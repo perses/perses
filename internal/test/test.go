@@ -75,7 +75,7 @@ func GetRepositoryPath() string {
 
 // simple wrapper to os.ReadFile for testing, to ensure the test gets aborted in case of error
 func ReadFile(filepath string) []byte {
-	fileContentBytes, err := os.ReadFile(filepath) //nolint: gosec
+	fileContentBytes, err := os.ReadFile(filepath)
 	if err != nil {
 		panic(err)
 	}

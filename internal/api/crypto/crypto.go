@@ -162,8 +162,7 @@ func (c *crypto) encrypt(stringToEncrypt string) (string, error) {
 		return "", err
 	}
 
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
+	stream := cipher.NewCFBEncrypter(c.block, iv)
 	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 
 	return base64.URLEncoding.EncodeToString(cipherText), nil
@@ -183,8 +182,7 @@ func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
 	iv := cipherText[:aes.BlockSize]
 	cipherText = cipherText[aes.BlockSize:]
 
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBDecrypter(c.block, iv) //nolint: staticcheck
+	stream := cipher.NewCFBDecrypter(c.block, iv)
 
 	// XORKeyStream can work in-place if the two arguments are the same.
 	stream.XORKeyStream(cipherText, cipherText)

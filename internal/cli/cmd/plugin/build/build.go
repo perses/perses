@@ -49,7 +49,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'plugin build'")
+		return fmt.Errorf("no args are supported by the command 'build'")
 	}
 	cfg, err := config.Resolve(o.pluginPath, o.cfgPath)
 	if err != nil {

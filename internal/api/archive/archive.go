@@ -62,7 +62,7 @@ func Build(archiveName string, archiveFormat Format, files []archives.FileInfo) 
 	if err != nil {
 		return err
 	}
-	defer out.Close() //nolint:errcheck
+	defer out.Close()
 	format := buildCompressedArchiveStruct(archiveFormat)
 
 	// create the archive

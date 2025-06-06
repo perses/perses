@@ -59,7 +59,7 @@ func addOutputDirToGitignore() error {
 	if err != nil {
 		return fmt.Errorf("error opening %s: %v", gitignorePath, err)
 	}
-	defer file.Close() //nolint:errcheck
+	defer file.Close()
 
 	// Check & skip if the output dir is already listed
 	scanner := bufio.NewScanner(file)
@@ -71,7 +71,7 @@ func addOutputDirToGitignore() error {
 	}
 
 	// Append the output folder to the list
-	if _, writeErr := fmt.Fprintf(file, "\n%s\n%s\n", comment, config.Global.Dac.OutputFolder); writeErr != nil {
+	if _, writeErr := file.WriteString(fmt.Sprintf("\n%s\n%s\n", comment, config.Global.Dac.OutputFolder)); writeErr != nil {
 		return fmt.Errorf("error appending to %s: %v", gitignorePath, writeErr)
 	}
 
@@ -121,7 +121,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'dac setup'")
+		return fmt.Errorf("no args are supported by the command 'setup'")
 	}
 
 	version, err := computeProperVersion(o.version)
@@ -168,7 +168,7 @@ func (o *option) Execute() error {
 	}
 
 	// Install dependencies
-	if o.language == cueLanguage { //nolint: staticcheck
+	if o.language == cueLanguage {
 		// Check cue.mod exists
 		if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
 			return fmt.Errorf("unable to find the 'cue.mod' dir. Please run 'cue mod init'")

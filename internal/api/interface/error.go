@@ -32,13 +32,12 @@ func (e *PersesError) Error() string {
 }
 
 var (
-	InternalError        = &PersesError{message: "internal server error"}
-	NotFoundError        = &PersesError{message: "document not found"}
-	ConflictError        = &PersesError{message: "document already exists"}
-	BadRequestError      = &PersesError{message: "bad request"}
-	UnauthorizedError    = &PersesError{message: "unauthorized"}
-	ForbiddenError       = &PersesError{message: "forbidden access"}
-	UnsupportedMediaType = &PersesError{message: "unsupported media type"}
+	InternalError     = &PersesError{message: "internal server error"}
+	NotFoundError     = &PersesError{message: "document not found"}
+	ConflictError     = &PersesError{message: "document already exists"}
+	BadRequestError   = &PersesError{message: "bad request"}
+	UnauthorizedError = &PersesError{message: "unauthorized"}
+	ForbiddenError    = &PersesError{message: "forbidden access"}
 )
 
 // HandleError is translating the given error to the echo.HTTPError
@@ -71,9 +70,6 @@ func HandleError(err error) error {
 	}
 	if errors.Is(err, ForbiddenError) {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
-	}
-	if errors.Is(err, UnsupportedMediaType) {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, err.Error())
 	}
 
 	var HTTPError *echo.HTTPError

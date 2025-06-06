@@ -12,7 +12,7 @@
     "start": "turbo run start",
     "clean": "turbo run clean",
     "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
-    "clear-turbo-cache": "rimraf ./.turbo/cache",
+    "clear-turbo-cache": "rimraf node_modules/.cache/turbo",
     "e2e": "turbo run e2e:local",
     "e2e:debug": "turbo run e2e -- --debug",
     "e2e:ci": "turbo run e2e:ci",
@@ -69,5 +69,5 @@
     "typescript": "5.4.5",
     "wait-on": "^7.0.1"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2"  
 }

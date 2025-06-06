@@ -180,7 +180,7 @@ func (d *DAO) GetLatestUpdateTime(kinds []modelV1.Kind) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close() //nolint:errcheck
+	defer r.Close()
 
 	if r.Next() {
 		var timestamp *string
@@ -252,7 +252,7 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	if queryErr != nil {
 		return queryErr
 	}
-	defer query.Close() //nolint:errcheck
+	defer query.Close()
 	if query.Next() {
 		var rowJSONDoc string
 		if scanErr := query.Scan(&rowJSONDoc); scanErr != nil {
@@ -272,7 +272,7 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	if runQueryErr != nil {
 		return nil, runQueryErr
 	}
-	defer rows.Close() //nolint:errcheck
+	defer rows.Close()
 
 	result := []json.RawMessage{}
 
@@ -318,7 +318,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	if runQueryErr != nil {
 		return runQueryErr
 	}
-	defer rows.Close() //nolint:errcheck
+	defer rows.Close()
 	for rows.Next() {
 		var rowJSONDoc string
 		if scanErr := rows.Scan(&rowJSONDoc); scanErr != nil {
@@ -421,7 +421,7 @@ func (d *DAO) exists(kind modelV1.Kind, metadata modelAPI.Metadata) (string, boo
 	if queryErr != nil {
 		return "", false, queryErr
 	}
-	defer query.Close() //nolint:errcheck
+	defer query.Close()
 	return id, query.Next(), nil
 }
 

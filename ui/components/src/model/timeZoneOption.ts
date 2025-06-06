@@ -72,7 +72,7 @@ export const getTimeZoneOptions = memoize((): TimeZoneOption[] => {
         const longOffset = getTimeZoneOffset(timeZone);
         return {
           value: timeZone,
-          label: timeZone.replaceAll('_', ' '),
+          label: timeZone,
           longOffset: longOffset ? longOffset.value : '',
         };
       })

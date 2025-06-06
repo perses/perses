@@ -38,7 +38,7 @@ Example for running a single test with UI:
 
 ### Locally with screenshots (maintainers only)
 
-*This option is limited to maintainers because it requires access to secrets in the Happo account.*
+_This option is limited to maintainers because it requires access to secrets in the Happo account._
 
 Occasionally, you may want to generate screenshots locally to debug an issue with visual tests.
 

@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useAllVariableValues, usePlugin, VariableOption, VariableStateMap } from '@perses-dev/plugin-system';
-import { ListVariableDefinition } from '@perses-dev/core';
-import { renderHookWithContext } from '../../test/render-hook';
-import { filterVariableList, useListVariablePluginValues } from './variable-model';
+import { VariableOption } from '@perses-dev/plugin-system';
+import { filterVariableList } from './variable-model';
 
 describe('filterVariableList', () => {
   const testSuite = [
@@ -55,105 +53,5 @@ describe('filterVariableList', () => {
     it(title, () => {
       expect(filterVariableList(originalValues, capturingRegexp)).toEqual(result);
     });
-  });
-});
-
-jest.mock('../../runtime', () => ({
-  ...jest.requireActual('../../runtime'),
-  usePlugin: jest.fn(),
-  useDatasourceStore: jest.fn().mockReturnValue({}),
-  useAllVariableValues: jest.fn(),
-  useTimeRange: jest.fn().mockReturnValue({
-    absoluteTimeRange: { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-02T00:00:00Z') },
-    refreshKey: 'refresh-key',
-  }),
-}));
-
-describe('useListVariablePluginValues', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const definition: ListVariableDefinition = {
-    kind: 'ListVariable',
-    spec: {
-      name: 'NewVariable',
-      display: {},
-      allowAllValue: false,
-      allowMultiple: false,
-      plugin: {
-        kind: 'PrometheusLabelNamesVariable',
-        spec: {},
-      },
-    },
-  };
-
-  it('should filter self variable from deps and ctx when dependsOn is not passed', () => {
-    const variables: VariableStateMap = {
-      NewVariable: { loading: false, value: [] },
-      NewVariable2: { loading: false, value: [] },
-      NewVariable3: { loading: false, value: [] },
-    };
-
-    const getVariableOptionsMock = jest.fn();
-
-    (usePlugin as jest.Mock).mockReturnValue({
-      data: { getVariableOptions: getVariableOptionsMock },
-    });
-
-    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
-      names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables
-    );
-
-    renderHookWithContext(() => useListVariablePluginValues(definition));
-
-    const allVariablesWithoutSelf = Object.fromEntries(
-      Object.entries(variables).filter(([key]) => key !== definition.spec.name)
-    );
-
-    const expectedCtx = {
-      datasourceStore: {},
-      variables: allVariablesWithoutSelf,
-      timeRange: expect.any(Object),
-    };
-
-    expect(getVariableOptionsMock).toHaveBeenCalledWith(definition.spec.plugin.spec, expectedCtx);
-  });
-
-  it('should filter self variable from deps and ctx when dependsOn is passed', () => {
-    const getVariableOptionsMock = jest.fn();
-    const variables: VariableStateMap = {
-      NewVariable: { loading: false, value: [] },
-      NewVariable2: { loading: false, value: [] },
-      NewVariable3: { loading: false, value: [] },
-      NewVariable4: { loading: false, value: [] },
-    };
-
-    const dependsOnVariables = Object.keys(variables).slice(0, 2);
-
-    (usePlugin as jest.Mock).mockReturnValue({
-      data: {
-        getVariableOptions: getVariableOptionsMock,
-        dependsOn: jest.fn().mockReturnValue({ variables: dependsOnVariables }),
-      },
-    });
-
-    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
-      names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables
-    );
-
-    renderHookWithContext(() => useListVariablePluginValues(definition));
-
-    const allVariableDepsWithoutSelf = Object.fromEntries(
-      Object.entries(variables).filter(([key]) => dependsOnVariables.includes(key) && key !== definition.spec.name)
-    );
-
-    const expectedCtx = {
-      datasourceStore: {},
-      variables: allVariableDepsWithoutSelf,
-      timeRange: expect.any(Object),
-    };
-
-    expect(getVariableOptionsMock).toHaveBeenCalledWith(definition.spec.plugin.spec, expectedCtx);
   });
 });
