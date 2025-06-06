@@ -14,38 +14,34 @@
 import React, { createContext, ReactElement, useContext } from 'react';
 import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
-type DashboardTimeZoneContextType = {
+type TimeZoneContextType = {
   timeZone: string;
   setTimeZone: (timeZone: string) => void;
 };
 
-export const DashboardTimeZoneContext = createContext<DashboardTimeZoneContextType | undefined>(undefined);
+export const TimeZoneContext = createContext<TimeZoneContextType | undefined>(undefined);
 
-export interface DashboardTimeZoneProviderProps {
+export interface TimeZoneProviderProps {
   timeZone: string;
   setTimeZone: (timeZone: string) => void;
   children: React.ReactNode;
 }
 
-export function DashboardTimeZoneProvider(props: DashboardTimeZoneProviderProps): ReactElement {
+export function TimeZoneProvider(props: TimeZoneProviderProps): ReactElement {
   const { timeZone, setTimeZone } = props;
-  return (
-    <DashboardTimeZoneContext.Provider value={{ timeZone, setTimeZone }}>
-      {props.children}
-    </DashboardTimeZoneContext.Provider>
-  );
+  return <TimeZoneContext.Provider value={{ timeZone, setTimeZone }}>{props.children}</TimeZoneContext.Provider>;
 }
 
-export function useDashboardTimeZone(): {
+export function useTimeZone(): {
   timeZone: string;
   setTimeZone: (timeZone: string) => void;
   formatWithUserTimeZone: (date: Date, formatString: string) => string;
   dateFormatOptionsWithUserTimeZone: (dateFormatOptions: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions;
 } {
-  const timeZoneContext = useContext(DashboardTimeZoneContext);
+  const timeZoneContext = useContext(TimeZoneContext);
 
   return {
-    timeZone: timeZoneContext?.timeZone || 'local',
+    timeZone: timeZoneContext?.timeZone ?? 'local',
     setTimeZone: (timeZone: string) => timeZoneContext?.setTimeZone(timeZone),
     formatWithUserTimeZone(date: Date, formatString: string): string {
       return formatWithTimeZone(date, formatString, timeZoneContext?.timeZone);

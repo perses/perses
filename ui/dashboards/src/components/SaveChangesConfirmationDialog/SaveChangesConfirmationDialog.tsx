@@ -15,7 +15,7 @@ import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
-import { Dialog, useDashboardTimeZone } from '@perses-dev/components';
+import { Dialog, useTimeZone } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = (): ReactElement => {
@@ -27,7 +27,7 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
   const [saveDefaultTimeZone, setSaveDefaultTimeZone] = useState(isSavedTimeZoneModified);
 
-  const { timeZone } = useDashboardTimeZone();
+  const { timeZone } = useTimeZone();
   const { getSavedVariablesStatus } = useVariableDefinitionActions();
   const { modifiedVariableNames } = getSavedVariablesStatus();
 
@@ -40,9 +40,8 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
 
   const saveTimeRangeText = `Save current time range as new default ${currentTimeRangeText}`;
 
-  const saveVariablesText = `Save current variable values as new default (${
-    modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
-  })`;
+  const saveVariablesText = `Save current variable values as new default (${modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
+    })`;
 
   const saveTimeZoneText = `Save time zone as "${timeZone}" time`;
 
