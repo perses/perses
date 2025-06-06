@@ -16,19 +16,19 @@ import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
 type DashboardTimeZoneContextType = {
   timeZone: string;
-  setTimeZone?: (timeZone: string) => void;
+  setTimeZone: (timeZone: string) => void;
 };
 
 export const DashboardTimeZoneContext = createContext<DashboardTimeZoneContextType | undefined>(undefined);
 
 export interface DashboardTimeZoneProviderProps {
-  timeZone?: string;
-  setTimeZone?: (timeZone: string) => void;
-  children?: React.ReactNode;
+  timeZone: string;
+  setTimeZone: (timeZone: string) => void;
+  children: React.ReactNode;
 }
 
 export function DashboardTimeZoneProvider(props: DashboardTimeZoneProviderProps): ReactElement {
-  const { timeZone = 'local', setTimeZone } = props;
+  const { timeZone, setTimeZone } = props;
   return (
     <DashboardTimeZoneContext.Provider value={{ timeZone, setTimeZone }}>
       {props.children}
@@ -43,20 +43,15 @@ export function useDashboardTimeZone(): {
   dateFormatOptionsWithUserTimeZone: (dateFormatOptions: Intl.DateTimeFormatOptions) => Intl.DateTimeFormatOptions;
 } {
   const timeZoneContext = useContext(DashboardTimeZoneContext);
-  if (!timeZoneContext) {
-    throw new Error('useDashboardTimeZone must be used within a DashboardTimeZoneProvider');
-  }
-
-  const { timeZone, setTimeZone } = timeZoneContext;
 
   return {
-    timeZone: timeZone,
-    setTimeZone: (timeZone: string) => setTimeZone?.(timeZone),
+    timeZone: timeZoneContext?.timeZone || 'local',
+    setTimeZone: (timeZone: string) => timeZoneContext?.setTimeZone(timeZone),
     formatWithUserTimeZone(date: Date, formatString: string): string {
-      return formatWithTimeZone(date, formatString, timeZone);
+      return formatWithTimeZone(date, formatString, timeZoneContext?.timeZone);
     },
     dateFormatOptionsWithUserTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions): Intl.DateTimeFormatOptions {
-      return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZone);
+      return dateFormatOptionsWithTimeZone(dateFormatOptions, timeZoneContext?.timeZone);
     },
   };
 }

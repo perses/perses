@@ -13,13 +13,12 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
-import { ErrorBoundary, ErrorAlert, combineSx, DashboardTimeZoneProvider } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
-  useSetInitialDashboardTimeZone,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import {
@@ -62,11 +61,9 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
-  const dashboardTimeZone = spec.timeZone ?? 'local';
+  const initialTimeZone = spec.timeZone ?? 'local';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
-  const { timeZone, setTimeZone } = useSetInitialDashboardTimeZone(dashboardTimeZone);
-  console.log('timeZone', timeZone);
   const { data } = usePluginBuiltinVariableDefinitions();
 
   const builtinVariables = useMemo(() => {
@@ -105,57 +102,54 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
   return (
-    <DashboardTimeZoneProvider timeZone={timeZone} setTimeZone={setTimeZone}>
-      <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-        <DashboardProviderWithQueryParams
-          initialState={{
-            dashboardResource,
-            timeZone,
-            setTimeZone,
-            isEditMode: !!isEditing,
-          }}
+    <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
+      <DashboardProviderWithQueryParams
+        initialState={{
+          dashboardResource,
+          isEditMode: !!isEditing,
+        }}
+      >
+        <TimeRangeProviderWithQueryParams
+          initialTimeRange={initialTimeRange}
+          initialRefreshInterval={initialRefreshInterval}
+          initialTimeZone={initialTimeZone}
         >
-          <TimeRangeProviderWithQueryParams
-            initialTimeRange={initialTimeRange}
-            initialRefreshInterval={initialRefreshInterval}
+          <VariableProviderWithQueryParams
+            initialVariableDefinitions={spec.variables}
+            externalVariableDefinitions={externalVariableDefinitions}
+            builtinVariableDefinitions={builtinVariables}
           >
-            <VariableProviderWithQueryParams
-              initialVariableDefinitions={spec.variables}
-              externalVariableDefinitions={externalVariableDefinitions}
-              builtinVariableDefinitions={builtinVariables}
+            <Box
+              sx={combineSx(
+                {
+                  display: 'flex',
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                  overflow: 'hidden',
+                },
+                sx
+              )}
+              {...others}
             >
-              <Box
-                sx={combineSx(
-                  {
-                    display: 'flex',
-                    width: '100%',
-                    height: '100%',
-                    position: 'relative',
-                    overflow: 'hidden',
-                  },
-                  sx
-                )}
-                {...others}
-              >
-                <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <DashboardApp
-                    dashboardResource={dashboardResource}
-                    dashboardTitleComponent={dashboardTitleComponent}
-                    emptyDashboardProps={emptyDashboardProps}
-                    onSave={onSave}
-                    onDiscard={onDiscard}
-                    initialVariableIsSticky={initialVariableIsSticky}
-                    isReadonly={isReadonly}
-                    isVariableEnabled={isVariableEnabled}
-                    isDatasourceEnabled={isDatasourceEnabled}
-                    isCreating={isCreating}
-                  />
-                </ErrorBoundary>
-              </Box>
-            </VariableProviderWithQueryParams>
-          </TimeRangeProviderWithQueryParams>
-        </DashboardProviderWithQueryParams>
-      </DatasourceStoreProvider>
-    </DashboardTimeZoneProvider>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <DashboardApp
+                  dashboardResource={dashboardResource}
+                  dashboardTitleComponent={dashboardTitleComponent}
+                  emptyDashboardProps={emptyDashboardProps}
+                  onSave={onSave}
+                  onDiscard={onDiscard}
+                  initialVariableIsSticky={initialVariableIsSticky}
+                  isReadonly={isReadonly}
+                  isVariableEnabled={isVariableEnabled}
+                  isDatasourceEnabled={isDatasourceEnabled}
+                  isCreating={isCreating}
+                />
+              </ErrorBoundary>
+            </Box>
+          </VariableProviderWithQueryParams>
+        </TimeRangeProviderWithQueryParams>
+      </DashboardProviderWithQueryParams>
+    </DatasourceStoreProvider>
   );
 }
