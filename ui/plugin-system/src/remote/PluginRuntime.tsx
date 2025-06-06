@@ -76,36 +76,44 @@ const getPluginRuntime = (): FederationHost => {
             requiredVersion: '^5.5.0',
           },
         },
+        '@perses-dev/core': {
+          version: '0.51.0-rc.1',
+          lib: () => require('@perses-dev/core'),
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^0.51.0-rc.1',
+          },
+        },
         '@perses-dev/components': {
-          version: '0.51.0-beta.0',
+          version: '0.51.0-rc.1',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-rc.1',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.51.0-beta.0',
+          version: '0.51.0-rc.1',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-rc.1',
           },
         },
         '@perses-dev/explore': {
-          version: '0.51.0-beta.0',
+          version: '0.51.0-rc.1',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-rc.1',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.51.0-beta.0',
+          version: '0.51.0-rc.1',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.51.0-rc.0',
+            requiredVersion: '^0.51.0-rc.1',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK

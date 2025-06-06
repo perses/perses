@@ -61,6 +61,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 			}
 		}
 		currentDir, _ := filepath.Split(currentPath)
+		logrus.Tracef("Loading model package from %s", currentDir)
 		name, instance, schemaErr := LoadModelSchema(currentDir)
 		if schemaErr != nil {
 			return schemaErr
