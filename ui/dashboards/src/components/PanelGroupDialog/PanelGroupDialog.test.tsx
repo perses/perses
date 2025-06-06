@@ -28,8 +28,6 @@ describe('Add Panel Group', () => {
         initialState={{
           dashboardResource: getTestDashboard(),
           isEditMode: true,
-          timeZone: 'local',
-          setTimeZone: () => undefined,
         }}
       >
         <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
