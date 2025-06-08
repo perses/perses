@@ -28,6 +28,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import EarthIcon from 'mdi-material-ui/Earth';
 import MagnifyIcon from 'mdi-material-ui/Magnify';
 import { ChangeEvent, ReactElement, useState } from 'react';
+import { DEFAULT_DASHBAORD_TIMEZONE } from '@perses-dev/core';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 import { InfoTooltip } from '../InfoTooltip';
 import { getTimeZoneOffset, TimeZoneOption } from '../model/timeZoneOption';
@@ -43,7 +44,7 @@ export function TimeZoneSelector({
   heightPx = '34px',
   timeZoneOptions: defaultTimeZoneOptions,
   onChange,
-  value = 'local',
+  value = DEFAULT_DASHBAORD_TIMEZONE,
 }: TimeZoneSelectorProps): ReactElement {
   const isMobile = useMediaQuery(useTheme().breakpoints.down('md'));
   const [open, setOpen] = useState(false);
@@ -80,7 +81,7 @@ export function TimeZoneSelector({
     <ClickAwayListener onClickAway={handleOnClickAway}>
       <Box>
         <Box sx={{ position: 'relative' }}>
-          <InfoTooltip description={value === 'local' ? localTimeZone : value}>
+          <InfoTooltip description={value === DEFAULT_DASHBAORD_TIMEZONE ? localTimeZone : value}>
             <ToolbarIconButton
               data-testid="current-timezone"
               aria-label="Timezone"
@@ -95,7 +96,9 @@ export function TimeZoneSelector({
               })}
             >
               <span className="timezone-text">
-                {value === 'local' ? getTimeZoneOffset(localTimeZone)?.value : getTimeZoneOffset(value)?.value}
+                {value === DEFAULT_DASHBAORD_TIMEZONE
+                  ? getTimeZoneOffset(localTimeZone)?.value
+                  : getTimeZoneOffset(value)?.value}
               </span>
               <EarthIcon sx={(theme) => ({ marginLeft: theme.spacing(0.5) })} />
             </ToolbarIconButton>
@@ -141,7 +144,7 @@ export function TimeZoneSelector({
                   <ListItemText>{timeZoneOption.label}</ListItemText>
                   <Typography variant="body2">{timeZoneOption.longOffset}</Typography>
                 </MenuItem>
-                {timeZoneOption.value === 'local' && <Divider />}
+                {timeZoneOption.value === DEFAULT_DASHBAORD_TIMEZONE && <Divider />}
               </Box>
             ))}
           </MenuList>

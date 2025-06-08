@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, TimeRangeValue } from '@perses-dev/core';
+import { DEFAULT_DASHBAORD_TIMEZONE, DurationString, TimeRangeValue } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
 import { TimeZoneProvider } from '@perses-dev/components';
 import { TimeRangeProvider } from './TimeRangeProvider';
@@ -25,7 +25,7 @@ export interface TimeRangeFromQueryProps {
 }
 
 export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps): ReactElement {
-  const { initialTimeRange, initialRefreshInterval, children, initialTimeZone = 'local' } = props;
+  const { initialTimeRange, initialRefreshInterval, children, initialTimeZone = DEFAULT_DASHBAORD_TIMEZONE } = props;
 
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);

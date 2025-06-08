@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { createContext, ReactElement, useContext } from 'react';
+import { DEFAULT_DASHBAORD_TIMEZONE } from '@perses-dev/core';
 import { formatWithTimeZone, dateFormatOptionsWithTimeZone } from '../utils';
 
 type TimeZoneContextType = {
@@ -41,7 +42,7 @@ export function useTimeZone(): {
   const timeZoneContext = useContext(TimeZoneContext);
 
   return {
-    timeZone: timeZoneContext?.timeZone ?? 'local',
+    timeZone: timeZoneContext?.timeZone ?? DEFAULT_DASHBAORD_TIMEZONE,
     setTimeZone: (timeZone: string) => timeZoneContext?.setTimeZone(timeZone),
     formatWithUserTimeZone(date: Date, formatString: string): string {
       return formatWithTimeZone(date, formatString, timeZoneContext?.timeZone);

@@ -12,7 +12,12 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
+import {
+  BuiltinVariableDefinition,
+  DEFAULT_DASHBAORD_TIMEZONE,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
@@ -61,7 +66,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
-  const initialTimeZone = spec.timeZone ?? 'local';
+  const initialTimeZone = spec.timeZone ?? DEFAULT_DASHBAORD_TIMEZONE;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();

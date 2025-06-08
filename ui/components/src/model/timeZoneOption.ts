@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DEFAULT_DASHBAORD_TIMEZONE } from '@perses-dev/core';
 import memoize from 'lodash/memoize';
 
 export interface TimeZoneOption {
@@ -45,7 +46,7 @@ export const getTimeZoneOptions = memoize((): TimeZoneOption[] => {
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   // define a browser time zone option
   const BROWSER_TIME_ZONE: TimeZoneOption = {
-    value: 'local',
+    value: DEFAULT_DASHBAORD_TIMEZONE,
     label: `${localTimeZone} (default)`,
     longOffset: getTimeZoneOffset(localTimeZone)?.value || '',
   };
@@ -54,10 +55,10 @@ export const getTimeZoneOptions = memoize((): TimeZoneOption[] => {
 
   return (
     // putting UTC and local time zone options first for better user experience
-    ['UTC', 'local', ...DEFAULT_TIMEZONE_OPTIONS()]
+    ['UTC', DEFAULT_DASHBAORD_TIMEZONE, ...DEFAULT_TIMEZONE_OPTIONS()]
       .map((timeZone) => {
-        // return defined BROWSER_TIME_ZONE if timeZone is 'local'
-        if (timeZone === 'local') {
+        // return defined BROWSER_TIME_ZONE if timeZone is DEFAULT_DASHBAORD_TIMEZONE
+        if (timeZone === DEFAULT_DASHBAORD_TIMEZONE) {
           return BROWSER_TIME_ZONE;
         }
         // return defined UTC if timeZone is 'UTC'
