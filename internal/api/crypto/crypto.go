@@ -32,7 +32,6 @@ import (
 type Crypto interface {
 	Encrypt(spec *modelV1.SecretSpec) error
 	Decrypt(spec *modelV1.SecretSpec) error
-	EncryptCFB(stringToEncrypt string) (string, error)
 	IsCFBEncrypted() bool
 }
 
@@ -182,7 +181,7 @@ func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
 		// Try CFB decryption if AES failed
 		cfbDecryptedPassword, cfbErr := c.decryptCFB(stringToDecrypt)
 		if cfbErr != nil {
-			return "", fmt.Errorf("failed to decrypt - AES error: %w\nCFB error: %v", err, cfbErr)
+			return "", fmt.Errorf("failed to decrypt - \nAES error: %w\nCFB error: %v", err, cfbErr)
 		}
 		c.isCfbEncrypted = true
 		return cfbDecryptedPassword, nil
@@ -192,24 +191,6 @@ func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
 
 func (c *crypto) IsCFBEncrypted() bool {
 	return c.isCfbEncrypted
-}
-
-func (c *crypto) EncryptCFB(stringToEncrypt string) (string, error) {
-	if len(stringToEncrypt) == 0 {
-		return "", nil
-	}
-	plainText := []byte(stringToEncrypt)
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
-	}
-
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
-
-	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
 func (c *crypto) decryptCFB(stringToDecrypt string) (string, error) {

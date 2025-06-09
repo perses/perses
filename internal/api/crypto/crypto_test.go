@@ -20,11 +20,8 @@ func TestEncryptDecryptUsingCFB(t *testing.T) {
 	}
 	assert.NoError(t, err)
 	assert.NotEmpty(t, spec.BasicAuth.Password)
-	cfbEncryptedPassword, err := crypto.EncryptCFB(spec.BasicAuth.Password)
+	cfbEncryptedPassword := "Bm11iHDx3AL966MEKBjQrL_AN8pzFqnRtluw"
 	spec.BasicAuth.Password = cfbEncryptedPassword
-	assert.NoError(t, err)
-	assert.NotEmpty(t, cfbEncryptedPassword)
-	assert.NotEqual(t, cfbEncryptedPassword, "password123")
 
 	err = crypto.Decrypt(spec)
 	assert.NoError(t, err)
