@@ -41,7 +41,7 @@ type endpoint struct {
 
 func NewEndpoint(service user.Service, rbacService rbac.RBAC, securityService crypto.Security, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
 	localUsers := true
-	if _, ok := rbacService.(rbac.K8sImpl); ok {
+	if _, ok := rbacService.(*rbac.K8sImpl); ok {
 		localUsers = false
 	}
 
@@ -61,7 +61,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 
 	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
 
-	if e.localUsers {
+	if !e.localUsers {
 		group.ANY("", e.disabled, true)
 		return
 	}

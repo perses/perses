@@ -172,30 +172,7 @@ func (o *option) Validate() error {
 		}
 	}
 	if o.useKubeconfig {
-		if !providers.KubernetesProvider.Enabled {
-			return fmt.Errorf("--kubeconfig input is forbidden as backend does not support kubernetes auth provider")
-		}
-		if len(o.kubeconfig) == 0 {
-			// Load KUBECONFIG env variable if "--kubeconfig" didn't receive a location
-			var kubeconfigEnv kubeconfigStruct
-			lamenv.Unmarshal(&kubeconfigEnv, []string{})
-			o.kubeconfig = kubeconfigEnv.Kubeconfig
-
-			// If KUBECONFIG isn't set, then attempt to load from the well known "~/.kube/config" location
-			if len(o.kubeconfig) == 0 {
-				usr, _ := user.Current()
-				dir := usr.HomeDir
-				path := filepath.Join(dir, ".kube/config")
-
-				o.kubeconfig = path
-			}
-		}
-
-		kubeconfig, err := crypto.InitKubeConfig(o.kubeconfig)
-		if err != nil {
-			return err
-		}
-		o.accessToken = kubeconfig.BearerToken
+		return o.validateKubernetes(providers)
 	}
 	return nil
 }
@@ -344,6 +321,37 @@ func (o *option) promptProvider(options []huh.Option[string]) (string, error) {
 func (o *option) setExternalAuthProvider(kind externalAuthKind, slugID string) {
 	o.externalAuthKind = kind
 	o.externalAuthProvider = slugID
+}
+
+func (o *option) validateKubernetes(providers backendConfig.AuthProviders) error {
+	if !providers.KubernetesProvider.Enabled {
+		return fmt.Errorf("--kubeconfig input is forbidden as backend does not support kubernetes auth provider")
+	}
+	if len(o.kubeconfig) == 0 {
+		// Load KUBECONFIG env variable if "--kubeconfig" didn't receive a location
+		var kubeconfigEnv kubeconfigStruct
+		err := lamenv.Unmarshal(&kubeconfigEnv, []string{})
+		if err != nil {
+			return err
+		}
+		o.kubeconfig = kubeconfigEnv.Kubeconfig
+
+		// If KUBECONFIG isn't set, then attempt to load from the well known "~/.kube/config" location
+		if len(o.kubeconfig) == 0 {
+			usr, _ := user.Current()
+			dir := usr.HomeDir
+			path := filepath.Join(dir, ".kube/config")
+
+			o.kubeconfig = path
+		}
+	}
+
+	kubeconfig, err := crypto.InitKubeConfig(o.kubeconfig)
+	if err != nil {
+		return err
+	}
+	o.accessToken = kubeconfig.BearerToken
+	return nil
 }
 
 func NewCMD() *cobra.Command {
