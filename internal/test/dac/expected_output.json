@@ -9,7 +9,8 @@
   },
   "spec": {
     "display": {
-      "name": "Containers monitoring"
+      "name": "Containers monitoring",
+      "description": "A dashboard to monitor containers"
     },
     "datasources": {
       "myPromDemo": {
