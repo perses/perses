@@ -47,7 +47,6 @@ var (
 		"/import",
 		"/config",
 		"/explore",
-		"/profile",
 	}
 	capturingPluginName = regexp.MustCompile(`/plugins/([a-zA-Z0-9_-]+)/?.*`)
 )

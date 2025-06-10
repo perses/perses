@@ -32,7 +32,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -40,6 +39,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -112,11 +112,11 @@ type endpoint struct {
 	dts          datasource.DAO
 	globalDTS    globaldatasource.DAO
 	crypto       crypto.Crypto
-	authz        authorization.Authorization
+	rbac         rbac.RBAC
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
-	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, authz authorization.Authorization) route.Endpoint {
+	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, rbac rbac.RBAC) route.Endpoint {
 	return &endpoint{
 		cfg:          cfg,
 		dashboard:    dashboardDAO,
@@ -125,7 +125,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		dts:          dtsDAO,
 		globalDTS:    globalDtsDAO,
 		crypto:       crypto,
-		authz:        authz,
+		rbac:         rbac,
 	}
 }
 
@@ -151,18 +151,20 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
-	if !e.authz.IsEnabled() {
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// If we're running without authentication, claims can be nil - just let requests through.
 		return nil
 	}
 
 	if role.IsGlobalScope(scope) {
-		if ok := e.authz.HasPermission(ctx, action, v1.WildcardProject, scope); !ok {
+		if ok := e.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, scope); !ok {
 			return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
 		}
 		return nil
 	}
 
-	if ok := e.authz.HasPermission(ctx, action, projectName, scope); !ok {
+	if ok := e.rbac.HasPermission(claims.Subject, action, projectName, scope); !ok {
 		return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
 	}
 

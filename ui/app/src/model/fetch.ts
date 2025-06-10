@@ -11,29 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatusError } from '@perses-dev/core';
+import { fetch as initialFetch, StatusError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
 
-export function enableRefreshFetch(): void {
-  global.fetch = new Proxy(global.fetch, {
-    apply: function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
-      return target
-        .apply(that, args)
-        .then((res) => {
-          if (res.status === 401) {
-            return refreshToken()
-              .then(() => {
-                return target.apply(that, args);
-              })
-              .catch((refreshError: StatusError) => {
-                throw refreshError;
-              });
-          }
-          return res;
-        })
-        .catch((error: StatusError) => {
-          throw error;
-        });
-    },
+export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
+  return initialFetch(...args).catch((error: StatusError) => {
+    if (error.status !== 401) {
+      throw error;
+    }
+    return refreshToken()
+      .catch((_: StatusError) => {
+        throw error;
+      })
+      .then(() => {
+        return initialFetch(...args);
+      });
   });
+}
+
+export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
+  const response = await fetch(...args);
+  const json: T = await response.json();
+  return json;
 }

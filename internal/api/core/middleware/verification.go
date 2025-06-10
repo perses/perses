@@ -83,7 +83,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				}
 			}
 			if len(projectName) > 0 {
-				if _, err := svc.Get(apiInterface.Parameters{Name: projectName}); err != nil {
+				if _, err := svc.Get(apiInterface.EmptyCtx, apiInterface.Parameters{Name: projectName}); err != nil {
 					if databaseModel.IsKeyNotFound(err) {
 						return apiInterface.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
 					}

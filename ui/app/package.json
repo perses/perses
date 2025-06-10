@@ -30,6 +30,7 @@
     "dompurify": "^3.2.4",
     "immer": "^10.1.1",
     "lodash": "^4.17.21",
+    "lru-cache": "^8.0.4",
     "marked": "^15.0.7",
     "mdi-material-ui": "^7.9.2",
     "react": "^18.0.0",

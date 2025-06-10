@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/pkg/model/api"
@@ -37,7 +36,7 @@ func NewService(dao folder.DAO) folder.Service {
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Folder) (*v1.Folder, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Folder) (*v1.Folder, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -54,7 +53,7 @@ func (s *service) create(entity *v1.Folder) (*v1.Folder, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Folder, parameters apiInterface.Parameters) (*v1.Folder, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Folder, parameters apiInterface.Parameters) (*v1.Folder, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -86,15 +85,15 @@ func (s *service) update(entity *v1.Folder, parameters apiInterface.Parameters) 
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (*v1.Folder, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.Folder, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q *folder.Query, params apiInterface.Parameters) ([]*v1.Folder, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]*v1.Folder, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -102,7 +101,7 @@ func (s *service) List(q *folder.Query, params apiInterface.Parameters) ([]*v1.F
 	return s.dao.List(query)
 }
 
-func (s *service) RawList(q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -110,7 +109,7 @@ func (s *service) RawList(q *folder.Query, params apiInterface.Parameters) ([]js
 	return s.dao.RawList(query)
 }
 
-func (s *service) MetadataList(q *folder.Query, params apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]api.Entity, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -118,7 +117,7 @@ func (s *service) MetadataList(q *folder.Query, params apiInterface.Parameters) 
 	return s.dao.MetadataList(query)
 }
 
-func (s *service) RawMetadataList(q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err

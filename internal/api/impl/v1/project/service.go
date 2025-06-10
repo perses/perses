@@ -17,9 +17,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/perses/perses/pkg/model/api"
+
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -29,7 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/internal/api/rbac"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/sirupsen/logrus"
@@ -45,10 +45,10 @@ type service struct {
 	roleBindingDAO rolebinding.DAO
 	secretDAO      secret.DAO
 	variableDAO    variable.DAO
-	authz          authorization.Authorization
+	rbac           rbac.RBAC
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, authz authorization.Authorization) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac rbac.RBAC) project.Service {
 	return &service{
 		dao:            dao,
 		folderDAO:      folderDAO,
@@ -58,11 +58,11 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 		roleBindingDAO: roleBindingDAO,
 		secretDAO:      secretDAO,
 		variableDAO:    variableDAO,
-		authz:          authz,
+		rbac:           rbac,
 	}
 }
 
-func (s *service) Create(ctx echo.Context, entity *v1.Project) (*v1.Project, error) {
+func (s *service) Create(ctx apiInterface.PersesContext, entity *v1.Project) (*v1.Project, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -70,7 +70,7 @@ func (s *service) Create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 	return s.create(ctx, copyEntity)
 }
 
-func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, error) {
+func (s *service) create(ctx apiInterface.PersesContext, entity *v1.Project) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -78,8 +78,8 @@ func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 	}
 
 	// If authorization is enabled, permissions to the creator need to be given
-	if s.authz.IsEnabled() {
-		if err := s.createProjectRoleAndRoleBinding(ctx, entity.Metadata.Name); err != nil {
+	if s.rbac.IsEnabled() {
+		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil {
 			return nil, err
 		}
 	}
@@ -87,7 +87,7 @@ func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 }
 
 // Create default roles and role bindings for the project
-func (s *service) createProjectRoleAndRoleBinding(ctx echo.Context, projectName string) error {
+func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInterface.PersesContext) error {
 	owner := utils.DefaultOwnerRole(projectName)
 	editor := utils.DefaultEditorRole(projectName)
 	viewer := utils.DefaultViewerRole(projectName)
@@ -101,20 +101,16 @@ func (s *service) createProjectRoleAndRoleBinding(ctx echo.Context, projectName 
 	if err := s.roleDAO.Create(viewer); err != nil {
 		return fmt.Errorf("failed to create viewer role: %e", err)
 	}
-	username, err := s.authz.GetUsername(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get username from context: %e", err)
-	}
-	if len(username) > 0 {
-		ownerRb := utils.DefaultOwnerRoleBinding(projectName, username)
+	if len(ctx.GetUsername()) > 0 {
+		ownerRb := utils.DefaultOwnerRoleBinding(projectName, ctx.GetUsername())
 		if err := s.roleBindingDAO.Create(ownerRb); err != nil {
 			return fmt.Errorf("failed to create owner role binding: %e", err)
 		}
 	}
-	return s.authz.RefreshPermissions()
+	return s.rbac.Refresh()
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -140,7 +136,7 @@ func (s *service) update(entity *v1.Project, parameters apiInterface.Parameters)
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	projectName := parameters.Name
 	if err := s.folderDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all folders")
@@ -170,30 +166,30 @@ func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) err
 		logrus.WithError(err).Error("unable to delete all roles")
 		return err
 	}
-	if s.authz.IsEnabled() {
-		if err := s.authz.RefreshPermissions(); err != nil {
+	if s.rbac.IsEnabled() {
+		if err := s.rbac.Refresh(); err != nil {
 			return err
 		}
 	}
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (*v1.Project, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.Project, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *project.Query, _ apiInterface.Parameters) ([]*v1.Project, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]*v1.Project, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *project.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

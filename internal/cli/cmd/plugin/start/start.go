@@ -199,14 +199,6 @@ func (o *option) Execute() error {
 	}
 	// Wait for context to be canceled or tasks to be ended and wait for graceful stop
 	taskhelper.JoinAll(ctx, time.Second*30, devServerTasks)
-	// if the context is canceled, we need to unregister the plugin from the remote server
-	for _, plg := range pluginInDev {
-		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(plg.Name); err != nil {
-			logrus.WithError(err).Errorf("failed to unregister the plugin %q from the remote server", plg.Name)
-		} else {
-			logrus.Infof("plugin %q has been unregistered from the remote server", plg.Name)
-		}
-	}
 	return nil
 }
 

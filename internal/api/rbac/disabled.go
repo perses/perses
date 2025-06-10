@@ -11,18 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package rbac
 
-kind: "DisjunctChart"
-spec: {
-	#A | #B
-	c: string
+import (
+	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
+)
+
+type disabledImpl struct{}
+
+func (r *disabledImpl) IsEnabled() bool {
+	return false
 }
 
-#A: {
-	a: string
+func (r *disabledImpl) GetUserProjects(_ string, _ v1Role.Action, _ v1Role.Scope) []string {
+	return []string{}
 }
 
-#B: {
-	b: int
+func (r *disabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
+	return true
+}
+
+func (r *disabledImpl) GetPermissions(_ string) map[string][]*v1Role.Permission {
+	return nil
+}
+
+func (r *disabledImpl) Refresh() error {
+	return nil
 }

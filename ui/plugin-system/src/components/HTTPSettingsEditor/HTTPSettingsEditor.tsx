@@ -34,7 +34,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const strProxy = 'Proxy';
 
   // Initialize Proxy mode by default, if neither direct nor proxy mode is selected.
-  if (value.directUrl === undefined && value.proxy === undefined) {
+  if (!value.directUrl && !value.proxy) {
     Object.assign(value, initialSpecProxy);
   }
 
@@ -60,6 +60,36 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   };
 
   const tabs = [
+    {
+      label: strDirect,
+      content: (
+        <Controller
+          name="URL"
+          render={({ field, fieldState }) => (
+            <TextField
+              {...field}
+              fullWidth
+              label="URL"
+              value={value.directUrl || ''}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+              InputProps={{
+                readOnly: isReadonly,
+              }}
+              InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+              onChange={(e) => {
+                field.onChange(e);
+                onChange(
+                  produce(value, (draft) => {
+                    draft.directUrl = e.target.value;
+                  })
+                );
+              }}
+            />
+          )}
+        />
+      ),
+    },
     {
       label: strProxy,
       content: (
@@ -393,36 +423,6 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
             )}
           />
         </>
-      ),
-    },
-    {
-      label: strDirect,
-      content: (
-        <Controller
-          name="URL"
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              fullWidth
-              label="URL"
-              value={value.directUrl || ''}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              InputProps={{
-                readOnly: isReadonly,
-              }}
-              InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-              onChange={(e) => {
-                field.onChange(e);
-                onChange(
-                  produce(value, (draft) => {
-                    draft.directUrl = e.target.value;
-                  })
-                );
-              }}
-            />
-          )}
-        />
       ),
     },
   ];

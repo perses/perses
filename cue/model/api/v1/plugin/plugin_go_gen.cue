@@ -14,7 +14,6 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	#KindPanel |
 	#KindTimeSeriesQuery |
 	#KindTraceQuery |
-	#KindProfileQuery |
 	#KindQuery |
 	#KindExplore
 
@@ -23,7 +22,6 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 #KindPanel:           #Kind & "Panel"
 #KindTimeSeriesQuery: #Kind & "TimeSeriesQuery"
 #KindTraceQuery:      #Kind & "TraceQuery"
-#KindProfileQuery:    #Kind & "ProfileQuery"
 #KindQuery:           #Kind & "Query"
 #KindExplore:         #Kind & "Explore"
 

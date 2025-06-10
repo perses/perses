@@ -12,12 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import {
-  BuiltinVariableDefinition,
-  DEFAULT_DASHBOARD_DURATION,
-  DEFAULT_REFRESH_INTERVAL,
-  GenericDatasourceResource,
-} from '@perses-dev/core';
+import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
@@ -31,6 +26,7 @@ import { DashboardProviderWithQueryParams } from '../../context/DashboardProvide
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
+  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
@@ -43,10 +39,10 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
 export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const {
     dashboardResource,
+    datasourceApi,
     externalVariableDefinitions,
     dashboardTitleComponent,
     emptyDashboardProps,
-    datasources,
     onSave,
     onDiscard,
     initialVariableIsSticky,

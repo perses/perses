@@ -15,12 +15,13 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
+  DatasourceResource,
   DatasourceSelector,
   DatasourceSpec,
+  GlobalDatasourceResource,
   useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
-  GenericDatasourceResource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -38,6 +39,17 @@ export interface DatasourceStoreProviderProps {
   children?: ReactNode;
   savedDatasources?: Record<string, DatasourceSpec>;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
+}
+
+/**
+ * The external API for fetching datasource resources
+ */
+export interface DatasourceApi {
+  buildProxyUrl?: BuildDatasourceProxyUrlFunc;
+  getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
+  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
+  listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
+  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
 }
 
 /**
@@ -128,13 +140,11 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
 
   const listDatasourceSelectItems = useEvent(
     async (datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]> => {
-      const projectDatasources = project
-        ? datasources.filter((ds) => ds.metadata['project'] === project && ds.spec.plugin.kind === datasourcePluginName)
-        : [];
-      const globalDatasources = datasources.filter(
-        (ds) => ds.kind === 'GlobalDatasource' && ds.spec.plugin.kind === datasourcePluginName
-      );
-      const pluginMetadata = await listPluginMetadata(['Datasource']);
+      const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
+        listPluginMetadata(['Datasource']),
+        project ? datasourceApi.listDatasources(project, datasourcePluginName) : [],
+        datasourceApi.listGlobalDatasources(datasourcePluginName),
+      ]);
 
       // Find the metadata for the plugin type they asked for, so we can use it for the name of the default datasource
       const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.spec.name === datasourcePluginName);
@@ -157,10 +167,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
 
       // Now look at project-level datasources
-      for (const pds of projectDatasources) {
-        const selectorName = pds.metadata.name;
+      for (const datasource of datasources) {
+        const selectorName = datasource.metadata.name;
         addItem({
-          spec: pds.spec,
+          spec: datasource.spec,
           selectorName,
           selectorGroup: 'project',
           editLink: `/projects/${project}/datasources`,
@@ -168,9 +178,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
 
       // And finally global datasources
-      for (const gds of globalDatasources) {
-        const selectorName = gds.metadata.name;
-        addItem({ spec: gds.spec, selectorName, selectorGroup: 'global', editLink: '/admin/datasources' });
+      for (const globalDatasource of globalDatasources) {
+        const selectorName = globalDatasource.metadata.name;
+        addItem({ spec: globalDatasource.spec, selectorName, selectorGroup: 'global', editLink: '/admin/datasources' });
       }
 
       return results;

@@ -39,10 +39,19 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const { project } = useProjectStore();
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
+  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+
+  useEffect(() => {
+    // warm up the caching of the datasources
+    if (projectName) {
+      datasourceApi.listDatasources(projectName);
+    }
+    datasourceApi.listGlobalDatasources();
+  }, [datasourceApi, projectName]);
+
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
-  const allDatasources = useAllDatasourceResources();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
       buildProjectVariableDefinition(projectName || '', projectVars ?? []),

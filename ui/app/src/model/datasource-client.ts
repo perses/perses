@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceResource, fetchJson, StatusError } from '@perses-dev/core';
+import { DatasourceResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -20,9 +20,10 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
+import { HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT, HTTPMethodDELETE, HTTPHeader } from './http';
+import buildQueryKey from './querykey-builder';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
-import { buildQueryKey } from './querykey-builder';
+import { fetch, fetchJson } from './fetch';
 
 export const resource = 'datasources';
 
@@ -30,68 +31,119 @@ type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], StatusEr
   project?: string;
 };
 
-export function createDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
-  const project = entity.metadata.project;
-  const url = buildURL({ resource, project });
-  return fetchJson<DatasourceResource>(url, {
-    method: HTTPMethodPOST,
-    headers: HTTPHeader,
-    body: JSON.stringify(entity),
-  });
+export function buildDatasourceQueryParameters(
+  kind?: string,
+  defaultDatasource?: boolean,
+  name?: string
+): URLSearchParams {
+  const q = new URLSearchParams();
+  if (kind !== undefined) {
+    q.append('kind', kind);
+  }
+  if (defaultDatasource !== undefined) {
+    q.append('default', String(defaultDatasource));
+  }
+  if (name !== undefined) {
+    q.append('name', name);
+  }
+  return q;
 }
 
-function getDatasource(name: string, project: string): Promise<DatasourceResource> {
-  const url = buildURL({ resource, project, name });
-  return fetchJson<DatasourceResource>(url, {
-    method: HTTPMethodGET,
-    headers: HTTPHeader,
+export function fetchDatasourceList(
+  project: string,
+  kind?: string,
+  defaultDatasource?: boolean,
+  name?: string
+): Promise<DatasourceResource[]> {
+  const url = buildURL({
+    resource: resource,
+    project: project,
+    queryParams: buildDatasourceQueryParameters(kind, defaultDatasource, name),
   });
-}
-
-function getDatasources(project?: string): Promise<DatasourceResource[]> {
-  const url = buildURL({ resource, project });
-  return fetchJson<DatasourceResource[]>(url, {
-    method: HTTPMethodGET,
-    headers: HTTPHeader,
-  });
-}
-
-export function updateDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
-  const name = entity.metadata.name;
-  const project = entity.metadata.project;
-  const url = buildURL({ resource, project, name });
-  return fetchJson<DatasourceResource>(url, {
-    method: HTTPMethodPUT,
-    headers: HTTPHeader,
-    body: JSON.stringify(entity),
-  });
-}
-
-export function deleteDatasource(entity: DatasourceResource): Promise<Response> {
-  const name = entity.metadata.name;
-  const project = entity.metadata.project;
-  const url = buildURL({ resource, project, name });
-  return fetch(url, {
-    method: HTTPMethodDELETE,
-    headers: HTTPHeader,
-  });
+  return fetchJson<DatasourceResource[]>(url);
 }
 
 /**
- * Used to get a datasource from the API.
- * Will automatically be refreshed when cache is invalidated
+ * Used to create a new project datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
  */
-export function useDatasource(name: string, project: string): UseQueryResult<DatasourceResource, StatusError> {
-  return useQuery<DatasourceResource, StatusError>({
-    queryKey: buildQueryKey({ resource, name, parent: project }),
-    queryFn: () => {
-      return getDatasource(name, project);
+export function useCreateDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
+    mutationKey: key,
+    mutationFn: (datasource: DatasourceResource) => {
+      return createDatasource(datasource);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: key });
     },
   });
 }
 
 /**
- * Used to get datasources from the API.
+ * Used to update a project datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
+ */
+export function useUpdateDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
+    mutationKey: key,
+    mutationFn: (datasource: DatasourceResource) => {
+      return updateDatasource(datasource);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+/**
+ * Used to delete a datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
+ */
+export function useDeleteDatasourceMutation(
+  projectName: string
+): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
+    mutationKey: key,
+    mutationFn: (entity: DatasourceResource) => {
+      return deleteDatasource(entity).then(() => {
+        return entity;
+      });
+    },
+    onSuccess: (datasource) => {
+      queryClient.removeQueries({ queryKey: [...key, datasource.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: key });
+    },
+  });
+}
+
+/**
+ * Used to get a datasource in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useDatasource(project: string, name: string): UseQueryResult<DatasourceResource, StatusError> {
+  return useQuery<DatasourceResource, StatusError>({
+    queryKey: buildQueryKey({ resource, parent: project, name }),
+    queryFn: () => {
+      return getDatasource(project, name);
+    },
+  });
+}
+
+/**
+ * Used to get datasources in the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDatasourceList(options: DatasourceListOptions): UseQueryResult<DatasourceResource[], StatusError> {
@@ -104,78 +156,44 @@ export function useDatasourceList(options: DatasourceListOptions): UseQueryResul
   });
 }
 
-/**
- * Returns a mutation that can be used to create a datasource.
- * Will automatically refresh the cache for all the list.
- *
- * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
- * @param project
- */
-export function useCreateDatasourceMutation(
-  project: string
-): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
-  const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource, parent: project });
-
-  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
-    mutationKey: queryKey,
-    mutationFn: (datasource: DatasourceResource) => {
-      return createDatasource(datasource);
-    },
-    onSuccess: () => {
-      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
-    },
+export function createDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
+  const url = buildURL({ resource, project: entity.metadata.project });
+  return fetchJson<DatasourceResource>(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
   });
 }
 
-/**
- * Returns a mutation that can be used to update a datasource.
- * Will automatically refresh the cache for all the list.
- *
- * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
- * @param project
- */
-export function useUpdateDatasourceMutation(
-  project: string
-): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
-  const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource, parent: project });
-  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
-    mutationKey: queryKey,
-    mutationFn: (datasource: DatasourceResource) => {
-      return updateDatasource(datasource);
-    },
-    onSuccess: (entity: DatasourceResource) => {
-      return Promise.all([
-        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
-        queryClient.invalidateQueries({ queryKey }),
-      ]);
-    },
+export function getDatasource(project: string, name: string): Promise<DatasourceResource> {
+  const url = buildURL({ resource, project: project, name: name });
+  return fetchJson<DatasourceResource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
   });
 }
 
-/**
- * Returns a mutation that can be used to delete a datasource.
- * Will automatically refresh the cache for all the list.
- *
- * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
- * @param project
- */
-export function useDeleteDatasourceMutation(
-  project: string
-): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
-  const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource, parent: project });
+export function getDatasources(project?: string): Promise<DatasourceResource[]> {
+  const url = buildURL({ resource, project: project });
+  return fetchJson<DatasourceResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
 
-  return useMutation<DatasourceResource, StatusError, DatasourceResource>({
-    mutationKey: queryKey,
-    mutationFn: async (entity: DatasourceResource) => {
-      await deleteDatasource(entity);
-      return entity;
-    },
-    onSuccess: (entity: DatasourceResource) => {
-      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
-      return queryClient.invalidateQueries({ queryKey });
-    },
+export function updateDatasource(entity: DatasourceResource): Promise<DatasourceResource> {
+  const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetchJson<DatasourceResource>(url, {
+    method: HTTPMethodPUT,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function deleteDatasource(entity: DatasourceResource): Promise<Response> {
+  const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetch(url, {
+    method: HTTPMethodDELETE,
+    headers: HTTPHeader,
   });
 }

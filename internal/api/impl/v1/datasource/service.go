@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -41,7 +40,7 @@ func NewService(dao datasource.DAO, sch schema.Schema) datasource.Service {
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Datasource) (*v1.Datasource, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Datasource) (*v1.Datasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -61,7 +60,7 @@ func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -96,14 +95,14 @@ func (s *service) update(entity *v1.Datasource, parameters apiInterface.Paramete
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (*v1.Datasource, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
-func (s *service) List(q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -115,15 +114,15 @@ func (s *service) List(q *datasource.Query, params apiInterface.Parameters) ([]*
 	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
 }
 
-func (s *service) RawList(_ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) MetadataList(_ *datasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawMetadataList(_ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

@@ -17,13 +17,14 @@ import {
   useInitialRefreshInterval,
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
-import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL, GenericDatasourceResource } from '@perses-dev/core';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import { VariableProviderProps, DatasourceStoreProvider, VariableProvider } from '@perses-dev/dashboards';
 import React, { ReactElement } from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
+  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
   datasources: GenericDatasourceResource[];

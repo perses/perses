@@ -19,9 +19,10 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -51,7 +52,7 @@ func isJSONContentType(ctx echo.Context) bool {
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
-// This is a way to align the code of the different endpoints.
+// This is a way to align the code of the different endpoint.
 type Toolbox[T api.Entity, K databaseModel.Query] interface {
 	Create(ctx echo.Context, entity T) error
 	Update(ctx echo.Context, entity T) error
@@ -60,10 +61,10 @@ type Toolbox[T api.Entity, K databaseModel.Query] interface {
 	List(ctx echo.Context, q K) error
 }
 
-func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], authz authorization.Authorization, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
+func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], rbac rbac.RBAC, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
 	return &toolbox[T, K, V]{
 		service:       service,
-		authz:         authz,
+		rbac:          rbac,
 		kind:          kind,
 		caseSensitive: caseSensitive,
 	}
@@ -72,7 +73,7 @@ func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface
 type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 	Toolbox[T, V]
 	service       apiInterface.Service[T, K, V]
-	authz         authorization.Authorization
+	rbac          rbac.RBAC
 	kind          v1.Kind
 	caseSensitive bool
 }
@@ -80,12 +81,14 @@ type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 // checkPermissionList will verify only the permission for the List method. As you can see, scope is hardcoded.
 // Use the generic checkPermission for any other purpose
 func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiInterface.Parameters, scope *role.Scope) error {
-	if !t.authz.IsEnabled() {
+	projectName := parameters.Project
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
 		return nil
 	}
-	projectName := parameters.Project
 	if role.IsGlobalScope(*scope) {
-		if ok := t.authz.HasPermission(ctx, role.ReadAction, v1.WildcardProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
 		}
 		return nil
@@ -97,33 +100,35 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 		// In this particular context, the user would like to get every resource to every project he has access to.
 		return nil
 	}
-	if ok := t.authz.HasPermission(ctx, role.ReadAction, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
 	}
 	return nil
 }
 
 func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
-	if !t.authz.IsEnabled() {
+	projectName := parameters.Project
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
 		return nil
 	}
-	projectName := parameters.Project
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return err
 	}
 	if role.IsGlobalScope(*scope) {
-		if ok := t.authz.HasPermission(ctx, action, v1.WildcardProject, *scope); !ok {
+		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
 			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
 	}
 
-	// Project is not a global scope to be attached to a Role (or GlobalRole) and have user able to delete their own projects
+	// Project is not a global scope, in order to be attached to a Role (or GlobalRole) and have user able to delete their own projects
 	if *scope == role.ProjectScope {
 		// Create is still a "Global" only permission
 		if action == role.CreateAction {
-			if ok := t.authz.HasPermission(ctx, action, v1.WildcardProject, *scope); !ok {
+			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
 				return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 			}
 			return nil
@@ -135,7 +140,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		// Retrieving project name from payload if project name not provided in the url
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
-	if ok := t.authz.HasPermission(ctx, action, projectName, *scope); !ok {
+	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 	}
 	return nil
@@ -149,7 +154,7 @@ func (t *toolbox[T, K, V]) Create(ctx echo.Context, entity T) error {
 	if err := t.checkPermission(ctx, entity, parameters, role.CreateAction); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Create(ctx, entity)
+	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx), entity)
 	if err != nil {
 		return err
 	}
@@ -164,7 +169,7 @@ func (t *toolbox[T, K, V]) Update(ctx echo.Context, entity T) error {
 	if err := t.checkPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Update(ctx, entity, parameters)
+	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx), entity, parameters)
 	if err != nil {
 		return err
 	}
@@ -176,7 +181,7 @@ func (t *toolbox[T, K, V]) Delete(ctx echo.Context) error {
 	if err := t.checkPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
 	}
-	if err := t.service.Delete(ctx, parameters); err != nil {
+	if err := t.service.Delete(apiInterface.NewPersesContext(ctx), parameters); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -187,7 +192,7 @@ func (t *toolbox[T, K, V]) Get(ctx echo.Context) error {
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
-	entity, err := t.service.Get(parameters)
+	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx), parameters)
 	if err != nil {
 		return err
 	}

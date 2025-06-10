@@ -20,7 +20,6 @@ import (
 
 var idRegexp = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
 var keyMaxLength = 75
-var maxDescriptionLength = 200
 
 // ValidateID checks for forbidden items in substring used inside id
 func ValidateID(name string) error {
@@ -34,19 +33,6 @@ func ValidateID(name string) error {
 
 	if !idRegexp.MatchString(name) {
 		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, idRegexp.String())
-	}
-
-	return nil
-}
-
-// ValidateDescription checks for forbidden items in substring used inside description
-func ValidateDescription(description string) error {
-	if len(description) > maxDescriptionLength {
-		return fmt.Errorf("description cannot contain more than %d characters", maxDescriptionLength)
-	}
-
-	if !idRegexp.MatchString(description) {
-		return fmt.Errorf("%q is not a correct description. It should match the regexp: %s", description, idRegexp.String())
 	}
 
 	return nil

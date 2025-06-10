@@ -18,11 +18,10 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -30,20 +29,20 @@ import (
 
 type service struct {
 	globalrole.Service
-	dao   globalrole.DAO
-	authz authorization.Authorization
-	sch   schema.Schema
+	dao  globalrole.DAO
+	rbac rbac.RBAC
+	sch  schema.Schema
 }
 
-func NewService(dao globalrole.DAO, authz authorization.Authorization, sch schema.Schema) globalrole.Service {
+func NewService(dao globalrole.DAO, rbac rbac.RBAC, sch schema.Schema) globalrole.Service {
 	return &service{
-		dao:   dao,
-		authz: authz,
-		sch:   sch,
+		dao:  dao,
+		rbac: rbac,
+		sch:  sch,
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.GlobalRole) (*v1.GlobalRole, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -58,13 +57,13 @@ func (s *service) create(entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 		return nil, err
 	}
 	// Refreshing RBAC cache as the role can add or remove new permissions to users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -89,39 +88,39 @@ func (s *service) update(entity *v1.GlobalRole, parameters apiInterface.Paramete
 		return nil, updateErr
 	}
 	// Refreshing RBAC cache as the role can add or remove new permissions to users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		return err
 	}
 	// Refreshing RBAC cache as the role can add or remove new permissions to users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return nil
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *globalrole.Query, _ apiInterface.Parameters) ([]*v1.GlobalRole, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]*v1.GlobalRole, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *globalrole.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

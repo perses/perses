@@ -13,13 +13,18 @@
 
 import { CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { Link } from '@perses-dev/core';
+import { Link, TimeSeriesData, TimeSeries, TimeSeriesMetadata } from '@perses-dev/core';
 import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
+
+interface AbsoluteTimeRange {
+  start: Date;
+  end: Date;
+}
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   id: string;
@@ -28,8 +33,11 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   links?: Link[];
   extra?: ReactNode;
   queryResults: QueryData[];
+  panelPluginKind: string;
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
+  projectName?: string;
+  panelProps?: Record<string, unknown>;
 }
 
 export function PanelHeader({
@@ -42,6 +50,9 @@ export function PanelHeader({
   editHandlers,
   sx,
   extra,
+  panelPluginKind,
+  projectName,
+  panelProps, // ========== ADDED ==========
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -49,6 +60,50 @@ export function PanelHeader({
 
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
+
+  const timeSeriesDataForExport = useMemo(() => {
+    // Collect all series from all queries
+    const allSeries: TimeSeries[] = [];
+    let timeRange: AbsoluteTimeRange | undefined = undefined;
+    let stepMs: number | undefined = undefined;
+    let metadata: TimeSeriesMetadata | undefined = undefined;
+
+    queryResults.forEach((query) => {
+      if (query.data && 'series' in query.data) {
+        const timeSeriesData = query.data as TimeSeriesData;
+
+        // Collect series from this query
+        if (timeSeriesData.series && timeSeriesData.series.length > 0) {
+          allSeries.push(...timeSeriesData.series);
+
+          // Use the first query's metadata/timeRange/stepMs as the base
+          if (!timeRange && timeSeriesData.timeRange) {
+            timeRange = timeSeriesData.timeRange;
+          }
+          if (!stepMs && timeSeriesData.stepMs) {
+            stepMs = timeSeriesData.stepMs;
+          }
+          if (!metadata && timeSeriesData.metadata) {
+            metadata = timeSeriesData.metadata;
+          }
+        }
+      }
+    });
+
+    // If we found series, create a combined TimeSeriesData object
+    if (allSeries.length > 0) {
+      const combinedData: TimeSeriesData = {
+        series: allSeries,
+        timeRange,
+        stepMs,
+        metadata,
+      };
+
+      return combinedData;
+    }
+
+    return undefined;
+  }, [queryResults]);
 
   return (
     <CardHeader
@@ -79,10 +134,15 @@ export function PanelHeader({
             description={description}
             descriptionTooltipId={descriptionTooltipId}
             links={links}
-            queryResults={queryResults}
+            queryResults={timeSeriesDataForExport}
+            panelPluginKind={panelPluginKind}
             readHandlers={readHandlers}
             editHandlers={editHandlers}
             extra={extra}
+            projectName={projectName}
+            // ========== ADDED: Pass panel props for actions ==========
+            panelProps={panelProps}
+            // ========================================================
           />
         </Stack>
       }

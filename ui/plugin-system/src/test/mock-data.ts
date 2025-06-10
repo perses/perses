@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
+import { TimeSeriesData, TraceData } from '@perses-dev/core';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {
@@ -71,26 +71,5 @@ export const MOCK_TRACE_DATA: TraceData = {
   ],
   metadata: {
     executedQueryString: '{ duration > 1000ms }',
-  },
-};
-
-export const MOCK_PROFILE_DATA: ProfileData = {
-  profile: {
-    stackTrace: {
-      id: 0,
-      name: 'root',
-      level: 0,
-      start: 1699916103945861,
-      end: 1699916105065861,
-      total: 1000,
-      self: 500,
-      children: [],
-    },
-  },
-  metadata: {
-    spyName: '',
-    sampleRate: 1000000000,
-    units: 'samples',
-    name: 'cpu',
   },
 };

@@ -53,7 +53,6 @@ const (
 	PathUser               = "users"
 	PathVariable           = "variables"
 	PathView               = "view"
-	ContextKeyAnonymous    = "anonymous"
 )
 
 const MetricNamespace = "perses"
@@ -69,16 +68,6 @@ func GetNameParameter(ctx echo.Context) string {
 
 func GetProjectParameter(ctx echo.Context) string {
 	return ctx.Param(ParamProject)
-}
-
-func IsAnonymous(ctx echo.Context) bool {
-	// When there is an anonymous endpoint, the user is not set in the context.
-	// During the authorization process, this is something that must be considered.
-	value := ctx.Get(ContextKeyAnonymous)
-	if value == nil {
-		return false
-	}
-	return value.(bool)
 }
 
 // GetMetadataProject Retrieve project from entity metadata

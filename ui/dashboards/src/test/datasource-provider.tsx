@@ -36,6 +36,25 @@ export const prometheusDemo: GlobalDatasourceResource = {
 // This default currently defines the bare minimum to get a story working in
 // the `Dashboard` storybook with the Prometheus demo api. We'll likely want
 // to expand it to do more in the future.
-export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'dashboardResource'> = {
+export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'datasourceApi' | 'dashboardResource'> = {
   dashboardResource: getTestDashboard(),
+  datasourceApi: {
+    buildProxyUrl: () => '',
+    getDatasource: () => {
+      return Promise.resolve(undefined);
+    },
+    getGlobalDatasource: (selector) => {
+      if (selector.kind === 'PrometheusDatasource') {
+        return Promise.resolve(prometheusDemo);
+      }
+
+      return Promise.resolve(undefined);
+    },
+    listDatasources: () => {
+      return Promise.resolve([]);
+    },
+    listGlobalDatasources: () => {
+      return Promise.resolve([]);
+    },
+  },
 };

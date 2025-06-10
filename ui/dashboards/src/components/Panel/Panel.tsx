@@ -27,6 +27,11 @@ export interface PanelProps extends CardProps<'section'> {
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
+  /**
+   * Project name to use for the panel. If not provided, will attempt to extract from URL.
+   * @default extracted from URL or 'unknown-project'
+   */
+  projectName?: string;
 }
 
 export type PanelOptions = {
@@ -53,6 +58,50 @@ export type PanelExtraProps = {
   panelGroupItemId?: PanelGroupItemId;
 };
 
+// Function to extract project name from URL (kept as fallback)
+const extractProjectNameFromUrl = (): string => {
+  try {
+    if (process.env.NODE_ENV === 'test') {
+      return 'test-project';
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ) {
+      const urlPath = window.location.pathname;
+
+      if (urlPath === '/' || urlPath === '') {
+        return 'dev-project';
+      }
+    }
+
+    const urlPath = window.location.pathname;
+
+    // Split the path and look for the project name after "/projects/"
+    const pathSegments = urlPath.split('/').filter((segment) => segment.length > 0);
+    const projectsIndex = pathSegments.findIndex((segment) => segment === 'projects');
+
+    if (projectsIndex !== -1 && projectsIndex + 1 < pathSegments.length) {
+      const projectName = pathSegments[projectsIndex + 1];
+      if (projectName && projectName.trim().length > 0) {
+        return projectName;
+      }
+    }
+
+    // Fallback: try to extract from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectParam = urlParams.get('project');
+    if (projectParam && projectParam.trim().length > 0) {
+      return projectParam;
+    }
+
+    return 'unknown-project';
+  } catch {
+    return 'unknown-project';
+  }
+};
+
 /**
  * Renders a PanelDefinition's content inside of a Card.
  *
@@ -71,6 +120,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     sx,
     panelOptions,
     panelGroupItemId,
+    projectName: providedProjectName,
     ...others
   } = props;
 
@@ -90,6 +140,24 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const chartsTheme = useChartsTheme();
 
   const { queryResults } = useDataQueriesContext();
+
+  // Use provided project name or extract from URL as fallback
+  const projectName = useMemo(() => {
+    return providedProjectName || extractProjectNameFromUrl();
+  }, [providedProjectName]);
+
+  const panelPropsForActions = useMemo(() => {
+    return {
+      spec: definition.spec.plugin.spec,
+      queryResults: queryResults.map((query) => ({
+        definition: query.definition,
+        data: query.data,
+      })),
+      contentDimensions,
+      definition,
+      projectName,
+    };
+  }, [definition, contentDimensions, queryResults, projectName]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
@@ -127,9 +195,12 @@ export const Panel = memo(function Panel(props: PanelProps) {
           title={definition.spec.display.name}
           description={definition.spec.display.description}
           queryResults={queryResults}
+          panelPluginKind={definition.spec.plugin.kind}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}
+          projectName={projectName}
+          panelProps={panelPropsForActions}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}
@@ -148,7 +219,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec, queryResults]}>
+        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec]}>
           <PanelContent
             definition={definition}
             panelPluginKind={definition.spec.plugin.kind}

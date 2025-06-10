@@ -22,7 +22,8 @@ import {
   useInitialTimeRange,
   remotePluginLoader,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { useAllDatasourceResources } from '../../model/datasource-api';
@@ -44,7 +45,12 @@ export function VariableDrawer<T extends Variable>({
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
-  const allDatasources = useAllDatasourceResources();
+  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+  useEffect(() => {
+    // warm up the caching of the datasources
+    if (projectName) datasourceApi.listDatasources(projectName);
+    datasourceApi.listGlobalDatasources();
+  }, [datasourceApi, projectName]);
 
   const variableDef = useMemo(() => {
     const result = structuredClone(variable.spec);

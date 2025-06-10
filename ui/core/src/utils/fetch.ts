@@ -19,7 +19,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
   if (response.ok === false) {
     const contentType = response.headers.get('content-type');
     if (contentType?.includes('application/json')) {
-      const json = await response.clone().json();
+      const json = await response.json();
       if (json.error) {
         throw new UserFriendlyError(json.error, response.status);
       }
@@ -28,7 +28,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
       }
     }
 
-    const text = await response.clone().text();
+    const text = await response.text();
     if (text) {
       throw new UserFriendlyError(text, response.status);
     }
@@ -44,10 +44,8 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
  */
 export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
-  if (!response.ok) {
-    throw new FetchError(response);
-  }
-  return await response.json();
+  const json: T = await response.json();
+  return json;
 }
 
 export interface StatusError extends Error {

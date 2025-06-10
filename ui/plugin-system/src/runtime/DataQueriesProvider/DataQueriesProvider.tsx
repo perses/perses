@@ -15,7 +15,6 @@ import { createContext, ReactElement, useCallback, useContext, useMemo } from 'r
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
-import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';
 
 import { useUsageMetrics } from '../UsageMetricsProvider';
 import {
@@ -87,22 +86,16 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     (definition) => definition.kind === 'TraceQuery'
   ) as TraceQueryDefinition[];
   const traceResults = useTraceQueries(traceQueries);
-  const profileQueries = queryDefinitions.filter(
-    (definition) => definition.kind === 'ProfileQuery'
-  ) as ProfileQueryDefinition[];
-  const profileResults = useProfileQueries(profileQueries);
 
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());
     traceResults.forEach((result) => result.refetch());
-    profileResults.forEach((result) => result.refetch());
-  }, [timeSeriesResults, traceResults, profileResults]);
+  }, [timeSeriesResults, traceResults]);
 
   const ctx = useMemo(() => {
     const mergedQueryResults = [
       ...transformQueryResults(timeSeriesResults, timeSeriesQueries),
       ...transformQueryResults(traceResults, traceQueries),
-      ...transformQueryResults(profileResults, profileQueries),
     ];
 
     if (queryOptions?.enabled) {
@@ -129,8 +122,6 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     timeSeriesResults,
     traceQueries,
     traceResults,
-    profileQueries,
-    profileResults,
     refetchAll,
     queryOptions?.enabled,
     usageMetrics,

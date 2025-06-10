@@ -56,71 +56,10 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
-## Legend specification
-
-```yaml
-position: <enum = "bottom" | "right">
-mode: <enum = "list" | "table"> # Optional
-size: <enum = "small" | "medium"> # Optional
-```
-
-
-## Legend-with-values specification
-
-```yaml
-<Legend specification>
-values:
-  - <Calculation specification> # Optional
-```
-
 ## Mapping specification
 
 ```yaml
-<anyOf = Value condition | Range condition | Regex condition | Misc condition>
-```
-
-### Value condition
-
-```yaml
-kind: "Value"
-spec:
-  value: <string>
-  result: <Mapping result>
-```
-
-### Range condition
-
-```yaml
-kind: "Range"
-spec:
-  from?: <number>
-  to?: <number>
-  result: <Mapping result>
-```
-
-### Regex condition
-
-```yaml
-kind: "Regex"
-spec:
-  pattern: <string>
-  result: <Mapping result>
-```
-
-### Misc condition
-
-```yaml
-kind: "Misc"
-spec:
-  value: <enum = "empty" | "null" | "NaN" | "true" | "false">
-  result: <Mapping result>
-```
-
-### Mapping result
-
-```yaml
-value: <string>
-color: <string> # Optional
+# TODO
 ```
 
 ## Proxy specification
@@ -230,49 +169,5 @@ name: <string> # Optional
 ## Transform specification
 
 ```yaml
-<anyOf = Join-by-column-value transform | Merge-columns transform | Merge-indexed-columns transform | Merge-series transform>
-```
-
-### Join-by-column-value transform
-
-```yaml
-kind: "JoinByColumnValue"
-spec:
-  columns: [string]
-  disabled?: bool
-```
-
-### Merge-columns transform
-
-```yaml
-kind: "MergeColumns"
-spec:
-  columns: [string]
-  name: <string>
-  disabled: bool # Optional
-```
-
-### Merge-indexed-columns transform
-
-```yaml
-kind: "MergeIndexedColumns"
-spec:
-  column: <string>
-  disabled: bool # Optional
-```
-
-### Merge-series transform
-
-```yaml
-kind: "MergeSeries"
-spec:
-  disabled: bool # Optional
-```
-
-### Merge-series transform
-
-```yaml
-kind: "MergeSeries"
-spec:
-  disabled: bool # Optional
+# TODO
 ```

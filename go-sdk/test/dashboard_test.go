@@ -143,7 +143,6 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.Name("Containers monitoring"),
 		dashboard.ProjectName("MyProject"),
-		dashboard.Description("A dashboard to monitor containers"),
 
 		// VARIABLES
 		dashboard.AddVariableGroup(
