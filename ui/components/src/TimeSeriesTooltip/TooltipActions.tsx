@@ -36,7 +36,7 @@ export const TooltipActions: React.FC<TooltipActionProps> = ({ actions, selected
         width: '100%',
         maxWidth: TOOLTIP_MAX_WIDTH,
         padding: theme.spacing(0.5, 1),
-        backgroundColor: theme.palette.common.white ?? TOOLTIP_BG_COLOR_FALLBACK,
+        backgroundColor: theme.palette.background.paper ?? TOOLTIP_BG_COLOR_FALLBACK,
         position: 'sticky',
         top: 0,
         left: 0,

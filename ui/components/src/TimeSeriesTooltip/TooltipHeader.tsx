@@ -76,7 +76,7 @@ export const TooltipHeader = memo(function TooltipHeader({
         top: 0,
         left: 0,
         // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
-        backgroundColor: theme.palette.common.white ?? TOOLTIP_BG_COLOR_FALLBACK,
+        backgroundColor: theme.palette.background.paper ?? TOOLTIP_BG_COLOR_FALLBACK,
         borderBottom: `1px solid ${theme.palette.divider}`,
         position: 'sticky',
         // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]

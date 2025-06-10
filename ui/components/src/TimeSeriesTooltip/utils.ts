@@ -107,7 +107,7 @@ export function getTooltipStyles(
     opacity: 1,
     transition: 'all 0.1s ease-out',
     // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
-    backgroundColor: theme.palette.common.white ?? TOOLTIP_BG_COLOR_FALLBACK,
+    backgroundColor: theme.palette.background.paper ?? TOOLTIP_BG_COLOR_FALLBACK,
     color: theme.palette.text.primary,
     border: `1px solid ${theme.palette.grey['200']}`,
     boxShadow: theme.shadows[4],
