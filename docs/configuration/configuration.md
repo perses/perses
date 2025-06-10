@@ -768,13 +768,15 @@ dashboard: <string>
 ```yaml
 # The path to the folder containing the plugins
 # The default value depends if Perses is running in a container or not.
-folder: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
+path: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
 
 # The path to the folder containing the plugins archive. 
 # When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
 archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
 
-dev_environment: <PluginDevEnvironment config> # Optional
+# Allow use of plugins in dev mode.
+enable_dev: <bool> | default = false # Optional
+
 ```
 
 #### PluginDevEnvironment config
