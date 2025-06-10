@@ -130,9 +130,11 @@ describe('TimeRangeControls', () => {
     const refreshButton = screen.getByLabelText(/refresh interval/i, { selector: '[role="combobox"]' });
     userEvent.click(refreshButton);
 
-    const firstRefreshSelected = screen.getByRole('option', { name: '5s' });
+    // LOGZ.IO CHANGE START:: Change refresh time interval options [APPZ-364]
+    const firstRefreshSelected = screen.getByRole('option', { name: '30s' });
     userEvent.click(firstRefreshSelected);
-    expect(history.location.search).toEqual('?start=12h&refresh=5s');
+    expect(history.location.search).toEqual('?start=12h&refresh=30s');
+    // LOGZ.IO CHANGE END:: Change refresh time interval options [APPZ-364]
 
     // back button should return to previous page selected
     act(() => {

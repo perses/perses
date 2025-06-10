@@ -26,10 +26,12 @@ test.describe('Refresh Interval Picker', () => {
     expect(page.url()).toContain('refresh=0s');
   });
   test.describe('can select refresh interval', () => {
-    test('changing to 5s refresh', async ({ page, dashboardPage }) => {
+    // LOGZ.IO CHANGE START:: Change refresh time interval options [APPZ-364]
+    test('changing to 30s refresh', async ({ page, dashboardPage }) => {
       await dashboardPage.refreshIntervalPicker.click();
-      await page.getByRole('option', { name: '5s', exact: true }).click();
-      expect(page.url()).toContain('refresh=5s');
+      await page.getByRole('option', { name: '30s', exact: true }).click();
+      expect(page.url()).toContain('refresh=30s');
     });
+    // LOGZ.IO CHANGE END:: Change refresh time interval options [APPZ-364]
   });
 });
