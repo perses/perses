@@ -779,35 +779,6 @@ enable_dev: <bool> | default = false # Optional
 
 ```
 
-#### PluginDevEnvironment config
-
-```yaml
-# The URL of the development server hosting the plugin. 
-# It is usually created by the command `rsbuild dev`.
-url: <string> | default = http://localhost:3005 # Optional
-
-plugins: 
-  - <PluginInDevelopment config>
-```
-
-##### PluginInDevelopment config
-
-```yaml
-# The name of the plugin in development
-name: <string>
-
-# A way to disable the schema validation of the plugin in development.
-# It can be useful when you are developing a plugin, and you didn't define the schema yet.
-disable_schema: <bool> | default = false # Optional
-
-# The unique URL of the development server hosting this specific plugin.
-# If defined, it will override the URL defined in the `PluginDevEnvironment` config.
-url: <string> # Optional
-
-# The absolute path to the plugin in development.
-absolute_path: <string>
-```
-
 ### Dashboard config
 
 ```yaml
