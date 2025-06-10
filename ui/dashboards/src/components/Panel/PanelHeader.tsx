@@ -13,9 +13,9 @@
 
 import { CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { Link } from '@perses-dev/core';
+import { Link, TimeSeriesData } from '@perses-dev/core';
 import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
 
@@ -50,6 +50,15 @@ export function PanelHeader({
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
 
+const timeSeriesDataForExport = useMemo(() => {
+    for (const query of queryResults) {
+      if (query.data && 'series' in query.data) {
+        return query.data as TimeSeriesData;
+      }
+    }
+    return undefined;
+  }, [queryResults]);
+
   return (
     <CardHeader
       id={id}
@@ -79,7 +88,7 @@ export function PanelHeader({
             description={description}
             descriptionTooltipId={descriptionTooltipId}
             links={links}
-            queryResults={queryResults}
+            queryResults={timeSeriesDataForExport}
             readHandlers={readHandlers}
             editHandlers={editHandlers}
             extra={extra}
