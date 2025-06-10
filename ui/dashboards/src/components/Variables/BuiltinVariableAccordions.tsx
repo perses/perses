@@ -48,7 +48,21 @@ export function BuiltinVariableAccordions({
     return result;
   }, [builtinVariableDefinitions]);
 
-  const sources = useMemo(() => {
+  // LOGZ.IO CHANGE START:: unidash add tooltips to make features more clear to users [APPZ-348]
+  const sourceDescriptionMap = useMemo((): Record<string, string> => {
+    const result: Record<string, string> = {};
+    for (const definition of builtinVariableDefinitions) {
+      const source = definition.spec.source;
+      // Only set if we haven't found a sourceDescription for this source yet and this definition has a sourceDescription
+      if (!result[source] && definition.spec.sourceDescription) {
+        result[source] = definition.spec.sourceDescription;
+      }
+    }
+    return result;
+  }, [builtinVariableDefinitions]);
+  // LOGZ.IO CHANGE END:: unidash add tooltips to make features more clear to users [APPZ-348]
+
+  const sources = useMemo((): string[] => {
     const result: string[] = [];
     for (const source in builtinVariablesBySource) {
       if (!result.includes(source)) {
@@ -57,6 +71,10 @@ export function BuiltinVariableAccordions({
     }
     return result;
   }, [builtinVariablesBySource]);
+
+  const getSourceDescription = (source: string): string => {
+    return sourceDescriptionMap[source] || 'Variables computed during dashboard rendering.';
+  };
 
   return (
     <>
@@ -74,10 +92,7 @@ export function BuiltinVariableAccordions({
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="builtin" id="builtin">
             <Typography variant="h2">
-              <InfoTooltip
-                title={`${source} Built-in Variables`}
-                description="Variables computed during dashboard rendering."
-              >
+              <InfoTooltip title={`${source} Built-in Variables`} description={getSourceDescription(source)}>
                 <span>{source} Built-in Variables</span>
               </InfoTooltip>
             </Typography>
