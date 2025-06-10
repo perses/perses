@@ -58,7 +58,6 @@ func (u *User) GetSpec() interface{} {
 func (u *User) UnmarshalJSON(data []byte) error {
 	var tmp User
 	type plain User
-
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}

@@ -345,7 +345,7 @@ enabled: <boolean>
 # File path to a local kubeconfig file. The current logged in user's bearer token will be used
 # for both the backend and as the user being logged into Perses. The user should have "create"
 # permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
-# available the pods service account token will be used
+# available the pods service account token will be used. This parameter should not be set in production
 kubeconfig: <string> # Optional
 ```
 
@@ -432,7 +432,6 @@ extension: <string> | default = yaml # Optional
 # Whether the database is case-sensitive.
 # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
 case_sensitive: <string> | default = false # Optional
-
 ```
 
 #### Database SQL config

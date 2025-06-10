@@ -466,8 +466,6 @@ sequenceDiagram
 
 ### => Authorize percli to list dashboards. (`device_code`)
 
-TODO: Finish implementing this flow and update sequence diagram when finished
-
 ```mermaid
 sequenceDiagram
     actor hu as John

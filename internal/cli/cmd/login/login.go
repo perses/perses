@@ -61,8 +61,6 @@ type loginOption interface {
 	SetMissingInput() error
 }
 
-// TODO: Add kubeconfig option which checks KUBECONFIG env, or the default $HOME/.kube/config
-// or a passed in location
 type option struct {
 	persesCMD.Option
 	writer               io.Writer
@@ -291,7 +289,6 @@ func (o *option) selectAndSetProvider() error {
 		return nil
 	}
 
-	// ERROR HERE
 	selectedItem, err := o.promptProvider(options)
 	if err != nil {
 		return err
