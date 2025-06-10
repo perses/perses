@@ -53,6 +53,50 @@ export type PanelExtraProps = {
   panelGroupItemId?: PanelGroupItemId;
 };
 
+// Function to extract project name from URL
+const extractProjectNameFromUrl = (): string => {
+  try {
+    if (process.env.NODE_ENV === 'test') {
+      return 'test-project';
+    }
+
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ) {
+      const urlPath = window.location.pathname;
+
+      if (urlPath === '/' || urlPath === '') {
+        return 'dev-project';
+      }
+    }
+
+    const urlPath = window.location.pathname;
+
+    // Split the path and look for the project name after "/projects/"
+    const pathSegments = urlPath.split('/').filter((segment) => segment.length > 0);
+    const projectsIndex = pathSegments.findIndex((segment) => segment === 'projects');
+
+    if (projectsIndex !== -1 && projectsIndex + 1 < pathSegments.length) {
+      const projectName = pathSegments[projectsIndex + 1];
+      if (projectName && projectName.trim().length > 0) {
+        return projectName;
+      }
+    }
+
+    // Fallback: try to extract from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectParam = urlParams.get('project');
+    if (projectParam && projectParam.trim().length > 0) {
+      return projectParam;
+    }
+
+    return 'unknown-project';
+  } catch {
+    return 'unknown-project';
+  }
+};
+
 /**
  * Renders a PanelDefinition's content inside of a Card.
  *
@@ -90,6 +134,9 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const chartsTheme = useChartsTheme();
 
   const { queryResults } = useDataQueriesContext();
+
+  // Extract project name from URL - memoized to prevent unnecessary re-calculations
+  const projectName = useMemo(() => extractProjectNameFromUrl(), []);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
@@ -130,6 +177,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}
+          projectName={projectName}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}

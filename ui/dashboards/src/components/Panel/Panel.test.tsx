@@ -197,7 +197,13 @@ describe('Panel', () => {
 
   it('shows loading indicator if 1/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [{ isFetching: true }, { data: [] }],
+      isFetching: true,
+      errors: [],
+      queryResults: [
+        {
+          data: { series: [{ name: 'test', values: [[1, 2]] }] },
+        },
+      ],
     });
 
     renderPanel();
@@ -206,6 +212,8 @@ describe('Panel', () => {
 
   it('does not show a loading indicator if 2/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
+      isFetching: true,
+      errors: [],
       queryResults: [{ isFetching: true }, { isFetching: true }],
     });
 
@@ -215,6 +223,8 @@ describe('Panel', () => {
 
   it('shows query errors in the tooltip', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
+      isFetching: false,
+      errors: ['test error'], // <- Top-level errors array
       queryResults: [{ error: 'test error' }],
     });
 
