@@ -61,6 +61,11 @@ const ConditionalBox = styled(Box)({
   justifyContent: 'flex-end',
 });
 
+// Function to check if the data is time series data
+const isTimeSeriesData = (data: TimeSeriesData | undefined): boolean => {
+  return !!(data && data.series && Array.isArray(data.series) && data.series.length > 0);
+};
+
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
   readHandlers,
@@ -75,15 +80,19 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return seriesName;
   };
 
+  // Check if current data is time series data
+  const hasTimeSeriesData = useMemo(() => isTimeSeriesData(queryResults), [queryResults]);
+
   const csvExportHandler = () => {
     if (!queryResults || !queryResults.series || !Array.isArray(queryResults.series) || queryResults.series.length === 0) {
-    console.warn('No data available to export to CSV. queryResults:', queryResults);
-    return;
-  }
+      console.warn('No data available to export to CSV. queryResults:', queryResults);
+      return;
+    }
 
-  let csvString = '';
-  const result: Record<string, Record<string, any>> = {};
-  const seriesNames: string[] = [];
+    let csvString = '';
+    const result: Record<string, Record<string, any>> = {};
+    const seriesNames: string[] = [];
+    const seriesLegendNames: string[] = []; // This will hold the formatted legend names
 
     for (let i = 0; i < queryResults.series.length; i++) {
       const series = queryResults.series[i];
@@ -127,8 +136,6 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       csvString += `${dateTime},${temp.join(',')}\n`;
     }
 
-    console.log('Generated CSV String:', csvString);
-
     const blobCsvData = new Blob([csvString], { type: 'text/csv' });
     const csvURL = URL.createObjectURL(blobCsvData);
     const link = document.createElement('a');
@@ -138,6 +145,11 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   };
 
   const csvExportButton = useMemo(() => {
+    // Only show CSV export button if we have time series data
+    if (!hasTimeSeriesData) {
+      return null;
+    }
+
     return (
       <InfoTooltip description="Export as CSV">
         <HeaderIconButton
@@ -149,7 +161,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </HeaderIconButton>
       </InfoTooltip>
     );
-  }, [csvExportHandler]);
+  }, [hasTimeSeriesData, csvExportHandler]);
 
   const descriptionAction = useMemo(() => {
     if (description && description.trim().length > 0) {
@@ -168,6 +180,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [descriptionTooltipId, description]);
+
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
@@ -294,7 +307,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
-            {csvExportButton/* ADD SMALL PANEL WIDTH HERE. THIS IS THE NEW STUFF*/}
+            {csvExportButton}
           </OverflowMenu>
           {moveAction}
         </OnHover>

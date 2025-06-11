@@ -50,7 +50,7 @@ export function PanelHeader({
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
 
-const timeSeriesDataForExport = useMemo(() => {
+  const timeSeriesDataForExport = useMemo(() => {
     for (const query of queryResults) {
       if (query.data && 'series' in query.data) {
         return query.data as TimeSeriesData;
