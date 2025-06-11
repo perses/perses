@@ -13,7 +13,8 @@ Perses currently supports several types of datasources, including:
 
 Datasources in Perses can be configured at different scopes. More details about that at [Datasource & Variable scopes](./datasource-and-variable-scopes.md).
 
-## Related Documentation
-- [Datasource API](../api/datasource.md)
-- [Proxy](./proxy.md)
+Creating a datasource is usually done through the Perses UI, but you also have the option to rely on:
+- [Provisioning](../configuration/provisioning.md) to have datasources directly available at startup – you should provision correct [Datasource resources](../api/datasource.md) in this case.
 - [Datasource Discovery](../configuration/datasource-discovery.md)
+
+A datasource can configured to be accessed directly, but you may want to get it [proxied](./proxy.md) through the Perses backend for security reasons.
