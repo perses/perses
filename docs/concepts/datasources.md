@@ -12,3 +12,8 @@ Perses currently supports several types of datasources, including:
 ## Configuring a datasource
 
 Datasources in Perses can be configured at different scopes. More details about that at [Datasource & Variable scopes](./datasource-and-variable-scopes.md).
+
+## Related Documentation
+- [Datasource API](../api/datasource.md)
+- [Proxy](./proxy.md)
+- [Datasource Discovery](../configuration/datasource-discovery.md)
