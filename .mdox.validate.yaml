@@ -32,3 +32,6 @@ validators:
   # timeout
   - regex: 'youtube\.com'
     type: 'ignore'
+  # timeout
+  - regex: 'lodash\.com'
+    type: 'ignore'
