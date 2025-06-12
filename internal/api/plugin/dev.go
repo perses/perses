@@ -45,7 +45,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 				InDev:    true,
 			},
 		}
-		pluginLoaded := Loaded{
+		pluginLoaded := &Loaded{
 			DevEnvironment: &v1.PluginInDevelopment{
 				Name:          plg.Name,
 				URL:           devURL,
@@ -55,7 +55,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			Module: pluginModule,
 		}
 		if IsSchemaRequired(pluginModule.Spec) && !plg.DisableSchema {
-			if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
+			if pluginSchemaLoadErr := p.sch.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
 				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
 			}
 			if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
