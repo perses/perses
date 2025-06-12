@@ -36,6 +36,7 @@ export * from './SortSelector';
 export * from './Table';
 export * from './ThresholdsEditor';
 export * from './TimeRangeSelector';
+export * from './TimeZoneSelector';
 export * from './TimeSeriesTooltip';
 export * from './ToolbarIconButton';
 export * from './FormatControls';
