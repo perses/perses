@@ -28,7 +28,8 @@ func NewMetadata(name string) *Metadata {
 }
 
 type Metadata struct {
-	Name string `json:"name" yaml:"name"`
+	Name      string `json:"name" yaml:"name"`
+	Namespace string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=date-time
