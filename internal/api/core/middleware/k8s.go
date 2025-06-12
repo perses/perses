@@ -11,31 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rbac
+package middleware
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
-	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/rbac"
 )
 
-type disabledImpl struct{}
+func K8sMiddleware(skipper middleware.Skipper, rb rbac.RBAC, security crypto.Security) echo.MiddlewareFunc {
 
-func (r *disabledImpl) IsEnabled() bool {
-	return false
-}
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if skipper(ctx) {
+				return next(ctx)
+			}
+			user := security.GetUser(ctx)
+			if user == "" {
+				return ctx.JSON(http.StatusUnauthorized, "invalid authorization header")
+			}
 
-func (r *disabledImpl) GetUserProjects(_ echo.Context, _ string, _ v1Role.Action, _ v1Role.Scope) []string {
-	return []string{}
-}
-
-func (r *disabledImpl) HasPermission(_ echo.Context, _ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
-	return true
-}
-
-func (r *disabledImpl) GetPermissions(_ echo.Context, _ string) map[string][]*v1Role.Permission {
-	return nil
-}
-
-func (r *disabledImpl) Refresh() error {
-	return nil
+			return next(ctx)
+		}
+	}
 }

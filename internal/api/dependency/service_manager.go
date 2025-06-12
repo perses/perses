@@ -16,6 +16,8 @@
 package dependency
 
 import (
+	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/crypto"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
@@ -59,6 +61,7 @@ import (
 )
 
 type ServiceManager interface {
+	GetAuthenticationMiddleware() echo.MiddlewareFunc
 	GetCrypto() crypto.Crypto
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
@@ -79,6 +82,7 @@ type ServiceManager interface {
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
+	GetSecurity() crypto.Security
 	GetUser() user.Service
 	GetVariable() variable.Service
 	GetView() view.Service
@@ -86,37 +90,39 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
-	crypto             crypto.Crypto
-	dashboard          dashboard.Service
-	datasource         datasource.Service
-	ephemeralDashboard ephemeraldashboard.Service
-	folder             folder.Service
-	globalDatasource   globaldatasource.Service
-	globalRole         globalrole.Service
-	globalRoleBinding  globalrolebinding.Service
-	globalSecret       globalsecret.Service
-	globalVariable     globalvariable.Service
-	health             health.Service
-	jwt                crypto.JWT
-	migrate            migrate.Migration
-	plugin             plugin.Plugin
-	project            project.Service
-	schema             schema.Schema
-	rbac               rbac.RBAC
-	role               role.Service
-	roleBinding        rolebinding.Service
-	secret             secret.Service
-	user               user.Service
-	variable           variable.Service
-	view               view.Service
+	crypto                   crypto.Crypto
+	dashboard                dashboard.Service
+	datasource               datasource.Service
+	ephemeralDashboard       ephemeraldashboard.Service
+	folder                   folder.Service
+	globalDatasource         globaldatasource.Service
+	globalRole               globalrole.Service
+	globalRoleBinding        globalrolebinding.Service
+	globalSecret             globalsecret.Service
+	globalVariable           globalvariable.Service
+	health                   health.Service
+	jwt                      crypto.JWT
+	authenticationMiddleware echo.MiddlewareFunc
+	migrate                  migrate.Migration
+	plugin                   plugin.Plugin
+	project                  project.Service
+	schema                   schema.Schema
+	rbac                     rbac.RBAC
+	role                     role.Service
+	roleBinding              rolebinding.Service
+	secret                   secret.Service
+	security                 crypto.Security
+	user                     user.Service
+	variable                 variable.Service
+	view                     view.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
-	cryptoService, jwtService, err := crypto.New(conf.Security)
+	cryptoService, securityService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
 	}
-	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
+	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), securityService, conf)
 	if err != nil {
 		return nil, err
 	}
@@ -140,31 +146,34 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser(), rbacService)
 	viewService := viewImpl.NewMetricsViewService()
+	authenticationMiddlewareService := middleware.GetAuthenticationMiddleware(conf, rbacService, securityService)
 
 	svc := &service{
-		crypto:             cryptoService,
-		dashboard:          dashboardService,
-		datasource:         datasourceService,
-		ephemeralDashboard: ephemeralDashboardService,
-		folder:             folderService,
-		globalDatasource:   globalDatasourceService,
-		globalRole:         globalRole,
-		globalRoleBinding:  globalRoleBinding,
-		globalSecret:       globalSecret,
-		globalVariable:     globalVariableService,
-		health:             healthService,
-		jwt:                jwtService,
-		migrate:            migrateService,
-		plugin:             pluginService,
-		project:            projectService,
-		rbac:               rbacService,
-		role:               roleService,
-		roleBinding:        roleBindingService,
-		schema:             schemaService,
-		secret:             secretService,
-		user:               userService,
-		variable:           variableService,
-		view:               viewService,
+		crypto:                   cryptoService,
+		dashboard:                dashboardService,
+		datasource:               datasourceService,
+		ephemeralDashboard:       ephemeralDashboardService,
+		folder:                   folderService,
+		globalDatasource:         globalDatasourceService,
+		globalRole:               globalRole,
+		globalRoleBinding:        globalRoleBinding,
+		globalSecret:             globalSecret,
+		globalVariable:           globalVariableService,
+		health:                   healthService,
+		jwt:                      securityService.GetJWT(),
+		authenticationMiddleware: authenticationMiddlewareService,
+		migrate:                  migrateService,
+		plugin:                   pluginService,
+		project:                  projectService,
+		rbac:                     rbacService,
+		role:                     roleService,
+		roleBinding:              roleBindingService,
+		schema:                   schemaService,
+		secret:                   secretService,
+		security:                 securityService,
+		user:                     userService,
+		variable:                 variableService,
+		view:                     viewService,
 	}
 	return svc, nil
 }
@@ -217,6 +226,10 @@ func (s *service) GetJWT() crypto.JWT {
 	return s.jwt
 }
 
+func (s *service) GetAuthenticationMiddleware() echo.MiddlewareFunc {
+	return s.authenticationMiddleware
+}
+
 func (s *service) GetMigration() migrate.Migration {
 	return s.migrate
 }
@@ -231,6 +244,10 @@ func (s *service) GetProject() project.Service {
 
 func (s *service) GetSchema() schema.Schema {
 	return s.schema
+}
+
+func (s *service) GetSecurity() crypto.Security {
+	return s.security
 }
 
 func (s *service) GetRBAC() rbac.RBAC {
