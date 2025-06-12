@@ -45,7 +45,7 @@ type Plugin interface {
 	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
 	List() ([]byte, error)
 	UnzipArchives() error
-	GetLoadedPlugin(name string) (Loaded, bool)
+	GetLoadedPlugin(name string) (*Loaded, bool)
 	Schema() schema.Schema
 	Migration() migrate.Migration
 }
@@ -77,9 +77,10 @@ func New(cfg config.Plugin) Plugin {
 			folder:       cfg.ArchivePath,
 			targetFolder: cfg.Path,
 		},
-		sch:    schema.New(),
-		mig:    migrate.New(),
-		loaded: make(map[string]Loaded),
+		sch:       schema.New(),
+		mig:       migrate.New(),
+		loaded:    make(map[string]*Loaded),
+		devLoaded: make(map[string]*Loaded),
 	}
 }
 
@@ -88,7 +89,9 @@ type pluginFile struct {
 	path string
 	// loaded is a map that contains all the loaded plugin modules.
 	// The key is the name of the plugin used by the frontend to get access to the plugin files.
-	loaded map[string]Loaded
+	loaded map[string]*Loaded
+	// devLoaded is a map that contains all the loaded plugin modules in development mode.
+	devLoaded map[string]*Loaded
 	// archibal is the archive service used only to extract the plugin files from the archive.
 	archibal *arch
 	// sch is the service used to load and provide the schema of the plugin.
@@ -115,9 +118,13 @@ func (p *pluginFile) List() ([]byte, error) {
 	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
-func (p *pluginFile) GetLoadedPlugin(prefixURI string) (Loaded, bool) {
+func (p *pluginFile) GetLoadedPlugin(prefixURI string) (*Loaded, bool) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
+	// Check in the dev plugin first
+	if devLoaded, ok := p.devLoaded[prefixURI]; ok {
+		return devLoaded, true
+	}
 	loaded, ok := p.loaded[prefixURI]
 	return loaded, ok
 }
@@ -150,7 +157,7 @@ func (p *pluginFile) Load() error {
 			// the plugin is not valid, we can skip it
 			continue
 		}
-		pluginLoaded := Loaded{
+		pluginLoaded := &Loaded{
 			DevEnvironment: nil,
 			Module:         *pluginModule,
 			LocalPath:      pluginPath,
@@ -218,7 +225,14 @@ func (p *pluginFile) storeLoadedList() error {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	var pluginModuleList []v1.PluginModule
+	mergeMap := make(map[string]*Loaded)
 	for _, l := range p.loaded {
+		mergeMap[l.Module.Metadata.Name] = l
+	}
+	for _, l := range p.devLoaded {
+		mergeMap[l.Module.Metadata.Name] = l
+	}
+	for _, l := range mergeMap {
 		pluginModuleList = append(pluginModuleList, l.Module)
 	}
 	if len(pluginModuleList) == 0 {
