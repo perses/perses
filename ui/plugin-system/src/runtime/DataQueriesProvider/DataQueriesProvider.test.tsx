@@ -13,7 +13,7 @@
 
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react';
-import { MOCK_TIME_SERIES_DATA, MOCK_TRACE_DATA } from '../../test';
+import { MOCK_TIME_SERIES_DATA, MOCK_TRACE_DATA, MOCK_PROFILE_DATA } from '../../test';
 import { useListPluginMetadata } from '../plugin-registry';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
 import { useQueryType } from './model';
@@ -24,6 +24,10 @@ jest.mock('../time-series-queries', () => ({
 
 jest.mock('../trace-queries', () => ({
   useTraceQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TRACE_DATA }]),
+}));
+
+jest.mock('../profile-queries', () => ({
+  useProfileQueries: jest.fn().mockImplementation(() => [{ data: MOCK_PROFILE_DATA }]),
 }));
 
 jest.mock('../plugin-registry', () => ({
