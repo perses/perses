@@ -1,7 +1,4 @@
 {
   "kind": "ThirdChart",
-  "spec": {
-    "a": "yes",
-    "b": "no"
-  }
+  "spec": {}
 }
