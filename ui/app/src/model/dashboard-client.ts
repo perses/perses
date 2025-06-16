@@ -25,7 +25,7 @@ import { useNavHistory } from '../context/DashboardNavHistory';
 import { useImportantDashboardSelectors } from '../context/Config';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
-import { fetch, fetchJson } from './fetch';
+import { fetchJson } from './fetch';
 
 export const resource = 'dashboards';
 

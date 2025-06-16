@@ -16,7 +16,7 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResul
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
-import { fetch, fetchJson } from './fetch';
+import { fetchJson } from './fetch';
 
 export const resource = 'secrets';
 

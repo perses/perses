@@ -11,26 +11,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch as initialFetch, StatusError } from '@perses-dev/core';
+import { StatusError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
 
-export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
-  return initialFetch(...args).catch((error: StatusError) => {
-    if (error.status !== 401) {
+global.fetch = new Proxy(global.fetch, {
+  apply: function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
+    // args holds argument of fetch function
+    // Do whatever you want with fetch request
+    //console.log('called');
+    const temp = target.apply(that, args);
+    temp.catch((error: StatusError) => {
+      // After completion of request
+      if (error.status === 401) {
+        return refreshToken()
+          .catch((refreshError: StatusError) => {
+            throw refreshError;
+          })
+          .then(() => {
+            return target.apply(that, args);
+          });
+      }
       throw error;
-    }
-    return refreshToken()
-      .catch((_: StatusError) => {
-        throw error;
-      })
-      .then(() => {
-        return initialFetch(...args);
-      });
-  });
-}
+    });
+    return temp;
+  },
+});
+
+// export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
+//   return initialFetch(...args).catch((error: StatusError) => {
+//     if (error.status !== 401) {
+//       throw error;
+//     }
+//     return refreshToken()
+//       .catch((_: StatusError) => {
+//         throw error;
+//       })
+//       .then(() => {
+//         return initialFetch(...args);
+//       });
+//   });
+// }
 
 export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
+  // if (!response.ok) {
+  //   throw { message: 'Failed to fetch data', status: response.status, response };
+  // }
   const json: T = await response.json();
   return json;
 }

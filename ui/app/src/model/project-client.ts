@@ -27,7 +27,7 @@ import { resource as dashboardResource, useDashboardList } from './dashboard-cli
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
-import { fetch, fetchJson } from './fetch';
+import { fetchJson } from './fetch';
 import { userKey } from './user-client';
 
 const resource = 'projects';
