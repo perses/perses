@@ -14,7 +14,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.1.0
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/cel-go v0.25.0
 	github.com/google/uuid v1.6.0
