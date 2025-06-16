@@ -21,6 +21,7 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -102,6 +103,15 @@ type pluginFile struct {
 
 func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
+	exist, err := file.Exists(pluginFilePath)
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		logrus.Warnf("unable to list plugins, plugin file %s does not exist", pluginFilePath)
+		// if the file does not exist, we return an empty file
+		return []byte("[]"), nil
+	}
 	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
