@@ -86,6 +86,10 @@ func (r *cacheImpl) GetUserProjects(ctx apiInterface.PersesContext, requestActio
 }
 
 func (r *cacheImpl) HasPermission(ctx apiInterface.PersesContext, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+	if ctx == apiInterface.EmptyCtx {
+		// If the context is empty, we assume the endpoint is an anonymous endpoint.
+		return true
+	}
 	// Checking default permissions
 	if ok := permissionListHasPermission(r.guestPermissions, requestAction, requestScope); ok {
 		return true
