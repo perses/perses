@@ -100,12 +100,16 @@ func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
+	// On browsers, if the cooke age is expired, the cookie is not sent with the request and will return 400.
+	// However, if we want to have the refresh token working with browsers, we need to have back returns status 401,
+	// if the access token is expired, so we need to set the cookie with a max age even if the cookie is expired before.
+	maxAge := max(int(j.accessTokenTTL.Seconds()), int(j.refreshTokenTTL.Seconds()))
 	tokenSplit := strings.Split(accessToken, ".")
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     cookiePath,
-		MaxAge:   int(j.accessTokenTTL.Seconds()),
+		MaxAge:   maxAge,
 		Expires:  expireDate,
 		Secure:   j.cookieConfig.Secure,
 		HttpOnly: false,
@@ -115,7 +119,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     cookiePath,
-		MaxAge:   int(j.accessTokenTTL.Seconds()),
+		MaxAge:   maxAge,
 		Expires:  expireDate,
 		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,

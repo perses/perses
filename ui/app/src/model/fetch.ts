@@ -18,21 +18,38 @@ global.fetch = new Proxy(global.fetch, {
   apply: function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
     // args holds argument of fetch function
     // Do whatever you want with fetch request
-    //console.log('called');
+    console.log('called');
     const temp = target.apply(that, args);
-    temp.catch((error: StatusError) => {
-      // After completion of request
-      if (error.status === 401) {
-        return refreshToken()
-          .catch((refreshError: StatusError) => {
-            throw refreshError;
-          })
-          .then(() => {
-            return target.apply(that, args);
-          });
-      }
-      throw error;
-    });
+    temp
+      .then((res) => {
+        // After completion of request
+        console.log('then status', res.status);
+        if (res.status === 401) {
+          console.log('refreshing');
+          return refreshToken()
+            .catch((refreshError: StatusError) => {
+              throw refreshError;
+            })
+            .then(() => {
+              return target.apply(that, args);
+            });
+        }
+      })
+      .catch((error: StatusError) => {
+        // After completion of request
+        console.log('catch status', error.status);
+        if (error.status === 401) {
+          console.log('refreshing');
+          return refreshToken()
+            .catch((refreshError: StatusError) => {
+              throw refreshError;
+            })
+            .then(() => {
+              return target.apply(that, args);
+            });
+        }
+        throw error;
+      });
     return temp;
   },
 });
