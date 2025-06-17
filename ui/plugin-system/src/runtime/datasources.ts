@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
+import { DatasourceResource, DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
@@ -43,6 +43,12 @@ export interface DatasourceStore {
    * Gets the list of datasources that are available in the dashboard (i.e. dashboards that have been created on the server side that we can use).
    */
   getSavedDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Gets datasources of all projects that the user has access to
+   */
+
+  getAllUserProjectsDatasources(): Promise<DatasourceResource[]>;
 
   /**
    * Sets the list of datasources that are saved in the dashboard

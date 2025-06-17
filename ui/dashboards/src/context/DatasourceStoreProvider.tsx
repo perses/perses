@@ -22,6 +22,7 @@ import {
   useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
+  ProjectResource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -35,6 +36,7 @@ import {
 export interface DatasourceStoreProviderProps {
   dashboardResource?: DashboardResource | EphemeralDashboardResource;
   projectName?: string;
+  userProjects?: ProjectResource[];
   datasourceApi: DatasourceApi;
   children?: ReactNode;
   savedDatasources?: Record<string, DatasourceSpec>;
@@ -64,7 +66,7 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): ReactElement {
-  const { projectName, datasourceApi, onCreate, children } = props;
+  const { projectName, datasourceApi, onCreate, children, userProjects } = props;
   const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
     props.savedDatasources ?? {}
@@ -132,7 +134,6 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
       const { kind } = selector;
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
-
       // allows extending client
       const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
       if (onCreate !== undefined) {
@@ -196,6 +197,14 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     return dashboardResource?.spec.datasources ?? {};
   }, [dashboardResource]);
 
+  const getAllUserProjectsDatasources = useCallback(async () => {
+    const allPromises: Array<Promise<DatasourceResource[]>> = [];
+    userProjects?.forEach((p) => {
+      allPromises.push(datasourceApi.listDatasources(p.metadata.name));
+    });
+    return (await Promise.all(allPromises)).filter((i) => i.length).flat();
+  }, [userProjects, datasourceApi]);
+
   const getSavedDatasources = useCallback((): Record<string, DatasourceSpec> => {
     return savedDatasources;
   }, [savedDatasources]);
@@ -235,6 +244,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         setSavedDatasources,
         getSavedDatasources,
         listDatasourceSelectItems,
+        getAllUserProjectsDatasources,
       }) as DatasourceStore,
     [
       getDatasource,
@@ -244,6 +254,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       listDatasourceSelectItems,
       setSavedDatasources,
       getSavedDatasources,
+      getAllUserProjectsDatasources,
     ]
   );
 

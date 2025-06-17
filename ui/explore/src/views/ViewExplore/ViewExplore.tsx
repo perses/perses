@@ -16,6 +16,7 @@ import {
   TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
   useInitialTimeRange,
+  useProjectList,
 } from '@perses-dev/plugin-system';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
@@ -36,12 +37,11 @@ export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
 
 export function ViewExplore(props: ViewExploreProps): ReactElement {
   const { datasourceApi, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
-
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);
   const initialRefreshInterval = useInitialRefreshInterval(DEFAULT_REFRESH_INTERVAL);
-
+  const { data: userProjects } = useProjectList();
   return (
-    <DatasourceStoreProvider datasourceApi={datasourceApi}>
+    <DatasourceStoreProvider datasourceApi={datasourceApi} userProjects={userProjects}>
       <TimeRangeProviderWithQueryParams
         initialTimeRange={initialTimeRange}
         initialRefreshInterval={initialRefreshInterval}

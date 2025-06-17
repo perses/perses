@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import {
   DatasourcePlugin,
   DatasourceSelectItemGroup,
+  DatasourceStoreContext,
   MockPlugin,
   mockPluginRegistry,
   PluginRegistry,
   useListDatasourceSelectItems,
 } from '@perses-dev/plugin-system';
-import { DatasourceStoreProvider } from '@perses-dev/dashboards';
-import { PropsWithChildren, ReactElement } from 'react';
+import { DatasourceApi, DatasourceStoreProvider } from '@perses-dev/dashboards';
+import { PropsWithChildren, ReactElement, useContext, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   DashboardResource,
@@ -30,6 +31,7 @@ import {
   DatasourceSpec,
   GlobalDatasourceResource,
   DatasourceResource,
+  ProjectResource,
 } from '@perses-dev/core';
 
 const PROJECT = 'perses';
@@ -523,9 +525,66 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
     };
     const { result } = renderHook(() => useListDatasourceSelectItems(FAKE_PLUGIN_NAME), { wrapper });
 
-    console.log(result.current);
-
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(result.current.data).toEqual(data.expected.result);
+  });
+});
+
+describe('DatasourceStoreProvider', () => {
+  const mockProjectDataSource: DatasourceResource[] = [
+    {
+      kind: 'Datasource',
+      metadata: { name: 'ds', project: 'perses' },
+    },
+  ] as DatasourceResource[];
+
+  const datasourceApiMock = {
+    listDatasources: jest.fn().mockReturnValue(Promise.resolve(mockProjectDataSource)),
+  } as unknown as DatasourceApi;
+
+  const queryClient = new QueryClient();
+
+  const DSWrapper = ({ children }: { children: React.ReactNode }): ReactElement => (
+    <PluginRegistry {...mockPluginRegistry(MOCK_DS_PLUGIN)}>
+      <QueryClientProvider client={queryClient}>
+        <DatasourceStoreProvider
+          datasourceApi={datasourceApiMock}
+          userProjects={[{ kind: 'Project', metadata: { name: 'perses' } }] as ProjectResource[]}
+          projectName="perses"
+        >
+          {children}
+        </DatasourceStoreProvider>
+      </QueryClientProvider>
+    </PluginRegistry>
+  );
+  describe('getAllUserProjectsDatasources', () => {
+    const MockUserProjectsResourcesComponent = (): ReactElement => {
+      const dataStore = useContext(DatasourceStoreContext);
+      const [dataResources, setDataResources] = useState<DatasourceResource[]>([]);
+
+      useEffect(() => {
+        dataStore?.getAllUserProjectsDatasources().then((dr) => {
+          setDataResources(dr);
+        });
+      }, [dataStore]);
+
+      return (
+        <>
+          {dataResources.map((dr) => (
+            <div key={`${dr.metadata.project}-${dr.metadata.name}`}>{`${dr.metadata.project}-${dr.metadata.name}`}</div>
+          ))}
+        </>
+      );
+    };
+    it('should fetch the data resource of the all user projects ', async () => {
+      const { findByText } = render(
+        <DSWrapper>
+          <MockUserProjectsResourcesComponent />
+        </DSWrapper>
+      );
+
+      const dataResource = await findByText('perses-ds');
+      expect(dataResource).toBeInTheDocument();
+    });
   });
 });
