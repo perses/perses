@@ -139,20 +139,18 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
-		// If we're running without authentication, claims can be nil - just let requests through.
+	if !e.rbac.IsEnabled() {
 		return nil
 	}
 
 	if role.IsGlobalScope(scope) {
-		if ok := e.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, scope); !ok {
+		if ok := e.rbac.HasPermission(apiinterface.NewPersesContext(ctx), action, rbac.GlobalProject, scope); !ok {
 			return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
 		}
 		return nil
 	}
 
-	if ok := e.rbac.HasPermission(claims.Subject, action, projectName, scope); !ok {
+	if ok := e.rbac.HasPermission(apiinterface.NewPersesContext(ctx), action, projectName, scope); !ok {
 		return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
 	}
 

@@ -14,6 +14,7 @@
 package rbac
 
 import (
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
@@ -23,15 +24,15 @@ func (r *disabledImpl) IsEnabled() bool {
 	return false
 }
 
-func (r *disabledImpl) GetUserProjects(_ string, _ v1Role.Action, _ v1Role.Scope) []string {
+func (r *disabledImpl) GetUserProjects(_ apiInterface.PersesContext, _ v1Role.Action, _ v1Role.Scope) []string {
 	return []string{}
 }
 
-func (r *disabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
+func (r *disabledImpl) HasPermission(_ apiInterface.PersesContext, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
 	return true
 }
 
-func (r *disabledImpl) GetPermissions(_ string) map[string][]*v1Role.Permission {
+func (r *disabledImpl) GetPermissions(_ apiInterface.PersesContext) map[string][]*v1Role.Permission {
 	return nil
 }
 

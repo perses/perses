@@ -23,20 +23,17 @@ import (
 )
 
 var (
-	EmptyCtx = &context{
-		username: "",
-	}
+	EmptyCtx = &context{}
 )
 
 func NewPersesContext(ctx echo.Context) PersesContext {
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {
 		// Claim can be empty in anonymous endpoints
-		return &context{}
+		return EmptyCtx
 	}
-	username, _ := claims.GetSubject()
 	return &context{
-		username: username,
+		username: claims.Subject,
 	}
 }
 
@@ -48,7 +45,7 @@ type context struct {
 	username string
 }
 
-func (c context) GetUsername() string {
+func (c *context) GetUsername() string {
 	return c.username
 }
 

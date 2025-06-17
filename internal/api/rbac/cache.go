@@ -16,6 +16,7 @@ package rbac
 import (
 	"sync"
 
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -65,12 +66,12 @@ func (r *cacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *cacheImpl) GetUserProjects(user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+func (r *cacheImpl) GetUserProjects(ctx apiInterface.PersesContext, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
 	if permissionListHasPermission(r.guestPermissions, requestAction, requestScope) {
 		return []string{GlobalProject}
 	}
 
-	projectPermission := r.cache.permissions[user]
+	projectPermission := r.cache.permissions[ctx.GetUsername()]
 	if globalPermissions, ok := projectPermission[GlobalProject]; ok && permissionListHasPermission(globalPermissions, requestAction, requestScope) {
 		return []string{GlobalProject}
 	}
@@ -84,7 +85,7 @@ func (r *cacheImpl) GetUserProjects(user string, requestAction v1Role.Action, re
 	return projects
 }
 
-func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (r *cacheImpl) HasPermission(ctx apiInterface.PersesContext, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// Checking default permissions
 	if ok := permissionListHasPermission(r.guestPermissions, requestAction, requestScope); ok {
 		return true
@@ -92,15 +93,15 @@ func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requ
 	// Checking cached permissions
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
-	return r.cache.hasPermission(user, requestAction, requestProject, requestScope)
+	return r.cache.hasPermission(ctx.GetUsername(), requestAction, requestProject, requestScope)
 }
 
-func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission {
+func (r *cacheImpl) GetPermissions(ctx apiInterface.PersesContext) map[string][]*v1Role.Permission {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 	userPermissions := make(map[string][]*v1Role.Permission)
 	userPermissions[GlobalProject] = r.guestPermissions
-	for project, projectPermissions := range r.cache.permissions[user] {
+	for project, projectPermissions := range r.cache.permissions[ctx.GetUsername()] {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
 	return userPermissions

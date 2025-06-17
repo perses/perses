@@ -62,9 +62,9 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	}
 	persesContext := apiInterface.NewPersesContext(ctx)
 	// Get the list of the project the user has access to, depending on the current scope.
-	projects := t.rbac.GetUserProjects(persesContext.GetUsername(), role.ReadAction, *scope)
+	projects := t.rbac.GetUserProjects(persesContext, role.ReadAction, *scope)
 
-	// If there is no project associated to the user, then we should just return an empty list.
+	// If there is no project associated with the user, then we should just return an empty list.
 	if len(projects) == 0 {
 		return []api.Entity{}, nil
 	}
