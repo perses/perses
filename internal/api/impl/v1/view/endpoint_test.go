@@ -43,11 +43,11 @@ type testRBAC struct {
 	allow bool
 }
 
-func (t *testRBAC) GetPermissions(_ string) map[string][]*role.Permission {
+func (t *testRBAC) GetPermissions(_ echo.Context, _ string) map[string][]*role.Permission {
 	return map[string][]*role.Permission{}
 }
 
-func (t *testRBAC) HasPermission(_ string, _ role.Action, _ string, _ role.Scope) bool {
+func (t *testRBAC) HasPermission(_ echo.Context, _ string, _ role.Action, _ string, _ role.Scope) bool {
 	return t.allow
 }
 
@@ -59,8 +59,18 @@ func (t *testRBAC) Refresh() error {
 	panic("unimplemented")
 }
 
-func (t *testRBAC) GetUserProjects(_ string, _ role.Action, _ role.Scope) []string {
+func (t *testRBAC) GetUserProjects(_ echo.Context, _ string, _ role.Action, _ role.Scope) []string {
 	panic("unimplemented")
+}
+
+type testSecurity struct{}
+
+func (t *testSecurity) GetJWT() crypto.JWT {
+	panic("unimplemented")
+}
+
+func (t *testSecurity) GetUser(_ echo.Context) string {
+	return "user"
 }
 
 type mockDashboardService struct {
@@ -107,7 +117,7 @@ func (*mockDashboardService) Update(_ apiInterface.PersesContext, _ *v1.Dashboar
 }
 
 func TestEndpoint(t *testing.T) {
-	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &testSecurity{}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
@@ -134,7 +144,7 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestNotAllowed(t *testing.T) {
-	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{false}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{false}, &testSecurity{}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
@@ -151,7 +161,7 @@ func TestNotAllowed(t *testing.T) {
 }
 
 func TestDashboardDoesntExist(t *testing.T) {
-	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &mockDashboardService{nil}).(*endpoint)
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &testSecurity{}, &mockDashboardService{nil}).(*endpoint)
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))

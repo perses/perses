@@ -16,8 +16,12 @@ package login
 import (
 	"fmt"
 	"io"
+	"os/user"
+	"path/filepath"
 
 	"github.com/charmbracelet/huh"
+	"github.com/nexucis/lamenv"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/utils"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
@@ -26,12 +30,17 @@ import (
 	clientConfig "github.com/perses/perses/pkg/client/config"
 	backendConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 )
 
 type externalAuthKind string
+
+type kubeconfigStruct struct {
+	Kubeconfig string
+}
 
 const (
 	externalAuthKindOAuth externalAuthKind = utils.AuthKindOAuth
@@ -44,6 +53,7 @@ const (
 	errSlowDown             = "slow_down"
 	errAccessDenied         = "access_denied"
 	errExpiredToken         = "expired_token"
+	defaultKubeconfig       = "default_kubeconfig"
 )
 
 type loginOption interface {
@@ -65,6 +75,8 @@ type option struct {
 	externalAuthProvider string
 	accessToken          string
 	refreshToken         string
+	kubeconfig           string
+	useKubeconfig        bool
 	insecureTLS          bool
 	apiClient            api.ClientInterface
 	restConfig           clientConfig.RestConfigClient
@@ -127,6 +139,12 @@ func (o *option) Validate() error {
 	if (len(o.username) > 0 || len(o.accessToken) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
 		return fmt.Errorf("you can not set --username or --token at the same time than --client-id or --client-secret or --provider")
 	}
+	if o.useKubeconfig && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
+		return fmt.Errorf("you can not set --kubeconfig at the same time than --client-id or --client-secret or --provider")
+	}
+	if (len(o.username) > 0 || len(o.accessToken) > 0) && o.useKubeconfig {
+		return fmt.Errorf("you can not set --username or --token at the same time than --kubeconfig")
+	}
 
 	// check if based on the API config, flags can be used
 	providers := o.remoteConfig.Security.Authentication.Providers
@@ -150,6 +168,9 @@ func (o *option) Validate() error {
 		if len(o.externalAuthKind) == 0 {
 			return fmt.Errorf("provider %q does not exist", o.externalAuthProvider)
 		}
+	}
+	if o.useKubeconfig {
+		return o.validateKubernetes(providers)
 	}
 	return nil
 }
@@ -299,6 +320,37 @@ func (o *option) setExternalAuthProvider(kind externalAuthKind, slugID string) {
 	o.externalAuthProvider = slugID
 }
 
+func (o *option) validateKubernetes(providers backendConfig.AuthProviders) error {
+	if !providers.KubernetesProvider.Enabled {
+		return fmt.Errorf("--kubeconfig input is forbidden as backend does not support kubernetes auth provider")
+	}
+	if len(o.kubeconfig) == 0 {
+		// Load KUBECONFIG env variable if "--kubeconfig" didn't receive a location
+		var kubeconfigEnv kubeconfigStruct
+		err := lamenv.Unmarshal(&kubeconfigEnv, []string{})
+		if err != nil {
+			return err
+		}
+		o.kubeconfig = kubeconfigEnv.Kubeconfig
+
+		// If KUBECONFIG isn't set, then attempt to load from the well known "~/.kube/config" location
+		if len(o.kubeconfig) == 0 {
+			usr, _ := user.Current()
+			dir := usr.HomeDir
+			path := filepath.Join(dir, ".kube/config")
+
+			o.kubeconfig = path
+		}
+	}
+
+	kubeconfig, err := crypto.InitKubeConfig(o.kubeconfig)
+	if err != nil {
+		return err
+	}
+	o.accessToken = kubeconfig.BearerToken
+	return nil
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
@@ -312,6 +364,11 @@ percli login https://demo.perses.dev
 percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id> --client-secret <client-secret>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			kub := cmd.Flags().Lookup("kubeconfig").Value.String()
+			if kub == defaultKubeconfig {
+				o.useKubeconfig = true
+				o.kubeconfig = ""
+			}
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
@@ -321,6 +378,8 @@ percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id
 	cmd.Flags().StringVar(&o.clientID, "client-id", "", "Client ID used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.clientSecret, "client-secret", "", "Client Secret used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
+	cmd.Flags().StringVar(&o.kubeconfig, "kubeconfig", "", "Kubeconfig file location to load Kubernetes token from. Defaults to KUBECONFIG env variable, then HOME/.kube/config if empty")
+	cmd.Flags().Lookup("kubeconfig").NoOptDefVal = defaultKubeconfig
 	cmd.Flags().StringVar(&o.externalAuthProvider, "provider", "", "External authentication provider identifier. (slug_id)")
 	return cmd
 }

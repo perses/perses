@@ -199,6 +199,9 @@ oidc:
 # List of the OIDC authentication providers
 oauth:
   - <OAuth provider> # Optional
+
+# Kubernetes authentication provider configuration
+  - <Kubernetes provider> # Optional
 ```
 
 ##### OIDC provider
@@ -332,6 +335,20 @@ timeout: <duration> | default = 1m # Optional
 tls_config: <TLS config> # Optional
 ```
 
+##### Kubernetes Provider
+
+```yaml
+# Must be the only authentication provider enabled and must be run alongside the kubernetes
+# authorization option enabled
+enabled: <boolean>
+
+# File path to a local kubeconfig file. The current logged in user's bearer token will be used
+# for both the backend and as the user being logged into Perses. The user should have "create"
+# permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
+# available the pods service account token will be used. This parameter should not be set in production
+kubeconfig: <string> # Optional
+```
+
 #### Authorization config
 
 ```yaml
@@ -341,6 +358,10 @@ check_latest_update_interval: <duration> | default = 30s> # Optional
 # Default permissions for guest users (logged-in users)
 guest_permissions:
   - <Permissions> # Optional
+
+# Whether or not to use kubernetes to authorize users. Must be used in conjunction
+# with the Kubernetes Provider
+kubernetes: <boolean>
 ```
 
 ##### Permissions
