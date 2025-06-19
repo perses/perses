@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rbac
+package native
 
 import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +26,7 @@ func generateMockCache(userCount int, projectCountByUser int) cache {
 	permissions := make(usersPermissions)
 	for u := 1; u <= userCount; u++ {
 		for p := 1; p <= projectCountByUser; p++ {
-			addEntry(permissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
+			permissions.addEntry(fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
 				Actions: []role.Action{role.WildcardAction},
 				Scopes:  []role.Scope{role.WildcardScope},
 			})
@@ -36,23 +37,23 @@ func generateMockCache(userCount int, projectCountByUser int) cache {
 
 func smallMockCache() cache {
 	permissions := make(usersPermissions)
-	addEntry(permissions, "user0", "project0", &role.Permission{
+	permissions.addEntry("user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	addEntry(permissions, "user0", "project0", &role.Permission{
+	permissions.addEntry("user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.VariableScope},
 	})
-	addEntry(permissions, "user1", "project0", &role.Permission{
+	permissions.addEntry("user1", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
-	addEntry(permissions, "user2", "project1", &role.Permission{
+	permissions.addEntry("user2", "project1", &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	addEntry(permissions, "admin", GlobalProject, &role.Permission{
+	permissions.addEntry("admin", v1.WildcardProject, &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
@@ -141,7 +142,7 @@ func TestCacheHasPermission(t *testing.T) {
 			cache:          smallCache,
 			user:           "user1",
 			reqAction:      role.CreateAction,
-			reqProject:     GlobalProject,
+			reqProject:     v1.WildcardProject,
 			reqScope:       role.GlobalDatasourceScope,
 			expectedResult: false,
 		},
@@ -197,7 +198,7 @@ func TestCacheHasPermission(t *testing.T) {
 			cache:          smallCache,
 			user:           "admin",
 			reqAction:      role.UpdateAction,
-			reqProject:     GlobalProject,
+			reqProject:     v1.WildcardProject,
 			reqScope:       role.GlobalRoleScope,
 			expectedResult: true,
 		},

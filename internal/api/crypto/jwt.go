@@ -52,19 +52,6 @@ func signedToken(login string, notBefore time.Time, expireAt time.Time, key []by
 	return token.SignedString(key)
 }
 
-func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
-	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
-	if !ok {
-		return nil
-	}
-
-	claims, ok := jwtToken.Claims.(*JWTCustomClaims)
-	if !ok {
-		return nil
-	}
-	return claims
-}
-
 type JWT interface {
 	SignedAccessToken(login string) (string, error)
 	SignedRefreshToken(login string) (string, error)

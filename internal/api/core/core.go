@@ -21,12 +21,12 @@ import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/perses/common/app"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/api/discovery"
 	"github.com/perses/perses/internal/api/provisioning"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/ui"
@@ -72,7 +72,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.WithTaskHelpers(datasourceDiscoveryTasks...)
 	}
 	if conf.Security.EnableAuth {
-		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
+		rbacTask := authorization.NewPermissionRefreshCronTask(serviceManager.GetAuthorization(), persesDAO)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
 

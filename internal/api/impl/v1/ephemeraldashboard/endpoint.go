@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
@@ -33,9 +33,9 @@ type endpoint struct {
 	isEnabled bool
 }
 
-func NewEndpoint(service ephemeraldashboard.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool, isEnabled bool) route.Endpoint {
+func NewEndpoint(service ephemeraldashboard.Service, authz authorization.Authorization, readonly bool, caseSensitive bool, isEnabled bool) route.Endpoint {
 	return &endpoint{
-		toolbox:   toolbox.New[*v1.EphemeralDashboard, *v1.EphemeralDashboard, *ephemeraldashboard.Query](service, rbacService, v1.KindEphemeralDashboard, caseSensitive),
+		toolbox:   toolbox.New[*v1.EphemeralDashboard, *v1.EphemeralDashboard, *ephemeraldashboard.Query](service, authz, v1.KindEphemeralDashboard, caseSensitive),
 		readonly:  readonly,
 		isEnabled: isEnabled,
 	}

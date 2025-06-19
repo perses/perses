@@ -108,114 +108,114 @@ func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterfac
 	case *modelV1.Dashboard:
 		svc := p.serviceManager.GetDashboard()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Datasource:
 		svc := p.serviceManager.GetDatasource()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Folder:
 		svc := p.serviceManager.GetFolder()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.GlobalDatasource:
 		svc := p.serviceManager.GetGlobalDatasource()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.GlobalRole:
 		svc := p.serviceManager.GetGlobalRole()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.GlobalRoleBinding:
 		svc := p.serviceManager.GetGlobalRoleBinding()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.GlobalSecret:
 		svc := p.serviceManager.GetGlobalSecret()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.GlobalVariable:
 		svc := p.serviceManager.GetGlobalVariable()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Project:
 		svc := p.serviceManager.GetProject()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Role:
 		svc := p.serviceManager.GetRole()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.RoleBinding:
 		svc := p.serviceManager.GetRoleBinding()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Secret:
 		svc := p.serviceManager.GetSecret()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.User:
 		svc := p.serviceManager.GetUser()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	case *modelV1.Variable:
 		svc := p.serviceManager.GetVariable()
 		return func() (modelAPI.Entity, error) {
-				return svc.Create(apiInterface.EmptyCtx, entity)
+				return svc.Create(nil, entity)
 			},
 			func() (modelAPI.Entity, error) {
-				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+				return svc.Update(nil, entity, parameters)
 			}, nil
 	// We don't support the provisioning of the following resources: EphemeralDashboard
 	default:

@@ -19,7 +19,6 @@ import (
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -43,7 +42,7 @@ func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	if err := e.checkPermission(ctx, rbac.GlobalProject, role.GlobalDatasourceScope, role.CreateAction); err != nil {
+	if err := e.checkPermission(ctx, v1.WildcardProject, role.GlobalDatasourceScope, role.CreateAction); err != nil {
 		return err
 	}
 
@@ -58,7 +57,7 @@ func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
 }
 
 func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
-	if err := e.checkPermission(ctx, rbac.GlobalProject, role.GlobalDatasourceScope, role.ReadAction); err != nil {
+	if err := e.checkPermission(ctx, v1.WildcardProject, role.GlobalDatasourceScope, role.ReadAction); err != nil {
 		return err
 	}
 
