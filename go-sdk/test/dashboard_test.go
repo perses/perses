@@ -38,7 +38,9 @@ import (
 func TestDashboardBuilder(t *testing.T) {
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.Name("Containers monitoring"),
+		dashboard.Namespace("MyNamespace"),
 		dashboard.ProjectName("MyProject"),
+		dashboard.Description("A dashboard to monitor containers"),
 
 		// VARIABLES
 		dashboard.AddVariable("stack",
