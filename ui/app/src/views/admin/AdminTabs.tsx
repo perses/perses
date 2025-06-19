@@ -395,7 +395,6 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
     navigate(`/admin/${newTabIndex}`);
   };
   const marginTop = isMobileSize ? 1 : 2;
-  console.log(isGlobalDatasourceEnabled);
   return (
     <Box sx={{ width: '100%' }}>
       <Stack
