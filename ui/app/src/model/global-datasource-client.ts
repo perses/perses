@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-import { fetch, GlobalDatasourceResource, StatusError } from '@perses-dev/core';
+import { fetch, fetchJson, GlobalDatasourceResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -21,7 +21,6 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { fetchJson } from './fetch';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildQueryKey from './querykey-builder';
 

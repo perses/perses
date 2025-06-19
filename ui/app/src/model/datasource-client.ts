@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceResource, StatusError } from '@perses-dev/core';
+import { DatasourceResource, fetchJson, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -23,7 +23,6 @@ import {
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
-import { fetchJson } from './fetch';
 
 export const resource = 'datasources';
 
