@@ -20,7 +20,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/rbac"
@@ -88,13 +87,13 @@ func (e *endpoint) List(ctx echo.Context) error {
 
 func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	parameters := toolbox.ExtractParameters(ctx, e.caseSensitive)
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
-		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
+	if !e.rbac.IsEnabled() {
+		return apiinterface.HandleUnauthorizedError("authentication is required to retrieve user permissions")
 	}
-	if claims.Subject != parameters.Name {
+	persesContext := apiinterface.NewPersesContext(ctx)
+	if persesContext.GetUsername() != parameters.Name {
 		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
-	permissions := e.rbac.GetPermissions(claims.Subject)
+	permissions := e.rbac.GetPermissions(persesContext)
 	return ctx.JSON(http.StatusOK, permissions)
 }

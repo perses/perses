@@ -14,6 +14,7 @@
 package rbac
 
 import (
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -26,9 +27,9 @@ import (
 type RBAC interface {
 	IsEnabled() bool
 	// GetUserProjects return the list of the project the user has access to in the context of the role and the scope requested.
-	GetUserProjects(user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string
-	HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
-	GetPermissions(user string) map[string][]*v1Role.Permission
+	GetUserProjects(ctx apiInterface.PersesContext, requestAction v1Role.Action, requestScope v1Role.Scope) []string
+	HasPermission(ctx apiInterface.PersesContext, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	GetPermissions(ctx apiInterface.PersesContext) map[string][]*v1Role.Permission
 	Refresh() error
 }
 

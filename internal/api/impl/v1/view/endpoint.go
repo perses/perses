@@ -17,7 +17,6 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/view"
@@ -47,28 +46,23 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) view(ctx echo.Context) error {
-	view := v1.View{}
-	if err := ctx.Bind(&view); err != nil {
+	result := v1.View{}
+	if err := ctx.Bind(&result); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 
 	if e.rbac.IsEnabled() {
-		claims := crypto.ExtractJWTClaims(ctx)
-		if claims == nil {
-			return apiInterface.HandleUnauthorizedError("missing claims")
-		}
-
-		if ok := e.rbac.HasPermission(claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
-			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
+		if ok := e.rbac.HasPermission(apiInterface.NewPersesContext(ctx), role.ReadAction, result.Project, role.DashboardScope); !ok {
+			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, result.Project, role.DashboardScope))
 		}
 	}
 
 	if _, err := e.dashboardService.Get(apiInterface.NewPersesContext(ctx), apiInterface.Parameters{
-		Project: view.Project,
-		Name:    view.Dashboard,
+		Project: result.Project,
+		Name:    result.Dashboard,
 	}); err != nil {
 		return apiInterface.HandleNotFoundError(err.Error())
 	}
 
-	return e.service.View(&view)
+	return e.service.View(&result)
 }
