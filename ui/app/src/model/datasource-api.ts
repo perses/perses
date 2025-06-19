@@ -18,6 +18,26 @@ import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 import { getBasePathName } from './route';
 
+export function buildProxyUrl({
+  project,
+  dashboard,
+  name,
+}: {
+  project?: string;
+  dashboard?: string;
+  name: string;
+}): string {
+  const basePath = getBasePathName();
+  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
+  if (dashboard) {
+    url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
+  }
+  if (project) {
+    url = `projects/${encodeURIComponent(project)}/${url}`;
+  }
+  return `${basePath}/proxy/${url}`;
+}
+
 export function useDatasourceApi(): DatasourceApi {
   const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
   const { data: datasources, isLoading: isDatasourcesPending } = useDatasourceList({});
@@ -93,18 +113,6 @@ export function useDatasourceApi(): DatasourceApi {
     },
     [globalDatasources, isGlobalDatasourcesPending]
   );
-
-  function buildProxyUrl({ project, dashboard, name }: { project?: string; dashboard?: string; name: string }): string {
-    const basePath = getBasePathName();
-    let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
-    if (dashboard) {
-      url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
-    }
-    if (project) {
-      url = `projects/${encodeURIComponent(project)}/${url}`;
-    }
-    return `${basePath}/proxy/${url}`;
-  }
 
   return {
     getDatasource,

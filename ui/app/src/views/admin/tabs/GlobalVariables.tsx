@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Card, Typography } from '@mui/material';
+import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { getResourceExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
@@ -30,7 +30,7 @@ interface GlobalVariablesProps {
 export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
   const { id } = props;
 
-  const { data, isLoading, error } = useGlobalVariableList();
+  const { data, isLoading } = useGlobalVariableList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createVariableMutation = useCreateGlobalVariableMutation();
