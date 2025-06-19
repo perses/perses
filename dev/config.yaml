@@ -13,7 +13,6 @@ security:
         scopes:
           - Project
   authentication:
-    access_token_ttl: 5s
     providers:
       enable_native: true
 

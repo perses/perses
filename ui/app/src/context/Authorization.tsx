@@ -16,6 +16,7 @@ import { Action, Permission, ProjectResource, Scope } from '@perses-dev/core';
 import { useAuthToken } from '../model/auth-client';
 import { useUserPermissions } from '../model/user-client';
 import { useProjectList } from '../model/project-client';
+import { enableRefreshFetch } from '../model/fetch';
 import { useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
@@ -41,6 +42,11 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
     }
     return data;
   }, [data]);
+
+  if (enabled) {
+    // Will refresh the access token if it has expired when fetching data
+    enableRefreshFetch();
+  }
 
   return (
     <AuthorizationContext.Provider value={{ enabled, username, userPermissions }}>

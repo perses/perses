@@ -25,6 +25,7 @@ import { NavHistoryProvider } from './context/DashboardNavHistory';
 import { ConfigContextProvider } from './context/Config';
 import { getBasePathName } from './model/route';
 import { AuthorizationProvider } from './context/Authorization';
+import { enableRefreshFetch } from './model/fetch';
 /**
  * Renders the Perses application in the target container.
  */

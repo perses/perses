@@ -14,28 +14,29 @@
 import { StatusError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
 
-global.fetch = new Proxy(global.fetch, {
-  apply: function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
-    // Only override fetch for Perses App (or other tools importing this file)
-    return target
-      .apply(that, args)
-      .then((res) => {
-        if (res.status === 401) {
-          return refreshToken()
-            .then(() => {
-              return target.apply(that, args);
-            })
-            .catch((refreshError: StatusError) => {
-              throw refreshError;
-            });
-        }
-        return res;
-      })
-      .catch((error: StatusError) => {
-        throw error;
-      });
-  },
-});
+export function enableRefreshFetch(): void {
+  global.fetch = new Proxy(global.fetch, {
+    apply: function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
+      return target
+        .apply(that, args)
+        .then((res) => {
+          if (res.status === 401) {
+            return refreshToken()
+              .then(() => {
+                return target.apply(that, args);
+              })
+              .catch((refreshError: StatusError) => {
+                throw refreshError;
+              });
+          }
+          return res;
+        })
+        .catch((error: StatusError) => {
+          throw error;
+        });
+    },
+  });
+}
 
 export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
