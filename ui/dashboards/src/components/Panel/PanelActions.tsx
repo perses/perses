@@ -24,7 +24,8 @@ import MenuIcon from 'mdi-material-ui/Menu';
 import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import DownloadIcon from 'mdi-material-ui/Download'; 
+import { Link, TimeSeriesData } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -50,7 +51,7 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
-  queryResults: QueryData[];
+  queryResults: TimeSeriesData | undefined;
 }
 
 const ConditionalBox = styled(Box)({
@@ -59,6 +60,11 @@ const ConditionalBox = styled(Box)({
   flexGrow: 1,
   justifyContent: 'flex-end',
 });
+
+// Function to check if the data is time series data
+const isTimeSeriesData = (data: TimeSeriesData | undefined): boolean => {
+  return !!(data && data.series && Array.isArray(data.series) && data.series.length > 0);
+};
 
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
@@ -70,6 +76,93 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   links,
   queryResults,
 }) => {
+  const formatSeriesTitle = (seriesName: string, seriesIndex: number) => {
+    return seriesName;
+  };
+
+  // Check if current data is time series data
+  const hasTimeSeriesData = useMemo(() => isTimeSeriesData(queryResults), [queryResults]);
+
+  const csvExportHandler = () => {
+    if (!queryResults || !queryResults.series || !Array.isArray(queryResults.series) || queryResults.series.length === 0) {
+      console.warn('No data available to export to CSV. queryResults:', queryResults);
+      return;
+    }
+
+    let csvString = '';
+    const result: Record<string, Record<string, any>> = {};
+    const seriesNames: string[] = [];
+    const seriesLegendNames: string[] = []; // This will hold the formatted legend names
+
+    for (let i = 0; i < queryResults.series.length; i++) {
+      const series = queryResults.series[i];
+
+      if (!series?.name || !Array.isArray(series.values)) {
+        continue;
+      }
+
+      const name = formatSeriesTitle(series.name, i);
+      seriesNames.push(name);
+      if (!name) {
+        continue;
+      }
+
+      for (const entry of series.values) {
+        const dateTime = new Date(entry[0]).toISOString();
+        const value = entry[1];
+
+        if (!result[dateTime]) {
+          result[dateTime] = {};
+        }
+        result[dateTime]![name] = value;
+      }
+    }
+
+    const uniqueSeriesNames = new Set(seriesNames);
+    const uniqueSeriesArray = Array.from(uniqueSeriesNames);
+
+    csvString = `DateTime,${uniqueSeriesArray.join(',')}\n`;
+
+    const sortedDateTimes = Object.keys(result).sort();
+
+    for (const dateTime of sortedDateTimes) {
+      const temp: any[] = [];
+      const rowData = result[dateTime];
+      if(rowData) {
+        for(const name of uniqueSeriesArray){
+          temp.push(rowData[name] ?? '');
+        }
+      }
+      csvString += `${dateTime},${temp.join(',')}\n`;
+    }
+
+    const blobCsvData = new Blob([csvString], { type: 'text/csv' });
+    const csvURL = URL.createObjectURL(blobCsvData);
+    const link = document.createElement('a');
+    link.href = csvURL;
+    link.download = `${title}_graphData.csv`;
+    link.click();
+  };
+
+  const csvExportButton = useMemo(() => {
+    // Only show CSV export button if we have time series data
+    if (!hasTimeSeriesData) {
+      return null;
+    }
+
+    return (
+      <InfoTooltip description="Export as CSV">
+        <HeaderIconButton
+          aria-label="CSV Export"
+          size="small"
+          onClick={csvExportHandler}
+        >
+          <DownloadIcon fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }, [hasTimeSeriesData, csvExportHandler]);
+
   const descriptionAction = useMemo(() => {
     if (description && description.trim().length > 0) {
       return (
@@ -87,21 +180,20 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [descriptionTooltipId, description]);
+
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo(() => {
-    const hasData = queryResults.some((q) => q.data);
-    const isFetching = queryResults.some((q) => q.isFetching);
-    const queryErrors = queryResults.filter((q) => q.error);
+    const hasData = queryResults && queryResults.series && queryResults.series.length > 0;
+    const isFetching = false;
+    const queryErrors: any[] = [];
     if (isFetching && hasData) {
-      // If the panel has no data, the panel content will show the loading overlay.
-      // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
         .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error')
         .join('\n');
 
       return (
@@ -215,6 +307,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+            {csvExportButton}
           </OverflowMenu>
           {moveAction}
         </OnHover>
@@ -234,7 +327,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider} {queryStateIndicator}
         <OnHover>
           {extraActions} {readActions}
-          <OverflowMenu title={title}>{editActions}</OverflowMenu>
+          <OverflowMenu title={title}>
+            {editActions}
+            {csvExportButton} 
+          </OverflowMenu>
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -253,6 +349,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider} {queryStateIndicator}
         <OnHover>
           {extraActions} {readActions} {editActions} {moveAction}
+          <OverflowMenu title={title}>
+            {csvExportButton}
+          </OverflowMenu>
         </OnHover>
       </ConditionalBox>
     </>
