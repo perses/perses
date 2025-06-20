@@ -16,29 +16,29 @@ package common
 #format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat
 
 #timeFormat: {
-	unit:           "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
+	unit?:          "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 	decimalPlaces?: number
 }
 
 #percentFormat: {
-	unit:           "percent" | "percent-decimal"
+	unit?:          "percent" | "percent-decimal"
 	decimalPlaces?: number
 }
 
 #decimalFormat: {
-	unit:           "decimal"
+	unit?:          "decimal"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
 
 #bytesFormat: {
-	unit:           "bytes"
+	unit?:          "bytes"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
 
 #throughputFormat: {
-	unit:           "bits/sec" | "bytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
+	unit?:          "bits/sec" | "bytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
 }

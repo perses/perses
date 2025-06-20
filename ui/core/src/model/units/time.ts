@@ -17,7 +17,7 @@ import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
 type TimeUnits = 'milliseconds' | 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 export type TimeFormatOptions = {
-  unit: TimeUnits;
+  unit?: TimeUnits;
   decimalPlaces?: number;
 };
 const TIME_GROUP = 'Time';
