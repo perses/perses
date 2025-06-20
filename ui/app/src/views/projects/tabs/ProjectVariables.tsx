@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { getResourceExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { VariableList } from '../../../components/variable/VariableList';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import {
   useCreateVariableMutation,
   useDeleteVariableMutation,
@@ -31,12 +30,6 @@ interface ProjectVariablesProps {
 
 export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
   const { projectName, id } = props;
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    datasourceApi.listDatasources(projectName);
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi, projectName]);
 
   const { data, isLoading } = useVariableList(projectName);
 

@@ -16,11 +16,11 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry, ProjectStoreProvider, useProjectStore, remotePluginLoader } from '@perses-dev/plugin-system';
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
+import React, { ReactElement, useMemo } from 'react';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
+import { useDatasourceApi } from '../../../model/datasource-api';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -39,15 +39,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const { project } = useProjectStore();
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-
-  useEffect(() => {
-    // warm up the caching of the datasources
-    if (projectName) {
-      datasourceApi.listDatasources(projectName);
-    }
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi, projectName]);
+  const datasourceApi = useDatasourceApi();
 
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
