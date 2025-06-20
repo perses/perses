@@ -85,20 +85,18 @@ describe('TimeRangeControls', () => {
 
   const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
-      <>
-        {testURLParams ? (
-          <TimeRangeProviderWithQueryParams
-            initialRefreshInterval={testDefaultRefreshInterval}
-            initialTimeRange={testDefaultTimeRange}
-          >
-            <TimeRangeControls />
-          </TimeRangeProviderWithQueryParams>
-        ) : (
-          <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
-            <TimeRangeControls />
-          </TimeRangeProvider>
-        )}
-      </>,
+      testURLParams ? (
+        <TimeRangeProviderWithQueryParams
+          initialRefreshInterval={testDefaultRefreshInterval}
+          initialTimeRange={testDefaultTimeRange}
+        >
+          <TimeRangeControls />
+        </TimeRangeProviderWithQueryParams>
+      ) : (
+        <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
+          <TimeRangeControls />
+        </TimeRangeProvider>
+      ),
       undefined,
       history
     );
@@ -120,19 +118,19 @@ describe('TimeRangeControls', () => {
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
-    expect(history.location.search).toEqual('?start=5m&refresh=0s');
+    expect(history.location.search).toEqual('?start=5m&refresh=0s&timeZone=local');
 
     // pick another option from TimeRangeSelector dropdown
     const secondSelected = screen.getByText('Last 12 hours');
     userEvent.click(secondSelected);
-    expect(history.location.search).toEqual('?start=12h&refresh=0s');
+    expect(history.location.search).toEqual('?start=12h&refresh=0s&timeZone=local');
 
     const refreshButton = screen.getByLabelText(/refresh interval/i, { selector: '[role="combobox"]' });
     userEvent.click(refreshButton);
 
     const firstRefreshSelected = screen.getByRole('option', { name: '5s' });
     userEvent.click(firstRefreshSelected);
-    expect(history.location.search).toEqual('?start=12h&refresh=5s');
+    expect(history.location.search).toEqual('?start=12h&refresh=5s&timeZone=local');
 
     // back button should return to previous page selected
     act(() => {

@@ -26,6 +26,7 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
   EphemeralDashboardResource,
+  DEFAULT_DASHBAORD_TIMEZONE,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -60,6 +61,7 @@ export interface DashboardStoreState
   metadata: ProjectMetadata;
   duration: DurationString;
   refreshInterval: DurationString;
+  timeZone: string;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   ttl?: DurationString;
@@ -123,7 +125,13 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
   const {
     kind,
     metadata,
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
+    spec: {
+      display,
+      duration,
+      timeZone = DEFAULT_DASHBAORD_TIMEZONE,
+      refreshInterval = DEFAULT_REFRESH_INTERVAL,
+      datasources,
+    },
   } = dashboardResource;
 
   const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
@@ -160,6 +168,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           display,
           duration,
           refreshInterval,
+          timeZone,
           datasources,
           ttl,
           isEditMode: !!isEditMode,
@@ -167,7 +176,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           setDashboard: ({
             kind,
             metadata,
-            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
+            spec: { display, panels = {}, layouts = [], duration, refreshInterval, timeZone, datasources = {} },
           }): void => {
             set((state) => {
               state.kind = kind;
@@ -179,6 +188,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+              state.timeZone = timeZone ?? DEFAULT_DASHBAORD_TIMEZONE;
               state.datasources = datasources;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
