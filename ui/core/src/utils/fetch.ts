@@ -44,8 +44,10 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
  */
 export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
   const response = await fetch(...args);
-  const json: T = await response.json();
-  return json;
+  if (!response.ok) {
+    throw new FetchError(response);
+  }
+  return await response.json();
 }
 
 export interface StatusError extends Error {

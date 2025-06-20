@@ -21,7 +21,7 @@ import {
   useDeleteGlobalDatasourceMutation,
   useGlobalDatasourceList,
   useUpdateGlobalDatasourceMutation,
-} from '../../../model/admin-client';
+} from '../../../model/global-datasource-client';
 
 interface GlobalDatasourcesProps {
   hideToolbar?: boolean;
