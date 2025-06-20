@@ -16,6 +16,7 @@ package proxy
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -28,12 +29,38 @@ import (
 
 func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
+	var scrt *v1.GlobalSecret
+
 	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(datasourceName, name)
-	})
+		globalScrt, err := e.getGlobalSecret(datasourceName, name)
+		if err != nil {
+			return nil, err
+		}
+
+		scrt, err = deep.Copy(globalScrt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create deep copy of global secret %q for datasource %q: %w", name, datasourceName, err)
+		}
+
+		return &scrt.Spec, nil
+	},
+	)
 	if err != nil {
 		return err
 	}
+
+	if e.crypto.IsCFBEncrypted() {
+		if decryptErr := e.crypto.Encrypt(&scrt.Spec); decryptErr != nil {
+			logrus.WithError(decryptErr).Errorf("failed to encrypt global secret for datasource %q", datasourceName)
+			return apiinterface.InternalError
+		}
+
+		if err := e.globalSecret.Update(scrt); err != nil {
+			logrus.WithError(err).Errorf("failed to update encrypted global secret for datasource %q", datasourceName)
+			return apiinterface.InternalError
+		}
+	}
+
 	return pr.serve(ctx)
 }
 
@@ -84,7 +111,7 @@ func (e *endpoint) getGlobalDatasource(name string) (*v1.GlobalDatasource, error
 	return dts, nil
 }
 
-func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
+func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.GlobalSecret, error) {
 	scrt, err := e.globalSecret.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -94,5 +121,5 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
 		return nil, apiinterface.InternalError
 	}
-	return &scrt.Spec, nil
+	return scrt, nil
 }
