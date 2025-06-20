@@ -50,7 +50,7 @@ const (
 )
 
 type Format struct {
-	Unit          string `json:"unit" yaml:"unit"`
+	Unit          string `json:"unit,omitempty" yaml:"unit,omitempty"`
 	DecimalPlaces int    `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
 	ShortValues   bool   `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
 }
