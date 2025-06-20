@@ -44,7 +44,7 @@ export function useDatasourceApi(): DatasourceApi {
 
   const getDatasource = useCallback(
     async (project: string, selector: DatasourceSelector) => {
-      if (isDatasourcesPending || datasources === undefined) {
+      if (isDatasourcesPending || !datasources) {
         return undefined;
       }
       return datasources.find((datasource) => {
@@ -54,7 +54,7 @@ export function useDatasourceApi(): DatasourceApi {
         if (selector.kind !== datasource.spec.plugin.kind) {
           return false;
         }
-        if (selector.name === undefined) {
+        if (!selector.name) {
           return datasource.spec.default;
         }
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
@@ -65,14 +65,14 @@ export function useDatasourceApi(): DatasourceApi {
 
   const getGlobalDatasource = useCallback(
     async (selector: DatasourceSelector) => {
-      if (isGlobalDatasourcesPending || globalDatasources === undefined) {
+      if (isGlobalDatasourcesPending || !globalDatasources) {
         return undefined;
       }
       return globalDatasources.find((datasource) => {
         if (selector.kind !== datasource.spec.plugin.kind) {
           return false;
         }
-        if (selector.name === undefined) {
+        if (!selector.name) {
           return datasource.spec.default;
         }
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
@@ -83,14 +83,14 @@ export function useDatasourceApi(): DatasourceApi {
 
   const listDatasources = useCallback(
     async (project: string, pluginKind?: string) => {
-      if (isDatasourcesPending || datasources === undefined) {
+      if (isDatasourcesPending || !datasources) {
         return [];
       }
       return datasources.filter((datasource) => {
         if (datasource.metadata.project !== project) {
           return false;
         }
-        if (pluginKind !== undefined && datasource.spec.plugin.kind !== pluginKind) {
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
           return false;
         }
         return true;
@@ -101,11 +101,11 @@ export function useDatasourceApi(): DatasourceApi {
 
   const listGlobalDatasources = useCallback(
     async (pluginKind?: string) => {
-      if (isGlobalDatasourcesPending || globalDatasources === undefined) {
+      if (isGlobalDatasourcesPending || !globalDatasources) {
         return [];
       }
       return globalDatasources.filter((datasource) => {
-        if (pluginKind !== undefined && datasource.spec.plugin.kind !== pluginKind) {
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
           return false;
         }
         return true;

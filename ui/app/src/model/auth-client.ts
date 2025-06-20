@@ -37,10 +37,7 @@ export function useIsAccessTokenExist(isAuthEnabled: boolean): boolean {
   // Warm the access token request cache back
   // If the refresh token is not expired, the debounce mechanism will get the refreshed accedd token.
   // Otherwise, debounce will let pass the empty access token and auth guard will redirect to sign in.
-  if (
-    isAuthEnabled &&
-    (!accessToken || !accessToken.data || !accessToken.data.exp || accessToken.data.exp > new Date())
-  ) {
+  if (isAuthEnabled && (!accessToken?.data?.exp || accessToken.data.exp > new Date())) {
     refreshToken();
   }
 
