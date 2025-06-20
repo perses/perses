@@ -91,6 +91,8 @@ const PERCENT_TESTS: UnitTestCase[] = [
   { value: 1, format: { unit: 'percent-decimal', decimalPlaces: 4 }, expected: '100.0000%' },
 
   { value: 10, format: { unit: 'percent-decimal' }, expected: '1,000%' },
+
+  { value: 14.5678, format: { decimalPlaces: 2 }, expected: '14.57%' },
 ];
 
 describe('formatValue', () => {
