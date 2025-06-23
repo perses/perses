@@ -109,10 +109,16 @@ export interface OauthProvider {
   user_infos_url: string;
 }
 
+export interface KubernetesProvider {
+  enabled: boolean;
+  kubeconfig: string;
+}
+
 export interface AuthProviders {
   enable_native: boolean;
   oauth: OauthProvider[];
   oidc: OIDCProvider[];
+  kubernetes: KubernetesProvider;
 }
 
 export interface AuthenticationConfig {

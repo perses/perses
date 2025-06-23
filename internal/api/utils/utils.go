@@ -35,6 +35,7 @@ const (
 	AuthKindNative         = "native"
 	AuthKindOIDC           = "oidc"
 	AuthKindOAuth          = "oauth"
+	AuthKindKubernetes     = "kubernetes"
 	APIV1Prefix            = "/api/v1"
 	PathDashboard          = "dashboards"
 	PathDatasource         = "datasources"

@@ -11,31 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rbac
+package crypto
 
 import (
 	"github.com/labstack/echo/v4"
-	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
-type disabledImpl struct{}
-
-func (r *disabledImpl) IsEnabled() bool {
-	return false
+type Security interface {
+	GetJWT() JWT
+	GetUser(ctx echo.Context) string
 }
 
-func (r *disabledImpl) GetUserProjects(_ echo.Context, _ string, _ v1Role.Action, _ v1Role.Scope) []string {
-	return []string{}
-}
-
-func (r *disabledImpl) HasPermission(_ echo.Context, _ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
-	return true
-}
-
-func (r *disabledImpl) GetPermissions(_ echo.Context, _ string) map[string][]*v1Role.Permission {
-	return nil
-}
-
-func (r *disabledImpl) Refresh() error {
-	return nil
+func GetSecurity(security config.Security, jwt JwtImpl) Security {
+	if security.Authentication.Providers.KubernetesProvider.Enabled {
+		return GetKubernetesSecurity(security, jwt)
+	}
+	return jwt
 }

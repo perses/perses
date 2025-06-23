@@ -38,6 +38,7 @@ import {
   useIsAuthEnabled,
   useIsGlobalDatasourceEnabled,
   useIsGlobalVariableEnabled,
+  useIsK8sAuth,
   useIsReadonly,
 } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
@@ -375,6 +376,7 @@ interface AdminTabsProps {
 export function AdminTabs(props: AdminTabsProps): ReactElement {
   const { initialTab } = props;
   const isAuthEnabled = useIsAuthEnabled();
+  const isK8sAuth = useIsK8sAuth();
   const isGlobalDatasourceEnabled = useIsGlobalDatasourceEnabled();
   const isGlobalVariableEnabled = useIsGlobalVariableEnabled();
 
@@ -439,7 +441,7 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
             value={secretsTabIndex}
             disabled={!hasGlobalSecretReadPermission}
           />
-          {isAuthEnabled && (
+          {isAuthEnabled && !isK8sAuth && (
             <MenuTab
               label="Global Roles"
               icon={<ShieldIcon />}
@@ -449,7 +451,7 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
               disabled={!hasGlobalRoleReadPermission}
             />
           )}
-          {isAuthEnabled && (
+          {isAuthEnabled && !isK8sAuth && (
             <MenuTab
               label="Global Role Bindings"
               icon={<ShieldAccountIcon />}
@@ -459,7 +461,7 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
               disabled={!hasGlobalRoleBindingReadPermission}
             />
           )}
-          {isAuthEnabled && (
+          {isAuthEnabled && !isK8sAuth && (
             <MenuTab
               label="Users"
               icon={<AccountIcon />}
@@ -486,7 +488,7 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
       <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: marginTop }}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
-      {isAuthEnabled && (
+      {isAuthEnabled && !isK8sAuth && (
         <>
           <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: marginTop }}>
             <GlobalRoles id="global-role-list" />
