@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// test with error cases only as nominal cases are already covered in schema_test.go
+// NB: most of the nominal cases are already covered in schema_test.go
 func TestLoadModelSchema(t *testing.T) {
 	testSuite := []struct {
 		desc        string
@@ -50,6 +50,17 @@ func TestLoadModelSchema(t *testing.T) {
 			schemaPath:  "testdata/schemas/variables/invalid_spec/",
 			wantErr:     true,
 			expectedErr: "`spec` is of wrong type",
+		},
+		{
+			desc:        "invalid query schema - invalid spec",
+			schemaPath:  "testdata/schemas/queries/invalid_spec/",
+			wantErr:     true,
+			expectedErr: "`spec` is of wrong type",
+		},
+		{
+			desc:       "valid panel schema that uses disjunction at the spec's root",
+			schemaPath: "testdata/schemas/panels/disjunct/",
+			wantErr:    false,
 		},
 	}
 

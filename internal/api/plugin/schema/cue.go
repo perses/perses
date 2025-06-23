@@ -60,9 +60,7 @@ func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 		return "", nil, fmt.Errorf("invalid schema at %s: required `spec` field is missing: %w", schemaPath, specValue.Err())
 	}
 	specKind := specValue.Kind()
-	// NB: not perfect check. We accept BottomKind as it is returned in valid cases (empty struct, disjunction..),
-	// but it is also returned in invalid cases (spec: number, spec: string..). Unfortunately we can't make this smarter here.
-	if specKind != cue.StructKind && specKind != cue.BottomKind {
+	if specKind != cue.StructKind && specValue.IncompleteKind() != cue.StructKind {
 		return "", nil, fmt.Errorf("invalid schema at %s: `spec` is of wrong type %q", schemaPath, specKind)
 	}
 
