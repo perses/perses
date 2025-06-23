@@ -20,9 +20,9 @@ spec: {
 }
 
 #A: {
-  a: string
+	a: string
 }
 
 #B: {
-  b: int
+	b: int
 }
