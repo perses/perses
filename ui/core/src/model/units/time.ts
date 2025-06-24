@@ -130,7 +130,7 @@ function isMonthOrYear(unit: TimeUnits): boolean {
 export function formatTime(value: number, { unit, decimalPlaces }: TimeFormatOptions): string {
   if (value === 0) return '0s';
 
-  const results = getValueAndKindForNaturalNumbers(value, unit);
+  const results = getValueAndKindForNaturalNumbers(value, unit ?? 'seconds');
 
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',

@@ -21,7 +21,7 @@ import {
 } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
-import { SettingsAutocomplete } from '../SettingsAutocomplete';
+import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
 
 export interface FormatControlsProps {
   value: FormatOptions;
@@ -29,13 +29,18 @@ export interface FormatControlsProps {
   disabled?: boolean;
 }
 
-type AutocompleteUnitOption = UnitConfig & { id: FormatOptions['unit'] };
+type AutocompleteUnitOption = Omit<SettingsAutocompleteOption, 'id'> &
+  UnitConfig & {
+    id: NonNullable<FormatOptions['unit']>;
+  };
 
-const KIND_OPTIONS: AutocompleteUnitOption[] = Object.entries(UNIT_CONFIG)
+const KIND_OPTIONS: readonly AutocompleteUnitOption[] = Object.entries(UNIT_CONFIG)
   .map(([id, config]) => {
+    const unit = id as NonNullable<FormatOptions['unit']>;
     return {
-      id: id as FormatOptions['unit'],
       ...config,
+      id: unit,
+      group: config.group ?? 'Decimal',
     };
   })
   .filter((config) => !config.disableSelectorOption);
@@ -61,7 +66,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
 
   const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption): void => {
     onChange({
-      unit: newValue.id,
+      unit: newValue.id ?? 'decimal', // Fallback to 'decimal' if no unit is selected
     });
   };
 
@@ -89,7 +94,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
     }
   };
 
-  const unitConfig = UNIT_CONFIG[value.unit];
+  const unitConfig = UNIT_CONFIG[value.unit || 'decimal'];
 
   return (
     <>
@@ -107,10 +112,10 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
         label="Unit"
         control={
           <SettingsAutocomplete
-            value={{ id: value.unit, ...unitConfig }}
+            value={{ id: value.unit ?? 'decimal', ...unitConfig }}
             options={KIND_OPTIONS}
-            groupBy={(option) => option.group}
-            onChange={handleKindChange}
+            groupBy={(option: AutocompleteUnitOption) => option.group ?? 'Decimal'}
+            onChange={(_, value) => handleKindChange(_, value as AutocompleteUnitOption)}
             disableClearable
             disabled={disabled}
           />
