@@ -13,5 +13,16 @@
 
 package model
 
-kind: "ThirdChart"
-spec: {}
+kind: "DisjunctChart"
+spec: {
+	#A | #B
+	c: string
+}
+
+#A: {
+	a: string
+}
+
+#B: {
+	b: int
+}

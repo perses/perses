@@ -27,8 +27,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const kindPath = "kind"
-
 var cueValidationOptions = []cue.Option{
 	cue.Concrete(true),
 	cue.Attributes(true),
@@ -47,14 +45,25 @@ func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	if schema.Err() != nil {
 		return "", nil, schema.Err()
 	}
-	kindValue := schema.LookupPath(cue.ParsePath(kindPath))
+	// Check the presence & type of `kind`
+	kindValue := schema.LookupPath(cue.ParsePath("kind"))
 	if kindValue.Err() != nil {
-		return "", nil, fmt.Errorf("unable to retrieve the kind value: %w", kindValue.Err())
+		return "", nil, fmt.Errorf("invalid schema at %s: required `kind` field is missing: %w", schemaPath, kindValue.Err())
 	}
 	kind, err := kindValue.String()
 	if err != nil {
-		return "", nil, fmt.Errorf("unable to retrieve the kind value: %w", err)
+		return "", nil, fmt.Errorf("invalid schema at %s: `kind` is not a string: %w", schemaPath, err)
 	}
+	// Check the presence & type of `spec`
+	specValue := schema.LookupPath(cue.ParsePath("spec"))
+	if specValue.Err() != nil {
+		return "", nil, fmt.Errorf("invalid schema at %s: required `spec` field is missing: %w", schemaPath, specValue.Err())
+	}
+	specKind := specValue.Kind()
+	if specKind != cue.StructKind && specValue.IncompleteKind() != cue.StructKind {
+		return "", nil, fmt.Errorf("invalid schema at %s: `spec` is of wrong type %q", schemaPath, specKind)
+	}
+
 	return kind, schemaInstance, nil
 }
 
