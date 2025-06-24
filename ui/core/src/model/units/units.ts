@@ -63,7 +63,6 @@ export type FormatOptions =
   | BytesFormatOptions
   | ThroughputFormatOptions;
 
-
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
 
@@ -102,7 +101,7 @@ export function getUnitConfig(formatOptions: FormatOptions): UnitConfig {
 }
 
 export function getUnitGroup(formatOptions: FormatOptions): UnitGroup {
-  return getUnitConfig(formatOptions).group ?? "Decimal";
+  return getUnitConfig(formatOptions).group ?? 'Decimal';
 }
 
 export function getUnitGroupConfig(formatOptions: FormatOptions): UnitGroupConfig {
