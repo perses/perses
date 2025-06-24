@@ -32,11 +32,12 @@ export interface NativeAuthBody {
 
 export function useIsAccessTokenExist(isAuthEnabled: boolean): boolean {
   const [cookies] = useCookies();
+  const accessToken = useAuthToken();
 
   // Warm the access token request cache back
   // If the refresh token is not expired, the debounce mechanism will get the refreshed accedd token.
   // Otherwise, debounce will let pass the empty access token and auth guard will redirect to sign in.
-  if (isAuthEnabled && cookies[jwtPayload] === undefined) {
+  if (isAuthEnabled && (!accessToken?.data?.exp || accessToken.data.exp > new Date())) {
     refreshToken();
   }
 

@@ -33,7 +33,6 @@ import AccountIcon from 'mdi-material-ui/Account';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
-import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import {
   useIsAuthEnabled,
@@ -50,6 +49,7 @@ import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useCreateGlobalSecretMutation } from '../../model/global-secret-client';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
+import { useCreateGlobalDatasourceMutation } from '../../model/global-datasource-client';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecrets';
@@ -395,7 +395,6 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
     navigate(`/admin/${newTabIndex}`);
   };
   const marginTop = isMobileSize ? 1 : 2;
-  console.log(isGlobalDatasourceEnabled);
   return (
     <Box sx={{ width: '100%' }}>
       <Stack

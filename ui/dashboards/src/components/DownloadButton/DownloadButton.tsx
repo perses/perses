@@ -54,8 +54,8 @@ export function DownloadButton(): ReactElement {
                   'app.kubernetes.io/part-of': 'perses-operator',
                 },
                 name,
+                namespace: dashboard.metadata.project,
               },
-              namespace: dashboard.metadata.project,
               spec: dashboard.spec,
             });
           } else {
