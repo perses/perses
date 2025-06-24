@@ -16,11 +16,10 @@ import {
   ErrorBoundary,
   ErrorAlert,
   TimeZoneSelector,
-  useTimeZone,
   getTimeZoneOptions,
   TimeZoneOption,
 } from '@perses-dev/components';
-import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { TimeRangeControls, useTimeZone } from '@perses-dev/plugin-system';
 import { ReactElement, useCallback } from 'react';
 import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';

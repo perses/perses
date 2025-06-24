@@ -13,9 +13,14 @@
 
 import { Box, MenuItem, Popover, Select, useMediaQuery, useTheme } from '@mui/material';
 import ClockTimeFiveOutline from 'mdi-material-ui/ClockTimeFiveOutline';
-import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import {
+  TimeRangeValue,
+  isRelativeTimeRange,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+  DEFAULT_DASHBOARD_TIMEZONE,
+} from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { useTimeZone } from '../context/TimeZoneProvider';
 import { TimeOption } from '../model';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
@@ -43,6 +48,10 @@ interface TimeRangeSelectorProps {
    * Defaults to true.
    */
   showCustomTimeRange?: boolean;
+  /**
+   * The time zone to use for the time range selector.
+   */
+  timeZone?: string;
 }
 
 /**
@@ -57,9 +66,9 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
+  timeZone = DEFAULT_DASHBOARD_TIMEZONE,
 }: TimeRangeSelectorProps): ReactElement {
   const isMobile = useMediaQuery(useTheme().breakpoints.down('md'));
-  const { timeZone } = useTimeZone();
 
   const anchorEl = useRef(); // Used to position the absolute time range picker
 
@@ -109,6 +118,7 @@ export function TimeRangeSelector({
             setOpen(false);
           }}
           onCancel={() => setShowCustomDateSelector(false)}
+          timeZone={timeZone}
         />
       </Popover>
       <Box ref={anchorEl}>

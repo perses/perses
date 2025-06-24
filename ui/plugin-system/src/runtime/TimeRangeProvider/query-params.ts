@@ -201,7 +201,7 @@ export function useSetRefreshIntervalParams(
   };
 }
 
-export function useSetInitialTimeZone(initialTimeZone: string): {
+export function useSetTimeZoneParams(initialTimeZone: string): {
   timeZone: string;
   setTimeZone: (timeZone: string) => void;
 } {

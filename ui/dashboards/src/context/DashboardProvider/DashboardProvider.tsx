@@ -26,7 +26,7 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
   EphemeralDashboardResource,
-  DEFAULT_DASHBAORD_TIMEZONE,
+  DEFAULT_DASHBOARD_TIMEZONE,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -128,7 +128,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
     spec: {
       display,
       duration,
-      timeZone = DEFAULT_DASHBAORD_TIMEZONE,
+      timeZone = DEFAULT_DASHBOARD_TIMEZONE,
       refreshInterval = DEFAULT_REFRESH_INTERVAL,
       datasources,
     },
@@ -188,7 +188,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
-              state.timeZone = timeZone ?? DEFAULT_DASHBAORD_TIMEZONE;
+              state.timeZone = timeZone ?? DEFAULT_DASHBOARD_TIMEZONE;
               state.datasources = datasources;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });

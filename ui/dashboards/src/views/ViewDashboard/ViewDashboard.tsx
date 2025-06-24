@@ -14,7 +14,7 @@
 import { Box, BoxProps } from '@mui/material';
 import {
   BuiltinVariableDefinition,
-  DEFAULT_DASHBAORD_TIMEZONE,
+  DEFAULT_DASHBOARD_TIMEZONE,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
 } from '@perses-dev/core';
@@ -66,7 +66,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
-  const initialTimeZone = spec.timeZone ?? DEFAULT_DASHBAORD_TIMEZONE;
+  const initialTimeZone = spec.timeZone ?? DEFAULT_DASHBOARD_TIMEZONE;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();

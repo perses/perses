@@ -14,8 +14,7 @@
 import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { isRelativeTimeRange } from '@perses-dev/core';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import { useTimeZone } from '@perses-dev/components';
+import { useTimeRange, useTimeZone } from '@perses-dev/plugin-system';
 import {
   OnSaveDashboard,
   useDashboard,
