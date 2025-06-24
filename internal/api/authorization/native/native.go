@@ -14,10 +14,17 @@
 package native
 
 import (
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"net/http"
 	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -30,8 +37,12 @@ import (
 )
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) *Native {
-	return &Native{
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (*native, error) {
+	key, err := hex.DecodeString(string(conf.Security.EncryptionKey))
+	if err != nil {
+		return nil, err
+	}
+	return &native{
 		cache:                &cache{},
 		userDAO:              userDAO,
 		roleDAO:              roleDAO,
@@ -39,11 +50,15 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
-	}
+		accessKey:            key,
+	}, err
 }
 
-// Native is expecting a JWT token to extract the user information and validate its permissions.
-type Native struct {
+// native is expecting a JWT token to extract the user information and validate its permissions.
+type native struct {
+	// The key used to sign the JWT token, it is expected to be the same as the one used in the crypto package.
+	accessKey []byte
+	// cache is used to store in memory the permissions of all users.
 	cache                *cache
 	userDAO              user.DAO
 	roleDAO              role.DAO
@@ -51,14 +66,15 @@ type Native struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	guestPermissions     []*v1Role.Permission
-	mutex                sync.RWMutex
+	// mutex is used to protect the cache from concurrent access.
+	mutex sync.RWMutex
 }
 
-func (n *Native) IsEnabled() bool {
+func (n *native) IsEnabled() bool {
 	return true
 }
 
-func (n *Native) GetUser(ctx echo.Context) (any, error) {
+func (n *native) GetUser(ctx echo.Context) (any, error) {
 	if ctx == nil {
 		return nil, nil // No context provided, cannot retrieve user
 	}
@@ -71,7 +87,7 @@ func (n *Native) GetUser(ctx echo.Context) (any, error) {
 	return token.Claims, nil
 }
 
-func (n *Native) GetUsername(ctx echo.Context) (string, error) {
+func (n *native) GetUsername(ctx echo.Context) (string, error) {
 	usr, _ := n.GetUser(ctx)
 	if usr == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
@@ -79,7 +95,34 @@ func (n *Native) GetUsername(ctx echo.Context) (string, error) {
 	return usr.(jwt.Claims).GetSubject()
 }
 
-func (n *Native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
+	jwtMiddlewareConfig := echojwt.Config{
+		Skipper: skipper,
+		BeforeFunc: func(c echo.Context) {
+			// Merge the JWT cookies if they exist to create the token,
+			// and then set the header Authorization with the complete token.
+			payloadCookie, err := c.Cookie(crypto.CookieKeyJWTPayload)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", crypto.CookieKeyJWTPayload)
+				return
+			}
+			signatureCookie, err := c.Cookie(crypto.CookieKeyJWTSignature)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", crypto.CookieKeyJWTSignature)
+				return
+			}
+			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
+		},
+		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
+			return &jwt.RegisteredClaims{}
+		},
+		SigningMethod: jwt.SigningMethodHS512.Name,
+		SigningKey:    n.accessKey,
+	}
+	return echojwt.WithConfig(jwtMiddlewareConfig)
+}
+
+func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
 	if listHasPermission(n.guestPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}
 	}
@@ -104,7 +147,7 @@ func (n *Native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 	return projects
 }
 
-func (n *Native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	username, _ := n.GetUsername(ctx)
 	if username == "" {
 		// if the username is empty, it means we are dealing with an anonymous endpoint.
@@ -120,7 +163,7 @@ func (n *Native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
-func (n *Native) GetPermissions(ctx echo.Context) map[string][]*v1Role.Permission {
+func (n *native) GetPermissions(ctx echo.Context) map[string][]*v1Role.Permission {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	username, _ := n.GetUsername(ctx)
@@ -137,7 +180,7 @@ func (n *Native) GetPermissions(ctx echo.Context) map[string][]*v1Role.Permissio
 	return userPermissions
 }
 
-func (n *Native) RefreshPermissions() error {
+func (n *native) RefreshPermissions() error {
 	permissions, err := n.loadAllPermissions()
 	if err != nil {
 		return err
@@ -149,7 +192,7 @@ func (n *Native) RefreshPermissions() error {
 }
 
 // loadAllPermissions is loading all permissions for all users.
-func (n *Native) loadAllPermissions() (usersPermissions, error) {
+func (n *native) loadAllPermissions() (usersPermissions, error) {
 	users, err := n.userDAO.List(&user.Query{})
 	if err != nil {
 		return nil, err

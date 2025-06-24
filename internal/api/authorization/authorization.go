@@ -15,6 +15,7 @@ package authorization
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -32,6 +33,11 @@ type Authorization interface {
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)
+	// Middleware returns the middleware function to be used in the echo server.
+	// This middleware is responsible for finding the token in the request, validating it and extracting it in the context.
+	// In case the token is not valid, it will prevent the request from being processed and return an error.
+	// The middleware should be used before any other middleware that requires the user information to be set in the context.
+	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 	// GetUserProjects returns the list of the project the user has access to in the context of the role and the scope requested.
 	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) []string
 	// HasPermission checks if the user has the permission to perform the action on the project with the given scope.
@@ -41,15 +47,15 @@ type Authorization interface {
 	// RefreshPermissions refreshes the permissions.
 	// We know this method is relative to the implementation and should not appear in the interface.
 	// This is convenient to have it here when the implementation is keeping the permissions in memory.
-	// And since it's a single method, it does not hurt to have it in the interface as it is straight forward to implement it if it's unnecessary.
+	// And since it is a single method, it does not hurt to have it in the interface as it is straight forward to implement it if it's unnecessary.
 	// Just return nil.
 	RefreshPermissions() error
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) Authorization {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
 	if !conf.Security.EnableAuth {
-		return &disabledImpl{}
+		return &disabledImpl{}, nil
 	}
 	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
 }

@@ -21,12 +21,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -49,6 +49,14 @@ func (t *testRBAC) GetUser(_ echo.Context) (any, error) {
 
 func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
 	return "", nil
+}
+
+func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			return next(c)
+		}
+	}
 }
 
 func (t *testRBAC) GetPermissions(_ echo.Context) map[string][]*role.Permission {
@@ -124,7 +132,7 @@ func TestEndpoint(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)
@@ -151,7 +159,7 @@ func TestNotAllowed(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)
@@ -168,7 +176,7 @@ func TestDashboardDoesntExist(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)

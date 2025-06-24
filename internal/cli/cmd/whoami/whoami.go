@@ -18,7 +18,6 @@ import (
 	"io"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/perses/perses/internal/api/crypto"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
@@ -66,12 +65,12 @@ func (o *option) Execute() error {
 }
 
 func (o *option) extractLogin() (string, error) {
-	claims := &crypto.JWTCustomClaims{}
+	claims := &jwt.RegisteredClaims{}
 	token, _, err := jwt.NewParser().ParseUnverified(o.authorization.Credentials, claims)
 	if err != nil {
 		return "", err
 	}
-	return token.Claims.(*crypto.JWTCustomClaims).Subject, nil
+	return token.Claims.(*jwt.RegisteredClaims).Subject, nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
