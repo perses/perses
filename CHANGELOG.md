@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.51.1 / 2025-06-24
+
+- [BUGFIX] Move namespace to correct location for Dashboard CR export (#3036)
+- [BUGFIX] Fixing fetch + JWT token expired and replacing datasource LRU cache by Tanstack query (#3031)
+- [BUGFIX] Plugin: Fix internal error returned when the plugin list is empty (#3022)
+- [BUGFIX] Fix issue when configuring datasource with direct access (#3016)
+- [BUGFIX] Remove wrong array length constraint in transform schema (#3012)
+- [BUGFIX] Echart: fixing barchart import (#3011)
+- [BUGFIX] Fix the redundant consumption of the response object when the JSON and text functions are called (#3009)
+
 ## 0.51.0 / 2025-06-06
 
 This release is one of the biggest releases we ever made.
