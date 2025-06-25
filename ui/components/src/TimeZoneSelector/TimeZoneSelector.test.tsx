@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_DASHBAORD_TIMEZONE } from '@perses-dev/core';
+import { DEFAULT_DASHBOARD_TIMEZONE } from '@perses-dev/core';
 import { getTimeZoneOffset } from '../model/timeZoneOption';
 import { TimeZoneSelector, TimeZoneSelectorProps } from './TimeZoneSelector';
 
@@ -24,11 +24,11 @@ describe('TimeZoneSelector', () => {
   const timeZoneSelectorProps: TimeZoneSelectorProps = {
     timeZoneOptions: [
       { label: 'UTC, GMT', value: 'UTC', longOffset: 'GMT+00:00' },
-      { label: `${localTimeZone} (default)`, value: DEFAULT_DASHBAORD_TIMEZONE, longOffset: 'GMT+01:00' },
+      { label: `${localTimeZone} (default)`, value: DEFAULT_DASHBOARD_TIMEZONE, longOffset: 'GMT+01:00' },
       { label: 'Europe/Paris', value: 'Europe/Paris', longOffset: 'GMT+02:00' },
     ],
     onChange: mockOnChange,
-    value: DEFAULT_DASHBAORD_TIMEZONE,
+    value: DEFAULT_DASHBOARD_TIMEZONE,
   };
   const renderComponent = (props: TimeZoneSelectorProps): void => {
     render(<TimeZoneSelector {...props} />);
