@@ -61,7 +61,10 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return nil, permErr
 	}
 	// Get the list of the project the user has access to, depending on the current scope.
-	projects := t.authz.GetUserProjects(ctx, role.ReadAction, *scope)
+	projects, err := t.authz.GetUserProjects(ctx, role.ReadAction, *scope)
+	if err != nil {
+		return nil, err
+	}
 
 	// If there is no project associated with the user, then we should just return an empty list.
 	if len(projects) == 0 {

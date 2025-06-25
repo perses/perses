@@ -25,11 +25,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/crypto"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
@@ -75,20 +77,29 @@ func (n *native) IsEnabled() bool {
 }
 
 func (n *native) GetUser(ctx echo.Context) (any, error) {
+	// Context can be nil when the function is called outside the request context.
+	// For example, the provisioning service is calling every service without any context.
 	if ctx == nil {
 		return nil, nil // No context provided, cannot retrieve user
 	}
+	// Verify if it is an anonymous endpoint
+	if utils.IsAnonymous(ctx) {
+		return nil, nil
+	}
+	// At this point, we are sure that the context is not nil and the user is not anonymous.
+	// The user is expected to be set in the context by the middleware.
 	token, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
 	if !ok {
-		// In case the token is not present in the context, we are dealing with an anonymous endpoint.
-		// We can assume that because there is a middleware that checks the token before calling this method.
-		return nil, nil
+		return nil, apiInterface.UnauthorizedError
 	}
 	return token.Claims, nil
 }
 
 func (n *native) GetUsername(ctx echo.Context) (string, error) {
-	usr, _ := n.GetUser(ctx)
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return "", err
+	}
 	if usr == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
 	}
@@ -122,20 +133,23 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	return echojwt.WithConfig(jwtMiddlewareConfig)
 }
 
-func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
 	if listHasPermission(n.guestPermissions, requestAction, requestScope) {
-		return []string{v1.WildcardProject}
+		return []string{v1.WildcardProject}, nil
 	}
 
-	username, _ := n.GetUsername(ctx)
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if username == "" {
-		// This use case should not happen.
+		// This method should not be called if the endpoint is anonymous or the username is not found.
 		logrus.Error("failed to get username from context to list the user projects")
-		return nil
+		return nil, apiInterface.InternalError
 	}
 	projectPermission := n.cache.permissions[username]
 	if globalPermissions, ok := projectPermission[v1.WildcardProject]; ok && listHasPermission(globalPermissions, requestAction, requestScope) {
-		return []string{v1.WildcardProject}
+		return []string{v1.WildcardProject}, nil
 	}
 
 	var projects []string
@@ -144,14 +158,29 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 			projects = append(projects, project)
 		}
 	}
-	return projects
+	return projects, nil
 }
 
 func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
-	username, _ := n.GetUsername(ctx)
-	if username == "" {
-		// if the username is empty, it means we are dealing with an anonymous endpoint.
+	// If the context is nil, it means the function is called internally without a request context.
+	// And in this case, we assume we want to bypass the authorization check.
+	if ctx == nil {
 		return true
+	}
+	if utils.IsAnonymous(ctx) {
+		// If the endpoint is anonymous, we allow the request to pass through.
+		return true
+	}
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		logrus.WithError(err).Error("failed to get username from context to check the user permissions")
+		return false // If we cannot get the username, we cannot check the permissions
+	}
+	if username == "" {
+		// At this point, as the endpoint is not anonymous, we should have a username in the context.
+		// If we don't, it means something went wrong, and we cannot check the permissions.
+		logrus.Error("no username found in the context, this should not happen in a native RBAC implementation")
+		return false // No username found, cannot check permissions
 	}
 	// Checking default permissions
 	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
@@ -163,21 +192,24 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
-func (n *native) GetPermissions(ctx echo.Context) map[string][]*v1Role.Permission {
+func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
-	username, _ := n.GetUsername(ctx)
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if username == "" {
 		// This use case should not happen.
-		logrus.Warning("No username found in the context, this should not happen in a native RBAC implementation")
-		return nil
+		logrus.Error("No username found in the context, this should not happen in a native RBAC implementation")
+		return nil, apiInterface.InternalError
 	}
 	userPermissions := make(map[string][]*v1Role.Permission)
 	userPermissions[v1.WildcardProject] = n.guestPermissions
 	for project, projectPermissions := range n.cache.permissions[username] {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
-	return userPermissions
+	return userPermissions, nil
 }
 
 func (n *native) RefreshPermissions() error {

@@ -30,6 +30,11 @@ type Authorization interface {
 	// IsEnabled returns true if the authorization is enabled, false otherwise.
 	IsEnabled() bool
 	// GetUser returns the user information from the context. The user information will depend on the implementation.
+	// While implementing this method, consider that the user information is not guaranteed to be set in the context.
+	// You should consider the case where the context can be empty and that the function can be called from an anonymous endpoint.
+	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
+	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
+	// If it is not the case, you should return an error.
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)
@@ -39,11 +44,17 @@ type Authorization interface {
 	// The middleware should be used before any other middleware that requires the user information to be set in the context.
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 	// GetUserProjects returns the list of the project the user has access to in the context of the role and the scope requested.
-	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) []string
+	// Be aware that this function cannot be called from an anonymous endpoint.
+	// In case the user information is not found in the context, the implementation should return an error.
+	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error)
 	// HasPermission checks if the user has the permission to perform the action on the project with the given scope.
+	// In case the endpoint is anonymous, or the context is empty, it will return true.
+	// In case the user information is not found in the context, the implementation should return false.
 	HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
 	// GetPermissions returns the permissions of the user found in the context.
-	GetPermissions(ctx echo.Context) map[string][]*v1Role.Permission
+	// Be aware that this function cannot be called from an anonymous endpoint.
+	// In case the user information is not found in the context, the implementation should return an error.
+	GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error)
 	// RefreshPermissions refreshes the permissions.
 	// We know this method is relative to the implementation and should not appear in the interface.
 	// This is convenient to have it here when the implementation is keeping the permissions in memory.

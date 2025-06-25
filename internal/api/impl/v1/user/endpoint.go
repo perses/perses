@@ -97,6 +97,9 @@ func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	if username != parameters.Name {
 		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
-	permissions := e.authz.GetPermissions(ctx)
+	permissions, err := e.authz.GetPermissions(ctx)
+	if err != nil {
+		return err
+	}
 	return ctx.JSON(http.StatusOK, permissions)
 }

@@ -59,8 +59,8 @@ func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
 	}
 }
 
-func (t *testRBAC) GetPermissions(_ echo.Context) map[string][]*role.Permission {
-	return map[string][]*role.Permission{}
+func (t *testRBAC) GetPermissions(_ echo.Context) (map[string][]*role.Permission, error) {
+	return map[string][]*role.Permission{}, nil
 }
 
 func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
@@ -75,7 +75,7 @@ func (t *testRBAC) RefreshPermissions() error {
 	return nil
 }
 
-func (t *testRBAC) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) []string {
+func (t *testRBAC) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	panic("unimplemented")
 }
 

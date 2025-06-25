@@ -16,6 +16,7 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dependency"
 	authendpoint "github.com/perses/perses/internal/api/impl/auth"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
@@ -141,7 +142,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 		// Finally, register the route with the echo.Group previously created.
 		// We will consider also if the route needs to remain anonymous or not and then inject the JWT middleware accordingly.
 		for _, rte := range el.group.Routes {
-			var mdws []echo.MiddlewareFunc
+			mdws := []echo.MiddlewareFunc{middleware.HandleAnonymous(rte.IsAnonymous)}
 			if !rte.IsAnonymous {
 				mdws = append(mdws, a.authorizationMiddlware)
 			}

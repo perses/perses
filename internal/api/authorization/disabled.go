@@ -43,16 +43,16 @@ func (r *disabledImpl) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
 	}
 }
 
-func (r *disabledImpl) GetUserProjects(_ echo.Context, _ v1Role.Action, _ v1Role.Scope) []string {
-	return []string{}
+func (r *disabledImpl) GetUserProjects(_ echo.Context, _ v1Role.Action, _ v1Role.Scope) ([]string, error) {
+	return []string{}, nil
 }
 
 func (r *disabledImpl) HasPermission(_ echo.Context, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
 	return true
 }
 
-func (r *disabledImpl) GetPermissions(_ echo.Context) map[string][]*v1Role.Permission {
-	return nil
+func (r *disabledImpl) GetPermissions(_ echo.Context) (map[string][]*v1Role.Permission, error) {
+	return nil, nil
 }
 
 func (r *disabledImpl) RefreshPermissions() error {
