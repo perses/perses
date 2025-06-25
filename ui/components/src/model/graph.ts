@@ -13,6 +13,7 @@
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import { ECharts } from 'echarts/core';
 import { LegendItem } from '../Legend';
 
 // adjust display when there are many time series to help with performance
@@ -58,6 +59,7 @@ export type ChartInstanceFocusOpts = {
 };
 
 export type ChartInstance = {
+  chartInstance: ECharts | undefined; // LOGZ.IO CHANGE:: Alert annotations [APPZ-477]
   /**
    * Highlight the series associated with the specified options.
    */

@@ -122,6 +122,10 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
         }
         clearHighlightedSeries(chartRef.current);
       },
+      // LOGZ.IO CHANGE:: Alert annotations [APPZ-477]
+      get chartInstance(): EChartsInstance | undefined {
+        return chartRef.current;
+      },
     };
   }, []);
 

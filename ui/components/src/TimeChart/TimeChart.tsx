@@ -159,6 +159,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         }
         clearHighlightedSeries(chartRef.current);
       },
+      // LOGZ.IO CHANGE:: Alert annotations [APPZ-477]
+      get chartInstance(): EChartsInstance | undefined {
+        return chartRef.current;
+      },
     };
   }, []);
 
