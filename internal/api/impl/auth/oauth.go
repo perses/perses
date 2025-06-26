@@ -25,10 +25,10 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
@@ -140,7 +140,7 @@ type oAuthEndpoint struct {
 	loginProps      []string
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, rbac rbac.RBAC) (route.Endpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -177,7 +177,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		slugID:          provider.SlugID,
 		userInfoURL:     provider.UserInfosURL.String(),
 		authURL:         *provider.AuthURL.URL,
-		svc:             service{dao: dao, rbac: rbac},
+		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
 	}, nil
 }
