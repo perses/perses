@@ -20,10 +20,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
@@ -32,16 +31,16 @@ import (
 
 type endpoint struct {
 	toolbox       toolbox.Toolbox[*v1.User, *user.Query]
-	rbac          rbac.RBAC
+	authz         authorization.Authorization
 	readonly      bool
 	disableSignUp bool
 	caseSensitive bool
 }
 
-func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(service user.Service, authz authorization.Authorization, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, rbacService, v1.KindUser, caseSensitive),
-		rbac:          rbacService,
+		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, authz, v1.KindUser, caseSensitive),
+		authz:         authz,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
 		caseSensitive: caseSensitive,
@@ -88,13 +87,19 @@ func (e *endpoint) List(ctx echo.Context) error {
 
 func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	parameters := toolbox.ExtractParameters(ctx, e.caseSensitive)
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
-		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
+	if !e.authz.IsEnabled() {
+		return apiinterface.HandleUnauthorizedError("authentication is required to retrieve user permissions")
 	}
-	if claims.Subject != parameters.Name {
+	username, err := e.authz.GetUsername(ctx)
+	if err != nil {
+		return apiinterface.HandleUnauthorizedError("failed to retrieve username from context")
+	}
+	if username != parameters.Name {
 		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
-	permissions := e.rbac.GetPermissions(claims.Subject)
+	permissions, err := e.authz.GetPermissions(ctx)
+	if err != nil {
+		return err
+	}
 	return ctx.JSON(http.StatusOK, permissions)
 }

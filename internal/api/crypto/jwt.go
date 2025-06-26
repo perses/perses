@@ -14,18 +14,13 @@
 package crypto
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/pkg/model/api/config"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -35,34 +30,15 @@ const (
 	cookiePath            = "/"
 )
 
-type JWTCustomClaims struct {
-	jwt.RegisteredClaims
-}
-
 func signedToken(login string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   login,
-			ExpiresAt: jwt.NewNumericDate(expireAt),
-			NotBefore: jwt.NewNumericDate(notBefore),
-		},
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &jwt.RegisteredClaims{
+		Subject:   login,
+		ExpiresAt: jwt.NewNumericDate(expireAt),
+		NotBefore: jwt.NewNumericDate(notBefore),
 	})
 	// The type of the key depends on the signature method.
 	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
 	return token.SignedString(key)
-}
-
-func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
-	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
-	if !ok {
-		return nil
-	}
-
-	claims, ok := jwtToken.Claims.(*JWTCustomClaims)
-	if !ok {
-		return nil
-	}
-	return claims
 }
 
 type JWT interface {
@@ -76,8 +52,7 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
-	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
-	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
+	ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error)
 }
 
 type jwtImpl struct {
@@ -169,39 +144,12 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(_ *jwt.Token) (interface{}, error) {
+func (j *jwtImpl) ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(_ *jwt.Token) (interface{}, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {
 		return nil, err
 	}
-	return parsedToken.Claims.(*JWTCustomClaims), nil
-}
-
-func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
-	jwtMiddlewareConfig := echojwt.Config{
-		Skipper: skipper,
-		BeforeFunc: func(c echo.Context) {
-			// Merge the JWT cookies if they exist to create the token,
-			// and then set the header Authorization with the complete token.
-			payloadCookie, err := c.Cookie(CookieKeyJWTPayload)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTPayload)
-				return
-			}
-			signatureCookie, err := c.Cookie(CookieKeyJWTSignature)
-			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
-				return
-			}
-			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
-		},
-		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return new(JWTCustomClaims)
-		},
-		SigningMethod: jwt.SigningMethodHS512.Name,
-		SigningKey:    j.accessKey,
-	}
-	return echojwt.WithConfig(jwtMiddlewareConfig)
+	return parsedToken.Claims.(*jwt.RegisteredClaims), nil
 }
