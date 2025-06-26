@@ -58,14 +58,14 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			if pluginSchemaLoadErr := p.sch.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
 				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
 			}
-			if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
+			if pluginMigrateLoadErr := p.mig.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
 				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin migration: %s", pluginMigrateLoadErr))
 			}
 		} else {
 			logrus.Debugf("schema is disabled or not required for plugin %q", pluginModule.Metadata.Name)
 		}
 		p.mutex.Lock()
-		p.loaded[manifest.Name] = pluginLoaded
+		p.devLoaded[manifest.Name] = pluginLoaded
 		p.mutex.Unlock()
 	}
 	return p.storeLoadedList()

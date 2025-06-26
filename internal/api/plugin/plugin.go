@@ -118,14 +118,14 @@ func (p *pluginFile) List() ([]byte, error) {
 	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
-func (p *pluginFile) GetLoadedPlugin(prefixURI string) (*Loaded, bool) {
+func (p *pluginFile) GetLoadedPlugin(name string) (*Loaded, bool) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	// Check in the dev plugin first
-	if devLoaded, ok := p.devLoaded[prefixURI]; ok {
+	if devLoaded, ok := p.devLoaded[name]; ok {
 		return devLoaded, true
 	}
-	loaded, ok := p.loaded[prefixURI]
+	loaded, ok := p.loaded[name]
 	return loaded, ok
 }
 
@@ -146,13 +146,13 @@ func (p *pluginFile) Load() error {
 	if err != nil {
 		return err
 	}
-	for _, file := range files {
-		if !file.IsDir() {
+	for _, f := range files {
+		if !f.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
 			continue
 		}
-		pluginPath := filepath.Join(p.path, file.Name())
-		pluginModule := p.loadSinglePlugin(file, pluginPath)
+		pluginPath := filepath.Join(p.path, f.Name())
+		pluginModule := p.loadSinglePlugin(f, pluginPath)
 		if pluginModule == nil {
 			// the plugin is not valid, we can skip it
 			continue

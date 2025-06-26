@@ -14,6 +14,7 @@
 package migrate
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"cuelang.org/go/cue/build"
@@ -42,7 +43,7 @@ var (
 	}
 )
 
-func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
+func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
 		if p.Type == grafanaPanelRowType {
@@ -64,7 +65,7 @@ func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*
 	return panels, nil
 }
 
-func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
+func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 	result := &v1.Panel{
 		Kind: string(plugin.KindPanel),
 		Spec: v1.PanelSpec{
@@ -77,10 +78,15 @@ func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 	if len(grafanaPanel.Title) > 0 {
 		result.Spec.Display.Name = grafanaPanel.Title
 	}
-	migrateScriptInstance, ok := m.panels[grafanaPanel.Type]
+	// first try to load the migration script from the dev migration instance.
+	migrateScriptInstance, ok := m.devMig.panels[grafanaPanel.Type]
 	if !ok {
-		result.Spec.Plugin = defaultPanelPlugin
-		return result, nil
+		// if not found, try to load the migration script from the prod migration instance.
+		migrateScriptInstance, ok = m.mig.panels[grafanaPanel.Type]
+		if !ok {
+			result.Spec.Plugin = defaultPanelPlugin
+			return result, nil
+		}
 	}
 	panelPlugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
 	if err != nil {
@@ -91,38 +97,51 @@ func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 	} else {
 		result.Spec.Plugin = *panelPlugin
 	}
-
-	// As Grafana does not provide a type of their queries, we can only execute every query migration script hoping there is only one that matches the target.
-	for _, target := range grafanaPanel.Targets {
-		isQueryMigrationEmpty := true
-		for _, query := range m.queries {
-			queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(query.instance, target)
-			if pluginErr != nil {
-				logrus.WithError(pluginErr).Debug("failed to execute query migration script")
-				continue
-			}
-			if !queryMigrationIsEmpty {
-				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-					Kind: string(query.kind),
-					Spec: v1.QuerySpec{
-						Plugin: *queryPlugin,
-					},
-				})
-				isQueryMigrationEmpty = false
-				break
-			}
-		}
-		if isQueryMigrationEmpty {
-			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-				Kind: string(plugin.KindTimeSeriesQuery),
-				Spec: v1.QuerySpec{
-					Plugin: defaultQueryPlugin,
-				},
-			})
-		}
-	}
+	m.migrateQueries(grafanaPanel.Targets, result)
 
 	return result, nil
+}
+
+func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1.Panel) {
+	// As Grafana does not provide a type of their queries, we can only execute every query migration script hoping there is only one that matches the target.
+	for _, target := range targets {
+		// We try first to execute the migration script from the dev migration instance.
+		isQueryMigrationEmpty := migrateQuery(m.devMig.queries, target, result)
+		if isQueryMigrationEmpty {
+			// If the migration failed, we tried again with the prod migration instance.
+			isQueryMigrationEmpty = migrateQuery(m.mig.queries, target, result)
+			if isQueryMigrationEmpty {
+				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+					Kind: string(plugin.KindTimeSeriesQuery),
+					Spec: v1.QuerySpec{
+						Plugin: defaultQueryPlugin,
+					},
+				})
+			}
+		}
+	}
+}
+
+func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *v1.Panel) bool {
+	isQueryMigrationEmpty := true
+	for _, query := range queries {
+		queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(query.instance, target)
+		if pluginErr != nil {
+			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
+			continue
+		}
+		if !queryMigrationIsEmpty {
+			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+				Kind: string(query.kind),
+				Spec: v1.QuerySpec{
+					Plugin: *queryPlugin,
+				},
+			})
+			isQueryMigrationEmpty = false
+			break
+		}
+	}
+	return isQueryMigrationEmpty
 }
 
 func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {

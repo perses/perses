@@ -173,36 +173,40 @@ func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 
 type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
+	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
 }
 
 func New() Migration {
-	return &mig{
-		panels:    make(map[string]*build.Instance),
-		variables: make(map[string]*build.Instance),
-		queries:   make(map[string]*queryInstance),
+	return &completeMigration{
+		mig: &mig{
+			panels:    make(map[string]*build.Instance),
+			variables: make(map[string]*build.Instance),
+			queries:   make(map[string]*queryInstance),
+		},
+		devMig: &mig{
+			panels:    make(map[string]*build.Instance),
+			variables: make(map[string]*build.Instance),
+			queries:   make(map[string]*queryInstance),
+		},
 	}
 }
 
-type queryInstance struct {
-	instance *build.Instance
-	kind     plugin.Kind
+type completeMigration struct {
+	Migration
+	mig    *mig
+	devMig *mig
 }
 
-type mig struct {
-	// panels is a map because we can decide which script to execute precisely.
-	// This is because in Grafana a panel has a type.
-	// The key is the Grafana type.
-	panels map[string]*build.Instance
-	// variables is a map that implies we won't allow having two migration scripts for the same variable type.
-	// The key is the variable instance kind (e.g., PrometheusLabelValuesVariable).
-	variables map[string]*build.Instance
-	// queries is a map that implies we won't allow having two migration scripts for the same query type.
-	// The key is the query instance kind (e.g., PrometheusTimeSeriesQuery).
-	queries map[string]*queryInstance
+func (m *completeMigration) Load(pluginPath string, module v1.PluginModule) error {
+	return m.mig.load(pluginPath, module)
 }
 
-func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
+func (m *completeMigration) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
+	return m.devMig.load(pluginPath, module)
+}
+
+func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
 	result := &v1.Dashboard{
 		Kind: v1.KindDashboard,
 		Metadata: v1.ProjectMetadata{
@@ -228,7 +232,7 @@ func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, err
 	return result, nil
 }
 
-func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
+func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
 	defaultSpec := &dashboard.GridLayoutSpec{}
 	defaultLayout := dashboard.Layout{
@@ -287,7 +291,25 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 	return result
 }
 
-func (m *mig) Load(pluginPath string, module v1.PluginModule) error {
+type queryInstance struct {
+	instance *build.Instance
+	kind     plugin.Kind
+}
+
+type mig struct {
+	// panels is a map because we can decide which script to execute precisely.
+	// This is because in Grafana a panel has a type.
+	// The key is the Grafana type.
+	panels map[string]*build.Instance
+	// variables is a map that implies we won't allow having two migration scripts for the same variable type.
+	// The key is the variable instance kind (e.g., PrometheusLabelValuesVariable).
+	variables map[string]*build.Instance
+	// queries is a map that implies we won't allow having two migration scripts for the same query type.
+	// The key is the query instance kind (e.g., PrometheusTimeSeriesQuery).
+	queries map[string]*queryInstance
+}
+
+func (m *mig) load(pluginPath string, module v1.PluginModule) error {
 	schemas, err := Load(pluginPath, module.Spec)
 	if err != nil {
 		return err
