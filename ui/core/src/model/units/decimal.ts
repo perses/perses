@@ -17,7 +17,7 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 
 type DecimalUnit = 'decimal';
 export type DecimalFormatOptions = {
-  unit: DecimalUnit;
+  unit?: DecimalUnit;
   decimalPlaces?: number;
   shortValues?: boolean;
 };
