@@ -99,6 +99,7 @@ func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
 
 type Schema interface {
 	Load(pluginPath string, module v1.PluginModule) error
+	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*v1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
@@ -109,57 +110,48 @@ type Schema interface {
 }
 
 func New() Schema {
-	return &sch{
-		datasources: make(map[string]*build.Instance),
-		queries:     make(map[string]*build.Instance),
-		variables:   make(map[string]*build.Instance),
-		panels:      make(map[string]*build.Instance),
+	return &completeSchema{
+		sch: &sch{
+			datasources: make(map[string]*build.Instance),
+			queries:     make(map[string]*build.Instance),
+			variables:   make(map[string]*build.Instance),
+			panels:      make(map[string]*build.Instance),
+		},
+		devSch: &sch{
+			datasources: make(map[string]*build.Instance),
+			queries:     make(map[string]*build.Instance),
+			variables:   make(map[string]*build.Instance),
+			panels:      make(map[string]*build.Instance),
+		},
 	}
 }
 
-type sch struct {
+type completeSchema struct {
 	Schema
-	datasources map[string]*build.Instance
-	queries     map[string]*build.Instance
-	variables   map[string]*build.Instance
-	panels      map[string]*build.Instance
+	sch    *sch
+	devSch *sch
 }
 
-func (s *sch) Load(pluginPath string, module v1.PluginModule) error {
-	schemas, err := Load(pluginPath, module.Spec)
-	if err != nil {
-		return err
-	}
-	for _, schema := range schemas {
-		switch schema.Kind {
-		case plugin.KindDatasource:
-			s.datasources[schema.Name] = schema.Instance
-		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
-			s.queries[schema.Name] = schema.Instance
-		case plugin.KindVariable:
-			s.variables[schema.Name] = schema.Instance
-		case plugin.KindPanel:
-			s.panels[schema.Name] = schema.Instance
-		default:
-			return fmt.Errorf("unknown kind %s", schema.Kind)
-		}
-	}
-
-	return nil
+func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
+	return s.sch.load(pluginPath, module)
 }
 
-func (s *sch) ValidateDatasource(plugin common.Plugin, dtsName string) error {
-	if s.datasources == nil {
-		return fmt.Errorf("datasource schemas are not loaded")
+func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
+	return s.devSch.load(pluginPath, module)
+}
+
+func (s *completeSchema) ValidateDatasource(plugin common.Plugin, dtsName string) error {
+	if _, ok := s.devSch.datasources[plugin.Kind]; ok {
+		return s.devSch.validateDatasource(plugin, dtsName)
 	}
-	return validatePlugin(plugin, s.datasources[plugin.Kind], "datasource", dtsName)
+	return s.sch.validateDatasource(plugin, dtsName)
 }
 
 // ValidatePanels verify a list of panels.
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
-func (s *sch) ValidatePanels(panels map[string]*v1.Panel) error {
-	if s.panels == nil {
+func (s *completeSchema) ValidatePanels(panels map[string]*v1.Panel) error {
+	if len(s.devSch.panels) == 0 && len(s.sch.panels) == 0 {
 		return fmt.Errorf("panel schemas are not loaded")
 	}
 	// go through the panels list
@@ -170,7 +162,7 @@ func (s *sch) ValidatePanels(panels map[string]*v1.Panel) error {
 			return err
 		}
 		for i, query := range panel.Spec.Queries {
-			if err := s.ValidateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
+			if err := s.validateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
 				return err
 			}
 		}
@@ -179,21 +171,14 @@ func (s *sch) ValidatePanels(panels map[string]*v1.Panel) error {
 	return nil
 }
 
-func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
-	if s.panels == nil {
-		return fmt.Errorf("panel schemas are not loaded")
+func (s *completeSchema) ValidatePanel(plugin common.Plugin, panelName string) error {
+	if _, ok := s.devSch.panels[plugin.Kind]; ok {
+		return s.devSch.validatePanel(plugin, panelName)
 	}
-	return validatePlugin(plugin, s.panels[plugin.Kind], "panel", panelName)
+	return s.sch.validatePanel(plugin, panelName)
 }
 
-func (s *sch) ValidateQuery(plugin common.Plugin, queryName string) error {
-	if s.queries == nil {
-		return fmt.Errorf("query schemas are not loaded")
-	}
-	return validatePlugin(plugin, s.queries[plugin.Kind], "query", queryName)
-}
-
-func (s *sch) ValidateGlobalVariable(v v1.VariableSpec) error {
+func (s *completeSchema) ValidateGlobalVariable(v v1.VariableSpec) error {
 	if v.Kind != variable.KindList {
 		return nil
 	}
@@ -209,8 +194,8 @@ func (s *sch) ValidateGlobalVariable(v v1.VariableSpec) error {
 // The variables are matched against the known list of CUE definitions (schemas)
 // This applies to the ListVariable type only (TextVariable is skipped as there are no plugins for this kind)
 // If no schema matches for at least 1 variable, the validation fails.
-func (s *sch) ValidateDashboardVariables(variables []dashboard.Variable) error {
-	if s.variables == nil {
+func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variable) error {
+	if len(s.devSch.variables) == 0 && len(s.sch.variables) == 0 {
 		return fmt.Errorf("variable schemas are not loaded")
 	}
 	// go through the variables list
@@ -235,15 +220,87 @@ func (s *sch) ValidateDashboardVariables(variables []dashboard.Variable) error {
 	return nil
 }
 
-func (s *sch) ValidateVariable(plugin common.Plugin, variableName string) error {
-	if s.variables == nil {
+func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) error {
+	if _, ok := s.devSch.panels[plugin.Kind]; ok {
+		return s.devSch.validateVariable(plugin, varName)
+	}
+	return s.sch.validateVariable(plugin, varName)
+}
+
+func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
+	if _, ok := s.devSch.datasources[pluginName]; ok {
+		return s.devSch.getDatasourceSchema(pluginName)
+	}
+	return s.sch.getDatasourceSchema(pluginName)
+}
+
+func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
+	if _, ok := s.devSch.queries[plugin.Kind]; ok {
+		return s.devSch.validateQuery(plugin, queryName)
+	}
+	return s.sch.validateQuery(plugin, queryName)
+}
+
+type sch struct {
+	datasources map[string]*build.Instance
+	queries     map[string]*build.Instance
+	variables   map[string]*build.Instance
+	panels      map[string]*build.Instance
+}
+
+func (s *sch) load(pluginPath string, module v1.PluginModule) error {
+	schemas, err := Load(pluginPath, module.Spec)
+	if err != nil {
+		return err
+	}
+	for _, schema := range schemas {
+		switch schema.Kind {
+		case plugin.KindDatasource:
+			s.datasources[schema.Name] = schema.Instance
+		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+			s.queries[schema.Name] = schema.Instance
+		case plugin.KindVariable:
+			s.variables[schema.Name] = schema.Instance
+		case plugin.KindPanel:
+			s.panels[schema.Name] = schema.Instance
+		default:
+			return fmt.Errorf("unknown kind %s", schema.Kind)
+		}
+	}
+
+	return nil
+}
+
+func (s *sch) validateDatasource(plugin common.Plugin, dtsName string) error {
+	if len(s.datasources) == 0 {
+		return fmt.Errorf("datasource schemas are not loaded")
+	}
+	return validatePlugin(plugin, s.datasources[plugin.Kind], "datasource", dtsName)
+}
+
+func (s *sch) validatePanel(plugin common.Plugin, panelName string) error {
+	if s.panels == nil {
+		return fmt.Errorf("panel schemas are not loaded")
+	}
+	return validatePlugin(plugin, s.panels[plugin.Kind], "panel", panelName)
+}
+
+func (s *sch) validateQuery(plugin common.Plugin, queryName string) error {
+	if s.queries == nil {
+		return fmt.Errorf("query schemas are not loaded")
+	}
+	return validatePlugin(plugin, s.queries[plugin.Kind], "query", queryName)
+}
+
+func (s *sch) validateVariable(plugin common.Plugin, variableName string) error {
+	if len(s.variables) == 0 {
 		return fmt.Errorf("variable schemas are not loaded")
 	}
 	return validatePlugin(plugin, s.variables[plugin.Kind], "variable", variableName)
 }
 
-func (s *sch) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
-	if s.datasources == nil {
+func (s *sch) getDatasourceSchema(pluginName string) (*build.Instance, error) {
+	if len(s.datasources) == 0 {
 		return nil, fmt.Errorf("datasource schemas are not loaded")
 	}
 	instance, ok := s.datasources[pluginName]
