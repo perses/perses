@@ -30,6 +30,7 @@ import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import {
   useTimeRange,
+  useTimeZone,
   useShowCustomTimeRangeSetting,
   useTimeRangeOptionsSetting,
   useShowZoomRangeSetting,
@@ -67,6 +68,7 @@ export function TimeRangeControls({
   timePresets,
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
+  const { timeZone } = useTimeZone();
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
   const showZoomInOutButtons = useShowZoomRangeSetting(showZoomButtons);
@@ -95,7 +97,7 @@ export function TimeRangeControls({
     const duration = parseDurationString(strDuration);
     const millis =
       // eslint-disable-next-line prettier/prettier
-        ((duration.seconds ?? 0) +
+      ((duration.seconds ?? 0) +
         (duration.minutes ?? 0) * 60 +
         (duration.hours ?? 0) * 3600 +
         (duration.days ?? 0) * 86400 +
@@ -103,7 +105,7 @@ export function TimeRangeControls({
         (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom purposes
         (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom purposes
       // eslint-disable-next-line prettier/prettier
-        1000; // to milliseconds
+      1000; // to milliseconds
     return millis;
   };
 
@@ -168,6 +170,7 @@ export function TimeRangeControls({
           onChange={setTimeRange}
           height={height}
           showCustomTimeRange={showCustomTimeRangeValue}
+          timeZone={timeZone}
         />
       )}
       {showZoomInOutButtons && (

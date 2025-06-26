@@ -24,7 +24,12 @@ describe('Add Panel Group', () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
-      <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
+      <DashboardProvider
+        initialState={{
+          dashboardResource: getTestDashboard(),
+          isEditMode: true,
+        }}
+      >
         <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
           <VariableProvider>
             <DashboardProviderSpy />

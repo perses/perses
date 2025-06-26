@@ -11,29 +11,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, TimeRangeValue } from '@perses-dev/core';
+import { DEFAULT_DASHBOARD_TIMEZONE, DurationString, TimeRangeValue } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
 import { TimeRangeProvider } from './TimeRangeProvider';
-import { useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
+import { useSetRefreshIntervalParams, useSetTimeZoneParams, useTimeRangeParams } from './query-params';
 
 export interface TimeRangeFromQueryProps {
   initialTimeRange: TimeRangeValue;
   initialRefreshInterval?: DurationString;
   children?: React.ReactNode;
+  initialTimeZone?: string;
 }
 
 export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps): ReactElement {
-  const { initialTimeRange, initialRefreshInterval, children } = props;
+  const { initialTimeRange, initialRefreshInterval, children, initialTimeZone = DEFAULT_DASHBOARD_TIMEZONE } = props;
 
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);
 
+  const { timeZone, setTimeZone } = useSetTimeZoneParams(initialTimeZone);
   return (
     <TimeRangeProvider
       timeRange={timeRange}
       refreshInterval={refreshInterval}
       setTimeRange={setTimeRange}
       setRefreshInterval={setRefreshInterval}
+      timeZone={timeZone}
+      setTimeZone={setTimeZone}
     >
       {children}
     </TimeRangeProvider>
