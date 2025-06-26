@@ -19,6 +19,7 @@ import (
 	"cuelang.org/go/cue/build"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -65,7 +66,7 @@ func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*
 
 func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 	result := &v1.Panel{
-		Kind: "Panel",
+		Kind: string(plugin.KindPanel),
 		Spec: v1.PanelSpec{
 			Display: v1.PanelDisplay{
 				Name:        "empty",
@@ -81,40 +82,39 @@ func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 		result.Spec.Plugin = defaultPanelPlugin
 		return result, nil
 	}
-	plugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
+	panelPlugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
 	if err != nil {
 		return nil, err
 	}
 	if panelMigrationIsEmpty {
 		result.Spec.Plugin = defaultPanelPlugin
 	} else {
-		result.Spec.Plugin = *plugin
+		result.Spec.Plugin = *panelPlugin
 	}
 
+	// As Grafana does not provide a type of their queries, we can only execute every query migration script hoping there is only one that matches the target.
 	for _, target := range grafanaPanel.Targets {
-		// For the moment, we are only supporting the migration of the TimeSeriesQuery.
-		// That's something we will need to change at some point.
-		// TODO This should be improved
-		i := 0
-		for ; i < len(m.queries); i++ {
-			queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(m.queries[i], target)
+		isQueryMigrationEmpty := true
+		for _, query := range m.queries {
+			queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(query.instance, target)
 			if pluginErr != nil {
 				logrus.WithError(pluginErr).Debug("failed to execute query migration script")
 				continue
 			}
 			if !queryMigrationIsEmpty {
 				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-					Kind: "TimeSeriesQuery",
+					Kind: string(query.kind),
 					Spec: v1.QuerySpec{
 						Plugin: *queryPlugin,
 					},
 				})
+				isQueryMigrationEmpty = false
 				break
 			}
 		}
-		if i == len(m.queries) {
+		if isQueryMigrationEmpty {
 			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-				Kind: "TimeSeriesQuery",
+				Kind: string(plugin.KindTimeSeriesQuery),
 				Spec: v1.QuerySpec{
 					Plugin: defaultQueryPlugin,
 				},

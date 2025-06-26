@@ -111,24 +111,29 @@ func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 		Name: v.Name,
 	}
 
-	// Only set CusomAllValue if IncludeAll is enabled for panel
+	// Only set CustomAllValue if IncludeAll is enabled for the variable.
 	if v.IncludeAll {
 		spec.CustomAllValue = v.AllValue
 	}
 
-	i := 0
-	for ; i < len(m.variables); i++ {
-		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(m.variables[i], v.RawMessage)
+	isQueryMigrationEmpty := true
+	// Dynamic variables are usually in a parameter named 'query' in the Grafana data model.
+	// Then depending on what contains the query, it will change the type of the plugin.
+	// So there is no easy way to know in advance which migration script to use.
+	// A simple way to handle this is to execute all the migration scripts and keep the first one that returns a non-empty plugin.
+	for _, variableInstance := range m.variables {
+		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(variableInstance, v.RawMessage)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute variable migration script")
 			continue
 		}
 		if !variableMigrationIsEmpty {
 			spec.Plugin = *plugin
+			isQueryMigrationEmpty = false
 			break
 		}
 	}
-	if i == len(m.variables) {
+	if isQueryMigrationEmpty {
 		return buildDefaultVariable(v)
 	}
 	result.Spec = spec
