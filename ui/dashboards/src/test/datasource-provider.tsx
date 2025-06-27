@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasourceResource } from '@perses-dev/core';
+import { DatasourceResource, GlobalDatasourceResource } from '@perses-dev/core';
 import { DatasourceStoreProviderProps } from '../context';
 import { getTestDashboard } from './dashboard-provider';
 
@@ -55,6 +55,9 @@ export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'datasou
     },
     listGlobalDatasources: () => {
       return Promise.resolve([]);
+    },
+    getProjectsDataSource: function (): Promise<DatasourceResource[][]> {
+      return Promise.resolve([[]]);
     },
   },
 };

@@ -498,6 +498,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       getGlobalDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
       listDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.project)),
       listGlobalDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
+      getProjectsDataSource: jest.fn().mockReturnValue(Promise.resolve([[]])),
     };
     const queryClient = new QueryClient();
     const dashboard = {

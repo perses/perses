@@ -30,10 +30,12 @@ import {
   DatasourceSelectItemGroup,
   DatasourceSelectItemSelector,
   useListDatasourceSelectItems,
+  useProjectsDataSource,
   useVariableValues,
   VariableStateMap,
 } from '../runtime';
 import { parseVariables } from '../utils';
+import { useProjectList } from '../context';
 
 const DATASOURCE_VARIABLE_VALUE_PREFIX = '__DATASOURCE_VARIABLE_VALUE__';
 const VARIABLE_IDENTIFIER = '$';
@@ -66,6 +68,12 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
+  const { data: projects } = useProjectList();
+  const { data: projectsDataSource } = useProjectsDataSource(
+    datasourcePluginKind,
+    projects?.map((p) => p.metadata.name) || []
+  );
+
   const variables = useVariableValues();
 
   const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
@@ -95,6 +103,19 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
       }))
     );
 
+    datasourceOptions.push(
+      ...(projectsDataSource || []).flatMap<DataSourceOption>((itemGroup) =>
+        itemGroup.items.map<DataSourceOption>((item) => ({
+          groupLabel: itemGroup.group,
+          groupEditLink: itemGroup.editLink,
+          name: item.name,
+          saved: item.saved ?? true,
+          group: item.selector.group,
+          value: selectorToOptionValue(item.selector),
+        }))
+      )
+    );
+
     const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
 
     const variableOptions = Object.entries(variables).flatMap<DataSourceOption>(([name, variable]) => {
@@ -112,7 +133,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
     });
 
     return [...datasourceOptions, ...variableOptions];
-  }, [data, variables]);
+  }, [data, variables, projectsDataSource]);
 
   // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
   const optionValue = isLoading

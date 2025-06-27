@@ -58,6 +58,7 @@ export interface DatasourceApi {
   getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
   listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
   listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
+  getProjectsDataSource(projects: string[]): Promise<DatasourceResource[][]>;
 }
 
 /**
@@ -225,6 +226,36 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     [dashboardResource]
   );
 
+  const getProjectsDataSource = useCallback(
+    async (dataSourcePluginKind: string, projects: string[]): Promise<DatasourceSelectItemGroup[]> => {
+      const groups: DatasourceSelectItemGroup[] = [];
+      const projectsDatasource = (await datasourceApi.getProjectsDataSource(projects)).filter(
+        (i) => i.length && i[0]?.spec?.plugin?.kind === dataSourcePluginKind
+      );
+
+      projectsDatasource.forEach((group) => {
+        groups.push({
+          group: group[0]?.metadata.project || 'Project',
+          editLink: `/projects/${group[0]?.metadata.project}/datasources`,
+          items: group.map(
+            (i) =>
+              ({
+                name: `${i.metadata.name}`,
+                selector: {
+                  kind: i.spec.plugin.kind,
+                  name: i.metadata.name,
+                  group: 'Projects',
+                },
+              }) as DatasourceSelectItem
+          ),
+        });
+      });
+
+      return groups;
+    },
+    [datasourceApi]
+  );
+
   const ctxValue: DatasourceStore = useMemo(
     () =>
       ({
@@ -235,6 +266,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         setSavedDatasources,
         getSavedDatasources,
         listDatasourceSelectItems,
+        getProjectsDataSource,
       }) as DatasourceStore,
     [
       getDatasource,
@@ -244,6 +276,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       listDatasourceSelectItems,
       setSavedDatasources,
       getSavedDatasources,
+      getProjectsDataSource,
     ]
   );
 
