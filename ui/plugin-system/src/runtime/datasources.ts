@@ -48,6 +48,11 @@ export interface DatasourceStore {
    * Sets the list of datasources that are saved in the dashboard
    */
   setSavedDatasources(datasources: Record<string, DatasourceSpec>): void;
+
+  /**
+   * Gets the projects' datasource filtered by dataSourcePluginKind
+   */
+  getProjectsDataSource(dataSourcePluginKind: string, projects: string[]): Promise<DatasourceSelectItemGroup[]>;
 }
 
 export interface DatasourceSelectItemGroup {
@@ -116,5 +121,16 @@ export function useDatasource(selector: DatasourceSelector): UseQueryResult<Data
   return useQuery<DatasourceSpec>({
     queryKey: ['getDatasource', selector],
     queryFn: () => store.getDatasource(selector),
+  });
+}
+
+export function useProjectsDataSource(
+  dataSourcePluginKind: string,
+  projects: string[]
+): UseQueryResult<DatasourceSelectItemGroup[]> {
+  const store = useDatasourceStore();
+  return useQuery<DatasourceSelectItemGroup[]>({
+    queryKey: ['DatasourceSelectItemGroup', projects.join('-')],
+    queryFn: () => store.getProjectsDataSource(dataSourcePluginKind, projects),
   });
 }
