@@ -44,3 +44,6 @@ export default function buildURL(params: URLParams): string {
   }
   return basePath + url;
 }
+
+export const buildProjectResourceURL = (project: string): string =>
+  `${getBasePathName()}${apiPrefix}/projects/${encodeURIComponent(project)}/datasources`;
