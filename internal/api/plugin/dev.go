@@ -45,7 +45,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 				InDev:    true,
 			},
 		}
-		pluginLoaded := Loaded{
+		pluginLoaded := &Loaded{
 			DevEnvironment: &v1.PluginInDevelopment{
 				Name:          plg.Name,
 				URL:           devURL,
@@ -55,18 +55,31 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			Module: pluginModule,
 		}
 		if IsSchemaRequired(pluginModule.Spec) && !plg.DisableSchema {
-			if pluginSchemaLoadErr := p.sch.Load(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
+			if pluginSchemaLoadErr := p.sch.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
 				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
 			}
-			if pluginMigrateLoadErr := p.mig.Load(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
+			if pluginMigrateLoadErr := p.mig.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
 				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin migration: %s", pluginMigrateLoadErr))
 			}
 		} else {
 			logrus.Debugf("schema is disabled or not required for plugin %q", pluginModule.Metadata.Name)
 		}
 		p.mutex.Lock()
-		p.loaded[manifest.Name] = pluginLoaded
+		p.devLoaded[manifest.Name] = pluginLoaded
 		p.mutex.Unlock()
 	}
+	return p.storeLoadedList()
+}
+
+func (p *pluginFile) UnLoadDevPlugin(name string) error {
+	plg, ok := p.devLoaded[name]
+	if !ok {
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", name))
+	}
+	p.mutex.Lock()
+	p.sch.UnloadDevPlugin(plg.Module)
+	p.mig.UnLoadDevPlugin(plg.Module)
+	delete(p.devLoaded, name)
+	p.mutex.Unlock()
 	return p.storeLoadedList()
 }
