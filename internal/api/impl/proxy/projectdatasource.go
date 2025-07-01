@@ -16,6 +16,7 @@ package proxy
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -27,12 +28,38 @@ import (
 
 func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
+	var scrt *v1.Secret
+
 	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(projectName, dtsName, name)
-	})
+		projectScrt, err := e.getProjectSecret(projectName, dtsName, name)
+		if err != nil {
+			return nil, err
+		}
+
+		scrt, err = deep.Copy(projectScrt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create deep copy of secret %q for datasource %q: %w", name, dtsName, err)
+		}
+
+		return &projectScrt.Spec, nil
+	},
+	)
 	if err != nil {
 		return err
 	}
+
+	if e.crypto.IsCFBEncrypted() {
+		if decryptErr := e.crypto.Encrypt(&scrt.Spec); decryptErr != nil {
+			logrus.WithError(decryptErr).Errorf("failed to encrypt secret for datasource %q in project %q", dtsName, projectName)
+			return apiinterface.InternalError
+		}
+
+		if err := e.secret.Update(scrt); err != nil {
+			logrus.WithError(err).Errorf("failed to update encrypted secret for datasource %q in project %q", dtsName, projectName)
+			return apiinterface.InternalError
+		}
+	}
+
 	return pr.serve(ctx)
 }
 
@@ -85,7 +112,7 @@ func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.Dat
 	return dts.Spec, nil
 }
 
-func (e *endpoint) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
+func (e *endpoint) getProjectSecret(projectName string, dtsName string, name string) (*v1.Secret, error) {
 	scrt, err := e.secret.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -95,5 +122,5 @@ func (e *endpoint) getProjectSecret(projectName string, dtsName string, name str
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
 		return nil, apiinterface.InternalError
 	}
-	return &scrt.Spec, nil
+	return scrt, nil
 }
