@@ -30,8 +30,10 @@ import {
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
-export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
-  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+export interface ViewDashboardProps
+  extends Omit<BoxProps, 'children'>,
+    DashboardAppProps,
+    DatasourceStoreProviderProps {
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
@@ -43,7 +45,6 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
 export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const {
     dashboardResource,
-    datasourceApi,
     externalVariableDefinitions,
     dashboardTitleComponent,
     emptyDashboardProps,
@@ -100,8 +101,9 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     return result;
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
+  /* TODO: 3059 */
   return (
-    <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
+    <DatasourceStoreProvider datasourceGroupingMetadata={{}} persesInternal dataSource={[]}>
       <DashboardProviderWithQueryParams
         initialState={{
           dashboardResource,

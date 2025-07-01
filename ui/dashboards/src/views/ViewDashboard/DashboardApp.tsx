@@ -15,7 +15,7 @@ import { ReactElement, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
-import { useDatasourceStore } from '@perses-dev/plugin-system';
+// import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
   PanelDrawer,
   Dashboard,
@@ -64,7 +64,8 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const [originalDashboard, setOriginalDashboard] = useState<
     DashboardResource | EphemeralDashboardResource | undefined
   >(undefined);
-  const { setSavedDatasources } = useDatasourceStore();
+  /* TODO: 3059 */
+  // const { setSavedDatasources } = useDatasourceStore();
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -84,7 +85,8 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const onEditButtonClick = (): void => {
     setEditMode(true);
     setOriginalDashboard(dashboard);
-    setSavedDatasources(dashboard.spec.datasources ?? {});
+    /* TODO: 3059 */
+    // setSavedDatasources(dashboard.spec.datasources ?? {});
   };
 
   const onCancelButtonClick = (): void => {

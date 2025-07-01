@@ -11,12 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
-import { DatasourceApi } from '@perses-dev/dashboards';
+import { DatasourceResource, DatasourceSelector, GlobalDatasourceResource } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 import { getBasePathName } from './route';
+
+export type BuildDatasourceProxyUrlParams = {
+  project?: string;
+  dashboard?: string;
+  name: string;
+};
+
+export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => string;
+
+export interface AppDatasourceApi {
+  buildProxyUrl?: BuildDatasourceProxyUrlFunc;
+  getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
+  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
+  listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
+  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
+  listAllDatasources: () => Array<GlobalDatasourceResource | DatasourceResource>;
+}
 
 export function buildProxyUrl({
   project,
@@ -38,7 +54,7 @@ export function buildProxyUrl({
   return `${basePath}/proxy/${url}`;
 }
 
-export function useDatasourceApi(): DatasourceApi {
+export function useDatasourceApi(): AppDatasourceApi {
   const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
   const { data: datasources, isLoading: isDatasourcesPending } = useDatasourceList({});
 
@@ -114,11 +130,19 @@ export function useDatasourceApi(): DatasourceApi {
     [globalDatasources, isGlobalDatasourcesPending]
   );
 
+  const listAllDatasources = useCallback(() => {
+    if (isDatasourcesPending || isGlobalDatasourcesPending) {
+      return [];
+    }
+    return [...(datasources || []), ...(globalDatasources || [])];
+  }, [datasources, globalDatasources, isDatasourcesPending, isGlobalDatasourcesPending]);
+
   return {
     getDatasource,
     getGlobalDatasource,
     listDatasources,
     listGlobalDatasources,
     buildProxyUrl: buildProxyUrl,
+    listAllDatasources,
   };
 }

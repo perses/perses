@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { useActiveTimeSeriesQueries, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
+import { useActiveTimeSeriesQueries, /* useDatasourceClient,*/ useTimeRange } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 
 export interface WarningDisplay {
@@ -42,7 +42,8 @@ interface QuerySummaryTableProps {
 
 export function QuerySummaryTable(props: QuerySummaryTableProps): ReactElement | null {
   const { showTotalQueries = true } = props;
-  const datasourceClient = useDatasourceClient({ kind: 'PrometheusDatasource' });
+  /* TODO: 3059 */
+  // const datasourceClient = useDatasourceClient({ kind: 'PrometheusDatasource' });
   const { absoluteTimeRange } = useTimeRange();
 
   // for displaying a summary of recent query results
@@ -52,9 +53,10 @@ export function QuerySummaryTable(props: QuerySummaryTableProps): ReactElement |
   const completedQueries = queries.filter((query) => query.state.status === 'success');
   const querySummary = useActiveTimeSeriesQueries();
 
-  if (datasourceClient.isLoading === true) {
-    return null;
-  }
+  /* TODO: 3059 */
+  // if (datasourceClient.isLoading === true) {
+  //   return null;
+  // }
 
   const warnings: WarningDisplay[] = [];
   querySummary.forEach((query) => {

@@ -12,6 +12,6 @@
 // limitations under the License.
 
 export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
+export * from './DataStoreProvider';
 export * from './VariableProvider';
 export * from './useDashboard';

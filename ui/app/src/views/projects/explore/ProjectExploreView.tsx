@@ -17,6 +17,7 @@ import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry, ProjectStoreProvider, useProjectStore, remotePluginLoader } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo } from 'react';
+import { DatasourceGroupingMetadata, GenericDatasource, GenericMetadata } from '@perses-dev/core';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
@@ -38,8 +39,22 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { project } = useProjectStore();
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
+  const { listAllDatasources } = useDatasourceApi();
+  const datasource = listAllDatasources().map<GenericDatasource>((ds) => ({
+    spec: ds.spec,
+    metadata: ds.metadata as GenericMetadata,
+    kind: ds.kind,
+  }));
 
-  const datasourceApi = useDatasourceApi();
+  const datasourceGroupingMetadata = useMemo(
+    (): DatasourceGroupingMetadata => ({
+      GlobalDatasource: {
+        label: 'global',
+        editLink: '/admin/datasources',
+      },
+    }),
+    []
+  );
 
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
@@ -65,7 +80,8 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
       <PluginRegistry pluginLoader={remotePluginLoader()}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
-            datasourceApi={datasourceApi}
+            datasourceGroupingMetadata={datasourceGroupingMetadata}
+            datasource={datasource}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
           />

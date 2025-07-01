@@ -24,9 +24,7 @@ export interface ExploreManagerProps {
 export function ExploreManager(props: ExploreManagerProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { explorer, setExplorer } = useExplorerManagerContext();
-
   const plugins = useListPluginMetadata(['Explore']);
-
   const smallScreen = useMediaQuery('(max-width: 768px)');
 
   const explorerPluginsMap = useMemo(

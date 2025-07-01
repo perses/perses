@@ -23,13 +23,13 @@ import {
   Autocomplete,
   TextField,
 } from '@mui/material';
-import { DatasourceSelector, VariableName } from '@perses-dev/core';
+import { DatasourceSelector, GenericDatasource, VariableName } from '@perses-dev/core';
 import { ReactElement, useMemo } from 'react';
 import {
   DatasourceSelectItem,
   DatasourceSelectItemGroup,
   DatasourceSelectItemSelector,
-  useListDatasourceSelectItems,
+  useDatasourceStore,
   useVariableValues,
   VariableStateMap,
 } from '../runtime';
@@ -48,8 +48,6 @@ type DataSourceOption = {
 } & Omit<DatasourceSelectItem, 'selector'> &
   Omit<DatasourceSelectItem['selector'], 'kind'>;
 
-const emptyDatasourceOption: DataSourceOption = { name: '', value: '' };
-
 export type DatasourceSelectValue<T = DatasourceSelector> = T | VariableName;
 
 export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSelectProps<string>, OmittedMuiProps> {
@@ -65,38 +63,55 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
  */
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, onChange, ...others } = props;
-  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   const variables = useVariableValues();
+  const { queryDatasource, getGroupingMetadata } = useDatasourceStore();
 
-  const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
-    if (isVariableDatasource(value)) {
-      return value;
-    }
+  const datasource = useMemo(() => {
+    return queryDatasource?.({ kind: datasourcePluginKind, name: project }, true) || [];
+  }, [datasourcePluginKind, project, queryDatasource]);
 
-    const group = (data ?? [])
-      .flatMap((itemGroup) => itemGroup.items)
-      .find((item) => {
-        return value.kind === item.selector.kind && value.name === item.selector.name && !item.overridden;
-      })?.selector.group;
-    return { ...value, group };
-  }, [value, data]);
+  const datasourceGroupingMetadata = useMemo(() => {
+    return getGroupingMetadata?.() || {};
+  }, [getGroupingMetadata]);
 
+  const createDatasourceGroup = (datasource: GenericDatasource[]): Map<string, GenericDatasource[]> => {
+    const groups = new Map<string, GenericDatasource[]>();
+    datasource.forEach((ds) => {
+      if (groups.has(ds.kind)) {
+        groups.get(ds.kind)?.push(ds);
+      } else {
+        groups.set(ds.kind, [ds]);
+      }
+    });
+    return groups;
+  };
+
+  /* TODO: 3059 - What about default?*/
   const options = useMemo<DataSourceOption[]>(() => {
-    const datasourceOptions = (data || []).flatMap<DataSourceOption>((itemGroup) =>
-      itemGroup.items.map<DataSourceOption>((item) => ({
-        groupLabel: itemGroup.group,
-        groupEditLink: itemGroup.editLink,
-        name: item.name,
-        overriding: item.overriding,
-        overridden: item.overridden,
-        saved: item.saved ?? true,
-        group: item.selector.group,
-        value: selectorToOptionValue(item.selector),
-      }))
-    );
+    const datasourceOptions: DataSourceOption[] = [];
+    const groups = createDatasourceGroup(datasource);
+    Array.from(groups).forEach((group) => {
+      /* IMPORTANT: 
+        Some fields including saved,overridden,overriding are deprecated fields and are set to default values.
+        Because, The data source provider should apply the priority and precedence for internal usage automatically.
+        Since the consumer should provide the data source itself, it should be saved and ready already
+        Later they should be safely removed  */
+      const [kind, datasources] = group;
 
+      datasources.forEach((ds) => {
+        datasourceOptions.push({
+          groupLabel: datasourceGroupingMetadata[kind]?.label || kind,
+          group: datasourceGroupingMetadata[kind]?.label || kind,
+          saved: true,
+          overridden: false,
+          overriding: false,
+          value: selectorToOptionValue(datasourcePluginKind),
+          name: ds.metadata.name,
+          groupEditLink: datasourceGroupingMetadata[kind]?.editLink,
+        });
+      });
+    });
     const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
-
     const variableOptions = Object.entries(variables).flatMap<DataSourceOption>(([name, variable]) => {
       if (Array.isArray(variable.value)) return [];
 
@@ -112,12 +127,22 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
     });
 
     return [...datasourceOptions, ...variableOptions];
-  }, [data, variables]);
+  }, [datasource, datasourcePluginKind, datasourceGroupingMetadata, variables]);
 
-  // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
-  const optionValue = isLoading
-    ? emptyDatasourceOption
-    : options.find((option) => option.value === selectorToOptionValue(defaultValue));
+  const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
+    if (isVariableDatasource(value)) {
+      return value;
+    }
+
+    const targetIndex = value?.name
+      ? datasource.findIndex((item) => item.spec.plugin.kind === value.kind && item.metadata.name === value.name)
+      : datasource.findIndex((item) => item.spec.plugin.kind === value.kind);
+
+    const group = datasource[targetIndex]?.kind === 'GlobalDatasource' ? 'global' : datasource[targetIndex]?.kind;
+    return { ...value, group };
+  }, [value, datasource]);
+
+  const optionValue = options.find((option) => option.value === selectorToOptionValue(defaultValue));
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
   const handleChange = (selectedOption: DataSourceOption | null): void => {
@@ -272,11 +297,16 @@ export const useDatasourceSelectValueToSelector = (
   value: DatasourceSelectValue,
   datasourcePluginKind: string
 ): DatasourceSelector => {
-  const { data } = useListDatasourceSelectItems(datasourcePluginKind);
+  const { queryGroupedDatasource } = useDatasourceStore();
+  const datasources = queryGroupedDatasource?.({ kind: datasourcePluginKind }) || [];
   const variables = useVariableValues();
   if (!isVariableDatasource(value)) {
     return value;
   }
 
-  return datasourceSelectValueToSelector(value, variables, data) ?? { kind: datasourcePluginKind };
+  return (
+    datasourceSelectValueToSelector(value, variables, datasources) ?? {
+      kind: datasourcePluginKind,
+    }
+  );
 };

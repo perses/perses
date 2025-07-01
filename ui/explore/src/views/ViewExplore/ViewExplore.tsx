@@ -17,31 +17,36 @@ import {
   useInitialRefreshInterval,
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
-import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
-import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import {
-  DatasourceStoreProviderProps,
-  VariableProviderProps,
-  DatasourceStoreProvider,
-  VariableProvider,
-} from '@perses-dev/dashboards';
+  DatasourceGroupingMetadata,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
+  GenericDatasource,
+} from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
+import { VariableProviderProps, VariableProvider, DatasourceStoreProvider } from '@perses-dev/dashboards';
 import React, { ReactElement } from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
-  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  datasource: GenericDatasource[];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
+  datasourceGroupingMetadata: DatasourceGroupingMetadata;
 }
 
 export function ViewExplore(props: ViewExploreProps): ReactElement {
-  const { datasourceApi, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
-
+  const { externalVariableDefinitions, sx, datasource, datasourceGroupingMetadata, exploreTitleComponent, ...others } =
+    props;
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);
   const initialRefreshInterval = useInitialRefreshInterval(DEFAULT_REFRESH_INTERVAL);
 
   return (
-    <DatasourceStoreProvider datasourceApi={datasourceApi}>
+    <DatasourceStoreProvider
+      datasourceGroupingMetadata={datasourceGroupingMetadata}
+      dataSource={datasource}
+      persesInternal
+    >
       <TimeRangeProviderWithQueryParams
         initialTimeRange={initialTimeRange}
         initialRefreshInterval={initialRefreshInterval}

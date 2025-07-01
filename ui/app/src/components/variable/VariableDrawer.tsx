@@ -73,6 +73,7 @@ export function VariableDrawer<T extends Variable>({
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
+            {/* TODO: 3059 */}
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
                 <VariableProviderWithQueryParams initialVariableDefinitions={[]}>

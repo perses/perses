@@ -15,6 +15,25 @@ import { Definition, UnknownSpec } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
 import { Display } from './display';
 
+export interface DatasourceGroupingMetadata {
+  [kind: string]: {
+    label?: string;
+    editLink?: string;
+  };
+}
+
+/**
+ * A generic Datasource interface which is not coupled to any specific internal Peres notion
+ * All third parties should be able to provide their own data-source without any limitations
+ */
+export interface GenericDatasource {
+  kind: string;
+  spec: DatasourceSpec<UnknownSpec>;
+  metadata: GenericMetadata;
+}
+
+export type GenericMetadata = Metadata & Record<string, string | object>;
+
 export interface DatasourceSpec<PluginSpec = UnknownSpec> {
   display?: Display;
   default: boolean;

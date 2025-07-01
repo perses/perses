@@ -16,16 +16,24 @@ import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { DashboardResource, DatasourceSpec, EphemeralDashboardResource } from '@perses-dev/core';
-import { useDatasourceStore } from '@perses-dev/plugin-system';
+// import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboard } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton(): ReactElement {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
-  const { getLocalDatasources, setLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
-  const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
-  const savedDatasources: Record<string, DatasourceSpec> = getSavedDatasources();
+  // const { queryDatasource } = useDatasourceStore();
+
+  // const localDatasources: Record<string, DatasourceSpec> = queryDatasource?.({ kind: '', name: '' }).reduce(
+  //   (prev, current): Record<string, DatasourceSpec> => ({ ...prev, name: current }),
+  //   {}
+  // ) as Record<string, DatasourceSpec>;
+
+  const localDatasources = {};
+
+  /* TODO: 3059 */
+  // const savedDatasources: Record<string, DatasourceSpec> = getSavedDatasources();
   const { dashboard, setDashboard } = useDashboard();
 
   const openDatasourceEditor = (): void => {
@@ -38,26 +46,29 @@ export function EditDatasourcesButton(): ReactElement {
 
   const handleChangeDatasources = (datasources: Record<string, DatasourceSpec>): void => {
     // Calculates the new list of datasources that are allowed to be used.
-    const newSavedDatasources: Record<string, DatasourceSpec> = Object.keys(datasources)
-      .filter((key) => {
-        // Datasources are allowed to be used if a) they are direct, or b) they are proxied, and their
-        // proxy is the same as what we have saved.
-        const isDirect = 'directUrl' in (datasources[key]?.plugin?.spec ?? {});
-        const isSavedProxy =
-          !isDirect &&
-          !('directUrl' in (savedDatasources[key]?.plugin?.spec ?? {})) &&
-          datasources[key]?.plugin?.spec?.proxy === savedDatasources[key]?.plugin?.spec?.proxy;
+    /* TODO: 3059 */
+    // const newSavedDatasources: Record<string, DatasourceSpec> = Object.keys(datasources)
+    //   .filter((key) => {
+    //     // Datasources are allowed to be used if a) they are direct, or b) they are proxied, and their
+    //     // proxy is the same as what we have saved.
+    //     const isDirect = 'directUrl' in (datasources[key]?.plugin?.spec ?? {});
 
-        return isDirect || isSavedProxy;
-      })
-      .reduce(
-        (obj, key) => {
-          obj[key] = datasources[key] as DatasourceSpec;
+    //     /* TODO: 3059 */
+    //     const isSavedProxy = false;
+    //     /*!isDirect &&
+    //       !('directUrl' in (savedDatasources[key]?.plugin?.spec ?? {})) &&
+    //       datasources[key]?.plugin?.spec?.proxy === savedDatasources[key]?.plugin?.spec?.proxy;*/
 
-          return obj;
-        },
-        {} as Record<string, DatasourceSpec>
-      );
+    //     return isDirect || isSavedProxy;
+    //   })
+    //   .reduce(
+    //     (obj, key) => {
+    //       obj[key] = datasources[key] as DatasourceSpec;
+
+    //       return obj;
+    //     },
+    //     {} as Record<string, DatasourceSpec>
+    //   );
 
     setDashboard(
       dashboard.kind === 'Dashboard'
@@ -76,8 +87,10 @@ export function EditDatasourcesButton(): ReactElement {
             },
           } as EphemeralDashboardResource)
     );
-    setSavedDatasources(newSavedDatasources);
-    setLocalDatasources(datasources);
+
+    alert(' /* TODO: 3059 */');
+    // setSavedDatasources(newSavedDatasources);
+    // setLocalDatasources(datasources);
     setIsDatasourceEditorOpen(false);
   };
 

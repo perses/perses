@@ -14,7 +14,7 @@
 import { FormEvent, ReactElement, useState } from 'react';
 import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
-import { useDatasourceStore, useTimeRange } from '@perses-dev/plugin-system';
+import { /*useDatasourceStore,*/ useTimeRange } from '@perses-dev/plugin-system';
 import { useEditJsonDialog, useDashboard } from '../../context';
 
 export interface EditJsonDialogProps {
@@ -41,7 +41,8 @@ const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
   const { closeEditJsonDialog } = useEditJsonDialog();
   const { setTimeRange, setRefreshInterval } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
-  const { setLocalDatasources } = useDatasourceStore();
+  /* TODO: 3059 */
+  // const { setLocalDatasources } = useDatasourceStore();
   const [draftDashboard, setDraftDashboard] = useState(dashboard);
 
   const handleApply = (e: FormEvent): void => {
@@ -49,7 +50,8 @@ const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
     setDashboard(draftDashboard);
     setTimeRange({ pastDuration: draftDashboard.spec.duration });
     setRefreshInterval(draftDashboard.spec.refreshInterval ?? '0s');
-    setLocalDatasources(draftDashboard.spec.datasources ?? {});
+    /* TODO: 3059 */
+    // setLocalDatasources(draftDashboard.spec.datasources ?? {});
     closeEditJsonDialog();
   };
 
