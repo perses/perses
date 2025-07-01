@@ -1,4 +1,5 @@
 # TO RUN THIS FILE: docker-compose --file dev/docker-compose.yaml up --detach
+# TO RUN WITH POSTGRES AND PROMETHEUS: docker-compose --file dev/docker-compose.yaml --profile postgres --profile prometheus up --detach
 # TO RUN WITH PROMETHEUS AND TEMPO: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile tempo up --detach
 
 name: "perses-dev"
@@ -12,6 +13,16 @@ services:
       MARIADB_DATABASE: perses
       MARIADB_USER: user
       MARIADB_PASSWORD: password
+
+  postgres:
+    image: postgres:17
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: perses
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    profiles: [postgres]
 
   prometheus:
     image: prom/prometheus:latest

@@ -155,6 +155,61 @@ endpointPattern: <RegExp>
 method: <enum | possibleValue = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'>
 ```
 
+### SQL Proxy specification
+
+```yaml
+kind: "SQLProxy"
+spec:
+  # Driver is the SQL driver for the datasource
+  driver: <enum | possibleValue = 'mysql' | 'postgres'>
+  
+  # Host is the hostname:port of datasource. It is not the hostname of the proxy.
+  host: <string>
+  
+  # Database name of database for the datasource.
+  database: <string>
+  
+  # This is the name of the secret that should be used for the proxy or discovery configuration
+  # It will contain any sensitive information such as password, token, certificate.
+  # Please read the documentation about secrets to understand how to create one
+  secret: <string> # Optional
+  
+  # MySQL specific driver config
+  mysql:
+    # params Connection parameters
+    params: 
+      <string>: <string> # Optional
+      
+    # max_allowed_packet Max packet size allowed
+    max_allowed_packet: <int> # Optional 
+    
+    # timeout Dial timeout 
+    timeout: <time.Duration> # Optional 
+    
+    # read_timeout I/O read timeout
+    read_timeout: <time.Duration> # Optional 
+    
+    # write_timeout I/O read timeout
+    write_timeout: <time.Duration> # Optional 
+
+  # Postgres specific driver config
+  postgres:
+    # specifies command-line options to send to the server at connection start
+    options: <string>
+    
+    # the max connections for the SQL connection
+    max_conns: <int> # Optional 
+    
+    # the timeout value used for socket connect operations.
+    connect_timeout: <time.Duration> # Optional
+
+    # specifies the number of PreparedStatement executions that must occur before the driver begins using server-side prepared statements.
+    prepare_threshold: <int> # Optional
+
+    # The ssl configuration when connection to the datasource
+    ssl_mode: <enum | possibleValue = 'disable' | 'allow' | 'prefer' | 'require' | 'verify-ca' | 'verify-full'> # Optional
+```
+
 ## Thresholds specification
 
 ```yaml

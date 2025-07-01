@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,8 +17,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
-	"strings"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -124,145 +122,5 @@ type Proxy struct {
 }
 
 const (
-	HTTPProxyKindField = "kind"
-	HTTPProxyKindName  = "httpproxy"
-	HTTPProxySpec      = "spec"
+	ProxyKindName = "httpproxy"
 )
-
-func ValidateAndExtract(pluginSpec interface{}) (*Config, error) {
-	finder := &configFinder{}
-	finder.find(reflect.ValueOf(pluginSpec))
-	return finder.config, finder.err
-}
-
-type configFinder struct {
-	err    error
-	found  bool
-	config *Config
-}
-
-func (c *configFinder) find(v reflect.Value) {
-	if len(v.Type().PkgPath()) > 0 {
-		// the field is not exported, so no need to look at it as we won't be able to set it in a later stage
-		return
-	}
-	v = getNextElem(v)
-
-	switch v.Kind() {
-	case reflect.Struct:
-		c.findInStruct(v)
-	case reflect.Map:
-		c.findInMap(v)
-	}
-}
-
-// findInStruct assumed that v is of type reflect.Struct
-func (c *configFinder) findInStruct(v reflect.Value) {
-	// first look at the field and find if we have the good kind
-	c.found = doesKindInStructExists(v)
-	if c.found {
-		// then get the spec field
-		spec := getConfigSpecInStruct(v)
-		// Then unmarshal the proxy to validate the content
-		c.unmarshalConfig(spec)
-	} else {
-		// Otherwise look deeper to find it
-		for i := 0; i < v.NumField(); i++ {
-			c.find(v.Field(i))
-			if c.found || c.err != nil {
-				return
-			}
-		}
-	}
-}
-
-// findInMap assumed that v is of type reflect.Map
-func (c *configFinder) findInMap(v reflect.Value) {
-	keyType := v.Type().Key()
-	if keyType.Kind() != reflect.String {
-		return
-	}
-	c.found = doesKindInMapExists(v)
-	if c.found {
-		// then get the spec field
-		spec := getConfigSpecInMap(v)
-		// Then unmarshal the proxy to validate the content
-		c.unmarshalConfig(spec)
-	} else {
-		// Otherwise look deeper to find it
-		for _, key := range v.MapKeys() {
-			c.find(v.MapIndex(key))
-			if c.found || c.err != nil {
-				return
-			}
-		}
-	}
-}
-
-func (c *configFinder) unmarshalConfig(spec reflect.Value) {
-	if spec == (reflect.Value{}) {
-		return
-	}
-	spec = getNextElem(spec)
-	var data []byte
-	if spec.Kind() == reflect.Struct {
-		data, c.err = json.Marshal(spec.Interface().(Config))
-	} else {
-		data, c.err = json.Marshal(spec.Interface())
-	}
-	if c.err != nil {
-		return
-	}
-	c.config = &Config{}
-	c.err = json.Unmarshal(data, c.config)
-}
-
-func doesKindInStructExists(v reflect.Value) bool {
-	for i := 0; i < v.NumField(); i++ {
-		if strings.ToLower(v.Type().Field(i).Name) == HTTPProxyKindField &&
-			v.Field(i).Type().Kind() == reflect.String &&
-			strings.ToLower(v.Field(i).String()) == HTTPProxyKindName {
-			return true
-		}
-	}
-	return false
-}
-
-func doesKindInMapExists(v reflect.Value) bool {
-	for _, key := range v.MapKeys() {
-		if key.String() == HTTPProxyKindField {
-			value := v.MapIndex(key)
-			value = getNextElem(value)
-			if value.Kind() == reflect.String &&
-				strings.ToLower(value.String()) == HTTPProxyKindName {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func getConfigSpecInStruct(v reflect.Value) reflect.Value {
-	for i := 0; i < v.NumField(); i++ {
-		if strings.ToLower(v.Type().Field(i).Name) == HTTPProxySpec {
-			return v.Field(i)
-		}
-	}
-	return reflect.Value{}
-}
-
-func getConfigSpecInMap(v reflect.Value) reflect.Value {
-	for _, key := range v.MapKeys() {
-		if key.String() == HTTPProxySpec {
-			return v.MapIndex(key)
-		}
-	}
-	return reflect.Value{}
-}
-
-func getNextElem(v reflect.Value) reflect.Value {
-	if v.Kind() == reflect.Interface || (v.Kind() == reflect.Ptr && !v.IsNil()) {
-		return v.Elem()
-	}
-	return v
-}

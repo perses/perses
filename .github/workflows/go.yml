@@ -61,6 +61,14 @@ jobs:
         image: prom/prometheus
         ports:
           - '9090:9090'
+      postgres:
+        image: postgres:17
+        ports:
+          - '5432:5432'
+        env:
+          POSTGRES_DB: perses
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -84,6 +92,12 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.12.0"
+      - uses: ikalnytskyi/action-setup-postgres@v7
+        with:
+          username: user
+          password: password
+          database: perses
+          postgres-version: 17
       - name: "install prometheus"
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
@@ -107,6 +121,14 @@ jobs:
           MARIADB_DATABASE: perses
           MARIADB_USER: user
           MARIADB_PASSWORD: password
+      postgres:
+        image: postgres:17
+        ports:
+          - '5432:5432'
+        env:
+          POSTGRES_DB: perses
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
     steps:
       - name: checkout
         uses: actions/checkout@v4
