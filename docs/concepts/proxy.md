@@ -28,6 +28,14 @@ Depending on the datasource scope (Global, Project, Local), the URL to access th
 /proxy/projects/<project-name>/dashboards/<dashboard-name>/datasources/<datasource-name>/<datasource_api_path>
 ```
 
+4. For the SQLProxy proxy kind, the URL to access the datasource is:
+
+The method needs to be `POST` and the path needs to be `/query`
+
+```text
+/proxy/projects/<project-name>/dashboards/<dashboard-name>/datasources/<datasource-name>/query
+```
+
 For example, if we have a Prometheus Global datasource named `brometheus`, the following URI will return the Prometheus
 config:
 

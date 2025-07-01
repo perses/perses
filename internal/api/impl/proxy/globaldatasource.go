@@ -17,19 +17,44 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	"github.com/sirupsen/logrus"
 )
 
 func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
-	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(datasourceName, name)
-	})
+
+	var (
+		pr  proxy
+		err error
+	)
+
+	kind, err := datasource.GetProxyKind(spec.Plugin.Spec)
+	if err != nil {
+		return err
+	}
+
+	switch kind {
+	case datasourceHTTP.HTTPProxyKindName:
+		pr, err = newHTTPProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+			return e.getGlobalSecret(datasourceName, name)
+		})
+	case datasourceSQL.SQLProxyKindName:
+		pr, err = newSQLProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+			return e.getGlobalSecret(datasourceName, name)
+		})
+	default:
+		return fmt.Errorf("unknown plugin kind: %s", kind)
+	}
+
 	if err != nil {
 		return err
 	}
