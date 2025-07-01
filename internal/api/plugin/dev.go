@@ -70,3 +70,16 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 	}
 	return p.storeLoadedList()
 }
+
+func (p *pluginFile) UnLoadDevPlugin(name string) error {
+	plg, ok := p.devLoaded[name]
+	if !ok {
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", name))
+	}
+	p.mutex.Lock()
+	p.sch.UnloadDevPlugin(plg.Module)
+	p.mig.UnLoadDevPlugin(plg.Module)
+	delete(p.devLoaded, name)
+	p.mutex.Unlock()
+	return p.storeLoadedList()
+}

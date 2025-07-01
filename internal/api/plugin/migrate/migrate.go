@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"cuelang.org/go/cue"
@@ -41,7 +42,7 @@ const (
 	migrationFolder = "migrate"
 )
 
-var kindRegexp = regexp.MustCompile(`(?m)kind: "(\w+)"`)
+var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
 
 func LoadMigrateSchema(schemaPath string) (*build.Instance, error) {
 	return schema.LoadSchemaInstance(schemaPath, "migrate")
@@ -174,18 +175,19 @@ func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
+	UnLoadDevPlugin(module v1.PluginModule)
 	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
 }
 
 func New() Migration {
 	return &completeMigration{
 		mig: &mig{
-			panels:    make(map[string]*build.Instance),
+			panels:    make(map[string]*panelInstance),
 			variables: make(map[string]*build.Instance),
 			queries:   make(map[string]*queryInstance),
 		},
 		devMig: &mig{
-			panels:    make(map[string]*build.Instance),
+			panels:    make(map[string]*panelInstance),
 			variables: make(map[string]*build.Instance),
 			queries:   make(map[string]*queryInstance),
 		},
@@ -196,17 +198,32 @@ type completeMigration struct {
 	Migration
 	mig    *mig
 	devMig *mig
+	mutex  sync.RWMutex
 }
 
 func (m *completeMigration) Load(pluginPath string, module v1.PluginModule) error {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.mig.load(pluginPath, module)
 }
 
 func (m *completeMigration) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	return m.devMig.load(pluginPath, module)
 }
 
+func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	for _, plg := range module.Spec.Plugins {
+		m.devMig.remove(plg.Kind, plg.Spec.Name)
+	}
+}
+
 func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
 		Kind: v1.KindDashboard,
 		Metadata: v1.ProjectMetadata{
@@ -296,11 +313,17 @@ type queryInstance struct {
 	kind     plugin.Kind
 }
 
+type panelInstance struct {
+	instance *build.Instance
+	// name is the name of the panel plugin. Like TimeSeriesPanel, TablePanel, etc.
+	name string
+}
+
 type mig struct {
 	// panels is a map because we can decide which script to execute precisely.
 	// This is because in Grafana a panel has a type.
 	// The key is the Grafana type.
-	panels map[string]*build.Instance
+	panels map[string]*panelInstance
 	// variables is a map that implies we won't allow having two migration scripts for the same variable type.
 	// The key is the variable instance kind (e.g., PrometheusLabelValuesVariable).
 	variables map[string]*build.Instance
@@ -321,23 +344,52 @@ func (m *mig) load(pluginPath string, module v1.PluginModule) error {
 		case plugin.KindVariable:
 			m.loadVariable(sch.Name, sch.Instance, module)
 		case plugin.KindPanel:
-			m.loadPanel(sch.Name, sch.Instance)
+			m.loadPanel(sch.Name, sch.Instance, module)
 		}
 	}
 	return nil
 }
 
-func (m *mig) loadPanel(schemaPath string, panelInstance *build.Instance) {
+func (m *mig) loadPanel(schemaPath string, instance *build.Instance, module v1.PluginModule) {
 	ctx := cuecontext.New()
-	panelSchema := ctx.BuildInstance(panelInstance)
+	panelSchema := ctx.BuildInstance(instance)
 	kindValue := panelSchema.LookupPath(cue.ParsePath(grafanaType))
-	kind := kindValue.Kind()
+	grafanaKind := kindValue.Kind()
+
+	// To be able to unregister the panel for the dev environment, we need to know the panel name associated.
+	// So we are going to read again the migration script and find the `kind` value like for the other migration scripts. (a.k.a variable, queries).
+	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
+	if err != nil {
+		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
+	}
+	var panelKindName string
+	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
+		if len(group) < 2 {
+			continue
+		}
+		k := group[1]
+		for _, plg := range module.Spec.Plugins {
+			if plg.Spec.Name == k {
+				panelKindName = k
+				break
+			}
+		}
+	}
+	if len(panelKindName) == 0 {
+		logrus.Warningf("unable to recognize the panel kind from the migrate script %q", schemaPath)
+		return
+	}
+	pInstance := &panelInstance{
+		instance: instance,
+		name:     panelKindName,
+	}
 
 	// Kind can be a simple string or a disjunction of strings. Like #grafanaType: "table" | "table-old"
-	if kind == cue.StringKind {
+	if grafanaKind == cue.StringKind {
 		kindAsString, _ := kindValue.String()
-		m.panels[kindAsString] = panelInstance
-	} else if kind == cue.BottomKind && kindValue.IncompleteKind() == cue.StringKind {
+		m.panels[kindAsString] = pInstance
+	} else if grafanaKind == cue.BottomKind && kindValue.IncompleteKind() == cue.StringKind {
 		op, values := kindValue.Expr()
 		if op != cue.AndOp && op != cue.OrOp {
 			logrus.Infof("unable to load migrate script from plugin %q: op in field %q not recognised", schemaPath, grafanaType)
@@ -349,7 +401,7 @@ func (m *mig) loadPanel(schemaPath string, panelInstance *build.Instance) {
 				continue
 			}
 			valueAsString, _ := value.String()
-			m.panels[valueAsString] = panelInstance
+			m.panels[valueAsString] = pInstance
 		}
 	}
 }
@@ -402,4 +454,27 @@ func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.P
 		}
 	}
 	logrus.Infof("unable to reconize the query kind from the migrate script %q", schemaPath)
+}
+
+func (m *mig) remove(kind plugin.Kind, name string) {
+	switch kind {
+	case plugin.KindPanel:
+		for grafanaKindName, p := range m.panels {
+			if p.name == name {
+				delete(m.panels, grafanaKindName)
+				// When parsing the migration script, it's possible we are finding that the script can match multiple Grafana panel types.
+				// So we need to remove all the entries that match the panel name.
+				// That's why; when finding one, we are not breaking the loop.
+			}
+		}
+		delete(m.panels, name)
+	case plugin.KindVariable:
+		delete(m.variables, name)
+	case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+		delete(m.queries, name)
+	case plugin.KindDatasource:
+		// No migration script for datasource, so nothing to remove
+	default:
+		logrus.Warnf("unable to remove migration script for %q: kind %q not supported", name, kind)
+	}
 }
