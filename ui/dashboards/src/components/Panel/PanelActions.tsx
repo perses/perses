@@ -83,7 +83,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const [exportCapability, setExportCapability] = useState<DataExportCapability | null>(null);
 
   useEffect(() => {
-    const loadExportCapability = async () => {
+    const loadExportCapability = async (): Promise<void> => {
       if (!panelPluginKind) {
         setExportCapability(null);
         return;
@@ -106,23 +106,6 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
     loadExportCapability();
   }, [panelPluginKind, queryResults, title, projectName, getPlugin]);
-
-  const exportButton = useMemo(() => {
-    if (!exportCapability) return null;
-
-    const formats = exportCapability.getSupportedFormats();
-    const csvFormat = formats.find((f) => f.name === 'CSV');
-
-    if (!csvFormat) return null;
-
-    return (
-      <InfoTooltip description="Export as CSV">
-        <HeaderIconButton aria-label="CSV Export" size="small" onClick={() => handleExport(csvFormat)}>
-          <DownloadIcon fontSize="inherit" />
-        </HeaderIconButton>
-      </InfoTooltip>
-    );
-  }, [exportCapability]);
 
   const handleExport = useCallback(
     async (format: ExportFormat) => {
@@ -148,6 +131,23 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     },
     [exportCapability, title, projectName]
   );
+
+  const exportButton = useMemo(() => {
+    if (!exportCapability) return null;
+
+    const formats = exportCapability.getSupportedFormats();
+    const csvFormat = formats.find((f) => f.name === 'CSV');
+
+    if (!csvFormat) return null;
+
+    return (
+      <InfoTooltip description="Export as CSV">
+        <HeaderIconButton aria-label="CSV Export" size="small" onClick={() => handleExport(csvFormat)}>
+          <DownloadIcon fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }, [exportCapability, handleExport]);
 
   const descriptionAction = useMemo(() => {
     if (description && description.trim().length > 0) {
@@ -349,7 +349,7 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
     return undefined;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
