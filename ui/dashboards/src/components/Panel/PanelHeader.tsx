@@ -33,6 +33,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   links?: Link[];
   extra?: ReactNode;
   queryResults: QueryData[];
+  panelPluginKind: string;
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
   projectName?: string;
@@ -48,6 +49,7 @@ export function PanelHeader({
   editHandlers,
   sx,
   extra,
+  panelPluginKind,
   projectName,
   ...rest
 }: PanelHeaderProps): ReactElement {
@@ -131,6 +133,7 @@ export function PanelHeader({
             descriptionTooltipId={descriptionTooltipId}
             links={links}
             queryResults={timeSeriesDataForExport}
+            panelPluginKind={panelPluginKind}
             readHandlers={readHandlers}
             editHandlers={editHandlers}
             extra={extra}

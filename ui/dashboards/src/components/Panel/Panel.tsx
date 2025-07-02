@@ -27,6 +27,11 @@ export interface PanelProps extends CardProps<'section'> {
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
+  /**
+   * Project name to use for the panel. If not provided, will attempt to extract from URL.
+   * @default extracted from URL or 'unknown-project'
+   */
+  projectName?: string;
 }
 
 export type PanelOptions = {
@@ -53,7 +58,7 @@ export type PanelExtraProps = {
   panelGroupItemId?: PanelGroupItemId;
 };
 
-// Function to extract project name from URL
+// Function to extract project name from URL (kept as fallback)
 const extractProjectNameFromUrl = (): string => {
   try {
     if (process.env.NODE_ENV === 'test') {
@@ -115,6 +120,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     sx,
     panelOptions,
     panelGroupItemId,
+    projectName: providedProjectName,
     ...others
   } = props;
 
@@ -135,8 +141,10 @@ export const Panel = memo(function Panel(props: PanelProps) {
 
   const { queryResults } = useDataQueriesContext();
 
-  // Extract project name from URL - memoized to prevent unnecessary re-calculations
-  const projectName = useMemo(() => extractProjectNameFromUrl(), []);
+  // Use provided project name or extract from URL as fallback
+  const projectName = useMemo(() => {
+    return providedProjectName || extractProjectNameFromUrl();
+  }, [providedProjectName]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
@@ -174,6 +182,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           title={definition.spec.display.name}
           description={definition.spec.display.description}
           queryResults={queryResults}
+          panelPluginKind={definition.spec.plugin.kind}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState, useCallback } from 'react';
+import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState, useCallback, useEffect } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
-import { useDataQueriesContext } from '@perses-dev/plugin-system';
+import { usePluginRegistry, useDataQueriesContext } from '@perses-dev/plugin-system';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -25,7 +25,7 @@ import MenuIcon from 'mdi-material-ui/Menu';
 import AlertIcon from 'mdi-material-ui/Alert';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import DownloadIcon from 'mdi-material-ui/Download';
-import { Link, TimeSeriesData, TimeSeries } from '@perses-dev/core';
+import { Link, TimeSeriesData, ExportFormat, DataExportCapability } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -42,6 +42,7 @@ export interface PanelActionsProps {
   descriptionTooltipId: string;
   links?: Link[];
   extra?: React.ReactNode;
+  panelPluginKind: string; // ADD THIS LINE
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -51,7 +52,7 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
-  queryResults: TimeSeriesData | undefined;
+  queryResults: TimeSeriesData | undefined; // Keep this for now
   projectName?: string;
 }
 
@@ -62,129 +63,6 @@ const ConditionalBox = styled(Box)({
   justifyContent: 'flex-end',
 });
 
-// Function to check if the data is time series data
-const isTimeSeriesData = (data: TimeSeriesData | undefined): boolean => {
-  return !!(data && data.series && Array.isArray(data.series) && data.series.length > 0);
-};
-
-// Function to format labels similar to how Perses displays them in legends
-const formatLegendName = (series: TimeSeries, seriesIndex: number): string => {
-  const seriesAny = series as TimeSeries & {
-    formattedName?: string;
-    legendName?: string;
-    displayName?: string;
-    legend?: string;
-    labels?: Record<string, string>;
-  };
-
-  // First try the standard TimeSeries properties that Perses uses for legend display
-  let legendName = series.formattedName || series.name;
-
-  // If we still don't have a good name, try other potential properties
-  if (!legendName || legendName === `Series ${seriesIndex + 1}`) {
-    legendName = seriesAny.legendName || seriesAny.displayName || seriesAny.legend || series.name || '';
-  }
-
-  // If we have labels, construct a meaningful name using Perses-style formatting
-  if ((!legendName || legendName === series.name) && series.labels) {
-    const labels = series.labels;
-
-    // Remove __name__ from labels for cleaner display (common Prometheus practice)
-    const displayLabels = { ...labels };
-    const metricName = displayLabels.__name__;
-    delete displayLabels.__name__;
-
-    // Create label pairs in the format key="value"
-    const labelPairs = Object.entries(displayLabels)
-      .filter(([value]) => value !== undefined && value !== null && value !== '')
-      .map(([key, value]) => `${key}="${value}"`)
-      .join(', ');
-
-    if (metricName && labelPairs) {
-      legendName = `${metricName}{${labelPairs}}`;
-    } else if (metricName) {
-      legendName = metricName;
-    } else if (labelPairs) {
-      legendName = `{${labelPairs}}`;
-    } else {
-      // Fallback to trying common labels
-      legendName = labels.job || labels.instance || labels.metric || `Series ${seriesIndex + 1}`;
-    }
-  }
-
-  // Final fallback
-  if (!legendName || legendName.trim() === '') {
-    legendName = `Series ${seriesIndex + 1}`;
-  }
-
-  return legendName;
-};
-
-// Function to sanitize column names for CSV (Excel/Sheets compatible)
-const sanitizeColumnName = (name: string): string => {
-  return name
-    .replace(/[,"\n\r]/g, '_') // Replace CSV-problematic characters
-    .replace(/\s+/g, '_') // Replace spaces with underscores
-    .replace(/_+/g, '_') // Collapse multiple underscores
-    .replace(/^_|_$/g, '') // Remove leading/trailing underscores
-    .substring(0, 255); // Limit length for Excel compatibility
-};
-
-// Function to sanitize filename by replacing/removing invalid characters
-const sanitizeFilename = (filename: string): string => {
-  return filename
-    .replace(/[<>:"/\\|?*]/g, '_')
-    .replace(/\s+/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '');
-};
-
-// Function to format timestamp in ISO 8601 format (Excel/Sheets compatible)
-const formatTimestampISO = (timestamp: number | string): string => {
-  let timestampMs: number;
-
-  // Handle different timestamp formats
-  if (typeof timestamp === 'string') {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) {
-      return timestamp; // Return original if can't parse
-    }
-    timestampMs = date.getTime();
-  } else {
-    // Convert Unix timestamp to milliseconds if needed
-    timestampMs = timestamp > 1e10 ? timestamp : timestamp * 1000;
-  }
-
-  const date = new Date(timestampMs);
-
-  // Check if date is valid
-  if (isNaN(date.getTime())) {
-    return new Date(timestampMs).toISOString();
-  }
-
-  // Return ISO 8601 format which includes timezone information
-  return date.toISOString();
-};
-
-const escapeCsvValue = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return '';
-  }
-
-  const stringValue = String(value);
-
-  if (
-    stringValue.includes(',') ||
-    stringValue.includes('"') ||
-    stringValue.includes('\n') ||
-    stringValue.includes('\r')
-  ) {
-    return `"${stringValue.replace(/"/g, '""')}"`;
-  }
-
-  return stringValue;
-};
-
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
   readHandlers,
@@ -194,155 +72,82 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   descriptionTooltipId,
   links,
   queryResults,
+  panelPluginKind,
   projectName,
 }) => {
   // Check if current data is time series data
-  const hasTimeSeriesData = useMemo(() => isTimeSeriesData(queryResults), [queryResults]);
-
   const { isFetching, errors } = useDataQueriesContext();
+  const { getPlugin } = usePluginRegistry();
 
-  const csvExportHandler = useCallback(() => {
-    if (
-      !queryResults ||
-      !queryResults.series ||
-      !Array.isArray(queryResults.series) ||
-      queryResults.series.length === 0
-    ) {
-      return;
-    }
+  // Create export capability using plugin system
+  const [exportCapability, setExportCapability] = useState<DataExportCapability | null>(null);
 
-    let csvString = '';
-    const result: Record<string, Record<string, unknown>> = {};
-    const seriesInfo: Array<{ legendName: string; columnName: string; originalName: string }> = [];
-    let validSeriesCount = 0;
-
-    // Process each series and collect legend information
-    for (let i = 0; i < queryResults.series.length; i++) {
-      const series = queryResults.series[i];
-
-      if (!series) {
-        continue;
+  useEffect(() => {
+    const loadExportCapability = async () => {
+      if (!panelPluginKind) {
+        setExportCapability(null);
+        return;
       }
 
-      if (!Array.isArray(series.values) || series.values.length === 0) {
-        continue;
+      try {
+        const plugin = await getPlugin('Panel', panelPluginKind);
+        if (!plugin?.createDataExporter) {
+          setExportCapability(null);
+          return;
+        }
+
+        const exporter = plugin.createDataExporter(queryResults, title, projectName);
+        setExportCapability(exporter);
+      } catch (error) {
+        console.warn('Failed to get plugin export capability:', error);
+        setExportCapability(null);
       }
+    };
 
-      const legendName = formatLegendName(series, i);
-      const columnName = sanitizeColumnName(legendName);
+    loadExportCapability();
+  }, [panelPluginKind, queryResults, title, projectName, getPlugin]);
 
-      const currentSeriesInfo = {
-        legendName,
-        columnName: columnName || `Series_${i + 1}`,
-        originalName: series.name || '',
-      };
+  const exportButton = useMemo(() => {
+    if (!exportCapability) return null;
 
-      seriesInfo.push(currentSeriesInfo);
-      validSeriesCount++;
+    const formats = exportCapability.getSupportedFormats();
+    const csvFormat = formats.find((f) => f.name === 'CSV');
 
-      // Process the time series data for this series
-      for (let j = 0; j < series.values.length; j++) {
-        const entry = series.values[j];
-
-        if (!Array.isArray(entry) || entry.length < 2) {
-          continue;
-        }
-
-        const timestamp = entry[0];
-        const value = entry[1];
-
-        // Skip null or undefined values but allow 0
-        if (value === null || value === undefined) {
-          continue;
-        }
-
-        // Format timestamp in ISO 8601 format
-        const dateTime = formatTimestampISO(timestamp);
-
-        if (!result[dateTime]) {
-          result[dateTime] = {};
-        }
-
-        result[dateTime]![currentSeriesInfo.columnName] = value;
-      }
-    }
-
-    // Check if we actually have data to export
-    if (validSeriesCount === 0 || seriesInfo.length === 0) {
-      alert('No valid data found to export to CSV.');
-      return;
-    }
-
-    const timestampCount = Object.keys(result).length;
-    if (timestampCount === 0) {
-      alert('No valid timestamp data found to export to CSV.');
-      return;
-    }
-
-    // Build CSV content - SIMPLIFIED FORMAT
-    // Add column headers only
-    const columnNames = seriesInfo.map((info) => info.columnName);
-    csvString += `DateTime,${columnNames.join(',')}\n`;
-
-    // Add data rows - sort by timestamp
-    const sortedDateTimes = Object.keys(result).sort((a, b) => {
-      const dateA = new Date(a).getTime();
-      const dateB = new Date(b).getTime();
-      return dateA - dateB;
-    });
-
-    for (const dateTime of sortedDateTimes) {
-      const rowData = result[dateTime];
-      const values: string[] = [];
-
-      if (rowData) {
-        for (const columnName of columnNames) {
-          const value = rowData[columnName];
-          values.push(escapeCsvValue(value));
-        }
-
-        csvString += `${escapeCsvValue(dateTime)},${values.join(',')}\n`;
-      }
-    }
-
-    // Create filename (keeping project name and title as requested)
-    let filename = '';
-    if (projectName) {
-      filename = `${sanitizeFilename(projectName)}_${sanitizeFilename(title)}_data.csv`;
-    } else {
-      filename = `${sanitizeFilename(title)}_data.csv`;
-    }
-
-    // Create and download the file
-    const blobCsvData = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
-    const csvURL = URL.createObjectURL(blobCsvData);
-    const link = document.createElement('a');
-    link.href = csvURL;
-    link.download = filename;
-
-    // Ensure the link is added to the document for some browsers
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up the URL object
-    URL.revokeObjectURL(csvURL);
-  }, [queryResults, title, projectName]);
-
-  const csvExportButton = useMemo(() => {
-    // Only show CSV export button if we have time series data
-    if (!hasTimeSeriesData) {
-      return null;
-    }
+    if (!csvFormat) return null;
 
     return (
       <InfoTooltip description="Export as CSV">
-        <HeaderIconButton aria-label="CSV Export" size="small" onClick={csvExportHandler}>
+        <HeaderIconButton aria-label="CSV Export" size="small" onClick={() => handleExport(csvFormat)}>
           <DownloadIcon fontSize="inherit" />
         </HeaderIconButton>
       </InfoTooltip>
     );
-  }, [hasTimeSeriesData, csvExportHandler]);
+  }, [exportCapability]);
+
+  const handleExport = useCallback(
+    async (format: ExportFormat) => {
+      if (!exportCapability) return;
+
+      try {
+        const exportData = await exportCapability.exportData(format, {
+          title,
+          projectName,
+        });
+
+        // Trigger download using browser
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(exportData.data);
+        link.download = exportData.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        console.error('Export failed:', error);
+      }
+    },
+    [exportCapability, title, projectName]
+  );
 
   const descriptionAction = useMemo(() => {
     if (description && description.trim().length > 0) {
@@ -491,8 +296,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
-            {csvExportButton}
           </OverflowMenu>
+          {exportButton}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -510,11 +315,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions}
-          <OverflowMenu title={title}>
-            {editActions}
-            {csvExportButton}
-          </OverflowMenu>
+          {extraActions} {readActions} {exportButton}
+          <OverflowMenu title={title}>{editActions}</OverflowMenu>
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -531,8 +333,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions} {moveAction}
-          <OverflowMenu title={title}>{csvExportButton}</OverflowMenu>
+          {extraActions} {readActions} {exportButton} {editActions} {moveAction}
         </OnHover>
       </ConditionalBox>
     </>

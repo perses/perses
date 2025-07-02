@@ -54,3 +54,31 @@ export interface PanelEditorValues {
   groupId: PanelGroupId;
   panelDefinition: PanelDefinition;
 }
+
+export interface ExportFormat {
+  name: string;
+  extension: string;
+  mimeType: string;
+}
+
+export interface ExportData {
+  format: ExportFormat;
+  data: Blob;
+  filename: string;
+}
+
+export interface DataExportCapability {
+  getSupportedFormats(): ExportFormat[];
+  exportData(format: ExportFormat, options?: ExportOptions): Promise<ExportData>;
+}
+export interface ExportOptions {
+  title?: string;
+  projectName?: string;
+  customFilename?: string;
+  includeMetadata?: boolean;
+}
+
+export const EXPORT_FORMATS = {
+  CSV: { name: 'CSV', extension: 'csv', mimeType: 'text/csv' },
+  JSON: { name: 'JSON', extension: 'json', mimeType: 'application/json' }
+} as const;

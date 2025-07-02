@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition, DataExportCapability } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
@@ -51,6 +51,8 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    * @default false
    */
   hideQueryEditor?: boolean;
+  //exporter data logic
+  createDataExporter?: (queryResults: any, title: string, projectName?: string) => DataExportCapability;
 }
 
 /**
