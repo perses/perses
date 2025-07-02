@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
+import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState, useCallback, useEffect } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
+import { usePluginRegistry, useDataQueriesContext } from '@perses-dev/plugin-system';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,10 +22,10 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
-import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import DownloadIcon from 'mdi-material-ui/Download';
+import { Link, TimeSeriesData, ExportFormat, DataExportCapability } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -41,6 +42,7 @@ export interface PanelActionsProps {
   descriptionTooltipId: string;
   links?: Link[];
   extra?: React.ReactNode;
+  panelPluginKind: string; // ADD THIS LINE
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -50,7 +52,8 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
-  queryResults: QueryData[];
+  queryResults: TimeSeriesData | undefined; // Keep this for now
+  projectName?: string;
 }
 
 const ConditionalBox = styled(Box)({
@@ -69,7 +72,83 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   descriptionTooltipId,
   links,
   queryResults,
+  panelPluginKind,
+  projectName,
 }) => {
+  // Check if current data is time series data
+  const { isFetching, errors } = useDataQueriesContext();
+  const { getPlugin } = usePluginRegistry();
+
+  // Create export capability using plugin system
+  const [exportCapability, setExportCapability] = useState<DataExportCapability | null>(null);
+
+  useEffect(() => {
+    const loadExportCapability = async (): Promise<void> => {
+      if (!panelPluginKind) {
+        setExportCapability(null);
+        return;
+      }
+
+      try {
+        const plugin = await getPlugin('Panel', panelPluginKind);
+        if (!plugin?.createDataExporter) {
+          setExportCapability(null);
+          return;
+        }
+
+        const exporter = plugin.createDataExporter(queryResults, title, projectName);
+        setExportCapability(exporter);
+      } catch (error) {
+        console.warn('Failed to get plugin export capability:', error);
+        setExportCapability(null);
+      }
+    };
+
+    loadExportCapability();
+  }, [panelPluginKind, queryResults, title, projectName, getPlugin]);
+
+  const handleExport = useCallback(
+    async (format: ExportFormat) => {
+      if (!exportCapability) return;
+
+      try {
+        const exportData = await exportCapability.exportData(format, {
+          title,
+          projectName,
+        });
+
+        // Trigger download using browser
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(exportData.data);
+        link.download = exportData.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        console.error('Export failed:', error);
+      }
+    },
+    [exportCapability, title, projectName]
+  );
+
+  const exportButton = useMemo(() => {
+    if (!exportCapability) return null;
+
+    const formats = exportCapability.getSupportedFormats();
+    const csvFormat = formats.find((f) => f.name === 'CSV');
+
+    if (!csvFormat) return null;
+
+    return (
+      <InfoTooltip description="Export as CSV">
+        <HeaderIconButton aria-label="CSV Export" size="small" onClick={() => handleExport(csvFormat)}>
+          <DownloadIcon fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }, [exportCapability, handleExport]);
+
   const descriptionAction = useMemo(() => {
     if (description && description.trim().length > 0) {
       return (
@@ -87,21 +166,26 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [descriptionTooltipId, description]);
+
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo(() => {
-    const hasData = queryResults.some((q) => q.data);
-    const isFetching = queryResults.some((q) => q.isFetching);
-    const queryErrors = queryResults.filter((q) => q.error);
+    const hasData = queryResults && queryResults.series && queryResults.series.length > 0;
     if (isFetching && hasData) {
-      // If the panel has no data, the panel content will show the loading overlay.
-      // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
-    } else if (queryErrors.length > 0) {
-      const errorTexts = queryErrors
-        .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+    const validErrors = (errors || []).filter((error) => error !== null);
+    if (validErrors.length > 0) {
+      const errorTexts = validErrors
+        .map((e: unknown) => {
+          if (typeof e === 'string') return e;
+          if (e && typeof e === 'object') {
+            const errorObj = e as { message?: string; toString?: () => string };
+            return errorObj.message ?? errorObj.toString?.() ?? 'Unknown error';
+          }
+          return 'Unknown error';
+        })
         .join('\n');
 
       return (
@@ -112,7 +196,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </InfoTooltip>
       );
     }
-  }, [queryResults]);
+  }, [queryResults, isFetching, errors]);
 
   const readActions = useMemo(() => {
     if (readHandlers !== undefined) {
@@ -137,7 +221,6 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   const editActions = useMemo(() => {
     if (editHandlers !== undefined) {
-      // If there are edit handlers, always just show the edit buttons
       return (
         <>
           <InfoTooltip description={TOOLTIP_TEXT.editPanel}>
@@ -158,8 +241,6 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
               <ContentCopyIcon
                 fontSize="inherit"
                 sx={{
-                  // Shrink this icon a little bit to look more consistent
-                  // with the other icons in the header.
                   transform: 'scale(0.925)',
                 }}
               />
@@ -216,6 +297,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
           </OverflowMenu>
+          {exportButton}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -233,7 +315,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions}
+          {extraActions} {readActions} {exportButton}
           <OverflowMenu title={title}>{editActions}</OverflowMenu>
           {moveAction}
         </OnHover>
@@ -242,7 +324,6 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       {/* large panel width: show all icons in panel header */}
       <ConditionalBox
         sx={(theme) => ({
-          // flip the logic here; if the browser (or jsdom) does not support container queries, always show all icons
           display: 'flex',
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
         })}
@@ -252,7 +333,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions} {moveAction}
+          {extraActions} {readActions} {exportButton} {editActions} {moveAction}
         </OnHover>
       </ConditionalBox>
     </>
@@ -262,13 +343,13 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
   const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
 
-  // do not show overflow menu if there is no content (for example, edit actions are hidden)
+  // do not show overflow menu if there is no content
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
   if (!hasContent) {
     return undefined;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
