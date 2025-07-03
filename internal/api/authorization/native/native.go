@@ -134,7 +134,7 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 }
 
 func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
-	if listHasPermission(n.guestPermissions, requestAction, requestScope) {
+	if ListHasPermission(n.guestPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}, nil
 	}
 
@@ -148,13 +148,13 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		return nil, apiInterface.InternalError
 	}
 	projectPermission := n.cache.permissions[username]
-	if globalPermissions, ok := projectPermission[v1.WildcardProject]; ok && listHasPermission(globalPermissions, requestAction, requestScope) {
+	if globalPermissions, ok := projectPermission[v1.WildcardProject]; ok && ListHasPermission(globalPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}, nil
 	}
 
 	var projects []string
 	for project, permList := range projectPermission {
-		if project != v1.WildcardProject && listHasPermission(permList, requestAction, requestScope) {
+		if project != v1.WildcardProject && ListHasPermission(permList, requestAction, requestScope) {
 			projects = append(projects, project)
 		}
 	}
@@ -183,7 +183,7 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return false // No username found, cannot check permissions
 	}
 	// Checking default permissions
-	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
+	if ok := ListHasPermission(n.guestPermissions, requestAction, requestScope); ok {
 		return true
 	}
 	// Checking cached permissions
