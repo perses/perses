@@ -26,13 +26,14 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/sirupsen/logrus"
+
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -233,8 +234,8 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 				X:      panel.GridPosition.X,
 				Y:      panel.GridPosition.Y,
 				Content: &common.JSONRef{
-					Ref:  fmt.Sprintf("#/spec/panels/%d", i),
-					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
+					Ref:  fmt.Sprintf("#/spec/panels/%s", normalizePanelName(i)),
+					Path: []string{"spec", "panels", normalizePanelName(i)},
 				},
 			})
 		} else {
@@ -257,8 +258,8 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 					X:      innerPanel.GridPosition.X,
 					Y:      innerPanel.GridPosition.Y,
 					Content: &common.JSONRef{
-						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
-						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
+						Ref:  fmt.Sprintf("#/spec/panels/%s", normalizePanelName(i, j)),
+						Path: []string{"spec", "panels", normalizePanelName(i, j)},
 					},
 				})
 			}

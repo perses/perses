@@ -53,7 +53,7 @@
       }
     ],
     "panels": {
-      "0": {
+      "zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -90,7 +90,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0"
+                "$ref": "#/spec/panels/zero"
               }
             }
           ]

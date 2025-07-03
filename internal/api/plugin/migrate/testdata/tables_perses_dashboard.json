@@ -25,7 +25,7 @@
       }
     ],
     "panels": {
-      "0": {
+      "zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -98,7 +98,7 @@
           ]
         }
       },
-      "1": {
+      "one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -139,7 +139,7 @@
           ]
         }
       },
-      "2": {
+      "two": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -188,7 +188,7 @@
           ]
         }
       },
-      "3": {
+      "three": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -237,7 +237,7 @@
           ]
         }
       },
-      "4": {
+      "four": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -280,7 +280,7 @@
           ]
         }
       },
-      "5": {
+      "five": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -321,7 +321,7 @@
           ]
         }
       },
-      "6": {
+      "six": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -362,7 +362,7 @@
           ]
         }
       },
-      "7": {
+      "seven": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -411,7 +411,7 @@
           ]
         }
       },
-      "8": {
+      "eight": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -476,7 +476,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0"
+                "$ref": "#/spec/panels/zero"
               }
             },
             {
@@ -485,7 +485,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/1"
+                "$ref": "#/spec/panels/one"
               }
             },
             {
@@ -494,7 +494,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/2"
+                "$ref": "#/spec/panels/two"
               }
             },
             {
@@ -503,7 +503,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/3"
+                "$ref": "#/spec/panels/three"
               }
             },
             {
@@ -512,7 +512,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/4"
+                "$ref": "#/spec/panels/four"
               }
             },
             {
@@ -521,7 +521,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/5"
+                "$ref": "#/spec/panels/five"
               }
             },
             {
@@ -530,7 +530,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/6"
+                "$ref": "#/spec/panels/six"
               }
             },
             {
@@ -539,7 +539,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/7"
+                "$ref": "#/spec/panels/seven"
               }
             },
             {
@@ -548,7 +548,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/8"
+                "$ref": "#/spec/panels/eight"
               }
             }
           ]

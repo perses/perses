@@ -33,7 +33,7 @@
       }
     ],
     "panels": {
-      "0_0": {
+      "zero_zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -47,7 +47,7 @@
           }
         }
       },
-      "0_1": {
+      "zero_one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -61,7 +61,7 @@
           }
         }
       },
-      "1_0": {
+      "one_zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -93,7 +93,7 @@
           ]
         }
       },
-      "1_1": {
+      "one_one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -156,7 +156,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0_0"
+                "$ref": "#/spec/panels/zero_zero"
               }
             },
             {
@@ -165,7 +165,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0_1"
+                "$ref": "#/spec/panels/zero_one"
               }
             }
           ]
@@ -187,7 +187,7 @@
               "width": 12,
               "height": 10,
               "content": {
-                "$ref": "#/spec/panels/1_0"
+                "$ref": "#/spec/panels/one_zero"
               }
             },
             {
@@ -196,7 +196,7 @@
               "width": 12,
               "height": 11,
               "content": {
-                "$ref": "#/spec/panels/1_1"
+                "$ref": "#/spec/panels/one_one"
               }
             }
           ]
