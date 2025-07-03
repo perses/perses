@@ -117,6 +117,16 @@ datasource is used.
       url= '/proxy/globaldatasources/' + datasource.metadata.name 
   ```
 
+When using the SQLProxy proxy kind:
+
+The method needs to be `POST` and the path needs to be `/query`
+
+```
+    var datasource; 
+    if datasource.kind == 'Datasource'; then 
+      url= '/proxy/projects' + datasource.metadata.project + '/datasources/' + datasource.metadata.name + '/query'
+  ```
+
 ## API definition
 
 ### `Datasource`

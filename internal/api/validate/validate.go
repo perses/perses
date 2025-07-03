@@ -21,7 +21,8 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 )
 
@@ -109,8 +110,11 @@ func validateVariableNames(variables []dashboard.Variable) error {
 }
 
 func validateDatasourcePlugin(plugin common.Plugin, name string, sch schema.Schema) error {
-	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
-		return err
+	switch plugin.Kind {
+	case datasourceHTTP.HTTPProxyKindName:
+		if err := datasource.ValidateAndExtract(datasourceHTTP.HTTPProxyKindName, plugin.Spec, nil); err != nil {
+			return err
+		}
 	}
 	return sch.ValidateDatasource(plugin, name)
 }

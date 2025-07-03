@@ -16,6 +16,7 @@ package proxy
 import (
 	"context"
 	"crypto/tls"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,15 +24,23 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/pkg/model/api/config"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
+
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -42,10 +51,11 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourceproxy "github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/sirupsen/logrus"
 )
 
 var _ = json.Unmarshaler(&unsavedProxyBody{})
@@ -75,8 +85,8 @@ func (u *unsavedProxyBody) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("invalid method %q", aux.Method)
 	}
 
-	if _, err := datasourceHTTP.ValidateAndExtract(aux.Spec.Plugin.Spec); err != nil {
-		return fmt.Errorf("invalid http config: %w", err)
+	if err := datasourceproxy.ValidateAndExtract("", aux.Spec.Plugin.Spec, nil); err != nil {
+		return fmt.Errorf("invalid config: %w", err)
 	}
 
 	*u = unsavedProxyBody(aux)
@@ -161,16 +171,14 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
-	cfg, err := datasourceHTTP.ValidateAndExtract(spec.Plugin.Spec)
+func newHTTPProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+	cfg := &datasourceHTTP.Config{}
+	err := datasourceproxy.ValidateAndExtract(datasourceHTTP.HTTPProxyKindName, spec.Plugin.Spec, cfg)
 	if err != nil {
 		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the http config")
 	}
-	if cfg == nil {
-		logrus.Error("unable to find the http config in the datasource")
-		return nil, echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("datasource type '%T' not managed", spec))
-	}
+
 	var scrt *v1.SecretSpec
 	if len(cfg.Secret) > 0 {
 		scrt, err = retrieveSecret(cfg.Secret)
@@ -178,7 +186,7 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 			return nil, err
 		}
 		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-			logrus.WithError(err).Errorf("unable to decrypt the secret")
+			logrus.WithError(decryptErr).Errorf("unable to decrypt the secret")
 			return nil, apiinterface.InternalError
 		}
 	}
@@ -378,4 +386,251 @@ func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
 		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
 	}
 	return secretModel.BuildTLSConfig(h.secret.TLSConfig)
+}
+
+// proxy SQL queries provided the plugin sends the SQL query in the request body as
+// {"query": "select * from table"}
+func newSQLProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+	cfg := &datasourceSQL.Config{}
+	err := datasourceproxy.ValidateAndExtract(datasourceSQL.SQLProxyKindName, spec.Plugin.Spec, cfg)
+	if err != nil {
+		logrus.WithError(err).Error("unable to build or find the sql config in the datasource")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the sql config")
+	}
+
+	var scrt *v1.SecretSpec
+	if len(cfg.Secret) > 0 {
+		scrt, err = retrieveSecret(cfg.Secret)
+		if err != nil {
+			return nil, err
+		}
+		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			logrus.WithError(decryptErr).Errorf("unable to decrypt the secret")
+			return nil, apiinterface.InternalError
+		}
+	}
+
+	return &sqlProxy{
+		config: cfg,
+		secret: scrt,
+		path:   path,
+	}, nil
+}
+
+type sqlQuery struct {
+	Query string `json:"query"`
+}
+
+type sqlProxy struct {
+	config   *datasourceSQL.Config
+	secret   *v1.SecretSpec
+	path     string
+	password string
+}
+
+func (s *sqlProxy) serve(c echo.Context) error {
+	r := c.Request()
+
+	if s.path != "query" {
+		return apiinterface.HandleBadRequestError("SQL proxy only supports the '/query' path")
+	}
+
+	// if this isn't a POST request don't perform the SQL query
+	if r.Method != http.MethodPost {
+		return echo.NewHTTPError(http.StatusMethodNotAllowed, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", s.path, r.Method))
+	}
+
+	q := &sqlQuery{}
+	if err := json.NewDecoder(r.Body).Decode(q); err != nil {
+		logrus.WithError(err).Error("unable to decode the query body")
+		return apiinterface.HandleBadRequestError(err.Error())
+	}
+
+	// add password if provided
+	if err := s.setupAuthentication(); err != nil {
+		logrus.WithError(err).Error("unable to setup authentication")
+		return apiinterface.InternalError
+	}
+
+	// add tls.Config
+	tlsConfig, err := s.prepareTLSConfig()
+	if err != nil {
+		logrus.WithError(err).Error("unable to build the tls config")
+		return apiinterface.InternalError
+	}
+
+	// get the correct SQL driver for address and open connection
+	db, err := s.sqlOpen(tlsConfig)
+	if err != nil {
+		logrus.WithError(err).Error("unable to open the database")
+		return apiinterface.InternalError
+	}
+	defer func(db *sql.DB) {
+		if err = db.Close(); err != nil {
+			logrus.WithError(err).Error("unable to close the database")
+		}
+	}(db)
+
+	rows, err := db.QueryContext(r.Context(), q.Query)
+	if err != nil {
+		logrus.WithError(err).Error("unable to execute the query")
+		return apiinterface.InternalError
+	}
+	defer func(rows *sql.Rows) {
+		if err = rows.Close(); err != nil {
+			logrus.WithError(err).Error("unable to close rows")
+		}
+	}(rows)
+
+	cols, err := rows.Columns()
+	if err != nil {
+		logrus.WithError(err).Error("unable to get columns")
+		return apiinterface.InternalError
+	}
+
+	// Create a slice of interface{} to hold the column values
+	values := make([]interface{}, len(cols))
+
+	// Create a slice of sql.RawBytes to hold the raw bytes of the column values
+	scanArgs := make([]interface{}, len(cols))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+	// set the Content-Type header to text/csv
+	c.Response().Header().Set(echo.HeaderContentType, "text/csv")
+	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment; filename=result.csv")
+
+	// write the CSV header
+	_, err = c.Response().Write([]byte(strings.Join(cols, ",") + "\n"))
+	if err != nil {
+		logrus.WithError(err).Error("unable to csv header")
+		return apiinterface.InternalError
+	}
+
+	// add each row to the csv response
+	for rows.Next() {
+		err = rows.Scan(scanArgs...)
+		if err != nil {
+			logrus.WithError(err).Error("unable to scan row")
+			return apiinterface.InternalError
+		}
+
+		record := make([]string, len(cols))
+		for i, col := range values {
+			if col == nil {
+				record[i] = ""
+			} else {
+				record[i] = fmt.Sprintf("%v", col)
+			}
+		}
+		_, err = c.Response().Write([]byte(strings.Join(record, ",") + "\n"))
+		if err != nil {
+			logrus.WithError(err).Error("unable to write response")
+			return apiinterface.InternalError
+		}
+	}
+
+	return nil
+}
+
+func (s *sqlProxy) setupAuthentication() error {
+	if s.secret == nil {
+		return nil
+	}
+
+	basicAuth := s.secret.BasicAuth
+	if basicAuth != nil {
+		password, err := basicAuth.GetPassword()
+		if err != nil {
+			return err
+		}
+		s.password = password
+	}
+
+	return nil
+}
+
+func (s *sqlProxy) prepareTLSConfig() (*tls.Config, error) {
+	if s.secret == nil {
+		return nil, nil
+	}
+	return secretModel.BuildTLSConfig(s.secret.TLSConfig)
+}
+
+// SQLOpen opens a database specified by its database driver in the address
+func (s *sqlProxy) sqlOpen(tlsConfig *tls.Config) (*sql.DB, error) {
+	switch s.config.Driver {
+	case datasourceSQL.DriverMySQL, datasourceSQL.DriverMariaDB:
+		mysqlConfig := mysql.Config{
+			User:   s.config.Username,
+			Net:    "tcp",
+			Addr:   s.config.Host,
+			DBName: s.config.Database,
+		}
+
+		if s.password != "" {
+			mysqlConfig.Passwd = s.password
+		}
+
+		if tlsConfig != nil {
+			tlsConfigName := "perses-tls"
+			if err := mysql.RegisterTLSConfig(tlsConfigName, tlsConfig); err != nil {
+				return nil, err
+			}
+			mysqlConfig.TLSConfig = tlsConfigName
+		}
+
+		db, dbErr := sql.Open(string(datasourceSQL.DriverMySQL), mysqlConfig.FormatDSN())
+		if dbErr != nil {
+			return nil, fmt.Errorf("failed to connect to database: %w", dbErr)
+		}
+		return db, nil
+	case datasourceSQL.DriverPostgreSQL:
+		// build the postgres DSN for pgx to parse
+		u := &url.URL{
+			Scheme: "postgres",
+			Host:   s.config.Host,
+			User:   url.User(s.config.Username),
+			// The database needs a '/' prefix
+			Path: "/" + s.config.Database,
+		}
+
+		if s.password != "" {
+			u.User = url.UserPassword(s.config.Username, s.password)
+		}
+
+		query := url.Values{}
+
+		// set the default max connections to 100
+		query.Set("pool_max_conns", "100")
+
+		if s.config.SSLMode != "" {
+			query.Set("sslmode", string(s.config.SSLMode))
+		}
+
+		u.RawQuery = query.Encode()
+
+		pgxConfig, parseErr := pgxpool.ParseConfig(u.String())
+		if parseErr != nil {
+			logrus.WithError(parseErr).Error("failed to parse postgres address")
+			return nil, parseErr
+		}
+
+		if tlsConfig != nil {
+			if s.config.SSLMode == "" || s.config.SSLMode == datasourceSQL.SSLModeDisable {
+				return nil, errors.New("cannot use custom TLSConfig with sslmode=disable")
+			}
+			pgxConfig.ConnConfig.TLSConfig = tlsConfig
+		}
+
+		if s.config.MaxConns != 0 {
+			pgxConfig.MaxConns = s.config.MaxConns
+		}
+
+		db := stdlib.OpenDB(*pgxConfig.ConnConfig)
+		return db, nil
+	default:
+		return nil, fmt.Errorf("unsupported database driver: %s", s.config.Driver)
+	}
 }
