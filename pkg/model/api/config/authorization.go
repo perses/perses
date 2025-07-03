@@ -18,17 +18,29 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	defaultCacheInterval = 30 * time.Second
 )
 
+type KubernetesProvider struct {
+	Enabled    bool   `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Kubeconfig string `json:"kubeconfig,omitempty" yaml:"kubeconfig,omitempty"`
+}
+
+type AuthorizationProviders struct {
+	EnableNative bool               `json:"enable_native" yaml:"enable_native"`
+	Kubernetes   KubernetesProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+}
+
 type AuthorizationConfig struct {
 	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
-	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	GuestPermissions []*role.Permission     `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	Providers        AuthorizationProviders `json:"providers" yaml:"providers"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -37,6 +49,13 @@ func (a *AuthorizationConfig) Verify() error {
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*role.Permission{}
+	}
+	return nil
+}
+
+func (p *KubernetesProvider) Verify() error {
+	if p.Kubeconfig != "" {
+		logrus.Warnln("kubeconfig present, this functionality should not be used in production")
 	}
 	return nil
 }

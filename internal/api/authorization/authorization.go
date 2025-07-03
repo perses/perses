@@ -65,8 +65,18 @@ type Authorization interface {
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
+	// If the higher level auth enabled is false then ignore all authorization configuration
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
-	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+	if conf.Security.Authorization.Providers.EnableNative {
+		return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+	}
+	if conf.Security.Authorization.Providers.Kubernetes.Enabled {
+		return NewK8sAuthz(conf)
+	}
+
+	// If no authorization providers are set, then don't check the authorization
+	return &disabledImpl{}, nil
+
 }
