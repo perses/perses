@@ -290,7 +290,7 @@
       }
     ],
     "panels": {
-      "0": {
+      "zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -340,7 +340,7 @@
           ]
         }
       },
-      "1": {
+      "one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -388,7 +388,7 @@
           ]
         }
       },
-      "2": {
+      "two": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -445,7 +445,7 @@
           ]
         }
       },
-      "3": {
+      "three": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -503,7 +503,7 @@
           ]
         }
       },
-      "4_0": {
+      "four_zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -540,7 +540,7 @@
           ]
         }
       },
-      "4_1": {
+      "four_one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -554,7 +554,7 @@
           }
         }
       },
-      "4_2": {
+      "four_two": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -580,7 +580,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0"
+                "$ref": "#/spec/panels/zero"
               }
             },
             {
@@ -589,7 +589,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/1"
+                "$ref": "#/spec/panels/one"
               }
             },
             {
@@ -598,7 +598,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/2"
+                "$ref": "#/spec/panels/two"
               }
             },
             {
@@ -607,7 +607,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/3"
+                "$ref": "#/spec/panels/three"
               }
             }
           ]
@@ -629,7 +629,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/4_0"
+                "$ref": "#/spec/panels/four_zero"
               }
             },
             {
@@ -638,7 +638,7 @@
               "width": 6,
               "height": 5,
               "content": {
-                "$ref": "#/spec/panels/4_1"
+                "$ref": "#/spec/panels/four_one"
               }
             },
             {
@@ -647,7 +647,7 @@
               "width": 6,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/4_2"
+                "$ref": "#/spec/panels/four_two"
               }
             }
           ]

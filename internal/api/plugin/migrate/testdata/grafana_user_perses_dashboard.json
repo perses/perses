@@ -12,7 +12,7 @@
       "name": "Node dashboard"
     },
     "panels": {
-      "0": {
+      "zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -61,7 +61,7 @@
           ]
         }
       },
-      "1": {
+      "one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -110,7 +110,7 @@
           ]
         }
       },
-      "2": {
+      "two": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -159,7 +159,7 @@
           ]
         }
       },
-      "3": {
+      "three": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -208,7 +208,7 @@
           ]
         }
       },
-      "4": {
+      "four": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -257,7 +257,7 @@
           ]
         }
       },
-      "5": {
+      "five": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -306,7 +306,7 @@
           ]
         }
       },
-      "6": {
+      "six": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -355,7 +355,7 @@
           ]
         }
       },
-      "7": {
+      "seven": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -404,7 +404,7 @@
           ]
         }
       },
-      "8": {
+      "eight": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -453,7 +453,7 @@
           ]
         }
       },
-      "9": {
+      "nine": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -502,7 +502,7 @@
           ]
         }
       },
-      "10": {
+      "ten": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -551,7 +551,7 @@
           ]
         }
       },
-      "11": {
+      "eleven": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -600,7 +600,7 @@
           ]
         }
       },
-      "12": {
+      "twelve": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -649,7 +649,7 @@
           ]
         }
       },
-      "13": {
+      "thirteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -698,7 +698,7 @@
           ]
         }
       },
-      "14": {
+      "fourteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -747,7 +747,7 @@
           ]
         }
       },
-      "15": {
+      "fifteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -796,7 +796,7 @@
           ]
         }
       },
-      "16": {
+      "sixteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -845,7 +845,7 @@
           ]
         }
       },
-      "17": {
+      "seventeen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -889,7 +889,7 @@
           ]
         }
       },
-      "18": {
+      "eighteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -938,7 +938,7 @@
           ]
         }
       },
-      "19": {
+      "nineteen": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -982,7 +982,7 @@
           ]
         }
       },
-      "20": {
+      "twenty": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -1026,7 +1026,7 @@
           ]
         }
       },
-      "21": {
+      "twenty_one": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -1087,7 +1087,7 @@
               "width": 6,
               "height": 7,
               "content": {
-                "$ref": "#/spec/panels/0"
+                "$ref": "#/spec/panels/zero"
               }
             },
             {
@@ -1096,7 +1096,7 @@
               "width": 6,
               "height": 7,
               "content": {
-                "$ref": "#/spec/panels/1"
+                "$ref": "#/spec/panels/one"
               }
             },
             {
@@ -1105,7 +1105,7 @@
               "width": 6,
               "height": 7,
               "content": {
-                "$ref": "#/spec/panels/2"
+                "$ref": "#/spec/panels/two"
               }
             },
             {
@@ -1114,7 +1114,7 @@
               "width": 6,
               "height": 7,
               "content": {
-                "$ref": "#/spec/panels/3"
+                "$ref": "#/spec/panels/three"
               }
             },
             {
@@ -1123,7 +1123,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/4"
+                "$ref": "#/spec/panels/four"
               }
             },
             {
@@ -1132,7 +1132,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/5"
+                "$ref": "#/spec/panels/five"
               }
             },
             {
@@ -1141,7 +1141,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/6"
+                "$ref": "#/spec/panels/six"
               }
             },
             {
@@ -1150,7 +1150,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/7"
+                "$ref": "#/spec/panels/seven"
               }
             },
             {
@@ -1159,7 +1159,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/8"
+                "$ref": "#/spec/panels/eight"
               }
             },
             {
@@ -1168,7 +1168,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/9"
+                "$ref": "#/spec/panels/nine"
               }
             },
             {
@@ -1177,7 +1177,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/10"
+                "$ref": "#/spec/panels/ten"
               }
             },
             {
@@ -1186,7 +1186,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/11"
+                "$ref": "#/spec/panels/eleven"
               }
             },
             {
@@ -1195,7 +1195,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/12"
+                "$ref": "#/spec/panels/twelve"
               }
             },
             {
@@ -1204,7 +1204,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/13"
+                "$ref": "#/spec/panels/thirteen"
               }
             },
             {
@@ -1213,7 +1213,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/14"
+                "$ref": "#/spec/panels/fourteen"
               }
             },
             {
@@ -1222,7 +1222,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/15"
+                "$ref": "#/spec/panels/fifteen"
               }
             },
             {
@@ -1231,7 +1231,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/16"
+                "$ref": "#/spec/panels/sixteen"
               }
             },
             {
@@ -1240,7 +1240,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/17"
+                "$ref": "#/spec/panels/seventeen"
               }
             },
             {
@@ -1249,7 +1249,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/18"
+                "$ref": "#/spec/panels/eighteen"
               }
             },
             {
@@ -1258,7 +1258,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/19"
+                "$ref": "#/spec/panels/nineteen"
               }
             },
             {
@@ -1267,7 +1267,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/20"
+                "$ref": "#/spec/panels/twenty"
               }
             },
             {
@@ -1276,7 +1276,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/21"
+                "$ref": "#/spec/panels/twenty_one"
               }
             }
           ]

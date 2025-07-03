@@ -14,12 +14,14 @@
 package migrate
 
 import (
-	"fmt"
+	"strings"
 
 	"cuelang.org/go/cue/build"
+	"github.com/divan/num2words"
+	"github.com/sirupsen/logrus"
+
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -50,14 +52,14 @@ func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*
 				if err != nil {
 					return nil, err
 				}
-				panels[fmt.Sprintf("%d_%d", i, j)] = panel
+				panels[normalizePanelName(i, j)] = panel
 			}
 		} else {
 			panel, err := m.migratePanel(p)
 			if err != nil {
 				return nil, err
 			}
-			panels[fmt.Sprintf("%d", i)] = panel
+			panels[normalizePanelName(i)] = panel
 		}
 	}
 	return panels, nil
@@ -131,4 +133,16 @@ func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []b
 
 func executePanelMigrationScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
 	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel", "panel")
+}
+
+// normalizePanelName convert from int to the word equivalent string
+// this keeps the current pattern of using the indexes to create the panel
+// names, but allows the Dashboard to be imported as a PersesDashboard CR
+func normalizePanelName(index ...int) string {
+	var name []string
+	for _, n := range index {
+		num := strings.ReplaceAll(num2words.Convert(n), "-", "_")
+		name = append(name, num)
+	}
+	return strings.Join(name, "_")
 }

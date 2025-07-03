@@ -12,7 +12,7 @@
       "name": "Perses testing / Dashboard with library panel"
     },
     "panels": {
-      "0_0": {
+      "zero_zero": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -44,7 +44,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/0_0"
+                "$ref": "#/spec/panels/zero_zero"
               }
             }
           ]
