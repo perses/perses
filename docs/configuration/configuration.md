@@ -341,6 +341,9 @@ check_latest_update_interval: <duration> | default = 30s> # Optional
 # Default permissions for guest users (logged-in users)
 guest_permissions:
   - <Permissions> # Optional
+
+# Authorization providers
+providers: <Authorization providers> # Optional
 ```
 
 ##### Permissions
@@ -352,6 +355,29 @@ actions:
 # Resource kinds that are concerned by the permission
 scopes:
   - <enum= kind | "*">
+```
+
+##### Authorization Providers
+
+```yaml
+# Enable the native authorization providers. 
+enable_native: <boolean> | default = false # Optional
+
+# Kubernetes authorization provider
+kubernetes:
+  - <Kubernetes provider> # Optional
+```
+
+##### Kubernetes provider
+```yaml
+# Must be the only authentication provider enabled and must be run alongside the kubernetes
+# authorization option enabled
+enabled: <boolean>
+# File path to a local kubeconfig file. The current logged in user's bearer token will be used
+# for both the backend and as the user being logged into Perses. The user should have "create"
+# permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
+# available the pods service account token will be used. This parameter should not be set in production
+kubeconfig: <string> # Optional
 ```
 
 #### CORS config
