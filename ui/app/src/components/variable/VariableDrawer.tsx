@@ -23,9 +23,9 @@ import {
   remotePluginLoader,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
-import { useDatasourceApi } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { buildProxyUrl, useAllDatasourceResources } from '../../model/datasource-api';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -44,7 +44,7 @@ export function VariableDrawer<T extends Variable>({
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
-  const datasourceApi = useDatasourceApi();
+  const allDatasources = useAllDatasourceResources();
 
   const variableDef = useMemo(() => {
     const result = structuredClone(variable.spec);
@@ -73,7 +73,11 @@ export function VariableDrawer<T extends Variable>({
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
-            <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
+            <DatasourceStoreProvider
+              buildProxyUrl={buildProxyUrl}
+              datasources={allDatasources}
+              projectName={projectName}
+            >
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
                 <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
                   <VariableEditorForm
