@@ -15,8 +15,8 @@ import { ClickAwayListener, Menu, MenuItem, MenuList } from '@mui/material';
 import { ToolbarIconButton } from '@perses-dev/components';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
 import React, { ReactElement, useRef } from 'react';
-import { stringify } from 'yaml';
 import { useDashboard } from '../../context';
+import { serializeDashboard } from './serializeDashboard';
 
 // Button that enables downloading the dashboard as a JSON file
 export function DownloadButton(): ReactElement {
@@ -30,47 +30,11 @@ export function DownloadButton(): ReactElement {
   const handleItemClick = (format: 'json' | 'yaml', shape?: 'cr') => (): void => {
     setAnchorEl(null);
 
-    let type,
-      content = '';
-
-    switch (format) {
-      case 'json':
-        type = 'application/json';
-        content = JSON.stringify(dashboard, null, 2);
-        break;
-      case 'yaml':
-        {
-          type = 'application/yaml';
-
-          if (shape === 'cr') {
-            const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-            content = stringify(
-              {
-                apiVersion: 'perses.dev/v1alpha1',
-                kind: 'PersesDashboard',
-                metadata: {
-                  labels: {
-                    'app.kubernetes.io/name': 'perses-dashboard',
-                    'app.kubernetes.io/instance': name,
-                    'app.kubernetes.io/part-of': 'perses-operator',
-                  },
-                  name,
-                  namespace: dashboard.metadata.project,
-                },
-                spec: dashboard.spec,
-              },
-              { schema: 'yaml-1.1' }
-            );
-          } else {
-            content = stringify(dashboard, { schema: 'yaml-1.1' });
-          }
-        }
-        break;
-    }
+    const { contentType, content } = serializeDashboard(dashboard, format, shape);
 
     if (!hiddenLinkRef || !hiddenLinkRef.current) return;
     // Create blob URL
-    const hiddenLinkUrl = URL.createObjectURL(new Blob([content], { type }));
+    const hiddenLinkUrl = URL.createObjectURL(new Blob([content], { type: contentType }));
     // Simulate click
     hiddenLinkRef.current.download = `${dashboard.metadata.name}${shape === 'cr' ? '-cr' : ''}.${format}`;
     hiddenLinkRef.current.href = hiddenLinkUrl;
