@@ -44,22 +44,25 @@ export function DownloadButton(): ReactElement {
 
           if (shape === 'cr') {
             const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-            content = stringify({
-              apiVersion: 'perses.dev/v1alpha1',
-              kind: 'PersesDashboard',
-              metadata: {
-                labels: {
-                  'app.kubernetes.io/name': 'perses-dashboard',
-                  'app.kubernetes.io/instance': name,
-                  'app.kubernetes.io/part-of': 'perses-operator',
+            content = stringify(
+              {
+                apiVersion: 'perses.dev/v1alpha1',
+                kind: 'PersesDashboard',
+                metadata: {
+                  labels: {
+                    'app.kubernetes.io/name': 'perses-dashboard',
+                    'app.kubernetes.io/instance': name,
+                    'app.kubernetes.io/part-of': 'perses-operator',
+                  },
+                  name,
+                  namespace: dashboard.metadata.project,
                 },
-                name,
-                namespace: dashboard.metadata.project,
+                spec: dashboard.spec,
               },
-              spec: dashboard.spec,
-            });
+              { schema: 'yaml-1.1' }
+            );
           } else {
-            content = stringify(dashboard);
+            content = stringify(dashboard, { schema: 'yaml-1.1' });
           }
         }
         break;
