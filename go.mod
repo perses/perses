@@ -26,7 +26,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mholt/archives v0.1.3
 	github.com/nexucis/lamenv v0.5.2
-	github.com/olekukonko/tablewriter v1.0.7
+	github.com/olekukonko/tablewriter v1.0.8
 	github.com/perses/common v0.27.1-0.20250326140707-96e439b14e0e
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/client_model v0.6.2
