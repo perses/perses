@@ -22,6 +22,7 @@ const pluginResource = "plugins"
 
 type PluginInterface interface {
 	PushDevPlugin([]*v1.PluginInDevelopment) error
+	UnLoadDevPlugin(name string) error
 	List() ([]v1.PluginModule, error)
 }
 
@@ -40,6 +41,14 @@ func (c *plugin) PushDevPlugin(plugins []*v1.PluginInDevelopment) error {
 	return c.client.Post().
 		Resource(pluginResource).
 		Body(plugins).
+		Do().
+		Error()
+}
+
+func (c *plugin) UnLoadDevPlugin(name string) error {
+	return c.client.Delete().
+		Resource(pluginResource).
+		Name(name).
 		Do().
 		Error()
 }

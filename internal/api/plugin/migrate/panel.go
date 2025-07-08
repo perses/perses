@@ -88,7 +88,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 			return result, nil
 		}
 	}
-	panelPlugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
+	panelPlugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance.instance, grafanaPanel.RawMessage)
 	if err != nil {
 		return nil, err
 	}

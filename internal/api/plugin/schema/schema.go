@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"cuelang.org/go/cue/build"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -100,6 +101,7 @@ func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
 type Schema interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
+	UnloadDevPlugin(module v1.PluginModule)
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*v1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
@@ -130,17 +132,32 @@ type completeSchema struct {
 	Schema
 	sch    *sch
 	devSch *sch
+	mutex  sync.RWMutex
 }
 
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	return s.sch.load(pluginPath, module)
 }
 
 func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	return s.devSch.load(pluginPath, module)
 }
 
+func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	for _, p := range module.Spec.Plugins {
+		s.devSch.remove(p.Kind, p.Spec.Name)
+	}
+}
+
 func (s *completeSchema) ValidateDatasource(plugin common.Plugin, dtsName string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.datasources[plugin.Kind]; ok {
 		return s.devSch.validateDatasource(plugin, dtsName)
 	}
@@ -172,6 +189,8 @@ func (s *completeSchema) ValidatePanels(panels map[string]*v1.Panel) error {
 }
 
 func (s *completeSchema) ValidatePanel(plugin common.Plugin, panelName string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.panels[plugin.Kind]; ok {
 		return s.devSch.validatePanel(plugin, panelName)
 	}
@@ -221,6 +240,8 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 }
 
 func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.panels[plugin.Kind]; ok {
 		return s.devSch.validateVariable(plugin, varName)
 	}
@@ -228,6 +249,8 @@ func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) 
 }
 
 func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.datasources[pluginName]; ok {
 		return s.devSch.getDatasourceSchema(pluginName)
 	}
@@ -235,6 +258,8 @@ func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance
 }
 
 func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.queries[plugin.Kind]; ok {
 		return s.devSch.validateQuery(plugin, queryName)
 	}
@@ -267,8 +292,20 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 			return fmt.Errorf("unknown kind %s", schema.Kind)
 		}
 	}
-
 	return nil
+}
+
+func (s *sch) remove(kind plugin.Kind, name string) {
+	switch kind {
+	case plugin.KindDatasource:
+		delete(s.datasources, name)
+	case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+		delete(s.queries, name)
+	case plugin.KindVariable:
+		delete(s.variables, name)
+	case plugin.KindPanel:
+		delete(s.panels, name)
+	}
 }
 
 func (s *sch) validateDatasource(plugin common.Plugin, dtsName string) error {
