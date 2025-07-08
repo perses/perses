@@ -26,13 +26,21 @@ var (
 )
 
 type KubernetesProvider struct {
-	Enabled    bool   `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
+	// File path to a local kubeconfig file used for local testing/development. The current logged in
+	// user's bearer token will be used for both the backend and as the user being logged into Perses.
+	// The user should have "create" permissions for the `TokenReview` and `SubjectAccessReview`
+	// resources. If this parameter isn't available the pods service account token will be used. This
+	// parameter should not be set in production
 	Kubeconfig string `json:"kubeconfig,omitempty" yaml:"kubeconfig,omitempty"`
+	// query per second (QPS) the k8s client will use with the apiserver. Default: 500 qps
+	QPS float32 `json:"qps,omitempty" yaml:"qps,omitempty"`
+	// burst QPS the k8s client will use with the apiserver. Default: 1000 qps
+	Burst float32 `json:"burst,omitempty" yaml:"burst,omitempty"`
 }
 
 type AuthorizationProviders struct {
-	EnableNative bool               `json:"enable_native" yaml:"enable_native"`
-	Kubernetes   KubernetesProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	Kubernetes KubernetesProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
 }
 
 type AuthorizationConfig struct {

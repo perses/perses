@@ -16,6 +16,7 @@ package authorization
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/authorization/k8s"
 	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -69,14 +70,12 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
-	if conf.Security.Authorization.Providers.EnableNative {
-		return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
-	}
-	if conf.Security.Authorization.Providers.Kubernetes.Enabled {
-		return NewK8sAuthz(conf)
+
+	if conf.Security.Authorization.Providers.Kubernetes.Enable {
+		return k8s.New(conf)
 	}
 
-	// If no authorization providers are set, then don't check the authorization
-	return &disabledImpl{}, nil
+	// If no providers are explicitly set but auth is enabled, then use the perses native authz
+	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
 
 }

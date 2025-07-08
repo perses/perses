@@ -190,15 +190,7 @@ func (s *Security) Verify() error {
 		return errors.New("impossible to enable auth if no authentication provider is setup")
 	}
 
-	if s.EnableAuth && !s.Authorization.Providers.EnableNative && !s.Authorization.Providers.Kubernetes.Enabled {
-		return errors.New("impossible to enable auth if no authorization provider is setup")
-	}
-
-	if s.Authorization.Providers.EnableNative && s.Authorization.Providers.Kubernetes.Enabled {
-		return errors.New("cannot have multiple authorization providers enabled at the same time")
-	}
-
-	if !s.EnableAuth && (s.Authorization.Providers.EnableNative || s.Authorization.Providers.Kubernetes.Enabled) {
+	if !s.EnableAuth && s.Authorization.Providers.Kubernetes.Enable {
 		return errors.New("authorization provider cannot be setup without auth enabled")
 	}
 

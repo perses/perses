@@ -471,9 +471,6 @@ plugin:
 								},
 							},
 						},
-						Providers: AuthorizationProviders{
-							EnableNative: true,
-						},
 					},
 					Authentication: AuthenticationConfig{
 						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),

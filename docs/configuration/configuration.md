@@ -141,6 +141,8 @@ authorization: <Authorization config> # Optional
 
 # When it is true, the authentication and authorization config are considered.
 # And you will need a valid JWT token to contact most of the endpoints exposed by the API
+# If no other authorization provider is set, and enable_auth is set to true, then the perses
+# native authorization provider will be used
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
@@ -360,9 +362,6 @@ scopes:
 ##### Authorization Providers
 
 ```yaml
-# Enable the native authorization providers. 
-enable_native: <boolean> | default = false # Optional
-
 # Kubernetes authorization provider
 kubernetes:
   - <Kubernetes provider> # Optional

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,7 +22,53 @@ import (
 
 // TestSecurity_VerifyK8s checks that the k8s authz can't be enabled alongside native authz
 func TestSecurity_VerifyK8s(t *testing.T) {
-	testYamlInput := `
+	testSuite := []struct {
+		title      string
+		yaml       string
+		errMessage string
+	}{
+		{
+			title: "auth cannot be disabled when a authz provider is enabled",
+			yaml: `
+readonly: false
+encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+enable_auth: false
+authentication:
+  disable_sign_up: true
+  providers:
+    enable_native: true
+authorization:
+  guest_permissions:
+    - actions:
+        - read
+      scopes:
+        - "*"
+    - actions:
+        - create
+      scopes:
+        - Project
+  providers:
+    kubernetes:
+      enable: true
+cors:
+  enable: true
+  allow_origins:
+    - https://github.com
+  allow_methods:
+    - GET
+    - POST
+  allow_headers:
+    - X-Custom-Header
+  allow_credentials: true
+  expose_headers:
+    - Content-Encoding
+  max_age: 60
+`,
+			errMessage: "authorization provider cannot be setup without auth enabled",
+		},
+		{
+			title: "valid k8s authz configuration",
+			yaml: `
 readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
@@ -42,8 +88,7 @@ authorization:
         - Project
   providers:
     kubernetes:
-      enabled: true
-    enable_native: true
+      enable: true
 cors:
   enable: true
   allow_origins:
@@ -57,21 +102,12 @@ cors:
   expose_headers:
     - Content-Encoding
   max_age: 60
-`
-
-	// Run the resolver
-	err := config.NewResolver[Security]().
-		SetConfigData([]byte(testYamlInput)).
-		Resolve(&Security{}).
-		Verify()
-
-	assert.ErrorContains(t, err, "cannot have multiple authorization providers enabled at the same time")
-}
-
-// TestSecurity_VerifyProviderSingularity checks that at least one authz provider is enabled
-// when auth is enabled
-func TestSecurity_VerifyK8sProviderSingularity(t *testing.T) {
-	testYamlInput := `
+`,
+			errMessage: "",
+		},
+		{
+			title: "valid native authz configuration (ensure backwards compatibility)",
+			yaml: `
 readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
@@ -89,8 +125,6 @@ authorization:
         - create
       scopes:
         - Project
-  providers:
-    enable_native: false
 cors:
   enable: true
   allow_origins:
@@ -104,60 +138,22 @@ cors:
   expose_headers:
     - Content-Encoding
   max_age: 60
-`
+`,
+			errMessage: "",
+		},
+	}
 
-	// Run the resolver
-	err := config.NewResolver[Security]().
-		SetConfigData([]byte(testYamlInput)).
-		Resolve(&Security{}).
-		Verify()
-
-	assert.ErrorContains(t, err, "impossible to enable auth if no authorization provider is setup")
-}
-
-// TestSecurity_VerifyK8sValid checks a valid k8s security configuration
-func TestSecurity_VerifyK8sValid(t *testing.T) {
-	testYamlInput := `
-readonly: false
-encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
-enable_auth: true
-authentication:
-  disable_sign_up: true
-  providers:
-    enable_native: true
-authorization:
-  guest_permissions:
-    - actions:
-        - read
-      scopes:
-        - "*"
-    - actions:
-        - create
-      scopes:
-        - Project
-  providers:
-    kubernetes:
-      enabled: true
-cors:
-  enable: true
-  allow_origins:
-    - https://github.com
-  allow_methods:
-    - GET
-    - POST
-  allow_headers:
-    - X-Custom-Header
-  allow_credentials: true
-  expose_headers:
-    - Content-Encoding
-  max_age: 60
-`
-
-	// Run the resolver
-	err := config.NewResolver[Security]().
-		SetConfigData([]byte(testYamlInput)).
-		Resolve(&Security{}).
-		Verify()
-
-	assert.NoError(t, err)
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := config.NewResolver[Security]().
+				SetConfigData([]byte(test.yaml)).
+				Resolve(&Security{}).
+				Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.errMessage)
+			}
+		})
+	}
 }
