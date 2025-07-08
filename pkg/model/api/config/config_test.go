@@ -48,11 +48,7 @@ func TestJSONMarshalConfig(t *testing.T) {
       "secure": false
     },
     "enable_auth": false,
-    "authorization": {
-      "providers": {
-        "enable_native": false
-      }
-    },
+    "authorization": {},
     "authentication": {
       "disable_sign_up": false,
       "providers": {
@@ -116,10 +112,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
     "authorization": {
-      "check_latest_update_interval": "30s",
-      "providers": {
-        "enable_native": false
-      }
+      "check_latest_update_interval": "30s"
     },
     "authentication": {
       "access_token_ttl": "15m",
@@ -396,8 +389,6 @@ security:
           - create
         scopes:
           - Project
-    providers:
-      enable_native: true
   cors:
     enable: true
     allow_origins:

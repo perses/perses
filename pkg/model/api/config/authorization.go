@@ -48,7 +48,7 @@ type AuthorizationConfig struct {
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission     `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
-	Providers        AuthorizationProviders `json:"providers" yaml:"providers"`
+	Providers        AuthorizationProviders `json:"providers,omitzero" yaml:"providers,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
