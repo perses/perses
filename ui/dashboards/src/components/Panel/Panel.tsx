@@ -146,6 +146,19 @@ export const Panel = memo(function Panel(props: PanelProps) {
     return providedProjectName || extractProjectNameFromUrl();
   }, [providedProjectName]);
 
+  const panelPropsForActions = useMemo(() => {
+    return {
+      spec: definition.spec.plugin.spec,
+      queryResults: queryResults.map((query) => ({
+        definition: query.definition,
+        data: query.data,
+      })),
+      contentDimensions,
+      definition,
+      projectName,
+    };
+  }, [definition, contentDimensions, queryResults, projectName]);
+
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
   };
@@ -187,6 +200,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           editHandlers={editHandlers}
           links={definition.spec.links}
           projectName={projectName}
+          panelProps={panelPropsForActions}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}

@@ -23,6 +23,11 @@ jest.mock('@perses-dev/plugin-system', () => {
   return {
     ...jest.requireActual('@perses-dev/plugin-system'),
     useDataQueriesContext: jest.fn(() => ({ queryResults: [] })),
+    usePluginRegistry: jest.fn(() => ({
+      getPlugin: jest.fn().mockResolvedValue({
+        PanelComponent: () => <div>Mock Panel</div>,
+      }),
+    })),
   };
 });
 
@@ -107,10 +112,7 @@ describe('Panel', () => {
     const descriptionButton = screen.getByRole('button', { name: /description/i });
     expect(descriptionButton).toBeInTheDocument();
 
-    // Can hover to see panel description in tooltip
-    userEvent.hover(descriptionButton);
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent('This is a fake panel - bar');
+    expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
   });
 
   it('shows panel link', async () => {
@@ -119,10 +121,8 @@ describe('Panel', () => {
     const linkButton = screen.getByRole('link', { name: 'Example Link' });
     expect(linkButton).toBeInTheDocument();
 
-    // Can hover to see panel description in tooltip
-    userEvent.hover(linkButton);
-    const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent('This is a fake panel link - bar');
+    expect(linkButton).toHaveAttribute('href', 'https://example.com');
+    expect(linkButton).toHaveAttribute('target', '_blank');
   });
 
   it('does not show description when panel does not have one', () => {

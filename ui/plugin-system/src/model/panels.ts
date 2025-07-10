@@ -12,13 +12,18 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition, DataExportCapability } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
 
 export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
   content: React.ComponentType<OptionsEditorProps<T>>;
+};
+
+export type PanelAction<TPanelProps> = {
+  component: React.ComponentType<TPanelProps>; // Self-contained component with onClick handler
+  location?: string; // 'header' or other available locations
 };
 
 /**
@@ -51,8 +56,13 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    * @default false
    */
   hideQueryEditor?: boolean;
-  //exporter data logic
-  createDataExporter?: (queryResults: any, title: string, projectName?: string) => DataExportCapability;
+
+  // ========== ADDED: Actions array ==========
+  /**
+   * List of panel actions that will be rendered in the panel header
+   */
+  actions?: Array<PanelAction<TPanelProps>>;
+  // ========================================
 }
 
 /**

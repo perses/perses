@@ -37,6 +37,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
   projectName?: string;
+  panelProps?: Record<string, unknown>;
 }
 
 export function PanelHeader({
@@ -51,6 +52,7 @@ export function PanelHeader({
   extra,
   panelPluginKind,
   projectName,
+  panelProps, // ========== ADDED ==========
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -138,6 +140,9 @@ export function PanelHeader({
             editHandlers={editHandlers}
             extra={extra}
             projectName={projectName}
+            // ========== ADDED: Pass panel props for actions ==========
+            panelProps={panelProps}
+            // ========================================================
           />
         </Stack>
       }

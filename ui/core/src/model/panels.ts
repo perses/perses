@@ -80,5 +80,5 @@ export interface ExportOptions {
 
 export const EXPORT_FORMATS = {
   CSV: { name: 'CSV', extension: 'csv', mimeType: 'text/csv' },
-  JSON: { name: 'JSON', extension: 'json', mimeType: 'application/json' }
+  JSON: { name: 'JSON', extension: 'json', mimeType: 'application/json' },
 } as const;
