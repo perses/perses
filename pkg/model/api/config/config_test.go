@@ -112,7 +112,11 @@ func TestJSONMarshalConfig(t *testing.T) {
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
     "authorization": {
-      "check_latest_update_interval": "30s"
+      "provider": {
+        "native": {
+          "check_latest_update_interval": "30s"
+        }
+      }
     },
     "authentication": {
       "access_token_ttl": "15m",
@@ -213,24 +217,33 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     "encryption_key": "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
     "enable_auth": true,
     "authorization": {
-      "guest_permissions": [
-        {
-          "actions": [
-            "read"
-          ],
-          "scopes": [
-            "*"
-          ]
-        },
-        {
-          "actions": [
-            "create"
-          ],
-          "scopes": [
-            "Project"
+      "provider": {
+        "native": {
+          "guest_permissions": [
+            {
+              "actions": [
+                "read"
+              ],
+              "scopes": [
+                "*"
+              ]
+            },
+            {
+              "actions": [
+                "create"
+              ],
+              "scopes": [
+                "Project"
+              ]
+            }
           ]
         }
-      ]
+      },
+    },
+    "authentication": {
+      "providers": {
+        "enable_native": true
+      }
     },
     "cors": {
       "enable": true,
@@ -282,24 +295,37 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 			result: Config{
 				Security: Security{
 					Readonly:      false,
-					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
+					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
+					Authentication: AuthenticationConfig{
+						Providers: AuthProviders{
+							EnableNative: true,
+						},
+						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
+						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
+					},
 					Authorization: AuthorizationConfig{
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable:                    true,
+								CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},
@@ -312,6 +338,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						AllowCredentials: true,
 						ExposeHeaders:    []string{"Content-Encoding"},
 						MaxAge:           60,
+					},
+					Cookie: Cookie{
+						SameSite: SameSite(http.SameSiteLaxMode),
+						Secure:   false,
 					},
 				},
 				Database: Database{
@@ -336,6 +366,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					TimeRange: TimeRange{
+						DisableCustomTimeRange: false,
+						Options:                defaultTimeRangeOptions,
+					},
 				},
 				Plugin: Plugin{
 					Path:        "plugins",
@@ -357,7 +391,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			c := Config{}
-			assert.NoError(t, json.Unmarshal([]byte(test.jason), &c))
+			assert.NoError(t, config.NewResolver[Config]().
+				SetConfigData([]byte(test.jason)).
+				Resolve(&c).
+				Verify())
+			assert.NoError(t, c.Verify())
 			assert.Equal(t, test.result, c)
 		})
 	}
@@ -380,15 +418,17 @@ security:
     providers:
       enable_native: true
   authorization:
-    guest_permissions:
-      - actions:
-          - read
-        scopes:
-          - "*"
-      - actions:
-          - create
-        scopes:
-          - Project
+    provider:
+      native:
+        guest_permissions:
+          - actions:
+              - read
+            scopes:
+              - "*"
+          - actions:
+              - create
+            scopes:
+              - Project
   cors:
     enable: true
     allow_origins:
@@ -443,22 +483,27 @@ plugin:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
-						CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable:                    true,
+								CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},

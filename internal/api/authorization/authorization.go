@@ -71,7 +71,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		return &disabledImpl{}, nil
 	}
 
-	if conf.Security.Authorization.Providers.Kubernetes.Enable {
+	if conf.Security.Authorization.Provider.Kubernetes.Enable {
 		return k8s.New(conf)
 	}
 

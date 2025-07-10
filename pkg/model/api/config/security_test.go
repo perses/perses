@@ -38,16 +38,7 @@ authentication:
   providers:
     enable_native: true
 authorization:
-  guest_permissions:
-    - actions:
-        - read
-      scopes:
-        - "*"
-    - actions:
-        - create
-      scopes:
-        - Project
-  providers:
+  provider:
     kubernetes:
       enable: true
 cors:
@@ -77,16 +68,7 @@ authentication:
   providers:
     enable_native: true
 authorization:
-  guest_permissions:
-    - actions:
-        - read
-      scopes:
-        - "*"
-    - actions:
-        - create
-      scopes:
-        - Project
-  providers:
+  provider:
     kubernetes:
       enable: true
 cors:
@@ -116,15 +98,17 @@ authentication:
   providers:
     enable_native: true
 authorization:
-  guest_permissions:
-    - actions:
-        - read
-      scopes:
-        - "*"
-    - actions:
-        - create
-      scopes:
-        - Project
+  provider:
+    native:
+      guest_permissions:
+        - actions:
+            - read
+          scopes:
+            - "*"
+        - actions:
+            - create
+          scopes:
+            - Project
 cors:
   enable: true
   allow_origins:

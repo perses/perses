@@ -23,7 +23,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/perses/perses/internal/api/authorization/native"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -46,27 +45,16 @@ import (
 )
 
 func New(conf config.Config) (*k8sImpl, error) {
-	if !conf.Security.Authorization.Providers.Kubernetes.Enable {
+	if !conf.Security.Authorization.Provider.Kubernetes.Enable {
 		return nil, fmt.Errorf("kubernetes authorization is not enabled")
 	}
-	kubeconfig, err := initKubeConfig(conf.Security.Authorization.Providers.Kubernetes.Kubeconfig)
+	kubeconfig, err := initKubeConfig(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig)
 	if err != nil {
 		return nil, err
 	}
 
-	// Since the Authenticator will need to make a lot of requests to check all permissions, raise the
-	// default limits
-	if conf.Security.Authorization.Providers.Kubernetes.QPS != 0 {
-		kubeconfig.QPS = conf.Security.Authorization.Providers.Kubernetes.QPS
-	} else {
-		kubeconfig.QPS = 500
-	}
-
-	if conf.Security.Authorization.Providers.Kubernetes.Burst != 0 {
-		kubeconfig.Burst = int(conf.Security.Authorization.Providers.Kubernetes.Burst)
-	} else {
-		kubeconfig.Burst = 1000
-	}
+	kubeconfig.QPS = float32(conf.Security.Authorization.Provider.Kubernetes.QPS)
+	kubeconfig.Burst = conf.Security.Authorization.Provider.Kubernetes.Burst
 
 	kubeClient, err := kubernetes.NewForConfig(kubeconfig)
 	if err != nil {
@@ -74,7 +62,7 @@ func New(conf config.Config) (*k8sImpl, error) {
 	}
 
 	sarClient := kubeClient.AuthorizationV1()
-	authorizer, err := newAuthorizer(sarClient)
+	authorizer, err := newAuthorizer(sarClient, conf.Security.Authorization.Provider.Kubernetes)
 	if err != nil {
 		return nil, nil
 	}
@@ -82,26 +70,25 @@ func New(conf config.Config) (*k8sImpl, error) {
 	tokenClient := kubeClient.AuthenticationV1()
 	kubernetesAuthenticator, err := newAuthenticator(
 		tokenClient,
+		conf.Security.Authorization.Provider.Kubernetes,
 	)
 	if err != nil {
 		return nil, nil
 	}
 
 	return &k8sImpl{
-		authenticator:    kubernetesAuthenticator,
-		authorizer:       authorizer,
-		kubeconfig:       kubeconfig,
-		kubeClient:       kubeClient,
-		guestPermissions: conf.Security.Authorization.GuestPermissions,
+		authenticator: kubernetesAuthenticator,
+		authorizer:    authorizer,
+		kubeconfig:    kubeconfig,
+		kubeClient:    kubeClient,
 	}, nil
 }
 
 type k8sImpl struct {
-	authenticator    authenticator.Request
-	authorizer       authorizer.Authorizer
-	kubeconfig       *rest.Config
-	kubeClient       *kubernetes.Clientset
-	guestPermissions []*v1Role.Permission
+	authenticator authenticator.Request
+	authorizer    authorizer.Authorizer
+	kubeconfig    *rest.Config
+	kubeClient    *kubernetes.Clientset
 }
 
 // IsEnabled implements [Authorization]
@@ -225,8 +212,8 @@ func (k k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 
 	scope := getK8sScope(requestScope)
 	if scope == "" {
-		// The permission isn't k8s related, default to using guest permissions
-		return native.ListHasPermission(k.guestPermissions, requestAction, requestScope)
+		// The permission isn't k8s related, default to false for now
+		return false
 	}
 
 	action := getK8sAction(requestAction)
@@ -280,7 +267,6 @@ func (k k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 	}
 
 	userPermissions := make(map[string][]*v1Role.Permission)
-	userPermissions[v1.WildcardProject] = k.guestPermissions
 
 	namespaces := k.getNamespaceList()
 
@@ -489,21 +475,21 @@ func getK8sUser(userStruct any) (user.Info, error) {
 }
 
 // newAuthorizer creates an authorizer compatible with the kubelet's needs
-func newAuthorizer(client authorizationclient.AuthorizationV1Interface) (authorizer.Authorizer, error) {
+func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf config.KubernetesProvider) (authorizer.Authorizer, error) {
 	if client == nil {
 		return nil, errors.New("no client provided, cannot use webhook authorization")
 	}
 	authorizerConfig := authorizerfactory.DelegatingAuthorizerConfig{
 		SubjectAccessReviewClient: client,
-		AllowCacheTTL:             5 * time.Minute,
-		DenyCacheTTL:              30 * time.Second,
+		AllowCacheTTL:             time.Duration(conf.AuthorizerAllowTTL),
+		DenyCacheTTL:              time.Duration(conf.AuthorizerDenyTTL),
 		WebhookRetryBackoff:       options.DefaultAuthWebhookRetryBackoff(),
 	}
 	return authorizerConfig.New()
 }
 
 // newAuthenticator creates an authenticator compatible with the kubelets needs
-func newAuthenticator(client authenticationclient.AuthenticationV1Interface) (authenticator.Request, error) {
+func newAuthenticator(client authenticationclient.AuthenticationV1Interface, conf config.KubernetesProvider) (authenticator.Request, error) {
 	if client == nil {
 		return nil, errors.New("tokenaccessreview client not provided, cannot use webhook authentication")
 	}
@@ -512,7 +498,7 @@ func newAuthenticator(client authenticationclient.AuthenticationV1Interface) (au
 		Anonymous: &apiserver.AnonymousAuthConfig{
 			Enabled: false, // always require authentication
 		},
-		CacheTTL:                2 * time.Minute,
+		CacheTTL:                time.Duration(conf.AuthenticatorTTL),
 		TokenAccessReviewClient: client,
 		WebhookRetryBackoff:     options.DefaultAuthWebhookRetryBackoff(),
 	}

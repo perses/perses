@@ -337,15 +337,32 @@ tls_config: <TLS config> # Optional
 #### Authorization config
 
 ```yaml
+# Authorization providers
+providers: <Authorization providers> # Optional
+```
+
+##### Authorization Providers
+
+```yaml
+# native authorization provider
+native:
+  <Native provider>
+# Kubernetes authorization provider
+kubernetes:
+  - <Kubernetes provider> # Optional
+```
+
+##### Native provider
+```yaml
+# Determines if the native provider is enabled. If security.enable_auth is set to true and no other
+# providers are set then this value will be automatically set to true
+enabled: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 check_latest_update_interval: <duration> | default = 30s> # Optional
 
 # Default permissions for guest users (logged-in users)
 guest_permissions:
   - <Permissions> # Optional
-
-# Authorization providers
-providers: <Authorization providers> # Optional
 ```
 
 ##### Permissions
@@ -359,13 +376,6 @@ scopes:
   - <enum= kind | "*">
 ```
 
-##### Authorization Providers
-
-```yaml
-# Kubernetes authorization provider
-kubernetes:
-  - <Kubernetes provider> # Optional
-```
 
 ##### Kubernetes provider
 ```yaml
@@ -377,6 +387,16 @@ enabled: <boolean>
 # permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
 # available the pods service account token will be used. This parameter should not be set in production
 kubeconfig: <string> # Optional
+# query per second (QPS) the k8s client will use with the apiserver
+qps <int> | default 500  # Optional
+# burst QPS the k8s client will use with the apiserver
+burst <int> | default 1000  # Optional
+# time an authorizer allow response will be cached for
+authorizer_allow_ttl <duration> | default 5m  # Optional
+# time an authorizer denied will be cached for
+authorizer_deny_ttl <duration> | default 30s  # Optional
+# time an authenticator response will be cached for
+authenticator_ttl <duration> | default 2m  # Optional
 ```
 
 #### CORS config
