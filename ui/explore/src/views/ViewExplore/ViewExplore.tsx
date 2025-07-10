@@ -19,12 +19,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL, GenericDatasourceResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
-import {
-  VariableProviderProps,
-  DatasourceStoreProvider,
-  VariableProvider,
-  BuildDatasourceProxyUrlFunc,
-} from '@perses-dev/dashboards';
+import { VariableProviderProps, DatasourceStoreProvider, VariableProvider } from '@perses-dev/dashboards';
 import React, { ReactElement } from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
 
@@ -32,17 +27,16 @@ export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
   datasources: GenericDatasourceResource[];
-  buildProxyUrl: BuildDatasourceProxyUrlFunc;
 }
 
 export function ViewExplore(props: ViewExploreProps): ReactElement {
-  const { externalVariableDefinitions, datasources, buildProxyUrl, sx, exploreTitleComponent, ...others } = props;
+  const { externalVariableDefinitions, datasources, sx, exploreTitleComponent, ...others } = props;
 
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);
   const initialRefreshInterval = useInitialRefreshInterval(DEFAULT_REFRESH_INTERVAL);
 
   return (
-    <DatasourceStoreProvider datasources={datasources} buildProxyUrl={buildProxyUrl}>
+    <DatasourceStoreProvider datasources={datasources}>
       <TimeRangeProviderWithQueryParams
         initialTimeRange={initialTimeRange}
         initialRefreshInterval={initialRefreshInterval}

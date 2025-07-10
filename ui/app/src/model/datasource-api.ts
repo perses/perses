@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { GenericDatasourceResource } from '@perses-dev/core';
+import { GenericDatasourceResource, GenericMetadata } from '@perses-dev/core';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 import { getBasePathName } from './route';
@@ -21,15 +21,13 @@ interface DataSourceFilter {
   project?: string;
 }
 
-export function buildProxyUrl({
-  project,
-  dashboard,
-  name,
-}: {
+interface ProxyBuilderParam {
   project?: string;
   dashboard?: string;
   name: string;
-}): string {
+}
+
+export const buildProxyUrl = ({ project, dashboard, name }: ProxyBuilderParam): string => {
   const basePath = getBasePathName();
   let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
   if (dashboard) {
@@ -39,7 +37,7 @@ export function buildProxyUrl({
     url = `projects/${encodeURIComponent(project)}/${url}`;
   }
   return `${basePath}/proxy/${url}`;
-}
+};
 
 /**
  * Retrieves and returns all global and projects datasource resources. An option filter param can be passed
@@ -62,7 +60,20 @@ export const useAllDatasourceResources = (filter?: DataSourceFilter): GenericDat
 
   const allDatasources = useMemo(() => {
     if (isDatasourceLoading || isGlobalDatasourceLoading) return [];
-    return [...(datasources || []), ...(globalDatasources || [])];
+    return [
+      ...globalDatasources.map<GenericDatasourceResource>((gds) => ({
+        ...(gds as GenericDatasourceResource),
+        spec: { ...gds.spec, proxyUrl: buildProxyUrl({ name: gds.metadata.name }) },
+      })),
+      ...datasources.map<GenericDatasourceResource>((ds) => ({
+        ...ds,
+        spec: { ...ds.spec, proxyUrl: buildProxyUrl({ name: ds.metadata.name, project: ds.metadata.project }) },
+        metadata: {
+          ...ds.metadata,
+          project: ds.metadata.project,
+        } as unknown as GenericMetadata,
+      })),
+    ];
   }, [datasources, globalDatasources, isDatasourceLoading, isGlobalDatasourceLoading]);
 
   return allDatasources as GenericDatasourceResource[];

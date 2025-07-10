@@ -42,5 +42,5 @@ export default function buildURL(params: URLParams): string {
   if (params.queryParams !== undefined) {
     url = `${url}?${params.queryParams.toString()}`;
   }
-  return basePath + url;
+  return `${basePath}${url}`;
 }
