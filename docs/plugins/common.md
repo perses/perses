@@ -155,6 +155,35 @@ endpointPattern: <RegExp>
 method: <enum | possibleValue = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'>
 ```
 
+### SQL Proxy specification
+
+```yaml
+kind: "SQLProxy"
+spec:
+  # Driver is the SQL driver for the datasource
+  driver: <enum | possibleValue = 'mysql' | 'mariadb' | 'postgres'>
+  
+  # Host is the hostname:port of datasource. It is not the hostname of the proxy.
+  host: <string>
+  
+  # Database name of database for the datasource.
+  database: <string>
+  
+  # Username for the database 
+  username: <string>
+
+  # This is the name of the secret that should be used for the proxy or discovery configuration
+  # It will contain any sensitive information such as password, token, certificate.
+  # Please read the documentation about secrets to understand how to create one
+  secret: <string> # Optional
+
+  # the max connections for the SQL connection
+  max_conns: <int> # Optional 
+  
+  # The ssl configuration when connection to the datasource (used for postgres)
+  ssl_mode: <enum | possibleValue = 'disable' | 'allow' | 'prefer' | 'require' | 'verify-ca' | 'verify-full'> # Optional
+```
+
 ## Thresholds specification
 
 ```yaml

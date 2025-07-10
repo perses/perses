@@ -52,9 +52,9 @@ func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
 	}
 }
 
-func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
+func BuildPromTLSConfig(cfg *TLSConfig) (*promConfig.TLSConfig, error) {
 	if cfg == nil {
-		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
+		return &promConfig.TLSConfig{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
 	}
 	minVersion := promConfig.TLSVersions["TLS12"]
 	maxVersion := promConfig.TLSVersions["TLS13"]
@@ -76,7 +76,16 @@ func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
 		MinVersion:         minVersion,
 		MaxVersion:         maxVersion,
 	}
-	return promConfig.NewTLSConfig(preConfig)
+	return preConfig, nil
+}
+
+func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
+	tlsConfig, err := BuildPromTLSConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return promConfig.NewTLSConfig(tlsConfig)
 }
 
 type TLSConfig struct {
