@@ -23,7 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { useDatasourceApi } from '../../../model/datasource-api';
+import { buildProxyUrl, useAllDatasourceResources } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
@@ -47,8 +47,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-  const datasourceApi = useDatasourceApi();
-
+  const allDatasources = useAllDatasourceResources({ project: dashboardResource.metadata.project });
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
@@ -93,8 +92,9 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
                 <ViewDashboard
+                  buildProxyUrl={buildProxyUrl}
+                  datasources={allDatasources}
                   dashboardResource={dashboardResource}
-                  datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={
                     <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />

@@ -30,6 +30,7 @@ import {
   DatasourceSpec,
   GlobalDatasourceResource,
   DatasourceResource,
+  GenericDatasourceResource,
 } from '@perses-dev/core';
 
 const PROJECT = 'perses';
@@ -492,13 +493,10 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       },
     },
   ])('$title', async (data: TestData) => {
-    const datasourceApiMock = {
-      buildProxyUrl: jest.fn().mockReturnValue(''),
-      getDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
-      getGlobalDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
-      listDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.project)),
-      listGlobalDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
-    };
+    const mockDatasources: GenericDatasourceResource[] = [
+      ...(data.input.datasources.global as GenericDatasourceResource[]),
+      ...(data.input.datasources.project as GenericDatasourceResource[]),
+    ];
     const queryClient = new QueryClient();
     const dashboard = {
       spec: { datasources: data.input.datasources.local } as Partial<DashboardSpec>,
@@ -510,7 +508,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
             <DatasourceStoreProvider
               dashboardResource={dashboard}
               projectName={PROJECT}
-              datasourceApi={datasourceApiMock}
+              datasources={mockDatasources}
               savedDatasources={
                 (data.input.datasources.saved ?? data.input.datasources.local) as Record<string, DatasourceSpec>
               }

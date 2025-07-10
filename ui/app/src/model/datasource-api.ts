@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
-import { DatasourceApi } from '@perses-dev/dashboards';
-import { useCallback } from 'react';
+import { useMemo } from 'react';
+import { GenericDatasourceResource } from '@perses-dev/core';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 import { getBasePathName } from './route';
+
+interface DataSourceFilter {
+  project?: string;
+}
 
 export function buildProxyUrl({
   project,
@@ -38,87 +41,29 @@ export function buildProxyUrl({
   return `${basePath}/proxy/${url}`;
 }
 
-export function useDatasourceApi(): DatasourceApi {
-  const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
-  const { data: datasources, isLoading: isDatasourcesPending } = useDatasourceList({});
+/**
+ * Retrieves and returns all global and projects datasource resources. An option filter param can be passed
+ * to filter the projects datasources
+ * @param filter Filters the project datasources
+ */
+export const useAllDatasourceResources = (filter?: DataSourceFilter): GenericDatasourceResource[] => {
+  const { project } = filter || {};
 
-  const getDatasource = useCallback(
-    async (project: string, selector: DatasourceSelector) => {
-      if (isDatasourcesPending || !datasources) {
-        return undefined;
-      }
-      return datasources.find((datasource) => {
-        if (datasource.metadata.project !== project) {
-          return false;
-        }
-        if (selector.kind !== datasource.spec.plugin.kind) {
-          return false;
-        }
-        if (!selector.name) {
-          return datasource.spec.default;
-        }
-        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
-      });
-    },
-    [datasources, isDatasourcesPending]
-  );
+  const { data: datasources, isLoading: isDatasourceLoading, error: datasourceError } = useDatasourceList({ project });
+  const {
+    data: globalDatasources,
+    isLoading: isGlobalDatasourceLoading,
+    error: globalDatasourceError,
+  } = useGlobalDatasourceList();
 
-  const getGlobalDatasource = useCallback(
-    async (selector: DatasourceSelector) => {
-      if (isGlobalDatasourcesPending || !globalDatasources) {
-        return undefined;
-      }
-      return globalDatasources.find((datasource) => {
-        if (selector.kind !== datasource.spec.plugin.kind) {
-          return false;
-        }
-        if (!selector.name) {
-          return datasource.spec.default;
-        }
-        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
-      });
-    },
-    [globalDatasources, isGlobalDatasourcesPending]
-  );
+  if (globalDatasourceError || datasourceError) {
+    throw new Error('Could not fetch all datasources');
+  }
 
-  const listDatasources = useCallback(
-    async (project: string, pluginKind?: string) => {
-      if (isDatasourcesPending || !datasources) {
-        return [];
-      }
-      return datasources.filter((datasource) => {
-        if (datasource.metadata.project !== project) {
-          return false;
-        }
-        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
-          return false;
-        }
-        return true;
-      });
-    },
-    [datasources, isDatasourcesPending]
-  );
+  const allDatasources = useMemo(() => {
+    if (isDatasourceLoading || isGlobalDatasourceLoading) return [];
+    return [...(datasources || []), ...(globalDatasources || [])];
+  }, [datasources, globalDatasources, isDatasourceLoading, isGlobalDatasourceLoading]);
 
-  const listGlobalDatasources = useCallback(
-    async (pluginKind?: string) => {
-      if (isGlobalDatasourcesPending || !globalDatasources) {
-        return [];
-      }
-      return globalDatasources.filter((datasource) => {
-        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
-          return false;
-        }
-        return true;
-      });
-    },
-    [globalDatasources, isGlobalDatasourcesPending]
-  );
-
-  return {
-    getDatasource,
-    getGlobalDatasource,
-    listDatasources,
-    listGlobalDatasources,
-    buildProxyUrl: buildProxyUrl,
-  };
-}
+  return allDatasources as GenericDatasourceResource[];
+};

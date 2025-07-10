@@ -20,7 +20,7 @@ import React, { ReactElement, useMemo } from 'react';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { useDatasourceApi } from '../../../model/datasource-api';
+import { buildProxyUrl, useAllDatasourceResources } from '../../../model/datasource-api';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -39,11 +39,10 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const { project } = useProjectStore();
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
-  const datasourceApi = useDatasourceApi();
-
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
+  const allDatasources = useAllDatasourceResources();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
       buildProjectVariableDefinition(projectName || '', projectVars ?? []),
@@ -65,7 +64,8 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
       <PluginRegistry pluginLoader={remotePluginLoader()}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
-            datasourceApi={datasourceApi}
+            datasources={allDatasources}
+            buildProxyUrl={buildProxyUrl}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
           />
