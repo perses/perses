@@ -26,12 +26,7 @@ import {
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
-import {
-  BuildDatasourceProxyUrlFunc,
-  DatasourceStoreProvider,
-  VariableProviderProps,
-  VariableProviderWithQueryParams,
-} from '../../context';
+import { DatasourceStoreProvider, VariableProviderProps, VariableProviderWithQueryParams } from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
@@ -40,7 +35,6 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
   isEditing?: boolean;
   isCreating?: boolean;
   datasources: GenericDatasourceResource[];
-  buildProxyUrl: BuildDatasourceProxyUrlFunc;
 }
 
 /**
@@ -55,7 +49,6 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     datasources,
     onSave,
     onDiscard,
-    buildProxyUrl,
     initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,
@@ -108,11 +101,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
   return (
-    <DatasourceStoreProvider
-      buildProxyUrl={buildProxyUrl}
-      dashboardResource={dashboardResource}
-      datasources={datasources}
-    >
+    <DatasourceStoreProvider dashboardResource={dashboardResource} datasources={datasources}>
       <DashboardProviderWithQueryParams
         initialState={{
           dashboardResource,

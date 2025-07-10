@@ -19,6 +19,7 @@ export interface DatasourceSpec<PluginSpec = UnknownSpec> {
   display?: Display;
   default: boolean;
   plugin: Definition<PluginSpec>;
+  proxyUrl?: string;
 }
 
 export interface GenericDatasourceResource {
