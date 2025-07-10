@@ -32,3 +32,6 @@ validators:
   # timeout
   - regex: 'youtube\.com'
     type: 'ignore'
+  # status code 403: Forbidden
+  - regex: 'webpack\.js\.org'
+    type: 'ignore'
