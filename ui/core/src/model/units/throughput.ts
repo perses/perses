@@ -30,7 +30,7 @@ type ThroughputUnit =
   | 'rows/sec'
   | 'writes/sec';
 export type ThroughputFormatOptions = {
-  unit: ThroughputUnit;
+  unit?: ThroughputUnit;
   decimalPlaces?: number;
   shortValues?: boolean;
 };
