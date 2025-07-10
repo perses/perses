@@ -22,9 +22,9 @@ import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { useProjectList } from '../../../model/project-client';
-import { useGlobalDatasourceList } from '../../../model/admin-client';
 import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
+import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { SearchList } from './SearchList';
 
 function shortcutCTRL(): string {

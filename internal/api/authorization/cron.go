@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rbac
+package authorization
 
 import (
 	"context"
@@ -23,13 +23,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewCronTask(rbacService RBAC, persesDAO model.DAO) async.SimpleTask {
-	return &rbacTask{svc: rbacService, persesDAO: persesDAO}
+func NewPermissionRefreshCronTask(authz Authorization, persesDAO model.DAO) async.SimpleTask {
+	return &rbacTask{authz: authz, persesDAO: persesDAO}
 }
 
 type rbacTask struct {
 	async.SimpleTask
-	svc             RBAC
+	authz           Authorization
 	persesDAO       model.DAO
 	lastRefreshTime time.Time
 }
@@ -55,7 +55,7 @@ func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
 		logrus.Debugf("refreshing rbac cache, previous last refresh time %v", r.lastRefreshTime)
-		if err := r.svc.Refresh(); err != nil {
+		if err := r.authz.RefreshPermissions(); err != nil {
 			logrus.WithError(err).Error("failed to refresh cache")
 			return nil
 		}

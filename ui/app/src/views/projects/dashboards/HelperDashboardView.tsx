@@ -21,19 +21,14 @@ import {
   ValidationProvider,
   remotePluginLoader,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
+import { buildProxyUrl, useAllDatasourceResources } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import {
-  useIsGlobalDatasourceEnabled,
-  useIsLocalDatasourceEnabled,
-  useIsLocalVariableEnabled,
-  useIsProjectDatasourceEnabled,
-} from '../../../context/Config';
+import { useIsLocalDatasourceEnabled, useIsLocalVariableEnabled } from '../../../context/Config';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -50,23 +45,9 @@ export interface GenericDashboardViewProps {
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
-  const isGlobalDatasourceEnabled = useIsGlobalDatasourceEnabled();
-  const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
-
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    if (isProjectDatasourceEnabled) {
-      datasourceApi.listDatasources(dashboardResource.metadata.project);
-    }
-    if (isGlobalDatasourceEnabled) {
-      datasourceApi.listGlobalDatasources();
-    }
-  }, [datasourceApi, dashboardResource, isProjectDatasourceEnabled, isGlobalDatasourceEnabled]);
-
+  const allDatasources = useAllDatasourceResources({ project: dashboardResource.metadata.project });
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
@@ -111,8 +92,9 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
                 <ViewDashboard
+                  buildProxyUrl={buildProxyUrl}
+                  datasources={allDatasources}
                   dashboardResource={dashboardResource}
-                  datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={
                     <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />

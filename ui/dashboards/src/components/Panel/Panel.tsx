@@ -219,7 +219,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
         }}
         ref={setContentElement}
       >
-        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec]}>
+        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec, queryResults]}>
           <PanelContent
             definition={definition}
             panelPluginKind={definition.spec.plugin.kind}

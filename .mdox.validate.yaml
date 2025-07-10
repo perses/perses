@@ -35,3 +35,6 @@ validators:
   # status code 403: Forbidden
   - regex: 'webpack\.js\.org'
     type: 'ignore'
+  # timeout
+  - regex: 'lodash\.com'
+    type: 'ignore'

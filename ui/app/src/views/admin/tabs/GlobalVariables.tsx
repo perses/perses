@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { getResourceExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { VariableList } from '../../../components/variable/VariableList';
 import {
   useCreateGlobalVariableMutation,
@@ -30,11 +29,6 @@ interface GlobalVariablesProps {
 
 export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
   const { id } = props;
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi]);
 
   const { data, isLoading } = useGlobalVariableList();
 
