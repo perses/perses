@@ -75,7 +75,7 @@ func grafanaMappingSort(sort *int) *variable.Sort {
 	return &mappingSort[i]
 }
 
-func (m *completeMigration) migrateVariables(grafanaDashboard *SimplifiedDashboard) []dashboard.Variable {
+func (m *mig) migrateVariables(grafanaDashboard *SimplifiedDashboard) []dashboard.Variable {
 	var result []dashboard.Variable
 	for _, v := range grafanaDashboard.Templating.List {
 		if v.Type == "constant" || v.Type == "textbox" {
@@ -92,7 +92,7 @@ func (m *completeMigration) migrateVariables(grafanaDashboard *SimplifiedDashboa
 	return result
 }
 
-func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variable {
+func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 	result := dashboard.Variable{
 		Kind: variable.KindList,
 	}
@@ -111,41 +111,28 @@ func (m *completeMigration) migrateListVariable(v TemplateVar) dashboard.Variabl
 		Name: v.Name,
 	}
 
-	// Only set CustomAllValue if IncludeAll is enabled for the variable.
+	// Only set CusomAllValue if IncludeAll is enabled for panel
 	if v.IncludeAll {
 		spec.CustomAllValue = v.AllValue
 	}
 
-	isQueryMigrationEmpty := migrateListVar(m.devMig.variables, v, spec)
-	if isQueryMigrationEmpty {
-		isQueryMigrationEmpty = migrateListVar(m.mig.variables, v, spec)
-		if isQueryMigrationEmpty {
-			return buildDefaultVariable(v)
-		}
-	}
-	result.Spec = spec
-	return result
-}
-
-func migrateListVar(varInstances map[string]*build.Instance, v TemplateVar, specResult *dashboard.ListVariableSpec) bool {
-	isQueryMigrationEmpty := true
-	// Dynamic variables are usually in a parameter named 'query' in the Grafana data model.
-	// Then depending on what contains the query, it will change the type of the plugin.
-	// So there is no easy way to know in advance which migration script to use.
-	// A simple way to handle this is to execute all the migration scripts and keep the first one that returns a non-empty plugin.
-	for _, variableInstance := range varInstances {
-		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(variableInstance, v.RawMessage)
+	i := 0
+	for ; i < len(m.variables); i++ {
+		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(m.variables[i], v.RawMessage)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute variable migration script")
 			continue
 		}
 		if !variableMigrationIsEmpty {
-			specResult.Plugin = *plugin
-			isQueryMigrationEmpty = false
+			spec.Plugin = *plugin
 			break
 		}
 	}
-	return isQueryMigrationEmpty
+	if i == len(m.variables) {
+		return buildDefaultVariable(v)
+	}
+	result.Spec = spec
+	return result
 }
 
 func migrateTextVariable(v TemplateVar) *dashboard.Variable {

@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
@@ -32,9 +32,9 @@ type endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service secret.Service, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(service secret.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.Secret, *v1.PublicSecret, *secret.Query](service, authz, v1.KindSecret, caseSensitive),
+		toolbox:  toolbox.New[*v1.Secret, *v1.PublicSecret, *secret.Query](service, rbacService, v1.KindSecret, caseSensitive),
 		readonly: readonly,
 	}
 }

@@ -37,27 +37,19 @@ const persesAPIVersion = "perses.dev/v1alpha1"
 
 var inputRegexp = regexp.MustCompile("([a-zA-Z0-9_-]+)=(.+)")
 
-type kubeMetadata struct {
-	Namespace string `json:"namespace" yaml:"namespace"`
-	Name      string `json:"name" yaml:"name"`
-}
-
 type kubeCustomResource struct {
-	APIVersion string                `json:"apiVersion" yaml:"apiVersion"`
-	Kind       string                `json:"kind" yaml:"kind"`
-	Metadata   kubeMetadata          `json:"metadata" yaml:"metadata"`
-	Spec       modelV1.DashboardSpec `json:"spec" yaml:"spec"`
+	APIVersion string                  `json:"apiVersion" yaml:"apiVersion"`
+	Kind       string                  `json:"kind" yaml:"kind"`
+	Metadata   modelV1.ProjectMetadata `json:"metadata" yaml:"metadata"`
+	Spec       modelV1.DashboardSpec   `json:"spec" yaml:"spec"`
 }
 
 func createCustomResource(dash *modelV1.Dashboard) *kubeCustomResource {
 	return &kubeCustomResource{
 		APIVersion: persesAPIVersion,
 		Kind:       "PersesDashboard",
-		Metadata: kubeMetadata{
-			Namespace: dash.Metadata.Project,
-			Name:      dash.Metadata.Name,
-		},
-		Spec: dash.Spec,
+		Metadata:   dash.Metadata,
+		Spec:       dash.Spec,
 	}
 }
 
@@ -77,7 +69,6 @@ type option struct {
 	errWriter       io.Writer
 	rowInput        []string
 	input           map[string]string
-	project         string
 	pluginPath      string
 	online          bool
 	mig             migrate.Migration
@@ -153,7 +144,6 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	persesDashboard.Metadata.Project = o.project
 	if o.migrationFormat == customResourceFormat || o.migrationFormat == customResourceShortFormat {
 		customResource := createCustomResource(persesDashboard)
 		return output.Handle(o.writer, o.Output, customResource)
@@ -204,7 +194,6 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	cmd.Flags().StringVar((*string)(&o.migrationFormat), "format", string(nativeFormat), "The format of the migration. Can be 'native' or 'custom-resource' or shorter 'cr'.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
-	cmd.Flags().StringVar(&o.project, "project", "", "The project to use for the migration. If not set, then the field 'project' in the dashboard will not be set. When the format 'cr' is used, the project will be set to the namespace of the custom resource.")
 	// When "online" flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.
 	// So no need to use / load the schemas with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("plugin.path", "online")

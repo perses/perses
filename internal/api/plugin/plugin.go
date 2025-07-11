@@ -21,7 +21,6 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
-	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -43,10 +42,9 @@ type Loaded struct {
 type Plugin interface {
 	Load() error
 	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
-	UnLoadDevPlugin(name string) error
 	List() ([]byte, error)
 	UnzipArchives() error
-	GetLoadedPlugin(name string) (*Loaded, bool)
+	GetLoadedPlugin(name string) (Loaded, bool)
 	Schema() schema.Schema
 	Migration() migrate.Migration
 }
@@ -78,10 +76,9 @@ func New(cfg config.Plugin) Plugin {
 			folder:       cfg.ArchivePath,
 			targetFolder: cfg.Path,
 		},
-		sch:       schema.New(),
-		mig:       migrate.New(),
-		loaded:    make(map[string]*Loaded),
-		devLoaded: make(map[string]*Loaded),
+		sch:    schema.New(),
+		mig:    migrate.New(),
+		loaded: make(map[string]Loaded),
 	}
 }
 
@@ -90,9 +87,7 @@ type pluginFile struct {
 	path string
 	// loaded is a map that contains all the loaded plugin modules.
 	// The key is the name of the plugin used by the frontend to get access to the plugin files.
-	loaded map[string]*Loaded
-	// devLoaded is a map that contains all the loaded plugin modules in development mode.
-	devLoaded map[string]*Loaded
+	loaded map[string]Loaded
 	// archibal is the archive service used only to extract the plugin files from the archive.
 	archibal *arch
 	// sch is the service used to load and provide the schema of the plugin.
@@ -107,26 +102,13 @@ type pluginFile struct {
 
 func (p *pluginFile) List() ([]byte, error) {
 	pluginFilePath := filepath.Join(p.path, pluginFileName)
-	exist, err := file.Exists(pluginFilePath)
-	if err != nil {
-		return nil, err
-	}
-	if !exist {
-		logrus.Warnf("unable to list plugins, plugin file %s does not exist", pluginFilePath)
-		// if the file does not exist, we return an empty file
-		return []byte("[]"), nil
-	}
 	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
-func (p *pluginFile) GetLoadedPlugin(name string) (*Loaded, bool) {
+func (p *pluginFile) GetLoadedPlugin(prefixURI string) (Loaded, bool) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
-	// Check in the dev plugin first
-	if devLoaded, ok := p.devLoaded[name]; ok {
-		return devLoaded, true
-	}
-	loaded, ok := p.loaded[name]
+	loaded, ok := p.loaded[prefixURI]
 	return loaded, ok
 }
 
@@ -147,18 +129,18 @@ func (p *pluginFile) Load() error {
 	if err != nil {
 		return err
 	}
-	for _, f := range files {
-		if !f.IsDir() {
+	for _, file := range files {
+		if !file.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
 			continue
 		}
-		pluginPath := filepath.Join(p.path, f.Name())
-		pluginModule := p.loadSinglePlugin(f, pluginPath)
+		pluginPath := filepath.Join(p.path, file.Name())
+		pluginModule := p.loadSinglePlugin(file, pluginPath)
 		if pluginModule == nil {
 			// the plugin is not valid, we can skip it
 			continue
 		}
-		pluginLoaded := &Loaded{
+		pluginLoaded := Loaded{
 			DevEnvironment: nil,
 			Module:         *pluginModule,
 			LocalPath:      pluginPath,
@@ -226,14 +208,7 @@ func (p *pluginFile) storeLoadedList() error {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	var pluginModuleList []v1.PluginModule
-	mergeMap := make(map[string]*Loaded)
 	for _, l := range p.loaded {
-		mergeMap[l.Module.Metadata.Name] = l
-	}
-	for _, l := range p.devLoaded {
-		mergeMap[l.Module.Metadata.Name] = l
-	}
-	for _, l := range mergeMap {
 		pluginModuleList = append(pluginModuleList, l.Module)
 	}
 	if len(pluginModuleList) == 0 {

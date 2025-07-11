@@ -17,7 +17,6 @@ import { PanelPlugin } from './panels';
 import { Plugin } from './plugin-base';
 import { TimeSeriesQueryPlugin } from './time-series-queries';
 import { TraceQueryPlugin } from './trace-queries';
-import { ProfileQueryPlugin } from './profile-queries';
 import { VariablePlugin } from './variables';
 import { ExplorePlugin } from './explore';
 
@@ -78,7 +77,6 @@ export interface SupportedPlugins {
   Panel: PanelPlugin;
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;
-  ProfileQuery: ProfileQueryPlugin;
   Datasource: DatasourcePlugin;
   Explore: ExplorePlugin;
 }

@@ -17,8 +17,6 @@ export function isProjectMetadata(metadata: Metadata | ProjectMetadata): metadat
   return 'project' in metadata;
 }
 
-export type GenericMetadata = Metadata & { [key: string]: string | object };
-
 export interface Metadata {
   name: string;
   createdAt?: string;

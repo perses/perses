@@ -20,10 +20,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
-// WildcardProject is a special project name that can be used to refer to all projects.
-// It is used in the context of user permissions to indicate that the permission applies to all projects.
-const WildcardProject = "*"
-
 type NativeProvider struct {
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
 }

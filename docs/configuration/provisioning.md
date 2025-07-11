@@ -2,12 +2,12 @@
 
 The provisioning feature allows to inject any kind of resources in the database when Perses is starting.
 
-This can be useful for instance to populate your database with a set of predefined datasources, projects, etc.
+That can be useful in case you would like to populate your database with a set of predefined datasources for example.
 
-To ensure these data are not removed at runtime, the provisioning is re-injecting them at a configured frequency (by
+To ensure these data are not removed at the runtime, the provisioning is re-injecting them at a configured frequency (by
 default 1 hour).
 
-To activate this feature, you need to add the following section to your configuration file:
+If you want to activate this feature, you need to complete your configuration file with the following section:
 
 ```yaml
 provisioning:
@@ -18,6 +18,3 @@ provisioning:
 
 You can add any folder you would like. Perses will ignore any files not managed and will loop recursively through any
 sub-folders contained in the folders configured.
-
-To learn more about the data model of the various resources that can be provisioned, please refer to the
-[API documentation](../api/README.md).

@@ -28,7 +28,6 @@ const (
 	KindPanel           Kind = "Panel"
 	KindTimeSeriesQuery Kind = "TimeSeriesQuery"
 	KindTraceQuery      Kind = "TraceQuery"
-	KindProfileQuery    Kind = "ProfileQuery"
 	KindQuery           Kind = "Query"
 	KindExplore         Kind = "Explore"
 )
@@ -71,7 +70,7 @@ func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Plugin) validate() error {
 	if p.Kind != KindVariable && p.Kind != KindDatasource &&
-		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery && p.Kind != KindProfileQuery && p.Kind != KindExplore {
+		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery && p.Kind != KindExplore {
 		return fmt.Errorf("invalid plugin kind %s", p.Kind)
 	}
 	return nil

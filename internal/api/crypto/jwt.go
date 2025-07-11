@@ -14,13 +14,18 @@
 package crypto
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	echojwt "github.com/labstack/echo-jwt/v4"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -30,15 +35,34 @@ const (
 	cookiePath            = "/"
 )
 
+type JWTCustomClaims struct {
+	jwt.RegisteredClaims
+}
+
 func signedToken(login string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &jwt.RegisteredClaims{
-		Subject:   login,
-		ExpiresAt: jwt.NewNumericDate(expireAt),
-		NotBefore: jwt.NewNumericDate(notBefore),
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   login,
+			ExpiresAt: jwt.NewNumericDate(expireAt),
+			NotBefore: jwt.NewNumericDate(notBefore),
+		},
 	})
 	// The type of the key depends on the signature method.
 	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
 	return token.SignedString(key)
+}
+
+func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
+	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
+	if !ok {
+		return nil
+	}
+
+	claims, ok := jwtToken.Claims.(*JWTCustomClaims)
+	if !ok {
+		return nil
+	}
+	return claims
 }
 
 type JWT interface {
@@ -52,7 +76,8 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
-	ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error)
+	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
+	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
 type jwtImpl struct {
@@ -75,16 +100,12 @@ func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
-	// On browsers, if the cooke age is expired, the cookie is not sent with the request and will return 400.
-	// However, if we want to have the refresh token working with browsers, we need to have back returns status 401,
-	// if the access token is expired, so we need to set the cookie with a max age even if the cookie is expired before.
-	maxAge := max(int(j.accessTokenTTL.Seconds()), int(j.refreshTokenTTL.Seconds()))
 	tokenSplit := strings.Split(accessToken, ".")
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     cookiePath,
-		MaxAge:   maxAge,
+		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   j.cookieConfig.Secure,
 		HttpOnly: false,
@@ -94,7 +115,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     cookiePath,
-		MaxAge:   maxAge,
+		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,
@@ -144,12 +165,39 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(_ *jwt.Token) (interface{}, error) {
+func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(_ *jwt.Token) (interface{}, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {
 		return nil, err
 	}
-	return parsedToken.Claims.(*jwt.RegisteredClaims), nil
+	return parsedToken.Claims.(*JWTCustomClaims), nil
+}
+
+func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
+	jwtMiddlewareConfig := echojwt.Config{
+		Skipper: skipper,
+		BeforeFunc: func(c echo.Context) {
+			// Merge the JWT cookies if they exist to create the token,
+			// and then set the header Authorization with the complete token.
+			payloadCookie, err := c.Cookie(CookieKeyJWTPayload)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", CookieKeyJWTPayload)
+				return
+			}
+			signatureCookie, err := c.Cookie(CookieKeyJWTSignature)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
+				return
+			}
+			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
+		},
+		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
+			return new(JWTCustomClaims)
+		},
+		SigningMethod: jwt.SigningMethodHS512.Name,
+		SigningKey:    j.accessKey,
+	}
+	return echojwt.WithConfig(jwtMiddlewareConfig)
 }

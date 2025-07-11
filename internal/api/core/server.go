@@ -16,7 +16,6 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
-	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dependency"
 	authendpoint "github.com/perses/perses/internal/api/impl/auth"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
@@ -49,41 +48,41 @@ import (
 
 type api struct {
 	echoUtils.Register
-	apiV1Endpoints         []route.Endpoint
-	apiEndpoints           []route.Endpoint
-	proxyEndpoint          route.Endpoint
-	authorizationMiddlware echo.MiddlewareFunc
-	apiPrefix              string
+	apiV1Endpoints []route.Endpoint
+	apiEndpoints   []route.Endpoint
+	proxyEndpoint  route.Endpoint
+	jwtMiddleware  echo.MiddlewareFunc
+	apiPrefix      string
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
 	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		datasource.NewEndpoint(cfg.Datasource, serviceManager.GetDatasource(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive, cfg.EphemeralDashboard.Enable),
-		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globaldatasource.NewEndpoint(cfg.Datasource, serviceManager.GetGlobalDatasource(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalvariable.NewEndpoint(cfg.Variable, serviceManager.GetGlobalVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		datasource.NewEndpoint(cfg.Datasource, serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive, cfg.EphemeralDashboard.Enable),
+		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globaldatasource.NewEndpoint(cfg.Datasource, serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalvariable.NewEndpoint(cfg.Variable, serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		plugin.NewEndpoint(serviceManager.GetPlugin(), cfg.Plugin.EnableDev),
-		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetAuthorization(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
-		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetAuthorization(), serviceManager.GetDashboard()),
+		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
+		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetRBAC(), serviceManager.GetDashboard()),
 	}
 
 	authEndpoint, err := authendpoint.New(
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
-		serviceManager.GetAuthorization(),
+		serviceManager.GetRBAC(),
 		cfg.Security.Authentication.Providers,
 		cfg.Security.EnableAuth,
 	)
@@ -100,8 +99,8 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
-			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetAuthorization()),
-		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
+			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetRBAC()),
+		jwtMiddleware: serviceManager.GetJWT().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),
 		apiPrefix: cfg.APIPrefix,
@@ -142,9 +141,9 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 		// Finally, register the route with the echo.Group previously created.
 		// We will consider also if the route needs to remain anonymous or not and then inject the JWT middleware accordingly.
 		for _, rte := range el.group.Routes {
-			mdws := []echo.MiddlewareFunc{middleware.HandleAnonymous(rte.IsAnonymous)}
+			var mdws []echo.MiddlewareFunc
 			if !rte.IsAnonymous {
-				mdws = append(mdws, a.authorizationMiddlware)
+				mdws = append(mdws, a.jwtMiddleware)
 			}
 			mdws = append(mdws, rte.Middlewares...)
 			rte.Register(group, mdws...)

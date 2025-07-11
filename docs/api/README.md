@@ -1,4 +1,4 @@
-# API Reference
+# Reference
 
 This section will give you insights into every resource supported by the Perses API, as well as the available API endpoints in general. While it offers explanations about the purpose of each resource, this documentation is mainly intended for users who want to interact directly with the API — whether to manipulate resources without using the UI or to perform other operations.
 

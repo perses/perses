@@ -21,10 +21,10 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	clientConfig "github.com/perses/perses/pkg/client/config"
@@ -88,7 +88,7 @@ type endpoint struct {
 	isAuthEnable    bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, rbac rbac.RBAC, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
@@ -102,7 +102,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz)
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, rbac)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz)
+		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, rbac)
 		if err != nil {
 			return nil, err
 		}

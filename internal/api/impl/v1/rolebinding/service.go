@@ -18,13 +18,12 @@ import (
 	"fmt"
 
 	"github.com/brunoga/deep"
-	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -35,21 +34,21 @@ type service struct {
 	dao     rolebinding.DAO
 	roleDAO role.DAO
 	userDAO user.DAO
-	authz   authorization.Authorization
+	rbac    rbac.RBAC
 	sch     schema.Schema
 }
 
-func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, authz authorization.Authorization, sch schema.Schema) rolebinding.Service {
+func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schema.Schema) rolebinding.Service {
 	return &service{
 		dao:     dao,
-		authz:   authz,
+		rbac:    rbac,
 		roleDAO: roleDAO,
 		userDAO: userDAO,
 		sch:     sch,
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.RoleBinding) (*v1.RoleBinding, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.RoleBinding) (*v1.RoleBinding, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -64,13 +63,13 @@ func (s *service) create(entity *v1.RoleBinding) (*v1.RoleBinding, error) {
 		return nil, err
 	}
 	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.RoleBinding, parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.RoleBinding, parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -108,28 +107,28 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 		return nil, updateErr
 	}
 	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
 
-func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
 		return err
 	}
 	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
-	if err := s.authz.RefreshPermissions(); err != nil {
+	if err := s.rbac.Refresh(); err != nil {
 		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return nil
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.RoleBinding, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q *rolebinding.Query, params apiInterface.Parameters) ([]*v1.RoleBinding, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]*v1.RoleBinding, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -137,7 +136,7 @@ func (s *service) List(q *rolebinding.Query, params apiInterface.Parameters) ([]
 	return s.dao.List(query)
 }
 
-func (s *service) RawList(q *rolebinding.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -145,7 +144,7 @@ func (s *service) RawList(q *rolebinding.Query, params apiInterface.Parameters) 
 	return s.dao.RawList(query)
 }
 
-func (s *service) MetadataList(q *rolebinding.Query, params apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]api.Entity, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -153,7 +152,7 @@ func (s *service) MetadataList(q *rolebinding.Query, params apiInterface.Paramet
 	return s.dao.MetadataList(query)
 }
 
-func (s *service) RawMetadataList(q *rolebinding.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err

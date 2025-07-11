@@ -62,8 +62,7 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 func IsSchemaRequired(moduleSpec plugin.ModuleSpec) bool {
 	for _, plg := range moduleSpec.Plugins {
 		if plg.Kind == plugin.KindDatasource || plg.Kind == plugin.KindPanel || plg.Kind == plugin.KindVariable ||
-			plg.Kind == plugin.KindQuery || plg.Kind == plugin.KindTimeSeriesQuery || plg.Kind == plugin.KindTraceQuery ||
-			plg.Kind == plugin.KindProfileQuery {
+			plg.Kind == plugin.KindQuery || plg.Kind == plugin.KindTimeSeriesQuery || plg.Kind == plugin.KindTraceQuery {
 			return true
 		}
 	}

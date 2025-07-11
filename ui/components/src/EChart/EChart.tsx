@@ -18,7 +18,6 @@ import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 
 import {
-  BarChart as EChartsBarChart,
   LineChart as EChartsLineChart,
   GaugeChart as EChartsGaugeChart,
   PieChart as EChartsPieChart,
@@ -48,7 +47,6 @@ use([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
-  EChartsBarChart,
   EChartsLineChart,
   EChartsGaugeChart,
   EChartsPieChart,

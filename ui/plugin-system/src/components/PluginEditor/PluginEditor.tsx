@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button } from '@mui/material';
-import Reload from 'mdi-material-ui/Reload';
+import { Box } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ReactElement } from 'react';
 import { PluginKindSelect } from '../PluginKindSelect';
@@ -33,31 +32,19 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-        <PluginKindSelect
-          fullWidth={false}
-          sx={{ mb: 2, minWidth: 120 }}
-          margin="dense"
-          label={pluginKindLabel}
-          pluginTypes={pluginTypes}
-          disabled={isLoading}
-          value={pendingSelection ? pendingSelection : value.selection}
-          InputProps={{ readOnly: isReadonly }}
-          error={!!error}
-          helperText={error?.message}
-          onChange={onSelectionChange}
-        />
-
-        <Button
-          variant="contained"
-          sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
-          startIcon={<Reload />}
-          onClick={() => onSpecChange(value.spec)}
-        >
-          Run Query
-        </Button>
-      </Box>
-
+      <PluginKindSelect
+        fullWidth={false}
+        sx={{ mb: 2, minWidth: 120 }}
+        margin="dense"
+        label={pluginKindLabel}
+        pluginTypes={pluginTypes}
+        disabled={isLoading}
+        value={pendingSelection ? pendingSelection : value.selection}
+        InputProps={{ readOnly: isReadonly }}
+        error={!!error}
+        helperText={error?.message}
+        onChange={onSelectionChange}
+      />
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginSpecEditor
           pluginSelection={value.selection}

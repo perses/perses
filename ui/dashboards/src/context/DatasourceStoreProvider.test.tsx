@@ -30,7 +30,6 @@ import {
   DatasourceSpec,
   GlobalDatasourceResource,
   DatasourceResource,
-  GenericDatasourceResource,
 } from '@perses-dev/core';
 
 const PROJECT = 'perses';
@@ -493,10 +492,13 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       },
     },
   ])('$title', async (data: TestData) => {
-    const mockDatasources: GenericDatasourceResource[] = [
-      ...(data.input.datasources.global as GenericDatasourceResource[]),
-      ...(data.input.datasources.project as GenericDatasourceResource[]),
-    ];
+    const datasourceApiMock = {
+      buildProxyUrl: jest.fn().mockReturnValue(''),
+      getDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
+      getGlobalDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
+      listDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.project)),
+      listGlobalDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
+    };
     const queryClient = new QueryClient();
     const dashboard = {
       spec: { datasources: data.input.datasources.local } as Partial<DashboardSpec>,
@@ -508,7 +510,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
             <DatasourceStoreProvider
               dashboardResource={dashboard}
               projectName={PROJECT}
-              datasources={mockDatasources}
+              datasourceApi={datasourceApiMock}
               savedDatasources={
                 (data.input.datasources.saved ?? data.input.datasources.local) as Record<string, DatasourceSpec>
               }
@@ -520,6 +522,8 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       );
     };
     const { result } = renderHook(() => useListDatasourceSelectItems(FAKE_PLUGIN_NAME), { wrapper });
+
+    console.log(result.current);
 
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(result.current.data).toEqual(data.expected.result);

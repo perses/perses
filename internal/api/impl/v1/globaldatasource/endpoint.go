@@ -19,8 +19,8 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
@@ -34,9 +34,9 @@ type endpoint struct {
 	isDisable bool
 }
 
-func NewEndpoint(cfg config.DatasourceConfig, service globaldatasource.Service, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(cfg config.DatasourceConfig, service globaldatasource.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:   toolbox.New[*v1.GlobalDatasource, *v1.GlobalDatasource, *globaldatasource.Query](service, authz, v1.KindGlobalDatasource, caseSensitive),
+		toolbox:   toolbox.New[*v1.GlobalDatasource, *v1.GlobalDatasource, *globaldatasource.Query](service, rbacService, v1.KindGlobalDatasource, caseSensitive),
 		readonly:  readonly,
 		isDisable: cfg.Global.Disable,
 	}

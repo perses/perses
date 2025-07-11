@@ -36,7 +36,7 @@ type ApplyService struct {
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	for _, entity := range entities {
 		entity.GetMetadata().Flatten(a.caseSensitive)
-		_, createErr := a.svc.Create(nil, entity)
+		_, createErr := a.svc.Create(apiInterface.EmptyCtx, entity)
 		if createErr == nil {
 			continue
 		}
@@ -50,7 +50,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 			Name: entity.Metadata.Name,
 		}
 
-		if _, updateError := a.svc.Update(nil, entity, param); updateError != nil {
+		if _, updateError := a.svc.Update(apiInterface.EmptyCtx, entity, param); updateError != nil {
 			logrus.WithError(updateError).Errorf("unable to update the globaldatasource %q", entity.Metadata.Name)
 		}
 	}

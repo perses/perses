@@ -14,14 +14,12 @@
 package plugin
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
-	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -43,7 +41,6 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET("", e.List, true)
 	if e.enableDev {
 		group.POST("", e.PushDevPlugin, true)
-		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.DeleteDevPlugin, true)
 	}
 }
 
@@ -62,16 +59,4 @@ func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 	return e.svc.LoadDevPlugin(list)
-}
-
-func (e *endpoint) DeleteDevPlugin(ctx echo.Context) error {
-	name := utils.GetNameParameter(ctx)
-	if len(name) == 0 {
-		return apiinterface.HandleBadRequestError("plugin name is required")
-	}
-	if err := e.svc.UnLoadDevPlugin(name); err != nil {
-		logrus.WithError(err).Errorf("unable to unload plugin %s", name)
-		return err
-	}
-	return ctx.NoContent(http.StatusNoContent)
 }

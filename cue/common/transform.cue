@@ -20,7 +20,7 @@ import (
 #joinByColumnValueTransform: {
 	kind: "JoinByColumnValue"
 	spec: {
-		columns: [...string]
+		columns: [string]
 		disabled?: bool
 	}
 }
@@ -28,7 +28,7 @@ import (
 #mergeColumnsTransform: {
 	kind: "MergeColumns"
 	spec: {
-		columns: [...string]
+		columns: [string]
 		name:      strings.MinRunes(1)
 		disabled?: bool
 	}

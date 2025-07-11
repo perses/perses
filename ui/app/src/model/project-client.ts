@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, fetchJson, ProjectResource, StatusError } from '@perses-dev/core';
+import { DashboardResource, ProjectResource, StatusError } from '@perses-dev/core';
 import {
   useMutation,
   UseMutationResult,
@@ -27,6 +27,7 @@ import { resource as dashboardResource, useDashboardList } from './dashboard-cli
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
+import { fetch, fetchJson } from './fetch';
 import { userKey } from './user-client';
 
 const resource = 'projects';
