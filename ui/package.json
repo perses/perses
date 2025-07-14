@@ -69,5 +69,9 @@
     "typescript": "5.4.5",
     "wait-on": "^7.0.1"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "dependencies": {
+    "i18next": "^25.3.2",
+    "react-i18next": "^15.6.0"
+  }
 }
