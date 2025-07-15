@@ -25,7 +25,7 @@ import {
 import { ReactElement, useMemo, useState } from 'react';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
-import { buildProxyUrl, useAllDatasourceResources } from '../../model/datasource-api';
+import { useAllDatasourceResources } from '../../model/datasource-api';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -73,11 +73,7 @@ export function VariableDrawer<T extends Variable>({
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
-            <DatasourceStoreProvider
-              buildProxyUrl={buildProxyUrl}
-              datasources={allDatasources}
-              projectName={projectName}
-            >
+            <DatasourceStoreProvider datasources={allDatasources} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
                 <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
                   <VariableEditorForm

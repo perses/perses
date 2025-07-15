@@ -17,10 +17,10 @@ import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry, ProjectStoreProvider, useProjectStore, remotePluginLoader } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo } from 'react';
-import { useGlobalVariableList } from '../../../model/global-variable-client';
-import { useVariableList } from '../../../model/variable-client';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { buildProxyUrl, useAllDatasourceResources } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../model/global-variable-client';
+import { useVariableList } from '../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../utils/variables';
+import { useAllDatasourceResources } from '../../model/datasource-api';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -65,7 +65,6 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasources={allDatasources}
-            buildProxyUrl={buildProxyUrl}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
           />

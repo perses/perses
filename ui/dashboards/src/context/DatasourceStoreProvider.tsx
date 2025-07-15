@@ -35,25 +35,16 @@ export interface DatasourceStoreProviderProps {
   dashboardResource?: DashboardResource | EphemeralDashboardResource;
   projectName?: string;
   datasources: GenericDatasourceResource[];
-  buildProxyUrl?: BuildDatasourceProxyUrlFunc;
   children?: ReactNode;
   savedDatasources?: Record<string, DatasourceSpec>;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
-export type BuildDatasourceProxyUrlParams = {
-  project?: string;
-  dashboard?: string;
-  name: string;
-};
-
-export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => string;
-
 /**
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): ReactElement {
-  const { projectName, datasources, buildProxyUrl, onCreate, children } = props;
+  const { projectName, datasources, onCreate, children } = props;
   const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
     props.savedDatasources ?? {}
@@ -67,17 +58,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     if (dashboardResource) {
       const { datasources } = dashboardResource.spec;
       const dashboardDatasource = findDashboardDatasource(datasources, selector);
-      if (dashboardDatasource !== undefined) {
+      if (dashboardDatasource) {
         return {
           spec: dashboardDatasource.spec,
-          proxyUrl: buildDatasourceProxyUrl(
-            {
-              project: dashboardResource.metadata.project,
-              dashboard: dashboardResource.metadata.name,
-              name: dashboardDatasource.name,
-            },
-            buildProxyUrl
-          ),
+          proxyUrl: dashboardDatasource.spec.proxyUrl,
         };
       }
     }
@@ -87,16 +71,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         (ds) => ds.spec.plugin.kind === selector.kind && ds.metadata['project'] === project
       );
 
-      if (datasource !== undefined) {
+      if (datasource) {
         return {
           spec: datasource.spec,
-          proxyUrl: buildDatasourceProxyUrl(
-            {
-              project: String(datasource.metadata['project']),
-              name: datasource.metadata.name,
-            },
-            buildProxyUrl
-          ),
+          proxyUrl: datasource.spec.proxyUrl,
         };
       }
     }
@@ -104,7 +82,6 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     const globalDatasource = datasources
       .filter((ds) => ds.kind === 'GlobalDatasource')
       .find((ds) => {
-        /* This logic comes from ui\app\src\model\datasource-api.ts */
         if (selector.kind !== ds.spec.plugin.kind) {
           return false;
         }
@@ -113,15 +90,11 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         }
         return ds.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
-    if (globalDatasource !== undefined) {
+
+    if (globalDatasource) {
       return {
         spec: globalDatasource.spec,
-        proxyUrl: buildDatasourceProxyUrl(
-          {
-            name: globalDatasource.metadata.name,
-          },
-          buildProxyUrl
-        ),
+        proxyUrl: globalDatasource.spec.proxyUrl,
       };
     }
 
@@ -260,13 +233,6 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
-}
-
-function buildDatasourceProxyUrl(
-  params: BuildDatasourceProxyUrlParams,
-  buildProxyUrl?: BuildDatasourceProxyUrlFunc
-): string {
-  return buildProxyUrl ? buildProxyUrl(params) : '';
 }
 
 // Helper to find a datasource in the list embedded in a dashboard spec

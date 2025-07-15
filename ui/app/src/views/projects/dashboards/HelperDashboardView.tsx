@@ -13,7 +13,12 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
+import {
+  DashboardResource,
+  DatasourceSpec,
+  EphemeralDashboardResource,
+  getResourceDisplayName,
+} from '@perses-dev/core';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import {
   PluginRegistry,
@@ -45,19 +50,49 @@ export interface GenericDashboardViewProps {
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
+  /* TODO: This will be removed after the dashboard local datasource refactor */
+  const dashboardResourceWithProxy = useMemo(
+    () => ({
+      ...dashboardResource,
+      spec: {
+        ...dashboardResource.spec,
+        datasources: Object.entries(dashboardResource.spec.datasources || {}).reduce<Record<string, DatasourceSpec>>(
+          (prev, current) => {
+            const [key, spec] = current;
+            return {
+              ...prev,
+              [key]: {
+                ...spec,
+                proxyUrl: buildProxyUrl({
+                  project: dashboardResource.metadata.project,
+                  dashboard: dashboardResource.metadata.name,
+                  name: key,
+                }),
+              },
+            };
+          },
+          {}
+        ),
+      },
+    }),
+    [dashboardResource]
+  );
+
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-  const allDatasources = useAllDatasourceResources({ project: dashboardResource.metadata.project });
+  const allDatasources = useAllDatasourceResources({ project: dashboardResourceWithProxy.metadata.project });
   // Collect the Project variables and setup external variables from it
-  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
+  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResourceWithProxy.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
-  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(dashboardResource.metadata.project);
+  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(
+    dashboardResourceWithProxy.metadata.project
+  );
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
-      buildProjectVariableDefinition(dashboardResource.metadata.project, projectVars ?? []),
+      buildProjectVariableDefinition(dashboardResourceWithProxy.metadata.project, projectVars ?? []),
       buildGlobalVariableDefinition(globalVars ?? []),
     ],
-    [dashboardResource, projectVars, globalVars]
+    [dashboardResourceWithProxy, projectVars, globalVars]
   );
 
   if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
@@ -92,7 +127,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
                 <ViewDashboard
-                  buildProxyUrl={buildProxyUrl}
                   datasources={allDatasources}
                   dashboardResource={dashboardResource}
                   externalVariableDefinitions={externalVariableDefinitions}
