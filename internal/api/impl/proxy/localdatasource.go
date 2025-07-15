@@ -16,6 +16,7 @@ package proxy
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiinterface "github.com/perses/perses/internal/api/interface"
@@ -27,13 +28,38 @@ import (
 
 func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
+	var scrt *v1.Secret
 
 	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(projectName, dtsName, name)
-	})
+		projectScrt, err := e.getProjectSecret(projectName, dtsName, name)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get project secret %q for datasource %q in project %q: %w", name, dtsName, projectName, err)
+		}
+
+		scrt, err = deep.Copy(projectScrt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create deep copy of secret %q for datasource %q: %w", name, dtsName, err)
+		}
+
+		return &projectScrt.Spec, nil
+	},
+	)
 	if err != nil {
 		return err
 	}
+
+	if e.crypto.IsCFBEncrypted() {
+		if decryptErr := e.crypto.Encrypt(&scrt.Spec); decryptErr != nil {
+			logrus.WithError(decryptErr).Errorf("failed to encrypt secret for datasource %q in project %q", dtsName, projectName)
+			return apiinterface.InternalError
+		}
+
+		if err := e.secret.Update(scrt); err != nil {
+			logrus.WithError(err).Errorf("failed to update encrypted secret for datasource %q in project %q", dtsName, projectName)
+			return apiinterface.InternalError
+		}
+	}
+
 	return pr.serve(ctx)
 }
 

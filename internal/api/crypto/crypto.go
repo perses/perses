@@ -32,6 +32,7 @@ import (
 type Crypto interface {
 	Encrypt(spec *modelV1.SecretSpec) error
 	Decrypt(spec *modelV1.SecretSpec) error
+	IsCFBEncrypted() bool
 }
 
 func New(security config.Security) (Crypto, JWT, error) {
@@ -45,8 +46,9 @@ func New(security config.Security) (Crypto, JWT, error) {
 		return nil, nil, err
 	}
 	return &crypto{
-			key:   key,
-			block: aesBlock,
+			key:            key,
+			block:          aesBlock,
+			isCfbEncrypted: false,
 		},
 		&jwtImpl{
 			accessKey:       key,
@@ -58,8 +60,9 @@ func New(security config.Security) (Crypto, JWT, error) {
 }
 
 type crypto struct {
-	key   []byte
-	block cipher.Block
+	key            []byte
+	block          cipher.Block
+	isCfbEncrypted bool
 }
 
 func (c *crypto) Encrypt(spec *modelV1.SecretSpec) error {
@@ -156,20 +159,41 @@ func (c *crypto) encrypt(stringToEncrypt string) (string, error) {
 		return "", nil
 	}
 	plainText := []byte(stringToEncrypt)
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
+
+	gcm, err := cipher.NewGCM(c.block)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gcm: %w", err)
 	}
 
-	// TODO use AEAD instead of CFB as recommended by Go
-	stream := cipher.NewCFBEncrypter(c.block, iv) //nolint: staticcheck
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		return "", fmt.Errorf("failed to create nonce: %w", err)
+	}
 
+	cipherText := gcm.Seal(nonce, nonce, plainText, nil)
 	return base64.URLEncoding.EncodeToString(cipherText), nil
 }
 
 func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
+	// Try AES decryption first
+	aeadDecryptedPassword, err := c.decryptAEAD(stringToDecrypt)
+	if err != nil {
+		// Try CFB decryption if AES failed
+		cfbDecryptedPassword, cfbErr := c.decryptCFB(stringToDecrypt)
+		if cfbErr != nil {
+			return "", fmt.Errorf("failed to decrypt - \nAES error: %w\nCFB error: %v", err, cfbErr)
+		}
+		c.isCfbEncrypted = true
+		return cfbDecryptedPassword, nil
+	}
+	return aeadDecryptedPassword, nil
+}
+
+func (c *crypto) IsCFBEncrypted() bool {
+	return c.isCfbEncrypted
+}
+
+func (c *crypto) decryptCFB(stringToDecrypt string) (string, error) {
 	if len(stringToDecrypt) == 0 {
 		return "", nil
 	}
@@ -190,4 +214,33 @@ func (c *crypto) decrypt(stringToDecrypt string) (string, error) {
 	stream.XORKeyStream(cipherText, cipherText)
 
 	return string(cipherText), nil
+}
+
+func (c *crypto) decryptAEAD(stringToDecrypt string) (string, error) {
+	if len(stringToDecrypt) == 0 {
+		return "", nil
+	}
+	cipherText, err := base64.URLEncoding.DecodeString(stringToDecrypt)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode ciphertext: %w", err)
+	}
+
+	gcm, err := cipher.NewGCM(c.block)
+	if err != nil {
+		return "", fmt.Errorf("failed to create gcm: %w", err)
+	}
+
+	if len(cipherText) < gcm.NonceSize() {
+		return "", fmt.Errorf("ciphertext too short")
+	}
+
+	nonce := cipherText[:gcm.NonceSize()]
+	cipherText = cipherText[gcm.NonceSize():]
+
+	plainText, err := gcm.Open(nil, nonce, cipherText, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to decrypt: %w", err)
+	}
+
+	return string(plainText), nil
 }
