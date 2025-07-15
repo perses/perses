@@ -23,8 +23,12 @@ import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton(): ReactElement {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
-  const { getLocalDatasources, setLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
-  const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
+  const { queryDatasources, addToLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
+  const dashboardDatasources: Record<string, DatasourceSpec> = queryDatasources({ kind: 'Dashboard' }).reduce(
+    (prev, current) => ({ ...prev, [current.metadata.name]: current.spec }),
+    {}
+  );
+
   const savedDatasources: Record<string, DatasourceSpec> = getSavedDatasources();
   const { dashboard, setDashboard } = useDashboard();
 
@@ -77,7 +81,13 @@ export function EditDatasourcesButton(): ReactElement {
           } as EphemeralDashboardResource)
     );
     setSavedDatasources(newSavedDatasources);
-    setLocalDatasources(datasources);
+    addToLocalDatasources(
+      Object.entries(datasources).map(([name, spec]) => ({
+        kind: 'Dashboard',
+        metadata: { name },
+        spec,
+      }))
+    );
     setIsDatasourceEditorOpen(false);
   };
 
@@ -102,7 +112,7 @@ export function EditDatasourcesButton(): ReactElement {
         data-testid="datasource-editor"
       >
         <DatasourceEditor
-          datasources={localDatasources}
+          datasources={dashboardDatasources}
           onCancel={closeDatasourceEditor}
           onChange={handleChangeDatasources}
         />
