@@ -11,9 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import shared from '../jest.shared';
-
-export default {
-  ...shared,
-  setupFilesAfterEnv: ['./jest.setup.ts'],
-};
+/// <reference types="jest" />
+jest.mock('echarts', () => ({
+  use: jest.fn(),
+  init: jest.fn(() => ({
+    setOption: jest.fn(),
+    dispose: jest.fn(),
+    resize: jest.fn(),
+  })),
+}));

@@ -13,12 +13,9 @@
 
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
-  DashboardResource,
-  DashboardSpec,
   DatasourceSelector,
   DatasourceSpec,
   useEvent,
-  EphemeralDashboardResource,
   DatasourceDefinition,
   GenericDatasourceResource,
 } from '@perses-dev/core';
@@ -30,9 +27,9 @@ import {
   DatasourceClient,
   DatasourceSelectItem,
 } from '@perses-dev/plugin-system';
+import { isEqual } from 'lodash';
 
 export interface DatasourceStoreProviderProps {
-  dashboardResource?: DashboardResource | EphemeralDashboardResource;
   projectName?: string;
   datasources: GenericDatasourceResource[];
   children?: ReactNode;
@@ -44,30 +41,33 @@ export interface DatasourceStoreProviderProps {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): ReactElement {
-  const { projectName, datasources, onCreate, children } = props;
-  const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
+  const { projectName: project, datasources, onCreate, children } = props;
+  /* IMPORTANT: Here local means in-memory datasources which are not persisted yet but can be injected to the provider by the consumer at run time  */
+  const [localDatasourcesState, setLocalDatasourcesState] = useState<GenericDatasourceResource[]>([]);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
     props.savedDatasources ?? {}
   );
-  const project = projectName ?? dashboardResource?.metadata.project;
-
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   const findDatasource = useEvent(async (selector: DatasourceSelector) => {
-    // Try to find it in dashboard spec
-    if (dashboardResource) {
-      const { datasources } = dashboardResource.spec;
-      const dashboardDatasource = findDashboardDatasource(datasources, selector);
-      if (dashboardDatasource) {
+    const searchDataset = [...datasources, ...localDatasourcesState];
+    // First try to find it in dashboard spec
+    if (searchDataset.some((ds) => ds.kind === 'Dashboard')) {
+      const foundDashboardDatasource = findDashboardDatasource(
+        datasources.filter((ds) => ds.kind === 'Dashboard'),
+        selector
+      );
+      if (foundDashboardDatasource) {
         return {
-          spec: dashboardDatasource.spec,
-          proxyUrl: dashboardDatasource.spec.proxyUrl,
+          spec: foundDashboardDatasource.spec,
+          proxyUrl: foundDashboardDatasource.spec.proxyUrl,
         };
       }
     }
 
+    // Then, try to find it in dashboard spec
     if (project) {
-      const datasource = datasources.find(
+      const datasource = searchDataset.find(
         (ds) => ds.spec.plugin.kind === selector.kind && ds.metadata['project'] === project
       );
 
@@ -79,7 +79,8 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
     }
 
-    const globalDatasource = datasources
+    // Finally, look for a global datasource
+    const globalDatasource = searchDataset
       .filter((ds) => ds.kind === 'GlobalDatasource')
       .find((ds) => {
         if (selector.kind !== ds.spec.plugin.kind) {
@@ -128,10 +129,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
 
   const listDatasourceSelectItems = useEvent(
     async (datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]> => {
+      const searchDataset = [...datasources, ...localDatasourcesState];
       const projectDatasources = project
-        ? datasources.filter((ds) => ds.metadata['project'] === project && ds.spec.plugin.kind === datasourcePluginName)
+        ? searchDataset.filter(
+            (ds) => ds.metadata['project'] === project && ds.spec.plugin.kind === datasourcePluginName
+          )
         : [];
-      const globalDatasources = datasources.filter(
+      const globalDatasources = searchDataset.filter(
         (ds) => ds.kind === 'GlobalDatasource' && ds.spec.plugin.kind === datasourcePluginName
       );
       const pluginMetadata = await listPluginMetadata(['Datasource']);
@@ -146,14 +150,15 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       const { results, addItem } = buildDatasourceSelectItemGroups(datasourcePluginMetadata.spec.display.name);
 
       // Start with dashboard datasources with the highest precedence
-      if (dashboardResource?.spec.datasources) {
-        for (const selectorName in dashboardResource.spec.datasources) {
-          const spec = dashboardResource.spec.datasources[selectorName];
-          if (spec === undefined || spec.plugin.kind !== datasourcePluginName) continue;
-
-          const saved = selectorName in savedDatasources;
-          addItem({ spec, selectorName, selectorGroup: 'dashboard', saved });
-        }
+      if (searchDataset.some((ds) => ds.kind === 'Dashboard')) {
+        searchDataset
+          .filter((ds) => ds.kind === 'Dashboard')
+          .forEach(({ spec, metadata: { name: selectorName } }) => {
+            if (spec.plugin?.kind === datasourcePluginName) {
+              const saved = selectorName in savedDatasources;
+              addItem({ spec, selectorName, selectorGroup: 'dashboard', saved });
+            }
+          });
       }
 
       // Now look at project-level datasources
@@ -177,58 +182,62 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     }
   );
 
-  const getLocalDatasources = useCallback((): Record<string, DatasourceSpec> => {
-    return dashboardResource?.spec.datasources ?? {};
-  }, [dashboardResource]);
-
   const getSavedDatasources = useCallback((): Record<string, DatasourceSpec> => {
     return savedDatasources;
   }, [savedDatasources]);
 
-  const setLocalDatasources = useCallback(
-    (datasources: Record<string, DatasourceSpec>) => {
-      if (dashboardResource) {
-        setDashboardResource(
-          dashboardResource.kind === 'Dashboard'
-            ? ({
-                ...dashboardResource,
-                spec: {
-                  ...dashboardResource.spec,
-                  datasources: datasources,
-                },
-              } as DashboardResource)
-            : ({
-                ...dashboardResource,
-                spec: {
-                  ...dashboardResource.spec,
-                  datasources: datasources,
-                },
-              } as EphemeralDashboardResource)
-        );
+  const queryDatasources = useCallback(
+    (selector: DatasourceSelector) => {
+      const { name, kind } = selector;
+      const queryDataSet = [...datasources, ...localDatasourcesState];
+
+      let result: GenericDatasourceResource[] = queryDataSet.filter((ds) => ds.kind === kind);
+      if (name) {
+        result = result.filter((ds) => ds.metadata.name.toLowerCase() === name.toLowerCase());
       }
+      return result;
     },
-    [dashboardResource]
+    [datasources, localDatasourcesState]
   );
+
+  const setLocalDatasources = useCallback(
+    (localDatasources: GenericDatasourceResource[]) => {
+      const uniqueNewLocalDatasources = localDatasources.filter((localDatasource) => {
+        for (let i = 0; i < datasources.length; i += 1) {
+          if (isEqual(datasources[i], localDatasource)) {
+            return false;
+          }
+        }
+        return true;
+      });
+      setLocalDatasourcesState([...uniqueNewLocalDatasources]);
+    },
+    [datasources]
+  );
+
+  const getLocalDatasources = useCallback(() => localDatasourcesState, [localDatasourcesState]);
 
   const ctxValue: DatasourceStore = useMemo(
     () =>
       ({
         getDatasource,
         getDatasourceClient,
-        getLocalDatasources,
-        setLocalDatasources,
         setSavedDatasources,
         getSavedDatasources,
         listDatasourceSelectItems,
+        queryDatasources,
+        setLocalDatasources,
+        getLocalDatasources,
       }) as DatasourceStore,
     [
       getDatasource,
       getDatasourceClient,
-      getLocalDatasources,
-      setLocalDatasources,
       listDatasourceSelectItems,
       setSavedDatasources,
       getSavedDatasources,
+      queryDatasources,
+      setLocalDatasources,
+      getLocalDatasources,
     ]
   );
 
@@ -237,26 +246,32 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
 
 // Helper to find a datasource in the list embedded in a dashboard spec
 function findDashboardDatasource(
-  dashboardDatasources: DashboardSpec['datasources'],
+  dashboardDatasources: GenericDatasourceResource[],
   selector: DatasourceSelector
 ): DatasourceDefinition | undefined {
-  if (dashboardDatasources === undefined) return undefined;
+  if (!dashboardDatasources?.length) return undefined;
 
-  // If using a name in the selector...
-  if (selector.name !== undefined) {
-    const named = dashboardDatasources[selector.name];
-    if (named === undefined) return undefined;
-    return named.plugin.kind === selector.kind ? { name: selector.name, spec: named } : undefined;
+  const { name: selectorName, kind: selectorKind } = selector;
+
+  if (selectorName) {
+    const namedDatasource = dashboardDatasources.find(
+      (ds) => ds.metadata.name === selector.name && ds.spec.plugin.kind === selectorKind
+    );
+    if (!namedDatasource) return undefined;
+
+    const {
+      metadata: { name },
+      spec,
+    } = namedDatasource;
+
+    return { name, spec };
   }
 
-  // If only using a kind, try to find one with that kind that is the default
-  const result = Object.entries(dashboardDatasources).find(
-    (entry) => entry[1].plugin.kind === selector.kind && entry[1].default
-  );
-  if (!result) {
-    return undefined;
-  }
-  return { name: result[0], spec: result[1] };
+  // If only kind is specified, try to find the default datasource for that kind
+  const defaultDatasource = dashboardDatasources.find((ds) => ds.spec.plugin.kind === selectorKind && ds.spec.default);
+  if (!defaultDatasource) return undefined;
+
+  return { name: defaultDatasource.metadata.name, spec: defaultDatasource.spec };
 }
 
 interface AddDatasouceSelectItemParams {

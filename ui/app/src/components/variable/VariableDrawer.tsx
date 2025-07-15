@@ -23,6 +23,7 @@ import {
   remotePluginLoader,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
+import { CircularProgress, Stack } from '@mui/material';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { useAllDatasourceResources } from '../../model/datasource-api';
@@ -73,22 +74,28 @@ export function VariableDrawer<T extends Variable>({
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
-            <DatasourceStoreProvider datasources={allDatasources} projectName={projectName}>
-              <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-                <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
-                  <VariableEditorForm
-                    initialVariableDefinition={variableDef}
-                    action={action}
-                    isDraft={false}
-                    isReadonly={isReadonly}
-                    onActionChange={onActionChange}
-                    onSave={handleSave}
-                    onClose={onClose}
-                    onDelete={onDelete ? (): void => setDeleteVariableDialogStateOpened(true) : undefined}
-                  />
-                </VariableProviderWithQueryParams>
-              </TimeRangeProviderWithQueryParams>
-            </DatasourceStoreProvider>
+            {allDatasources.isLoading ? (
+              <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                <CircularProgress />
+              </Stack>
+            ) : (
+              <DatasourceStoreProvider datasources={allDatasources.datasources} projectName={projectName}>
+                <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
+                  <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
+                    <VariableEditorForm
+                      initialVariableDefinition={variableDef}
+                      action={action}
+                      isDraft={false}
+                      isReadonly={isReadonly}
+                      onActionChange={onActionChange}
+                      onSave={handleSave}
+                      onClose={onClose}
+                      onDelete={onDelete ? (): void => setDeleteVariableDialogStateOpened(true) : undefined}
+                    />
+                  </VariableProviderWithQueryParams>
+                </TimeRangeProviderWithQueryParams>
+              </DatasourceStoreProvider>
+            )}
           </ValidationProvider>
         </PluginRegistry>
         {onDelete && (

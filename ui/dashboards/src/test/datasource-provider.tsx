@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { GlobalDatasourceResource } from '@perses-dev/core';
-import { DatasourceStoreProviderProps } from '../context';
-import { getTestDashboard } from './dashboard-provider';
+// import { DatasourceStoreProviderProps } from '../context';
+// import { getTestDashboard } from './dashboard-provider';
 
 export const prometheusDemoUrl = 'https://prometheus.demo.prometheus.io';
 export const prometheusDemo: GlobalDatasourceResource = {
@@ -36,6 +36,6 @@ export const prometheusDemo: GlobalDatasourceResource = {
 // This default currently defines the bare minimum to get a story working in
 // the `Dashboard` storybook with the Prometheus demo api. We'll likely want
 // to expand it to do more in the future.
-export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'dashboardResource'> = {
-  dashboardResource: getTestDashboard(),
-};
+// export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'dashboardResource'> = {
+//   dashboardResource: getTestDashboard(),
+// };

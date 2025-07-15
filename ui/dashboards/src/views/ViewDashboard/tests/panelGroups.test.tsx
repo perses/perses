@@ -16,16 +16,13 @@ import userEvent from '@testing-library/user-event';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { GenericDatasourceResource } from '@perses-dev/core';
 import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
-import { defaultDatasourceProps, getTestDashboard, prometheusDemo, renderWithContext } from '../../../test';
+import { getTestDashboard, prometheusDemo, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
 describe('Panel Groups', () => {
   const renderDashboard = (): void => {
     renderWithContext(
-      <DatasourceStoreProvider
-        datasources={[prometheusDemo] as GenericDatasourceResource[]}
-        {...defaultDatasourceProps}
-      >
+      <DatasourceStoreProvider datasources={[prometheusDemo] as GenericDatasourceResource[]}>
         <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
           <VariableProvider>
             <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>

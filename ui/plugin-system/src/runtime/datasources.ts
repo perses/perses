@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec, GenericDatasourceResource } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
@@ -30,24 +30,30 @@ export interface DatasourceStore {
   listDatasourceSelectItems(datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]>;
 
   /**
-   * Gets the list of datasources defined in the dashboard
-   */
-  getLocalDatasources(): Record<string, DatasourceSpec>;
-
-  /**
-   * Sets the list of datasources defined in the dashboard
-   */
-  setLocalDatasources(datasources: Record<string, DatasourceSpec>): void;
-
-  /**
    * Gets the list of datasources that are available in the dashboard (i.e. dashboards that have been created on the server side that we can use).
    */
   getSavedDatasources(): Record<string, DatasourceSpec>;
 
   /**
+   * Tries to find and retrieve a cloned array of datasources available in the provider
+   */
+  queryDatasources(selector: DatasourceSelector): GenericDatasourceResource[];
+
+  /**
    * Sets the list of datasources that are saved in the dashboard
    */
   setSavedDatasources(datasources: Record<string, DatasourceSpec>): void;
+
+  /**
+   * Sets a local temporary of datasources that are injected into the store.
+   * This is used to have some temporary datasources that are not saved in the dashboard yet.
+   */
+  setLocalDatasources(newLocalDatasources: GenericDatasourceResource[]): void;
+
+  /**
+   * Retrieves the cloned set of local datasources
+   */
+  getLocalDatasources(): GenericDatasourceResource[];
 }
 
 export interface DatasourceSelectItemGroup {

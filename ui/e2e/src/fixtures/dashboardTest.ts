@@ -94,6 +94,8 @@ const IGNORE_CONSOLE_ERRORS = [
   // See https://github.com/emotion-js/emotion/issues/1105
   'potentially unsafe when doing server-side rendering',
   'MUI X: useResizeContainer - The parent DOM element of the Data Grid has an empty height.',
+  /* TODO: This exception is expected from ephemeral dashboard. We need to find a clean way to avoid such a request when running Playwright dashboard tests  */
+  'Failed to load resource: the server responded with a status of 404 (Not Found)',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage): boolean {
   const msgText = message.text();
@@ -156,6 +158,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     const persesApp = new AppHomePage(page);
 
     const consoleErrors: string[] = [];
+
     page.on('console', (msg) => {
       if (msg.type() === 'error' && !shouldIgnoreConsoleError(msg)) {
         // Watch for console errors because they are often a sign that something

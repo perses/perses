@@ -101,7 +101,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
   return (
-    <DatasourceStoreProvider dashboardResource={dashboardResource} datasources={datasources}>
+    <DatasourceStoreProvider datasources={datasources}>
       <DashboardProviderWithQueryParams
         initialState={{
           dashboardResource,

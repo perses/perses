@@ -42,7 +42,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
-  const allDatasources = useAllDatasourceResources();
+  const { datasources: allDatasources, isLoading: isAllDatasourcesLoading } = useAllDatasourceResources();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
       buildProjectVariableDefinition(projectName || '', projectVars ?? []),
@@ -51,7 +51,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
     [projectName, projectVars, globalVars]
   );
 
-  if (isLoadingProjectVars || isLoadingGlobalVars) {
+  if (isLoadingProjectVars || isLoadingGlobalVars || isAllDatasourcesLoading) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />

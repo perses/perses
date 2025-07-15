@@ -80,7 +80,10 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-  const allDatasources = useAllDatasourceResources({ project: dashboardResourceWithProxy.metadata.project });
+  const { datasources: allDatasources, isLoading: isAllDatasourcesLoading } = useAllDatasourceResources({
+    project: dashboardResourceWithProxy.metadata.project,
+    dashboard: dashboardResourceWithProxy.metadata.name,
+  });
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResourceWithProxy.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
@@ -95,7 +98,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     [dashboardResourceWithProxy, projectVars, globalVars]
   );
 
-  if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
+  if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars || isAllDatasourcesLoading) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />
