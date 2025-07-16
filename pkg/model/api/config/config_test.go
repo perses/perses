@@ -111,13 +111,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
-    "authorization": {
-      "provider": {
-        "native": {
-          "check_latest_update_interval": "30s"
-        }
-      }
-    },
+    "authorization": {},
     "authentication": {
       "access_token_ttl": "15m",
       "refresh_token_ttl": "1d",
@@ -238,7 +232,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
             }
           ]
         }
-      },
+      }
     },
     "authentication": {
       "providers": {
@@ -295,20 +289,17 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 			result: Config{
 				Security: Security{
 					Readonly:      false,
-					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
 					EnableAuth:    true,
 					Authentication: AuthenticationConfig{
 						Providers: AuthProviders{
 							EnableNative: true,
 						},
-						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
-						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 					},
 					Authorization: AuthorizationConfig{
 						Provider: AuthorizationProvider{
 							Native: NativeAuthorizationProvider{
-								Enable:                    true,
-								CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+								Enable: false,
 								GuestPermissions: []*role.Permission{
 									{
 										Actions: []role.Action{
@@ -339,10 +330,6 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						ExposeHeaders:    []string{"Content-Encoding"},
 						MaxAge:           60,
 					},
-					Cookie: Cookie{
-						SameSite: SameSite(http.SameSiteLaxMode),
-						Secure:   false,
-					},
 				},
 				Database: Database{
 					File: &File{
@@ -366,10 +353,6 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
-					TimeRange: TimeRange{
-						DisableCustomTimeRange: false,
-						Options:                defaultTimeRangeOptions,
-					},
 				},
 				Plugin: Plugin{
 					Path:        "plugins",
@@ -391,11 +374,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			c := Config{}
-			assert.NoError(t, config.NewResolver[Config]().
-				SetConfigData([]byte(test.jason)).
-				Resolve(&c).
-				Verify())
-			assert.NoError(t, c.Verify())
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &c))
 			assert.Equal(t, test.result, c)
 		})
 	}

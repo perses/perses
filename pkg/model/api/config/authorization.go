@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	defaultCacheInterval                   = 30 * time.Second
+	defaultCacheInterval                   = time.Second * 30
 	DefaultKubernetesAuthorizationAllowTTL = time.Minute * 5
 	DefaultKubernetesAuthorizationDenyTTL  = time.Second * 30
 	DefaultKubernetesAuthenticationTTL     = time.Minute * 2
@@ -48,42 +48,12 @@ type KubernetesProvider struct {
 	AuthenticatorTTL common.Duration `json:"authenticator_ttl,omitempty" yaml:"authenticator_ttl,omitempty"`
 }
 
-type NativeAuthorizationProvider struct {
-	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
-	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
-	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
-	// Default permissions for guest users (logged-in users)
-	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
-}
-
-type AuthorizationProvider struct {
-	Kubernetes KubernetesProvider          `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
-	Native     NativeAuthorizationProvider `json:"native,omitzero" yaml:"native,omitempty"`
-}
-
-type AuthorizationConfig struct {
-	Provider AuthorizationProvider `json:"provider,omitzero" yaml:"provider,omitempty"`
-}
-
-func (n *NativeAuthorizationProvider) Verify() error {
-	if !n.Enable {
-		return nil
-	}
-	if n.CheckLatestUpdateInterval <= 0 {
-		n.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
-	}
-	if n.GuestPermissions == nil {
-		n.GuestPermissions = []*role.Permission{}
-	}
-	return nil
-}
-
 func (k *KubernetesProvider) Verify() error {
 	if !k.Enable {
 		return nil
 	}
 	if k.Kubeconfig != "" {
-		logrus.Warnln("kubeconfig present, this functionality should not be used in production")
+		logrus.Warn("kubeconfig present, this functionality should not be used in production")
 	}
 	if k.QPS == 0 {
 		k.QPS = 500
@@ -99,6 +69,52 @@ func (k *KubernetesProvider) Verify() error {
 	}
 	if k.AuthenticatorTTL == 0 {
 		k.AuthorizerDenyTTL = common.Duration(DefaultKubernetesAuthorizationDenyTTL)
+	}
+	return nil
+}
+
+type NativeAuthorizationProvider struct {
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
+	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
+	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
+	// Default permissions for guest users (logged-in users)
+	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+}
+
+func (n *NativeAuthorizationProvider) Verify() error {
+	if !n.Enable {
+		return nil
+	}
+	if n.CheckLatestUpdateInterval <= 0 {
+		n.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
+	}
+	if n.GuestPermissions == nil {
+		n.GuestPermissions = []*role.Permission{}
+	}
+	return nil
+}
+
+type AuthorizationProvider struct {
+	Kubernetes KubernetesProvider          `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	Native     NativeAuthorizationProvider `json:"native,omitzero" yaml:"native,omitempty"`
+}
+
+type AuthorizationConfig struct {
+	// DEPRECATED: use NativeAuthorizationProvider.CheckLatestUpdateInterval instead.
+	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
+	// DEPRECATED: use NativeAuthorizationProvider.GuestPermissions instead.
+	GuestPermissions []*role.Permission    `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	Provider         AuthorizationProvider `json:"provider,omitzero" yaml:"provider,omitempty"`
+}
+
+func (a *AuthorizationConfig) Verify() error {
+	if a.CheckLatestUpdateInterval > 0 {
+		logrus.Warn("'security.authorization.check_latest_update_interval' is deprecated, use 'security.authorization.provider.native.check_latest_update_interval' instead.")
+		a.Provider.Native.CheckLatestUpdateInterval = a.CheckLatestUpdateInterval
+	}
+	if len(a.GuestPermissions) > 0 {
+		logrus.Warn("'security.authorization.guest_permissions' is deprecated, use 'security.authorization.provider.native.guest_permissions' instead.")
+		a.Provider.Native.GuestPermissions = a.GuestPermissions
 	}
 	return nil
 }

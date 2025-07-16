@@ -48,7 +48,7 @@ func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestP
 	// Checking global perm first
 	if requestProject != v1.WildcardProject {
 		if globalPermissions, ok := usrPermissions[v1.WildcardProject]; ok {
-			if ListHasPermission(globalPermissions, requestAction, requestScope) {
+			if listHasPermission(globalPermissions, requestAction, requestScope) {
 				return true
 			}
 		}
@@ -58,10 +58,10 @@ func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestP
 	if !ok {
 		return false
 	}
-	return ListHasPermission(projectPermissions, requestAction, requestScope)
+	return listHasPermission(projectPermissions, requestAction, requestScope)
 }
 
-func ListHasPermission(permissions []*v1Role.Permission, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
+func listHasPermission(permissions []*v1Role.Permission, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
 	for _, permission := range permissions {
 		for _, action := range permission.Actions {
 			if action == requestAction || action == v1Role.WildcardAction {

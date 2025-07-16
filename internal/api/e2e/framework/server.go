@@ -88,9 +88,6 @@ func DefaultAuthConfig() apiConfig.Config {
 			Scopes:  []role.Scope{role.ProjectScope},
 		},
 	},
-		Providers: apiConfig.AuthorizationProviders{
-			EnableNative: true,
-		},
 	}
 	return conf
 }
