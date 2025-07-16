@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"cuelang.org/go/cue"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
@@ -110,10 +111,10 @@ func (n *Node) doesKindExistWithSpecIndex() (bool, int, int) {
 	kindIndex := -1
 	specIndex := -1
 	for i, node := range n.Nodes {
-		if node.FieldName == http.HTTPProxyKindField && strings.ToLower(node.ConcreteValue) == http.HTTPProxyKindName {
+		if node.FieldName == datasource.ProxyKindField && strings.ToLower(node.ConcreteValue) == http.ProxyKindName {
 			kindExist = true
 			kindIndex = i
-		} else if node.FieldName == http.HTTPProxySpec {
+		} else if node.FieldName == datasource.ProxySpec {
 			specIndex = i
 		}
 	}
