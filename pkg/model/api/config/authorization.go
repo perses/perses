@@ -88,9 +88,6 @@ func (n *NativeAuthorizationProvider) Verify() error {
 	if n.CheckLatestUpdateInterval <= 0 {
 		n.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
 	}
-	if n.GuestPermissions == nil {
-		n.GuestPermissions = []*role.Permission{}
-	}
 	return nil
 }
 
