@@ -29,7 +29,7 @@ const DEFAULT_NUMBRO_MANTISSA = 2;
 
 type BytesUnit = 'bytes';
 export type BytesFormatOptions = {
-  unit: BytesUnit;
+  unit?: BytesUnit;
   decimalPlaces?: number;
   shortValues?: boolean;
 };

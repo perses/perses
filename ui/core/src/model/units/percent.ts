@@ -17,7 +17,7 @@ import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
 type PercentUnit = 'percent' | 'percent-decimal' | '%';
 export type PercentFormatOptions = {
-  unit: PercentUnit;
+  unit?: PercentUnit;
   decimalPlaces?: number;
 };
 export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
