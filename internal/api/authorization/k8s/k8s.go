@@ -118,7 +118,7 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 		return nil, fmt.Errorf("request unable to be authenticated")
 	}
 
-	return &res.User, nil
+	return res.User, nil
 }
 
 // GetUsername implements [Authorization]
@@ -136,7 +136,7 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 		// into the appropriate struct
 		return "", err
 	}
-	return (*k8sUser).GetName(), nil
+	return k8sUser.GetName(), nil
 }
 
 // Middleware implements [Authorization]
@@ -179,7 +179,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, requestAction v1Role.Action,
 	authorizedNamespaces := []string{}
 
 	for _, k8sNamespace := range k8sNamespaces {
-		if k.checkNamespacePermission(ctx, k8sNamespace, *kubernetesUser) {
+		if k.checkNamespacePermission(ctx, k8sNamespace, kubernetesUser) {
 			authorizedNamespaces = append(authorizedNamespaces, k8sNamespace)
 		}
 	}
@@ -222,7 +222,7 @@ func (k k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	// Try checking the specific project for access
 	// If the namespace doesn't exist in k8s, the authorizer will return the "*" permissions
 	attributes := authorizer.AttributesRecord{
-		User:            *kubernetesUser,
+		User:            kubernetesUser,
 		Verb:            string(action),
 		Namespace:       requestProject,
 		APIGroup:        apiGroup,
@@ -304,7 +304,7 @@ scope:
 		action:
 			for _, k8sActionToCheck := range actionsToCheck {
 				attributes := authorizer.AttributesRecord{
-					User:            *kubernetesUser,
+					User:            kubernetesUser,
 					Verb:            string(k8sActionToCheck),
 					Namespace:       k8sProject,
 					APIGroup:        apiGroup,
@@ -465,8 +465,8 @@ func getK8sAPIGroup(scope k8sScope) string {
 
 // helper function to convert any type into a user.Info. This function should not error, and it is
 // expected that the struct being passed in is user.Info
-func getK8sUser(userStruct any) (*user.Info, error) {
-	if k8sUser, ok := userStruct.(*user.Info); ok {
+func getK8sUser(userStruct any) (user.Info, error) {
+	if k8sUser, ok := userStruct.(user.Info); ok {
 		return k8sUser, nil
 	}
 	logrus.Errorf("invalid struct type passed representing the user in kubernetes provider: %T", userStruct)
