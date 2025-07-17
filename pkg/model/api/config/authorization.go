@@ -111,10 +111,12 @@ func (a *AuthorizationConfig) Verify() error {
 	if a.CheckLatestUpdateInterval > 0 {
 		logrus.Warn("'security.authorization.check_latest_update_interval' is deprecated, use 'security.authorization.provider.native.check_latest_update_interval' instead.")
 		a.Provider.Native.CheckLatestUpdateInterval = a.CheckLatestUpdateInterval
+		a.CheckLatestUpdateInterval = 0
 	}
 	if len(a.GuestPermissions) > 0 {
 		logrus.Warn("'security.authorization.guest_permissions' is deprecated, use 'security.authorization.provider.native.guest_permissions' instead.")
 		a.Provider.Native.GuestPermissions = a.GuestPermissions
+		a.GuestPermissions = nil
 	}
 	return nil
 }

@@ -189,25 +189,6 @@ security:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
-						CheckLatestUpdateInterval: common.Duration(time.Minute * 10),
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
-								},
-							},
-						},
 						Provider: AuthorizationProvider{
 							Native: NativeAuthorizationProvider{
 								Enable:                    true,
