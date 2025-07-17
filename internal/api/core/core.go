@@ -71,9 +71,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}
 		runner.WithTaskHelpers(datasourceDiscoveryTasks...)
 	}
-	if conf.Security.EnableAuth {
+	if conf.Security.Authorization.Provider.Native.Enable {
 		rbacTask := authorization.NewPermissionRefreshCronTask(serviceManager.GetAuthorization(), persesDAO)
-		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
+		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.Provider.Native.CheckLatestUpdateInterval), rbacTask)
 	}
 
 	// Extract the plugin archives and load the plugins.

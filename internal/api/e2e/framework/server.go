@@ -78,16 +78,23 @@ func DefaultAuthConfig() apiConfig.Config {
 		SameSite: apiConfig.SameSite(http.SameSiteNoneMode),
 		Secure:   true,
 	}
-	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
-		{
-			Actions: []role.Action{role.ReadAction},
-			Scopes:  []role.Scope{role.WildcardScope},
+	conf.Security.Authorization = apiConfig.AuthorizationConfig{
+		Provider: apiConfig.AuthorizationProvider{
+			Native: apiConfig.NativeAuthorizationProvider{
+				Enable: true,
+				GuestPermissions: []*role.Permission{
+					{
+						Actions: []role.Action{role.ReadAction},
+						Scopes:  []role.Scope{role.WildcardScope},
+					},
+					{
+						Actions: []role.Action{role.CreateAction},
+						Scopes:  []role.Scope{role.ProjectScope},
+					},
+				},
+			},
 		},
-		{
-			Actions: []role.Action{role.CreateAction},
-			Scopes:  []role.Scope{role.ProjectScope},
-		},
-	}}
+	}
 	return conf
 }
 

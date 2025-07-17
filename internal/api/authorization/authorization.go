@@ -16,6 +16,7 @@ package authorization
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/authorization/k8s"
 	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -65,8 +66,16 @@ type Authorization interface {
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
+	// If the higher level auth enabled is false then ignore all authorization configuration
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
+
+	if conf.Security.Authorization.Provider.Kubernetes.Enable {
+		return k8s.New(conf)
+	}
+
+	// If no providers are explicitly set but auth is enabled, then use the perses native authz
 	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+
 }
