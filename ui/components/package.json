@@ -33,7 +33,7 @@
     "@codemirror/lang-json": "^6.0.1",
     "@fontsource/lato": "^4.5.10",
     "@mui/x-date-pickers": "^7.23.1",
-    "@perses-dev/core": "0.51.0",
+    "@perses-dev/core": "snapshot-panel-actions",
     "@tanstack/react-table": "^8.20.5",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
