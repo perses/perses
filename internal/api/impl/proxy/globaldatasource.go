@@ -27,7 +27,8 @@ import (
 
 func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
-	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+
+	pr, err := newProxy(datasourceName, "", spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getGlobalSecret(datasourceName, name)
 	})
 	if err != nil {
@@ -93,5 +94,6 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
 		return nil, apiinterface.InternalError
 	}
+
 	return &scrt.Spec, nil
 }
