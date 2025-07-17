@@ -40,6 +40,16 @@ func Name(name string) Option {
 	}
 }
 
+func Namespace(namespace string) Option {
+	return func(builder *Builder) error {
+		if err := common.ValidateID(namespace); err != nil {
+			return fmt.Errorf("invalid namespace: %w", err)
+		}
+		builder.Dashboard.Metadata.Namespace = namespace
+		return nil
+	}
+}
+
 func Description(description string) Option {
 	return func(builder *Builder) error {
 		if err := common.ValidateDescription(description); err != nil {
