@@ -80,7 +80,10 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-  const allDatasources = useAllDatasourceResources({ project: dashboardResourceWithProxy.metadata.project });
+  const allDatasources = useAllDatasourceResources({
+    project: dashboardResourceWithProxy.metadata.project,
+    dashboard: dashboardResourceWithProxy.metadata.name,
+  });
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResourceWithProxy.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();

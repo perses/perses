@@ -41,7 +41,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
   const { closeEditJsonDialog } = useEditJsonDialog();
   const { setTimeRange, setRefreshInterval } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
-  const { setLocalDatasources } = useDatasourceStore();
+  const { addToLocalDatasources } = useDatasourceStore();
   const [draftDashboard, setDraftDashboard] = useState(dashboard);
 
   const handleApply = (e: FormEvent): void => {
@@ -49,7 +49,13 @@ const EditJsonDialogForm = (props: EditJsonDialogProps): ReactElement => {
     setDashboard(draftDashboard);
     setTimeRange({ pastDuration: draftDashboard.spec.duration });
     setRefreshInterval(draftDashboard.spec.refreshInterval ?? '0s');
-    setLocalDatasources(draftDashboard.spec.datasources ?? {});
+    addToLocalDatasources(
+      Object.entries(draftDashboard?.spec?.datasources || []).map(([name, spec]) => ({
+        kind: 'Dashboard',
+        metadata: { name },
+        spec,
+      }))
+    );
     closeEditJsonDialog();
   };
 

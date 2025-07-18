@@ -24,8 +24,6 @@ import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  DashboardResource,
-  DashboardSpec,
   Datasource,
   DatasourceSpec,
   GlobalDatasourceResource,
@@ -496,17 +494,19 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
     const mockDatasources: GenericDatasourceResource[] = [
       ...(data.input.datasources.global as GenericDatasourceResource[]),
       ...(data.input.datasources.project as GenericDatasourceResource[]),
+      ...Object.entries(data.input.datasources.local || []).map<GenericDatasourceResource>(([name, spec]) => ({
+        kind: 'Dashboard',
+        metadata: { name },
+        spec: spec as DatasourceSpec,
+      })),
     ];
     const queryClient = new QueryClient();
-    const dashboard = {
-      spec: { datasources: data.input.datasources.local } as Partial<DashboardSpec>,
-    } as DashboardResource;
+
     const wrapper = ({ children }: PropsWithChildren): ReactElement => {
       return (
         <PluginRegistry {...mockPluginRegistry(MOCK_DS_PLUGIN)}>
           <QueryClientProvider client={queryClient}>
             <DatasourceStoreProvider
-              dashboardResource={dashboard}
               projectName={PROJECT}
               datasources={mockDatasources}
               savedDatasources={

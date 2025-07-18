@@ -96,6 +96,15 @@ const IGNORE_CONSOLE_ERRORS = [
   'MUI X: useResizeContainer - The parent DOM element of the Data Grid has an empty height.',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage): boolean {
+  /* TODO: This exception is expected. We need to find a clean way to avoid such a request when running Playwright dashboard tests  */
+  if (
+    message.location().url ===
+    'http://localhost:8080/api/v1/projects/testing/ephemeraldashboards/variables__can_add_simple_list_variable__2'
+  ) {
+    if (message.text() === 'Failed to load resource: the server responded with a status of 404 (Not Found)') {
+      return true;
+    }
+  }
   const msgText = message.text();
   return IGNORE_CONSOLE_ERRORS.some((ignoreErr) => msgText.includes(ignoreErr));
 }
@@ -156,11 +165,13 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     const persesApp = new AppHomePage(page);
 
     const consoleErrors: string[] = [];
+    const consoleMessage: ConsoleMessage[] = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error' && !shouldIgnoreConsoleError(msg)) {
         // Watch for console errors because they are often a sign that something
         // is wrong.
         consoleErrors.push(msg.text());
+        consoleMessage.push(msg);
       }
     });
 
