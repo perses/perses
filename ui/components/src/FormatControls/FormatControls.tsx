@@ -63,7 +63,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
   const hasShortValues = isUnitWithShortValues(value);
 
   const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption | null): void => {
-    onChange({ unit: newValue?.id || 'decimal' }); // Fallback to 'decimal' if no unit is selected
+    onChange({ unit: newValue?.id || 'decimal' } as FormatOptions); // Fallback to 'decimal' if no unit is selected
   };
 
   const handleDecimalPlacesChange = ({
