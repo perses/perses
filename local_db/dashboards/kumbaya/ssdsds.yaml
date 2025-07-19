@@ -1,0 +1,40 @@
+kind: Dashboard
+metadata:
+    name: ssdsds
+    createdAt: 2025-07-17T19:48:28.1029831Z
+    updatedAt: 2025-07-17T19:48:28.1029831Z
+    version: 0
+    project: kumbaya
+spec:
+    display:
+        name: ssdsds
+    panels:
+        sdsds:
+            kind: Panel
+            spec:
+                display:
+                    name: sdsds
+                plugin:
+                    kind: BarChart
+                    spec:
+                        calculation: last
+                        format:
+                            shortValues: true
+                            unit: decimal
+                        mode: value
+                        sort: desc
+    layouts:
+        - kind: Grid
+          spec:
+            display:
+                title: Panel Group
+                collapse:
+                    open: true
+            items:
+                - x: 0
+                  "y": 0
+                  width: 12
+                  height: 6
+                  content:
+                    $ref: '#/spec/panels/sdsds'
+    duration: 1h

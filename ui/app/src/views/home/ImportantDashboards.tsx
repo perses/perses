@@ -15,7 +15,7 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { ReactElement } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
@@ -28,7 +28,6 @@ interface DashboardMosaicProps {
 
 function DashboardMosaic({ dashboards }: DashboardMosaicProps): ReactElement {
   const isMobileSize = useIsMobileSize();
-  const { t, i18n } = useTranslation();
 
   //return <h1>{t('Welcome to React')}</h1>
   if (dashboards.length === 0) {

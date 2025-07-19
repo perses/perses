@@ -2,18 +2,24 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// 👇 Import your translations
-import en from './en.json';
-import fr from './fr.json';
-import am from './am.json';
+// Type-safe resources object
+const resources: Record<string, { translation: Record<string, string> }> = {};
+
+// Dynamically require all .json files from ./locales
+const context = require.context('./locales', false, /\.json$/);
+
+context.keys().forEach((key: string) => {
+  const match = key.match(/\.\/(.*)\.json$/);
+  if (match && match[1]) {
+    const lang = match[1];
+    const translation = context(key) as Record<string, string>;
+    resources[lang] = { translation };
+  }
+});
 
 i18n.use(initReactI18next).init({
-  resources: {
-    en: { translation: en },
-    fr: { translation: fr },
-    am: { translation: am },
-  },
-  lng: 'fr', // or dynamically set later
+  resources,
+  lng: 'en', // default language
   fallbackLng: 'en',
   interpolation: {
     escapeValue: false,
