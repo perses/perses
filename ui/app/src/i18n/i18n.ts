@@ -18,6 +18,7 @@ context.keys().forEach((key: string) => {
 });
 
 i18n.use(initReactI18next).init({
+  debug: false,
   resources,
   lng: 'en', // default language
   fallbackLng: 'en',
