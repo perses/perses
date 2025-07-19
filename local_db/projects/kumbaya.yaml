@@ -1,0 +1,9 @@
+kind: Project
+metadata:
+    name: kumbaya
+    createdAt: 2025-07-17T19:48:07.7202614Z
+    updatedAt: 2025-07-17T19:48:07.7202614Z
+    version: 0
+spec:
+    display:
+        name: Kumbaya

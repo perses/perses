@@ -18,9 +18,10 @@ import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
-import i18n from './i18n/i18n';
+//import i18n from './i18n/i18n';
+import './i18n/i18n'; // <-- Import before <App />
 
-i18n.changeLanguage('am'); // or 'en', 'fr', etc.
+//i18n.changeLanguage('en'); // or 'en', 'fr', etc.
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
