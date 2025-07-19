@@ -37,6 +37,7 @@ import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Con
 import { useHasPermission } from '../../context/Authorization';
 import { DeleteResourceDialog } from '../../components/dialogs';
 import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
+import { Trans } from 'react-i18next';
 
 interface ProjectAccordionProps {
   row: ProjectWithDashboards;
@@ -216,7 +217,7 @@ export function ProjectsAndDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2>Projects & Dashboards</h2>
+        <h2><Trans i18nKey="hdgProjectsandDashboards" /></h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>
