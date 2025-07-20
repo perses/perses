@@ -10,18 +10,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import resources from './locales';
 
-i18n.use(initReactI18next).init({
-  debug: false,
-  resources,
-  lng: 'en',
-  fallbackLng: 'en',
-  interpolation: {
-    escapeValue: false,
-  },
-});
+import en from './en.json';
+import fr from './fr.json';
+import am from './am.json';
 
-export default i18n;
+const resources = {
+  en: { translation: en },
+  fr: { translation: fr },
+  am: { translation: am },
+};
+
+export default resources;
