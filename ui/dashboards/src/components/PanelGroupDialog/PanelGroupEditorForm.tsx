@@ -19,11 +19,12 @@ type CollapsedState = 'Open' | 'Closed';
 
 export interface PanelGroupEditorFormProps {
   initialValues: PanelGroupEditorValues;
+  variables?: string[];
   onSubmit: (next: PanelGroupEditorValues) => void;
 }
 
 export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactElement {
-  const { initialValues, onSubmit } = props;
+  const { initialValues, variables, onSubmit } = props;
 
   const [title, setTitle] = useState(initialValues.title);
   const [isCollapsed, setIsCollapsed] = useState(initialValues.isCollapsed);
@@ -60,12 +61,19 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
         </Select>
         <FormControl fullWidth margin="normal">
           <TextField
+            select
             required
             label="Repeated Variable"
             variant="outlined"
             value={repeatVariable}
             onChange={(e) => setRepeatVariable(e.target.value)}
-          />
+          >
+            {variables?.map((variable) => (
+              <MenuItem key={variable} value={variable}>
+                {variable}
+              </MenuItem>
+            ))}
+          </TextField>
         </FormControl>{' '}
       </FormControl>
     </form>
