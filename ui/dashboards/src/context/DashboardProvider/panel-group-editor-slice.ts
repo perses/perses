@@ -26,6 +26,7 @@ export interface PanelGroupEditor {
 export interface PanelGroupEditorValues {
   title: string;
   isCollapsed: boolean;
+  repeatVariable: string;
 }
 
 /**
@@ -64,11 +65,13 @@ export const createPanelGroupEditorSlice: StateCreator<
       initialValues: {
         title: '',
         isCollapsed: false,
+        repeatVariable: '',
       },
       applyChanges(next) {
         const newGroup = createEmptyPanelGroup();
         newGroup.title = next.title;
         newGroup.isCollapsed = next.isCollapsed;
+        newGroup.repeatVariable = next.repeatVariable;
         set((draft) => {
           addPanelGroup(draft, newGroup);
         });
@@ -98,6 +101,7 @@ export const createPanelGroupEditorSlice: StateCreator<
       initialValues: {
         title: existingGroup.title ?? '',
         isCollapsed: existingGroup.isCollapsed,
+        repeatVariable: existingGroup.repeatVariable ?? '',
       },
       applyChanges(next) {
         set((draft) => {
@@ -107,6 +111,7 @@ export const createPanelGroupEditorSlice: StateCreator<
           }
           group.title = next.title;
           group.isCollapsed = next.isCollapsed;
+          group.repeatVariable = next.repeatVariable;
         });
       },
       close() {

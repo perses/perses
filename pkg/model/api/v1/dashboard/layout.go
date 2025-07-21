@@ -85,8 +85,9 @@ type GridLayoutDisplay struct {
 }
 
 type GridLayoutSpec struct {
-	Display *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
-	Items   []GridItem         `json:"items" yaml:"items"`
+	Display        *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+	Items          []GridItem         `json:"items" yaml:"items"`
+	RepeatVariable string             `json:"repeatVariable,omitempty" yaml:"repeatVariable,omitempty"`
 }
 
 type LayoutSpec interface {

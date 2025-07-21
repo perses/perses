@@ -47,6 +47,8 @@ export interface PanelGroupDefinition {
   id: PanelGroupId;
   isCollapsed: boolean;
   title?: string;
+  repeatedOriginId?: PanelGroupId; // ID of the original panel group from which this repeated group is derived
+  repeatVariable?: string; // Optional, used for repeated panel groups
   itemLayouts: PanelGroupItemLayout[];
   itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
 }
@@ -63,6 +65,7 @@ export type PanelGroupItemLayoutId = string;
 export interface PanelGroupItemId {
   panelGroupId: PanelGroupId;
   panelGroupItemLayoutId: PanelGroupItemLayoutId;
+  repeatVariable?: [string, string]; // Optional, used for repeated panel groups. Variable name and value.
 }
 
 /*
@@ -141,6 +144,7 @@ export function convertLayoutsToPanelGroups(
     panelGroups[panelGroupId] = {
       id: panelGroupId,
       isCollapsed: layout.spec.display?.collapse?.open === false,
+      repeatVariable: layout.spec.repeatVariable,
       title: layout.spec.display?.title,
       itemLayouts,
       itemPanelKeys,
