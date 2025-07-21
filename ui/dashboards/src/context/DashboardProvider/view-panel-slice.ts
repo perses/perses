@@ -83,15 +83,21 @@ function getViewPanelGroupId(
 // Find the PanelGroupItemId of a Panel from a PanelRef
 function findPanelGroupItemIdOfPanelRef(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
-  panelRef?: string
+  panelRef: string
 ): PanelGroupItemId | undefined {
   for (const panelGroup of Object.values(panelGroups)) {
-    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef);
+    // TODO: do something cleaner with panelRef
+    const [ref, repeatVariable] = panelRef.split('###');
+    const repeatVariableSplit =
+      repeatVariable?.split('|').length === 2 ? (repeatVariable.split('|') as [string, string]) : undefined;
+
+    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === ref);
     if (itemPanel) {
       const [key] = itemPanel;
       return {
         panelGroupId: panelGroup.id,
         panelGroupItemLayoutId: key,
+        repeatVariable: repeatVariableSplit,
       };
     }
   }
@@ -108,7 +114,11 @@ function findPanelRefOfPanelGroupItemId(
   }
   const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
   if (panelGroup) {
-    return panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+    const panelRef = panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+    if (panelGroupItemId.repeatVariable !== undefined) {
+      return `${panelRef}###${panelGroupItemId.repeatVariable.join('|')}`;
+    }
+    return panelRef;
   }
   return undefined;
 }

@@ -102,20 +102,20 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProviderWithQueryParams
-        initialState={{
-          dashboardResource,
-          isEditMode: !!isEditing,
-        }}
+      <TimeRangeProviderWithQueryParams
+        initialTimeRange={initialTimeRange}
+        initialRefreshInterval={initialRefreshInterval}
       >
-        <TimeRangeProviderWithQueryParams
-          initialTimeRange={initialTimeRange}
-          initialRefreshInterval={initialRefreshInterval}
+        <VariableProviderWithQueryParams
+          initialVariableDefinitions={spec.variables}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariables}
         >
-          <VariableProviderWithQueryParams
-            initialVariableDefinitions={spec.variables}
-            externalVariableDefinitions={externalVariableDefinitions}
-            builtinVariableDefinitions={builtinVariables}
+          <DashboardProviderWithQueryParams
+            initialState={{
+              dashboardResource,
+              isEditMode: !!isEditing,
+            }}
           >
             <Box
               sx={combineSx(
@@ -145,9 +145,9 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                 />
               </ErrorBoundary>
             </Box>
-          </VariableProviderWithQueryParams>
-        </TimeRangeProviderWithQueryParams>
-      </DashboardProviderWithQueryParams>
+          </DashboardProviderWithQueryParams>
+        </VariableProviderWithQueryParams>
+      </TimeRangeProviderWithQueryParams>
     </DatasourceStoreProvider>
   );
 }

@@ -15,6 +15,7 @@
 import { ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelEditorValues } from '@perses-dev/core';
+import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { usePanelEditor } from '../../context';
 import { PanelEditorForm } from './PanelEditorForm';
 
@@ -23,6 +24,7 @@ import { PanelEditorForm } from './PanelEditorForm';
  */
 export const PanelDrawer = (): ReactElement => {
   const panelEditor = usePanelEditor();
+  const variables = useVariableValues();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
@@ -54,6 +56,36 @@ export const PanelDrawer = (): ReactElement => {
   const handleClickOut = (): void => {
     /* do nothing */
   };
+
+  // If the panel editor is for a repeatable variable, we need to provide the variable context
+  // So the plugin editor can access the variable values and the preview can render correctly
+  const repeatVariable = panelEditor?.panelGroupItemId?.repeatVariable;
+  if (repeatVariable) {
+    return (
+      <Drawer
+        isOpen={isOpen}
+        onClose={handleClickOut}
+        SlideProps={{ onExited: handleExited }}
+        data-testid="panel-editor"
+      >
+        {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
+        {panelEditor && (
+          <VariableContext.Provider
+            value={{ state: { ...variables, [repeatVariable[0]]: { value: repeatVariable[1], loading: false } } }}
+          >
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <PanelEditorForm
+                initialAction={panelEditor.mode}
+                initialValues={panelEditor.initialValues}
+                onSave={handleSave}
+                onClose={handleClose}
+              />
+            </ErrorBoundary>
+          </VariableContext.Provider>
+        )}
+      </Drawer>
+    );
+  }
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">

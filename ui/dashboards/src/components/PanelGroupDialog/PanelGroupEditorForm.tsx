@@ -27,6 +27,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
 
   const [title, setTitle] = useState(initialValues.title);
   const [isCollapsed, setIsCollapsed] = useState(initialValues.isCollapsed);
+  const [repeatVariable, setRepeatVariable] = useState(initialValues.repeatVariable);
 
   const handleCollapsedChange: SelectProps<CollapsedState>['onChange'] = (e) => {
     const next = e.target.value;
@@ -35,7 +36,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    onSubmit({ title, isCollapsed });
+    onSubmit({ title, isCollapsed, repeatVariable });
   };
 
   return (
@@ -57,6 +58,15 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
           <MenuItem value="Open">Open</MenuItem>
           <MenuItem value="Closed">Closed</MenuItem>
         </Select>
+        <FormControl fullWidth margin="normal">
+          <TextField
+            required
+            label="Repeated Variable"
+            variant="outlined"
+            value={repeatVariable}
+            onChange={(e) => setRepeatVariable(e.target.value)}
+          />
+        </FormControl>{' '}
       </FormControl>
     </form>
   );

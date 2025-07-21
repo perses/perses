@@ -10,26 +10,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
-import { Collapse, useTheme } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ReactElement, useState } from 'react';
+import { Layouts, Layout } from 'react-grid-layout';
+
 import { PanelGroupId } from '@perses-dev/core';
+import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import {
   useEditMode,
   usePanelGroup,
   usePanelGroupActions,
-  PanelGroupItemLayout,
   useViewPanelGroup,
   PanelGroupDefinition,
 } from '../../context';
-import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelOptions } from '../Panel';
-import { GridTitle } from './GridTitle';
-import { GridItemContent } from './GridItemContent';
-import { GridContainer } from './GridContainer';
-const DEFAULT_MARGIN = 10;
-const ROW_HEIGHT = 30;
+
+import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
@@ -42,47 +38,18 @@ export interface GridLayoutProps {
  */
 export function GridLayout(props: GridLayoutProps): ReactElement {
   const { panelGroupId, panelOptions, panelFullHeight } = props;
-  const theme = useTheme();
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
+  const viewPanelItemId = useViewPanelGroup();
 
-  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
   const { isEditMode } = useEditMode();
 
   const [gridColWidth, setGridColWidth] = useState(0);
 
-  const viewPanelItemId = useViewPanelGroup();
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
-  const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
-
-  useEffect(() => {
-    if (hasViewPanel) {
-      setIsOpen(true);
-    }
-  }, [hasViewPanel]);
-
   // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
   const isGridDisplayed = viewPanelItemId === undefined || hasViewPanel;
-
-  // Item layout is override if there is a panel in view mode
-  const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
-    if (itemLayoutViewed) {
-      return groupDefinition.itemLayouts.map((itemLayout) => {
-        if (itemLayout.i === itemLayoutViewed) {
-          const rowTitleHeight = 40 + 8; // 40 is the height of the row title and 8 is the margin height
-          return {
-            h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)), // Viewed panel should take the full height remaining
-            i: itemLayoutViewed,
-            w: 48,
-            x: 0,
-            y: 0,
-          } as PanelGroupItemLayout;
-        }
-        return itemLayout;
-      });
-    }
-    return groupDefinition.itemLayouts;
-  }, [groupDefinition.itemLayouts, itemLayoutViewed, panelFullHeight]);
+  // const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts): void => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
@@ -112,76 +79,107 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
     setGridColWidth((containerWidth - marginWidth - containerPaddingWidth) / cols);
   };
 
-  // https://github.com/react-grid-layout/react-grid-layout?tab=readme-ov-file#react-hooks-performance
-  const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
-
   return (
-    <GridContainer
-      sx={{
-        display: isGridDisplayed ? 'block' : 'none',
-        height: itemLayoutViewed ? `${panelFullHeight}px` : 'unset',
-        overflow: itemLayoutViewed ? 'hidden' : 'unset',
-      }}
-    >
-      {groupDefinition.title !== undefined && (
-        <GridTitle
+    <>
+      {!groupDefinition.repeatVariable ? (
+        <Row
           panelGroupId={panelGroupId}
-          title={groupDefinition.title}
-          collapse={
-            groupDefinition.isCollapsed === undefined
-              ? undefined
-              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
-          }
-        />
-      )}
-      <Collapse in={isOpen} unmountOnExit appear={false} data-testid="panel-group-content">
-        <ResponsiveGridLayout
-          className="layout"
-          breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
-          cols={GRID_LAYOUT_COLS}
-          rowHeight={ROW_HEIGHT}
-          draggableHandle=".drag-handle"
-          resizeHandles={['se']}
-          isDraggable={isEditMode && !hasViewPanel}
-          isResizable={isEditMode && !hasViewPanel}
-          margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
-          containerPadding={[0, 10]}
-          layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: itemLayouts }}
+          groupDefinition={groupDefinition}
+          itemLayoutViewed={viewPanelItemId?.panelGroupItemLayoutId}
+          gridColWidth={gridColWidth}
+          panelFullHeight={panelFullHeight}
+          panelOptions={panelOptions}
+          isEditMode={isEditMode}
+          isHidden={!isGridDisplayed}
+          hasViewPanel={hasViewPanel}
           onLayoutChange={handleLayoutChange}
           onWidthChange={handleWidthChange}
-          allowOverlap={hasViewPanel} // Enabling overlap when viewing a specific panel because panel in front of the viewed panel will add empty spaces (empty row height)
-        >
-          {itemLayouts.map(({ i, w }) => (
-            <div
-              key={i}
-              style={{
-                display: itemLayoutViewed !== undefined ? (itemLayoutViewed === i ? 'unset' : 'none') : 'unset',
-              }}
-            >
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <GridItemContent
-                  panelOptions={panelOptions}
-                  panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
-                  width={calculateGridItemWidth(w, gridColWidth)}
-                />
-              </ErrorBoundary>
-            </div>
-          ))}
-        </ResponsiveGridLayout>
-      </Collapse>
-    </GridContainer>
+        />
+      ) : (
+        <RepeatGridLayout
+          repeatVariableName={groupDefinition.repeatVariable}
+          panelGroupId={panelGroupId}
+          groupDefinition={groupDefinition}
+          itemLayoutViewed={viewPanelItemId?.panelGroupItemLayoutId}
+          gridColWidth={gridColWidth}
+          panelFullHeight={panelFullHeight}
+          panelOptions={panelOptions}
+          isEditMode={isEditMode}
+          isHidden={!isGridDisplayed}
+          hasViewPanel={hasViewPanel}
+          onLayoutChange={handleLayoutChange}
+          onWidthChange={handleWidthChange}
+        />
+      )}
+    </>
   );
 }
 
+export interface RepeatGridLayoutProps extends RowProps {
+  repeatVariableName: string;
+}
+
 /**
- * Calculates grid item width
- * @param w number of columns the grid item spans
- * @param colWidth the width of each column in px
- * @returns grid item's width in px
- * https://github.com/react-grid-layout/react-grid-layout/blob/master/lib/calculateUtils.js#L14-L35
+ * Renders a grid layout for a repeated variable, where each value of the variable will create a new row.
  */
-const calculateGridItemWidth = (w: number, colWidth: number): number => {
-  // 0 * Infinity === NaN, which causes problems with resize contraints
-  if (!Number.isFinite(w)) return w;
-  return Math.round(colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN);
-};
+export function RepeatGridLayout({
+  repeatVariableName,
+  panelGroupId,
+  groupDefinition,
+  itemLayoutViewed,
+  gridColWidth,
+  panelFullHeight,
+  panelOptions,
+  isEditMode = false,
+  isHidden = false,
+  hasViewPanel = false,
+  onLayoutChange,
+  onWidthChange,
+}: RepeatGridLayoutProps): ReactElement | null {
+  const variables = useVariableValues();
+  const variable = variables[repeatVariableName];
+
+  if (variable === undefined || !variable.value || !Array.isArray(variable.value)) {
+    return (
+      <Row
+        panelGroupId={panelGroupId}
+        groupDefinition={groupDefinition}
+        itemLayoutViewed={itemLayoutViewed}
+        gridColWidth={gridColWidth}
+        panelFullHeight={panelFullHeight}
+        panelOptions={panelOptions}
+        isEditMode={isEditMode}
+        isHidden={isHidden}
+        hasViewPanel={hasViewPanel}
+        onLayoutChange={onLayoutChange}
+        onWidthChange={onWidthChange}
+      />
+    );
+  }
+
+  return (
+    <>
+      {variable.value.map((value) => (
+        <VariableContext.Provider
+          key={`${repeatVariableName}-${value}`}
+          value={{ state: { ...variables, [repeatVariableName]: { value, loading: false } } }}
+        >
+          <Row
+            panelGroupId={panelGroupId}
+            groupDefinition={groupDefinition}
+            itemLayoutViewed={itemLayoutViewed}
+            gridColWidth={gridColWidth}
+            panelFullHeight={panelFullHeight}
+            panelOptions={panelOptions}
+            isEditMode={isEditMode}
+            isHidden={isHidden}
+            hasViewPanel={hasViewPanel}
+            onLayoutChange={onLayoutChange}
+            onWidthChange={onWidthChange}
+            repeatVariable={[repeatVariableName, value]}
+          />
+        </VariableContext.Provider>
+      ))}
+    </>
+  );
+}

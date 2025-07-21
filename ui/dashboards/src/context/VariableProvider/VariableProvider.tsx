@@ -463,7 +463,7 @@ function createVariableDefinitionStore({
     )
   );
 
-  return store as unknown as StoreApi<VariableDefinitionStore>; // TODO: @Gladorme check if we can avoid this cast
+  return store as StoreApi<VariableDefinitionStore>;
 }
 
 /**
@@ -527,3 +527,57 @@ export function VariableProviderWithQueryParams({
     </VariableDefinitionStoreContext.Provider>
   );
 }
+
+// TODO: make Variable Provider more generic to sources
+
+interface VariablesContext {
+  store: StoreApi<VariableDefinitionStore>;
+  getParentVariableDefinitions: () => VariableDefinition[];
+  getParentVariableDefinition: (name: string) => VariableDefinition[];
+  getParentVariableStates: () => VariableStateMap;
+  getParentVariableState: (name: string) => VariableState;
+}
+
+const VariablesContext = createContext<VariablesContext | undefined>(undefined);
+
+export function useVariablesContext(): VariablesContext | undefined {
+  return useContext(VariablesContext);
+}
+
+// Call parent component when calling for variable states, else state will not be updated
+
+export interface VariablesProvider2Props {
+  children: ReactNode;
+  // List of variable definitions that will be used to provide the variable states.
+  variableDefinitions: VariableDefinition[];
+  // Helper to identify the source of the variable definitions.
+  source?: string;
+  // If not set, use parent settings
+  enableQueryParams?: boolean;
+}
+
+// VariableProvider providers is used to provide the variable definitions and their states to the children components.
+// This providers can be chained to add more variable definitions and states. Children will override the parent variable definitions.
+// export function VariablesProvider2({
+//   children,
+//   variableDefinitions,
+//   source,
+//   enableQueryParams,
+// }: VariablesProvider2Props): ReactElement {
+//   const ctx = useVariablesContext();
+//
+//   function getVariableDefinitions(): VariableDefinition[] {
+//     const definitions: VariableDefinition[] = [];
+//     if (ctx?.getParentVariableDefinitions) {
+//       definitions.push(...ctx.getParentVariableDefinitions());
+//     }
+//     definitions.push(...variableDefinitions);
+//     return definitions;
+//   }
+//
+//   return (
+//     <VariablesContext.Provider value={{ getParentVariableDefinitions: getVariableDefinitions }}>
+//       {children}
+//     </VariablesContext.Provider>
+//   );
+// }
