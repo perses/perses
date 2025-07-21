@@ -20,13 +20,10 @@ const ROW_HEIGHT = 30;
 export interface RowProps {
   panelGroupId: PanelGroupId;
   groupDefinition: PanelGroupDefinition;
-  itemLayoutViewed?: string;
   gridColWidth: number;
   panelFullHeight?: number;
   panelOptions?: PanelOptions;
   isEditMode?: boolean;
-  isHidden?: boolean;
-  hasViewPanel?: boolean;
   onLayoutChange?: (currentLayout: Layout[], allLayouts: Layouts) => void;
   onWidthChange?: (
     containerWidth: number,
@@ -40,13 +37,10 @@ export interface RowProps {
 export function Row({
   panelGroupId,
   groupDefinition,
-  // itemLayoutViewed,
   gridColWidth,
   panelFullHeight,
   panelOptions,
   isEditMode = false,
-  // isHidden = false,
-  // hasViewPanel = false,
   onLayoutChange,
   onWidthChange,
   repeatVariable,
