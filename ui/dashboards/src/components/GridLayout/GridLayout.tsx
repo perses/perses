@@ -41,18 +41,14 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
   const viewPanelItemId = useViewPanelGroup();
-
   const { isEditMode } = useEditMode();
 
   const [gridColWidth, setGridColWidth] = useState(0);
 
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
-  // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
-  const isGridDisplayed = viewPanelItemId === undefined || hasViewPanel;
-  // const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts): void => {
-    // Using the value from `allLayouts` instead of `currentLayout` because of
+    // Using the value from `allLayouts` instead of `c urrentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
@@ -85,13 +81,10 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
         <Row
           panelGroupId={panelGroupId}
           groupDefinition={groupDefinition}
-          itemLayoutViewed={viewPanelItemId?.panelGroupItemLayoutId}
           gridColWidth={gridColWidth}
           panelFullHeight={panelFullHeight}
           panelOptions={panelOptions}
           isEditMode={isEditMode}
-          isHidden={!isGridDisplayed}
-          hasViewPanel={hasViewPanel}
           onLayoutChange={handleLayoutChange}
           onWidthChange={handleWidthChange}
         />
@@ -100,13 +93,10 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
           repeatVariableName={groupDefinition.repeatVariable}
           panelGroupId={panelGroupId}
           groupDefinition={groupDefinition}
-          itemLayoutViewed={viewPanelItemId?.panelGroupItemLayoutId}
           gridColWidth={gridColWidth}
           panelFullHeight={panelFullHeight}
           panelOptions={panelOptions}
           isEditMode={isEditMode}
-          isHidden={!isGridDisplayed}
-          hasViewPanel={hasViewPanel}
           onLayoutChange={handleLayoutChange}
           onWidthChange={handleWidthChange}
         />
@@ -126,13 +116,10 @@ export function RepeatGridLayout({
   repeatVariableName,
   panelGroupId,
   groupDefinition,
-  itemLayoutViewed,
   gridColWidth,
   panelFullHeight,
   panelOptions,
   isEditMode = false,
-  isHidden = false,
-  hasViewPanel = false,
   onLayoutChange,
   onWidthChange,
 }: RepeatGridLayoutProps): ReactElement | null {
@@ -144,13 +131,10 @@ export function RepeatGridLayout({
       <Row
         panelGroupId={panelGroupId}
         groupDefinition={groupDefinition}
-        itemLayoutViewed={itemLayoutViewed}
         gridColWidth={gridColWidth}
         panelFullHeight={panelFullHeight}
         panelOptions={panelOptions}
         isEditMode={isEditMode}
-        isHidden={isHidden}
-        hasViewPanel={hasViewPanel}
         onLayoutChange={onLayoutChange}
         onWidthChange={onWidthChange}
       />
@@ -167,13 +151,10 @@ export function RepeatGridLayout({
           <Row
             panelGroupId={panelGroupId}
             groupDefinition={groupDefinition}
-            itemLayoutViewed={itemLayoutViewed}
             gridColWidth={gridColWidth}
             panelFullHeight={panelFullHeight}
             panelOptions={panelOptions}
             isEditMode={isEditMode}
-            isHidden={isHidden}
-            hasViewPanel={hasViewPanel}
             onLayoutChange={onLayoutChange}
             onWidthChange={onWidthChange}
             repeatVariable={[repeatVariableName, value]}
