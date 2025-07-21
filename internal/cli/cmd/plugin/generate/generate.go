@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-
 	"text/template"
 
 	plugin "github.com/perses/perses/internal/api/plugin"
@@ -227,17 +226,19 @@ func (o *generateOptions) Execute() error {
 	})
 
 	for _, p := range persesPlugins {
-		switch p.Kind {
-		case apiv1.KindDatasource:
-			persesDatasourcePlugins = append(persesDatasourcePlugins, p)
-		case apiv1.KindTimeSeriesQuery:
+		if p.Kind.IsQuery() {
 			persesQueryPlugins = append(persesQueryPlugins, p)
-		case apiv1.KindVariable:
-			persesVariablePlugins = append(persesVariablePlugins, p)
-		case apiv1.KindExplore:
-			persesExplorePlugins = append(persesExplorePlugins, p)
-		case apiv1.KindPanel:
-			persesPanelPlugins = append(persesPanelPlugins, p)
+		} else {
+			switch p.Kind {
+			case apiv1.KindDatasource:
+				persesDatasourcePlugins = append(persesDatasourcePlugins, p)
+			case apiv1.KindVariable:
+				persesVariablePlugins = append(persesVariablePlugins, p)
+			case apiv1.KindExplore:
+				persesExplorePlugins = append(persesExplorePlugins, p)
+			case apiv1.KindPanel:
+				persesPanelPlugins = append(persesPanelPlugins, p)
+			}
 		}
 	}
 
