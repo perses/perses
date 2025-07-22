@@ -61,7 +61,7 @@ func New(conf config.Config) (*k8sImpl, error) {
 	}
 
 	sarClient := kubeClient.AuthorizationV1()
-	authorizer, err := newAuthorizer(sarClient, conf.Security.Authorization.Provider.Kubernetes)
+	k8sAuthorizer, err := newAuthorizer(sarClient, conf.Security.Authorization.Provider.Kubernetes)
 	if err != nil {
 		return nil, nil
 	}
@@ -77,7 +77,7 @@ func New(conf config.Config) (*k8sImpl, error) {
 
 	return &k8sImpl{
 		authenticator: kubernetesAuthenticator,
-		authorizer:    authorizer,
+		authorizer:    k8sAuthorizer,
 		kubeconfig:    kubeconfig,
 		kubeClient:    kubeClient,
 	}, nil
@@ -157,27 +157,25 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 }
 
 // GetUserProjects implements [Authorization]
-func (k *k8sImpl) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
+func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Scope) ([]string, error) {
 	if utils.IsAnonymous(ctx) {
 		// This method should not be called if the endpoint is anonymous or the username is not found.
 		logrus.Error("failed to get username from context to list the user projects")
 		return nil, apiInterface.InternalError
 	}
 
-	user, err := k.GetUser(ctx)
+	usr, err := k.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	kubernetesUser, err := getK8sUser(user)
+	kubernetesUser, err := getK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
 
 	k8sNamespaces := k.getNamespaceList()
-
-	authorizedNamespaces := []string{}
-
+	var authorizedNamespaces []string
 	for _, k8sNamespace := range k8sNamespaces {
 		if k.checkNamespacePermission(ctx, k8sNamespace, kubernetesUser) {
 			authorizedNamespaces = append(authorizedNamespaces, k8sNamespace)
@@ -188,7 +186,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, requestAction v1Role.Action,
 }
 
 // HasPermission implements [Authorization]
-func (k k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
+func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// If the context is nil, it means the function is called internally without a request context.
 	// And in this case, we assume we want to bypass the authorization check.
 	if ctx == nil {
@@ -199,12 +197,12 @@ func (k k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return true
 	}
 
-	user, err := k.GetUser(ctx)
+	usr, err := k.GetUser(ctx)
 	if err != nil {
 		return false
 	}
 
-	kubernetesUser, err := getK8sUser(user)
+	kubernetesUser, err := getK8sUser(usr)
 	if err != nil {
 		return false
 	}
@@ -239,7 +237,7 @@ func (k k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 }
 
 // GetPermissions implements [Authorization]
-func (k k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
+func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
 	// If the context is nil, it means the function is called internally without a request context.
 	// This function should not be called for such a case
 	if ctx == nil {
@@ -250,17 +248,17 @@ func (k k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 		// This function should not be called without a user
 		return nil, apiInterface.InternalError
 	}
-	user, err := k.GetUser(ctx)
+	usr, err := k.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
+	if usr == nil {
 		// The user is unable to be found for the request, however without a user we cannot determine
 		// their permissions
 		return nil, apiInterface.InternalError
 	}
 
-	kubernetesUser, err := getK8sUser(user)
+	kubernetesUser, err := getK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
@@ -271,8 +269,8 @@ func (k k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 
 scope:
 	for _, k8sScope := range k8sScopesToCheck {
-		// Contains the actions which need to be checked every loop. If action is permitted
-		// at the global scope then we don't need to check within the namespace scope
+		// Contains the actions which need to be checked every loop.
+		// If action is permitted at the global scope, then we don't need to check within the namespace scope.
 		// Since each permission check is a network round trip, it is best to optimize
 		// the logic to reduce the number of permission checks we make
 		actionsToCheck := []k8sAction{
@@ -379,7 +377,7 @@ func (k *k8sImpl) RefreshPermissions() error {
 }
 
 func (k *k8sImpl) checkNamespacePermission(ctx echo.Context, namespace string, user user.Info) bool {
-	// rather than checking if the user has access to the namespace, we check if the user has access
+	// Rather than checking if the user has access to the namespace, we check if the user has access
 	// to any of the perses scopes within the namespace, since namespaces which the user has access to
 	// but cannot view perses scopes are irrelevant
 	for _, k8sScope := range k8sScopesToCheck {
@@ -502,9 +500,8 @@ func newAuthenticator(client authenticationclient.AuthenticationV1Interface, con
 		WebhookRetryBackoff:     options.DefaultAuthWebhookRetryBackoff(),
 	}
 
-	authenticator, _, err := authenticatorConfig.New()
-	if err != nil {
-		return nil, err
-	}
-	return authenticator, nil
+	result, _, err := authenticatorConfig.New()
+	// In case of error, the function New() will return nil, nil, err.
+	// So, we don't need to check if the error is nil or not.
+	return result, err
 }
