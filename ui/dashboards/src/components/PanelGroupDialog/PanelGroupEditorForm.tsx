@@ -12,10 +12,8 @@
 // limitations under the License.
 
 import { FormEventHandler, ReactElement, useState } from 'react';
-import { FormControl, InputLabel, TextField, Select, SelectProps, MenuItem } from '@mui/material';
+import { FormControl, TextField, MenuItem } from '@mui/material';
 import { PanelGroupEditorValues } from '../../context';
-
-type CollapsedState = 'Open' | 'Closed';
 
 export interface PanelGroupEditorFormProps {
   initialValues: PanelGroupEditorValues;
@@ -30,11 +28,6 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
   const [isCollapsed, setIsCollapsed] = useState(initialValues.isCollapsed);
   const [repeatVariable, setRepeatVariable] = useState(initialValues.repeatVariable);
 
-  const handleCollapsedChange: SelectProps<CollapsedState>['onChange'] = (e) => {
-    const next = e.target.value;
-    setIsCollapsed(next === 'Closed');
-  };
-
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
     onSubmit({ title, isCollapsed, repeatVariable });
@@ -43,22 +36,27 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
   return (
     <form id={panelGroupEditorFormId} onSubmit={handleSubmit}>
       <FormControl fullWidth margin="normal">
-        <TextField required label="Name" variant="outlined" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <TextField
+          required
+          label="Name"
+          variant="outlined"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          data-testid="panel-group-editor-name"
+        />
       </FormControl>
       <FormControl fullWidth margin="normal">
-        <InputLabel id="select-collapse-state">Collapse State</InputLabel>
-        <Select<CollapsedState>
+        <TextField
+          select
           required
-          displayEmpty
-          labelId="select-collapse-state"
           label="Collapse State"
           size="small"
           value={isCollapsed ? 'Closed' : 'Open'}
-          onChange={handleCollapsedChange}
+          onChange={(e) => setIsCollapsed(e.target.value === 'Closed')}
         >
           <MenuItem value="Open">Open</MenuItem>
           <MenuItem value="Closed">Closed</MenuItem>
-        </Select>
+        </TextField>
         <FormControl fullWidth margin="normal">
           <TextField
             select

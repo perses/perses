@@ -12,7 +12,6 @@
 // limitations under the License.
 import { ReactElement, useState } from 'react';
 import { Layouts, Layout } from 'react-grid-layout';
-
 import { PanelGroupId } from '@perses-dev/core';
 import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import {
@@ -24,7 +23,6 @@ import {
 } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelOptions } from '../Panel';
-
 import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {
