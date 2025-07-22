@@ -39,7 +39,7 @@ import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
-import { createViewPanelSlice, ViewPanelSlice } from './view-panel-slice';
+import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -78,8 +78,8 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 export interface DashboardStoreProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
-  viewPanelRef?: string;
-  setViewPanelRef?: (viewPanelRef: string | undefined) => void;
+  viewPanelRef?: VirtualPanelRef;
+  setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
 }
 
 export interface DashboardProviderProps {

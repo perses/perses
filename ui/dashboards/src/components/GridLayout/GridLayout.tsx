@@ -126,7 +126,8 @@ export function RepeatGridLayout({
   const variables = useVariableValues();
   const variable = variables[repeatVariableName];
 
-  if (variable === undefined || !variable.value || !Array.isArray(variable.value)) {
+  // If the variable is not defined, or if it is defined but has no values, render a standard row without repeating
+  if (variable === undefined || !Array.isArray(variable.value) || variable.value.length === 0) {
     return (
       <Row
         panelGroupId={panelGroupId}
