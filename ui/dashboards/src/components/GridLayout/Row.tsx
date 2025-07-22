@@ -11,21 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  GridContainer,
-  GridItemContent,
-  GridTitle,
-  PanelGroupDefinition,
-  PanelGroupItemLayout,
-  PanelOptions,
-  useViewPanelGroup,
-} from '@perses-dev/dashboards';
 import { Collapse, useTheme } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { PanelGroupId } from '@perses-dev/core';
+import { PanelGroupDefinition, PanelGroupItemLayout, PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
 import { ReactElement, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
-import { PanelGroupId } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { GridContainer } from './GridContainer';
+import { GridItemContent } from './GridItemContent';
+import { GridTitle } from './GridTitle';
 
 const DEFAULT_MARGIN = 10;
 const ROW_HEIGHT = 30;
