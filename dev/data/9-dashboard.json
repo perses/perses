@@ -77,19 +77,19 @@
           }
         },
         {
-        "kind": "ListVariable",
-        "spec": {
-          "name": "datasourceVariable",
-          "allowAllValue": false,
-          "allowMultiple": false,
-          "plugin": {
-            "kind": "DatasourceVariable",
-            "spec": {
-              "datasourcePluginKind": "PrometheusDatasource"
+          "kind": "ListVariable",
+          "spec": {
+            "name": "datasourceVariable",
+            "allowAllValue": false,
+            "allowMultiple": false,
+            "plugin": {
+              "kind": "DatasourceVariable",
+              "spec": {
+                "datasourcePluginKind": "PrometheusDatasource"
+              }
             }
           }
         }
-      }
       ],
       "panels": {
         "defaultTimeSeriesChart": {
