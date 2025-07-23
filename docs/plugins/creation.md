@@ -80,7 +80,7 @@ Perses CLI (`percli`) has a plugin option that helps you create and manage your 
   - `--module.org`: The organization name on which the plugin module will be created, useful for publising the plugin. This is required only when the module does not exist, ignored otherwise.
   - `--plugin.name`: The plugin name. A pascal case and kebab case variants will be generated inside the templates. If a plugin with the same name already exists, it will be overwritten.
   - `--plugin.type`: The plugin type can be one of
-    `Datasource`, `TimeSeriesQuery`, `Variable`, `Panel`, or `Explore`.
+    `Datasource`, `TimeSeriesQuery` , `TraceQuery`, `ProfileQuery`, `LogQuery`, `Variable`, `Panel`, or `Explore`.
   - `--plugin.display-name`: The more human name of the plugin to be used in the UI. If not provided, the plugin name will be used.
   - `[<plugin module directory>]`: The plugin module directory is optional and the current directory will be used if not provided.
 - `percli plugin build`: Build the plugin module and create the archive file.

@@ -61,9 +61,7 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 // IsSchemaRequired check if any plugins described in the module require a schema
 func IsSchemaRequired(moduleSpec plugin.ModuleSpec) bool {
 	for _, plg := range moduleSpec.Plugins {
-		if plg.Kind == plugin.KindDatasource || plg.Kind == plugin.KindPanel || plg.Kind == plugin.KindVariable ||
-			plg.Kind == plugin.KindQuery || plg.Kind == plugin.KindTimeSeriesQuery || plg.Kind == plugin.KindTraceQuery ||
-			plg.Kind == plugin.KindProfileQuery {
+		if plg.Kind == plugin.KindDatasource || plg.Kind == plugin.KindPanel || plg.Kind == plugin.KindVariable || plg.Kind.IsQuery() {
 			return true
 		}
 	}

@@ -457,24 +457,26 @@ func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.P
 }
 
 func (m *mig) remove(kind plugin.Kind, name string) {
-	switch kind {
-	case plugin.KindPanel:
-		for grafanaKindName, p := range m.panels {
-			if p.name == name {
-				delete(m.panels, grafanaKindName)
-				// When parsing the migration script, it's possible we are finding that the script can match multiple Grafana panel types.
-				// So we need to remove all the entries that match the panel name.
-				// That's why; when finding one, we are not breaking the loop.
-			}
-		}
-		delete(m.panels, name)
-	case plugin.KindVariable:
-		delete(m.variables, name)
-	case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+	if kind.IsQuery() {
 		delete(m.queries, name)
-	case plugin.KindDatasource:
-		// No migration script for datasource, so nothing to remove
-	default:
-		logrus.Warnf("unable to remove migration script for %q: kind %q not supported", name, kind)
+	} else {
+		switch kind {
+		case plugin.KindPanel:
+			for grafanaKindName, p := range m.panels {
+				if p.name == name {
+					delete(m.panels, grafanaKindName)
+					// When parsing the migration script, it's possible we are finding that the script can match multiple Grafana panel types.
+					// So we need to remove all the entries that match the panel name.
+					// That's why; when finding one, we are not breaking the loop.
+				}
+			}
+			delete(m.panels, name)
+		case plugin.KindVariable:
+			delete(m.variables, name)
+		case plugin.KindDatasource:
+			// No migration script for datasource, so nothing to remove
+		default:
+			logrus.Warnf("unable to remove migration script for %q: kind %q not supported", name, kind)
+		}
 	}
 }
