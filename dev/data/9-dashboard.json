@@ -75,7 +75,21 @@
             "value": "test",
             "constant": true
           }
+        },
+        {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "datasourceVariable",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "DatasourceVariable",
+            "spec": {
+              "datasourcePluginKind": "PrometheusDatasource"
+            }
+          }
         }
+      }
       ],
       "panels": {
         "defaultTimeSeriesChart": {
@@ -95,7 +109,8 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "up"
+                      "query": "up",
+                      "datasource": "$datasourceVariable"
                     }
                   }
                 }
