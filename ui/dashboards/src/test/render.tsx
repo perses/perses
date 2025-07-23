@@ -20,10 +20,9 @@ import { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
-import { GenericDatasourceResource } from '@perses-dev/core';
 import { DatasourceStoreProvider } from '../context';
+import { defaultDatasourceProps } from '../test';
 import { MOCK_PLUGINS } from './plugin-registry';
-import { prometheusDemo } from './datasource-provider';
 
 interface CustomRouterProps {
   history: MemoryHistory;
@@ -74,9 +73,7 @@ export function renderWithContext(
                 pluginLoader={mockRegistry.pluginLoader}
                 defaultPluginKinds={mockRegistry.defaultPluginKinds}
               >
-                <DatasourceStoreProvider datasources={[prometheusDemo as GenericDatasourceResource]}>
-                  {ui}
-                </DatasourceStoreProvider>
+                <DatasourceStoreProvider {...defaultDatasourceProps}>{ui}</DatasourceStoreProvider>
               </PluginRegistry>
             </ChartsProvider>
           </SnackbarProvider>

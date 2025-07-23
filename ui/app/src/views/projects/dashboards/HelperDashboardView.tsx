@@ -13,12 +13,7 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import {
-  DashboardResource,
-  DatasourceSpec,
-  EphemeralDashboardResource,
-  getResourceDisplayName,
-} from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import {
   PluginRegistry,
@@ -28,7 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { buildProxyUrl, useAllDatasourceResources } from '../../../model/datasource-api';
+import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
@@ -50,49 +45,20 @@ export interface GenericDashboardViewProps {
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
-  /* TODO: This will be removed after the dashboard local datasource refactor */
-  const dashboardResourceWithProxy = useMemo(
-    () => ({
-      ...dashboardResource,
-      spec: {
-        ...dashboardResource.spec,
-        datasources: Object.entries(dashboardResource.spec.datasources || {}).reduce<Record<string, DatasourceSpec>>(
-          (prev, current) => {
-            const [key, spec] = current;
-            return {
-              ...prev,
-              [key]: {
-                ...spec,
-                proxyUrl: buildProxyUrl({
-                  project: dashboardResource.metadata.project,
-                  dashboard: dashboardResource.metadata.name,
-                  name: key,
-                }),
-              },
-            };
-          },
-          {}
-        ),
-      },
-    }),
-    [dashboardResource]
-  );
-
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-  const allDatasources = useAllDatasourceResources({ project: dashboardResourceWithProxy.metadata.project });
+  const datasourceApi = useDatasourceApi();
+
   // Collect the Project variables and setup external variables from it
-  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResourceWithProxy.metadata.project);
+  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
-  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(
-    dashboardResourceWithProxy.metadata.project
-  );
+  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(dashboardResource.metadata.project);
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [
-      buildProjectVariableDefinition(dashboardResourceWithProxy.metadata.project, projectVars ?? []),
+      buildProjectVariableDefinition(dashboardResource.metadata.project, projectVars ?? []),
       buildGlobalVariableDefinition(globalVars ?? []),
     ],
-    [dashboardResourceWithProxy, projectVars, globalVars]
+    [dashboardResource, projectVars, globalVars]
   );
 
   if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
@@ -127,8 +93,8 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
                 <ViewDashboard
-                  datasources={allDatasources}
                   dashboardResource={dashboardResource}
+                  datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={
                     <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
