@@ -19,5 +19,3 @@ package common
 		name?: string
 	}
 }
-
-#variableSyntaxRegex: "^\\$\\w+$"
