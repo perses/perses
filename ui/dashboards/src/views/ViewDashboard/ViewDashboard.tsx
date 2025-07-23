@@ -49,6 +49,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     emptyDashboardProps,
     onSave,
     onDiscard,
+    buildProxyUrl,
     initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,

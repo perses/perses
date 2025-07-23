@@ -13,7 +13,7 @@
 
 import Compass from 'mdi-material-ui/Compass';
 import { ReactElement } from 'react';
-import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import AppBreadcrumbs from '../../../components/breadcrumbs/AppBreadcrumbs';
 import ProjectExploreView from './ProjectExploreView';
 
 function ExploreView(): ReactElement {

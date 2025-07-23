@@ -26,9 +26,7 @@ export function buildProxyUrl({
   project?: string;
   dashboard?: string;
   name: string;
-}
-
-export const buildProxyUrl = ({ project, dashboard, name }: ProxyBuilderParam): string => {
+}): string {
   const basePath = getBasePathName();
   let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
   if (dashboard) {
@@ -38,7 +36,7 @@ export const buildProxyUrl = ({ project, dashboard, name }: ProxyBuilderParam): 
     url = `projects/${encodeURIComponent(project)}/${url}`;
   }
   return `${basePath}/proxy/${url}`;
-};
+}
 
 export function useDatasourceApi(): DatasourceApi {
   const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();

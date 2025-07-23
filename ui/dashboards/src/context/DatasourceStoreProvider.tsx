@@ -41,6 +41,14 @@ export interface DatasourceStoreProviderProps {
   onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
+export type BuildDatasourceProxyUrlParams = {
+  project?: string;
+  dashboard?: string;
+  name: string;
+};
+
+export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => string;
+
 /**
  * The external API for fetching datasource resources
  */
@@ -70,7 +78,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     if (dashboardResource) {
       const { datasources } = dashboardResource.spec;
       const dashboardDatasource = findDashboardDatasource(datasources, selector);
-      if (dashboardDatasource) {
+      if (dashboardDatasource !== undefined) {
         return {
           spec: dashboardDatasource.spec,
           proxyUrl: buildDatasourceProxyUrl(datasourceApi, {
