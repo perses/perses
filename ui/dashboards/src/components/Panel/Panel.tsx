@@ -14,8 +14,8 @@
 import { Card, CardContent, CardProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, combineSx, useChartsTheme, useId } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
-import { useDataQueriesContext } from '@perses-dev/plugin-system';
-import { ReactNode, memo, useMemo, useState } from 'react';
+import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
+import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { PanelGroupItemId } from '../../context';
 import { PanelContent } from './PanelContent';
@@ -90,6 +90,100 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const chartsTheme = useChartsTheme();
 
   const { queryResults } = useDataQueriesContext();
+  const { getPlugin } = usePluginRegistry();
+
+  const panelPropsForActions = useMemo(() => {
+    return {
+      spec: definition.spec.plugin.spec,
+      queryResults: queryResults.map((query) => ({
+        definition: query.definition,
+        data: query.data,
+      })),
+      contentDimensions,
+      definition,
+    };
+  }, [definition, contentDimensions, queryResults]);
+
+  // Load plugin actions from the plugin
+  const [pluginActions, setPluginActions] = useState<ReactNode[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPluginActions = async (): Promise<void> => {
+      const panelPluginKind = definition.spec.plugin.kind;
+      const panelProps = panelPropsForActions;
+
+      if (!panelPluginKind || !panelProps) {
+        if (!cancelled) {
+          setPluginActions([]);
+        }
+        return;
+      }
+
+      try {
+        // Add defensive check for getPlugin availability
+        if (!getPlugin || typeof getPlugin !== 'function') {
+          if (!cancelled) {
+            setPluginActions([]);
+          }
+          return;
+        }
+
+        const plugin = await getPlugin('Panel', panelPluginKind);
+
+        if (cancelled) return;
+
+        // More defensive checking for plugin and actions
+        if (
+          !plugin ||
+          typeof plugin !== 'object' ||
+          !plugin.actions ||
+          !Array.isArray(plugin.actions) ||
+          plugin.actions.length === 0
+        ) {
+          if (!cancelled) {
+            setPluginActions([]);
+          }
+          return;
+        }
+
+        // Render plugin actions in header location
+        const headerActions = plugin.actions
+          .filter((action) => !action.location || action.location === 'header')
+          .map((action, index): ReactNode | null => {
+            const ActionComponent = action.component;
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return <ActionComponent key={`plugin-action-${index}`} {...(panelProps as any)} />;
+            } catch (error) {
+              console.warn(`Failed to render plugin action ${index}:`, error);
+              return null;
+            }
+          })
+          .filter((item): item is ReactNode => Boolean(item));
+
+        if (!cancelled) {
+          setPluginActions(headerActions);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.warn('Failed to load plugin actions:', error);
+          setPluginActions([]);
+        }
+      }
+    };
+
+    // Use setTimeout to defer the async operation to the next tick
+    const timeoutId = setTimeout(() => {
+      loadPluginActions();
+    }, 0);
+
+    return (): void => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [definition.spec.plugin.kind, panelPropsForActions, getPlugin]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
@@ -130,6 +224,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}
+          pluginActions={pluginActions}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}

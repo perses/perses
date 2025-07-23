@@ -15,14 +15,66 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { DataQueriesProvider, TimeRangeProvider, useDataQueriesContext } from '@perses-dev/plugin-system';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { renderWithContext } from '../../test';
 import { VariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
 
+const testTheme = createTheme({
+  components: {
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+        disableTouchRipple: true,
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        disableRipple: true,
+        disableTouchRipple: true,
+      },
+    },
+    MuiIconButton: {
+      defaultProps: {
+        disableRipple: true,
+        disableTouchRipple: true,
+      },
+    },
+  },
+  transitions: {
+    create: () => 'none',
+  },
+});
+
+jest.mock('@perses-dev/components', () => ({
+  ...jest.requireActual('@perses-dev/components'),
+  InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
+    <>
+      {children}
+      <div role="tooltip">{description}</div>
+    </>
+  ),
+}));
+
+jest.mock('@mui/material/CircularProgress', () => {
+  return function MockCircularProgress(props: { 'aria-label'?: string }): JSX.Element {
+    return <div aria-label={props['aria-label'] || 'loading'} />;
+  };
+});
+
 jest.mock('@perses-dev/plugin-system', () => {
   return {
     ...jest.requireActual('@perses-dev/plugin-system'),
-    useDataQueriesContext: jest.fn(() => ({ queryResults: [] })),
+    useDataQueriesContext: jest.fn(() => ({
+      queryResults: [],
+      isFetching: false,
+      errors: [],
+    })),
+    usePluginRegistry: jest.fn(() => ({
+      getPlugin: jest.fn((): { PanelComponent: () => JSX.Element } => ({
+        PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
+      })),
+    })),
   };
 });
 
@@ -51,7 +103,6 @@ describe('Panel', () => {
     },
   });
 
-  // Helper to render the panel with some context set
   const renderPanel = (
     definition?: PanelDefinition,
     editHandlers?: PanelProps['editHandlers'],
@@ -60,27 +111,28 @@ describe('Panel', () => {
     definition ??= createTestPanel();
 
     renderWithContext(
-      <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
-        <VariableProvider
-          initialVariableDefinitions={[
-            {
-              kind: 'TextVariable',
-              spec: {
-                name: 'foo',
-                value: 'bar ',
+      <ThemeProvider theme={testTheme}>
+        <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
+          <VariableProvider
+            initialVariableDefinitions={[
+              {
+                kind: 'TextVariable',
+                spec: {
+                  name: 'foo',
+                  value: 'bar ',
+                },
               },
-            },
-          ]}
-        >
-          <DataQueriesProvider definitions={[]}>
-            <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
-          </DataQueriesProvider>
-        </VariableProvider>
-      </TimeRangeProvider>
+            ]}
+          >
+            <DataQueriesProvider definitions={[]}>
+              <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+            </DataQueriesProvider>
+          </VariableProvider>
+        </TimeRangeProvider>
+      </ThemeProvider>
     );
   };
 
-  // Helper to get the panel once rendered
   const getPanel = (): HTMLElement => screen.getByTestId('panel');
 
   it('should render panel', async () => {
@@ -89,11 +141,9 @@ describe('Panel', () => {
     const panel = getPanel();
     expect(panel).toBeInTheDocument();
 
-    // Should diplay header with panel's title
     const header = screen.getByRole('banner');
     expect(header).toHaveTextContent('Fake Panel Title');
 
-    // Should display chart's content from the fake panel plugin
     const content = screen.getByRole('figure');
     await waitFor(() => {
       expect(content).toHaveTextContent('TimeSeriesChart panel');
@@ -109,8 +159,11 @@ describe('Panel', () => {
 
     // Can hover to see panel description in tooltip
     userEvent.hover(descriptionButton);
-    const tooltip = await screen.findByRole('tooltip');
+
+    const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel - bar' });
+    expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveTextContent('This is a fake panel - bar');
+    expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
   });
 
   it('shows panel link', async () => {
@@ -121,8 +174,12 @@ describe('Panel', () => {
 
     // Can hover to see panel description in tooltip
     userEvent.hover(linkButton);
-    const tooltip = await screen.findByRole('tooltip');
+
+    const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel link - bar' });
+    expect(tooltip).toBeInTheDocument();
     expect(tooltip).toHaveTextContent('This is a fake panel link - bar');
+    expect(linkButton).toHaveAttribute('href', 'https://example.com');
+    expect(linkButton).toHaveAttribute('target', '_blank');
   });
 
   it('does not show description when panel does not have one', () => {
@@ -197,7 +254,9 @@ describe('Panel', () => {
 
   it('shows loading indicator if 1/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [{ isFetching: true }, { data: [] }],
+      isFetching: true,
+      errors: [],
+      queryResults: [{ data: { series: [{ name: 'test', values: [[1, 2]] }] }, isFetching: true }],
     });
 
     renderPanel();
@@ -206,7 +265,9 @@ describe('Panel', () => {
 
   it('does not show a loading indicator if 2/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [{ isFetching: true }, { isFetching: true }],
+      isFetching: true,
+      errors: [],
+      queryResults: [],
     });
 
     renderPanel();
@@ -215,6 +276,8 @@ describe('Panel', () => {
 
   it('shows query errors in the tooltip', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
+      isFetching: false,
+      errors: ['test error'],
       queryResults: [{ error: 'test error' }],
     });
 
