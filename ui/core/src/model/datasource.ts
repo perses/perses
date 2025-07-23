@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
-import { GenericMetadata, Metadata, ProjectMetadata } from './resource';
+import { Metadata, ProjectMetadata } from './resource';
 import { Display } from './display';
 
 export interface DatasourceSpec<PluginSpec = UnknownSpec> {
@@ -20,12 +20,6 @@ export interface DatasourceSpec<PluginSpec = UnknownSpec> {
   default: boolean;
   plugin: Definition<PluginSpec>;
   proxyUrl?: string;
-}
-
-export interface GenericDatasourceResource {
-  kind: string;
-  metadata: GenericMetadata;
-  spec: DatasourceSpec;
 }
 
 /**

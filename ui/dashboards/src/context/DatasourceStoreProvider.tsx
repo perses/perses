@@ -15,12 +15,13 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
+  DatasourceResource,
   DatasourceSelector,
   DatasourceSpec,
+  GlobalDatasourceResource,
   useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
-  GenericDatasourceResource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -34,17 +35,28 @@ import {
 export interface DatasourceStoreProviderProps {
   dashboardResource?: DashboardResource | EphemeralDashboardResource;
   projectName?: string;
-  datasources: GenericDatasourceResource[];
+  datasourceApi: DatasourceApi;
   children?: ReactNode;
   savedDatasources?: Record<string, DatasourceSpec>;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
 /**
+ * The external API for fetching datasource resources
+ */
+export interface DatasourceApi {
+  buildProxyUrl?: BuildDatasourceProxyUrlFunc;
+  getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
+  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
+  listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
+  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
+}
+
+/**
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): ReactElement {
-  const { projectName, datasources, onCreate, children } = props;
+  const { projectName, datasourceApi, onCreate, children } = props;
   const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
     props.savedDatasources ?? {}
@@ -61,40 +73,37 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       if (dashboardDatasource) {
         return {
           spec: dashboardDatasource.spec,
-          proxyUrl: dashboardDatasource.spec.proxyUrl,
+          proxyUrl: buildDatasourceProxyUrl(datasourceApi, {
+            project: dashboardResource.metadata.project,
+            dashboard: dashboardResource.metadata.name,
+            name: dashboardDatasource.name,
+          }),
         };
       }
     }
 
     if (project) {
-      const datasource = datasources.find(
-        (ds) => ds.spec.plugin.kind === selector.kind && ds.metadata['project'] === project
-      );
-
-      if (datasource) {
+      // Try to find it at the project level as a Datasource resource
+      const datasource = await datasourceApi.getDatasource(project, selector);
+      if (datasource !== undefined) {
         return {
           spec: datasource.spec,
-          proxyUrl: datasource.spec.proxyUrl,
+          proxyUrl: buildDatasourceProxyUrl(datasourceApi, {
+            project: datasource.metadata.project,
+            name: datasource.metadata.name,
+          }),
         };
       }
     }
 
-    const globalDatasource = datasources
-      .filter((ds) => ds.kind === 'GlobalDatasource')
-      .find((ds) => {
-        if (selector.kind !== ds.spec.plugin.kind) {
-          return false;
-        }
-        if (!selector.name) {
-          return ds.spec.default;
-        }
-        return ds.metadata.name.toLowerCase() === selector.name.toLowerCase();
-      });
-
-    if (globalDatasource) {
+    // Try to find it at the global level as a GlobalDatasource resource
+    const globalDatasource = await datasourceApi.getGlobalDatasource(selector);
+    if (globalDatasource !== undefined) {
       return {
         spec: globalDatasource.spec,
-        proxyUrl: globalDatasource.spec.proxyUrl,
+        proxyUrl: buildDatasourceProxyUrl(datasourceApi, {
+          name: globalDatasource.metadata.name,
+        }),
       };
     }
 
@@ -128,13 +137,11 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
 
   const listDatasourceSelectItems = useEvent(
     async (datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]> => {
-      const projectDatasources = project
-        ? datasources.filter((ds) => ds.metadata['project'] === project && ds.spec.plugin.kind === datasourcePluginName)
-        : [];
-      const globalDatasources = datasources.filter(
-        (ds) => ds.kind === 'GlobalDatasource' && ds.spec.plugin.kind === datasourcePluginName
-      );
-      const pluginMetadata = await listPluginMetadata(['Datasource']);
+      const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
+        listPluginMetadata(['Datasource']),
+        project ? datasourceApi.listDatasources(project, datasourcePluginName) : [],
+        datasourceApi.listGlobalDatasources(datasourcePluginName),
+      ]);
 
       // Find the metadata for the plugin type they asked for, so we can use it for the name of the default datasource
       const datasourcePluginMetadata = pluginMetadata.find((metadata) => metadata.spec.name === datasourcePluginName);
@@ -157,10 +164,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
 
       // Now look at project-level datasources
-      for (const pds of projectDatasources) {
-        const selectorName = pds.metadata.name;
+      for (const datasource of datasources) {
+        const selectorName = datasource.metadata.name;
         addItem({
-          spec: pds.spec,
+          spec: datasource.spec,
           selectorName,
           selectorGroup: 'project',
           editLink: `/projects/${project}/datasources`,
@@ -168,9 +175,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
 
       // And finally global datasources
-      for (const gds of globalDatasources) {
-        const selectorName = gds.metadata.name;
-        addItem({ spec: gds.spec, selectorName, selectorGroup: 'global', editLink: '/admin/datasources' });
+      for (const globalDatasource of globalDatasources) {
+        const selectorName = globalDatasource.metadata.name;
+        addItem({ spec: globalDatasource.spec, selectorName, selectorGroup: 'global', editLink: '/admin/datasources' });
       }
 
       return results;
@@ -233,6 +240,10 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
+}
+
+function buildDatasourceProxyUrl(api: DatasourceApi, params: BuildDatasourceProxyUrlParams): string {
+  return api.buildProxyUrl ? api.buildProxyUrl(params) : '';
 }
 
 // Helper to find a datasource in the list embedded in a dashboard spec

@@ -12,12 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import {
-  BuiltinVariableDefinition,
-  DEFAULT_DASHBOARD_DURATION,
-  DEFAULT_REFRESH_INTERVAL,
-  GenericDatasourceResource,
-} from '@perses-dev/core';
+import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
@@ -26,15 +21,20 @@ import {
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
-import { DatasourceStoreProvider, VariableProviderProps, VariableProviderWithQueryParams } from '../../context';
+import {
+  DatasourceStoreProviderProps,
+  DatasourceStoreProvider,
+  VariableProviderProps,
+  VariableProviderWithQueryParams,
+} from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
+  datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
-  datasources: GenericDatasourceResource[];
 }
 
 /**
@@ -43,10 +43,10 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
 export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const {
     dashboardResource,
+    datasourceApi,
     externalVariableDefinitions,
     dashboardTitleComponent,
     emptyDashboardProps,
-    datasources,
     onSave,
     onDiscard,
     initialVariableIsSticky,
@@ -101,7 +101,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
   return (
-    <DatasourceStoreProvider dashboardResource={dashboardResource} datasources={datasources}>
+    <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProviderWithQueryParams
         initialState={{
           dashboardResource,
