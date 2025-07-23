@@ -38,3 +38,6 @@ validators:
   # timeout
   - regex: 'lodash\.com'
     type: 'ignore'
+  # timeout
+  - regex: 'eslint\.org'
+    type: 'ignore'
