@@ -50,9 +50,9 @@ const (
 )
 
 type Format struct {
-	Unit          string `json:"unit" yaml:"unit"`
-	DecimalPlaces int    `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
-	ShortValues   bool   `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
+	Unit          *string `json:"unit,omitempty" yaml:"unit,omitempty"`
+	DecimalPlaces int     `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
+	ShortValues   bool    `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
 }
 
 func (f *Format) UnmarshalJSON(data []byte) error {
@@ -82,7 +82,10 @@ func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (f *Format) validate() error {
-	switch f.Unit {
+	if f.Unit == nil {
+		return nil
+	}
+	switch *f.Unit {
 	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
 		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, BytesUnit,

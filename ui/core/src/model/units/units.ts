@@ -96,16 +96,17 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 }
 
 export function getUnitConfig(formatOptions: FormatOptions): UnitConfig {
-  return UNIT_CONFIG[formatOptions.unit];
+  const unit = formatOptions.unit ?? 'decimal';
+  return UNIT_CONFIG[unit];
 }
 
 export function getUnitGroup(formatOptions: FormatOptions): UnitGroup {
-  return getUnitConfig(formatOptions).group;
+  return getUnitConfig(formatOptions).group ?? 'Decimal';
 }
 
 export function getUnitGroupConfig(formatOptions: FormatOptions): UnitGroupConfig {
   const unitConfig = getUnitConfig(formatOptions);
-  return UNIT_GROUP_CONFIG[unitConfig.group];
+  return UNIT_GROUP_CONFIG[unitConfig.group ?? 'Decimal'];
 }
 
 // Type guards
