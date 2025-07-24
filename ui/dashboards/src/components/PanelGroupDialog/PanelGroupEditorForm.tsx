@@ -72,7 +72,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
               </MenuItem>
             ))}
           </TextField>
-        </FormControl>{' '}
+        </FormControl>
       </FormControl>
     </form>
   );

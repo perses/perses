@@ -46,7 +46,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
 
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts): void => {
-    // Using the value from `allLayouts` instead of `c urrentLayout` because of
+    // Using the value from `allLayouts` instead of `currentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
