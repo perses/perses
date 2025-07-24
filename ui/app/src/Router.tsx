@@ -164,9 +164,9 @@ function Router(): ReactElement {
  */
 function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
   const isAuthEnabled = useIsAuthEnabled();
-  const isAuthenticated = useIsAccessTokenExist(isAuthEnabled);
+  const isAccessTokenExist = useIsAccessTokenExist();
   const location = useLocation();
-  if (!isAuthEnabled || isAuthenticated) {
+  if (!isAuthEnabled || isAccessTokenExist) {
     return children;
   }
   let to = SignInRoute;
