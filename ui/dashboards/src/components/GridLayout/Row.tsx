@@ -14,7 +14,7 @@
 import { Collapse, useTheme } from '@mui/material';
 import { PanelGroupId } from '@perses-dev/core';
 import { PanelGroupDefinition, PanelGroupItemLayout, PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
@@ -54,10 +54,10 @@ export function Row({
   repeatVariable,
 }: RowProps): ReactElement {
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
-  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
   const theme = useTheme();
-
   const viewPanelItemId = useViewPanelGroup();
+
+  const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
 
   const hasViewPanel =
     viewPanelItemId?.panelGroupId === panelGroupId &&
@@ -68,6 +68,13 @@ export function Row({
 
   // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
   const isGridDisplayed = !viewPanelItemId || hasViewPanel;
+
+  // TODO: handle it without useEffect
+  useEffect(() => {
+    if (hasViewPanel) {
+      setIsOpen(true);
+    }
+  }, [hasViewPanel]);
 
   // Item layout is override if there is a panel in view mode
   const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
@@ -104,7 +111,7 @@ export function Row({
           collapse={
             groupDefinition.isCollapsed === undefined
               ? undefined
-              : { isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
+              : { isOpen: isOpen, onToggleOpen: () => setIsOpen((current) => !current) }
           }
         />
       )}

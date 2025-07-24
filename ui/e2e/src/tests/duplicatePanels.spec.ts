@@ -29,6 +29,8 @@ test.describe('Dashboard: Panels can be duplicated', () => {
   });
 
   test('multiple times', async ({ dashboardPage }) => {
+    await dashboardPage.page.waitForTimeout(3000);
+
     await dashboardPage.startEditing();
     const panelGroup = dashboardPage.getPanelGroup('single panel with space to right');
     await panelGroup.expand();
@@ -74,7 +76,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     for (const [i, duplicatePanel] of duplicatePanels.entries()) {
       await dashboardPage.editPanel(duplicatePanel, async (panelEditor) => {
         await panelEditor.nameInput.clear();
-        await panelEditor.nameInput.type(`Duplicate panel ${i + 1}`);
+        await panelEditor.nameInput.fill(`Duplicate panel ${i + 1}`);
       });
     }
 
@@ -98,6 +100,8 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     'multiple panels w/o space & more panels below',
   ].forEach((panelGroupName) => {
     test(`with ${panelGroupName}`, async ({ dashboardPage, page }) => {
+      await dashboardPage.page.waitForTimeout(3000);
+
       await dashboardPage.startEditing();
       const panelGroup = dashboardPage.getPanelGroup(panelGroupName);
       await panelGroup.expand();
