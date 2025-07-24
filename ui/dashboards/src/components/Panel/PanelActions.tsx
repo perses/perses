@@ -206,7 +206,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
   }, [queryResults, isFetching, errors]);
 
-  const readActions = useMemo(() => {
+  const readActions = useMemo((): ReactNode | undefined => {
     if (readHandlers !== undefined) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.viewPanel}>
@@ -227,7 +227,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
-  const editActions = useMemo(() => {
+  const editActions = useMemo((): ReactNode | undefined => {
     if (editHandlers !== undefined) {
       // If there are edit handlers, always just show the edit buttons
       return (
@@ -272,7 +272,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [editHandlers, title]);
 
-  const moveAction = useMemo(() => {
+  const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
@@ -361,11 +361,11 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
     return undefined;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
-  const handleClose = (): undefined => {
+  const handleClose = (): void => {
     setAnchorPosition(undefined);
   };
 
