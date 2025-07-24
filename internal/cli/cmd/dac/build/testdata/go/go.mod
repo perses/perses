@@ -24,7 +24,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/zitadel/oidc/v3 v3.39.1 // indirect
+	github.com/zitadel/oidc/v3 v3.41.0 // indirect
 	github.com/zitadel/schema v1.3.1 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/net v0.41.0 // indirect

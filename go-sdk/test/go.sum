@@ -44,8 +44,8 @@ github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0t
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/zitadel/oidc/v3 v3.39.1 h1:6QwGwI3yxh4somT7fwRCeT1KOn/HOGv0PA0dFciwJjE=
-github.com/zitadel/oidc/v3 v3.39.1/go.mod h1:aH8brOrzoliAybVdfq2xIdGvbtl0j/VsKRNa7WE72gI=
+github.com/zitadel/oidc/v3 v3.41.0 h1:mzxk23KNLKoQ4pm8lTpfVywX043IPtsHsY7D+DEFBDc=
+github.com/zitadel/oidc/v3 v3.41.0/go.mod h1:vKJZJJou2Je8/6d3M+gEFVYC9NKExRuHedjwWWElVKo=
 github.com/zitadel/schema v1.3.1 h1:QT3kwiRIRXXLVAs6gCK/u044WmUVh6IlbLXUsn6yRQU=
 github.com/zitadel/schema v1.3.1/go.mod h1:071u7D2LQacy1HAN+YnMd/mx1qVE2isb0Mjeqg46xnU=
 golang.org/x/crypto v0.40.0 h1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=

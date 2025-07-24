@@ -15,7 +15,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.1.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/google/cel-go v0.26.0
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser/v2 v2.11.0
@@ -39,9 +39,9 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.18.0
-	github.com/zitadel/oidc/v3 v3.39.1
+	github.com/zitadel/oidc/v3 v3.41.0
 	golang.org/x/crypto v0.40.0
-	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc
+	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
 	golang.org/x/mod v0.26.0
 	golang.org/x/oauth2 v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
