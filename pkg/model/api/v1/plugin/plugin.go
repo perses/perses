@@ -29,9 +29,14 @@ const (
 	KindTimeSeriesQuery Kind = "TimeSeriesQuery"
 	KindTraceQuery      Kind = "TraceQuery"
 	KindProfileQuery    Kind = "ProfileQuery"
+	KindLogQuery        Kind = "LogQuery"
 	KindQuery           Kind = "Query"
 	KindExplore         Kind = "Explore"
 )
+
+func (k Kind) IsQuery() bool {
+	return k == KindTimeSeriesQuery || k == KindTraceQuery || k == KindProfileQuery || k == KindLogQuery
+}
 
 type Spec struct {
 	Display *common.Display `json:"display" yaml:"display"`
@@ -71,7 +76,7 @@ func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Plugin) validate() error {
 	if p.Kind != KindVariable && p.Kind != KindDatasource &&
-		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery && p.Kind != KindProfileQuery && p.Kind != KindExplore {
+		p.Kind != KindPanel && !p.Kind.IsQuery() && p.Kind != KindExplore {
 		return fmt.Errorf("invalid plugin kind %s", p.Kind)
 	}
 	return nil

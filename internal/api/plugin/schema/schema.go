@@ -279,32 +279,36 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 		return err
 	}
 	for _, schema := range schemas {
-		switch schema.Kind {
-		case plugin.KindDatasource:
-			s.datasources[schema.Name] = schema.Instance
-		case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+		if schema.Kind.IsQuery() {
 			s.queries[schema.Name] = schema.Instance
-		case plugin.KindVariable:
-			s.variables[schema.Name] = schema.Instance
-		case plugin.KindPanel:
-			s.panels[schema.Name] = schema.Instance
-		default:
-			return fmt.Errorf("unknown kind %s", schema.Kind)
+		} else {
+			switch schema.Kind {
+			case plugin.KindDatasource:
+				s.datasources[schema.Name] = schema.Instance
+			case plugin.KindVariable:
+				s.variables[schema.Name] = schema.Instance
+			case plugin.KindPanel:
+				s.panels[schema.Name] = schema.Instance
+			default:
+				return fmt.Errorf("unknown kind %s", schema.Kind)
+			}
 		}
 	}
 	return nil
 }
 
 func (s *sch) remove(kind plugin.Kind, name string) {
-	switch kind {
-	case plugin.KindDatasource:
-		delete(s.datasources, name)
-	case plugin.KindTimeSeriesQuery, plugin.KindTraceQuery, plugin.KindProfileQuery:
+	if kind.IsQuery() {
 		delete(s.queries, name)
-	case plugin.KindVariable:
-		delete(s.variables, name)
-	case plugin.KindPanel:
-		delete(s.panels, name)
+	} else {
+		switch kind {
+		case plugin.KindDatasource:
+			delete(s.datasources, name)
+		case plugin.KindVariable:
+			delete(s.variables, name)
+		case plugin.KindPanel:
+			delete(s.panels, name)
+		}
 	}
 }
 

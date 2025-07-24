@@ -45,7 +45,7 @@ export type UnitConfig = {
   /**
    * The group the unit is part of. This will inform common rendering behavior.
    */
-  group: UnitGroup;
+  group?: UnitGroup;
 
   /**
    * When true, this unit will not be displayed in the unit selector. This is

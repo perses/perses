@@ -48,7 +48,7 @@ function getGlobalDatasource(name: string): Promise<GlobalDatasourceResource> {
   });
 }
 
-function globalDatasourceClient(): Promise<GlobalDatasourceResource[]> {
+function getGlobalDatasources(): Promise<GlobalDatasourceResource[]> {
   const url = buildURL({ resource });
   return fetchJson<GlobalDatasourceResource[]>(url, {
     method: HTTPMethodGET,
@@ -98,7 +98,7 @@ export function useGlobalDatasourceList(
   return useQuery<GlobalDatasourceResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
-      return globalDatasourceClient();
+      return getGlobalDatasources();
     },
     ...options,
   });
