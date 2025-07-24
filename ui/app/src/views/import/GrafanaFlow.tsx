@@ -128,16 +128,12 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Project name"
-                  onBlur={(event) => {
-                    setProjectName(event.target.value);
-                  }}
-                />
-              )}
+              onChange={(event, value) => {
+                if (value) {
+                  setProjectName(value);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} required label="Project name" />}
               options={data.map((project) => {
                 return project.metadata.name;
               })}
