@@ -67,7 +67,7 @@ export function Row({
   const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
   // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
-  const isGridDisplayed = viewPanelItemId === undefined || hasViewPanel;
+  const isGridDisplayed = !viewPanelItemId || hasViewPanel;
 
   // Item layout is override if there is a panel in view mode
   const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
@@ -97,7 +97,7 @@ export function Row({
         overflow: itemLayoutViewed ? 'hidden' : 'unset',
       }}
     >
-      {groupDefinition.title !== undefined && (
+      {groupDefinition.title && (
         <GridTitle
           panelGroupId={panelGroupId}
           title={groupDefinition.title}
@@ -129,7 +129,7 @@ export function Row({
             <div
               key={i}
               style={{
-                display: itemLayoutViewed !== undefined ? (itemLayoutViewed === i ? 'unset' : 'none') : 'unset',
+                display: itemLayoutViewed ? (itemLayoutViewed === i ? 'unset' : 'none') : 'unset',
               }}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
