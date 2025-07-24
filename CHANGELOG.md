@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.52.0-beta.0 / 2025-07-24
+
+- [FEATURE] Support LogQuery type (#3104)
+- [FEATURE] Support SQL queries on the Perses proxy (#3061)
+- [FEATURE] Unregister plugin from dev environment (#3069)
+- [FEATURE] Explorer: allow users to collapse tabs menu (#3064)
+- [FEATURE] Add user profile (#2984)
+- [FEATURE] Core: Add ProfileQuery (#2959) (#3017)
+- [ENHANCEMENT] Spec: make `unit` field in `format` optional (#3035)
+- [ENHANCEMENT] Plugins List: sort plugins (#3099)
+- [ENHANCEMENT] Configuration: Check the default plugin path instead of checking environment (#3070)
+- [ENHANCEMENT] stronger plugin format validation (#3020)
+- [ENHANCEMENT] Go SDK: Allow passing description as a dashboard option (#2998)
+- [ENHANCEMENT] Explorer: Add Execute Query Button to query editors (#3049)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show trace metadata on top of chart (perses/plugins#193)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show span metadata in attribute pane (perses/plugins#192)
+- [ENHANCEMENT] Plugins/Tempo: convert base64-encoded trace IDs and span IDs to hex-encoding (perses/plugins#191)
+- [BUGFIX] UI: remove cookies on token refresh fail (#3115)
+- [BUGFIX] UI: After selecting a project in import dashboard import button stays disabled unless clicked outside (#3083)
+- [BUGFIX] Spec: update datasource selector to include datasourcevariable (#3111)
+- [BUGFIX] CLI/migrate: replace `project` by `namespace` when migrating to CR (#3073)
+- [BUGFIX] UI: use YAML 1.1 spec to export dashboards (#3072)
+- [BUGFIX] Explorer: Fix tabs in random order (#3043)
+- [DOC] Add link to the API specs in the provisioning doc (#3032)
+- [DOC] Improve datasources concept doc (#3007)
+- [DOC] Add concept doc for Datasources (#3004)
+- [DOC] remove plugin development configuration doc (#3002)
+- [DOC] Fix docs for plugin configuration (#3000)
+- [DOC] Add model doc for missing common defs (#2987)
+- [DOC] Fix format issue for mkdocs syntax (#2985)
+
 ## 0.51.0 / 2025-06-06
 
 This release is one of the biggest releases we ever made.
