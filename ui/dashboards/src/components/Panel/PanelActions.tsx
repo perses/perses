@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
+import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState, useEffect } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
+import { usePluginRegistry, useDataQueriesContext } from '@perses-dev/plugin-system';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,10 +22,9 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
-import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import { Link, TimeSeriesData } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -41,6 +41,7 @@ export interface PanelActionsProps {
   descriptionTooltipId: string;
   links?: Link[];
   extra?: React.ReactNode;
+  panelPluginKind: string;
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -50,7 +51,9 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
-  queryResults: QueryData[];
+  queryResults: TimeSeriesData | undefined;
+  projectName?: string;
+  panelProps?: Record<string, unknown>;
 }
 
 const ConditionalBox = styled(Box)({
@@ -69,8 +72,91 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   descriptionTooltipId,
   links,
   queryResults,
+  panelPluginKind,
+  projectName: _propsProjectName,
+  panelProps,
 }) => {
-  const descriptionAction = useMemo(() => {
+  const { isFetching, errors } = useDataQueriesContext();
+  const { getPlugin } = usePluginRegistry();
+
+  const [pluginActions, setPluginActions] = useState<ReactNode[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPluginActions = async (): Promise<void> => {
+      if (!panelPluginKind || !panelProps) {
+        if (!cancelled) {
+          setPluginActions([]);
+        }
+        return;
+      }
+
+      try {
+        // Add defensive check for getPlugin availability
+        if (!getPlugin || typeof getPlugin !== 'function') {
+          if (!cancelled) {
+            setPluginActions([]);
+          }
+          return;
+        }
+
+        const plugin = await getPlugin('Panel', panelPluginKind);
+
+        if (cancelled) return;
+
+        // More defensive checking for plugin and actions
+        if (
+          !plugin ||
+          typeof plugin !== 'object' ||
+          !plugin.actions ||
+          !Array.isArray(plugin.actions) ||
+          plugin.actions.length === 0
+        ) {
+          if (!cancelled) {
+            setPluginActions([]);
+          }
+          return;
+        }
+
+        // Render plugin actions in header location
+        const headerActions = plugin.actions
+          .filter((action) => !action.location || action.location === 'header')
+          .map((action, index): ReactNode | null => {
+            const ActionComponent = action.component;
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return <ActionComponent key={`plugin-action-${index}`} {...(panelProps as any)} />;
+            } catch (error) {
+              console.warn(`Failed to render plugin action ${index}:`, error);
+              return null;
+            }
+          })
+          .filter((item): item is ReactNode => Boolean(item));
+
+        if (!cancelled) {
+          setPluginActions(headerActions);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.warn('Failed to load plugin actions:', error);
+          setPluginActions([]);
+        }
+      }
+    };
+
+    // Use setTimeout to defer the async operation to the next tick
+    const timeoutId = setTimeout(() => {
+      loadPluginActions();
+    }, 0);
+
+    return (): void => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [panelPluginKind, panelProps, getPlugin]);
+
+  const descriptionAction = useMemo((): ReactNode | undefined => {
     if (description && description.trim().length > 0) {
       return (
         <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
@@ -90,18 +176,24 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
-  const queryStateIndicator = useMemo(() => {
-    const hasData = queryResults.some((q) => q.data);
-    const isFetching = queryResults.some((q) => q.isFetching);
-    const queryErrors = queryResults.filter((q) => q.error);
+  const queryStateIndicator = useMemo((): ReactNode | undefined => {
+    const hasData = queryResults && queryResults.series && queryResults.series.length > 0;
     if (isFetching && hasData) {
       // If the panel has no data, the panel content will show the loading overlay.
       // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
-    } else if (queryErrors.length > 0) {
-      const errorTexts = queryErrors
-        .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+    const validErrors = (errors || []).filter((error) => error !== null);
+    if (validErrors.length > 0) {
+      const errorTexts = validErrors
+        .map((e: unknown) => {
+          if (typeof e === 'string') return e;
+          if (e && typeof e === 'object') {
+            const errorObj = e as { message?: string; toString?: () => string };
+            return errorObj.message ?? errorObj.toString?.() ?? 'Unknown error';
+          }
+          return 'Unknown error';
+        })
         .join('\n');
 
       return (
@@ -112,9 +204,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </InfoTooltip>
       );
     }
-  }, [queryResults]);
+  }, [queryResults, isFetching, errors]);
 
-  const readActions = useMemo(() => {
+  const readActions = useMemo((): ReactNode | undefined => {
     if (readHandlers !== undefined) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.viewPanel}>
@@ -135,7 +227,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
-  const editActions = useMemo(() => {
+  const editActions = useMemo((): ReactNode | undefined => {
     if (editHandlers !== undefined) {
       // If there are edit handlers, always just show the edit buttons
       return (
@@ -180,7 +272,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [editHandlers, title]);
 
-  const moveAction = useMemo(() => {
+  const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
@@ -216,6 +308,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
           </OverflowMenu>
+          {pluginActions}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -233,7 +326,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions}
+          {extraActions} {readActions} {pluginActions}
           <OverflowMenu title={title}>{editActions}</OverflowMenu>
           {moveAction}
         </OnHover>
@@ -252,7 +345,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions} {moveAction}
+          {extraActions} {readActions} {pluginActions} {editActions} {moveAction}
         </OnHover>
       </ConditionalBox>
     </>
@@ -268,11 +361,11 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
     return undefined;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
-  const handleClose = (): undefined => {
+  const handleClose = (): void => {
     setAnchorPosition(undefined);
   };
 
