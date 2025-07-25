@@ -15,16 +15,21 @@ import { JsonParam, useQueryParam } from 'use-query-params';
 import { ReactElement } from 'react';
 import { DashboardProvider, DashboardProviderProps } from './DashboardProvider';
 
-export function DashboardProviderWithQueryParams({ children, initialState }: DashboardProviderProps): ReactElement {
+export function DashboardProviderWithQueryParams({
+  children,
+  currentState,
+  initialState,
+}: DashboardProviderProps): ReactElement {
   const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', JsonParam);
 
   return (
     <DashboardProvider
-      initialState={{
+      currentState={{
+        ...currentState,
         viewPanelRef: viewPanelRef ?? undefined, // viewPanelRef can be null, forcing to undefined
         setViewPanelRef: setViewPanelRef,
-        ...initialState,
       }}
+      initialState={initialState}
     >
       {children}
     </DashboardProvider>
