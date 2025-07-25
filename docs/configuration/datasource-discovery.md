@@ -32,7 +32,7 @@ datasource:
     discovery:
       - name: "my discovery"
         http_sd:
-        url: "http://my-service.com/datasources"
+          url: "http://my-service.com/datasources"
 ```
 
 If you want more details about how to fine-tune the HTTP config (like adding oauth2 authentication), you can check
@@ -40,11 +40,11 @@ the [complete configuration documentation](../configuration/configuration.md#htt
 
 ## Kubernetes Service Discovery
 
-Perses is able to discovery datasource using the Kubernetes API to list the pods or the services. Based on the list of
+Perses is able to discover datasources using the Kubernetes API to list the pods or the services. Based on the list of
 pods or services found, Perses will generate the associated list of Global Datasources and save it into the database.
 
 This discovery can be useful when you have various Prometheus instances running in your Kubernetes cluster, and you want
-to automatically discover them and provide them to your user through Perses.
+to automatically discover them and provide them to your users through Perses.
 
 ### Configuration
 
