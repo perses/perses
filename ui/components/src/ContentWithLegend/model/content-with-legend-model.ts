@@ -81,7 +81,9 @@ export interface ContentWithLegendLayout {
   legend: Dimensions & {
     show: boolean;
   };
-  content: Dimensions;
+  content: Dimensions & {
+    css: { overflow: 'hidden' | 'none' };
+  };
   margin: {
     right: number;
     bottom: number;
@@ -136,6 +138,7 @@ export function getContentWithLegendLayout({
     content: {
       width,
       height,
+      css: { overflow: 'hidden' },
     },
     margin: {
       right: 0,
@@ -185,6 +188,7 @@ export function getContentWithLegendLayout({
     legendHeight = position === 'bottom' ? rowsToShow * tableLayout.height : height;
   }
 
+  /* TODO: Layout structure would be a refactor candidate */
   const contentWidth = position === 'right' ? width - legendWidth - spacing : width;
   const contentHeight = position === 'bottom' ? height - legendHeight - spacing : height;
 
@@ -205,6 +209,7 @@ export function getContentWithLegendLayout({
     content: {
       width: contentWidth,
       height: contentHeight,
+      css: { overflow: contentWidth < legendWidth ? 'hidden' : 'none' },
     },
     margin: {
       right: position === 'right' ? spacing : 0,
