@@ -13,7 +13,7 @@
     "@module-federation/enhanced": "^0.16.0",
     "@codemirror/autocomplete": "^6.18.4",
     "@lezer/highlight": "^1.2.1x",
-    "@grafana/lezer-traceql": "^0.0.20"
+    "@grafana/lezer-traceql": "^0.0.22"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
