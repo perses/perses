@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { getLegendSize } from '@perses-dev/core';
 import { Legend } from '../Legend';
@@ -35,16 +35,45 @@ export function ContentWithLegend({
   minChildrenHeight = 100,
 }: ContentWithLegendProps): ReactElement {
   const theme = useTheme();
-  const { content, legend, margin } = getContentWithLegendLayout({
-    width,
-    height,
-    legendProps,
-    minChildrenHeight,
-    minChildrenWidth,
-    spacing,
-    theme,
-    legendSize: getLegendSize(legendSize),
-  });
+  // State to store the layout dynamically
+  const [layout, setLayout] = useState(() =>
+    getContentWithLegendLayout({
+      width,
+      height,
+      legendProps,
+      minChildrenHeight,
+      minChildrenWidth,
+      spacing,
+      theme,
+      legendSize: getLegendSize(legendSize),
+    })
+  );
+
+  useEffect(() => {
+    const handleResize = (): void => {
+      const newLayout = getContentWithLegendLayout({
+        width,
+        height,
+        legendProps,
+        minChildrenHeight,
+        minChildrenWidth,
+        spacing,
+        theme,
+        legendSize: getLegendSize(legendSize),
+      });
+
+      setLayout(newLayout);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    // Cleanup event listener on unmount or dependency change
+    return (): void => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [legendProps, minChildrenHeight, minChildrenWidth, spacing, theme, legendSize, width, height]);
+
+  const { content, legend, margin } = layout;
 
   return (
     <Box
@@ -65,11 +94,12 @@ export function ContentWithLegend({
         sx={{
           marginRight: `${margin.right}px`,
           marginBottom: `${margin.bottom}px`,
-          overflow: 'hidden',
+          overflow: content.css.overflow,
         }}
       >
         {typeof children === 'function' ? children({ width: content.width, height: content.height }) : children}
       </Box>
+
       {legendProps && legend.show && <Legend {...legendProps} height={legend.height} width={legend.width} />}
     </Box>
   );
