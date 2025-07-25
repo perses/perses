@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FormEventHandler, ReactElement, useState } from 'react';
-import { FormControl, TextField, MenuItem } from '@mui/material';
+import { FormControl, TextField, MenuItem, Typography } from '@mui/material';
 import { PanelGroupEditorValues } from '../../context';
 
 export interface PanelGroupEditorFormProps {
@@ -26,7 +26,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
 
   const [title, setTitle] = useState(initialValues.title);
   const [isCollapsed, setIsCollapsed] = useState(initialValues.isCollapsed);
-  const [repeatVariable, setRepeatVariable] = useState(initialValues.repeatVariable);
+  const [repeatVariable, setRepeatVariable] = useState<string | undefined>(initialValues.repeatVariable);
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
@@ -64,13 +64,18 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
             label="Repeated Variable"
             variant="outlined"
             value={repeatVariable}
-            onChange={(e) => setRepeatVariable(e.target.value)}
+            onChange={(e) => setRepeatVariable(e.target.value === '' ? undefined : e.target.value)}
           >
-            {variables?.map((variable) => (
-              <MenuItem key={variable} value={variable}>
-                {variable}
-              </MenuItem>
-            ))}
+            <MenuItem value="">
+              <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
+            </MenuItem>
+            {variables
+              ?.sort((a, b) => a.localeCompare(b))
+              .map((variable) => (
+                <MenuItem key={variable} value={variable}>
+                  {variable}
+                </MenuItem>
+              ))}
           </TextField>
         </FormControl>
       </FormControl>

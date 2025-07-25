@@ -26,7 +26,7 @@ export interface PanelGroupEditor {
 export interface PanelGroupEditorValues {
   title: string;
   isCollapsed: boolean;
-  repeatVariable: string;
+  repeatVariable: string | undefined;
 }
 
 /**

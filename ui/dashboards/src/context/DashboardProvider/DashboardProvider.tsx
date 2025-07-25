@@ -78,6 +78,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 export interface DashboardStoreProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
+  setEditMode?: (isEditMode: boolean) => void;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
 }
@@ -115,7 +116,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
 function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
-    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
+    initialState: { dashboardResource, isEditMode, setEditMode, viewPanelRef, setViewPanelRef },
   } = props;
 
   const {
@@ -153,7 +154,10 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           datasources,
           ttl,
           isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean): void => set({ isEditMode }),
+          setEditMode: (isEditMode: boolean): void => {
+            set({ isEditMode });
+            setEditMode?.(isEditMode);
+          },
           setDashboard: ({
             kind,
             metadata,
