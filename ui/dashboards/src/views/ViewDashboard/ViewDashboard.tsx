@@ -59,7 +59,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     ...others
   } = props;
   const { spec } = dashboardResource;
-  const [isEditMode, setIsEditMode] = useState(isEditing);
+  const [isEditMode, setIsEditMode] = useState<boolean>(isEditing ?? false);
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -113,10 +113,12 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
           builtinVariableDefinitions={builtinVariables}
         >
           <DashboardProviderWithQueryParams
-            initialState={{
-              dashboardResource,
+            currentState={{
               isEditMode: isEditMode,
               setEditMode: setIsEditMode,
+            }}
+            initialState={{
+              dashboardResource,
             }}
           >
             <Box

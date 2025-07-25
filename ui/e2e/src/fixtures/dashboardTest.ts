@@ -165,9 +165,9 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     });
 
     await persesApp.navigateToDashboard(projectName, testDashboardName);
-    await persesApp.page.waitForTimeout(3000); // Wait for the dashboard to warm up (variable loading)
 
     const dashboardPage = new DashboardPage(page);
+    await dashboardPage.page.waitForTimeout(3000);
 
     // Use the fixture value in the test.
     await use(dashboardPage);

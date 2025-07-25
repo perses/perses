@@ -75,15 +75,19 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
-export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
+export interface DashboardCurrentStateProps {
   isEditMode?: boolean;
   setEditMode?: (isEditMode: boolean) => void;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
 }
 
+export interface DashboardStoreProps {
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
+}
+
 export interface DashboardProviderProps {
+  currentState: DashboardCurrentStateProps;
   initialState: DashboardStoreProps;
   children?: ReactNode;
 }
@@ -116,7 +120,8 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
 function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
-    initialState: { dashboardResource, isEditMode, setEditMode, viewPanelRef, setViewPanelRef },
+    currentState: { isEditMode, setEditMode, viewPanelRef, setViewPanelRef } = {},
+    initialState: { dashboardResource },
   } = props;
 
   const {
