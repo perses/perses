@@ -19,6 +19,7 @@ import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useConfig } from '../../model/config-client';
+import { Trans } from 'react-i18next';
 
 interface DashboardMosaicProps {
   dashboards: DashboardResource[];
@@ -59,7 +60,7 @@ export function ImportantDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <ViewDashboardIcon />
-        <h2>Important Dashboards</h2>
+        <h2><Trans i18nKey="Perses_lblImportantDashboards" /></h2>
       </Stack>
       {isLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>

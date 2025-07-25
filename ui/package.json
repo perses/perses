@@ -67,7 +67,9 @@
     "turbo": "^2.3.4",
     "typedoc": "^0.25.8",
     "typescript": "5.4.5",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "i18next": "^25.3.2",
+    "react-i18next": "^15.6.0"    
   },
   "packageManager": "npm@10.9.2"
 }
