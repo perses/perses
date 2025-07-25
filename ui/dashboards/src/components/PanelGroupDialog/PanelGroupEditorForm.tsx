@@ -63,7 +63,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
             required
             label="Repeated Variable"
             variant="outlined"
-            value={repeatVariable}
+            value={repeatVariable ?? ''}
             onChange={(e) => setRepeatVariable(e.target.value === '' ? undefined : e.target.value)}
           >
             <MenuItem value="">
