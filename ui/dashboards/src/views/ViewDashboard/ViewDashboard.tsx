@@ -20,7 +20,7 @@ import {
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
@@ -59,6 +59,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     ...others
   } = props;
   const { spec } = dashboardResource;
+  const [isEditMode, setIsEditMode] = useState(isEditing);
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -114,7 +115,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
           <DashboardProviderWithQueryParams
             initialState={{
               dashboardResource,
-              isEditMode: !!isEditing,
+              isEditMode: isEditMode,
+              setEditMode: setIsEditMode,
             }}
           >
             <Box
