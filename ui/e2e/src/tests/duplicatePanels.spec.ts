@@ -74,7 +74,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     for (const [i, duplicatePanel] of duplicatePanels.entries()) {
       await dashboardPage.editPanel(duplicatePanel, async (panelEditor) => {
         await panelEditor.nameInput.clear();
-        await panelEditor.nameInput.type(`Duplicate panel ${i + 1}`);
+        await panelEditor.nameInput.fill(`Duplicate panel ${i + 1}`);
       });
     }
 

@@ -167,6 +167,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     await persesApp.navigateToDashboard(projectName, testDashboardName);
 
     const dashboardPage = new DashboardPage(page);
+    await dashboardPage.page.waitForTimeout(3000);
 
     // Use the fixture value in the test.
     await use(dashboardPage);
