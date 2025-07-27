@@ -60,7 +60,9 @@ export function ImportantDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <ViewDashboardIcon />
-        <h2><Trans i18nKey="Perses_lblImportantDashboards" /></h2>
+        <h2>
+          <Trans>Important Dashboards</Trans>
+        </h2>
       </Stack>
       {isLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
