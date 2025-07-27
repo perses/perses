@@ -217,7 +217,7 @@ export function ProjectsAndDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2><Trans i18nKey="hdgProjectsandDashboards" /></h2>
+        <h2><Trans>Projects & Dashboards</Trans></h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>
