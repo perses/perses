@@ -61,5 +61,9 @@ interface ReactRouterProviderProps {
 export function ReactRouterProvider(props: ReactRouterProviderProps): ReactElement {
   const { children } = props;
   const navigate = useNavigate();
-  return <RouterContext.Provider value={{ RouterComponent: RouterLink, navigate }}>{children}</RouterContext.Provider>;
+  return (
+    <RouterProvider RouterComponent={RouterLink} navigate={navigate}>
+      {children}
+    </RouterProvider>
+  );
 }
