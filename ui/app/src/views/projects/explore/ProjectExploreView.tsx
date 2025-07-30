@@ -15,7 +15,13 @@ import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
-import { PluginRegistry, ProjectStoreProvider, useProjectStore, remotePluginLoader } from '@perses-dev/plugin-system';
+import {
+  PluginRegistry,
+  ProjectStoreProvider,
+  ReactRouterProvider,
+  useProjectStore,
+  remotePluginLoader,
+} from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo } from 'react';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
@@ -62,15 +68,17 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <PluginRegistry pluginLoader={remotePluginLoader()}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <ViewExplore
-            datasourceApi={datasourceApi}
-            externalVariableDefinitions={externalVariableDefinitions}
-            exploreTitleComponent={exploreTitleComponent}
-          />
-        </ErrorBoundary>
-      </PluginRegistry>
+      <ReactRouterProvider>
+        <PluginRegistry pluginLoader={remotePluginLoader()}>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <ViewExplore
+              datasourceApi={datasourceApi}
+              externalVariableDefinitions={externalVariableDefinitions}
+              exploreTitleComponent={exploreTitleComponent}
+            />
+          </ErrorBoundary>
+        </PluginRegistry>
+      </ReactRouterProvider>
     </ErrorBoundary>
   );
 }

@@ -18,6 +18,7 @@ import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@per
 import {
   PluginRegistry,
   UsageMetricsProvider,
+  ReactRouterProvider,
   ValidationProvider,
   remotePluginLoader,
 } from '@perses-dev/plugin-system';
@@ -82,39 +83,41 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
       }}
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={remotePluginLoader()}
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
-          <ValidationProvider>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
-                <ViewDashboard
-                  dashboardResource={dashboardResource}
-                  datasourceApi={datasourceApi}
-                  externalVariableDefinitions={externalVariableDefinitions}
-                  dashboardTitleComponent={
-                    <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
-                  }
-                  emptyDashboardProps={{
-                    additionalText: 'In order to save this dashboard, you need to add at least one panel!',
-                  }}
-                  onSave={onSave}
-                  onDiscard={onDiscard}
-                  initialVariableIsSticky={true}
-                  isReadonly={isReadonly}
-                  isVariableEnabled={isLocalVariableEnabled}
-                  isDatasourceEnabled={isLocalDatasourceEnabled}
-                  isEditing={isEditing}
-                  isCreating={isCreating}
-                />
-              </UsageMetricsProvider>
-            </ErrorBoundary>
-          </ValidationProvider>
-        </PluginRegistry>
+        <ReactRouterProvider>
+          <PluginRegistry
+            pluginLoader={remotePluginLoader()}
+            defaultPluginKinds={{
+              Panel: 'TimeSeriesChart',
+              TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+            }}
+          >
+            <ValidationProvider>
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
+                  <ViewDashboard
+                    dashboardResource={dashboardResource}
+                    datasourceApi={datasourceApi}
+                    externalVariableDefinitions={externalVariableDefinitions}
+                    dashboardTitleComponent={
+                      <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
+                    }
+                    emptyDashboardProps={{
+                      additionalText: 'In order to save this dashboard, you need to add at least one panel!',
+                    }}
+                    onSave={onSave}
+                    onDiscard={onDiscard}
+                    initialVariableIsSticky={true}
+                    isReadonly={isReadonly}
+                    isVariableEnabled={isLocalVariableEnabled}
+                    isDatasourceEnabled={isLocalDatasourceEnabled}
+                    isEditing={isEditing}
+                    isCreating={isCreating}
+                  />
+                </UsageMetricsProvider>
+              </ErrorBoundary>
+            </ValidationProvider>
+          </PluginRegistry>
+        </ReactRouterProvider>
       </ErrorBoundary>
     </Box>
   );
