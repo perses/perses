@@ -14,7 +14,7 @@ no "deny" permissions.
 - A `Role` specifies permissions within a specific project. The project must be defined when the `Role` is created.
 - A `GlobalRole` applies to resources globally and is not limited to a project scope.
 
-### Role Example
+### Role example
 
 This example defines a `Role` in the "MySuperProject" project that grants edit access to dashboards:
 
