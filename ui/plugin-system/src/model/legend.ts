@@ -40,8 +40,17 @@ export const legendValues: CalculationType[] = [
   'min',
   'max',
   'sum',
+  'abs',
+  'relative',
 ];
 export type LegendValue = (typeof legendValues)[number];
+
+/* Important, Only for the plugins which support the legend*/
+export const PLUGIN_KIND_TO_LEGEND_VALUES: Record<string, LegendValue[]> = {
+  TimeSeriesChart: ['mean', 'first', 'first-number', 'last', 'last-number', 'min', 'max', 'sum'],
+  StatChart: ['mean', 'first', 'first-number', 'last', 'last-number', 'min', 'max', 'sum'],
+  PieChart: ['abs', 'relative'],
+};
 
 // Note: explicitly defining different options for the legend spec and
 // legend component that extend from some common options, so we can allow the
@@ -70,14 +79,21 @@ export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectC
   medium: { label: 'Medium' },
 };
 
-export const LEGEND_VALUE_CONFIG = legendValues.reduce(
-  (config, value) => {
-    config[value] = CALCULATIONS_CONFIG[value];
-
-    return config;
-  },
-  {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>
-);
+export function getLegendValuesConfig(options: {
+  pluginKind?: string;
+  legendValues?: CalculationType[];
+}): Partial<Record<LegendValue, LegendSingleSelectConfig>> {
+  console.log(options);
+  const valuesToIterate =
+    options.legendValues || PLUGIN_KIND_TO_LEGEND_VALUES[options.pluginKind || ''] || legendValues;
+  return valuesToIterate.reduce(
+    (config, value) => {
+      config[value as LegendValue] = CALCULATIONS_CONFIG[value];
+      return config;
+    },
+    {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>
+  );
+}
 
 export function validateLegendSpec(legend?: LegendOptionsBase): boolean {
   if (legend === undefined) {

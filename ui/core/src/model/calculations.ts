@@ -24,6 +24,8 @@ export const CalculationsMap = {
   sum: sum,
   min: min,
   max: max,
+  abs: () => {},
+  relative: () => {},
 };
 
 export type CalculationType = keyof typeof CalculationsMap;
@@ -65,6 +67,14 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
   max: {
     label: 'Max',
     description: 'Maximum value',
+  },
+  abs: {
+    label: 'Absolute',
+    description: 'Absolute value',
+  },
+  relative: {
+    label: 'Relative',
+    description: 'Relative value',
   },
 } as const;
 

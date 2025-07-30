@@ -14,16 +14,16 @@
 import { Switch, SwitchProps } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
 import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
   LegendSpecOptions,
   LegendSingleSelectConfig,
   validateLegendSpec,
-  LEGEND_VALUE_CONFIG,
   LegendValue,
   LEGEND_SIZE_CONFIG,
+  getLegendValuesConfig,
 } from '../../model';
 
 type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['position'] };
@@ -54,23 +54,19 @@ const SIZE_OPTIONS: LegendSizeOption[] = Object.entries(LEGEND_SIZE_CONFIG).map(
 });
 
 type LegendValueOption = LegendSingleSelectConfig & { id: LegendValue };
-const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).map(([id, config]) => {
-  return {
-    id: id as LegendValue,
-    ...config,
-  };
-});
 
 export interface LegendOptionsEditorProps {
   value?: LegendSpecOptions;
   onChange: (legend?: LegendSpecOptions) => void;
   showValuesEditor?: boolean;
+  pluginKind?: string;
 }
 
 export function LegendOptionsEditor({
   value,
   onChange,
   showValuesEditor = true,
+  pluginKind,
 }: LegendOptionsEditorProps): ReactElement {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
@@ -121,22 +117,33 @@ export function LegendOptionsEditor({
   const currentSize = getLegendSize(value?.size);
   const legendSizeConfig = LEGEND_SIZE_CONFIG[currentSize];
 
-  const currentValues = value?.values || [];
-  const legendValuesConfig = currentValues.reduce((result, item) => {
-    const config = LEGEND_VALUE_CONFIG[item];
-    if (config) {
-      result.push({ ...config, id: item });
-    }
-    return result;
-  }, [] as LegendValueOption[]);
+  /* This prepares all available options for this specific plugin kind */
+  const legendValuesConfig = useMemo(() => getLegendValuesConfig({ pluginKind }), [pluginKind]);
+  const valueOptions = useMemo(
+    () =>
+      Object.entries(legendValuesConfig || {}).map(([id, config]) => ({
+        id: id as LegendValue,
+        ...config,
+      })),
+    [legendValuesConfig]
+  );
+
+  /* This prepares current (saved) options  */
+  const currentValues = useMemo(
+    () =>
+      Object.entries(getLegendValuesConfig({ legendValues: value?.values }) || {}).map(([id, config]) => ({
+        id: id as LegendValue,
+        ...config,
+      })),
+    [value?.values]
+  );
+
+  console.log(currentValues);
 
   return (
     <OptionsEditorGroup title="Legend">
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
-      <OptionsEditorControl
-        label="Show"
-        control={<Switch checked={value !== undefined} onChange={handleLegendShowChange} />}
-      />
+      <OptionsEditorControl label="Show" control={<Switch checked={!!value} onChange={handleLegendShowChange} />} />
       <OptionsEditorControl
         label="Position"
         control={
@@ -147,7 +154,7 @@ export function LegendOptionsEditor({
             }}
             options={POSITION_OPTIONS}
             onChange={handleLegendPositionChange}
-            disabled={value === undefined}
+            disabled={!value}
             disableClearable
           ></SettingsAutocomplete>
         }
@@ -162,7 +169,7 @@ export function LegendOptionsEditor({
             }}
             options={MODE_OPTIONS}
             onChange={handleLegendModeChange}
-            disabled={value === undefined}
+            disabled={!value}
             disableClearable
           ></SettingsAutocomplete>
         }
@@ -179,7 +186,7 @@ export function LegendOptionsEditor({
             onChange={handleLegendSizeChange}
             // TODO: enable sizes for list mode when we normalize the layout of
             // lists to more closely match tables.
-            disabled={value === undefined || currentMode !== 'table'}
+            disabled={!value || currentMode !== 'table'}
             disableClearable
           ></SettingsAutocomplete>
         }
@@ -195,10 +202,10 @@ export function LegendOptionsEditor({
               multiple={true}
               disableCloseOnSelect
               disableClearable
-              value={legendValuesConfig}
-              options={VALUE_OPTIONS}
+              value={currentValues}
+              options={valueOptions}
               onChange={handleLegendValueChange}
-              disabled={value === undefined || currentMode !== 'table'}
+              disabled={!value || currentMode !== 'table'}
               limitTags={1}
               ChipProps={{
                 size: 'small',
