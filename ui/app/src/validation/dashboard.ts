@@ -33,23 +33,49 @@ export const renameDashboardDialogValidationSchema = z.object({
 });
 export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialogValidationSchema>;
 
-// Validate dashboard name and check if it doesn't already exist
-export function useDashboardValidationSchema(projectName?: string): z.ZodSchema {
-  const dashboards = useDashboardList({ project: projectName });
+export interface DashboardValidationSchema {
+  schema?: z.ZodSchema;
+  isSchemaLoading: boolean;
+  hasSchemaError: boolean; // TODO: Later use it with a goog error handling design
+}
 
-  return useMemo(() => {
-    return createDashboardDialogValidationSchema.refine(
+// Validate dashboard name and check if it doesn't already exist
+export function useDashboardValidationSchema(projectName?: string): DashboardValidationSchema {
+  const { data: dashboards, isLoading: isDashboardsLoading, isError } = useDashboardList({ project: projectName });
+  return useMemo((): DashboardValidationSchema => {
+    if (isDashboardsLoading)
+      return {
+        schema: undefined,
+        isSchemaLoading: true,
+        hasSchemaError: false,
+      };
+
+    if (isError) {
+      return {
+        hasSchemaError: true,
+        isSchemaLoading: false,
+        schema: undefined,
+      };
+    }
+
+    if (!dashboards?.length)
+      return { schema: createDashboardDialogValidationSchema, isSchemaLoading: true, hasSchemaError: false };
+
+    const refinedSchema = createDashboardDialogValidationSchema.refine(
       (schema) => {
-        return !(dashboards.data ?? []).some(
-          (dashboard) =>
-            dashboard.metadata.project === schema.projectName &&
-            dashboard.metadata.name === generateMetadataName(schema.dashboardName)
-        );
+        return !(dashboards ?? []).some((dashboard) => {
+          return (
+            dashboard.metadata.project.toLowerCase() === schema.projectName.toLowerCase() &&
+            dashboard.metadata.name.toLowerCase() === generateMetadataName(schema.dashboardName).toLowerCase()
+          );
+        });
       },
       (schema) => ({
         message: `Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
         path: ['dashboardName'],
       })
     );
-  }, [dashboards.data]);
+
+    return { schema: refinedSchema, isSchemaLoading: true, hasSchemaError: false };
+  }, [dashboards, isDashboardsLoading, isError]);
 }
