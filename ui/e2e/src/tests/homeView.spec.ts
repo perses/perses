@@ -96,7 +96,7 @@ test.describe('homeView', () => {
     await projectPage.createDashboard('my new dashboard');
 
     const dashboardPage = new DashboardPage(page);
-    await dashboardPage.page.waitForTimeout(3000);
+    await dashboardPage.page.waitForTimeout(3000); // TODO (gladorme): rerender issue
 
     await dashboardPage.forEachTheme(async (themeName) => {
       // Should see empty state
