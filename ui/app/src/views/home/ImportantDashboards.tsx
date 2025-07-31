@@ -15,6 +15,7 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import { ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 import { useIsMobileSize } from '../../utils/browser-size';
