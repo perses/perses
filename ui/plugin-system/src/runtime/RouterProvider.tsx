@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, ReactNode, ReactElement } from 'react';
+import React, { createContext, useContext, ReactNode, ReactElement, useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -50,7 +50,12 @@ interface RouterProviderProps {
  */
 export function RouterProvider(props: RouterProviderProps): ReactElement {
   const { RouterComponent, navigate, children } = props;
-  return <RouterContext.Provider value={{ RouterComponent, navigate }}>{children}</RouterContext.Provider>;
+
+  const ctx = useMemo(() => {
+    return { RouterComponent, navigate };
+  }, [RouterComponent, navigate]);
+
+  return <RouterContext.Provider value={ctx}>{children}</RouterContext.Provider>;
 }
 
 interface ReactRouterProviderProps {
@@ -61,6 +66,7 @@ interface ReactRouterProviderProps {
 export function ReactRouterProvider(props: ReactRouterProviderProps): ReactElement {
   const { children } = props;
   const navigate = useNavigate();
+
   return (
     <RouterProvider RouterComponent={RouterLink} navigate={navigate}>
       {children}
