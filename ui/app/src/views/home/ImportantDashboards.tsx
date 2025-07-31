@@ -15,11 +15,11 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useConfig } from '../../model/config-client';
-import { Trans } from 'react-i18next';
 
 interface DashboardMosaicProps {
   dashboards: DashboardResource[];
