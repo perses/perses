@@ -37,5 +37,10 @@ const config: PlaywrightTestConfig = {
   // all the processes started by turborepo, so you can easily end up with a
   // lot of zombie node processes on your machine that are annoying to clean up.
   webServer: [],
+
+  use: {
+    ...baseConfig.use,
+    trace: 'on',
+  },
 };
 export default config;

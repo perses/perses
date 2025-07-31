@@ -60,8 +60,7 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
         <FormControl fullWidth margin="normal">
           <TextField
             select
-            required
-            label="Repeated Variable"
+            label="Repeat Variable"
             variant="outlined"
             value={repeatVariable ?? ''}
             onChange={(e) => setRepeatVariable(e.target.value === '' ? undefined : e.target.value)}
