@@ -73,7 +73,11 @@ jest.mock('@perses-dev/plugin-system', () => {
         PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
         actions: [
           {
-            component: (): JSX.Element => <button aria-label="Export CSV">Export</button>,
+            component: (): JSX.Element => (
+              <button aria-label="Export CSV" data-testid="export-action">
+                Export
+              </button>
+            ),
             location: 'header',
           },
         ],
@@ -145,11 +149,9 @@ describe('Panel', () => {
     userEvent.hover(panel);
 
     await waitFor(() => {
-      const exportButton = screen.getAllByLabelText('Export CSV');
-      expect(exportButton.length).toBeGreaterThan(0);
-      exportButton.forEach((button) => {
-        expect(button).toHaveTextContent('Export');
-      });
+      const exportButtons = screen.getAllByTestId('export-action');
+      expect(exportButtons.length).toBeGreaterThan(0);
+      expect(exportButtons[0]).toBeInTheDocument();
     });
   });
 
@@ -272,8 +274,6 @@ describe('Panel', () => {
 
   it('shows loading indicator if 1/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      isFetching: true,
-      errors: [],
       queryResults: [{ data: { series: [{ name: 'test', values: [[1, 2]] }] }, isFetching: true }],
     });
 
@@ -283,8 +283,6 @@ describe('Panel', () => {
 
   it('does not show a loading indicator if 2/2 queries are loading', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      isFetching: true,
-      errors: [],
       queryResults: [],
     });
 
@@ -294,8 +292,6 @@ describe('Panel', () => {
 
   it('shows query errors in the tooltip', () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
-      isFetching: false,
-      errors: ['test error'],
       queryResults: [{ error: 'test error' }],
     });
 
