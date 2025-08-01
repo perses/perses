@@ -67,13 +67,17 @@ jest.mock('@perses-dev/plugin-system', () => {
     ...jest.requireActual('@perses-dev/plugin-system'),
     useDataQueriesContext: jest.fn(() => ({
       queryResults: [],
-      isFetching: false,
-      errors: [],
     })),
     usePluginRegistry: jest.fn(() => ({
-      getPlugin: jest.fn((): { PanelComponent: () => JSX.Element } => ({
+      getPlugin: jest.fn().mockResolvedValue({
         PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
-      })),
+        actions: [
+          {
+            component: (): JSX.Element => <button aria-label="Export CSV">Export</button>,
+            location: 'header',
+          },
+        ],
+      }),
     })),
   };
 });
@@ -134,6 +138,20 @@ describe('Panel', () => {
   };
 
   const getPanel = (): HTMLElement => screen.getByTestId('panel');
+
+  it('should render plugin actions in header', async () => {
+    renderPanel();
+    const panel = getPanel();
+    userEvent.hover(panel);
+
+    await waitFor(() => {
+      const exportButton = screen.getAllByLabelText('Export CSV');
+      expect(exportButton.length).toBeGreaterThan(0);
+      exportButton.forEach((button) => {
+        expect(button).toHaveTextContent('Export');
+      });
+    });
+  });
 
   it('should render panel', async () => {
     renderPanel();
