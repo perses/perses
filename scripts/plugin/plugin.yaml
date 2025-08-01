@@ -6,6 +6,8 @@
   version: "0.8.0"
 - name: "HistogramChart"
   version: "0.8.0"
+- name: "HeatMapChart"
+  version: "0.1.0"
 - name: "Markdown"
   version: "0.8.0"
 - name: "PieChart"
