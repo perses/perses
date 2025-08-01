@@ -1,4 +1,4 @@
-# Plugins
+# Plugin
 
 In Perses, the following object types are available as plugins:
 
