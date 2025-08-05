@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat
 
 #timeFormat: {
 	unit?:          "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
@@ -41,4 +41,9 @@ package common
 	unit?:          "bits/sec" | "bytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
+}
+
+#currencyFormat: {
+	unit?:          "aud" | "cad" | "chf" | "cny" | "eur" | "gbp" | "hkd" | "inr" | "jpy" | "krw" | "nok" | "nzd" | "sek" | "sgd" | "usd"
+	decimalPlaces?: number
 }
