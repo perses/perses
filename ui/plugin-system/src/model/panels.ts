@@ -21,6 +21,11 @@ export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
   content: React.ComponentType<OptionsEditorProps<T>>;
 };
 
+export type PanelAction<TPanelProps> = {
+  component: React.ComponentType<TPanelProps>;
+  location?: string; // 'header' or other available locations
+};
+
 /**
  * Plugin the provides custom visualizations inside a Panel.
  */
@@ -51,6 +56,10 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    * @default false
    */
   hideQueryEditor?: boolean;
+  /**
+   * List of panel actions that will be rendered in the panel header
+   */
+  actions?: Array<PanelAction<TPanelProps>>;
 }
 
 /**

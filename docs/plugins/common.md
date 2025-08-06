@@ -15,7 +15,7 @@ Calculation is defined as:
 The format spec is defined as:
 
 ```yaml
-<anyOf = Time format | Percent format | Decimal format | Bytes format | Throughput format>
+<anyOf = Time format | Percent format | Decimal format | Bytes format | Throughput format | Currency Format>
 ```
 
 ### Time format
@@ -56,6 +56,13 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
+### Currency format
+
+```yaml
+unit: < enum = "aud" | "cad" | "chf" | "cny" | "eur" | "gbp" | "hkd" | "inr" | "jpy" | "krw" | "nok" | "nzd" | "usd" | "sek" | "sgd" >
+decimalPlaces: <int> # Optional
+```
+
 ## Legend specification
 
 ```yaml
@@ -63,7 +70,6 @@ position: <enum = "bottom" | "right">
 mode: <enum = "list" | "table"> # Optional
 size: <enum = "small" | "medium"> # Optional
 ```
-
 
 ## Legend-with-values specification
 

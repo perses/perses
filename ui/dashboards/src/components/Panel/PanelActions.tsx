@@ -14,6 +14,7 @@
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
 import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
+import { QueryData } from '@perses-dev/plugin-system';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,7 +22,6 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
-import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import { Link } from '@perses-dev/core';
@@ -51,6 +51,7 @@ export interface PanelActionsProps {
     onViewPanelClick: () => void;
   };
   queryResults: QueryData[];
+  pluginActions?: ReactNode[];
 }
 
 const ConditionalBox = styled(Box)({
@@ -69,8 +70,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   descriptionTooltipId,
   links,
   queryResults,
+  pluginActions = [],
 }) => {
-  const descriptionAction = useMemo(() => {
+  const descriptionAction = useMemo((): ReactNode | undefined => {
     if (description && description.trim().length > 0) {
       return (
         <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
@@ -87,16 +89,16 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [descriptionTooltipId, description]);
+
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
-  const queryStateIndicator = useMemo(() => {
+  const queryStateIndicator = useMemo((): ReactNode | undefined => {
     const hasData = queryResults.some((q) => q.data);
     const isFetching = queryResults.some((q) => q.isFetching);
     const queryErrors = queryResults.filter((q) => q.error);
+
     if (isFetching && hasData) {
-      // If the panel has no data, the panel content will show the loading overlay.
-      // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
@@ -114,7 +116,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
   }, [queryResults]);
 
-  const readActions = useMemo(() => {
+  const readActions = useMemo((): ReactNode | undefined => {
     if (readHandlers !== undefined) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.viewPanel}>
@@ -135,7 +137,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
-  const editActions = useMemo(() => {
+  const editActions = useMemo((): ReactNode | undefined => {
     if (editHandlers !== undefined) {
       // If there are edit handlers, always just show the edit buttons
       return (
@@ -180,7 +182,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [editHandlers, title]);
 
-  const moveAction = useMemo(() => {
+  const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
@@ -216,6 +218,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
           </OverflowMenu>
+          {pluginActions}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -233,7 +236,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions}
+          {extraActions} {readActions} {pluginActions}
           <OverflowMenu title={title}>{editActions}</OverflowMenu>
           {moveAction}
         </OnHover>
@@ -252,7 +255,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions} {moveAction}
+          {extraActions} {readActions} {pluginActions} {editActions} {moveAction}
         </OnHover>
       </ConditionalBox>
     </>
@@ -268,11 +271,11 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
     return undefined;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
-  const handleClose = (): undefined => {
+  const handleClose = (): void => {
     setAnchorPosition(undefined);
   };
 
