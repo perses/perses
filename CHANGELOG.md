@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.52.0-beta.1 / 2025-08-06
+
+- [FEATURE] Add Pyroscope and FlameChart plugin (#3154)
+- [FEATURE] Add currency value formatting (#3132)
+- [FEATURE] TimeSeries export functionality for plugins (#3129)
+- [FEATURE] Add HeatMap plugin (#3143)
+- [ENHANCEMENT] create RouterProvider to remove hard dependency on react-router in plugins (#3140)
+- [ENHANCEMENT] Plugins/Prometheus: Increase size of the finder tab datasource dropdown in the Explorer view (perses/plugins#195)
+- [ENHANCEMENT] Plugins/Prometheus: Round the promql response time (perses/plugins#206)
+- [BUGFIX] Avoid dashboard name duplication from the front-end side (#3141)
+- [BUGFIX] Add optional validation to the insecure skip verify (#3136)
+- [BUGFIX] Handle Piechart tooltip overlap with legend (#3128)
+- [BUGFIX] Plugins/StatChart: Fix color for zero values (perses/plugins#224)
+- [BUGFIX] Plugins/PieChart: Remove the static text Access from the tooltip (perses/plugins#207)
+- [BUGFIX] Plugins/Prometheus: Set the time range end according to the step and start (perses/plugins#213)
+- [BUGFIX] Plugins/Prometheus: move PromQL Expression label higher to avoid overlap with editor (perses/plugins#189)
+- [DOC] Add concept doc for Variable + few patches (#3138)
+- [DOC] update materials with the Rawkode live (#3127)
+- [DOC] patch datasource discovery doc (#3130)
+- [DOC] docs: fix wrong redirect_url in examples (#3148)
+
 ## 0.52.0-beta.0 / 2025-07-24
 
 - [FEATURE] Support LogQuery type (#3104)
