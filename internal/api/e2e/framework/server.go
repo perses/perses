@@ -18,6 +18,7 @@ package e2eframework
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -32,6 +33,7 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
@@ -115,7 +117,32 @@ func defaultFileConfig() *apiConfig.File {
 	}
 }
 
-func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
+func createToken(expect *httpexpect.Expect, login, password string) (string, modelAPI.Entity) {
+	creator := login
+	usrEntity := NewUser(creator, password)
+	expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+		WithJSON(usrEntity).
+		Expect().
+		Status(http.StatusOK)
+
+	authEntity := modelAPI.Auth{
+		Login:    usrEntity.GetMetadata().GetName(),
+		Password: usrEntity.Spec.NativeProvider.Password,
+	}
+	authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+		WithJSON(authEntity).
+		Expect().
+		Status(http.StatusOK)
+
+	authResponse.JSON().Object().Keys().ContainsAll("access_token", "refresh_token")
+	return authResponse.JSON().Object().Value("access_token").String().Raw(), usrEntity
+}
+
+func CreateAuthorizationHeader(token string) (string, string) {
+	return "Authorization", fmt.Sprintf("Bearer %s", token)
+}
+
+func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.Manager) {
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{
@@ -134,7 +161,7 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 		}
 	}
 	registerer := prometheus.NewRegistry()
-	runner, persistenceManager, err := core.New(conf, false, registerer, "")
+	runner, dependencyManager, err := core.New(conf, false, registerer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,24 +173,34 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	return server, httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
-	}), persistenceManager
+	}), dependencyManager
 }
 
 func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	conf := DefaultConfig()
-	server, expect, persistenceManager := CreateServer(t, conf)
-	defer persistenceManager.GetPersesDAO().Close()
+	server, expect, dependencyManager := CreateServer(t, conf)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, persistenceManager)
-	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+	entities := testFunc(server, expect, dependencyManager.Persistence())
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
+}
+
+func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager, string) []modelAPI.Entity) {
+	conf := DefaultAuthConfig()
+	server, expect, dependencyManager := CreateServer(t, conf)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
+	defer server.Close()
+	token, usrEntity := createToken(expect, "alice", "password")
+	entities := testFunc(server, expect, dependencyManager, token)
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), append(entities, usrEntity)...)
 }
 
 func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
-	server, expect, persistenceManager := CreateServer(t, config)
-	defer persistenceManager.GetPersesDAO().Close()
+	server, expect, dependencyManager := CreateServer(t, config)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, persistenceManager)
-	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+	entities := testFunc(server, expect, dependencyManager.Persistence())
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 }
 
 // NewOAuthProviderTestServer creates a new OAuth provider server that will be used to test the OAuth login.

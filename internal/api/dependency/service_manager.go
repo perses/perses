@@ -111,7 +111,7 @@ type service struct {
 	view               view.Service
 }
 
-func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err

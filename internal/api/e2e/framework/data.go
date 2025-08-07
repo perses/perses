@@ -348,8 +348,19 @@ func newRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
 		Permissions: []role.Permission{
 			{
-				Actions: []role.Action{role.CreateAction},
-				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope},
+				Actions: []role.Action{role.CreateAction, role.UpdateAction},
+				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope, role.RoleScope, role.RoleBindingScope},
+			},
+		},
+	}
+}
+
+func newGlobalRoleSpec() v1.RoleSpec {
+	return v1.RoleSpec{
+		Permissions: []role.Permission{
+			{
+				Actions: []role.Action{role.CreateAction, role.UpdateAction},
+				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope, role.ProjectScope, role.GlobalRoleScope, role.GlobalRoleBindingScope},
 			},
 		},
 	}
@@ -359,7 +370,7 @@ func NewGlobalRole(name string) *v1.GlobalRole {
 	entity := &v1.GlobalRole{
 		Kind:     v1.KindGlobalRole,
 		Metadata: newMetadata(name),
-		Spec:     newRoleSpec(),
+		Spec:     newGlobalRoleSpec(),
 	}
 	entity.Metadata.CreateNow()
 	return entity

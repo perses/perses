@@ -57,12 +57,12 @@ func main() {
 	promRegistry := prometheus.NewRegistry()
 	registerMetrics(promRegistry)
 
-	runner, persistentManager, err := core.New(conf, *pprof, promRegistry, banner)
+	runner, dependencyManager, err := core.New(conf, *pprof, promRegistry, banner)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	defer func() {
-		if daoCloseErr := persistentManager.GetPersesDAO().Close(); daoCloseErr != nil {
+		if daoCloseErr := dependencyManager.Persistence().GetPersesDAO().Close(); daoCloseErr != nil {
 			logrus.WithError(daoCloseErr).Error("unable to close the connection to the database")
 		}
 	}()

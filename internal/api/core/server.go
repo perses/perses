@@ -56,8 +56,10 @@ type api struct {
 	apiPrefix              string
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
+	persistenceManager := dependencyManager.Persistence()
+	serviceManager := dependencyManager.Service()
 	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive),
