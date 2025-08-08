@@ -34,21 +34,13 @@ func TestMainScenarioRoleBinding(t *testing.T) {
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
 		role := e2eframework.NewRole(project.Metadata.Name, "admin")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), role)
-		roleBiding := e2eframework.NewRoleBinding(project.Metadata.Name, "admin")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), roleBiding)
-		// Refresh the permissions to ensure Alice has the latest permissions
-		err := manager.Service().GetAuthorization().RefreshPermissions()
-		if err != nil {
-			t.Fatalf("failed to refresh permissions: %v", err)
-		}
-
-		entity := e2eframework.NewRoleBinding(project.Metadata.Name, "foo")
+		entity := e2eframework.NewRoleBinding(project.Metadata.Name, "admin")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathRoleBinding)).
 			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK)
-		return []api.Entity{entity, role, roleBiding, project}
+		return []api.Entity{entity, project}
 	})
 }
 
@@ -62,12 +54,6 @@ func TestUpdateScenarioRoleBindingRole(t *testing.T) {
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), role)
 		entity := e2eframework.NewRoleBinding(project.Metadata.Name, "admin")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), entity)
-		// Refresh the permissions to ensure Alice has the latest permissions
-		err := manager.Service().GetAuthorization().RefreshPermissions()
-		if err != nil {
-			t.Fatalf("failed to refresh permissions: %v", err)
-		}
-
 		entity.Spec.Role = "newRoleName"
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.PathProject, entity.Metadata.Project, utils.APIV1Prefix, utils.PathRoleBinding, entity.Metadata.Name)).
 			WithHeader(e2eframework.CreateAuthorizationHeader(token)).

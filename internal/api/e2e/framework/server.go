@@ -117,9 +117,8 @@ func defaultFileConfig() *apiConfig.File {
 	}
 }
 
-func createToken(expect *httpexpect.Expect, login, password string) (string, modelAPI.Entity) {
-	creator := login
-	usrEntity := NewUser(creator, password)
+func createAliceUserAndLogin(expect *httpexpect.Expect) (string, modelAPI.Entity) {
+	usrEntity := NewUser("alice", "password")
 	expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 		WithJSON(usrEntity).
 		Expect().
@@ -136,6 +135,22 @@ func createToken(expect *httpexpect.Expect, login, password string) (string, mod
 
 	authResponse.JSON().Object().Keys().ContainsAll("access_token", "refresh_token")
 	return authResponse.JSON().Object().Value("access_token").String().Raw(), usrEntity
+}
+
+// CreateRoleAndBidingForAlice creates a GlobalRole and a GlobalRoleBinding for Alice.
+// This is useful to ensure that Alice has the necessary permissions to create any other entity.
+// It also refreshes the permissions to ensure that Alice has the latest permissions.
+func createRoleAndBidingForAlice(t *testing.T, manager dependency.Manager) (*modelV1.GlobalRole, *modelV1.GlobalRoleBinding) {
+	globalRole := NewGlobalRole("admin")
+	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRole)
+	globalRoleBinding := NewGlobalRoleBinding("admin")
+	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRoleBinding)
+	// Refresh the permissions to ensure Alice has the latest permissions
+	err := manager.Service().GetAuthorization().RefreshPermissions()
+	if err != nil {
+		t.Fatalf("failed to refresh permissions: %v", err)
+	}
+	return globalRole, globalRoleBinding
 }
 
 func CreateAuthorizationHeader(token string) (string, string) {
@@ -190,9 +205,10 @@ func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexp
 	server, expect, dependencyManager := CreateServer(t, conf)
 	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	token, usrEntity := createToken(expect, "alice", "password")
+	token, usrEntity := createAliceUserAndLogin(expect)
+	globalRole, globalRoleBinding := createRoleAndBidingForAlice(t, dependencyManager)
 	entities := testFunc(server, expect, dependencyManager, token)
-	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), append(entities, usrEntity)...)
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), append(entities, usrEntity, globalRole, globalRoleBinding)...)
 }
 
 func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {

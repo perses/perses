@@ -348,8 +348,8 @@ func newRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
 		Permissions: []role.Permission{
 			{
-				Actions: []role.Action{role.CreateAction, role.UpdateAction},
-				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope, role.RoleScope, role.RoleBindingScope},
+				Actions: []role.Action{role.CreateAction},
+				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope},
 			},
 		},
 	}
@@ -359,8 +359,8 @@ func newGlobalRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
 		Permissions: []role.Permission{
 			{
-				Actions: []role.Action{role.CreateAction, role.UpdateAction},
-				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope, role.ProjectScope, role.GlobalRoleScope, role.GlobalRoleBindingScope},
+				Actions: []role.Action{role.WildcardAction},
+				Scopes:  []role.Scope{role.WildcardScope},
 			},
 		},
 	}
