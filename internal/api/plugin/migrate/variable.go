@@ -177,5 +177,5 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 }
 
 func executeVariableMigrationScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaVariableData, "#var", "variable")
+	return ExecuteCuelangMigrationScript(cueScript, grafanaVariableData, "#var", "variable")
 }

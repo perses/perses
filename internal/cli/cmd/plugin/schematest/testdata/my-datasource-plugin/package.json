@@ -1,0 +1,36 @@
+{
+  "name": "@test/my-datasource-plugin",
+  "version": "1.0.0",
+  "perses": {
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Datasource",
+        "spec": {
+          "display": {
+            "name": "My Datasource"
+          },
+          "name": "MyDatasource"
+        }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "My Query"
+          },
+          "name": "MyQuery"
+        }
+      },
+      {
+        "kind": "Variable",
+        "spec": {
+          "display": {
+            "name": "My Variable"
+          },
+          "name": "MyVariable"
+        }
+      }
+    ]
+  }
+}

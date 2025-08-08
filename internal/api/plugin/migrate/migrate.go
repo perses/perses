@@ -95,7 +95,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema,
 		// We could try to enforce the convention that the migration script is a subfolder of the schema folder of the plugin it is supposed to migrate.
 		// But it's not certain you have the migration script, and besides, it's almost certain user won't respect this convention.
 		// Finally, reading the migration script to determinate the kind of plugin is not that complicated, we have just a couple of rules to follow, and it's the most flexible way.
-		pluginKind, err := getPluginKind(migrateFilePath)
+		pluginKind, err := GetPluginKind(migrateFilePath)
 		if err != nil {
 			return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
 		}
@@ -119,7 +119,8 @@ func isPackageMigrate(file string) (bool, error) {
 	return strings.Contains(string(data), "package migrate"), nil
 }
 
-func getPluginKind(migrateFile string) (plugin.Kind, error) {
+// GetPluginKind determines the plugin kind from a migration file
+func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	data, err := os.ReadFile(migrateFile) //nolint: gosec
 	if err != nil {
 		return "", err
@@ -133,7 +134,22 @@ func getPluginKind(migrateFile string) (plugin.Kind, error) {
 	return plugin.KindQuery, nil
 }
 
-func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
+// GetPluginName extracts the specific plugin name from a migration file
+func GetPluginName(migrateFile string) (string, error) {
+	data, err := os.ReadFile(migrateFile) //nolint: gosec
+	if err != nil {
+		return "", err
+	}
+	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
+		if len(group) >= 2 {
+			return group[1], nil
+		}
+	}
+	return "", fmt.Errorf("no plugin name found in migration file")
+}
+
+// ExecuteCuelangMigrationScript executes a CUE migration script against grafana data
+func ExecuteCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -154,10 +170,11 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
 		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
-	return convertToPlugin(finalVal)
+	return ConvertToPlugin(finalVal)
 }
 
-func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
+// ConvertToPlugin converts a CUE value to a common.Plugin
+func ConvertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if migrateValue.IsNull() {
 		return nil, true, nil
 	}

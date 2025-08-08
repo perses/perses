@@ -1,0 +1,6 @@
+{
+  "kind": "MyVariable",
+  "spec": {
+    "options": ["value1", "value2", "value3"]
+  }
+}

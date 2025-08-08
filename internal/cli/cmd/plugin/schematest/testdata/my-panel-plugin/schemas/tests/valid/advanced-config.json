@@ -1,0 +1,25 @@
+{
+  "kind": "MyPanel",
+  "spec": {
+    "title": "Memory Usage with Thresholds",
+    "query": {
+      "datasource": "prometheus",
+      "expression": "memory_usage_bytes / 1024 / 1024"
+    },
+    "display": {
+      "color": "blue",
+      "size": "large",
+      "showLegend": false
+    },
+    "thresholds": [
+      {
+        "value": 80,
+        "color": "yellow"
+      },
+      {
+        "value": 95,
+        "color": "red"
+      }
+    ]
+  }
+}
