@@ -64,6 +64,7 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
   ]);
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
   const { data: profileQueryPlugins, isLoading: isProfileQueryPluginLoading } = useListPluginMetadata(['ProfileQuery']);
+  const { data: logQueries, isLoading: isLogQueryPluginLoading } = useListPluginMetadata(['LogQuery']);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
   const queryTypeMap = useMemo(() => {
@@ -71,6 +72,7 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       TimeSeriesQuery: [],
       TraceQuery: [],
       ProfileQuery: [],
+      LogQuery: [],
     };
 
     if (timeSeriesQueryPlugins) {
@@ -90,8 +92,15 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
         map[plugin.kind]?.push(plugin.spec.name);
       });
     }
+
+    if (logQueries) {
+      logQueries.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
+
     return map;
-  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins]);
+  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins, logQueries]);
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
@@ -103,9 +112,16 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
             return isTraceQueryPluginLoading;
           case 'PyroscopeProfileQuery':
             return isProfileQueryPluginLoading;
+          case 'LokiLogQuery':
+            return isLogQueryPluginLoading;
         }
 
-        return isTraceQueryPluginLoading || isTimeSeriesQueryLoading || isProfileQueryPluginLoading;
+        return (
+          isTraceQueryPluginLoading ||
+          isTimeSeriesQueryLoading ||
+          isProfileQueryPluginLoading ||
+          isLogQueryPluginLoading
+        );
       };
 
       if (isLoading(pluginKind)) {
@@ -120,7 +136,13 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
       throw new Error(`Unable to determine the query type: ${pluginKind}`);
     },
-    [queryTypeMap, isTimeSeriesQueryLoading, isTraceQueryPluginLoading, isProfileQueryPluginLoading]
+    [
+      queryTypeMap,
+      isTimeSeriesQueryLoading,
+      isTraceQueryPluginLoading,
+      isProfileQueryPluginLoading,
+      isLogQueryPluginLoading,
+    ]
   );
 
   return getQueryType;
