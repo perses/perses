@@ -216,9 +216,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {pluginActions}
+            {editActions}
           </OverflowMenu>
-          {pluginActions}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -236,8 +236,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {pluginActions}
-          <OverflowMenu title={title}>{editActions}</OverflowMenu>
+          {extraActions} {readActions}
+          <OverflowMenu title={title}>
+            {editActions} {pluginActions}
+          </OverflowMenu>
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -255,7 +257,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {pluginActions} {editActions} {moveAction}
+          {extraActions} {readActions} {editActions}
+          {/* Show plugin actions inside a menu if it gets crowded */}
+          {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
+          {moveAction}
         </OnHover>
       </ConditionalBox>
     </>

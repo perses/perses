@@ -60,7 +60,7 @@ export function PanelHeader({
       aria-describedby={descriptionTooltipId}
       disableTypography
       title={
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center" height="var(--panel-header-height, 30px)">
           <Typography
             id={titleElementId}
             variant="subtitle1"
