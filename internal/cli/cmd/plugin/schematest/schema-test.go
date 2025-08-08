@@ -115,10 +115,10 @@ func (o *option) runSchemaTests() error {
 	for _, result := range results {
 		if result.Success {
 			passed++
-			fmt.Fprintf(o.writer, "✓ %s (%s)\n", result.TestName, result.TestType)
+			fmt.Fprintf(o.writer, "✓ %s (%s) [%s]\n", result.TestName, result.TestType, result.TestPath)
 		} else {
 			failed++
-			fmt.Fprintf(o.writer, "✗ %s (%s): %s\n", result.TestName, result.TestType, result.Error)
+			fmt.Fprintf(o.writer, "✗ %s (%s) [%s]: %s\n", result.TestName, result.TestType, result.TestPath, result.Error)
 		}
 	}
 
@@ -226,6 +226,7 @@ const (
 // TestResult represents the result of a single test
 type TestResult struct {
 	TestName string
+	TestPath string // Path relative to schema directory
 	TestType TestType
 	Success  bool
 	Error    string
@@ -536,6 +537,8 @@ func (tr *TestRunner) RunModelTests() ([]TestResult, error) {
 // runModelValidationTests runs validation tests for a specific directory
 func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool) ([]TestResult, error) {
 	var results []TestResult
+	// Get the schemas path from the loaded package data
+	schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -549,8 +552,14 @@ func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool
 		}
 
 		testName := filepath.Base(currentPath)
+		// Calculate relative path from schemas directory
+		relPath, err := filepath.Rel(schemasPath, currentPath)
+		if err != nil {
+			relPath = currentPath // Fallback to full path if relative path calculation fails
+		}
 		result := TestResult{
 			TestName: testName,
+			TestPath: relPath,
 			TestType: map[bool]TestType{true: TestTypeModelValid, false: TestTypeModelInvalid}[shouldBeValid],
 		}
 
@@ -830,8 +839,19 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, explicitPluginNam
 		}
 
 		testName := d.Name()
+
+		// Calculate relative path that includes both plugin name and test directory
+		// First try to get the path relative to the schemas directory
+		schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
+		relPath, err := filepath.Rel(schemasPath, currentPath)
+		if err != nil {
+			// If we can't get a relative path, use plugin name and directory name
+			relPath = filepath.Join(explicitPluginName, "migrate", "tests", testName)
+		}
+
 		result := TestResult{
 			TestName: testName,
+			TestPath: relPath,
 			TestType: TestTypeMigrate,
 		}
 
