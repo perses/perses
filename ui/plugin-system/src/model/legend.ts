@@ -43,11 +43,18 @@ export const legendValues: CalculationType[] = [
 ];
 export type LegendValue = (typeof legendValues)[number];
 
+export type ComparisonValues = 'abs' | 'relative';
+
+export const comparisonLegends: Record<ComparisonValues, LegendSingleSelectConfig> = {
+  abs: { label: 'Absolute', description: 'Absolute value' },
+  relative: { label: 'Relative', description: 'Relative value' },
+};
+
 // Note: explicitly defining different options for the legend spec and
 // legend component that extend from some common options, so we can allow the
 // component and the spec to diverge in some upcoming work.
 export interface LegendSpecOptions extends LegendOptionsBase {
-  values?: LegendValue[];
+  values?: Array<LegendValue | ComparisonValues>;
 }
 
 export type LegendSingleSelectConfig = {
