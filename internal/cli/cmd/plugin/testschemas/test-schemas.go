@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package schematest
+package testschemas
 
 import (
 	"encoding/json"
@@ -49,7 +49,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'plugin schema-test'")
+		return fmt.Errorf("no args are supported by the command 'plugin test-schemas'")
 	}
 	cfg, err := config.Resolve(o.pluginPath, o.cfgPath)
 	if err != nil {
@@ -142,7 +142,7 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "schema-test",
+		Use:   "test-schemas",
 		Short: "Run tests for plugin schemas",
 		Long: `Run tests for the plugin schemas, validating:
 - CUE model schema validation tests
@@ -200,10 +200,10 @@ Or with a flattened structure:
               └── expected.json`,
 		Example: `
 # Run schema tests for a plugin
-$ percli plugin schema-test --plugin.path ./my-plugin
+$ percli plugin test-schemas --plugin.path ./my-plugin
 
 # Run in current directory
-$ percli plugin schema-test`,
+$ percli plugin test-schemas`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
