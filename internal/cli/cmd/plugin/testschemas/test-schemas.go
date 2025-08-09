@@ -19,10 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 
-	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/perses/internal/api/plugin"
@@ -74,31 +71,15 @@ func (o *option) Execute() error {
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
-	if plugin.IsSchemaRequired(npmPackageData.Perses) {
-		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
-			return fmt.Errorf("cue module not found in %s", filepath.Join(o.pluginPath, plugin.CuelangModuleFolder))
-		}
-		// There is a possibility the schema path set in package.json differ from the one set in the configuration.
-		// In this case, we will use the one set in the configuration.
-		npmPackageData.Perses.SchemasPath = o.relativeSchemaPath
-		if _, err := schema.Load(o.pluginPath, npmPackageData.Perses); err != nil {
-			return err
-		}
-		if _, err := migrate.Load(o.pluginPath, npmPackageData.Perses); err != nil {
-			return err
-		}
 
-		// Run tests directly from the schemas directory
-		if err := o.runSchemaTests(); err != nil {
-			return err
-		}
-	} else {
+	if !plugin.IsSchemaRequired(npmPackageData.Perses) {
 		return output.HandleString(o.writer, "No schemas found in this plugin, nothing to test")
 	}
-	return nil
-}
 
-func (o *option) runSchemaTests() error {
+	if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
+		return fmt.Errorf("cue module not found in %s", filepath.Join(o.pluginPath, plugin.CuelangModuleFolder))
+	}
+
 	testRunner := NewTestRunner(o.pluginPath, "")
 	results, err := testRunner.RunAllTests(o.cfg.SchemasPath)
 	if err != nil {
@@ -131,89 +112,6 @@ func (o *option) runSchemaTests() error {
 	return output.HandleString(o.writer, "All schema tests passed")
 }
 
-func (o *option) SetWriter(writer io.Writer) {
-	o.writer = writer
-}
-
-func (o *option) SetErrWriter(errWriter io.Writer) {
-	o.errWriter = errWriter
-}
-
-func NewCMD() *cobra.Command {
-	o := &option{}
-	cmd := &cobra.Command{
-		Use:   "test-schemas",
-		Short: "Run tests for plugin schemas",
-		Long: `Run tests for the plugin schemas, validating:
-- CUE model schema validation tests
-- CUE migration schema tests
-
-Test files are placed directly alongside the CUE files they're testing:
-
-Testing structure:
-  schemas/
-  ├── my-datasource/
-  │   ├── model.cue
-  │   ├── tests/
-  │   │   ├── valid/
-  │   │   │   ├── basic-config.json
-  │   │   │   └── advanced-config.json
-  │   │   └── invalid/
-  │   │       ├── missing-required.json
-  │   │       └── invalid-type.json
-  │   └── migrate/
-  │       ├── migrate.cue
-  │       └── tests/
-  │           ├── basic-migration/
-  │           │   ├── input.json
-  │           │   └── expected.json
-  │           └── complex-migration/
-  │               ├── input.json
-  │               └── expected.json
-  └── my-query/
-      ├── model.cue
-      ├── tests/
-      │   ├── valid/
-      │   └── invalid/
-      └── migrate/
-          ├── migrate.cue
-          └── tests/
-
-Or with a flattened structure:
-  schemas/
-  ├── my-panel.cue
-  ├── tests/
-  │   ├── valid/
-  │   │   ├── basic-config.json
-  │   │   └── advanced-config.json
-  │   └── invalid/
-  │       ├── missing-required.json
-  │       └── invalid-type.json
-  └── migrate/
-      ├── migrate.cue
-      └── tests/
-          ├── basic-migration/
-          │   ├── input.json
-          │   └── expected.json
-          └── complex-migration/
-              ├── input.json
-              └── expected.json`,
-		Example: `
-# Run schema tests for a plugin
-$ percli plugin test-schemas --plugin.path ./my-plugin
-
-# Run in current directory
-$ percli plugin test-schemas`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return persesCMD.Run(o, cmd, args)
-		},
-	}
-	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag --plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
-	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
-
-	return cmd
-}
-
 // TestType represents the type of test being run
 type TestType string
 
@@ -236,8 +134,6 @@ type TestResult struct {
 type TestRunner struct {
 	pluginPath  string
 	testsPath   string
-	schemas     map[string]*build.Instance
-	migrations  map[string]*build.Instance
 	packageData *plugin.NPMPackage
 }
 
@@ -246,8 +142,6 @@ func NewTestRunner(pluginPath, testsPath string) *TestRunner {
 	return &TestRunner{
 		pluginPath: pluginPath,
 		testsPath:  testsPath,
-		schemas:    make(map[string]*build.Instance),
-		migrations: make(map[string]*build.Instance),
 	}
 }
 
@@ -266,276 +160,8 @@ func (tr *TestRunner) loadPackageData() error {
 	return nil
 }
 
-// getPluginKindMapping returns the CUE definition ID and type based on plugin kind
-func (tr *TestRunner) getPluginKindMapping(pluginKind string) (defID, typeOfData string, err error) {
-	if err := tr.loadPackageData(); err != nil {
-		return "", "", fmt.Errorf("failed to load package.json: %w", err)
-	}
-
-	// Find the plugin in the package.json that matches the expected kind
-	for _, pluginSpec := range tr.packageData.Perses.Plugins {
-		// Try different matching strategies
-		kindName := strings.ToLower(string(pluginSpec.Kind))
-		specName := strings.ToLower(pluginSpec.Spec.Name)
-		testKind := strings.ToLower(pluginKind)
-
-		if strings.Contains(testKind, kindName) || strings.Contains(kindName, testKind) ||
-			strings.Contains(testKind, specName) || strings.Contains(specName, testKind) ||
-			testKind == kindName || testKind == specName {
-
-			// Now determine what kind of plugin it is
-			switch pluginSpec.Kind {
-			case "Panel":
-				return "#panel", "panel", nil
-			case "Variable":
-				return "#var", "variable", nil
-			default:
-				// Check if it's a query type (ends with "Query")
-				if strings.HasSuffix(string(pluginSpec.Kind), "Query") {
-					return "#target", "query", nil
-				}
-				return "", "", fmt.Errorf("unsupported plugin kind: %s", pluginSpec.Kind)
-			}
-		}
-	}
-
-	// If we can't match to a plugin in package.json, make a best guess based on the name
-	lowerKind := strings.ToLower(pluginKind)
-	if strings.Contains(lowerKind, "panel") {
-		return "#panel", "panel", nil
-	} else if strings.Contains(lowerKind, "var") || strings.Contains(lowerKind, "variable") {
-		return "#var", "variable", nil
-	} else if strings.Contains(lowerKind, "query") {
-		return "#target", "query", nil
-	}
-
-	return "", "", fmt.Errorf("plugin %s not found in package.json and could not be identified by name", pluginKind)
-}
-
-func (tr *TestRunner) LoadModelSchemas(schemasPath string) error {
-	return filepath.WalkDir(schemasPath, func(currentPath string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			if d.Name() == "migrate" {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if filepath.Ext(currentPath) != ".cue" {
-			return nil
-		}
-
-		// Check if it's a model package
-		data, err := os.ReadFile(currentPath)
-		if err != nil {
-			return err
-		}
-		if !strings.Contains(string(data), "package model") {
-			return nil
-		}
-
-		currentDir, _ := filepath.Split(currentPath)
-		logrus.Tracef("Loading model schema from %s", currentDir)
-
-		kind, instance, err := schema.LoadModelSchema(currentDir)
-		if err != nil {
-			return err
-		}
-
-		logrus.Debugf("Loaded model schema for kind %s", kind)
-		tr.schemas[kind] = instance
-		return filepath.SkipDir
-	})
-}
-
-func (tr *TestRunner) LoadMigrationSchemas(schemasPath string) error {
-	// Ensure we have package data loaded
-	if err := tr.loadPackageData(); err != nil {
-		return fmt.Errorf("failed to load package.json: %w", err)
-	}
-
-	// Use the migrate package's function to load the schemas
-	// We need to pass the parent directory of schemasPath as pluginPath
-	pluginPath := filepath.Dir(schemasPath)
-	schemas, err := migrate.Load(pluginPath, v1plugin.ModuleSpec{
-		SchemasPath: filepath.Base(schemasPath),
-	})
-	if err != nil {
-		return err
-	}
-
-	// Process the loaded schemas
-	for _, schema := range schemas {
-		logrus.Debugf("Loaded migration schema for plugin kind: %s, path: %s", schema.Kind, schema.Name)
-
-		// Store the schema with different keys to maximize chances of finding it
-
-		// 1. Store with the official kind from migrate.Load
-		tr.migrations[string(schema.Kind)] = schema.Instance
-
-		// 2. Extract directory name for matching by directory
-		pathParts := strings.Split(schema.Name, string(filepath.Separator))
-		if len(pathParts) >= 2 {
-			// The plugin directory is the directory above "migrate"
-			pluginDirName := pathParts[len(pathParts)-2]
-			tr.migrations[pluginDirName] = schema.Instance
-		}
-
-		// 3. Find all related plugin kinds/names in package.json and store with those
-		for _, pluginSpec := range tr.packageData.Perses.Plugins {
-			// If this plugin spec kind matches the schema kind
-			if strings.EqualFold(string(pluginSpec.Kind), string(schema.Kind)) {
-				// Also store with the plugin name from package.json
-				tr.migrations[pluginSpec.Spec.Name] = schema.Instance
-			}
-		}
-	}
-
-	return nil
-}
-
-// RunModelTests runs all model validation tests
-func (tr *TestRunner) RunModelTests() ([]TestResult, error) {
-	var results []TestResult
-
-	// Check for tests alongside schema files
-	if err := tr.loadPackageData(); err != nil {
-		return nil, fmt.Errorf("failed to load package.json: %w", err)
-	}
-
-	schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
-
-	// First check if tests are directly in the schemas path (flattened structure)
-	rootTestsPath := filepath.Join(schemasPath, "tests")
-	if _, err := os.Stat(rootTestsPath); err == nil {
-		logrus.Debugf("Found tests directory at root level: %s", rootTestsPath)
-
-		// Valid tests
-		validPath := filepath.Join(rootTestsPath, "valid")
-		if _, err := os.Stat(validPath); err == nil {
-			logrus.Debugf("Found valid tests at root level")
-			validResults, err := tr.runModelValidationTests(validPath, true)
-			if err != nil {
-				return nil, err
-			}
-			if len(validResults) > 0 {
-				logrus.Debugf("Processed %d valid tests at root level", len(validResults))
-				results = append(results, validResults...)
-			}
-		}
-
-		// Invalid tests
-		invalidPath := filepath.Join(rootTestsPath, "invalid")
-		if _, err := os.Stat(invalidPath); err == nil {
-			logrus.Debugf("Found invalid tests at root level")
-			invalidResults, err := tr.runModelValidationTests(invalidPath, false)
-			if err != nil {
-				return nil, err
-			}
-			if len(invalidResults) > 0 {
-				logrus.Debugf("Processed %d invalid tests at root level", len(invalidResults))
-				results = append(results, invalidResults...)
-			}
-		}
-
-		// If we found any tests at the root level, return them
-		if len(results) > 0 {
-			return results, nil
-		}
-	}
-
-	// If no tests at root level, try the hierarchical structure
-	// Find tests next to schema files
-	for kind := range tr.schemas {
-		// Try to find the corresponding directory for this plugin kind
-		kindDir := ""
-		entries, err := os.ReadDir(schemasPath)
-		if err == nil {
-			for _, entry := range entries {
-				if entry.IsDir() {
-					// Look inside each top-level directory to find potential plugin subdirectories
-					subEntries, subErr := os.ReadDir(filepath.Join(schemasPath, entry.Name()))
-					if subErr == nil {
-						for _, subEntry := range subEntries {
-							if subEntry.IsDir() {
-								// Check if this subdirectory matches the plugin kind
-								subDirName := strings.ToLower(subEntry.Name())
-								kindName := strings.ToLower(kind)
-
-								// Try different matching strategies
-								if subDirName == kindName ||
-									strings.Contains(subDirName, kindName) ||
-									strings.Contains(kindName, subDirName) ||
-									strings.ReplaceAll(subDirName, "-", "") == strings.ReplaceAll(kindName, "-", "") {
-									kindDir = filepath.Join(entry.Name(), subEntry.Name())
-									break
-								}
-							}
-						}
-						if kindDir != "" {
-							break
-						}
-					}
-
-					// Also check the top-level directory as before
-					dirName := strings.ToLower(entry.Name())
-					kindName := strings.ToLower(kind)
-
-					// Try different matching strategies
-					if dirName == kindName ||
-						strings.Contains(dirName, kindName) ||
-						strings.Contains(kindName, dirName) ||
-						strings.ReplaceAll(dirName, "-", "") == strings.ReplaceAll(kindName, "-", "") {
-						kindDir = entry.Name()
-						break
-					}
-				}
-			}
-		}
-
-		if kindDir != "" {
-			kindPath := filepath.Join(schemasPath, kindDir)
-			logrus.Debugf("Found directory for plugin kind %s at %s", kind, kindPath)
-
-			// Test valid cases
-			validPath := filepath.Join(kindPath, "tests", "valid")
-			if _, err := os.Stat(validPath); err == nil {
-				logrus.Debugf("Found valid tests for %s at %s", kind, validPath)
-				validResults, err := tr.runModelValidationTests(validPath, true)
-				if err != nil {
-					return nil, err
-				}
-				if len(validResults) > 0 {
-					logrus.Debugf("Processed %d valid tests for %s", len(validResults), kind)
-					results = append(results, validResults...)
-				}
-			}
-
-			// Test invalid cases
-			invalidPath := filepath.Join(kindPath, "tests", "invalid")
-			if _, err := os.Stat(invalidPath); err == nil {
-				logrus.Debugf("Found invalid tests for %s at %s", kind, invalidPath)
-				invalidResults, err := tr.runModelValidationTests(invalidPath, false)
-				if err != nil {
-					return nil, err
-				}
-				if len(invalidResults) > 0 {
-					logrus.Debugf("Processed %d invalid tests for %s", len(invalidResults), kind)
-					results = append(results, invalidResults...)
-				}
-			}
-		} else {
-			logrus.Debugf("Could not find directory for plugin kind: %s", kind)
-		}
-	}
-
-	return results, nil
-}
-
-// runModelValidationTests runs validation tests for a specific directory
-func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool) ([]TestResult, error) {
+// runModelValidationTests runs the model tests found in the provided directory
+func (tr *TestRunner) runModelValidationTests(testDir string, buildInstance *build.Instance, shouldBeValid bool) ([]TestResult, error) {
 	var results []TestResult
 	// Get the schemas path from the loaded package data
 	schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
@@ -571,7 +197,7 @@ func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool
 			return nil
 		}
 
-		// Parse the plugin from JSON
+		// Unmarshal the JSON to the plugin struct
 		var plugin common.Plugin
 		if err := json.Unmarshal(data, &plugin); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse JSON: %v", err)
@@ -579,26 +205,13 @@ func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool
 			return nil
 		}
 
-		// Find the appropriate schema
-		schemaInstance, exists := tr.schemas[plugin.Kind]
-		if !exists {
-			result.Error = fmt.Sprintf("No schema found for plugin kind: %s", plugin.Kind)
-			results = append(results, result)
-			return nil
-		}
-
 		// Validate the plugin against the schema
 		ctx := cuecontext.New()
 		pluginValue := ctx.CompileBytes(data)
-		finalValue := pluginValue.Unify(ctx.BuildInstance(schemaInstance))
+		finalValue := pluginValue.Unify(ctx.BuildInstance(buildInstance))
 
-		validationOptions := []cue.Option{
-			cue.Concrete(true),
-			cue.Attributes(true),
-			cue.Definitions(true),
-			cue.Hidden(true),
-		}
-		validationErr := finalValue.Validate(validationOptions...)
+		logrus.Debugf("Running model validation for %s", currentPath)
+		validationErr := finalValue.Validate(schema.CueValidationOptions...)
 		isValid := validationErr == nil
 
 		if !isValid {
@@ -622,207 +235,8 @@ func (tr *TestRunner) runModelValidationTests(testDir string, shouldBeValid bool
 	})
 }
 
-// RunMigrationTests runs all migration tests
-func (tr *TestRunner) RunMigrationTests() ([]TestResult, error) {
-	var results []TestResult
-
-	// Check for tests alongside migration files
-	if err := tr.loadPackageData(); err != nil {
-		return nil, fmt.Errorf("failed to load package.json: %w", err)
-	}
-
-	schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
-
-	// First check for a migrate directory directly in the schemas path (flattened structure)
-	rootMigratePath := filepath.Join(schemasPath, "migrate")
-	if _, err := os.Stat(rootMigratePath); err == nil {
-		migrateTestsPath := filepath.Join(rootMigratePath, "tests")
-		if _, err := os.Stat(migrateTestsPath); err == nil {
-			logrus.Debugf("Found migration tests at root level: %s", migrateTestsPath)
-
-			// Try to determine the plugin kind from package.json
-			pluginKind := ""
-			if len(tr.packageData.Perses.Plugins) > 0 {
-				// Use the first plugin in the package.json
-				pluginKind = tr.packageData.Perses.Plugins[0].Spec.Name
-			}
-
-			if pluginKind == "" {
-				// Extract from a migration file if possible
-				files, err := os.ReadDir(rootMigratePath)
-				if err == nil {
-					for _, file := range files {
-						if !file.IsDir() && strings.HasSuffix(file.Name(), ".cue") {
-							data, err := os.ReadFile(filepath.Join(rootMigratePath, file.Name()))
-							if err == nil {
-								fileContent := string(data)
-								kindMatch := regexp.MustCompile(`kind:\s*"([^"]+)"`).FindStringSubmatch(fileContent)
-								if len(kindMatch) > 1 {
-									pluginKind = kindMatch[1]
-									break
-								}
-							}
-						}
-					}
-				}
-			}
-
-			if pluginKind == "" {
-				// If still no kind, use the parent directory name
-				parentDir := filepath.Base(tr.pluginPath)
-				pluginKind = parentDir
-			}
-
-			logrus.Debugf("Running migration tests with plugin kind: %s", pluginKind)
-			migrateResults, err := tr.runMigrationTestsForPath(migrateTestsPath, pluginKind)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, migrateResults...)
-
-			// If we found tests at the root level, return them
-			if len(results) > 0 {
-				return results, nil
-			}
-		}
-	}
-
-	// If no tests at root level, try the hierarchical structure
-	// Look through all directories in the schemas path
-	entries, err := os.ReadDir(schemasPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read schemas directory: %w", err)
-	}
-
-	// Check each plugin directory for migration tests
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-
-		// First check if this top directory has a migrate folder
-		migratePath := filepath.Join(schemasPath, entry.Name(), "migrate")
-		migrateTestsPath := filepath.Join(migratePath, "tests")
-
-		if _, err := os.Stat(migratePath); err == nil {
-			if _, err := os.Stat(migrateTestsPath); err == nil {
-				logrus.Debugf("Found migration tests for plugin directory: %s", entry.Name())
-
-				// Determine the plugin kind from the package.json if possible
-				pluginKind := ""
-				for _, pluginSpec := range tr.packageData.Perses.Plugins {
-					// Try different matching strategies
-					dirName := strings.ToLower(entry.Name())
-					kindName := strings.ToLower(string(pluginSpec.Kind))
-					specName := strings.ToLower(pluginSpec.Spec.Name)
-
-					if strings.Contains(dirName, kindName) || strings.Contains(kindName, dirName) ||
-						strings.Contains(dirName, specName) || strings.Contains(specName, dirName) {
-						pluginKind = pluginSpec.Spec.Name
-						break
-					}
-				}
-
-				if pluginKind == "" {
-					// If we can't match to a plugin in package.json, use the directory name
-					pluginKind = entry.Name()
-				}
-
-				logrus.Debugf("Running migration tests for plugin: %s (dir: %s)", pluginKind, entry.Name())
-
-				// Run the tests for this plugin
-				migrateResults, err := tr.runMigrationTestsForPath(migrateTestsPath, pluginKind)
-				if err != nil {
-					return nil, err
-				}
-				results = append(results, migrateResults...)
-			}
-		}
-
-		// Now check for subdirectories that might have migrate folders
-		subEntries, subErr := os.ReadDir(filepath.Join(schemasPath, entry.Name()))
-		if subErr == nil {
-			for _, subEntry := range subEntries {
-				if !subEntry.IsDir() {
-					continue
-				}
-
-				migratePath := filepath.Join(schemasPath, entry.Name(), subEntry.Name(), "migrate")
-				migrateTestsPath := filepath.Join(migratePath, "tests")
-
-				if _, err := os.Stat(migratePath); err == nil {
-					if _, err := os.Stat(migrateTestsPath); err == nil {
-						logrus.Debugf("Found migration tests for plugin directory: %s/%s", entry.Name(), subEntry.Name())
-
-						// Determine the plugin kind from the package.json if possible
-						pluginKind := ""
-						for _, pluginSpec := range tr.packageData.Perses.Plugins {
-							// Try different matching strategies
-							dirName := strings.ToLower(subEntry.Name())
-							kindName := strings.ToLower(string(pluginSpec.Kind))
-							specName := strings.ToLower(pluginSpec.Spec.Name)
-
-							if strings.Contains(dirName, kindName) || strings.Contains(kindName, dirName) ||
-								strings.Contains(dirName, specName) || strings.Contains(specName, dirName) {
-								pluginKind = pluginSpec.Spec.Name
-								break
-							}
-						}
-
-						if pluginKind == "" {
-							// If we can't match to a plugin in package.json, use the directory name
-							pluginKind = subEntry.Name()
-						}
-
-						logrus.Debugf("Running migration tests for plugin: %s (dir: %s/%s)", pluginKind, entry.Name(), subEntry.Name())
-
-						// Run the tests for this plugin
-						migrateResults, err := tr.runMigrationTestsForPath(migrateTestsPath, pluginKind)
-						if err != nil {
-							return nil, err
-						}
-						results = append(results, migrateResults...)
-					}
-				}
-			}
-		}
-	}
-
-	return results, nil
-}
-
-// RunAllTests runs both model and migration tests
-func (tr *TestRunner) RunAllTests(schemasPath string) ([]TestResult, error) {
-	// Load schemas and migrations
-	if err := tr.LoadModelSchemas(schemasPath); err != nil {
-		return nil, fmt.Errorf("failed to load schemas: %w", err)
-	}
-
-	if err := tr.LoadMigrationSchemas(schemasPath); err != nil {
-		return nil, fmt.Errorf("failed to load migrations: %w", err)
-	}
-
-	var allResults []TestResult
-
-	// Run model tests
-	modelResults, err := tr.RunModelTests()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run model tests: %w", err)
-	}
-	allResults = append(allResults, modelResults...)
-
-	// Run migration tests
-	migrationResults, err := tr.RunMigrationTests()
-	if err != nil {
-		return nil, fmt.Errorf("failed to run migration tests: %w", err)
-	}
-	allResults = append(allResults, migrationResults...)
-
-	return allResults, nil
-}
-
 // runMigrationTestsForPath runs migration tests for a specific directory path
-func (tr *TestRunner) runMigrationTestsForPath(testDir string, explicitPluginName string) ([]TestResult, error) {
+func (tr *TestRunner) runMigrationTestsForPath(testDir string, buildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
 	var results []TestResult
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
@@ -840,13 +254,11 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, explicitPluginNam
 
 		testName := d.Name()
 
-		// Calculate relative path that includes both plugin name and test directory
-		// First try to get the path relative to the schemas directory
+		// Calculate relative path from schemas directory
 		schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
 		relPath, err := filepath.Rel(schemasPath, currentPath)
 		if err != nil {
-			// If we can't get a relative path, use plugin name and directory name
-			relPath = filepath.Join(explicitPluginName, "migrate", "tests", testName)
+			relPath = currentPath // Fallback to full path if relative path calculation fails
 		}
 
 		result := TestResult{
@@ -887,74 +299,36 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, explicitPluginNam
 			return filepath.SkipDir
 		}
 
-		// Determine the plugin name - either use the explicitly provided one or extract from expected.json
-		var pluginKind string
-		if explicitPluginName != "" {
-			pluginKind = explicitPluginName
-		} else {
-			// Parse expected output to determine plugin kind
-			var expectedPlugin common.Plugin
-			if err := json.Unmarshal(expectedData, &expectedPlugin); err != nil {
-				result.Error = fmt.Sprintf("Failed to parse expected.json: %v", err)
-				results = append(results, result)
-				return filepath.SkipDir
-			}
-			pluginKind = expectedPlugin.Kind
-		}
-
-		logrus.Debugf("Migration test for plugin kind: %s", pluginKind)
-
-		// Find the appropriate migration - try to match with any of our loaded migrations
-		var migrationInstance *build.Instance
-		var foundKey string
-
-		// First try exact match
-		if instance, exists := tr.migrations[pluginKind]; exists {
-			migrationInstance = instance
-			foundKey = pluginKind
-		} else {
-			// If no exact match, try case-insensitive match
-			pluginKindLower := strings.ToLower(pluginKind)
-			for key, instance := range tr.migrations {
-				if strings.ToLower(key) == pluginKindLower {
-					migrationInstance = instance
-					foundKey = key
-					break
-				}
-			}
-
-			// If still no match, try more flexible matching
-			if migrationInstance == nil {
-				for key, instance := range tr.migrations {
-					keyLower := strings.ToLower(key)
-					if strings.Contains(keyLower, pluginKindLower) ||
-						strings.Contains(pluginKindLower, keyLower) {
-						migrationInstance = instance
-						foundKey = key
-						break
-					}
-				}
-			}
-		}
-
-		if migrationInstance == nil {
-			result.Error = fmt.Sprintf("No migration found for plugin: %s", pluginKind)
+		// Extract plugin kind from expected.json
+		var expectedPlugin common.Plugin
+		if err := json.Unmarshal(expectedData, &expectedPlugin); err != nil {
+			result.Error = fmt.Sprintf("Failed to parse expected.json: %v", err)
 			results = append(results, result)
 			return filepath.SkipDir
 		}
 
-		logrus.Debugf("Found migration logic for plugin key: %s", foundKey)
-
-		// Get the correct definition ID and type based on plugin kind
-		defID, typeOfData, err := tr.getPluginKindMapping(pluginKind)
-		if err != nil {
-			result.Error = fmt.Sprintf("Failed to determine plugin mapping: %v", err)
-			results = append(results, result)
-			return filepath.SkipDir
+		// Determine the definition ID and type based on the plugin kind
+		var defID, typeOfData string
+		// Set default definition ID and type based on the plugin kind from the loaded schema
+		switch pluginKind {
+		case v1plugin.KindVariable:
+			defID = "#var"
+			typeOfData = "variable"
+		case v1plugin.KindQuery:
+			defID = "#target"
+			typeOfData = "query"
+		case v1plugin.KindPanel:
+			defID = "#panel"
+			typeOfData = "panel"
+		default:
+			return fmt.Errorf("unsupported migration schema kind: %s", pluginKind)
 		}
 
-		// Execute the migration logic
-		resultPlugin, resultIsEmpty, err := migrate.ExecuteCuelangMigrationScript(migrationInstance, inputData, defID, typeOfData)
+		logrus.Debugf("Run migration test for plugin %s of type %s, using definition ID: %s and type: %s",
+			expectedPlugin.Kind, pluginKind, defID, typeOfData)
+		resultPlugin, resultIsEmpty, err := migrate.ExecuteCuelangMigrationScript(buildInstance, inputData, defID, typeOfData)
+		logrus.Debugf("Migration results - success: %v, empty: %v, error: %v", resultPlugin != nil, resultIsEmpty, err)
+
 		if err != nil {
 			result.Error = fmt.Sprintf("Migration execution failed: %v", err)
 			results = append(results, result)
@@ -992,4 +366,196 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, explicitPluginNam
 		results = append(results, result)
 		return filepath.SkipDir
 	})
+}
+
+// RunAllTests runs both model and migration tests
+func (tr *TestRunner) RunAllTests(schemasPath string) ([]TestResult, error) {
+	if err := tr.loadPackageData(); err != nil {
+		return nil, fmt.Errorf("failed to load package.json: %w", err)
+	}
+
+	var allResults []TestResult
+
+	// Walk the schemas directory and run tests when found
+	err := filepath.WalkDir(schemasPath, func(currentPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip non-directories
+		if !d.IsDir() {
+			return nil
+		}
+
+		// Process "tests" directories for model validation tests
+		if d.Name() == "tests" {
+			// Determine the plugin kind from the parent directory (which is assumed to be the entrypoint of the `model` CUE package, cf -h)
+			parentDir := filepath.Dir(currentPath)
+
+			_, buildInstance, err := schema.LoadModelSchema(parentDir)
+			if err != nil {
+				return err
+			}
+
+			// Look for "valid" and "invalid" subdirectories
+			validPath := filepath.Join(currentPath, "valid")
+			if _, err := os.Stat(validPath); err == nil {
+				validResults, err := tr.runModelValidationTests(validPath, buildInstance, true)
+				if err != nil {
+					return err
+				}
+				allResults = append(allResults, validResults...)
+			}
+
+			invalidPath := filepath.Join(currentPath, "invalid")
+			if _, err := os.Stat(invalidPath); err == nil {
+				invalidResults, err := tr.runModelValidationTests(invalidPath, buildInstance, false)
+				if err != nil {
+					return err
+				}
+				allResults = append(allResults, invalidResults...)
+			}
+
+			return filepath.SkipDir
+		}
+
+		// Process "migrate/tests" directories for migration tests
+		if d.Name() == "migrate" {
+			migrateTestsPath := filepath.Join(currentPath, "tests")
+
+			if _, err := os.Stat(migrateTestsPath); err == nil {
+				buildInstance, err := migrate.LoadMigrateSchema(currentPath)
+
+				if err != nil {
+					return fmt.Errorf("failed to load migration schemas: %w", err)
+				}
+
+				migrateFilePath := filepath.Join(currentPath, "migrate.cue")
+				pluginKind, err := migrate.GetPluginKind(migrateFilePath)
+				if err != nil {
+					return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
+				}
+				// Run migration tests with the loaded schema
+				migrateResults, err := tr.runMigrationTestsForPath(migrateTestsPath, buildInstance, pluginKind)
+				if err != nil {
+					return err
+				}
+
+				allResults = append(allResults, migrateResults...)
+			}
+
+			// Skip further traversal of migrate directory after processing
+			return filepath.SkipDir
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking schemas directory: %w", err)
+	}
+
+	return allResults, nil
+}
+
+func (o *option) SetWriter(writer io.Writer) {
+	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
+func NewCMD() *cobra.Command {
+	o := &option{}
+	cmd := &cobra.Command{
+		Use:   "test-schemas",
+		Short: "Run tests for plugin schemas",
+		Long: `Run tests for the plugin schemas, validating:
+- CUE model schema validation tests
+- CUE migration schema tests
+
+Test files are placed directly alongside the CUE files they're testing, within a "tests" folder.
+
+Supported test types:
+
+1. **Model Valid Tests**:
+  - Validate that a configuration is accepted by the plugin's CUE schema.
+  - Place valid tests under "tests/valid/". "tests" is located next to the entrypoint of the "model" CUE package.
+  - Each test is a JSON file containing a valid configuration expected to pass validation.
+
+2. **Model Invalid Tests**:
+  - Validate that a configuration is rejected by the plugin's CUE schema.
+  - Place invalid tests in "tests/invalid/". "tests" is located next to the entrypoint of the "model" CUE package.
+  - Each test is a JSON file containing an invalid configuration expected to fail validation.
+
+3. **Migration Tests**:
+  - Validate migration logic defined in the plugin's "migrate.cue" file.
+  - Place migration tests under "migrate/tests/". "tests" is located next to "migrate.cue".
+  - Each test is a directory containing:
+    - "input.json": The source configuration (e.g., Grafana format).
+    - "expected.json": The expected result after migration (Perses format).
+  - The migration test unifies the input with the migration schema and compares the result to the expected output.
+
+Example of file structure for a single plugin:
+  schemas/
+  ├── model.cue
+  ├── tests/
+  │   ├── valid/
+  │   │   ├── basic-config.json
+  │   │   └── advanced-config.json
+  │   └── invalid/
+  │       ├── missing-required.json
+  │       └── invalid-type.json
+  └── migrate/
+      ├── migrate.cue
+      └── tests/
+          ├── basic-migration/
+          │   ├── input.json
+          │   └── expected.json
+          └── complex-migration/
+              ├── input.json
+              └── expected.json
+
+More complex example for a package embedding several plugins:
+  schemas/
+  ├── my-datasource/
+  │   ├── model.cue
+  │   ├── tests/
+  │   │   ├── valid/
+  │   │   │   ├── basic-config.json
+  │   │   │   └── advanced-config.json
+  │   │   └── invalid/
+  │   │       ├── missing-required.json
+  │   │       └── invalid-type.json
+  │   └── migrate/
+  │       ├── migrate.cue
+  │       └── tests/
+  │           ├── basic-migration/
+  │           │   ├── input.json
+  │           │   └── expected.json
+  │           └── complex-migration/
+  │               ├── input.json
+  │               └── expected.json
+  └── my-query/
+      ├── model.cue
+      ├── tests/
+      │   ├── valid/
+      │   └── invalid/
+      └── migrate/
+          ├── migrate.cue
+          └── tests/`,
+		Example: `
+# Run schema tests for a plugin
+$ percli plugin test-schemas --plugin.path ./my-plugin
+
+# Run in current directory
+$ percli plugin test-schemas`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return persesCMD.Run(o, cmd, args)
+		},
+	}
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag --plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
+	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
+
+	return cmd
 }

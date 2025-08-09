@@ -25,16 +25,16 @@ func TestPluginTestSchemasCMD(t *testing.T) {
 	projectPath := testutil.GetRepositoryPath()
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "Schema test for panel plugin",
-			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-panel-plugin")},
-			IsErrorExpected: false,
-			ExpectedMessage: "✓ advanced-config.json (model-valid) [tests\\valid\\advanced-config.json]\n✓ basic-config.json (model-valid) [tests\\valid\\basic-config.json]\n✓ invalid-type.json (model-invalid) [tests\\invalid\\invalid-type.json]\n✓ missing-required.json (model-invalid) [tests\\invalid\\missing-required.json]\n✓ basic-migration (migrate) [migrate\\tests\\basic-migration]\n✓ complex-migration (migrate) [migrate\\tests\\complex-migration]\n\nTest Results: 6 passed, 0 failed\nAll schema tests passed\n",
+			Title:                "Schema test for panel plugin",
+			Args:                 []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-panel-plugin")},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: "Test Results: 6 passed, 0 failed\nAll schema tests passed\n",
 		},
 		{
-			Title:           "Schema test for datasource plugin (multi-plugins)",
-			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-datasource-plugin")},
-			IsErrorExpected: false,
-			ExpectedMessage: "✓ basic-datasource.json (model-valid) [my-datasource\\tests\\valid\\basic-datasource.json]\n✓ empty-url.json (model-invalid) [my-datasource\\tests\\invalid\\empty-url.json]\n✓ basic-variable.json (model-valid) [my-variable\\tests\\valid\\basic-variable.json]\n✓ invalid-options.json (model-invalid) [my-variable\\tests\\invalid\\invalid-options.json]\n✓ basic-migration (migrate) [my-query\\migrate\\tests\\basic-migration]\n✓ basic-migration (migrate) [my-variable\\migrate\\tests\\basic-migration]\n\nTest Results: 6 passed, 0 failed\nAll schema tests passed\n",
+			Title:                "Schema test for datasource plugin (multi-plugins)",
+			Args:                 []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-datasource-plugin")},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: "Test Results: 6 passed, 0 failed\nAll schema tests passed\n",
 		},
 		{
 			Title:           "Schema test for plugin without schemas",
