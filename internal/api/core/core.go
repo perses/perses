@@ -34,26 +34,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, banner string) (*app.Runner, dependency.PersistenceManager, error) {
-	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
+func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, banner string) (*app.Runner, dependency.Manager, error) {
+	dependencyManager, err := dependency.NewManager(conf)
 	if err != nil {
-		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
+		return nil, nil, fmt.Errorf("unable to instantiate the dependency manager: %w", err)
 	}
-	persesDAO := persistenceManager.GetPersesDAO()
+	persesDAO := dependencyManager.Persistence().GetPersesDAO()
 	if dbInitError := persesDAO.Init(); dbInitError != nil {
 		return nil, nil, fmt.Errorf("unable to initialize the database: %w", dbInitError)
 	}
-	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to initialize the service manager: %w", err)
-	}
-	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
-	persesFrontend := ui.NewPersesFrontend(conf, serviceManager.GetPlugin())
+	persesAPI := NewPersesAPI(dependencyManager, conf)
+	persesFrontend := ui.NewPersesFrontend(conf, dependencyManager.Service().GetPlugin())
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
 
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {
-		ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
+		ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(dependencyManager.Persistence().GetEphemeralDashboard())
 		if err != nil {
 			return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
 		}
@@ -61,28 +57,28 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	if len(conf.Provisioning.Folders) > 0 {
-		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
+		provisioningTask := provisioning.New(dependencyManager.Service(), conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
 	if len(conf.Datasource.Global.Discovery) > 0 {
-		datasourceDiscoveryTasks, sdErr := discovery.New(conf, serviceManager, persesDAO.IsCaseSensitive())
+		datasourceDiscoveryTasks, sdErr := discovery.New(conf, dependencyManager.Service(), persesDAO.IsCaseSensitive())
 		if sdErr != nil {
 			return nil, nil, fmt.Errorf("unable to instantiate the tasks for datasource discovery: %w", sdErr)
 		}
 		runner.WithTaskHelpers(datasourceDiscoveryTasks...)
 	}
 	if conf.Security.Authorization.Provider.Native.Enable {
-		rbacTask := authorization.NewPermissionRefreshCronTask(serviceManager.GetAuthorization(), persesDAO)
+		rbacTask := authorization.NewPermissionRefreshCronTask(dependencyManager.Service().GetAuthorization(), persesDAO)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.Provider.Native.CheckLatestUpdateInterval), rbacTask)
 	}
 
 	// Extract the plugin archives and load the plugins.
 	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.
-	unzipErr := serviceManager.GetPlugin().UnzipArchives()
+	unzipErr := dependencyManager.Service().GetPlugin().UnzipArchives()
 	if unzipErr != nil {
 		logrus.WithError(unzipErr).Error("unable to unzip the plugin archives")
 	} else {
-		if pluginErr := serviceManager.GetPlugin().Load(); pluginErr != nil {
+		if pluginErr := dependencyManager.Service().GetPlugin().Load(); pluginErr != nil {
 			logrus.WithError(pluginErr).Error("unable to load the plugins")
 		}
 	}
@@ -98,7 +94,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 				(conf.Plugin.EnableDev && strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/plugins", conf.APIPrefix)))
 		}).
 		Middleware(middleware.HandleError()).
-		Middleware(middleware.CheckProject(serviceManager.GetProject()))
+		Middleware(middleware.CheckProject(dependencyManager.Service().GetProject()))
 	if !conf.Frontend.Disable {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
 	}
@@ -115,5 +111,5 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 			MaxAge:           conf.Security.CORS.MaxAge,
 		}))
 	}
-	return runner, persistenceManager, nil
+	return runner, dependencyManager, nil
 }

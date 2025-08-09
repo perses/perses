@@ -56,8 +56,10 @@ type api struct {
 	apiPrefix              string
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
+	persistenceManager := dependencyManager.Persistence()
+	serviceManager := dependencyManager.Service()
 	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive),
@@ -65,19 +67,26 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive, cfg.EphemeralDashboard.Enable),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		globaldatasource.NewEndpoint(cfg.Datasource, serviceManager.GetGlobalDatasource(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		globalvariable.NewEndpoint(cfg.Variable, serviceManager.GetGlobalVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		plugin.NewEndpoint(serviceManager.GetPlugin(), cfg.Plugin.EnableDev),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
-		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetAuthorization(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
 		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetAuthorization(), serviceManager.GetDashboard()),
+	}
+
+	if cfg.Security.Authorization.Provider.Native.Enable {
+		// When the authorization is provided by a third-party service, roles are not managed by the Perses API.
+		// Therefore, we provide endpoints to manage them only if the native authorization is enabled.
+		apiV1Endpoints = append(apiV1Endpoints,
+			globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+			globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+			role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+			rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+		)
 	}
 
 	authEndpoint, err := authendpoint.New(

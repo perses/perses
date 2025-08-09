@@ -92,7 +92,7 @@ type persistence struct {
 	variable           variable.DAO
 }
 
-func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
+func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	persesDAO, err := database.New(conf)
 	if err != nil {
 		return nil, err

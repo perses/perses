@@ -355,11 +355,22 @@ func newRoleSpec() v1.RoleSpec {
 	}
 }
 
+func newGlobalRoleSpec() v1.RoleSpec {
+	return v1.RoleSpec{
+		Permissions: []role.Permission{
+			{
+				Actions: []role.Action{role.WildcardAction},
+				Scopes:  []role.Scope{role.WildcardScope},
+			},
+		},
+	}
+}
+
 func NewGlobalRole(name string) *v1.GlobalRole {
 	entity := &v1.GlobalRole{
 		Kind:     v1.KindGlobalRole,
 		Metadata: newMetadata(name),
-		Spec:     newRoleSpec(),
+		Spec:     newGlobalRoleSpec(),
 	}
 	entity.Metadata.CreateNow()
 	return entity
