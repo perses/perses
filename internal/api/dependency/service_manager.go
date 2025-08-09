@@ -111,7 +111,7 @@ type service struct {
 	view               view.Service
 }
 
-func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemaService)
 	healthService := healthImpl.NewService(dao.GetHealth())
-	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), authzService)
+	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), authzService, conf.Security.Authorization.Provider.Native.Enable)
 	roleService := roleImpl.NewService(dao.GetRole(), authzService, schemaService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), authzService, schemaService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
