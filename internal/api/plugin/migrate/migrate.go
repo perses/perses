@@ -134,20 +134,6 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	return plugin.KindQuery, nil
 }
 
-// GetPluginName extracts the specific plugin name from a migration file
-func GetPluginName(migrateFile string) (string, error) {
-	data, err := os.ReadFile(migrateFile) //nolint: gosec
-	if err != nil {
-		return "", err
-	}
-	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
-		if len(group) >= 2 {
-			return group[1], nil
-		}
-	}
-	return "", fmt.Errorf("no plugin name found in migration file")
-}
-
 // ExecuteCuelangMigrationScript executes a CUE migration script against grafana data
 func ExecuteCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New()
@@ -170,11 +156,11 @@ func ExecuteCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
 		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
-	return ConvertToPlugin(finalVal)
+	return convertToPlugin(finalVal)
 }
 
-// ConvertToPlugin converts a CUE value to a common.Plugin
-func ConvertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
+// convertToPlugin converts a CUE value to a common.Plugin struct
+func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if migrateValue.IsNull() {
 		return nil, true, nil
 	}
