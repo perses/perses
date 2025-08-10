@@ -48,7 +48,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("unable to resolve the configuration: %w", err)
 	}
 	o.cfg = cfg
-	// Overriding the path with the plugin path
+	// Overriding the paths using the plugin path
 	o.cfg.DistPath = filepath.Join(o.pluginPath, o.cfg.DistPath)
 	o.cfg.FrontendPath = filepath.Join(o.pluginPath, o.cfg.FrontendPath)
 	o.relativeSchemaPath = o.cfg.SchemasPath
@@ -68,7 +68,7 @@ func (o *option) Execute() error {
 	}
 	if plugin.IsSchemaRequired(npmPackageData.Perses) {
 		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
-			return errors.New("cue module not found")
+			return errors.New("CUE module not found")
 		}
 		// There is a possibility the schema path set in package.json differ from the one set in the configuration.
 		// In this case, we will use the one set in the configuration.

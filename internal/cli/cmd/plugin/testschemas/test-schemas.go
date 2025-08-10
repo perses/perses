@@ -34,14 +34,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TestType represents the type of test being run
+type TestType string
+
+const (
+	TestTypeModelValid   TestType = "model-valid"
+	TestTypeModelInvalid TestType = "model-invalid"
+	TestTypeMigrate      TestType = "migrate"
+)
+
+// TestResult represents the result of a single test
+type TestResult struct {
+	TestName string
+	TestPath string // Path relative to schema directory
+	TestType TestType
+	Success  bool
+	Error    string
+}
+
 type option struct {
 	persesCMD.Option
-	cfg                config.PluginConfig
-	cfgPath            string
-	pluginPath         string
-	relativeSchemaPath string
-	writer             io.Writer
-	errWriter          io.Writer
+	cfg        config.PluginConfig
+	cfgPath    string
+	pluginPath string
+	writer     io.Writer
+	errWriter  io.Writer
 }
 
 func (o *option) Complete(args []string) error {
@@ -53,10 +70,9 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("unable to resolve the configuration: %w", err)
 	}
 	o.cfg = cfg
-	// Overriding the path with the plugin path
+	// Overriding the paths using the plugin path
 	o.cfg.DistPath = filepath.Join(o.pluginPath, o.cfg.DistPath)
 	o.cfg.FrontendPath = filepath.Join(o.pluginPath, o.cfg.FrontendPath)
-	o.relativeSchemaPath = o.cfg.SchemasPath
 	o.cfg.SchemasPath = filepath.Join(o.pluginPath, o.cfg.SchemasPath)
 
 	return nil
@@ -77,11 +93,10 @@ func (o *option) Execute() error {
 	}
 
 	if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
-		return fmt.Errorf("cue module not found in %s", filepath.Join(o.pluginPath, plugin.CuelangModuleFolder))
+		return fmt.Errorf("CUE module not found in %s", filepath.Join(o.pluginPath, plugin.CuelangModuleFolder))
 	}
 
-	testRunner := NewTestRunner(o.pluginPath, "")
-	results, err := testRunner.RunAllTests(o.cfg.SchemasPath)
+	results, err := o.runAllTests()
 	if err != nil {
 		return fmt.Errorf("failed to run tests: %w", err)
 	}
@@ -112,59 +127,94 @@ func (o *option) Execute() error {
 	return output.HandleString(o.writer, "All schema tests passed")
 }
 
-// TestType represents the type of test being run
-type TestType string
+// runAllTests runs both model and migration tests
+func (o *option) runAllTests() ([]TestResult, error) {
+	var allResults []TestResult
 
-const (
-	TestTypeModelValid   TestType = "model-valid"
-	TestTypeModelInvalid TestType = "model-invalid"
-	TestTypeMigrate      TestType = "migrate"
-)
+	// Walk the schemas directory and run tests when found
+	err := filepath.WalkDir(o.cfg.SchemasPath, func(currentPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 
-// TestResult represents the result of a single test
-type TestResult struct {
-	TestName string
-	TestPath string // Path relative to schema directory
-	TestType TestType
-	Success  bool
-	Error    string
-}
+		// Skip non-directories
+		if !d.IsDir() {
+			return nil
+		}
 
-// TestRunner handles execution of plugin tests
-type TestRunner struct {
-	pluginPath  string
-	testsPath   string
-	packageData *plugin.NPMPackage
-}
+		// Process "tests" directories for model validation tests
+		if d.Name() == "tests" {
+			// Determine the plugin kind from the parent directory (which is assumed to be the entrypoint of the `model` CUE package, cf -h)
+			parentDir := filepath.Dir(currentPath)
 
-// NewTestRunner creates a new test runner
-func NewTestRunner(pluginPath, testsPath string) *TestRunner {
-	return &TestRunner{
-		pluginPath: pluginPath,
-		testsPath:  testsPath,
-	}
-}
+			_, buildInstance, err := schema.LoadModelSchema(parentDir)
+			if err != nil {
+				return err
+			}
 
-// loadPackageData loads and caches the package.json data
-func (tr *TestRunner) loadPackageData() error {
-	if tr.packageData != nil {
+			// Look for "valid" and "invalid" subdirectories
+			validPath := filepath.Join(currentPath, "valid")
+			if _, err := os.Stat(validPath); err == nil {
+				validResults, err := o.runModelValidationTests(validPath, buildInstance, true)
+				if err != nil {
+					return err
+				}
+				allResults = append(allResults, validResults...)
+			}
+
+			invalidPath := filepath.Join(currentPath, "invalid")
+			if _, err := os.Stat(invalidPath); err == nil {
+				invalidResults, err := o.runModelValidationTests(invalidPath, buildInstance, false)
+				if err != nil {
+					return err
+				}
+				allResults = append(allResults, invalidResults...)
+			}
+
+			return filepath.SkipDir
+		}
+
+		// Process "migrate/tests" directories for migration tests
+		if d.Name() == "migrate" {
+			migrateTestsPath := filepath.Join(currentPath, "tests")
+
+			if _, err := os.Stat(migrateTestsPath); err == nil {
+				buildInstance, err := migrate.LoadMigrateSchema(currentPath)
+
+				if err != nil {
+					return fmt.Errorf("failed to load migration schemas: %w", err)
+				}
+
+				migrateFilePath := filepath.Join(currentPath, "migrate.cue")
+				pluginKind, err := migrate.GetPluginKind(migrateFilePath)
+				if err != nil {
+					return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
+				}
+				// Run migration tests with the loaded schema
+				migrateResults, err := o.runMigrationTestsForPath(migrateTestsPath, buildInstance, pluginKind)
+				if err != nil {
+					return err
+				}
+
+				allResults = append(allResults, migrateResults...)
+			}
+
+			// Skip further traversal of migrate directory after processing
+			return filepath.SkipDir
+		}
 		return nil
-	}
+	})
 
-	var err error
-	tr.packageData, err = plugin.ReadPackage(tr.pluginPath)
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("error walking schemas directory: %w", err)
 	}
 
-	return nil
+	return allResults, nil
 }
 
 // runModelValidationTests runs the model tests found in the provided directory
-func (tr *TestRunner) runModelValidationTests(testDir string, buildInstance *build.Instance, shouldBeValid bool) ([]TestResult, error) {
+func (o *option) runModelValidationTests(testDir string, buildInstance *build.Instance, shouldBeValid bool) ([]TestResult, error) {
 	var results []TestResult
-	// Get the schemas path from the loaded package data
-	schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -179,7 +229,7 @@ func (tr *TestRunner) runModelValidationTests(testDir string, buildInstance *bui
 
 		testName := filepath.Base(currentPath)
 		// Calculate relative path from schemas directory
-		relPath, err := filepath.Rel(schemasPath, currentPath)
+		relPath, err := filepath.Rel(o.cfg.SchemasPath, currentPath)
 		if err != nil {
 			relPath = currentPath // Fallback to full path if relative path calculation fails
 		}
@@ -236,7 +286,7 @@ func (tr *TestRunner) runModelValidationTests(testDir string, buildInstance *bui
 }
 
 // runMigrationTestsForPath runs migration tests for a specific directory path
-func (tr *TestRunner) runMigrationTestsForPath(testDir string, buildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
+func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
 	var results []TestResult
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
@@ -254,9 +304,7 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, buildInstance *bu
 
 		testName := d.Name()
 
-		// Calculate relative path from schemas directory
-		schemasPath := filepath.Join(tr.pluginPath, tr.packageData.Perses.SchemasPath)
-		relPath, err := filepath.Rel(schemasPath, currentPath)
+		relPath, err := filepath.Rel(o.cfg.SchemasPath, currentPath)
 		if err != nil {
 			relPath = currentPath // Fallback to full path if relative path calculation fails
 		}
@@ -366,95 +414,6 @@ func (tr *TestRunner) runMigrationTestsForPath(testDir string, buildInstance *bu
 		results = append(results, result)
 		return filepath.SkipDir
 	})
-}
-
-// RunAllTests runs both model and migration tests
-func (tr *TestRunner) RunAllTests(schemasPath string) ([]TestResult, error) {
-	if err := tr.loadPackageData(); err != nil {
-		return nil, fmt.Errorf("failed to load package.json: %w", err)
-	}
-
-	var allResults []TestResult
-
-	// Walk the schemas directory and run tests when found
-	err := filepath.WalkDir(schemasPath, func(currentPath string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Skip non-directories
-		if !d.IsDir() {
-			return nil
-		}
-
-		// Process "tests" directories for model validation tests
-		if d.Name() == "tests" {
-			// Determine the plugin kind from the parent directory (which is assumed to be the entrypoint of the `model` CUE package, cf -h)
-			parentDir := filepath.Dir(currentPath)
-
-			_, buildInstance, err := schema.LoadModelSchema(parentDir)
-			if err != nil {
-				return err
-			}
-
-			// Look for "valid" and "invalid" subdirectories
-			validPath := filepath.Join(currentPath, "valid")
-			if _, err := os.Stat(validPath); err == nil {
-				validResults, err := tr.runModelValidationTests(validPath, buildInstance, true)
-				if err != nil {
-					return err
-				}
-				allResults = append(allResults, validResults...)
-			}
-
-			invalidPath := filepath.Join(currentPath, "invalid")
-			if _, err := os.Stat(invalidPath); err == nil {
-				invalidResults, err := tr.runModelValidationTests(invalidPath, buildInstance, false)
-				if err != nil {
-					return err
-				}
-				allResults = append(allResults, invalidResults...)
-			}
-
-			return filepath.SkipDir
-		}
-
-		// Process "migrate/tests" directories for migration tests
-		if d.Name() == "migrate" {
-			migrateTestsPath := filepath.Join(currentPath, "tests")
-
-			if _, err := os.Stat(migrateTestsPath); err == nil {
-				buildInstance, err := migrate.LoadMigrateSchema(currentPath)
-
-				if err != nil {
-					return fmt.Errorf("failed to load migration schemas: %w", err)
-				}
-
-				migrateFilePath := filepath.Join(currentPath, "migrate.cue")
-				pluginKind, err := migrate.GetPluginKind(migrateFilePath)
-				if err != nil {
-					return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
-				}
-				// Run migration tests with the loaded schema
-				migrateResults, err := tr.runMigrationTestsForPath(migrateTestsPath, buildInstance, pluginKind)
-				if err != nil {
-					return err
-				}
-
-				allResults = append(allResults, migrateResults...)
-			}
-
-			// Skip further traversal of migrate directory after processing
-			return filepath.SkipDir
-		}
-		return nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("error walking schemas directory: %w", err)
-	}
-
-	return allResults, nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
