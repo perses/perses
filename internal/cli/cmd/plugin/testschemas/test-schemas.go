@@ -28,7 +28,6 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
-	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -56,7 +55,6 @@ type TestResult struct {
 
 type option struct {
 	persesCMD.Option
-	opt.OutputOption
 	cfg        config.PluginConfig
 	cfgPath    string
 	pluginPath string
@@ -108,7 +106,7 @@ func (o *option) Execute() error {
 		return output.HandleString(o.writer, "No tests found")
 	}
 
-	// Report test results using strings.Builder
+	// Report test results
 	var outputBuilder strings.Builder
 	passed := 0
 	failed := 0
@@ -124,17 +122,12 @@ func (o *option) Execute() error {
 	outputBuilder.WriteString(fmt.Sprintf("\nTest Results: %d passed, %d failed\n", passed, failed))
 
 	if failed > 0 {
-		outputBuilder.WriteString(fmt.Sprintf("%d test(s) failed\n", failed))
-		fmt.Fprint(o.writer, outputBuilder.String())
-
-		output.Handle(o.writer, o.Output, outputBuilder.String())
-
-		return fmt.Errorf("%d test(s) failed", failed)
+		outputBuilder.WriteString(fmt.Sprintf("%d test(s) failed", failed))
+	} else {
+		outputBuilder.WriteString("All schema tests passed\n")
 	}
 
-	outputBuilder.WriteString("All schema tests passed\n")
-	fmt.Fprint(o.writer, outputBuilder.String())
-	return nil
+	return output.HandleString(o.writer, outputBuilder.String())
 }
 
 // runAllTests runs both model and migration tests
