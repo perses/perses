@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
@@ -27,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -54,6 +56,7 @@ type TestResult struct {
 
 type option struct {
 	persesCMD.Option
+	opt.OutputOption
 	cfg        config.PluginConfig
 	cfgPath    string
 	pluginPath string
@@ -105,26 +108,33 @@ func (o *option) Execute() error {
 		return output.HandleString(o.writer, "No tests found")
 	}
 
-	// Report test results
+	// Report test results using strings.Builder
+	var outputBuilder strings.Builder
 	passed := 0
 	failed := 0
 	for _, result := range results {
 		if result.Success {
 			passed++
-			fmt.Fprintf(o.writer, "✓ %s (%s) [%s]\n", result.TestName, result.TestType, result.TestPath)
+			outputBuilder.WriteString(fmt.Sprintf("✓ %s (%s) [%s]\n", result.TestName, result.TestType, result.TestPath))
 		} else {
 			failed++
-			fmt.Fprintf(o.writer, "✗ %s (%s) [%s]: %s\n", result.TestName, result.TestType, result.TestPath, result.Error)
+			outputBuilder.WriteString(fmt.Sprintf("✗ %s (%s) [%s]: %s\n", result.TestName, result.TestType, result.TestPath, result.Error))
 		}
 	}
-
-	fmt.Fprintf(o.writer, "\nTest Results: %d passed, %d failed\n", passed, failed)
+	outputBuilder.WriteString(fmt.Sprintf("\nTest Results: %d passed, %d failed\n", passed, failed))
 
 	if failed > 0 {
+		outputBuilder.WriteString(fmt.Sprintf("%d test(s) failed\n", failed))
+		fmt.Fprint(o.writer, outputBuilder.String())
+
+		output.Handle(o.writer, o.Output, outputBuilder.String())
+
 		return fmt.Errorf("%d test(s) failed", failed)
 	}
 
-	return output.HandleString(o.writer, "All schema tests passed")
+	outputBuilder.WriteString("All schema tests passed\n")
+	fmt.Fprint(o.writer, outputBuilder.String())
+	return nil
 }
 
 // runAllTests runs both model and migration tests
