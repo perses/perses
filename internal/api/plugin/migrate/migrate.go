@@ -119,7 +119,7 @@ func isPackageMigrate(file string) (bool, error) {
 	return strings.Contains(string(data), "package migrate"), nil
 }
 
-// GetPluginKind determines the plugin kind from a migration file
+// GetPluginKind guesses the plugin kind from a migration file based on expected patterns
 func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	data, err := os.ReadFile(migrateFile) //nolint: gosec
 	if err != nil {
