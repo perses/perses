@@ -243,7 +243,7 @@ func (o *option) runModelValidationTests(testDir string, buildInstance *build.In
 		}
 
 		// Read test data
-		data, err := os.ReadFile(currentPath)
+		data, err := os.ReadFile(currentPath) //nolint: gosec
 		if err != nil {
 			result.Error = fmt.Sprintf("Failed to read test file: %v", err)
 			results = append(results, result)
@@ -335,7 +335,7 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 		}
 
 		// Read input data (Grafana format)
-		inputData, err := os.ReadFile(inputPath)
+		inputData, err := os.ReadFile(inputPath) //nolint: gosec
 		if err != nil {
 			result.Error = fmt.Sprintf("Failed to read input.json: %v", err)
 			results = append(results, result)
@@ -343,7 +343,7 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 		}
 
 		// Read expected data (Perses format)
-		expectedData, err := os.ReadFile(expectedPath)
+		expectedData, err := os.ReadFile(expectedPath) //nolint: gosec
 		if err != nil {
 			result.Error = fmt.Sprintf("Failed to read expected.json: %v", err)
 			results = append(results, result)
@@ -401,8 +401,16 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 
 		// Compare JSON outputs (normalized)
 		var actualNormalized, expectedNormalized interface{}
-		json.Unmarshal(actualBytes, &actualNormalized)
-		json.Unmarshal(expectedData, &expectedNormalized)
+		if err := json.Unmarshal(actualBytes, &actualNormalized); err != nil {
+			result.Error = fmt.Sprintf("Failed to parse actual migration output: %v", err)
+			results = append(results, result)
+			return filepath.SkipDir
+		}
+		if err := json.Unmarshal(expectedData, &expectedNormalized); err != nil {
+			result.Error = fmt.Sprintf("Failed to parse expected migration output: %v", err)
+			results = append(results, result)
+			return filepath.SkipDir
+		}
 
 		actualNormalizedBytes, _ := json.Marshal(actualNormalized)
 		expectedNormalizedBytes, _ := json.Marshal(expectedNormalized)
