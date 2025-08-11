@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.52.0-beta.2 / 2025-08-11
+
+- [FEATURE] CLI: new command `plugin test-schemas` (#3168)
+- [BUGFIX] Fix Piechart legend value (#3162)
+- [BUGFIX] set default panel header height to avoid layout shift (#3165)
+- [BUGFIX] Explorer: remove the dependency to the app (#3160)
+
 ## 0.52.0-beta.1 / 2025-08-06
 
 - [FEATURE] Add Pyroscope and FlameChart plugin (#3154)
