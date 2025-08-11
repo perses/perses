@@ -27,7 +27,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var cueValidationOptions = []cue.Option{
+// Options to run the final validation (e.g only concrete values allowed)
+var CueValidationOptions = []cue.Option{
 	cue.Concrete(true),
 	cue.Attributes(true),
 	cue.Definitions(true),
@@ -97,7 +98,7 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 	ctx := cuecontext.New()
 	pluginValue := ctx.CompileBytes(pluginData)
 	finalValue := pluginValue.Unify(ctx.BuildInstance(schema))
-	if validateErr := finalValue.Validate(cueValidationOptions...); validateErr != nil {
+	if validateErr := finalValue.Validate(CueValidationOptions...); validateErr != nil {
 		// retrieve the full error detail to provide better insights to the end user:
 		ex, errOs := os.Executable()
 		if errOs != nil {

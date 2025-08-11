@@ -95,7 +95,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema,
 		// We could try to enforce the convention that the migration script is a subfolder of the schema folder of the plugin it is supposed to migrate.
 		// But it's not certain you have the migration script, and besides, it's almost certain user won't respect this convention.
 		// Finally, reading the migration script to determinate the kind of plugin is not that complicated, we have just a couple of rules to follow, and it's the most flexible way.
-		pluginKind, err := getPluginKind(migrateFilePath)
+		pluginKind, err := GetPluginKind(migrateFilePath)
 		if err != nil {
 			return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
 		}
@@ -119,7 +119,8 @@ func isPackageMigrate(file string) (bool, error) {
 	return strings.Contains(string(data), "package migrate"), nil
 }
 
-func getPluginKind(migrateFile string) (plugin.Kind, error) {
+// GetPluginKind guesses the plugin kind from a migration file based on expected patterns
+func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	data, err := os.ReadFile(migrateFile) //nolint: gosec
 	if err != nil {
 		return "", err
@@ -133,7 +134,8 @@ func getPluginKind(migrateFile string) (plugin.Kind, error) {
 	return plugin.KindQuery, nil
 }
 
-func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
+// executeCuelangScript executes a CUE migration script against grafana data
+func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -157,6 +159,7 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 	return convertToPlugin(finalVal)
 }
 
+// convertToPlugin converts a CUE value to a common.Plugin struct
 func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if migrateValue.IsNull() {
 		return nil, true, nil

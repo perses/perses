@@ -131,3 +131,40 @@ The API backend is now available on port 8080 :). You can log in with user: `adm
 ### Web App
 
 See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI.
+
+### Development Container Image
+
+A Dockerfile can be found at the root of the repo which can build a container
+for development purposes which includes both the API and UI.
+
+```
+make container-dev
+```
+
+The resulting image can be used as follows.
+
+```
+# the version here depends on your local git state
+=> => naming to localhost:5000/persesdev:v0.51.0-rc.0-48-g18d1e15d
+
+$ docker run -p 8080:8080 localhost:5000/persesdev:v0.51.0-rc.0-48-g18d1e15d
+```
+
+The image can be pushed to the registry with a make target.
+
+```
+make push-container-dev
+```
+
+If you would like to push this image to a remote container registry using the
+tag `myregistry.io/myname/myrepo:v0.0.51` then you can use the make targets as
+follows. Keep in mind that this is a development image which does not match the
+one built by the `goreleaser` build process.
+
+```
+export IMAGE_REGISTRY_DEV=myregistry.io/myname
+export IMAGE_REPO_DEV=myname
+export IMAGE_VERSION_DEV=v0.0.51
+make container-dev
+make push-container-dev
+```
