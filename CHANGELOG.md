@@ -1,5 +1,64 @@
 # Changelog
 
+## 0.52.0-beta.2 / 2025-08-11
+
+- [FEATURE] CLI: new command `plugin test-schemas` (#3168)
+- [BUGFIX] Fix Piechart legend value (#3162)
+- [BUGFIX] set default panel header height to avoid layout shift (#3165)
+- [BUGFIX] Explorer: remove the dependency to the app (#3160)
+
+## 0.52.0-beta.1 / 2025-08-06
+
+- [FEATURE] Add Pyroscope and FlameChart plugin (#3154)
+- [FEATURE] Add currency value formatting (#3132)
+- [FEATURE] TimeSeries export functionality for plugins (#3129)
+- [FEATURE] Add HeatMap plugin (#3143)
+- [ENHANCEMENT] create RouterProvider to remove hard dependency on react-router in plugins (#3140)
+- [ENHANCEMENT] Plugins/Prometheus: Increase size of the finder tab datasource dropdown in the Explorer view (perses/plugins#195)
+- [ENHANCEMENT] Plugins/Prometheus: Round the promql response time (perses/plugins#206)
+- [BUGFIX] Avoid dashboard name duplication from the front-end side (#3141)
+- [BUGFIX] Add optional validation to the insecure skip verify (#3136)
+- [BUGFIX] Handle Piechart tooltip overlap with legend (#3128)
+- [BUGFIX] Plugins/StatChart: Fix color for zero values (perses/plugins#224)
+- [BUGFIX] Plugins/PieChart: Remove the static text Access from the tooltip (perses/plugins#207)
+- [BUGFIX] Plugins/Prometheus: Set the time range end according to the step and start (perses/plugins#213)
+- [BUGFIX] Plugins/Prometheus: move PromQL Expression label higher to avoid overlap with editor (perses/plugins#189)
+- [DOC] Add concept doc for Variable + few patches (#3138)
+- [DOC] update materials with the Rawkode live (#3127)
+- [DOC] patch datasource discovery doc (#3130)
+- [DOC] docs: fix wrong redirect_url in examples (#3148)
+
+## 0.52.0-beta.0 / 2025-07-24
+
+- [FEATURE] Support LogQuery type (#3104)
+- [FEATURE] Support SQL queries on the Perses proxy (#3061)
+- [FEATURE] Unregister plugin from dev environment (#3069)
+- [FEATURE] Explorer: allow users to collapse tabs menu (#3064)
+- [FEATURE] Add user profile (#2984)
+- [FEATURE] Core: Add ProfileQuery (#2959) (#3017)
+- [ENHANCEMENT] Spec: make `unit` field in `format` optional (#3035)
+- [ENHANCEMENT] Plugins List: sort plugins (#3099)
+- [ENHANCEMENT] Configuration: Check the default plugin path instead of checking environment (#3070)
+- [ENHANCEMENT] stronger plugin format validation (#3020)
+- [ENHANCEMENT] Go SDK: Allow passing description as a dashboard option (#2998)
+- [ENHANCEMENT] Explorer: Add Execute Query Button to query editors (#3049)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show trace metadata on top of chart (perses/plugins#193)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show span metadata in attribute pane (perses/plugins#192)
+- [ENHANCEMENT] Plugins/Tempo: convert base64-encoded trace IDs and span IDs to hex-encoding (perses/plugins#191)
+- [BUGFIX] UI: remove cookies on token refresh fail (#3115)
+- [BUGFIX] UI: After selecting a project in import dashboard import button stays disabled unless clicked outside (#3083)
+- [BUGFIX] Spec: update datasource selector to include datasourcevariable (#3111)
+- [BUGFIX] CLI/migrate: replace `project` by `namespace` when migrating to CR (#3073)
+- [BUGFIX] UI: use YAML 1.1 spec to export dashboards (#3072)
+- [BUGFIX] Explorer: Fix tabs in random order (#3043)
+- [DOC] Add link to the API specs in the provisioning doc (#3032)
+- [DOC] Improve datasources concept doc (#3007)
+- [DOC] Add concept doc for Datasources (#3004)
+- [DOC] remove plugin development configuration doc (#3002)
+- [DOC] Fix docs for plugin configuration (#3000)
+- [DOC] Add model doc for missing common defs (#2987)
+- [DOC] Fix format issue for mkdocs syntax (#2985)
+
 ## 0.51.0 / 2025-06-06
 
 This release is one of the biggest releases we ever made.
