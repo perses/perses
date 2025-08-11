@@ -1,0 +1,30 @@
+{
+  "id": "grafana-panel-456",
+  "title": "Memory Usage with Thresholds",
+  "type": "stat",
+  "targets": [
+    {
+      "expr": "memory_usage_bytes / 1024 / 1024",
+      "refId": "A"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "blue"
+      },
+      "thresholds": {
+        "steps": [
+          {
+            "color": "yellow",
+            "value": 80
+          },
+          {
+            "color": "red", 
+            "value": 95
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "kind": "MyDatasource",
+  "spec": {
+    "url": "actually_not_empty"
+  }
+}

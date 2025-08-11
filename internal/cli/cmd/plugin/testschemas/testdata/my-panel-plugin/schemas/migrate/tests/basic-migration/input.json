@@ -1,0 +1,24 @@
+{
+  "id": "grafana-panel-123",
+  "title": "CPU Usage",
+  "type": "stat",
+  "targets": [
+    {
+      "expr": "cpu_usage_percent",
+      "refId": "A"
+    }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "color": {
+        "mode": "green"
+      }
+    }
+  },
+  "options": {
+    "reduceOptions": {
+      "values": false,
+      "calcs": ["lastNotNull"]
+    }
+  }
+}

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { test, expect } from '../fixtures/dashboardTest';
 
 const TEXT_VARIABLE_UPDATED_VALUE = 'new';
+const SAVE_DEFAULTS_DIALOG_TEXT =
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
 
 test.use({
   dashboardName: 'Defaults',

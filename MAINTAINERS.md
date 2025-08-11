@@ -16,4 +16,5 @@ be found in [GOVERNANCE.md](GOVERNANCE.md).
 | Guillaume Ladorme             | [gladorme](https://github.com/Gladorme)                 | Amadeus      |
 | Nicolas Takashi               | [nicolastakashi](https://github.com/nicolastakashi)     | Coralogix    |
 | Steven Cobb                   | [sjcobb](https://github.com/sjcobb)                     | Chronosphere |
+| Seyed Mahmoud SHAHROKNI       | [shahrokni](https://github.com/shahrokni)               | Amadeus      |
 | Jenny Zhu                     | [zhuje](https://github.com/zhuje)                       | Red Hat      |
