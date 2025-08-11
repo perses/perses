@@ -48,11 +48,12 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("unable to resolve the configuration: %w", err)
 	}
 	o.cfg = cfg
-	// Overriding the path with the plugin path
+	// Overriding the paths using the plugin path
 	o.cfg.DistPath = filepath.Join(o.pluginPath, o.cfg.DistPath)
 	o.cfg.FrontendPath = filepath.Join(o.pluginPath, o.cfg.FrontendPath)
 	o.relativeSchemaPath = o.cfg.SchemasPath
 	o.cfg.SchemasPath = filepath.Join(o.pluginPath, o.cfg.SchemasPath)
+
 	return nil
 }
 
@@ -67,7 +68,7 @@ func (o *option) Execute() error {
 	}
 	if plugin.IsSchemaRequired(npmPackageData.Perses) {
 		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
-			return errors.New("cue module not found")
+			return errors.New("CUE module not found")
 		}
 		// There is a possibility the schema path set in package.json differ from the one set in the configuration.
 		// In this case, we will use the one set in the configuration.
@@ -96,12 +97,22 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "lint",
-		Short: "Validate the plugin model. To be used for plugin development purpose only.",
+		Short: "Validate the plugin format and configuration. To be used for plugin development purpose only.",
+		Long: `Validate the plugin format & configuration, by checking:
+- Plugin package.json structure and perses configuration
+- if the plugin requires a CUE model schema, its existence & correctness.
+- if the plugin comes with a CUE migration schema, its correctness.`,
+		Example: `
+# Basic plugin validation
+$ percli plugin lint --plugin.path ./my-plugin
+
+# Run on current directory
+$ percli plugin lint`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
-	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag ---plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
+	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag --plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
 
 	return cmd
