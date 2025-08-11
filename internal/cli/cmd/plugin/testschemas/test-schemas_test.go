@@ -25,16 +25,16 @@ func TestPluginTestSchemasCMD(t *testing.T) {
 	projectPath := testutil.GetRepositoryPath()
 	testSuite := []cmdTest.Suite{
 		{
-			Title:                "Schema tests for panel plugin",
+			Title:                "Schema tests for a panel plugin, all succeeding",
 			Args:                 []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-panel-plugin")},
 			IsErrorExpected:      false,
-			ExpectedRegexMessage: "Test Results: 6 passed, 0 failed\nAll schema tests passed\n",
+			ExpectedRegexMessage: "Test Results: 6 passed, 0 failed\nAll schema tests passed",
 		},
 		{
-			Title:                "Schema tests for datasource plugin (multi-plugins)",
-			Args:                 []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-datasource-plugin")},
-			IsErrorExpected:      false,
-			ExpectedRegexMessage: "Test Results: 6 passed, 0 failed\nAll schema tests passed\n",
+			Title:           "Schema tests for datasource plugin (multi-plugins), 2 failing",
+			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "testschemas", "testdata", "my-datasource-plugin")},
+			IsErrorExpected: true,
+			ExpectedMessage: "2 test(s) failed",
 		},
 		{
 			Title:           "Schema tests for plugin without schemas",

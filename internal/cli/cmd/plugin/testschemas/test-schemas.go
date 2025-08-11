@@ -19,10 +19,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/kylelemons/godebug/diff"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -107,27 +107,31 @@ func (o *option) Execute() error {
 	}
 
 	// Report test results
-	var outputBuilder strings.Builder
 	passed := 0
 	failed := 0
 	for _, result := range results {
 		if result.Success {
 			passed++
-			outputBuilder.WriteString(fmt.Sprintf("✓ %s (%s) [%s]\n", result.TestName, result.TestType, result.TestPath))
+			if err := output.HandleString(o.writer, fmt.Sprintf("✓ %s (%s) [%s]", result.TestName, result.TestType, result.TestPath)); err != nil {
+				return err
+			}
 		} else {
 			failed++
-			outputBuilder.WriteString(fmt.Sprintf("✗ %s (%s) [%s]: %s\n", result.TestName, result.TestType, result.TestPath, result.Error))
+			if err := output.HandleString(o.writer, fmt.Sprintf("✗ %s (%s) [%s]: %s", result.TestName, result.TestType, result.TestPath, result.Error)); err != nil {
+				return err
+			}
 		}
 	}
-	outputBuilder.WriteString(fmt.Sprintf("\nTest Results: %d passed, %d failed\n", passed, failed))
 
-	if failed > 0 {
-		outputBuilder.WriteString(fmt.Sprintf("%d test(s) failed", failed))
-	} else {
-		outputBuilder.WriteString("All schema tests passed\n")
+	if err := output.HandleString(o.writer, fmt.Sprintf("\nTest Results: %d passed, %d failed", passed, failed)); err != nil {
+		return err
 	}
 
-	return output.HandleString(o.writer, outputBuilder.String())
+	if failed > 0 {
+		return fmt.Errorf("%d test(s) failed", failed)
+	}
+
+	return output.HandleString(o.writer, "All schema tests passed")
 }
 
 // runAllTests runs both model and migration tests
@@ -318,24 +322,8 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 			TestType: TestTypeMigrate,
 		}
 
-		// Look for input.json and expected.json in this directory
-		inputPath := filepath.Join(currentPath, "input.json")
-		expectedPath := filepath.Join(currentPath, "expected.json")
-
-		if _, err := os.Stat(inputPath); os.IsNotExist(err) {
-			result.Error = "input.json not found"
-			results = append(results, result)
-			return filepath.SkipDir
-		}
-
-		if _, err := os.Stat(expectedPath); os.IsNotExist(err) {
-			result.Error = "expected.json not found"
-			results = append(results, result)
-			return filepath.SkipDir
-		}
-
 		// Read input data (Grafana format)
-		inputData, err := os.ReadFile(inputPath) //nolint: gosec
+		inputData, err := os.ReadFile(filepath.Join(currentPath, "input.json")) //nolint: gosec
 		if err != nil {
 			result.Error = fmt.Sprintf("Failed to read input.json: %v", err)
 			results = append(results, result)
@@ -343,7 +331,7 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 		}
 
 		// Read expected data (Perses format)
-		expectedData, err := os.ReadFile(expectedPath) //nolint: gosec
+		expectedData, err := os.ReadFile(filepath.Join(currentPath, "expected.json")) //nolint: gosec
 		if err != nil {
 			result.Error = fmt.Sprintf("Failed to read expected.json: %v", err)
 			results = append(results, result)
@@ -358,26 +346,21 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 			return filepath.SkipDir
 		}
 
-		// Determine the definition ID and type based on the plugin kind
-		var defID, typeOfData string
+		logrus.Debugf("Run migration test for plugin %s of type %s", expectedPlugin.Kind, pluginKind)
+
+		var resultPlugin *common.Plugin
+		var resultIsEmpty bool
 		// Set default definition ID and type based on the plugin kind from the loaded schema
 		switch pluginKind {
 		case v1plugin.KindVariable:
-			defID = "#var"
-			typeOfData = "variable"
+			resultPlugin, resultIsEmpty, err = migrate.ExecuteVariableScript(buildInstance, inputData)
 		case v1plugin.KindQuery:
-			defID = "#target"
-			typeOfData = "query"
+			resultPlugin, resultIsEmpty, err = migrate.ExecuteQueryScript(buildInstance, inputData)
 		case v1plugin.KindPanel:
-			defID = "#panel"
-			typeOfData = "panel"
+			resultPlugin, resultIsEmpty, err = migrate.ExecutePanelScript(buildInstance, inputData)
 		default:
 			return fmt.Errorf("unsupported migration schema kind: %s", pluginKind)
 		}
-
-		logrus.Debugf("Run migration test for plugin %s of type %s, using definition ID: %s and type: %s",
-			expectedPlugin.Kind, pluginKind, defID, typeOfData)
-		resultPlugin, resultIsEmpty, err := migrate.ExecuteCuelangMigrationScript(buildInstance, inputData, defID, typeOfData)
 		logrus.Debugf("Migration results - success: %v, empty: %v, error: %v", resultPlugin != nil, resultIsEmpty, err)
 
 		if err != nil {
@@ -386,8 +369,8 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 			return filepath.SkipDir
 		}
 
-		if resultIsEmpty || resultPlugin == nil {
-			result.Error = "Migration resulted in ignored or nil result"
+		if resultIsEmpty {
+			result.Error = "Migration produced an empty result"
 			results = append(results, result)
 			return filepath.SkipDir
 		}
@@ -397,29 +380,29 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 			"kind": resultPlugin.Kind,
 			"spec": resultPlugin.Spec,
 		}
-		actualBytes, _ := json.Marshal(resultValue)
 
-		// Compare JSON outputs (normalized)
-		var actualNormalized, expectedNormalized interface{}
-		if err := json.Unmarshal(actualBytes, &actualNormalized); err != nil {
-			result.Error = fmt.Sprintf("Failed to parse actual migration output: %v", err)
-			results = append(results, result)
-			return filepath.SkipDir
+		actualData, err := json.MarshalIndent(resultValue, "", "  ")
+		if err != nil {
+			return err
 		}
+
+		// Normalizing the bytes of expectedData is needed for comparison
+		var expectedNormalized map[string]interface{}
 		if err := json.Unmarshal(expectedData, &expectedNormalized); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse expected migration output: %v", err)
 			results = append(results, result)
 			return filepath.SkipDir
 		}
 
-		actualNormalizedBytes, _ := json.Marshal(actualNormalized)
-		expectedNormalizedBytes, _ := json.Marshal(expectedNormalized)
+		expectedNormalizedData, _ := json.MarshalIndent(expectedNormalized, "", "  ")
 
-		if string(actualNormalizedBytes) == string(expectedNormalizedBytes) {
+		diff := diff.Diff(string(actualData), string(expectedNormalizedData))
+
+		// Compare JSON outputs
+		if diff == "" {
 			result.Success = true
 		} else {
-			result.Error = fmt.Sprintf("Migration output mismatch.\nExpected: %s\nActual: %s",
-				string(expectedNormalizedBytes), string(actualNormalizedBytes))
+			result.Error = fmt.Sprintf("Migration output mismatch.\nDiff: %s", diff)
 		}
 
 		results = append(results, result)
