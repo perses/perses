@@ -134,8 +134,8 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	return plugin.KindQuery, nil
 }
 
-// ExecuteCuelangScript executes a CUE migration script against grafana data
-func ExecuteCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
+// executeCuelangScript executes a CUE migration script against grafana data
+func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(

@@ -145,9 +145,9 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 }
 
 func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
-	return ExecuteCuelangScript(cueScript, grafanaQueryData, "#target", "query")
+	return executeCuelangScript(cueScript, grafanaQueryData, "#target", "query")
 }
 
 func ExecutePanelScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
-	return ExecuteCuelangScript(cueScript, grafanaPanelData, "#panel", "panel")
+	return executeCuelangScript(cueScript, grafanaPanelData, "#panel", "panel")
 }
