@@ -41,12 +41,19 @@ export interface Span {
   endTimeUnixNano: string;
   attributes?: KeyValue[];
   events?: Event[];
+  links?: Link[];
   status?: Status;
 }
 
 export interface Event {
   timeUnixNano: string;
   name: string;
+  attributes?: KeyValue[];
+}
+
+export interface Link {
+  traceId: string;
+  spanId: string;
   attributes?: KeyValue[];
 }
 

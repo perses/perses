@@ -63,7 +63,12 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 					}
 				}
 			} else if assert.Nil(t, err) {
-				assert.Equal(t, test.ExpectedMessage, buffer.String())
+				if len(test.ExpectedRegexMessage) > 0 {
+					matched, _ := regexp.MatchString(test.ExpectedRegexMessage, buffer.String())
+					assert.True(t, matched, "Expected output to match regex: %s", test.ExpectedRegexMessage)
+				} else {
+					assert.Equal(t, test.ExpectedMessage, buffer.String())
+				}
 			}
 			_ = os.Remove(configFilePath)
 		})

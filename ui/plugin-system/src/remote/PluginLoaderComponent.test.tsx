@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FederationHost } from '@module-federation/enhanced/runtime';
+import { ModuleFederation } from '@module-federation/enhanced/runtime';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
@@ -32,7 +32,7 @@ jest.mock('@module-federation/enhanced/runtime', () => ({
 
 jest.mock('./PluginRuntime', () => ({
   usePluginRuntime: jest.fn(),
-  pluginRuntime: {} as FederationHost,
+  pluginRuntime: {} as ModuleFederation,
 }));
 
 class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { error: Error | null }> {
@@ -67,7 +67,7 @@ describe('PluginLoaderComponent', () => {
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<{ 'test-plugin': () => React.ReactNode }> =>
         Promise.resolve({ 'test-plugin': mockPluginModule }),
-      pluginRuntime: {} as FederationHost,
+      pluginRuntime: {} as ModuleFederation,
     }));
 
     act(() => {
@@ -86,7 +86,7 @@ describe('PluginLoaderComponent', () => {
 
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<RemotePluginModule> => Promise.resolve({ mockPluginModule } as RemotePluginModule),
-      pluginRuntime: {} as FederationHost,
+      pluginRuntime: {} as ModuleFederation,
     }));
 
     act(() => {
@@ -108,7 +108,7 @@ describe('PluginLoaderComponent', () => {
     jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<RemotePluginModule> =>
         Promise.resolve({ 'test-plugin': 'not a function' } as unknown as RemotePluginModule),
-      pluginRuntime: {} as FederationHost,
+      pluginRuntime: {} as ModuleFederation,
     }));
 
     act(() => {

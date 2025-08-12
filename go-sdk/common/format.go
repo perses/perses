@@ -18,9 +18,12 @@ import (
 	"fmt"
 )
 
-type TimeUnit string
-type PercentageUnit string
-type ThroughputUnit string
+type (
+	TimeUnit       string
+	PercentageUnit string
+	ThroughputUnit string
+	CurrencyUnit   string
+)
 
 const (
 	MilliSecondsUnit       TimeUnit       = "milliseconds"
@@ -47,12 +50,27 @@ const (
 	RequestsPerSecondsUnit ThroughputUnit = "requests/sec"
 	RowsPerSecondsUnit     ThroughputUnit = "rows/sec"
 	WritesPerSecondsUnit   ThroughputUnit = "writes/sec"
+	AustralianDollarUnit   CurrencyUnit   = "aud"
+	CanadianDollarUnit     CurrencyUnit   = "cad"
+	SwissFrancUnit         CurrencyUnit   = "chf"
+	RenminbiUnit           CurrencyUnit   = "cny"
+	EuroUnit               CurrencyUnit   = "eur"
+	PoundUnit              CurrencyUnit   = "gbp"
+	HongKongDollarUnit     CurrencyUnit   = "hkd"
+	IndianRupeeUniit       CurrencyUnit   = "inr"
+	YenUnit                CurrencyUnit   = "jpy"
+	SouthKoreanWonUnit     CurrencyUnit   = "krw"
+	NorwegianKroneUnit     CurrencyUnit   = "nok"
+	NewZealandDollarUnit   CurrencyUnit   = "nzd"
+	SwedishKronaDollarUnit CurrencyUnit   = "sek"
+	SingaporeDollarUnit    CurrencyUnit   = "sgd"
+	USDollarUnit           CurrencyUnit   = "usd"
 )
 
 type Format struct {
-	Unit          *string `json:"unit,omitempty" yaml:"unit,omitempty"`
+	Unit          *string `json:"unit,omitempty"          yaml:"unit,omitempty"`
 	DecimalPlaces int     `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
-	ShortValues   bool    `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
+	ShortValues   bool    `json:"shortValues,omitempty"   yaml:"shortValues,omitempty"`
 }
 
 func (f *Format) UnmarshalJSON(data []byte) error {
@@ -92,7 +110,10 @@ func (f *Format) validate() error {
 		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
-		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit):
+		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),
+		string(SwissFrancUnit), string(RenminbiUnit), string(EuroUnit), string(PoundUnit),
+		string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit), string(SouthKoreanWonUnit),
+		string(NorwegianKroneUnit), string(NewZealandDollarUnit):
 		return nil
 	default:
 		return fmt.Errorf("unknown format")

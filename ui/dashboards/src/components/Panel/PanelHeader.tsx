@@ -30,6 +30,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   queryResults: QueryData[];
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
+  pluginActions?: ReactNode[]; // Add pluginActions prop
 }
 
 export function PanelHeader({
@@ -42,6 +43,7 @@ export function PanelHeader({
   editHandlers,
   sx,
   extra,
+  pluginActions,
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -58,7 +60,7 @@ export function PanelHeader({
       aria-describedby={descriptionTooltipId}
       disableTypography
       title={
-        <Stack direction="row">
+        <Stack direction="row" alignItems="center" height="var(--panel-header-height, 30px)">
           <Typography
             id={titleElementId}
             variant="subtitle1"
@@ -79,10 +81,11 @@ export function PanelHeader({
             description={description}
             descriptionTooltipId={descriptionTooltipId}
             links={links}
-            queryResults={queryResults}
             readHandlers={readHandlers}
             editHandlers={editHandlers}
             extra={extra}
+            queryResults={queryResults}
+            pluginActions={pluginActions}
           />
         </Stack>
       }

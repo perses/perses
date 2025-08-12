@@ -88,7 +88,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 			return result, nil
 		}
 	}
-	panelPlugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance.instance, grafanaPanel.RawMessage)
+	panelPlugin, panelMigrationIsEmpty, err := ExecutePanelScript(migrateScriptInstance.instance, grafanaPanel.RawMessage)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *v1.Panel) bool {
 	isQueryMigrationEmpty := true
 	for _, query := range queries {
-		queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(query.instance, target)
+		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
 		if pluginErr != nil {
 			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
 			continue
@@ -144,10 +144,10 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	return isQueryMigrationEmpty
 }
 
-func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaQueryData, "#target", "query")
+func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
+	return executeCuelangScript(cueScript, grafanaQueryData, "#target", "query")
 }
 
-func executePanelMigrationScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel", "panel")
+func ExecutePanelScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
+	return executeCuelangScript(cueScript, grafanaPanelData, "#panel", "panel")
 }

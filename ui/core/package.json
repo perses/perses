@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.51.0",
+  "version": "0.52.0-beta.2",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -18,8 +18,8 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
-    "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
-    "build:esm": "swc ./src -d dist --config-file ../.swcrc",
+    "build:cjs": "swc ./src -d dist/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",

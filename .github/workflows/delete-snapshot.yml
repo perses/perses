@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.9.0
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.10.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true

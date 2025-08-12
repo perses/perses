@@ -19,6 +19,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from '@perses-dev/components';
 import { CookiesProvider } from 'react-cookie';
+import { ReactRouterProvider } from '@perses-dev/plugin-system';
 import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
@@ -56,13 +57,15 @@ export function renderApp(container: Element | null): void {
             <DarkModeContextProvider>
               <ConfigContextProvider>
                 <QueryParamProvider adapter={ReactRouter6Adapter}>
-                  <NavHistoryProvider>
-                    <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                      <AuthorizationProvider>
-                        <App />
-                      </AuthorizationProvider>
-                    </SnackbarProvider>
-                  </NavHistoryProvider>
+                  <ReactRouterProvider>
+                    <NavHistoryProvider>
+                      <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                        <AuthorizationProvider>
+                          <App />
+                        </AuthorizationProvider>
+                      </SnackbarProvider>
+                    </NavHistoryProvider>
+                  </ReactRouterProvider>
                 </QueryParamProvider>
               </ConfigContextProvider>
             </DarkModeContextProvider>

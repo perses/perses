@@ -33,20 +33,20 @@ const AuthorizationContext = createContext<AuthorizationContext | undefined>(und
 // Provide RBAC helpers for checking current user permissions
 export function AuthorizationProvider(props: { children: ReactNode }): ReactElement {
   const enabled = useIsAuthEnabled();
-  const { data: decodedToken } = useAuthToken();
-  const username = decodedToken?.sub || '';
-  const { data } = useUserPermissions(username);
-  const userPermissions = useMemo(() => {
-    if (!data) {
-      return {} as Record<string, Permission[]>;
-    }
-    return data;
-  }, [data]);
-
   if (enabled) {
     // Will refresh the access token if it has expired when fetching data
     enableRefreshFetch();
   }
+
+  const { data: decodedToken } = useAuthToken();
+  const username = decodedToken?.sub || '';
+  const { data } = useUserPermissions(username);
+  const userPermissions: Record<string, Permission[]> = useMemo(() => {
+    if (!data) {
+      return {};
+    }
+    return data;
+  }, [data]);
 
   return (
     <AuthorizationContext.Provider value={{ enabled, username, userPermissions }}>

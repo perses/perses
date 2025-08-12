@@ -1,8 +1,8 @@
-# Datasources
+# Datasource
 
 A **datasource** in Perses represents a connection configuration to an external system that provides observability data, such as metrics or traces. Datasources are there to allow retrieving data from different backends without hardcoding connection details everytime. They are thus reusable configuration objects that encapsulate how to query a specific data provider.
 
-## Supported Backends
+## Supported backends
 
 Perses currently supports several types of datasources, including:
 
@@ -11,7 +11,7 @@ Perses currently supports several types of datasources, including:
 
 ## Configuring a datasource
 
-Datasources in Perses can be configured at different scopes. More details about that at [Datasource & Variable scopes](./datasource-and-variable-scopes.md).
+Datasources in Perses can be configured at different scopes, providing flexibility for reuse and organization. More details about scopes at [Datasource & Variable scopes](./datasource-and-variable-scopes.md).
 
 Creating a datasource is usually done through the Perses UI, but you also have the option to rely on:
 
