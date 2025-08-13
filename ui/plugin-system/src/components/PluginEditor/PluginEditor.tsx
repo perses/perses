@@ -29,8 +29,9 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  */
 export function PluginEditor(props: PluginEditorProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
+
   return (
     <Box {...others}>
       <Box sx={{ display: 'flex', flexDirection: 'row' }}>
@@ -48,14 +49,16 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           onChange={onSelectionChange}
         />
 
-        <Button
-          variant="contained"
-          sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
-          startIcon={<Reload />}
-          onClick={() => onSpecChange(value.spec)}
-        >
-          Run Query
-        </Button>
+        {withRunQueryButton && (
+          <Button
+            variant="contained"
+            sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
+            startIcon={<Reload />}
+            onClick={() => onSpecChange(value.spec)}
+          >
+            Run Query
+          </Button>
+        )}
       </Box>
 
       <ErrorBoundary FallbackComponent={ErrorAlert}>
