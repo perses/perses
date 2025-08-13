@@ -39,6 +39,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   pluginKindLabel: string;
   value: PluginEditorValue;
   isReadonly?: boolean;
+  withRunQueryButton?: boolean;
   onChange: (next: PluginEditorValue) => void;
 }
 
