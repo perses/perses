@@ -17,7 +17,7 @@ import { ReactElement } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import Router from './Router';
-import { SignInRoute, SignUpRoute } from './model/route';
+import { ExternalSignInRoute, SignInRoute, SignUpRoute } from './model/route';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -34,7 +34,9 @@ function App(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+      {location.pathname !== SignInRoute &&
+        location.pathname !== SignUpRoute &&
+        location.pathname !== ExternalSignInRoute && <Header />}
 
       <Box
         sx={{

@@ -75,19 +75,29 @@ func New(conf config.Config) (*k8sImpl, error) {
 		return nil, nil
 	}
 
+	var devBearer string
+	if len(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig) != 0 {
+		// The server is running in development mode with a kubeconfig file set. To make the development
+		// process easier we will inject the Authorization header into any request which doesn't have
+		// one
+		devBearer = fmt.Sprintf("Bearer %s", kubeconfig.BearerToken)
+	}
+
 	return &k8sImpl{
-		authenticator: kubernetesAuthenticator,
-		authorizer:    k8sAuthorizer,
-		kubeconfig:    kubeconfig,
-		kubeClient:    kubeClient,
+		authenticator:     kubernetesAuthenticator,
+		authorizer:        k8sAuthorizer,
+		kubeconfig:        kubeconfig,
+		kubeClient:        kubeClient,
+		developmentBearer: devBearer,
 	}, nil
 }
 
 type k8sImpl struct {
-	authenticator authenticator.Request
-	authorizer    authorizer.Authorizer
-	kubeconfig    *rest.Config
-	kubeClient    *kubernetes.Clientset
+	authenticator     authenticator.Request
+	authorizer        authorizer.Authorizer
+	kubeconfig        *rest.Config
+	kubeClient        *kubernetes.Clientset
+	developmentBearer string
 }
 
 // IsEnabled implements [Authorization]
@@ -105,6 +115,12 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 
 	if utils.IsAnonymous(ctx) {
 		return nil, nil
+	}
+
+	// Since we know that kubernetes expects the authorization header, we should check and return a
+	// specific error if it doesn't exist
+	if len(ctx.Request().Header.Get("Authorization")) == 0 {
+		return nil, errors.New("missing authorization header")
 	}
 
 	// At this point, we are sure that the context is not nil and the user is not anonymous.
@@ -130,7 +146,7 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 	if userStruct == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
 	}
-	k8sUser, err := getK8sUser(userStruct)
+	k8sUser, err := GetK8sUser(userStruct)
 	if err != nil {
 		// this case should not happen, as the getK8sUser function should just be used to unwrap any
 		// into the appropriate struct
@@ -146,6 +162,12 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			if skipper(ctx) {
 				return next(ctx)
 			}
+			// When running in development mode, inject any request which doesn't have the Authorization
+			// header with the header
+			if len(k.developmentBearer) != 0 && len(ctx.Request().Header.Get("Authorization")) == 0 {
+				ctx.Request().Header.Set("Authorization", k.developmentBearer)
+			}
+
 			_, err := k.GetUser(ctx)
 			if err != nil {
 				return apiInterface.HandleUnauthorizedError("invalid authorization header")
@@ -169,7 +191,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 		return nil, err
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +224,7 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 		return false
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return false
 	}
@@ -258,7 +280,7 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 		return nil, apiInterface.InternalError
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
@@ -463,7 +485,7 @@ func getK8sAPIGroup(scope k8sScope) string {
 
 // helper function to convert any type into a user.Info. This function should not error, and it is
 // expected that the struct being passed in is user.Info
-func getK8sUser(userStruct any) (user.Info, error) {
+func GetK8sUser(userStruct any) (user.Info, error) {
 	if k8sUser, ok := userStruct.(user.Info); ok {
 		return k8sUser, nil
 	}

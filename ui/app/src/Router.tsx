@@ -27,14 +27,19 @@ import {
   SignUpRoute,
   ExploreRoute,
   ProfileRoute,
+  ExternalSignInRoute,
 } from './model/route';
 import {
+  useExternalProvider,
   useIsAuthEnabled,
   useIsEphemeralDashboardEnabled,
   useIsExplorerEnabled,
+  useIsExternalAuth,
+  useIsNativeAuth,
   useIsSignUpDisable,
 } from './context/Config';
-import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
+import { buildRedirectQueryString, useIsAccessTokenExist, useExternalUsername } from './model/auth-client';
+import ExternalSignInView from './views/auth/ExternalSignInView';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -51,6 +56,8 @@ const ProfileView = lazy(() => import('./views/profile/ProfileView'));
 
 function Router(): ReactElement {
   const isAuthEnabled = useIsAuthEnabled();
+  const isNativeAuth = useIsNativeAuth();
+  const isExternalAuth = useIsExternalAuth();
   const isSignUpDisable = useIsSignUpDisable();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const isExplorerEnabled = useIsExplorerEnabled();
@@ -59,8 +66,9 @@ function Router(): ReactElement {
       {/* TODO: What sort of loading fallback do we want? */}
       <Suspense>
         <Routes>
-          {isAuthEnabled && <Route path={SignInRoute} element={<SignInView />} />}
-          {isAuthEnabled && !isSignUpDisable && <Route path={SignUpRoute} element={<SignUpView />} />}
+          {isAuthEnabled && isNativeAuth && <Route path={SignInRoute} element={<SignInView />} />}
+          {isAuthEnabled && isNativeAuth && !isSignUpDisable && <Route path={SignUpRoute} element={<SignUpView />} />}
+          {isAuthEnabled && isExternalAuth && <Route path={ExternalSignInRoute} element={<ExternalSignInView />} />}
           <Route
             path={ProfileRoute}
             element={
@@ -153,6 +161,18 @@ function Router(): ReactElement {
   );
 }
 
+function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
+  const isAuthEnabled = useIsAuthEnabled();
+  const isNativeAuth = useIsNativeAuth();
+  if (!isAuthEnabled) {
+    return children;
+  }
+  if (isNativeAuth) {
+    return <RequireNativeAuth>{children}</RequireNativeAuth>;
+  }
+  return <RequireExternalAuth>{children}</RequireExternalAuth>;
+}
+
 /**
  * This component aims to redirect the user to the SignIn page if not logged in.
  * Otherwise, it just loads the underlying component(s) defined as children.
@@ -162,14 +182,32 @@ function Router(): ReactElement {
  * @param children
  * @constructor
  */
-function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
-  const isAuthEnabled = useIsAuthEnabled();
-  const isAuthenticated = useIsAccessTokenExist(isAuthEnabled);
+function RequireNativeAuth({ children }: { children: ReactElement }): ReactElement | null {
+  const isAuthenticated = useIsAccessTokenExist(true);
   const location = useLocation();
-  if (!isAuthEnabled || isAuthenticated) {
+
+  if (isAuthenticated) {
     return children;
   }
+
   let to = SignInRoute;
+  if (location.pathname !== '' && location.pathname !== '/') {
+    to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
+  }
+  return <Navigate to={to} />;
+}
+
+function RequireExternalAuth({ children }: { children: ReactElement }): ReactElement | null {
+  const externalProvider = useExternalProvider();
+  // default to kubernetes as the default external auth provider
+  const externalUsername = useExternalUsername(externalProvider);
+  const location = useLocation();
+
+  if (externalUsername) {
+    return children;
+  }
+
+  let to = ExternalSignInRoute;
   if (location.pathname !== '' && location.pathname !== '/') {
     to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
   }
