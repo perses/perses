@@ -1,0 +1,158 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROM",
+      "label": "PROM",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "VAR_MYCONST",
+      "type": "constant",
+      "label": "My Constant Variable",
+      "value": "const_val",
+      "description": ""
+    }
+  ],
+  "editable": false,
+  "graphTooltip": 0,
+  "id": null,
+  "panels": [
+    {
+      "datasource": "$datasource",
+      "description": "Just displaying some metrics with Bar panel",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "percent",
+          "decimal": 2
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 11,
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "valueMode": "color",
+        "namePlacement": "auto",
+        "showUnfilled": true,
+        "sizing": "auto",
+        "minVizWidth": 0,
+        "minVizHeight": 10,
+        "maxVizHeight": 300
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "expr": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}",
+          "refID": "A"
+        }
+      ],
+      "title": "Some metrics",
+      "type": "bargauge"
+    },
+    {
+      TODO add 2 other panel and have 2 rows in total?
+    },
+    {
+      TODO check placeholder is appended for unssupôrted kind
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 25,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
+        "hide": 2,
+        "label": "My Constant Variable",
+        "name": "MyConst",
+        "query": "${VAR_MYCONST}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_MYCONST}",
+          "text": "${VAR_MYCONST}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_MYCONST}",
+            "text": "${VAR_MYCONST}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "<placeholder text>",
+          "value": "<placeholder text>"
+        },
+        "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false",
+        "hide": 0,
+        "label": "My Text Box Variable",
+        "name": "MyTextBox",
+        "options": [
+          {
+            "selected": true,
+            "text": "<placeholder text>",
+            "value": "<placeholder text>"
+          }
+        ],
+        "query": "<placeholder text>",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        TODO ListVariable from dummy testdata kind plugin
+      },
+      {
+        TODO check placeholder is appended for unssupôrted kind
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Barchart panel dash",
+  "uid": "barchart"
+}
