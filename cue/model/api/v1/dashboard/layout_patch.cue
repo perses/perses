@@ -43,6 +43,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 #GridLayoutSpec: {
 	display: #GridLayoutDisplay @go(Title)
 	items?: [...#GridItem] @go(Items,[]GridItem)
+	repeatVariable?: string @go(RepeatVariable)
 }
 
 #LayoutKind: "Grid"

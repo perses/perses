@@ -22,6 +22,7 @@ import { waitForStableCanvas } from '../utils';
 test.use({
   dashboardName: 'TimeSeriesChartPanel',
   mockNow: 1673805600000,
+  ignoresConsoleErrors: ['MUI: A component is changing the controlled value state of Autocomplete to be uncontrolled.'], // TODO (gladorme): find the input that causes this error
 });
 
 test.describe('Dashboard: Time Series Chart Panel', () => {

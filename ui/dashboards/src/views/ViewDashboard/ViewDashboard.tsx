@@ -20,7 +20,7 @@ import {
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
@@ -59,6 +59,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     ...others
   } = props;
   const { spec } = dashboardResource;
+  const [isEditMode, setIsEditMode] = useState<boolean>(isEditing ?? false);
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
@@ -102,20 +103,23 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProviderWithQueryParams
-        initialState={{
-          dashboardResource,
-          isEditMode: !!isEditing,
-        }}
+      <TimeRangeProviderWithQueryParams
+        initialTimeRange={initialTimeRange}
+        initialRefreshInterval={initialRefreshInterval}
       >
-        <TimeRangeProviderWithQueryParams
-          initialTimeRange={initialTimeRange}
-          initialRefreshInterval={initialRefreshInterval}
+        <VariableProviderWithQueryParams
+          initialVariableDefinitions={spec.variables}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariables}
         >
-          <VariableProviderWithQueryParams
-            initialVariableDefinitions={spec.variables}
-            externalVariableDefinitions={externalVariableDefinitions}
-            builtinVariableDefinitions={builtinVariables}
+          <DashboardProviderWithQueryParams
+            currentState={{
+              isEditMode: isEditMode,
+              setEditMode: setIsEditMode,
+            }}
+            initialState={{
+              dashboardResource,
+            }}
           >
             <Box
               sx={combineSx(
@@ -145,9 +149,9 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                 />
               </ErrorBoundary>
             </Box>
-          </VariableProviderWithQueryParams>
-        </TimeRangeProviderWithQueryParams>
-      </DashboardProviderWithQueryParams>
+          </DashboardProviderWithQueryParams>
+        </VariableProviderWithQueryParams>
+      </TimeRangeProviderWithQueryParams>
     </DatasourceStoreProvider>
   );
 }

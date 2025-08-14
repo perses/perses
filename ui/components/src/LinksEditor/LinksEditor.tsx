@@ -47,7 +47,10 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
           No links defined
         </Typography>
       )}
-      <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => append({ url: '' })}>
+      <IconButton
+        style={{ width: 'fit-content', height: 'fit-content' }}
+        onClick={() => append({ url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false })}
+      >
         <PlusIcon />
       </IconButton>
     </Stack>
@@ -83,7 +86,6 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               {...field}
               fullWidth
               label="Name"
-              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {
@@ -100,7 +102,6 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               {...field}
               fullWidth
               label="Tooltip"
-              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {
