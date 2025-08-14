@@ -476,8 +476,8 @@ func (m *mig) remove(kind plugin.Kind, name string) {
 			delete(m.panels, name)
 		case plugin.KindVariable:
 			delete(m.variables, name)
-		case plugin.KindDatasource:
-			// No migration script for datasource, so nothing to remove
+		case plugin.KindDatasource, plugin.KindExplore:
+		// No migration script for datasource or explorer, so nothing to remove
 		default:
 			logrus.Warnf("unable to remove migration script for %q: kind %q not supported", name, kind)
 		}
