@@ -20,6 +20,7 @@ import { TraceQueryPlugin } from './trace-queries';
 import { ProfileQueryPlugin } from './profile-queries';
 import { VariablePlugin } from './variables';
 import { ExplorePlugin } from './explore';
+import { LogQueryPlugin } from './log-queries';
 
 export interface PluginModuleSpec {
   plugins: PluginMetadata[];
@@ -79,6 +80,7 @@ export interface SupportedPlugins {
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;
   ProfileQuery: ProfileQueryPlugin;
+  LogQuery: LogQueryPlugin;
   Datasource: DatasourcePlugin;
   Explore: ExplorePlugin;
 }

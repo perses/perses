@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
+import { LogData, ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {
@@ -72,6 +72,28 @@ export const MOCK_TRACE_DATA: TraceData = {
   metadata: {
     executedQueryString: '{ duration > 1000ms }',
   },
+};
+
+export const MOCK_LOG_DATA: LogData = {
+  totalCount: 2,
+  entries: [
+    {
+      timestamp: 1666479357903,
+      line: 'Error: Something went wrong',
+      labels: {
+        level: 'error',
+        service: 'backend',
+      },
+    },
+    {
+      timestamp: 1666479382282,
+      line: 'Info: Request processed successfully',
+      labels: {
+        level: 'info',
+        service: 'frontend',
+      },
+    },
+  ],
 };
 
 export const MOCK_PROFILE_DATA: ProfileData = {
