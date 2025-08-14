@@ -14,6 +14,8 @@
 package v1
 
 import (
+	"fmt"
+
 	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -22,6 +24,7 @@ const pluginResource = "plugins"
 
 type PluginInterface interface {
 	PushDevPlugin([]*v1.PluginInDevelopment) error
+	RefreshDevPlugin(name string) error
 	UnLoadDevPlugin(name string) error
 	List() ([]v1.PluginModule, error)
 }
@@ -41,6 +44,13 @@ func (c *plugin) PushDevPlugin(plugins []*v1.PluginInDevelopment) error {
 	return c.client.Post().
 		Resource(pluginResource).
 		Body(plugins).
+		Do().
+		Error()
+}
+
+func (c *plugin) RefreshDevPlugin(name string) error {
+	return c.client.Post().
+		Resource(fmt.Sprintf("%s/%s/refresh", pluginResource, name)).
 		Do().
 		Error()
 }

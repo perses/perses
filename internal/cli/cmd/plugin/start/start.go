@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/plugin"
@@ -196,6 +197,16 @@ func (o *option) Execute() error {
 	if apiErr := o.apiClient.V1().Plugin().PushDevPlugin(pluginInDev); apiErr != nil {
 		logrus.WithError(apiErr).Error("failed to register the plugin in development")
 		cancel()
+	} else {
+		// If the registration is successful, we can start watching the plugin schema.
+		for _, plg := range pluginInDev {
+			// Start watching the plugin schema
+			if err := o.watchPluginSchema(ctx, plg); err != nil {
+				logrus.WithError(err).Errorf("failed to watch the plugin schema for the plugin %q", plg.Name)
+			} else {
+				logrus.Infof("watching the plugin schema for %q", plg.Name)
+			}
+		}
 	}
 	// Wait for context to be canceled or tasks to be ended and wait for graceful stop
 	taskhelper.JoinAll(ctx, time.Second*30, devServerTasks)
@@ -241,6 +252,77 @@ func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *
 		AbsolutePath: abs,
 	}
 	return server, pluginInDevelopment, nil
+}
+
+func (o *option) watchPluginSchema(ctx context.Context, pluginInDev *v1.PluginInDevelopment) error {
+	// First, we need to find the command to start the dev server.
+	npmPackageData, readErr := plugin.ReadPackage(pluginInDev.AbsolutePath)
+	if readErr != nil {
+		return fmt.Errorf("failed to read package for the plugin %q", pluginInDev.AbsolutePath)
+	}
+	if !plugin.IsSchemaRequired(npmPackageData.Perses) || pluginInDev.DisableSchema {
+		logrus.Debugf("the plugin %q does not require a schema or is disabled, no need to watch it", pluginInDev.Name)
+		return nil
+	}
+	// Create new watcher.
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer func() {
+			if watcherErr := watcher.Close(); watcherErr != nil {
+				logrus.WithError(watcherErr).Error("failed to close watcher")
+			}
+			logrus.Debug("watcher closed")
+		}()
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					// Channel was closed (i.e. Watcher.Close() was called).
+					return
+				}
+				if !event.Has(fsnotify.Write) {
+					// We are only interested in write events, aka file modification.
+					continue
+				}
+
+				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(pluginInDev.Name); apiErr != nil {
+					logrus.WithError(apiErr).Errorf("failed to refresh the plugin schema for the plugin %q: %s", pluginInDev.Name, apiErr)
+				} else {
+					logrus.Infof("plugin schema for %q has been refreshed", pluginInDev.Name)
+				}
+			case watchErr, ok := <-watcher.Errors:
+				if !ok {
+					// Channel was closed (i.e. Watcher.Close() was called).
+					return
+				}
+				logrus.WithError(watchErr).Error("error while watching plugin schema")
+			case <-ctx.Done():
+				logrus.Info("stopping the watcher for plugin schema")
+				return
+			}
+		}
+	}()
+	return filepath.WalkDir(filepath.Join(pluginInDev.AbsolutePath, npmPackageData.Perses.SchemasPath), func(currentPath string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil // we are only interested in files
+		}
+		if filepath.Ext(currentPath) != ".cue" {
+			return nil
+		}
+		// file is a CUE file, we can add it to the watcher.
+		// It does not matter if it is a schema or a migration file because If a CUE file is modified,
+		// we want to reload the Cuelang instance representing the schema.
+		if watcherErr := watcher.Add(currentPath); watcherErr != nil {
+			return fmt.Errorf("failed to add file %q to the watcher: %w", currentPath, watcherErr)
+		}
+		return nil
+	})
 }
 
 func (o *option) SetWriter(writer io.Writer) {
