@@ -38,6 +38,10 @@ export interface OptionsEditorProps<Spec> {
   value: Spec;
   onChange: (next: Spec) => void;
   isReadonly?: boolean;
+  queryHandlerSettings?: {
+    runWithOnBlur: boolean;
+    watchQueryChanges: (query: string) => void;
+  };
 }
 
 /**
