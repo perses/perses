@@ -25,7 +25,7 @@ export interface LogData {
   timeRange?: AbsoluteTimeRange;
   entries: LogEntry[];
   metadata?: LogMetadata;
-  totalCount: number;
+  totalCount?: number;
   hasMore?: boolean;
   direction?: 'forward' | 'backward';
 }
