@@ -14,7 +14,7 @@
 import { Box, Button } from '@mui/material';
 import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -31,6 +31,22 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
+  const [watchedQuery, setWatchQuery] = useState<string>(value.spec['query'] as string);
+
+  const runQueryHandler = useCallback((): void => {
+    onSpecChange({ ...value.spec, query: watchedQuery });
+  }, [value.spec, onSpecChange, watchedQuery]);
+
+  let queryHandlerSettings = undefined;
+
+  if (withRunQueryButton) {
+    queryHandlerSettings = {
+      runWithOnBlur: false,
+      watchQueryChanges: (query: string): void => {
+        setWatchQuery(query);
+      },
+    };
+  }
 
   return (
     <Box {...others}>
@@ -49,12 +65,13 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           onChange={onSelectionChange}
         />
 
-        {withRunQueryButton && (
+        {withRunQueryButton && !isLoading && (
           <Button
+            data-testid="run_query_button"
             variant="contained"
             sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
             startIcon={<Reload />}
-            onClick={() => onSpecChange(value.spec)}
+            onClick={runQueryHandler}
           >
             Run Query
           </Button>
@@ -67,6 +84,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           value={value.spec}
           onChange={onSpecChange}
           isReadonly={isReadonly}
+          queryHandlerSettings={queryHandlerSettings}
         />
       </ErrorBoundary>
     </Box>
