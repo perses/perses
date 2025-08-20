@@ -44,7 +44,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	if e.enableDev {
 		group.POST("", e.PushDevPlugin, true)
 		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.DeleteDevPlugin, true)
-		group.POST(fmt.Sprintf("/:%s/refresh", utils.ParamName), e.PushDevPlugin, true)
+		group.POST(fmt.Sprintf("/:%s/refresh", utils.ParamName), e.RefreshDevPlugin, true)
 	}
 }
 

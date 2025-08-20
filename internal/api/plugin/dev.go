@@ -72,7 +72,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 }
 
 func (p *pluginFile) RefreshDevPlugin(name string) error {
-	p.mutex.RUnlock()
+	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	plg, ok := p.devLoaded[name]
 	if !ok {
