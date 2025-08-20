@@ -22,7 +22,7 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-// reuse the test data from the plugin package
+// reuse the test data from the API
 var testDataFolder = filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata")
 
 func TestMigrateCMD(t *testing.T) {

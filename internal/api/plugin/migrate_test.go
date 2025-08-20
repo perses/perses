@@ -65,10 +65,8 @@ func TestMig_Migrate(t *testing.T) {
 		},
 	}
 
-	// load dummy plugins
 	pl := LoadTestPlugins()
 
-	// run tests
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			input := testUtils.ReadFile(filepath.Join("migrate", testDataFolder, "dashboards", test.inputGrafanaDashboardFile))

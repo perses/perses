@@ -15,5 +15,5 @@ package model
 
 kind: "SomeVariable"
 spec: close({
-	options: [...string]
+	values: [...string]
 })
