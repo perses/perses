@@ -19,8 +19,8 @@ interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 }
 
 export interface RouterContextType {
-  RouterComponent: (props: LinkProps & React.RefAttributes<HTMLAnchorElement>) => ReactNode;
-  navigate: (to: string) => void;
+  RouterComponent?: (props: LinkProps & React.RefAttributes<HTMLAnchorElement>) => ReactNode;
+  navigate?: (to: string) => void;
 }
 
 export const RouterContext = createContext<RouterContextType | undefined>(undefined);
@@ -28,7 +28,8 @@ export const RouterContext = createContext<RouterContextType | undefined>(undefi
 export function useRouterContext(): RouterContextType {
   const ctx = useContext(RouterContext);
   if (ctx === undefined) {
-    throw new Error('No RouterContext found. Did you forget a <RouterProvider>?');
+    console.warn('No RouterContext found. Did you forget a <RouterProvider>?');
+    return {};
   }
   return ctx;
 }
