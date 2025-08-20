@@ -30,11 +30,6 @@ export interface LogData {
   direction?: 'forward' | 'backward';
 }
 
-export interface LogStream {
-  labels: Labels;
-  entries: LogEntry[];
-}
-
 export interface LogMetadata {
   notices?: Notice[];
 
