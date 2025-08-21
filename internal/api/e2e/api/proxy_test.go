@@ -198,7 +198,7 @@ func TestSQLProxyBadMethod(t *testing.T) {
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s", utils.PathGlobalDatasource, dtsName)).
 			Expect().
-			Status(http.StatusNotFound)
+			Status(http.StatusMethodNotAllowed)
 		return []api.Entity{dts}
 	})
 }
