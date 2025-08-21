@@ -113,7 +113,6 @@ test.describe('Dashboard: Panels can be duplicated', () => {
       // Wait for new panel to be added and loaded.
       await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(orignalPanelCount + 1);
       const newPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated', nth: 1 });
-      await newPanel.container.scrollIntoViewIfNeeded();
       await newPanel.isLoaded();
 
       // Take a screenshot of each duplicate case because it's easier to look

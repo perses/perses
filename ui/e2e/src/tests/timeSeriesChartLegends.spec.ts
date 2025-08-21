@@ -86,7 +86,6 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
 
       await dashboardPage.forEachTheme(async (themeName) => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
-        await timeSeriesPanel.container.scrollIntoViewIfNeeded();
         await timeSeriesPanel.isLoaded();
         await waitForStableCanvas(timeSeriesPanel.canvas);
 

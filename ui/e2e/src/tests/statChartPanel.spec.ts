@@ -41,7 +41,6 @@ test.describe('Dashboard: Stat Chart Panel', () => {
       await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
       await dashboardPage.forEachTheme(async (themeName) => {
         const panel = dashboardPage.getPanelByName(panelName);
-        await panel.container.scrollIntoViewIfNeeded();
         await panel.isLoaded();
 
         await happoPlaywright.screenshot(page, panel.parent, {

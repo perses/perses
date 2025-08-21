@@ -214,7 +214,7 @@ export class DashboardPage {
     const dialog = this.getDialog('edit panel group');
     const nameInput = dialog.getByLabel('Name');
     await nameInput.clear();
-    await nameInput.type(name);
+    await nameInput.fill(name);
     await dialog.getByRole('button', { name: 'Apply' }).click();
   }
 
