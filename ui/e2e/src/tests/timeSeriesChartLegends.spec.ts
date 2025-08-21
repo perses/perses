@@ -93,12 +93,6 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
         const legendItemRole = panelName.includes('table') ? 'row' : 'listitem';
 
         const legendItems = timeSeriesPanel.container.getByRole(legendItemRole);
-        for (let i = 0; i < 3; i++) {
-          if (!(await legendItems.nth(2).isVisible())) {
-            await dashboardPage.refreshDashboard();
-            await dashboardPage.page.waitForTimeout(1000);
-          }
-        }
         await legendItems.nth(2).hover();
 
         await happoPlaywright.screenshot(page, timeSeriesPanel.parent, {

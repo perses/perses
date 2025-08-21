@@ -93,7 +93,7 @@ export interface DashboardProviderProps {
 }
 
 export function DashboardProvider(props: DashboardProviderProps): ReactElement {
-  const store = useMemo(() => initStore(props), [props]);
+  const store = useMemo(() => initStore(props), [props]); // TODO (gladorme): init store should be based only on initialState
 
   // load plugin to retrieve initial spec if default panel kind is defined
   const { defaultPluginKinds } = usePluginRegistry();
