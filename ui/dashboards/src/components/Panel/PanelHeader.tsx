@@ -28,6 +28,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   links?: Link[];
   extra?: ReactNode;
   queryResults: QueryData[];
+  viewQueriesHandler?: PanelActionsProps['viewQueriesHandler'];
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
   pluginActions?: ReactNode[]; // Add pluginActions prop
@@ -44,6 +45,7 @@ export function PanelHeader({
   sx,
   extra,
   pluginActions,
+  viewQueriesHandler,
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -83,6 +85,7 @@ export function PanelHeader({
             links={links}
             readHandlers={readHandlers}
             editHandlers={editHandlers}
+            viewQueriesHandler={viewQueriesHandler}
             extra={extra}
             queryResults={queryResults}
             pluginActions={pluginActions}

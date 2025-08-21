@@ -27,6 +27,7 @@ export interface PanelProps extends CardProps<'section'> {
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
+  viewQueriesHandler?: PanelHeaderProps['viewQueriesHandler'];
 }
 
 export type PanelOptions = {
@@ -71,6 +72,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     sx,
     panelOptions,
     panelGroupItemId,
+    viewQueriesHandler,
     ...others
   } = props;
 
@@ -223,6 +225,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           queryResults={queryResults}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
+          viewQueriesHandler={viewQueriesHandler}
           links={definition.spec.links}
           pluginActions={pluginActions}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
