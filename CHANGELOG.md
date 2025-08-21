@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.52.0-beta.4 / 2025-08-21
+
+- [FEATURE] Add LogQuery support and related data structures and queries (#3163)
+- [ENHANCEMENT] CLI/PLUGIN: schema files are watched and reloaded when modified (#3190)
+- [ENHANCEMENT] CLI/PLUGIN: improve the condition to run npm ci (#3206)
+- [ENHANCEMENT] CLI/PLUGIN: improve output of the cmd test-schemas (#3194)
+- [BUGFIX] Add watch_query_changes to fix run query button issue (#3192)
+- [BUGFIX] Show Run Query Button accordingly (#3185)
+
 ## 0.52.0-beta.3 / 2025-08-12
 
 - [BUGFIX] Fix swc configuration to use the root directory for transpiled files. Previous packages published were unusable. (#3179)
@@ -36,7 +45,7 @@
 
 - [FEATURE] Support LogQuery type (#3104)
 - [FEATURE] Support SQL queries on the Perses proxy (#3061)
-- [FEATURE] Unregister plugin from dev environment (#3069)
+- [FEATURE] CLI/PLUGIN: Unregister plugin from dev environment (#3069)
 - [FEATURE] Explorer: allow users to collapse tabs menu (#3064)
 - [FEATURE] Add user profile (#2984)
 - [FEATURE] Core: Add ProfileQuery (#2959) (#3017)
