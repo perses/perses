@@ -14,6 +14,7 @@
 import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { CircularProgress, Stack } from '@mui/material';
 import { OptionsEditorProps } from '../../model';
 import { usePlugin } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -34,24 +35,22 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
     return <ErrorAlert error={error} />;
   }
 
-  // TODO: Proper loading indicator
   if (isLoading) {
-    return null;
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
   }
 
-  if (plugin === undefined) {
+  if (!plugin) {
     throw new Error(`Missing implementation for ${pluginType} plugin with kind '${pluginKind}'`);
   }
 
   if (pluginType === 'Panel') {
     throw new Error('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
   }
-
   const { OptionsEditorComponent } = plugin;
 
-  if (OptionsEditorComponent !== undefined) {
-    return <OptionsEditorComponent {...others} />;
-  }
-
-  return null;
+  return OptionsEditorComponent ? <OptionsEditorComponent {...others} /> : null;
 }
