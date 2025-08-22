@@ -22,6 +22,7 @@ import (
 
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/fatih/color"
 	"github.com/kylelemons/godebug/diff"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
@@ -84,6 +85,10 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
+	red := color.New(color.FgRed)
+	green := color.New(color.FgGreen)
+	cyan := color.New(color.FgCyan)
+	magenta := color.New(color.FgHiMagenta)
 	npmPackageData, readErr := plugin.ReadPackage(o.cfg.FrontendPath)
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
@@ -107,31 +112,25 @@ func (o *option) Execute() error {
 	}
 
 	// Report test results
-	passed := 0
 	failed := 0
 	for _, result := range results {
 		if result.Success {
-			passed++
-			if err := output.HandleString(o.writer, fmt.Sprintf("✓ %s (%s) [%s]", result.TestName, result.TestType, result.TestPath)); err != nil {
-				return err
+			if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s %s (%s) [%s]", green.Sprint("✓"), result.TestName, cyan.Sprint(result.TestType), magenta.Sprint(result.TestPath))); outputErr != nil {
+				return outputErr
 			}
 		} else {
 			failed++
-			if err := output.HandleString(o.writer, fmt.Sprintf("✗ %s (%s) [%s]: %s", result.TestName, result.TestType, result.TestPath, result.Error)); err != nil {
-				return err
+			if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s %s (%s) [%s]: %s", red.Sprint("✗"), result.TestName, result.TestType, result.TestPath, result.Error)); outputErr != nil {
+				return outputErr
 			}
 		}
 	}
 
-	if err := output.HandleString(o.writer, fmt.Sprintf("\nTest Results: %d passed, %d failed", passed, failed)); err != nil {
-		return err
-	}
-
 	if failed > 0 {
-		return fmt.Errorf("%d test(s) failed", failed)
+		return fmt.Errorf("%s: %d out of the %d test(s) failed", red.Sprint("ERROR"), failed, len(results))
 	}
 
-	return output.HandleString(o.writer, "All schema tests passed")
+	return output.HandleString(o.writer, fmt.Sprintf("\n%s: All of the %d schema test(s) passed\n", green.Sprint("SUCCESS"), len(results)))
 }
 
 // runAllTests runs both model and migration tests

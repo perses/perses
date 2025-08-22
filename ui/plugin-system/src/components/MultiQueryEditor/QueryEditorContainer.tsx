@@ -109,6 +109,7 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
   return (
     <Box {...others}>
       <PluginEditor
+        withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{

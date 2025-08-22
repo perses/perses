@@ -15,6 +15,7 @@ import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '
 import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
+import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -50,6 +51,9 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
+  viewQueriesHandler?: {
+    onClick: () => void;
+  };
   queryResults: QueryData[];
   pluginActions?: ReactNode[];
 }
@@ -64,6 +68,7 @@ const ConditionalBox = styled(Box)({
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
   readHandlers,
+  viewQueriesHandler,
   extra,
   title,
   description,
@@ -136,6 +141,21 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [readHandlers, title]);
+
+  const viewQueryAction = useMemo(() => {
+    if (!viewQueriesHandler?.onClick) return null;
+    return (
+      <InfoTooltip description={TOOLTIP_TEXT.queryView}>
+        <HeaderIconButton
+          aria-label={ARIA_LABEL_TEXT.openQueryView(title)}
+          size="small"
+          onClick={viewQueriesHandler.onClick}
+        >
+          <DatabaseSearch fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }, [viewQueriesHandler, title]);
 
   const editActions = useMemo((): ReactNode | undefined => {
     if (editHandlers !== undefined) {
@@ -216,7 +236,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {pluginActions}
+            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {viewQueryAction}
+            {readActions} {pluginActions}
             {editActions}
           </OverflowMenu>
           {moveAction}
@@ -236,9 +257,10 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions}
+          {extraActions}
+          {readActions}
           <OverflowMenu title={title}>
-            {editActions} {pluginActions}
+            {editActions} {viewQueryAction} {pluginActions}
           </OverflowMenu>
           {moveAction}
         </OnHover>
@@ -257,7 +279,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         </OnHover>
         {divider} {queryStateIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions}
+          {extraActions}
+          {viewQueryAction}
+          {readActions} {editActions}
           {/* Show plugin actions inside a menu if it gets crowded */}
           {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
           {moveAction}
