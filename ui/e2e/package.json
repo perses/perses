@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/e2e",
-  "version": "0.52.0-beta.4",
+  "version": "0.52.0-beta.5",
   "private": true,
   "scripts": {
     "e2e": "npm run e2e:local",
@@ -14,12 +14,12 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@perses-dev/core": "0.52.0-beta.4",
+    "@perses-dev/core": "0.52.0-beta.5",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
-    "@perses-dev/internal-utils": "0.52.0-beta.4",
+    "@perses-dev/internal-utils": "0.52.0-beta.5",
     "@playwright/test": "^1.54.2",
     "chokidar-cli": "^3.0.0",
     "eslint-plugin-playwright": "^0.11.2",
