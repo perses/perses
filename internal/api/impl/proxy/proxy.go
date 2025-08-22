@@ -132,20 +132,23 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	if !e.cfg.Global.Disable {
 		g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, false)
-		// add route for SQLProxy kind to be able to POST directly to the datasource endpoint
-		g.POST(fmt.Sprintf("/%s/:%s", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, false)
+		// allow direct datasource queries without extra path (e.g., from ClickHouse)
+		g.ANY(fmt.Sprintf("/%s/:%s", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, false)
+
 		g.POST(fmt.Sprintf("/%s/%s/*", utils.PathUnsaved, utils.PathGlobalDatasource), e.proxyUnsavedGlobalDatasource, false)
 	}
 	if !e.cfg.Project.Disable {
 		g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, false)
-		// add route for SQLProxy kind to be able to POST directly to the datasource endpoint
-		g.POST(fmt.Sprintf("/%s/:%s/%s/:%s", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, false)
+		// allow direct datasource queries without extra path (e.g., from ClickHouse)
+		g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, false)
+
 		g.POST(fmt.Sprintf("/%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDatasource), e.proxyUnsavedProjectDatasource, false)
 	}
 	if !e.cfg.DisableLocal {
 		g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, false)
-		// add route for SQLProxy kind to be able to POST directly to the datasource endpoint
-		g.POST(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, false)
+		// allow direct datasource queries without extra path (e.g., from ClickHouse)
+		g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, false)
+
 		g.POST(fmt.Sprintf("/%s/%s/:%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource), e.proxyUnsavedDashboardDatasource, false)
 	}
 }

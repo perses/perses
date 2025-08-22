@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import React from 'react';
 
 /**
@@ -41,6 +41,7 @@ export interface OptionsEditorProps<Spec> {
   queryHandlerSettings?: {
     runWithOnBlur: boolean;
     watchQueryChanges: (query: string) => void;
+    setWatchOtherSpecs: (otherSpecs: UnknownSpec) => void;
   };
 }
 

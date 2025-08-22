@@ -14,7 +14,8 @@
 import { Box, Button } from '@mui/material';
 import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { UnknownSpec } from '@perses-dev/core';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -31,22 +32,34 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
+
+  /* 
+    We could technically merge the watchedQuery, watchedOtherSpecs into a single watched-object,
+    because at the end of the day, they are all specs.
+    However, let's have them separated to keep the code simple and readable.
+    Reason: Only Query string field is common between all of them. Other specs may be different
+    Example: Legend, and MinSteps
+   */
   const [watchedQuery, setWatchQuery] = useState<string>(value.spec['query'] as string);
+  const [watchedOtherSpecs, setWatchOtherSpecs] = useState<UnknownSpec>(value.spec);
 
   const runQueryHandler = useCallback((): void => {
-    onSpecChange({ ...value.spec, query: watchedQuery });
-  }, [value.spec, onSpecChange, watchedQuery]);
+    onSpecChange({ ...value.spec, ...watchedOtherSpecs, query: watchedQuery });
+  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs]);
 
-  let queryHandlerSettings = undefined;
-
-  if (withRunQueryButton) {
-    queryHandlerSettings = {
-      runWithOnBlur: false,
-      watchQueryChanges: (query: string): void => {
-        setWatchQuery(query);
-      },
-    };
-  }
+  const queryHandlerSettings = useMemo(() => {
+    return withRunQueryButton
+      ? {
+          runWithOnBlur: false,
+          watchQueryChanges: (query: string): void => {
+            setWatchQuery(query);
+          },
+          setWatchOtherSpecs: (otherSpecs: UnknownSpec): void => {
+            setWatchOtherSpecs(otherSpecs);
+          },
+        }
+      : undefined;
+  }, [withRunQueryButton]);
 
   return (
     <Box {...others}>
