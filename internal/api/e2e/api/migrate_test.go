@@ -37,14 +37,11 @@ func TestMigrateEndpoint(t *testing.T) {
 		resultDashboardPath  string
 	}{
 		{
-			title:                "grafana dashboard containing simple vars & panels",
-			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "simple_grafana_dashboard.json"),
-			resultDashboardPath:  filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "simple_perses_dashboard.json"),
-		},
-		{
-			title:                "grafana dashboard containing old-formatted elements (text panels without `options` field & a legacy graph panel)",
-			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "old_grafana_panels_grafana_dashboard.json"),
-			resultDashboardPath:  filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "old_grafana_panels_perses_dashboard.json"),
+			// here we reuse some test data from the API but since real plugins are used here,
+			// we have to use another JSON file for the expected result.
+			title:                "basic grafana dashboard containing some vars & panels",
+			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "dashboards", "basic_grafana_dashboard.json"),
+			resultDashboardPath:  filepath.Join("testdata", "basic_perses_dashboard.json"),
 		},
 	}
 	for _, test := range testSuite {

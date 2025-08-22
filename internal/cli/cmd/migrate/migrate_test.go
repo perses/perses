@@ -22,9 +22,12 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+// reuse the test data from the API
+var testDataFolder = filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata")
+
 func TestMigrateCMD(t *testing.T) {
-	pathToGrafanaDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_grafana_dashboard.json")
-	pathToPersesDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_perses_dashboard.json")
+	pathToGrafanaDashboard := filepath.Join(testDataFolder, "dashboards", "basic_grafana_dashboard.json")
+	pathToPersesDashboard := filepath.Join(testDataFolder, "dashboards", "basic_perses_dashboard.json")
 	var dashboard *modelV1.Dashboard
 	test.JSONUnmarshalFromFile(pathToPersesDashboard, &dashboard)
 	testSuite := []cmdTest.Suite{
@@ -42,13 +45,13 @@ func TestMigrateCMD(t *testing.T) {
 		},
 		{
 			Title:           "migrate with native format",
-			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
 		},
 		{
 			Title:           "migrate with custom resource format",
-			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(createCustomResource(dashboard))) + "\n",
 		},

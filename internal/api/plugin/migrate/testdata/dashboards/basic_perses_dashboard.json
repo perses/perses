@@ -1,0 +1,219 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "random",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Basic dashboard"
+    },
+    "variables": [
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "display": {
+            "name": "My Constant Variable",
+            "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
+            "hidden": true
+          },
+          "value": "job!=\"\"",
+          "constant": true,
+          "name": "MyConst"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "display": {
+            "name": "My Text Box Variable",
+            "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false",
+            "hidden": false
+          },
+          "value": "<placeholder text>",
+          "name": "MyTextBox"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "1",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "SomeVariable",
+            "spec": {
+              "values": [
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          },
+          "name": "MyList"
+        }
+      }
+    ],
+    "panels": {
+      "0_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Some metrics",
+            "description": "Just displaying some metrics with a Gauge panel"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "**Migration from Grafana not supported !**"
+            }
+          }
+        }
+      },
+      "0_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Some metrics",
+            "description": "Just displaying some metrics with a BarGauge panel"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "**Migration from Grafana not supported !**"
+            }
+          }
+        }
+      },
+      "0_2": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Some metrics",
+            "description": "Just displaying some metrics with a Stat panel"
+          },
+          "plugin": {
+            "kind": "BarChart",
+            "spec": {
+              "nested": {
+                "iwas": "stat"
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "ExoticQuery",
+                  "spec": {
+                    "query": "sum(up{$MyTextBox,$MyConst})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "1_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Some metrics",
+            "description": "Just displaying some metrics with a TimeSeries panel"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "iwas": "timeseries"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "ExoticQuery",
+                  "spec": {
+                    "query": "up{$MyTextBox,$MyConst} * 100"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Instant",
+            "collapse": {
+              "open": false
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 1,
+              "width": 8,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/0_0"
+              }
+            },
+            {
+              "x": 8,
+              "y": 1,
+              "width": 8,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/0_1"
+              }
+            },
+            {
+              "x": 16,
+              "y": 1,
+              "width": 8,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/0_2"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Over time",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 8,
+              "width": 24,
+              "height": 10,
+              "content": {
+                "$ref": "#/spec/panels/1_0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}

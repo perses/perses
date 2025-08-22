@@ -1,0 +1,1 @@
+[{"kind":"PluginModule","metadata":{"name":"","version":""},"spec":{"schemasPath":"schemas","plugins":[{"kind":"Variable","spec":{"display":{"name":"Some Variable"},"name":"SomeVariable"}}]},"status":{"isLoaded":true,"inDev":false}}]
