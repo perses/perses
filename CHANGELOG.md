@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.52.0-beta.5 / 2025-08-22
+
+- [FEATURE] : Add Quick Query Viewer (#3214)
+- [ENHANCEMENT] Allow direct datasource queries without trailing path (#3217)
+- [BREAKINGCHANGE] Watch the changes of the unknown specs in all Editor Plugins (#3203)
+
 ## 0.52.0-beta.4 / 2025-08-21
 
 - [FEATURE] Add LogQuery support and related data structures and queries (#3163)
