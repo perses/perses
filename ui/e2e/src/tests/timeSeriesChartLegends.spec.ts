@@ -50,7 +50,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/-/healthy',
                       },
@@ -59,7 +59,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/api/v1/alerts',
                       },
@@ -68,7 +68,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/api/v1/labels',
                       },
@@ -86,7 +86,6 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
 
       await dashboardPage.forEachTheme(async (themeName) => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
-        await timeSeriesPanel.container.scrollIntoViewIfNeeded();
         await timeSeriesPanel.isLoaded();
         await waitForStableCanvas(timeSeriesPanel.canvas);
 

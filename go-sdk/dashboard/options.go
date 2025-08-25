@@ -92,7 +92,8 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			Display: &dashboard.GridLayoutDisplay{
 				Title: r.Title,
 			},
-			Items: []dashboard.GridItem{},
+			Items:          []dashboard.GridItem{},
+			RepeatVariable: r.RepeatVariable,
 		}
 
 		if !r.IsCollapsed {

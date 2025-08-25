@@ -14,6 +14,7 @@
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { ReactElement, useState } from 'react';
+import { useVariableValues } from '@perses-dev/plugin-system';
 import { usePanelGroupEditor } from '../../context';
 import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps } from './PanelGroupEditorForm';
 
@@ -22,6 +23,7 @@ import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps
  */
 export function PanelGroupDialog(): ReactElement {
   const panelGroupEditor = usePanelGroupEditor();
+  const variables = useVariableValues();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
@@ -62,7 +64,11 @@ export function PanelGroupDialog(): ReactElement {
             <CloseIcon />
           </IconButton>
           <DialogContent dividers sx={{ width: '500px' }}>
-            <PanelGroupEditorForm initialValues={panelGroupEditor.initialValues} onSubmit={handleSubmit} />
+            <PanelGroupEditorForm
+              initialValues={panelGroupEditor.initialValues}
+              variables={Object.keys(variables)}
+              onSubmit={handleSubmit}
+            />
           </DialogContent>
           <DialogActions>
             <Button variant="contained" type="submit" form={panelGroupEditorFormId}>

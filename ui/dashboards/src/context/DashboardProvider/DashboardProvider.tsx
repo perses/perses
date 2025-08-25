@@ -39,7 +39,7 @@ import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
-import { createViewPanelSlice, ViewPanelSlice } from './view-panel-slice';
+import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -65,18 +65,6 @@ export interface DashboardStoreState
   ttl?: DurationString;
 }
 
-export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
-  isEditMode?: boolean;
-  viewPanelRef?: string;
-  setViewPanelRef?: (viewPanelRef: string | undefined) => void;
-}
-
-export interface DashboardProviderProps {
-  initialState: DashboardStoreProps;
-  children?: ReactNode;
-}
-
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
 
 export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T): T {
@@ -87,15 +75,27 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
+export interface DashboardStoreProps {
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  isEditMode?: boolean;
+  viewPanelRef?: VirtualPanelRef;
+  setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
+}
+
+export interface DashboardProviderProps {
+  initialState: DashboardStoreProps;
+  children?: ReactNode;
+}
+
 export function DashboardProvider(props: DashboardProviderProps): ReactElement {
+  // Prevent calling createDashboardStore every time it rerenders
   const createDashboardStore = useCallback(initStore, [props]);
+  const [store] = useState(createDashboardStore(props));
 
   // load plugin to retrieve initial spec if default panel kind is defined
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
-
-  const [store] = useState(createDashboardStore(props)); // prevent calling createDashboardStore every time it rerenders
 
   useEffect(() => {
     if (plugin === undefined) return;
@@ -123,18 +123,10 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
   const {
     kind,
     metadata,
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
   } = dashboardResource;
 
   const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
-
-  let {
-    spec: { layouts, panels },
-  } = dashboardResource;
-
-  // Set fallbacks in case the frontend is used with a non-Perses backend
-  layouts = layouts ?? [];
-  panels = panels ?? {};
 
   const store = createStore<DashboardStoreState>()(
     immer(
@@ -163,7 +155,9 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           datasources,
           ttl,
           isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean): void => set({ isEditMode }),
+          setEditMode: (isEditMode: boolean): void => {
+            set({ isEditMode });
+          },
           setDashboard: ({
             kind,
             metadata,
