@@ -24,10 +24,7 @@ describe('Panel Groups', () => {
       <DatasourceStoreProvider {...defaultDatasourceProps}>
         <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
           <VariableProvider>
-            <DashboardProvider
-              currentState={{ isEditMode: true }}
-              initialState={{ dashboardResource: getTestDashboard() }}
-            >
+            <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
               <DashboardApp
                 dashboardResource={getTestDashboard()}
                 isReadonly={false}

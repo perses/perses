@@ -17,7 +17,7 @@ import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useMemo } from 'react';
+import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import {
   DashboardResource,
   Display,
@@ -75,25 +75,22 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
-export interface DashboardCurrentStateProps {
+export interface DashboardStoreProps {
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
-  setEditMode?: (isEditMode: boolean) => void;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
 }
 
-export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
-}
-
 export interface DashboardProviderProps {
-  currentState: DashboardCurrentStateProps;
   initialState: DashboardStoreProps;
   children?: ReactNode;
 }
 
 export function DashboardProvider(props: DashboardProviderProps): ReactElement {
-  const store = useMemo(() => initStore(props), [props]); // TODO (gladorme): init store should be based only on initialState
+  // Prevent calling createDashboardStore every time it rerenders
+  const createDashboardStore = useCallback(initStore, [props]);
+  const [store] = useState(createDashboardStore(props));
 
   // load plugin to retrieve initial spec if default panel kind is defined
   const { defaultPluginKinds } = usePluginRegistry();
@@ -120,8 +117,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
 function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
-    currentState: { isEditMode, setEditMode, viewPanelRef, setViewPanelRef } = {},
-    initialState: { dashboardResource },
+    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
   } = props;
 
   const {
@@ -161,7 +157,6 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean): void => {
             set({ isEditMode });
-            setEditMode?.(isEditMode);
           },
           setDashboard: ({
             kind,
