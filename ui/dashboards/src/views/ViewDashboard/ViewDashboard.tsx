@@ -104,8 +104,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProviderWithQueryParams
         initialState={{
-          dashboardResource,
           isEditMode: !!isEditing,
+          dashboardResource,
         }}
       >
         <TimeRangeProviderWithQueryParams

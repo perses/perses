@@ -16,11 +16,12 @@ package panelgroup
 import v1 "github.com/perses/perses/pkg/model/api/v1"
 
 type PanelGroup struct {
-	Title        string
-	PanelsWidth  int
-	PanelsHeight int
-	IsCollapsed  bool
-	Panels       []v1.Panel
+	Title          string
+	PanelsWidth    int
+	PanelsHeight   int
+	IsCollapsed    bool
+	RepeatVariable string
+	Panels         []v1.Panel
 }
 
 type Option func(plugin *Builder) error
