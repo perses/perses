@@ -152,14 +152,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
         )}
 
         <Stack>
-          {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
-          {/* 
-              TODO: What is cool about this? This makes an extra request to the server
-              This is already a bug. Should be removed after investigation
-          */}
-          <ClickAwayListener onClickAway={() => refreshPreview()}>
-            <Box />
-          </ClickAwayListener>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
               control={control}
