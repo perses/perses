@@ -38,7 +38,7 @@ require (
 	github.com/redbo/gohsv v0.0.0-20191210185714-eac2cca0cae9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	github.com/tidwall/gjson v1.18.0
 	github.com/zitadel/oidc/v3 v3.44.0
 	golang.org/x/crypto v0.41.0
