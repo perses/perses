@@ -29,9 +29,10 @@ import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormAction
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getSubmitText, getTitleAction } from '../../../utils';
-import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
+import { VARIABLE_TYPES } from '../variable-model';
+import { useTimeRange } from '../../../runtime';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 
 function FallbackPreview(): ReactElement {
@@ -108,7 +109,9 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
    * having to re-fetch the values when the user is still editing the spec.
    */
   const [previewSpec, setPreviewSpec] = useState<ListVariableDefinition>(form.getValues() as ListVariableDefinition);
+  const { refresh } = useTimeRange();
   const refreshPreview = (): void => {
+    refresh();
     setPreviewSpec(form.getValues() as ListVariableDefinition);
   };
 
@@ -150,10 +153,13 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
 
         <Stack>
           {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
+          {/* 
+              TODO: What is cool about this? This makes an extra request to the server
+              This is already a bug. Should be removed after investigation
+          */}
           <ClickAwayListener onClickAway={() => refreshPreview()}>
             <Box />
           </ClickAwayListener>
-          {/** **/}
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
               control={control}
