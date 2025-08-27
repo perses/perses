@@ -35,6 +35,7 @@ import {
 } from '../../constants';
 import { HeaderIconButton } from './HeaderIconButton';
 import { PanelLinks } from './PanelLinks';
+import { PanelOptions } from './Panel';
 
 export interface PanelActionsProps {
   title: string;
@@ -56,6 +57,7 @@ export interface PanelActionsProps {
   };
   queryResults: QueryData[];
   pluginActions?: ReactNode[];
+  showIcons: PanelOptions['showIcons'];
 }
 
 const ConditionalBox = styled(Box)({
@@ -76,6 +78,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   links,
   queryResults,
   pluginActions = [],
+  showIcons,
 }) => {
   const descriptionAction = useMemo((): ReactNode | undefined => {
     if (description && description.trim().length > 0) {
@@ -217,13 +220,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   const divider = <Box sx={{ flexGrow: 1 }}></Box>;
 
-  // if the panel is in non-editing, non-fullscreen mode, show certain icons only on hover
+  // By default, the panel header shows certain icons only on hover if the panel is in non-editing, non-fullscreen mode
   const OnHover = ({ children }: PropsWithChildren): ReactNode =>
-    editHandlers === undefined && !readHandlers?.isPanelViewed ? (
-      <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box>
-    ) : (
-      <>{children}</>
-    );
+    showIcons === 'hover' ? <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box> : <>{children}</>;
 
   return (
     <>
