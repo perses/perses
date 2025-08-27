@@ -11,19 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { DispatchWithoutAction, ReactElement, useState } from 'react';
-import {
-  Box,
-  Typography,
-  Switch,
-  TextField,
-  Grid,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  ClickAwayListener,
-  Divider,
-} from '@mui/material';
+import { DispatchWithoutAction, ReactElement, useState } from 'react';
+import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
@@ -152,14 +141,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
         )}
 
         <Stack>
-          {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
-          {/* 
-              TODO: What is cool about this? This makes an extra request to the server
-              This is already a bug. Should be removed after investigation
-          */}
-          <ClickAwayListener onClickAway={() => refreshPreview()}>
-            <Box />
-          </ClickAwayListener>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
               control={control}
