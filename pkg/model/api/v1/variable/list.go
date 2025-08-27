@@ -145,7 +145,15 @@ func (v *ListSpec) Validate() error {
 	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
 		return fmt.Errorf("customAllValue cannot be set if allowAllValue is not set to true")
 	}
+
 	if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 && !v.AllowMultiple {
+		// If the default value list has only one element, convert it to a single value
+		if len(v.DefaultValue.SliceValues) == 1 {
+			v.DefaultValue.SingleValue = v.DefaultValue.SliceValues[0]
+			v.DefaultValue.SliceValues = nil
+
+			return nil
+		}
 		return fmt.Errorf("you can not use a list of default values if allowMultiple is set to false")
 	}
 
