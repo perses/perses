@@ -16,6 +16,7 @@ import { Box } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '@perses-dev/core';
 import { Panel } from '../Panel';
+import { PanelVisualInfoProvider } from '../../context';
 
 const PANEL_PREVIEW_HEIGHT = 300;
 const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
@@ -52,7 +53,9 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
   return (
     <Box ref={boxRef} height={PANEL_PREVIEW_HEIGHT}>
       <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, ...plugin?.queryOptions }}>
-        <Panel definition={panelDefinition} />
+        <PanelVisualInfoProvider width={width}>
+          <Panel definition={panelDefinition} />
+        </PanelVisualInfoProvider>
       </DataQueriesProvider>
     </Box>
   );

@@ -31,6 +31,7 @@ export function useBuiltinVariableContext(): BuiltinVariableSrv {
 
 export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
   const { variables } = useBuiltinVariableContext();
+
   const states = useMemo(() => {
     const values: VariableStateMap = {};
     for (const variable of variables) {
