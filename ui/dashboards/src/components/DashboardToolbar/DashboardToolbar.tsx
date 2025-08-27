@@ -14,7 +14,7 @@
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
@@ -28,7 +28,7 @@ import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
-  dashboardTitleComponent?: JSX.Element;
+  dashboardTitleComponent?: ReactNode;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
   isVariableEnabled: boolean;
