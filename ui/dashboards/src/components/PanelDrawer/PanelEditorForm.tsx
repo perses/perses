@@ -43,6 +43,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     usePanelEditor(initialValues.panelDefinition);
   const { plugin } = panelDefinition.spec;
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
+  const [calculatedSuggestedStepMs, setCalculatedSuggestedStepMs] = useState<number | undefined>(undefined);
 
   const { panelEditorSchema } = useValidationSchemas();
   const form = useForm<PanelEditorValues>({
@@ -225,23 +226,29 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
               Preview
             </Typography>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <PanelPreview panelDefinition={panelDefinition} />
+              <PanelPreview
+                setCalculatedSuggestedStepMs={setCalculatedSuggestedStepMs}
+                panelEditorValues={{ panelDefinition: panelDefinition }}
+              />
             </ErrorBoundary>
           </Grid>
           <Grid item xs={12}>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <PanelSpecEditor
-                control={form.control}
-                panelDefinition={panelDefinition}
-                onJSONChange={handlePanelDefinitionChange}
-                onQueriesChange={(queries) => {
-                  setQueries(queries);
-                }}
-                onPluginSpecChange={(spec) => {
-                  pluginEditor.onSpecChange(spec);
-                }}
-              />
-            </ErrorBoundary>
+            {calculatedSuggestedStepMs && (
+              <ErrorBoundary FallbackComponent={ErrorAlert}>
+                <PanelSpecEditor
+                  calculatedSuggestedStepMs={calculatedSuggestedStepMs}
+                  control={form.control}
+                  panelDefinition={panelDefinition}
+                  onJSONChange={handlePanelDefinitionChange}
+                  onQueriesChange={(queries) => {
+                    setQueries(queries);
+                  }}
+                  onPluginSpecChange={(spec) => {
+                    pluginEditor.onSpecChange(spec);
+                  }}
+                />
+              </ErrorBoundary>
+            )}
           </Grid>
         </Grid>
       </Box>
