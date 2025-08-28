@@ -71,7 +71,7 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 	result := make([]json.RawMessage, 0, len(raws))
 	for _, raw := range raws {
 		metadata := gjson.GetBytes(raw, "metadata").String()
-		result = append(result, []byte(fmt.Sprintf(`{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata)))
+		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
 	return result, nil
 }

@@ -15,6 +15,7 @@ package cuetils
 
 import (
 	"fmt"
+	"maps"
 	"sort"
 	"strconv"
 	"strings"
@@ -275,7 +276,5 @@ func buildMapFromStructValue(v cue.Value) map[string]cue.Value {
 }
 
 func merge(a map[string]cue.Value, b map[string]cue.Value) {
-	for k, v := range b {
-		a[k] = v
-	}
+	maps.Copy(a, b)
 }
