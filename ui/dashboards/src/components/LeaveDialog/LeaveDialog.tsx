@@ -38,5 +38,5 @@ export function LeaveDialog({
     };
   }, [original, current]);
 
-  return <div></div>;
+  return <></>;
 }
