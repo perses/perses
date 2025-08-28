@@ -86,7 +86,7 @@ func (f *Format) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (f *Format) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Format
 	type plain Format
 	if err := unmarshal((*plain)(&tmp)); err != nil {

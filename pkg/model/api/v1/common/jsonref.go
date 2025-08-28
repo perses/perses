@@ -35,7 +35,7 @@ type JSONRef struct {
 	// Path is a list of string that will be used to find from the root of the struct the object pointed.
 	Path []string `json:"-" yaml:"-"`
 	// Object will contain the pointer to the actual object referenced by Ref
-	Object interface{} `json:"-" yaml:"-"`
+	Object any `json:"-" yaml:"-"`
 }
 
 func (j *JSONRef) UnmarshalJSON(data []byte) error {
@@ -51,7 +51,7 @@ func (j *JSONRef) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (j *JSONRef) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (j *JSONRef) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp JSONRef
 	type plain JSONRef
 	if err := unmarshal((*plain)(&tmp)); err != nil {

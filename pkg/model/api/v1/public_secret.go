@@ -62,7 +62,7 @@ func (g *PublicGlobalSecret) GetKind() string {
 	return string(g.Kind)
 }
 
-func (g *PublicGlobalSecret) GetSpec() interface{} {
+func (g *PublicGlobalSecret) GetSpec() any {
 	return g.Spec
 }
 
@@ -91,6 +91,6 @@ func (s *PublicSecret) GetKind() string {
 	return string(s.Kind)
 }
 
-func (s *PublicSecret) GetSpec() interface{} {
+func (s *PublicSecret) GetSpec() any {
 	return s.Spec
 }

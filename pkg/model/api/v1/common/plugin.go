@@ -22,7 +22,7 @@ type Plugin struct {
 	Kind string `json:"kind" yaml:"kind"`
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
-	Spec interface{} `json:"spec" yaml:"spec"`
+	Spec any `json:"spec" yaml:"spec"`
 }
 
 func (p Plugin) JSONMarshal() ([]byte, error) {
@@ -42,7 +42,7 @@ func (p *Plugin) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Plugin) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Plugin
 	type plain Plugin
 	if err := unmarshal((*plain)(&tmp)); err != nil {

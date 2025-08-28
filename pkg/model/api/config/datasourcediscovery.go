@@ -28,7 +28,7 @@ type HTTPDiscovery struct {
 	config.RestConfigClient `json:",inline" yaml:",inline"`
 }
 
-func (d HTTPDiscovery) MarshalYAML() (interface{}, error) {
+func (d HTTPDiscovery) MarshalYAML() (any, error) {
 	cfg := config.NewPublicRestConfigClient(&d.RestConfigClient)
 	return cfg, nil
 }

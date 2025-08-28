@@ -44,7 +44,7 @@ func ValidateAndSet(o *string) error {
 	return nil
 }
 
-func Handle(writer io.Writer, output string, obj interface{}) error {
+func Handle(writer io.Writer, output string, obj any) error {
 	var data []byte
 	var err error
 	if output == JSONOutput {

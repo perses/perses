@@ -21,12 +21,12 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-func convertDashboardToJSONRaw(dash *modelV1.Dashboard) (map[string]interface{}, error) {
+func convertDashboardToJSONRaw(dash *modelV1.Dashboard) (map[string]any, error) {
 	data, err := json.Marshal(dash)
 	if err != nil {
 		return nil, fmt.Errorf("error while marshalling the dashboard: %w", err)
 	}
-	var jsonRaw map[string]interface{}
+	var jsonRaw map[string]any
 	return jsonRaw, json.Unmarshal(data, &jsonRaw)
 }
 

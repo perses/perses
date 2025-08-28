@@ -56,7 +56,7 @@ func (d *dao) Upsert(entity modelAPI.Entity) error {
 func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	return d.client.Get(kind, metadata, entity)
 }
-func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
+func (d *dao) Query(query databaseModel.Query, slice any) error {
 	return d.client.Query(query, slice)
 }
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {

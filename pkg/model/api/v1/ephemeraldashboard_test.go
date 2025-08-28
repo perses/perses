@@ -167,7 +167,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 									ListSpec: variable.ListSpec{
 										Plugin: common.Plugin{
 											Kind: "PrometheusLabelNamesVariable",
-											Spec: map[string]interface{}{
+											Spec: map[string]any{
 												"matchers": []string{
 													"up",
 												},
@@ -183,7 +183,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 									ListSpec: variable.ListSpec{
 										Plugin: common.Plugin{
 											Kind: "PrometheusLabelValuesVariable",
-											Spec: map[string]interface{}{
+											Spec: map[string]any{
 												"labelName": "$labelName",
 												"matchers": []string{
 													"up",
@@ -425,8 +425,8 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 			},
 			Plugin: common.Plugin{
 				Kind: "TimeSeriesChart",
-				Spec: map[string]interface{}{
-					"lines": []interface{}{
+				Spec: map[string]any{
+					"lines": []any{
 						"up",
 					},
 					"showLegend": false,
@@ -456,8 +456,8 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 							ListSpec: variable.ListSpec{
 								Plugin: common.Plugin{
 									Kind: "PrometheusLabelNamesVariable",
-									Spec: map[string]interface{}{
-										"matchers": []interface{}{
+									Spec: map[string]any{
+										"matchers": []any{
 											"up",
 										},
 									},
@@ -472,9 +472,9 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 							ListSpec: variable.ListSpec{
 								Plugin: common.Plugin{
 									Kind: "PrometheusLabelValuesVariable",
-									Spec: map[string]interface{}{
+									Spec: map[string]any{
 										"labelName": "$labelName",
-										"matchers": []interface{}{
+										"matchers": []any{
 											"up",
 										},
 									},

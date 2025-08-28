@@ -646,10 +646,10 @@ func writeCSVResponse(c echo.Context, rows *sql.Rows) error {
 	}
 
 	// Create a slice of interface{} to hold the column values
-	values := make([]interface{}, len(cols))
+	values := make([]any, len(cols))
 
 	// Create a slice of sql.RawBytes to hold the raw bytes of the column values
-	scanArgs := make([]interface{}, len(cols))
+	scanArgs := make([]any, len(cols))
 	for i := range values {
 		scanArgs[i] = &values[i]
 	}

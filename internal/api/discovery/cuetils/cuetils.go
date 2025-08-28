@@ -77,11 +77,11 @@ func BuildPluginAndInjectProxy(decodedSchema []*Node, proxy http.Config) (common
 	return plugin, err
 }
 
-func buildPluginSpecWithProxy(spec *Node, proxy http.Config) (map[string]interface{}, error) {
-	result := make(map[string]interface{})
+func buildPluginSpecWithProxy(spec *Node, proxy http.Config) (map[string]any, error) {
+	result := make(map[string]any)
 	type queueElement struct {
 		node *Node
-		val  map[string]interface{}
+		val  map[string]any
 	}
 	queue := []queueElement{{node: spec, val: result}}
 	// It is our current element on each iteration.
@@ -101,7 +101,7 @@ func buildPluginSpecWithProxy(spec *Node, proxy http.Config) (map[string]interfa
 			//
 			// So that means we need to create the struct attached to the field 'proxy' and inject the actual proxy in it.
 			// First thing, let's create the maps representing the struct associated to 'proxy'
-			newResult := make(map[string]interface{})
+			newResult := make(map[string]any)
 			// We grab the node corresponding to the 'kind' field
 			kindNode := el.node.Nodes[kindIndex]
 			// We set the map to the field 'proxy'
@@ -124,7 +124,7 @@ func buildPluginSpecWithProxy(spec *Node, proxy http.Config) (map[string]interfa
 
 		// In case kind doesn't exist, then we just need to complete the current map or to fill the queue with additional nodes
 		if el.node.Type == StructNodeType {
-			newResult := make(map[string]interface{})
+			newResult := make(map[string]any)
 			el.val[el.node.FieldName] = newResult
 			for _, node := range el.node.Nodes {
 				queue = append(queue, queueElement{node: node, val: newResult})

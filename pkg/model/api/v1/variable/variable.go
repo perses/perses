@@ -43,7 +43,7 @@ func (k *Kind) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (k *Kind) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (k *Kind) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Kind
 	type plain Kind
 	if err := unmarshal((*plain)(&tmp)); err != nil {
