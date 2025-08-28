@@ -509,7 +509,7 @@ func TestGraph_BuildOrder(t *testing.T) {
 			result, err := g.buildOrder()
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
-			for i := 0; i < len(result); i++ {
+			for i := range result {
 				assert.ElementsMatch(t, test.result[i].Variables, result[i].Variables)
 			}
 		})
@@ -653,7 +653,7 @@ func TestBuildOrder(t *testing.T) {
 			groups, err := BuildVariableOrder(test.variables, test.projectVariables, test.globalVariables)
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(groups))
-			for i := 0; i < len(groups); i++ {
+			for i := range groups {
 				assert.ElementsMatch(t, test.result[i].Variables, groups[i].Variables)
 			}
 		})
