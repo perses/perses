@@ -37,6 +37,11 @@ export type PanelOptions = {
    */
   hideHeader?: boolean;
   /**
+   * Whether to show panel icons always, or only when hovering over the panel.
+   * Default: if the dashboard is in editing mode or the panel is in fullscreen mode: 'always', otherwise 'hover'
+   */
+  showIcons?: 'always' | 'hover';
+  /**
    * Content to render in right of the panel header. (top right of the panel)
    * It will only be rendered when the panel is in edit mode.
    */
@@ -195,6 +200,9 @@ export const Panel = memo(function Panel(props: PanelProps) {
     onMouseLeave?.(e);
   };
 
+  // default value for showIcons: if the dashboard is in editing mode or the panel is in fullscreen mode: 'always', otherwise 'hover'
+  const showIcons = panelOptions?.showIcons ?? (editHandlers || readHandlers?.isPanelViewed ? 'always' : 'hover');
+
   return (
     <Card
       component="section"
@@ -228,6 +236,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           viewQueriesHandler={viewQueriesHandler}
           links={definition.spec.links}
           pluginActions={pluginActions}
+          showIcons={showIcons}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}

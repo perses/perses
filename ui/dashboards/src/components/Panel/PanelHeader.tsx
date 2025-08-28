@@ -18,6 +18,7 @@ import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-syste
 import { ReactElement, ReactNode } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
+import { PanelOptions } from './Panel';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
@@ -32,6 +33,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
   pluginActions?: ReactNode[]; // Add pluginActions prop
+  showIcons: PanelOptions['showIcons'];
 }
 
 export function PanelHeader({
@@ -45,6 +47,7 @@ export function PanelHeader({
   sx,
   extra,
   pluginActions,
+  showIcons,
   viewQueriesHandler,
   ...rest
 }: PanelHeaderProps): ReactElement {
@@ -89,6 +92,7 @@ export function PanelHeader({
             extra={extra}
             queryResults={queryResults}
             pluginActions={pluginActions}
+            showIcons={showIcons}
           />
         </Stack>
       }
