@@ -27,10 +27,12 @@ export interface PanelSpecEditorProps {
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
+  calculatedSuggestedStepMs?: number;
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
+  const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange, calculatedSuggestedStepMs } =
+    props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -58,6 +60,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
           name="panelDefinition.spec.queries"
           render={({ field }) => (
             <MultiQueryEditor
+              calculatedSuggestedStepMs={calculatedSuggestedStepMs}
               ref={ref}
               queryTypes={plugin.supportedQueryTypes ?? []}
               queries={panelDefinition.spec.queries ?? []}

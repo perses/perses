@@ -32,6 +32,7 @@ import { PluginEditorProps, PluginEditorRef, usePluginEditor } from './plugin-ed
 export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((props, ref): ReactElement => {
   const {
     value,
+    calculatedSuggestedStepMs,
     withRunQueryButton = true,
     pluginTypes,
     pluginKindLabel,
@@ -113,6 +114,7 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
           onChange={onSpecChange}
           isReadonly={isReadonly}
           queryHandlerSettings={queryHandlerSettings}
+          calculatedSuggestedStepMs={calculatedSuggestedStepMs}
         />
       </ErrorBoundary>
     </Box>

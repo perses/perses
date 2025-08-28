@@ -244,7 +244,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                 Preview
               </Typography>
               <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <PanelPreview panelDefinition={panelDefinition} />
+                <PanelPreview setCalculatedSuggestedStepMs={() => {}} panelEditorValues={{ panelDefinition }} />
               </ErrorBoundary>
             </Grid>
             <Grid item xs={12}>

@@ -25,6 +25,7 @@ import { useTimeRange } from '../../runtime';
  * Properties for {@link QueryEditorContainer}
  */
 interface QueryEditorContainerProps {
+  calculatedSuggestedStepMs?: number;
   queryTypes: QueryPluginType[];
   index: number;
   query: QueryDefinition;
@@ -49,7 +50,8 @@ interface QueryEditorContainerProps {
 
 export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorContainerProps>(
   (props, ref): ReactElement => {
-    const { queryTypes, index, query, isCollapsed, onDelete, onChange, onCollapseExpand } = props;
+    const { queryTypes, index, query, isCollapsed, onDelete, onChange, onCollapseExpand, calculatedSuggestedStepMs } =
+      props;
     return (
       <Stack key={index} spacing={1}>
         <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
@@ -69,7 +71,13 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
           </IconButton>
         </Stack>
         {!isCollapsed && (
-          <QueryEditor ref={ref} queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />
+          <QueryEditor
+            calculatedSuggestedStepMs={calculatedSuggestedStepMs}
+            ref={ref}
+            queryTypes={queryTypes}
+            value={query}
+            onChange={(next) => onChange(index, next)}
+          />
         )}
       </Stack>
     );
@@ -85,6 +93,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
   value: QueryDefinition;
   onChange: (next: QueryDefinition) => void;
+  calculatedSuggestedStepMs?: number;
 }
 
 /**

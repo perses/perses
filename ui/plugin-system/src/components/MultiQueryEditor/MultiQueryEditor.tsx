@@ -24,6 +24,7 @@ export interface MultiQueryEditorProps {
   queryTypes: QueryPluginType[];
   queries?: QueryDefinition[];
   onChange: (queries: QueryDefinition[]) => void;
+  calculatedSuggestedStepMs?: number;
 }
 
 function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
@@ -69,7 +70,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
  */
 
 export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, queries = [], onChange } = props;
+  const { queryTypes, queries = [], onChange, calculatedSuggestedStepMs } = props;
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
@@ -143,6 +144,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
+            calculatedSuggestedStepMs={calculatedSuggestedStepMs}
           />
         ))}
       </Stack>
