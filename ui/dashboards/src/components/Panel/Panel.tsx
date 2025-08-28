@@ -238,6 +238,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           pluginActions={pluginActions}
           showIcons={showIcons}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
+          dimension={contentDimensions}
         />
       )}
       <CardContent
