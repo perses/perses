@@ -43,7 +43,7 @@ func (f *FolderSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *FolderSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (f *FolderSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp FolderSpec
 	type plain FolderSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -83,7 +83,7 @@ func (f *Folder) GetKind() string {
 	return string(f.Kind)
 }
 
-func (f *Folder) GetSpec() interface{} {
+func (f *Folder) GetSpec() any {
 	return f.Spec
 }
 
@@ -100,7 +100,7 @@ func (f *Folder) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *Folder) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (f *Folder) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Folder
 	type plain Folder
 	if err := unmarshal((*plain)(&tmp)); err != nil {

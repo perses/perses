@@ -39,7 +39,7 @@ func (p *Project) GetKind() string {
 	return string(p.Kind)
 }
 
-func (p *Project) GetSpec() interface{} {
+func (p *Project) GetSpec() any {
 	return p.Spec
 }
 
@@ -56,7 +56,7 @@ func (p *Project) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *Project) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Project) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Project
 	type plain Project
 	if err := unmarshal((*plain)(&tmp)); err != nil {

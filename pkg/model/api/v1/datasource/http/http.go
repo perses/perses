@@ -39,7 +39,7 @@ func (h *AllowedEndpoint) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *AllowedEndpoint) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (h *AllowedEndpoint) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp AllowedEndpoint
 	type plain AllowedEndpoint
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -96,7 +96,7 @@ func (h *Config) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (h *Config) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Config
 	type plain Config
 	if err := unmarshal((*plain)(&tmp)); err != nil {

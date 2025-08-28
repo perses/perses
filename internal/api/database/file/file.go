@@ -144,7 +144,7 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 		// If it's YAML, we need to convert to JSON first
 		if d.Extension == config.YAMLExtension {
 			// Parse the YAML content
-			var yamlData interface{}
+			var yamlData any
 			if err := yaml.Unmarshal(data, &yamlData); err != nil {
 				return nil, fmt.Errorf("failed to parse YAML from %s: %w", file, err)
 			}
@@ -163,7 +163,7 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	return result, nil
 }
 
-func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
+func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)
 	// to avoid any miss usage when using this method, slice should be a pointer to a slice.
@@ -301,14 +301,14 @@ func (d *DAO) buildPath(key string) string {
 	return filepath.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
 }
 
-func (d *DAO) unmarshal(data []byte, entity interface{}) error {
+func (d *DAO) unmarshal(data []byte, entity any) error {
 	if d.Extension == config.JSONExtension {
 		return json.Unmarshal(data, entity)
 	}
 	return yaml.Unmarshal(data, entity)
 }
 
-func (d *DAO) marshal(entity interface{}) ([]byte, error) {
+func (d *DAO) marshal(entity any) ([]byte, error) {
 	if d.Extension == config.JSONExtension {
 		return json.Marshal(entity)
 	}

@@ -375,7 +375,7 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 		}
 
 		// Convert back to map for comparison
-		resultValue := map[string]interface{}{
+		resultValue := map[string]any{
 			"kind": resultPlugin.Kind,
 			"spec": resultPlugin.Spec,
 		}
@@ -386,7 +386,7 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 		}
 
 		// Normalizing the bytes of expectedData is needed for comparison
-		var expectedNormalized map[string]interface{}
+		var expectedNormalized map[string]any
 		if err := json.Unmarshal(expectedData, &expectedNormalized); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse expected migration output: %v", err)
 			results = append(results, result)

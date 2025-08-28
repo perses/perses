@@ -57,7 +57,7 @@ func (p *PluginInDevelopment) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PluginInDevelopment) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *PluginInDevelopment) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp PluginInDevelopment
 	type plain PluginInDevelopment
 	if err := unmarshal((*plain)(&tmp)); err != nil {

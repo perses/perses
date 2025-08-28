@@ -21,7 +21,7 @@ const secretToken = "<secret>"
 type Hidden string
 
 // MarshalYAML implements the yaml.Marshaler interface for Hidden.
-func (h Hidden) MarshalYAML() (interface{}, error) {
+func (h Hidden) MarshalYAML() (any, error) {
 	if h != "" {
 		return secretToken, nil
 	}
@@ -29,7 +29,7 @@ func (h Hidden) MarshalYAML() (interface{}, error) {
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface for Hidden.
-func (h *Hidden) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (h *Hidden) UnmarshalYAML(unmarshal func(any) error) error {
 	type plain Hidden
 	return unmarshal((*plain)(h))
 }

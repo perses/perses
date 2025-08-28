@@ -66,7 +66,7 @@ func (a *Authorization) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *Authorization) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *Authorization) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Authorization
 	type plain Authorization
 	if err := unmarshal((*plain)(&tmp)); err != nil {

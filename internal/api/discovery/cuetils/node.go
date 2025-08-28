@@ -59,7 +59,7 @@ func (n *Node) sort() {
 	}
 }
 
-func (n *Node) setPrimitiveValue(result map[string]interface{}) error {
+func (n *Node) setPrimitiveValue(result map[string]any) error {
 	switch n.Type {
 	case StringNodeType:
 		// We consider that any empty string is a nil value.
