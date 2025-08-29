@@ -16,6 +16,7 @@ package migrate
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"cuelang.org/go/cue/build"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -43,6 +44,14 @@ var (
 	}
 )
 
+// grafanaVariablePattern matches Grafana variable syntax: ${variableName}
+var grafanaVariablePattern = regexp.MustCompile(`\$\{[a-zA-Z_][a-zA-Z0-9_]*\}`)
+
+// hasGrafanaVariables checks if a URL contains Grafana variable references
+func hasGrafanaVariables(url string) bool {
+	return grafanaVariablePattern.MatchString(url)
+}
+
 // convertGrafanaLinksToPerses converts Grafana links to Perses Link format
 func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
 	if len(grafanaLinks) == 0 {
@@ -55,7 +64,7 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
 			Name:            grafanaLink.Title,
 			URL:             grafanaLink.URL,
 			TargetBlank:     grafanaLink.TargetBlank,
-			RenderVariables: true, // Grafana URLs often contain variables like ${region} - https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/create-dashboard-url-variables/
+			RenderVariables: hasGrafanaVariables(grafanaLink.URL),
 		}
 	}
 	return persesLinks
