@@ -91,7 +91,6 @@ func TestMig_Migrate(t *testing.T) {
 }
 
 func TestLinkConversionLogic(t *testing.T) {
-	// Test the link conversion logic directly using the internal migrate package functions
 	testSuite := []struct {
 		name                    string
 		grafanaLinks           []migrate.GrafanaLink
@@ -131,8 +130,7 @@ func TestLinkConversionLogic(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
-			// Use a simple JSON marshaling approach to test the conversion logic
-			grafanaPanelJSON := map[string]interface{}{
+			grafanaPanelJSON := map[string]any{
 				"type":  "test",
 				"title": "Test Panel",
 				"links": test.grafanaLinks,
@@ -149,13 +147,12 @@ func TestLinkConversionLogic(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			// Test that links were properly parsed
-			assert.Equal(t, len(test.expectedURLs), len(panel.Links), "Number of parsed links should match expected")
+			assert.Equal(t, len(test.expectedURLs), len(panel.Links))
 			
 			for i, expectedURL := range test.expectedURLs {
-				assert.Equal(t, expectedURL, panel.Links[i].URL, "URL should match")
-				assert.Equal(t, test.expectedTargetBlanks[i], panel.Links[i].TargetBlank, "TargetBlank should match")
-				assert.Equal(t, test.expectedNames[i], panel.Links[i].Title, "Title should match")
+				assert.Equal(t, expectedURL, panel.Links[i].URL)
+				assert.Equal(t, test.expectedTargetBlanks[i], panel.Links[i].TargetBlank)
+				assert.Equal(t, test.expectedNames[i], panel.Links[i].Title)
 			}
 		})
 	}

@@ -44,15 +44,12 @@ var (
 	}
 )
 
-// grafanaVariablePattern matches Grafana variable syntax: ${variableName}
 var grafanaVariablePattern = regexp.MustCompile(`\$\{[a-zA-Z_][a-zA-Z0-9_]*\}`)
 
-// hasGrafanaVariables checks if a URL contains Grafana variable references
 func hasGrafanaVariables(url string) bool {
 	return grafanaVariablePattern.MatchString(url)
 }
 
-// convertGrafanaLinksToPerses converts Grafana links to Perses Link format
 func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
 	if len(grafanaLinks) == 0 {
 		return nil
@@ -125,8 +122,6 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 		result.Spec.Plugin = *panelPlugin
 	}
 	m.migrateQueries(grafanaPanel.Targets, result)
-
-	// Migrate panel links from Grafana to Perses format
 	result.Spec.Links = convertGrafanaLinksToPerses(grafanaPanel.Links)
 
 	return result, nil
