@@ -63,6 +63,11 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "library_panel_grafana_dashboard.json",
 			expectedPersesDashboardFile: "library_panel_perses_dashboard.json",
 		},
+		{
+			title:                       "dashboard with panel links should migrate links correctly",
+			inputGrafanaDashboardFile:   "panel_with_links_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_with_links_perses_dashboard.json",
+		},
 	}
 
 	pl := LoadTestPlugins()
@@ -81,6 +86,74 @@ func TestMig_Migrate(t *testing.T) {
 			}
 			output := testUtils.JSONMarshalStrict(persesDashboard)
 			assert.JSONEq(t, string(expected), string(output))
+		})
+	}
+}
+
+func TestLinkConversionLogic(t *testing.T) {
+	testSuite := []struct {
+		name                    string
+		grafanaLinks            []migrate.GrafanaLink
+		expectedURLs            []string
+		expectedRenderVariables []bool
+		expectedTargetBlanks    []bool
+		expectedNames           []string
+	}{
+		{
+			name: "mixed links with variables and static URLs",
+			grafanaLinks: []migrate.GrafanaLink{
+				{
+					Title:       "Dynamic Prometheus",
+					URL:         "https://prometheus.${region}.com/graph?service=${service}",
+					TargetBlank: true,
+				},
+				{
+					Title:       "Static Dashboard",
+					URL:         "https://grafana.example.com/d/abc123",
+					TargetBlank: false,
+				},
+			},
+			expectedURLs:            []string{"https://prometheus.${region}.com/graph?service=${service}", "https://grafana.example.com/d/abc123"},
+			expectedRenderVariables: []bool{true, false},
+			expectedTargetBlanks:    []bool{true, false},
+			expectedNames:           []string{"Dynamic Prometheus", "Static Dashboard"},
+		},
+		{
+			name:                    "empty links",
+			grafanaLinks:            []migrate.GrafanaLink{},
+			expectedURLs:            []string{},
+			expectedRenderVariables: []bool{},
+			expectedTargetBlanks:    []bool{},
+			expectedNames:           []string{},
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			grafanaPanelJSON := map[string]any{
+				"type":  "test",
+				"title": "Test Panel",
+				"links": test.grafanaLinks,
+			}
+
+			jsonData, err := json.Marshal(grafanaPanelJSON)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var panel migrate.Panel
+			err = json.Unmarshal(jsonData, &panel)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			assert.Equal(t, len(test.expectedURLs), len(panel.Links))
+
+			for i, expectedURL := range test.expectedURLs {
+				assert.Equal(t, expectedURL, panel.Links[i].URL)
+				assert.Equal(t, test.expectedTargetBlanks[i], panel.Links[i].TargetBlank)
+				assert.Equal(t, test.expectedNames[i], panel.Links[i].Title)
+			}
 		})
 	}
 }

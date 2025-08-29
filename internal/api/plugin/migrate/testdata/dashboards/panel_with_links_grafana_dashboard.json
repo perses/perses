@@ -1,0 +1,57 @@
+{
+  "uid": "panel-links-test",
+  "title": "Panel Links Test Dashboard",
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "CPU Usage",
+      "description": "CPU usage percentage",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "h": 4,
+        "w": 6
+      },
+      "targets": [
+        {
+          "expr": "cpu_usage_percent",
+          "refId": "A"
+        }
+      ],
+      "links": [
+        {
+          "targetBlank": true,
+          "title": "Prometheus",
+          "url": "https://prometheus.${region}.example.com/graph?g0.range_input=1h&g0.expr=cpu_usage_percent"
+        },
+        {
+          "targetBlank": false,
+          "title": "Static Dashboard",
+          "url": "https://grafana.example.com/d/cpu-dashboard"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Memory Usage",
+      "description": "Memory usage without links",
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "h": 4,
+        "w": 6
+      },
+      "targets": [
+        {
+          "expr": "memory_usage_percent",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}

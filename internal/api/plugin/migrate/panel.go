@@ -16,6 +16,7 @@ package migrate
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"cuelang.org/go/cue/build"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -42,6 +43,29 @@ var (
 		},
 	}
 )
+
+var grafanaVariablePattern = regexp.MustCompile(`\$\{[a-zA-Z_][a-zA-Z0-9_]*\}`)
+
+func hasGrafanaVariables(url string) bool {
+	return grafanaVariablePattern.MatchString(url)
+}
+
+func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
+	if len(grafanaLinks) == 0 {
+		return nil
+	}
+
+	persesLinks := make([]v1.Link, len(grafanaLinks))
+	for i, grafanaLink := range grafanaLinks {
+		persesLinks[i] = v1.Link{
+			Name:            grafanaLink.Title,
+			URL:             grafanaLink.URL,
+			TargetBlank:     grafanaLink.TargetBlank,
+			RenderVariables: hasGrafanaVariables(grafanaLink.URL),
+		}
+	}
+	return persesLinks
+}
 
 func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
@@ -98,6 +122,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 		result.Spec.Plugin = *panelPlugin
 	}
 	m.migrateQueries(grafanaPanel.Targets, result)
+	result.Spec.Links = convertGrafanaLinksToPerses(grafanaPanel.Links)
 
 	return result, nil
 }
