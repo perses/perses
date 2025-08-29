@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceResource, DatasourceSelector, fetchJson } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 import { useCallback } from 'react';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
 import { getBasePathName } from './route';
+import { buildProjectResourceURL } from './url-builder';
+import { HTTPHeader, HTTPMethodGET } from './http';
 
 export function buildProxyUrl({
   project,
@@ -114,11 +116,22 @@ export function useDatasourceApi(): DatasourceApi {
     [globalDatasources, isGlobalDatasourcesPending]
   );
 
+  const getProjectsDataSource = async (projects: string[]): Promise<DatasourceResource[][]> => {
+    const urls = projects.map((project) => buildProjectResourceURL(project));
+    const allPromises: Array<Promise<DatasourceResource[]>> = [];
+    urls.forEach((url) => {
+      allPromises.push(fetchJson(url, { method: HTTPMethodGET, headers: HTTPHeader }));
+    });
+
+    return Promise.all(allPromises);
+  };
+
   return {
     getDatasource,
     getGlobalDatasource,
     listDatasources,
     listGlobalDatasources,
+    getProjectsDataSource,
     buildProxyUrl: buildProxyUrl,
   };
 }
