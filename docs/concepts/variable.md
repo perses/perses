@@ -19,14 +19,16 @@ Variables are generally defined as part of a dashboard, but you also have the op
 
 Once defined, variables can be used in places like:
 
-- **Query expressions** – reference variables using one of the following syntax:
-  - `$variableName`
-  - `${variableName}`
-  - `${variableName:format}`: this allows to define custom interpolation formats.
-- **Panel titles and descriptions** – for dynamic content based on current selections.
-- **Other variables** – create cascading dropdowns where one variable filters another.
+- **Query expressions**.
+- **Other variables** to create cascading dropdowns where one variable filters another.
+- **Panel titles and descriptions**.
 
-## Variables interpolation
+Variables can be referenced using one of the following syntax:
+- `$variableName`
+- `${variableName}`
+- `${variableName:format}`: this allows to define custom interpolation formats.
+
+### Variables interpolation
 
 The format syntax `${variableName:format}` allows you to define custom interpolation. The following formats are supported:
 
