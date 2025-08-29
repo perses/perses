@@ -23,6 +23,7 @@ export interface MultiQueryEditorProps {
   queryTypes: QueryPluginType[];
   queries?: QueryDefinition[];
   onChange: (queries: QueryDefinition[]) => void;
+  calculatedSuggestedStepMs?: number;
 }
 
 function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
@@ -66,7 +67,12 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
  * @param onChange The callback to call when the queries are modified
  * @constructor
  */
-export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps): ReactElement {
+export function MultiQueryEditor({
+  queryTypes,
+  calculatedSuggestedStepMs,
+  queries = [],
+  onChange,
+}: MultiQueryEditorProps): ReactElement {
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
 
   // State for which queries are collapsed
@@ -132,6 +138,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
       <Stack spacing={1}>
         {queryDefinitions.map((query: QueryDefinition, i: number) => (
           <QueryEditorContainer
+            calculatedSuggestedStepMs={calculatedSuggestedStepMs}
             queryTypes={queryTypes}
             key={i}
             index={i}

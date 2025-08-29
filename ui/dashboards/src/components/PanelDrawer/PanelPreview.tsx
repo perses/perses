@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useRef } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '@perses-dev/core';
@@ -20,13 +20,26 @@ import { Panel } from '../Panel';
 const PANEL_PREVIEW_HEIGHT = 300;
 const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
 
-export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>): ReactElement | null {
+export interface PanelPreviewProps {
+  panelEditorValues: Pick<PanelEditorValues, 'panelDefinition'>;
+  setCalculatedSuggestedStepMs: (calculatedSuggestedStepMs: number) => void;
+}
+
+export function PanelPreview({
+  panelEditorValues: { panelDefinition },
+  setCalculatedSuggestedStepMs: setCalculatedSuggestedStepMs,
+}: PanelPreviewProps): ReactElement | null {
   const boxRef = useRef<HTMLDivElement>(null);
   let width = PANEL_PREVIEW_DEFAULT_WIDTH;
   if (boxRef.current !== null) {
     width = boxRef.current.getBoundingClientRect().width;
   }
+
   const suggestedStepMs = useSuggestedStepMs(width);
+
+  useEffect((): void => {
+    setCalculatedSuggestedStepMs(suggestedStepMs);
+  }, [suggestedStepMs, setCalculatedSuggestedStepMs]);
 
   const { data: plugin, isLoading } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
   if (isLoading) {

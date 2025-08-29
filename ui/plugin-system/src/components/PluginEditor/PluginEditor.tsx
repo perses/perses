@@ -30,7 +30,16 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  */
 export function PluginEditor(props: PluginEditorProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const {
+    value,
+    calculatedSuggestedStepMs,
+    withRunQueryButton = true,
+    pluginTypes,
+    pluginKindLabel,
+    onChange: _,
+    isReadonly,
+    ...others
+  } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
 
   /* 
@@ -98,6 +107,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           onChange={onSpecChange}
           isReadonly={isReadonly}
           queryHandlerSettings={queryHandlerSettings}
+          calculatedSuggestedStepMs={calculatedSuggestedStepMs}
         />
       </ErrorBoundary>
     </Box>

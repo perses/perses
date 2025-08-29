@@ -24,6 +24,7 @@ import { PluginEditor, PluginEditorProps } from '../PluginEditor';
  * Properties for {@link QueryEditorContainer}
  */
 interface QueryEditorContainerProps {
+  calculatedSuggestedStepMs?: number;
   queryTypes: QueryPluginType[];
   index: number;
   query: QueryDefinition;
@@ -53,6 +54,7 @@ export const QueryEditorContainer = ({
   onDelete,
   onChange,
   onCollapseExpand,
+  calculatedSuggestedStepMs,
 }: QueryEditorContainerProps): ReactElement => {
   return (
     <Stack key={index} spacing={1}>
@@ -72,7 +74,14 @@ export const QueryEditorContainer = ({
           <DeleteIcon />
         </IconButton>
       </Stack>
-      {!isCollapsed && <QueryEditor queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />}
+      {!isCollapsed && (
+        <QueryEditor
+          calculatedSuggestedStepMs={calculatedSuggestedStepMs}
+          queryTypes={queryTypes}
+          value={query}
+          onChange={(next) => onChange(index, next)}
+        />
+      )}
     </Stack>
   );
 };
@@ -84,6 +93,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
   value: QueryDefinition;
   onChange: (next: QueryDefinition) => void;
+  calculatedSuggestedStepMs?: number;
 }
 
 /**
@@ -94,7 +104,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  * @constructor
  */
 function QueryEditor(props: QueryEditorProps): ReactElement {
-  const { value, onChange, queryTypes, ...others } = props;
+  const { value, onChange, queryTypes, calculatedSuggestedStepMs, ...others } = props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
@@ -109,6 +119,7 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
   return (
     <Box {...others}>
       <PluginEditor
+        calculatedSuggestedStepMs={calculatedSuggestedStepMs}
         withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
