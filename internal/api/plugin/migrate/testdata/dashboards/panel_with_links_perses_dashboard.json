@@ -43,7 +43,7 @@
           "links": [
             {
               "name": "Prometheus",
-              "url": "https://prometheus-infra-collector.${region}.cloud.sap/graph?g0.range_input=1h&g0.expr=cpu_usage_percent",
+              "url": "https://prometheus.${region}.example.com/graph?g0.range_input=1h&g0.expr=cpu_usage_percent",
               "targetBlank": true,
               "renderVariables": true
             },
