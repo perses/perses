@@ -93,11 +93,11 @@ func TestMig_Migrate(t *testing.T) {
 func TestLinkConversionLogic(t *testing.T) {
 	testSuite := []struct {
 		name                    string
-		grafanaLinks           []migrate.GrafanaLink
-		expectedURLs           []string
+		grafanaLinks            []migrate.GrafanaLink
+		expectedURLs            []string
 		expectedRenderVariables []bool
-		expectedTargetBlanks   []bool
-		expectedNames          []string
+		expectedTargetBlanks    []bool
+		expectedNames           []string
 	}{
 		{
 			name: "mixed links with variables and static URLs",
@@ -113,18 +113,18 @@ func TestLinkConversionLogic(t *testing.T) {
 					TargetBlank: false,
 				},
 			},
-			expectedURLs:           []string{"https://prometheus.${region}.com/graph?service=${service}", "https://grafana.example.com/d/abc123"},
+			expectedURLs:            []string{"https://prometheus.${region}.com/graph?service=${service}", "https://grafana.example.com/d/abc123"},
 			expectedRenderVariables: []bool{true, false},
-			expectedTargetBlanks:   []bool{true, false},
-			expectedNames:          []string{"Dynamic Prometheus", "Static Dashboard"},
+			expectedTargetBlanks:    []bool{true, false},
+			expectedNames:           []string{"Dynamic Prometheus", "Static Dashboard"},
 		},
 		{
 			name:                    "empty links",
-			grafanaLinks:           []migrate.GrafanaLink{},
-			expectedURLs:           []string{},
+			grafanaLinks:            []migrate.GrafanaLink{},
+			expectedURLs:            []string{},
 			expectedRenderVariables: []bool{},
-			expectedTargetBlanks:   []bool{},
-			expectedNames:          []string{},
+			expectedTargetBlanks:    []bool{},
+			expectedNames:           []string{},
 		},
 	}
 
@@ -135,12 +135,12 @@ func TestLinkConversionLogic(t *testing.T) {
 				"title": "Test Panel",
 				"links": test.grafanaLinks,
 			}
-			
+
 			jsonData, err := json.Marshal(grafanaPanelJSON)
 			if err != nil {
 				t.Fatal(err)
 			}
-			
+
 			var panel migrate.Panel
 			err = json.Unmarshal(jsonData, &panel)
 			if err != nil {
@@ -148,7 +148,7 @@ func TestLinkConversionLogic(t *testing.T) {
 			}
 
 			assert.Equal(t, len(test.expectedURLs), len(panel.Links))
-			
+
 			for i, expectedURL := range test.expectedURLs {
 				assert.Equal(t, expectedURL, panel.Links[i].URL)
 				assert.Equal(t, test.expectedTargetBlanks[i], panel.Links[i].TargetBlank)
