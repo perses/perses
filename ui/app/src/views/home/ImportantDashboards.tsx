@@ -15,6 +15,7 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -59,7 +60,9 @@ export function ImportantDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <ViewDashboardIcon />
-        <h2>Important Dashboards</h2>
+        <h2>
+          <Trans>Important Dashboards</Trans>
+        </h2>
       </Stack>
       {isLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
