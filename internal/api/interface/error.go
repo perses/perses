@@ -82,7 +82,7 @@ func HandleError(err error) error {
 		// In this particular case, we shouldn't touch to the error and let it like that
 		return err
 	}
-	logrus.WithError(err).Error("unexpected error not handle")
+	logrus.WithError(err).Error("unexpected error not handled")
 	return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
 }
 
