@@ -43,6 +43,24 @@ var (
 	}
 )
 
+// convertGrafanaLinksToPerses converts Grafana links to Perses Link format
+func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
+	if len(grafanaLinks) == 0 {
+		return nil
+	}
+
+	persesLinks := make([]v1.Link, len(grafanaLinks))
+	for i, grafanaLink := range grafanaLinks {
+		persesLinks[i] = v1.Link{
+			Name:            grafanaLink.Title,
+			URL:             grafanaLink.URL,
+			TargetBlank:     grafanaLink.TargetBlank,
+			RenderVariables: true, // Grafana URLs often contain variables like ${region} - https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/create-dashboard-url-variables/
+		}
+	}
+	return persesLinks
+}
+
 func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
@@ -98,6 +116,9 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 		result.Spec.Plugin = *panelPlugin
 	}
 	m.migrateQueries(grafanaPanel.Targets, result)
+
+	// Migrate panel links from Grafana to Perses format
+	result.Spec.Links = convertGrafanaLinksToPerses(grafanaPanel.Links)
 
 	return result, nil
 }
