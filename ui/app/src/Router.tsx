@@ -14,7 +14,6 @@
 import { Suspense, lazy, ReactElement } from 'react';
 import { Navigate, useLocation, createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 // Default route is eagerly loaded
-import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
 import HomeView from './views/home/HomeView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
@@ -108,9 +107,7 @@ function Router(): ReactElement {
 
   return (
     <Suspense fallback={<PersesLoader />}>
-      <NuqsAdapter>
-        <RouterProvider router={router} />
-      </NuqsAdapter>
+      <RouterProvider router={router} />
     </Suspense>
   );
 }

@@ -16,6 +16,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from '@perses-dev/components';
 import { CookiesProvider } from 'react-cookie';
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
 import { DarkModeContextProvider } from './context/DarkMode';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
 import { ConfigContextProvider } from './context/Config';
@@ -52,7 +53,9 @@ export function renderApp(container: Element | null): void {
               <NavHistoryProvider>
                 <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
                   <AuthorizationProvider>
-                    <Router />
+                    <NuqsAdapter>
+                      <Router />
+                    </NuqsAdapter>
                   </AuthorizationProvider>
                 </SnackbarProvider>
               </NavHistoryProvider>

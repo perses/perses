@@ -13,10 +13,11 @@
 
 import { Box } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
-import { ReactElement } from 'react';
+import { ReactElement, Suspense } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import { SignInRoute, SignUpRoute } from './model/route';
+import { PersesLoader } from './components/PersesLoader';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -46,7 +47,9 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        <Outlet />
+        <Suspense fallback={<PersesLoader />}>
+          <Outlet />
+        </Suspense>
       </Box>
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>
