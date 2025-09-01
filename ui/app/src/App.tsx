@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { ReactElement } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
-import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
 
 function isDashboardViewRoute(pathname: string): boolean {
@@ -46,7 +45,7 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        <Router />
+        <Outlet />
       </Box>
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>

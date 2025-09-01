@@ -14,15 +14,13 @@
 import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 
 interface ExplorerState<T> {
-  explorer?: string;
+  explorer: string | null;
   data: T;
-  // tab: number;
-  // queries: QueryDefinition[];
 }
 
 interface ExplorerManagerContextType<T> {
   /** observability signal, for example metrics or traces */
-  explorer?: string;
+  explorer: string | null;
   data: T;
   setExplorer: (explorer: string) => void;
   setData: (data: T) => void;
@@ -44,7 +42,7 @@ export function ExplorerManagerProvider({
     Record<string, Omit<ExplorerState<unknown>, 'explorer'>>
   >({});
   // local store in case external store is not provided by prop
-  const localStore = useState<ExplorerState<unknown>>({ explorer: undefined, data: {} });
+  const localStore = useState<ExplorerState<unknown>>({ explorer: null, data: {} });
   // use store provided by 'store' prop if available, otherwise use local store
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
   const { explorer, data } = explorerState;

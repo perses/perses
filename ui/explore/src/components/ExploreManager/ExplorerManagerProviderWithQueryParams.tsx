@@ -13,12 +13,13 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 
-import { JsonParam, StringParam, useQueryParams, withDefault } from 'use-query-params';
+import { parseAsJson, parseAsString, useQueryStates } from 'nuqs';
+import { z } from 'zod';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
-const exploreQueryConfig = {
-  explorer: withDefault(StringParam, undefined),
-  data: withDefault(JsonParam, {}),
+const parseAsExplorerConfig = {
+  explorer: parseAsString,
+  data: parseAsJson(z.unknown()),
 };
 
 interface ExplorerManagerProviderWithQueryParamsProps {
@@ -28,7 +29,7 @@ interface ExplorerManagerProviderWithQueryParamsProps {
 export function ExplorerManagerProviderWithQueryParams({
   children,
 }: ExplorerManagerProviderWithQueryParamsProps): ReactElement {
-  const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig);
+  const [queryParams, setQueryParams] = useQueryStates(parseAsExplorerConfig);
 
   return <ExplorerManagerProvider store={[queryParams, setQueryParams]}>{children}</ExplorerManagerProvider>;
 }

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Suspense, lazy, ReactElement } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { Navigate, useLocation, createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 // Default route is eagerly loaded
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
 import HomeView from './views/home/HomeView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
@@ -27,14 +27,11 @@ import {
   SignUpRoute,
   ExploreRoute,
   ProfileRoute,
+  getBasePathName,
 } from './model/route';
-import {
-  useIsAuthEnabled,
-  useIsEphemeralDashboardEnabled,
-  useIsExplorerEnabled,
-  useIsSignUpDisable,
-} from './context/Config';
+import { useIsAuthEnabled } from './context/Config';
 import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
+import App from './App';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -50,106 +47,70 @@ const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/Ep
 const ProfileView = lazy(() => import('./views/profile/ProfileView'));
 
 function Router(): ReactElement {
-  const isAuthEnabled = useIsAuthEnabled();
-  const isSignUpDisable = useIsSignUpDisable();
-  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
-  const isExplorerEnabled = useIsExplorerEnabled();
+  const router = createBrowserRouter(
+    [
+      {
+        path: '/',
+        Component: App,
+        children: [
+          {
+            path: '',
+            element: <RequireAuth />,
+            children: [
+              { index: true, Component: HomeView },
+              { path: ProfileRoute, Component: ProfileView },
+              {
+                path: AdminRoute,
+                children: [
+                  { index: true, Component: AdminView },
+                  { path: ':tab', Component: AdminView },
+                ],
+              },
+              { path: ConfigRoute, Component: ConfigView },
+              { path: ImportRoute, Component: ImportView },
+              { path: ProjectRoute, Component: ProjectView },
+              { path: ExploreRoute, Component: ExploreView },
+              {
+                path: ProjectRoute,
+                element: <GuardedProjectRoute />,
+                children: [
+                  { index: true, element: <Navigate to="/" replace /> },
+                  {
+                    path: `:projectName`,
+                    children: [
+                      { index: true, Component: ProjectView },
+                      { path: 'dashboards/new', Component: CreateDashboardView },
+                      { path: 'dashboards/:dashboardName', Component: DashboardView },
+                      { path: 'ephemeraldashboard/new', Component: CreateEphemeralDashboardView },
+                      { path: 'ephemeraldashboard/:ephemeralDashboardName', Component: EphemeralDashboardView },
+                      { path: ':tab', Component: ProjectView },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: SignInRoute,
+            Component: SignInView,
+          },
+          {
+            path: SignUpRoute,
+            Component: SignUpView,
+          },
+        ],
+      },
+      { path: '*', element: <Navigate to="/" replace /> },
+    ],
+    { basename: getBasePathName() }
+  );
+
   return (
-    <ErrorBoundary FallbackComponent={ErrorAlert}>
-      {/* TODO: What sort of loading fallback do we want? */}
-      <Suspense>
-        <Routes>
-          {isAuthEnabled && <Route path={SignInRoute} element={<SignInView />} />}
-          {isAuthEnabled && !isSignUpDisable && <Route path={SignUpRoute} element={<SignUpView />} />}
-          <Route
-            path={ProfileRoute}
-            element={
-              <RequireAuth>
-                <ProfileView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={AdminRoute}
-            element={
-              <RequireAuth>
-                <AdminView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={`${AdminRoute}/:tab`}
-            element={
-              <RequireAuth>
-                <AdminView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={ConfigRoute}
-            element={
-              <RequireAuth>
-                <ConfigView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={ImportRoute}
-            element={
-              <RequireAuth>
-                <ImportView />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path={ProjectRoute}
-            element={
-              <RequireAuth>
-                <HomeView />
-              </RequireAuth>
-            }
-          />
-          {isExplorerEnabled && (
-            <Route
-              path={ExploreRoute}
-              element={
-                <RequireAuth>
-                  <ExploreView />
-                </RequireAuth>
-              }
-            />
-          )}
-          <Route
-            path={`${ProjectRoute}/:projectName`}
-            element={
-              <RequireAuth>
-                <GuardedProjectRoute />
-              </RequireAuth>
-            }
-          >
-            <Route path="" element={<ProjectView />} />
-            <Route path=":tab" element={<ProjectView />} />
-            <Route path="dashboard/new" element={<CreateDashboardView />} />
-            <Route path="dashboards/:dashboardName" element={<DashboardView />} />
-            {isEphemeralDashboardEnabled && (
-              <Route path="ephemeraldashboard/new" element={<CreateEphemeralDashboardView />} />
-            )}
-            {isEphemeralDashboardEnabled && (
-              <Route path="ephemeraldashboards/:ephemeralDashboardName" element={<EphemeralDashboardView />} />
-            )}
-          </Route>
-          <Route
-            path="/"
-            element={
-              <RequireAuth>
-                <HomeView />
-              </RequireAuth>
-            }
-          />
-          <Route path="*" element={<Navigate replace to="/" />} />
-        </Routes>
-      </Suspense>
-    </ErrorBoundary>
+    <Suspense>
+      <NuqsAdapter>
+        <RouterProvider router={router} />
+      </NuqsAdapter>
+    </Suspense>
   );
 }
 
@@ -162,12 +123,12 @@ function Router(): ReactElement {
  * @param children
  * @constructor
  */
-function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
+function RequireAuth(): ReactElement | null {
   const isAuthEnabled = useIsAuthEnabled();
   const isAccessTokenExist = useIsAccessTokenExist();
   const location = useLocation();
   if (!isAuthEnabled || isAccessTokenExist) {
-    return children;
+    return <Outlet />;
   }
   let to = SignInRoute;
   if (location.pathname !== '' && location.pathname !== '/') {

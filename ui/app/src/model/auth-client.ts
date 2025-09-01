@@ -15,8 +15,8 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResul
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
-import { useQueryParam } from 'use-query-params';
 import { useEffect, useState } from 'react';
+import { useQueryState } from 'nuqs';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -51,7 +51,7 @@ export function useIsAccessTokenExist(): boolean {
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
 export function useRedirectQueryParam(): string {
-  const [path] = useQueryParam<string>(redirectQueryParam);
+  const [path] = useQueryState('name');
   return path ?? '/';
 }
 
