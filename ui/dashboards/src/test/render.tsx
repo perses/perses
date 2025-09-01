@@ -18,6 +18,7 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
 import { DatasourceStoreProvider } from '../context';
 import { defaultDatasourceProps } from '../test';
 import { MOCK_PLUGINS } from './plugin-registry';
@@ -62,20 +63,22 @@ export function renderWithContext(
   const mockRegistry = mockPluginRegistry(...MOCK_PLUGINS);
 
   const BaseRender = (): ReactElement => (
-    <CustomRouter history={customHistory}>
-      <QueryClientProvider client={queryClient}>
-        <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <PluginRegistry
-              pluginLoader={mockRegistry.pluginLoader}
-              defaultPluginKinds={mockRegistry.defaultPluginKinds}
-            >
-              <DatasourceStoreProvider {...defaultDatasourceProps}>{ui}</DatasourceStoreProvider>
-            </PluginRegistry>
-          </ChartsProvider>
-        </SnackbarProvider>
-      </QueryClientProvider>
-    </CustomRouter>
+    <NuqsAdapter>
+      <CustomRouter history={customHistory}>
+        <QueryClientProvider client={queryClient}>
+          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <PluginRegistry
+                pluginLoader={mockRegistry.pluginLoader}
+                defaultPluginKinds={mockRegistry.defaultPluginKinds}
+              >
+                <DatasourceStoreProvider {...defaultDatasourceProps}>{ui}</DatasourceStoreProvider>
+              </PluginRegistry>
+            </ChartsProvider>
+          </SnackbarProvider>
+        </QueryClientProvider>
+      </CustomRouter>
+    </NuqsAdapter>
   );
 
   return render(<BaseRender />, options);

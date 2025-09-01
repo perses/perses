@@ -80,10 +80,10 @@ function Router(): ReactElement {
                     path: `:projectName`,
                     children: [
                       { index: true, Component: ProjectView },
-                      { path: 'dashboards/new', Component: CreateDashboardView },
+                      { path: 'dashboard/new', Component: CreateDashboardView },
                       { path: 'dashboards/:dashboardName', Component: DashboardView },
                       { path: 'ephemeraldashboard/new', Component: CreateEphemeralDashboardView },
-                      { path: 'ephemeraldashboard/:ephemeralDashboardName', Component: EphemeralDashboardView },
+                      { path: 'ephemeraldashboards/:ephemeralDashboardName', Component: EphemeralDashboardView },
                       { path: ':tab', Component: ProjectView },
                     ],
                   },

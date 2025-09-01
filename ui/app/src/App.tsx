@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { Outlet, useLocation, useNavigation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { ReactElement } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
