@@ -43,6 +43,10 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   onChange: (next: PluginEditorValue) => void;
 }
 
+export interface PluginEditorRef {
+  flushChanges?: () => void;
+}
+
 type PreviousSpecState = Record<string, Record<string, UnknownSpec>>;
 type HideQueryEditorState = Record<string, boolean>;
 
