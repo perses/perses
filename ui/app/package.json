@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=development rspack serve",
     "build": "rspack build",
     "type-check": "tsc --noEmit",
-    "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" TZ=UTC jest",
+    "test": "cross-env TZ=UTC jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
     "analyze": "rspack build --analyze"
