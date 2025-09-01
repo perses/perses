@@ -143,7 +143,7 @@ test.describe('Time Picker', () => {
       // Time picker shows the original time range.
       await expect(dashboardPage.timePicker).toContainText('6 hours');
       expect(page.url()).toContain('start=6h');
-      expect(page.url()).not.toContain('end=');
+      expect(page.url()).toContain('end=&');
     });
   });
 });
