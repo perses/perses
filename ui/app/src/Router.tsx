@@ -32,6 +32,7 @@ import {
 import { useIsAuthEnabled } from './context/Config';
 import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 import App from './App';
+import { PersesLoader } from './components/PersesLoader';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -106,7 +107,7 @@ function Router(): ReactElement {
   );
 
   return (
-    <Suspense>
+    <Suspense fallback={<PersesLoader />}>
       <NuqsAdapter>
         <RouterProvider router={router} />
       </NuqsAdapter>
