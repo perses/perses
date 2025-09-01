@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent, ReactElement, useState } from 'react';
+import { MouseEvent, Profiler, ReactElement, useState } from 'react';
 import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import AccountBox from 'mdi-material-ui/AccountBox';
 import Logout from 'mdi-material-ui/Logout';
+import { Link as RouterLink } from 'react-router-dom';
 import { useAuthToken } from '../../model/auth-client';
+import { ConfigRoute, ProfileRoute } from '../../model/route';
 import { ThemeSwitch } from './ThemeSwitch';
 
 export function AccountMenu(): ReactElement {
@@ -59,7 +61,7 @@ export function AccountMenu(): ReactElement {
         </MenuItem>
         <Divider />
         <ThemeSwitch isAuthEnabled />
-        <MenuItem component="a" href="/profile">
+        <MenuItem component={RouterLink} to={ProfileRoute}>
           <ListItemIcon>
             <AccountBox />
           </ListItemIcon>
