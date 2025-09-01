@@ -28,7 +28,7 @@ import {
   ProfileRoute,
   getBasePathName,
 } from './model/route';
-import { useIsAuthEnabled } from './context/Config';
+import { useIsAuthEnabled, useIsExplorerEnabled } from './context/Config';
 import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 import App from './App';
 import { PersesLoader } from './components/PersesLoader';
@@ -69,7 +69,11 @@ function Router(): ReactElement {
               { path: ConfigRoute, Component: ConfigView },
               { path: ImportRoute, Component: ImportView },
               { path: ProjectRoute, Component: ProjectView },
-              { path: ExploreRoute, Component: ExploreView },
+              {
+                path: ExploreRoute,
+                element: <RequireExplorerEnabled />,
+                children: [{ index: true, Component: ExploreView }],
+              },
               {
                 path: ProjectRoute,
                 element: <GuardedProjectRoute />,
@@ -81,8 +85,16 @@ function Router(): ReactElement {
                       { index: true, Component: ProjectView },
                       { path: 'dashboard/new', Component: CreateDashboardView },
                       { path: 'dashboards/:dashboardName', Component: DashboardView },
-                      { path: 'ephemeraldashboard/new', Component: CreateEphemeralDashboardView },
-                      { path: 'ephemeraldashboards/:ephemeralDashboardName', Component: EphemeralDashboardView },
+                      {
+                        path: 'ephemeraldashboard/new',
+                        element: <RequireEphermalDashboardEnabled />,
+                        children: [{ index: true, Component: CreateEphemeralDashboardView }],
+                      },
+                      {
+                        path: 'ephemeraldashboards/:ephemeralDashboardName',
+                        element: <RequireEphermalDashboardEnabled />,
+                        children: [{ index: true, Component: EphemeralDashboardView }],
+                      },
                       { path: ':tab', Component: ProjectView },
                     ],
                   },
@@ -92,11 +104,13 @@ function Router(): ReactElement {
           },
           {
             path: SignInRoute,
-            Component: SignInView,
+            element: <RequireAuthEnabled />,
+            children: [{ index: true, Component: SignInView }],
           },
           {
             path: SignUpRoute,
-            Component: SignUpView,
+            element: <RequireAuthEnabled />,
+            children: [{ index: true, Component: SignUpView }],
           },
         ],
       },
@@ -133,6 +147,30 @@ function RequireAuth(): ReactElement | null {
     to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
   }
   return <Navigate to={to} />;
+}
+
+function RequireAuthEnabled(): ReactElement {
+  const isAuthEnabled = useIsAuthEnabled();
+  if (!isAuthEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+function RequireExplorerEnabled(): ReactElement {
+  const isExplorerEnabled = useIsExplorerEnabled();
+  if (!isExplorerEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
+}
+
+function RequireEphermalDashboardEnabled(): ReactElement {
+  const isExplorerEnabled = useIsExplorerEnabled();
+  if (!isExplorerEnabled) {
+    return <Navigate to="/" replace />;
+  }
+  return <Outlet />;
 }
 
 export default Router;
