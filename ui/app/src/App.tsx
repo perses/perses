@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-import { ReactElement } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { ReactElement, Suspense } from 'react';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
-import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
+import { PersesLoader } from './components/PersesLoader';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -25,6 +25,7 @@ function isDashboardViewRoute(pathname: string): boolean {
 
 function App(): ReactElement {
   const location = useLocation();
+
   return (
     <Box
       sx={{
@@ -46,7 +47,9 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        <Router />
+        <Suspense fallback={<PersesLoader />}>
+          <Outlet />
+        </Suspense>
       </Box>
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { VariableValue, VariableDefinition } from '@perses-dev/core';
-import { QueryParamConfig, useQueryParams } from 'use-query-params';
+import { createParser, useQueryStates } from 'nuqs';
 
 const variableQueryParameterPrefix = 'var-';
 
@@ -20,11 +20,11 @@ export function getURLQueryParamName(name: string): string {
   return `${variableQueryParameterPrefix}${name}`;
 }
 
-export function encodeVariableValue(value: VariableValue): string | null {
+export function encodeVariableValue(value: VariableValue): string {
   if (Array.isArray(value)) {
     return value.join(',');
   }
-  return value;
+  return value ?? '';
 }
 
 export function decodeVariableValue(value: string): VariableValue {
@@ -38,23 +38,18 @@ export function decodeVariableValue(value: string): VariableValue {
   return values;
 }
 
-const VariableValueParam: QueryParamConfig<VariableValue> = {
-  encode: encodeVariableValue,
-  decode: (v) => {
-    if (typeof v === 'string') {
-      return decodeVariableValue(v);
-    }
-    return '';
-  },
-};
+export const parseAsVariableValue = createParser<VariableValue>({
+  parse: decodeVariableValue,
+  serialize: encodeVariableValue,
+});
 
-export function useVariableQueryParams(defs: VariableDefinition[]): ReturnType<typeof useQueryParams> {
-  const config: Record<string, typeof VariableValueParam> = {};
+export function useVariableQueryParams(defs: VariableDefinition[]): ReturnType<typeof useQueryStates> {
+  const config: Record<string, typeof parseAsVariableValue> = {};
   defs.forEach((def) => {
     const name = getURLQueryParamName(def.spec.name);
-    config[name] = VariableValueParam;
+    config[name] = parseAsVariableValue;
   });
-  return useQueryParams(config, { updateType: 'replaceIn' });
+  return useQueryStates(config, { history: 'replace' });
 }
 
 export function getInitalValuesFromQueryParameters(

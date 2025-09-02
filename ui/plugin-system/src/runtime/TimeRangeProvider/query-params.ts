@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { useQueryParams, QueryParamConfig } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
 import {
   TimeRangeValue,
@@ -21,6 +20,7 @@ import {
   DurationString,
   AbsoluteTimeRange,
 } from '@perses-dev/core';
+import { createParser, useQueryStates } from 'nuqs';
 import { TimeRange } from './TimeRangeProvider';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
@@ -47,9 +47,9 @@ function getEncodedValue(
 }
 
 /* Encodes individual TimeRangeValue as a string, depends on whether start is relative or absolute */
-export function encodeTimeRangeValue(timeOptionValue: TimeOptionValue): string | null | undefined {
+export function encodeTimeRangeValue(timeOptionValue: TimeOptionValue): string {
   if (!timeOptionValue) {
-    return timeOptionValue;
+    return '';
   }
 
   if (typeof timeOptionValue === 'string') {
@@ -69,27 +69,23 @@ export function decodeTimeRangeValue(
   return isDurationString(paramString) ? paramString : new Date(Number(paramString));
 }
 
-/**
- * Custom TimeRangeValue param type
- * See: https://github.com/pbeshai/use-query-params/tree/master/packages/serialize-query-params#param-types
- */
-export const TimeRangeParam: QueryParamConfig<TimeOptionValue, TimeOptionValue> = {
-  encode: encodeTimeRangeValue,
-  decode: decodeTimeRangeValue,
-  equals: (valueA: TimeOptionValue, valueB: TimeOptionValue) => {
+export const parseAsTimeRangeValue = createParser<TimeOptionValue>({
+  parse: decodeTimeRangeValue,
+  serialize: encodeTimeRangeValue,
+  eq: (valueA: TimeOptionValue, valueB: TimeOptionValue) => {
     if (valueA === valueB) return true;
     if (!valueA || !valueB) return valueA === valueB;
     return valueA.valueOf() === valueB.valueOf();
   },
+});
+
+export const parseAsTimeRange = {
+  start: parseAsTimeRangeValue,
+  end: parseAsTimeRangeValue,
 };
 
-export const timeRangeQueryConfig = {
-  start: TimeRangeParam,
-  end: TimeRangeParam,
-};
-
-export const refreshIntervalQueryConfig = {
-  refresh: TimeRangeParam,
+export const parseAsRefreshInterval = {
+  refresh: parseAsTimeRangeValue,
 };
 
 /**
@@ -97,8 +93,9 @@ export const refreshIntervalQueryConfig = {
  * Sets start query param if it is empty on page load
  */
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
-  const [query] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
+  const [query] = useQueryStates(parseAsTimeRange, { history: 'replace' });
   const { start, end } = query;
+
   return useMemo(() => {
     let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
     if (!start) {
@@ -118,8 +115,7 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
  * Returns time range getter and setter, taking the URL query params.
  */
 export function useTimeRangeParams(initialTimeRange: TimeRangeValue): Pick<TimeRange, 'timeRange' | 'setTimeRange'> {
-  const [query, setQuery] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
-
+  const [query, setQuery] = useQueryStates(parseAsTimeRange, { history: 'replace' });
   // determine whether initial param had previously been populated to fix back btn
   const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
 
@@ -154,7 +150,7 @@ export function useTimeRangeParams(initialTimeRange: TimeRangeValue): Pick<TimeR
  * Sets refresh query param if it is empty on page load
  */
 export function useInitialRefreshInterval(dashboardDuration: DurationString): DurationString {
-  const [query] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
+  const [query] = useQueryStates(parseAsRefreshInterval, { history: 'replace' });
   const { refresh } = query;
   return useMemo(() => {
     let initialTimeRange: DurationString = dashboardDuration;
@@ -175,7 +171,7 @@ export function useInitialRefreshInterval(dashboardDuration: DurationString): Du
 export function useSetRefreshIntervalParams(
   initialRefreshInterval?: DurationString
 ): Pick<TimeRange, 'refreshInterval' | 'setRefreshInterval'> {
-  const [query, setQuery] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
+  const [query, setQuery] = useQueryStates(parseAsRefreshInterval, { history: 'replace' });
 
   // determine whether initial param had previously been populated to fix back btn
   const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
