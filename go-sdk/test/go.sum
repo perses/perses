@@ -22,8 +22,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f h1:KUppIJq7/+
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nexucis/lamenv v0.5.2 h1:tK/u3XGhCq9qIoVNcXsK9LZb8fKopm0A5weqSRvHd7M=
 github.com/nexucis/lamenv v0.5.2/go.mod h1:HusJm6ltmmT7FMG8A750mOLuME6SHCsr2iFYxp5fFi0=
-github.com/perses/plugins/prometheus v0.52.1 h1:VzV+oAEXYQMw7eCYyVi6ZWhCyQY+4QMhpOK81LidB+k=
-github.com/perses/plugins/prometheus v0.52.1/go.mod h1:yloGFbZLSK6jSnW4A7wIb2NQQn6v/ryLgTC3Dw44EXc=
+github.com/perses/plugins/prometheus v0.53.0 h1:IL8z4JN7BWza/bwkh1gN1KwGMTg8m9EdeQ2cKsE1mHU=
+github.com/perses/plugins/prometheus v0.53.0/go.mod h1:XlpZnuFN/Rv5vQJ7+XKpgt/QcxPZWzyMgoLIRhepVx0=
 github.com/perses/plugins/staticlistvariable v0.4.0 h1:Wiy3v+UrlxI23y3paPsCNIgVKBac/RlijmXpJRWJfwQ=
 github.com/perses/plugins/staticlistvariable v0.4.0/go.mod h1:7U6JCtsEmEzgWIHO8gdwXkSnopzkPZK3l5e7r/rjdu4=
 github.com/perses/plugins/table v0.7.1 h1:C5eMaaKC960apgR7+Vs9jZf9snkxA1gYDSFzEAXtnGM=
