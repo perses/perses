@@ -28,7 +28,7 @@ import {
   ProfileRoute,
   getBasePathName,
 } from './model/route';
-import { useIsAuthEnabled, useIsExplorerEnabled } from './context/Config';
+import { useIsAuthEnabled, useIsEphemeralDashboardEnabled, useIsExplorerEnabled } from './context/Config';
 import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 import App from './App';
 import { PersesLoader } from './components/PersesLoader';
@@ -87,12 +87,12 @@ function Router(): ReactElement {
                       { path: 'dashboards/:dashboardName', Component: DashboardView },
                       {
                         path: 'ephemeraldashboard/new',
-                        element: <RequireEphermalDashboardEnabled />,
+                        element: <RequireEphemeralDashboardEnabled />,
                         children: [{ index: true, Component: CreateEphemeralDashboardView }],
                       },
                       {
                         path: 'ephemeraldashboards/:ephemeralDashboardName',
-                        element: <RequireEphermalDashboardEnabled />,
+                        element: <RequireEphemeralDashboardEnabled />,
                         children: [{ index: true, Component: EphemeralDashboardView }],
                       },
                       { path: ':tab', Component: ProjectView },
@@ -165,9 +165,9 @@ function RequireExplorerEnabled(): ReactElement {
   return <Outlet />;
 }
 
-function RequireEphermalDashboardEnabled(): ReactElement {
-  const isExplorerEnabled = useIsExplorerEnabled();
-  if (!isExplorerEnabled) {
+function RequireEphemeralDashboardEnabled(): ReactElement {
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
+  if (!isEphemeralDashboardEnabled) {
     return <Navigate to="/" replace />;
   }
   return <Outlet />;
