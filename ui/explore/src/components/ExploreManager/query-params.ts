@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useQueryStates, createSerializer, parseAsString, parseAsJson } from 'nuqs';
 import { parseAsTimeRangeValue } from '@perses-dev/plugin-system';
-import { stringify } from 'qs';
-import { parseAsJson, parseAsString, useQueryStates } from 'nuqs';
 import { z } from 'zod';
 
 export const parseAsExplorerQueryConfig = {
@@ -35,5 +34,6 @@ interface ExplorerQueryData {
 // Provide a query string for the explorer page using the given inputs, but also including any existing query params
 export function useExplorerQueryParams(inputs: ExplorerQueryData): string {
   const [query] = useQueryStates(parseAsExplorerQueryConfig, { history: 'replace' });
-  return stringify({ ...query, ...inputs }, { addQueryPrefix: true });
+  const serialize = createSerializer(parseAsExplorerQueryConfig);
+  return serialize({ ...query, ...inputs });
 }

@@ -17,7 +17,7 @@ import { parseAsJson, parseAsString, useQueryStates } from 'nuqs';
 import { z } from 'zod';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
-const parseAsExplorerConfig = {
+export const parseAsExplorerConfig = {
   explorer: parseAsString,
   data: parseAsJson(z.unknown()),
 };
