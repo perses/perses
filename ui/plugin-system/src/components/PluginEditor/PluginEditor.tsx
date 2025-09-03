@@ -30,8 +30,16 @@ import { PluginEditorProps, PluginEditorRef, usePluginEditor } from './plugin-ed
  */
 
 export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((props, ref): ReactElement => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const {
+    value,
+    withRunQueryButton = true,
+    pluginTypes,
+    pluginKindLabel,
+    onChange: _,
+    isReadonly,
+    postExecuteRunQuery: refresh,
+    ...others
+  } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
 
   /* 
@@ -46,7 +54,8 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
 
   const runQueryHandler = useCallback((): void => {
     onSpecChange({ ...value.spec, ...watchedOtherSpecs, query: watchedQuery });
-  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs]);
+    refresh?.();
+  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs, refresh]);
 
   const queryHandlerSettings = useMemo(() => {
     return withRunQueryButton

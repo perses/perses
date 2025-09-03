@@ -41,6 +41,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   isReadonly?: boolean;
   withRunQueryButton?: boolean;
   onChange: (next: PluginEditorValue) => void;
+  postExecuteRunQuery?: () => void;
 }
 
 export interface PluginEditorRef {
