@@ -153,7 +153,7 @@ export function useTimeSeriesQueries(
 /**
  * Build the time series query context object from data available at runtime
  */
-function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
+export function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   const { absoluteTimeRange, refreshKey } = useTimeRange();
   const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
