@@ -135,6 +135,13 @@ export interface ExplorerConfig {
   enable: boolean;
 }
 
+export type Severity = 'warning' | 'info' | 'error';
+
+export interface Banner {
+  severity?: Severity;
+  message: string;
+}
+
 export interface TimeRangeConfig {
   disable_custom: boolean;
   disable_zoom: boolean;
@@ -146,6 +153,7 @@ export interface FrontendConfig {
   information?: string;
   explorer: ExplorerConfig;
   time_range: TimeRangeConfig;
+  banner?: Banner;
 }
 
 export interface EphemeralDashboardConfig {

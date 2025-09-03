@@ -23,6 +23,7 @@ import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
 import WhitePersesLogo from '../logo/WhitePersesLogo';
 import PersesLogoCropped from '../logo/PersesLogoCropped';
+import { BannerInfo } from '../BannerInfo';
 import { ToolMenu } from './ToolMenu';
 import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
@@ -131,6 +132,7 @@ export default function Header(): JSX.Element {
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>
+      <BannerInfo />
     </AppBar>
   );
 }
