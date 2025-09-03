@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -22,6 +22,7 @@ import {
   getTitleAction,
   getSubmitText,
   useValidationSchemas,
+  PluginEditorRef,
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +39,7 @@ export interface PanelEditorFormProps {
 
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, onSave, onClose } = props;
+  const pluginEditorRef = useRef<PluginEditorRef>(null);
   const panelGroups = useListPanelGroups();
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialValues.panelDefinition);
@@ -75,9 +77,12 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     setLinks(links);
   }, [setLinks, links]);
 
-  const processForm: SubmitHandler<PanelEditorValues> = (data) => {
-    onSave(data);
-  };
+  const processForm: SubmitHandler<PanelEditorValues> = useCallback(
+    (data) => {
+      onSave(data);
+    },
+    [onSave]
+  );
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -108,6 +113,11 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const watchedDescription = useWatch({ control: form.control, name: 'panelDefinition.spec.display.description' });
   const watchedPluginKind = useWatch({ control: form.control, name: 'panelDefinition.spec.plugin.kind' });
 
+  const handleSubmit = useCallback(() => {
+    pluginEditorRef.current?.flushChanges?.();
+    form.handleSubmit(processForm)();
+  }, [form, processForm]);
+
   return (
     <FormProvider {...form}>
       <Box
@@ -120,7 +130,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
       >
         <Typography variant="h2">{titleAction} Panel</Typography>
         <Stack direction="row" spacing={1} marginLeft="auto">
-          <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
+          <Button variant="contained" disabled={!form.formState.isValid} onClick={handleSubmit}>
             {submitText}
           </Button>
           <Button color="secondary" variant="outlined" onClick={handleCancel}>
@@ -231,6 +241,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
           <Grid item xs={12}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <PanelSpecEditor
+                ref={pluginEditorRef}
                 control={form.control}
                 panelDefinition={panelDefinition}
                 onJSONChange={handlePanelDefinitionChange}

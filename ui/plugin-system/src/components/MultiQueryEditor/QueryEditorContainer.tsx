@@ -17,8 +17,8 @@ import { Stack, IconButton, Typography, BoxProps, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { ReactElement } from 'react';
-import { PluginEditor, PluginEditorProps } from '../PluginEditor';
+import { forwardRef, ReactElement } from 'react';
+import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
 
 /**
  * Properties for {@link QueryEditorContainer}
@@ -45,37 +45,37 @@ interface QueryEditorContainerProps {
  * @param onCollapseExpand callback when the query is collapsed or expanded
  * @constructor
  */
-export const QueryEditorContainer = ({
-  queryTypes,
-  index,
-  query,
-  isCollapsed,
-  onDelete,
-  onChange,
-  onCollapseExpand,
-}: QueryEditorContainerProps): ReactElement => {
-  return (
-    <Stack key={index} spacing={1}>
-      <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
-        <IconButton size="small" onClick={() => onCollapseExpand(index)}>
-          {isCollapsed ? <ChevronRight /> : <ChevronDown />}
-        </IconButton>
-        <Typography variant="overline" component="h4">
-          Query #{index + 1}
-        </Typography>
-        <IconButton
-          size="small"
-          // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
-          sx={{ marginLeft: 'auto', visibility: `${onDelete ? 'visible' : 'hidden'}` }}
-          onClick={() => onDelete && onDelete(index)}
-        >
-          <DeleteIcon />
-        </IconButton>
+
+export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorContainerProps>(
+  (props, ref): ReactElement => {
+    const { queryTypes, index, query, isCollapsed, onDelete, onChange, onCollapseExpand } = props;
+    return (
+      <Stack key={index} spacing={1}>
+        <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
+          <IconButton size="small" onClick={() => onCollapseExpand(index)}>
+            {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+          </IconButton>
+          <Typography variant="overline" component="h4">
+            Query #{index + 1}
+          </Typography>
+          <IconButton
+            size="small"
+            // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
+            sx={{ marginLeft: 'auto', visibility: `${onDelete ? 'visible' : 'hidden'}` }}
+            onClick={() => onDelete && onDelete(index)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Stack>
+        {!isCollapsed && (
+          <QueryEditor ref={ref} queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />
+        )}
       </Stack>
-      {!isCollapsed && <QueryEditor queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />}
-    </Stack>
-  );
-};
+    );
+  }
+);
+
+QueryEditorContainer.displayName = 'QueryEditorContainer';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -93,7 +93,8 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  * @param props
  * @constructor
  */
-function QueryEditor(props: QueryEditorProps): ReactElement {
+
+const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
   const { value, onChange, queryTypes, ...others } = props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
@@ -109,6 +110,7 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
   return (
     <Box {...others}>
       <PluginEditor
+        ref={ref}
         withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
@@ -123,4 +125,6 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
       />
     </Box>
   );
-}
+});
+
+QueryEditor.displayName = 'QueryEditor';
