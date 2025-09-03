@@ -36,7 +36,6 @@ function App(): ReactElement {
       }}
     >
       {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-
       <Box
         sx={{
           flex: 1,
