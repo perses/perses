@@ -26,20 +26,30 @@ import {
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { VariableDefinition } from '@perses-dev/core';
 import { VariableList } from '../Variables';
+import { ExternalVariableDefinition, useExternalVariableDefinitions, useVariableDefinitions } from '../../context';
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
   sx?: SxProps<Theme>;
 }
 
-export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): ReactElement {
+export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): ReactElement | null {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
 
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
+
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
+  const variablesLength = variableDefinitions.length + externalVariableDefinitions.length;
+
+  if (!variablesLength) {
+    return null;
+  }
 
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
