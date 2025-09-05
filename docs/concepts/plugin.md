@@ -3,9 +3,9 @@
 In Perses, the following object types are available as plugins:
 
 - Panel
-- Datasource
+- [Datasource](./datasource.md)
 - Query
-- Variable
+- [Variable](./variable.md)
 - Explorer
 
 The goal with this is to eventually empower users to seamlessly enhance Perses' native capabilities through custom
@@ -19,7 +19,7 @@ plugins, allowing them to:
 
 While Panel plugins are relatively self-sufficient, a datasource plugin requires one or more corresponding query and/or
 variable plugin to be actually usable, and vice versa.
-For instance, the native support for Prometheus is essentially a comprehensive package that includes all three types of
+For instance, the support of [Prometheus](https://perses.dev/plugins/docs/prometheus/) is powered by a comprehensive package that includes these three types of
 plugins.
 
 A plugin is made of two parts:
