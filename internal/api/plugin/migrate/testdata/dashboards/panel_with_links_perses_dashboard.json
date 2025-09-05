@@ -89,6 +89,12 @@
       {
         "kind": "Grid",
         "spec": {
+          "display": {
+            "title": "Panel Group 1",
+            "collapse": {
+              "open": true
+            }
+          },
           "items": [
             {
               "width": 6,
