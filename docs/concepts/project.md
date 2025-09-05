@@ -10,9 +10,6 @@ It's the place where users spend most of their time creating dashboards, variabl
 You have to own a project to be able to create a dashboard in Perses.
 
 ## How it can be used
-### In the CLI:
-
-You can use the [Project API](../api/project.md) in order to get a single or list of projects, create, update and delete a single project.
 
 ### In the Perses UI:
 
@@ -43,7 +40,11 @@ When you are inside your project, you have the options to rename or delete your 
 
 ![rename delete project](https://github.com/user-attachments/assets/3d18082a-5790-43ec-8ad4-df1deeaa6d3a)
 
-#### Project Permissions
+### In the CLI:
+
+You can create, read, update, or delete projects using the CLI. Refer to the [Project API](../api/project.md) documentation for the data model.
+
+### Project Permissions
 
 When a user creates a project, they are automatically assigned the Owner role for that project.
 Users with the owner role can edit, rename and delete a project.
