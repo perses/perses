@@ -97,12 +97,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
    * spec that will be used for preview. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
    */
-  const [previewSpec, setPreviewSpec] = useState<ListVariableDefinition>(form.getValues() as ListVariableDefinition);
-  const { refresh } = useTimeRange();
-  const refreshPreview = (): void => {
-    refresh();
-    setPreviewSpec(form.getValues() as ListVariableDefinition);
-  };
+  const previewSpec = form.getValues() as ListVariableDefinition;
 
   const plugin = useWatch<VariableDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
   const kind = plugin?.kind;
@@ -124,6 +119,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.allowMultiple', false);
   }
 
+  const { refresh } = useTimeRange();
+
   return (
     <>
       <Typography py={1} variant="subtitle1">
@@ -133,7 +130,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
         {kind ? (
           <Box>
             <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-              <VariableListPreview definition={previewSpec} onRefresh={refreshPreview} />
+              <VariableListPreview definition={previewSpec} />
             </ErrorBoundary>
           </Box>
         ) : (
@@ -148,6 +145,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
               render={({ field }) => {
                 return (
                   <PluginEditor
+                    postExecuteRunQuery={refresh}
                     withRunQueryButton
                     width="100%"
                     pluginTypes={['Variable']}
@@ -157,7 +155,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                         type: 'Variable',
                         kind: kind ?? 'StaticListVariable',
                       },
-                      spec: pluginSpec ?? { values: [] },
+                      spec: pluginSpec ?? {},
                     }}
                     isReadonly={action === 'read'}
                     onChange={(v) => {
