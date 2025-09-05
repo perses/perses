@@ -19,6 +19,7 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { forwardRef, ReactElement } from 'react';
 import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
+import { useTimeRange } from '../../runtime';
 
 /**
  * Properties for {@link QueryEditorContainer}
@@ -96,7 +97,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
   const { value, onChange, queryTypes, ...others } = props;
-
+  const { refresh } = useTimeRange();
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
@@ -110,6 +111,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
   return (
     <Box {...others}>
       <PluginEditor
+        postExecuteRunQuery={refresh}
         ref={ref}
         withRunQueryButton
         pluginTypes={queryTypes}
