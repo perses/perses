@@ -19,7 +19,7 @@ Perses is first and foremost a dashboard tool that you can use to display a vari
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-![img.png](https://perses.dev/assets/images/perses_overview.gif)
+![img.png](https://perses.dev/assets/images/home/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 

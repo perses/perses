@@ -17,17 +17,17 @@ Most of these benefits comes from not dealing with the Perses JSON format direct
 
 These 2 SDKs come with different pros & cons:
 
-|                             | CUE | Go |
-|-----------------------------|-----|----|
-| IDE Support                 | 🟡  | 🟢 |
-| Native plugins integration* | 🟢  | 🔴 |
-| Validation                  | 🟢  | 🟡 |
-| Dependency management       | 🟡  | 🟢 |
-| Integration possibilities   | 🔴  | 🟢 |
-| Ramp-up effort              | 🔴  | 🟢 |
-| Popularity                  | 🔴  | 🟢 |
+|                           | CUE | Go |
+|---------------------------|-----|----|
+| IDE Support               | 🟡  | 🟢 |
+| Plugins integration*      | 🟢  | 🟡 |
+| Validation                | 🟢  | 🟡 |
+| Dependency management     | 🟡  | 🟢 |
+| Integration possibilities | 🔴  | 🟢 |
+| Ramp-up effort            | 🔴  | 🟢 |
+| Popularity                | 🔴  | 🟢 |
 
-\* *CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK. However, the Golang SDK may not support all the plugins: it's basically up to each plugin developer to provide a Go package to enable the DaC use case. This statement applies also to any other language we might have a SDK for in the future.*
+\* *CUE is the language used for defining the data model of plugins. This means that when using the CUE SDK, you can always include any external plugin installed on your Perses server in your code. However, the Go SDK may not support every plugin you wish to use. Support depends on whether each plugin developer provides a corresponding Go package to enable the DaC use case. This limitation also applies to any other language SDKs we may introduce in the future. That said, rest assured that all official plugins are fully supported in the Go SDK.*
 
 Don't hesitate to try both to see which one suits you best!
 

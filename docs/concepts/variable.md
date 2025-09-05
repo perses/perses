@@ -9,7 +9,7 @@ A **variable** in Perses is a dynamic configuration element that allows you to c
 Perses supports several types of variables to meet different use cases:
 
 - **Text Variable** – for static string values that can be constant or user-editable.
-- **List Variable** – for dynamic dropdown selections, powered by [plugins](../plugins).
+- **List Variable** – for dynamic dropdown selections, powered by [plugins](./plugin.md).
 
 ## Configuring variables
 
