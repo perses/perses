@@ -9,7 +9,7 @@ A **variable** in Perses is a dynamic configuration element that allows you to c
 Perses supports several types of variables to meet different use cases:
 
 - **Text Variable** – for static string values that can be constant or user-editable.
-- **List Variable** – for dynamic dropdown selections, powered by [plugins](../plugins).
+- **List Variable** – for dynamic dropdown selections, powered by [plugins](./plugin.md).
 
 ## Configuring variables
 
@@ -19,14 +19,16 @@ Variables are generally defined as part of a dashboard, but you also have the op
 
 Once defined, variables can be used in places like:
 
-- **Query expressions** – reference variables using one of the following syntax:
-  - `$variableName`
-  - `${variableName}`
-  - `${variableName:format}`: this allows to define custom interpolation formats.
-- **Panel titles and descriptions** – for dynamic content based on current selections.
-- **Other variables** – create cascading dropdowns where one variable filters another.
+- **Query expressions**.
+- **Other variables** to create cascading dropdowns where one variable filters another.
+- **Panel titles and descriptions**.
 
-## Variables interpolation
+Variables can be referenced using one of the following syntax:
+- `$variableName`
+- `${variableName}`
+- `${variableName:format}`: this allows to define custom interpolation formats.
+
+### Variables interpolation
 
 The format syntax `${variableName:format}` allows you to define custom interpolation. The following formats are supported:
 

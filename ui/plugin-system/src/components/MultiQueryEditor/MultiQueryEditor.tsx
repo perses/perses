@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { forwardRef, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
 import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
 export interface MultiQueryEditorProps {
@@ -66,9 +67,10 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
  * @param onChange The callback to call when the queries are modified
  * @constructor
  */
-export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps): ReactElement {
-  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
 
+export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
+  const { queryTypes, queries = [], onChange } = props;
+  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
@@ -132,6 +134,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
       <Stack spacing={1}>
         {queryDefinitions.map((query: QueryDefinition, i: number) => (
           <QueryEditorContainer
+            ref={ref}
             queryTypes={queryTypes}
             key={i}
             index={i}
@@ -148,4 +151,6 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
       </Button>
     </>
   );
-}
+});
+
+MultiQueryEditor.displayName = 'MultiQueryEditor';

@@ -296,7 +296,7 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
   if (!hasContent) {
-    return undefined;
+    return null;
   }
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {

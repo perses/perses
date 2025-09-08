@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { useCallback, useState } from 'react';
-import { useQueryParams } from 'use-query-params';
+import { parseAsString, useQueryStates } from 'nuqs';
 
 export function useSetProjectParams(enabledURLParams = true): {
   project: string;
   setProject: (project: string) => void;
 } {
-  const [query, setQuery] = useQueryParams({ project: '' }, { updateType: 'replaceIn' });
+  const [query, setQuery] = useQueryStates({ project: parseAsString }, { history: 'replace' });
 
   const [projectState, setProjectState] = useState<string>('none');
 

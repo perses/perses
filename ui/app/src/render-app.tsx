@@ -13,19 +13,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { QueryParamProvider } from 'use-query-params';
-import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
-import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from '@perses-dev/components';
 import { CookiesProvider } from 'react-cookie';
-import { ReactRouterProvider } from '@perses-dev/plugin-system';
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
 import { DarkModeContextProvider } from './context/DarkMode';
-import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
 import { ConfigContextProvider } from './context/Config';
-import { getBasePathName } from './model/route';
 import { AuthorizationProvider } from './context/Authorization';
+import Router from './Router';
 /**
  * Renders the Perses application in the target container.
  */
@@ -47,31 +43,26 @@ export function renderApp(container: Element | null): void {
   });
 
   const root = ReactDOM.createRoot(container);
-  const basePath = getBasePathName();
 
   root.render(
     <React.StrictMode>
-      <BrowserRouter basename={basePath}>
-        <CookiesProvider>
-          <QueryClientProvider client={queryClient}>
-            <DarkModeContextProvider>
-              <ConfigContextProvider>
-                <QueryParamProvider adapter={ReactRouter6Adapter}>
-                  <ReactRouterProvider>
-                    <NavHistoryProvider>
-                      <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                        <AuthorizationProvider>
-                          <App />
-                        </AuthorizationProvider>
-                      </SnackbarProvider>
-                    </NavHistoryProvider>
-                  </ReactRouterProvider>
-                </QueryParamProvider>
-              </ConfigContextProvider>
-            </DarkModeContextProvider>
-          </QueryClientProvider>
-        </CookiesProvider>
-      </BrowserRouter>
+      <CookiesProvider>
+        <QueryClientProvider client={queryClient}>
+          <DarkModeContextProvider>
+            <ConfigContextProvider>
+              <NavHistoryProvider>
+                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                  <AuthorizationProvider>
+                    <NuqsAdapter>
+                      <Router />
+                    </NuqsAdapter>
+                  </AuthorizationProvider>
+                </SnackbarProvider>
+              </NavHistoryProvider>
+            </ConfigContextProvider>
+          </DarkModeContextProvider>
+        </QueryClientProvider>
+      </CookiesProvider>
     </React.StrictMode>
   );
 }

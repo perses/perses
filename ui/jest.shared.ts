@@ -34,7 +34,9 @@ const config: Config.InitialOptions = {
     // Configure Jest to handle stylesheets
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',
   },
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml))'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(lodash-es|yaml|nuqs|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror))',
+  ],
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the
     // build process)
