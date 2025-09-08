@@ -1,0 +1,33 @@
+name: doc
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+    paths:
+      - '**.md'
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref_name != 'main' }}
+
+jobs:
+  docs-fmt:
+    name: "check doc format"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.10.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install mdox
+        run: go install github.com/bwplotka/mdox@latest
+      - name: check docs
+        run: make checkdocs

@@ -9,6 +9,8 @@ on:
     tags:
       - v*
   pull_request:
+    paths-ignore:
+      - '**.md'
   merge_group:
 
 concurrency:

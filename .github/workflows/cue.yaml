@@ -8,6 +8,9 @@ on:
     tags:
       - v*
   pull_request:
+    paths-ignore:
+      - 'ui/**'
+      - '**.md'
   merge_group:
 
 concurrency:

@@ -8,6 +8,9 @@ on:
     tags:
       - v*
   pull_request:
+    paths-ignore:
+      - 'ui/**'
+      - '**.md'
   merge_group:
 
 concurrency:
@@ -23,20 +26,6 @@ jobs:
         uses: actions/checkout@v5
       - name: check license headers
         run: make checklicense
-  docs-fmt:
-    name: "check doc format"
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v5
-      - uses: perses/github-actions@v0.10.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_go: true
-      - name: install mdox
-        run: go install github.com/bwplotka/mdox@latest
-      - name: check docs
-        run: make checkdocs
   gofmt:
     name: "check code format"
     runs-on: ubuntu-latest
@@ -161,7 +150,7 @@ jobs:
           version: v2.1.6
           args: --timeout 5m
   validate-dev-data:
-    name: validate CUE schemas
+    name: validate dev data
     runs-on: ubuntu-latest
     steps:
       - name: checkout
