@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.52.0-rc.1 / 2025-09-08
+
+- [FEATURE] Dashboard: leave confirmation dialog with unsaved changes works with react-router navigation (#3286)
+- [ENHANCEMENT] Update plugins (#3299)
+- [ENHANCEMENT] app: migrate to react-router data mode + replace use-query-params by nuqs (#3268)
+- [ENHANCEMENT] adds more mappings for throughput units (#3267)
+- [ENHANCEMENT] Plugins/TraceTable: sort by trace start time by default (perses/plugins#321)
+- [BUGFIX] Remove Variable Preview refresh button (#3298)
+- [BUGFIX] Force a refresh time range when the Run Query Button is clicked every time (#3287)
+- [BUGFIX] Plugins/Tempo: do not escape raw strings in TraceQL auto-complete (perses/plugins#324)
+- [BUGFIX] Interaction with controls should not update spec directly (perses/plugins#326)
+- [BREAKINGCHANGE] Cleanup spec editor before the form is submitted (#3269)
+- [DOC] Add some hyperlinks in Plugin concept doc (#3295)
+- [DOC] User Documentation on project concept (#3293)
+
 ## 0.52.0-rc.0 / 2025-08-29
 
 - [FEATURE] Add Grafana panel links migration support (#3259)
