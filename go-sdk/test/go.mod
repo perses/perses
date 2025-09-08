@@ -7,9 +7,9 @@ toolchain go1.24.2
 replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.52.0-beta.5
+	github.com/perses/perses v0.52.0-rc.0
 	github.com/perses/plugins/prometheus v0.53.0
-	github.com/perses/plugins/staticlistvariable v0.5.0
+	github.com/perses/plugins/staticlistvariable v0.5.1
 	github.com/perses/plugins/table v0.8.0
 	github.com/perses/plugins/timeserieschart v0.10.0
 	github.com/stretchr/testify v1.11.1
