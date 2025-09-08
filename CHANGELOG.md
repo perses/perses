@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.52.0-rc.1 / 2025-09-08
+
+- [FEATURE] Dashboard: leave confirmation dialog with unsaved changes works with react-router navigation (#3286)
+- [ENHANCEMENT] Update plugins (#3299)
+- [ENHANCEMENT] app: migrate to react-router data mode + replace use-query-params by nuqs (#3268)
+- [ENHANCEMENT] adds more mappings for throughput units (#3267)
+- [ENHANCEMENT] Plugins/TraceTable: sort by trace start time by default (perses/plugins#321)
+- [BUGFIX] Remove Variable Preview refresh button (#3298)
+- [BUGFIX] Force a refresh time range when the Run Query Button is clicked every time (#3287)
+- [BUGFIX] Plugins/Tempo: do not escape raw strings in TraceQL auto-complete (perses/plugins#324)
+- [BUGFIX] Interaction with controls should not update spec directly (perses/plugins#326)
+- [BREAKINGCHANGE] Cleanup spec editor before the form is submitted (#3269)
+- [DOC] Add some hyperlinks in Plugin concept doc (#3295)
+- [DOC] User Documentation on project concept (#3293)
+
+## 0.52.0-rc.0 / 2025-08-29
+
+- [FEATURE] Add Grafana panel links migration support (#3259)
+- [FEATURE] Add tool tip in case of panel header ellipsis (#3255)
+- [FEATURE] Enhance variable replacement with custom formats (#3250)
+- [FEATURE] Dashboard: add optional confirmation dialog on unsaved leave (#3243)
+- [FEATURE] Dashboard: add panel group repeat based on a variable (#3106)
+- [FEATURE] Plugins/TracingGanttChart: show span links (perses/plugins#214)
+- [FEATURE] Plugins/TracingGanttChart: support downloading traces as JSON (perses/plugins#179)
+- [FEATURE] Plugins/TimeSeriesChart: Add CSV export functionality (perses/plugins#208)
+- [FEATURE] Plugins/Tempo: add attribute filter search (perses/plugins#194)
+- [ENHANCEMENT] Plugins/Tempo: add missing limit to the query in sdk/go (perses/plugins#270)
+- [ENHANCEMENT] Plugins/TimeSeriesChart: Grafana migration: migrate byName-based fixedColor overrides (perses/plugins#275)
+- [ENHANCEMENT] Plugins/TracingGanttChart: support linking to Gantt Chart with a span selected (perses/plugins#282)
+- [ENHANCEMENT] Plugins/StaticListVariable migration: handle escaped commas in query values (perses/plugins#277)
+- [ENHANCEMENT] Plugins/ Prometheus: Redesign metric finder filters (perses/plugins#175)
+- [ENHANCEMENT] bump all plugin version and add Loki plugin (#3260)
+- [ENHANCEMENT] update ListSpec validation to handle single default value conversion (#3239)
+- [BREAKINGCHANGE] Plugins/TracingGanttChart: configure attribute links in panel spec instead of panel props (perses/plugins#210)
+- [BREAKINGCHANGE] Plugins/TraceTable: configure link in panel spec (perses/plugins#211)
+- [BREAKINGCHANGE] ScatterChart: configure link in panel spec (perses/plugins#212)
+- [BUGFIX] Plugins/Tempo filter bar: escape backslash (perses/plugins#279)
+- [BUGFIX] Plugins/Tempo TraceQL editor: escape label values and support backticks (perses/plugins#278)
+- [BUGFIX] Plugins/Table: prevent failing migration on undefined fields (perses/plugins#274)
+- [BUGFIX] Plugins/Prometheus: handle datasource as a variable in the cue schema (perses/plugins#237)
+- [BUGFIX] Plugins/Prometheus: fix wrong usage of close() in schema (perses/plugins#159)
+- [BUGFIX] Plugins/Prometheus: CUE SDK: fix "incomplete value string" error (perses/plugins#100)
+- [BUGFIX] Plugins/PieChart: Add multi-column feature to the legend table (perses/plugins#238)
+- [BUGFIX] Fix typo in error message (#3257)
+- [BUGFIX] Remove Click away to avoid unnecessary endpoint call (#3238)
+- [BUGFIX] Add refresh token to the variable fetch (#3231)
+- [DOC] add variable interpolation format docs (#3256)
+
 ## 0.52.0-beta.5 / 2025-08-22
 
 - [FEATURE] : Add Quick Query Viewer (#3214)
