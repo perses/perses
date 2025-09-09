@@ -89,6 +89,9 @@
       {
         "kind": "Grid",
         "spec": {
+          "display": {
+            "title": "Panel Group 1"
+          },
           "items": [
             {
               "width": 6,
