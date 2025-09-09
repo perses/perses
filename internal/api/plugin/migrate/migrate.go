@@ -260,9 +260,6 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 	orphansGridSpec := &dashboard.GridLayoutSpec{
 		Display: &dashboard.GridLayoutDisplay{
 			Title: "Panel Group 1", // placeholder value since we don't want an empty string.
-			Collapse: &dashboard.GridLayoutCollapse{
-				Open: true, // because orphan panels are always visible in Grafana
-			},
 		},
 	}
 	orphansGrid := dashboard.Layout{

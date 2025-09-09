@@ -90,10 +90,7 @@
         "kind": "Grid",
         "spec": {
           "display": {
-            "title": "Panel Group 1",
-            "collapse": {
-              "open": true
-            }
+            "title": "Panel Group 1"
           },
           "items": [
             {
