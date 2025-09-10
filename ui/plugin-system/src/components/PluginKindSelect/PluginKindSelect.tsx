@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
-import { forwardRef, ReactElement, useCallback } from 'react';
+import { forwardRef, ReactElement, useCallback, useMemo } from 'react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -34,6 +34,11 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
   const { pluginTypes, value: propValue, onChange, ...others } = props;
   const { data, isLoading } = useListPluginMetadata(pluginTypes);
 
+  const sortedData = useMemo(
+    () => data?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name)),
+    [data]
+  );
+
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = !propValue || isLoading ? '' : selectionToOptionValue(propValue);
 
@@ -47,9 +52,10 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
         return '';
       }
       const selectedValue = optionValueToSelection(selected as string);
-      return data?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display.name;
+      return sortedData?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display
+        .name;
     },
-    [data]
+    [sortedData]
   );
 
   // TODO: Does this need a loading indicator of some kind?
@@ -65,7 +71,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       data-testid="plugin-kind-select"
     >
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
-      {data?.map((metadata) => (
+      {sortedData?.map((metadata) => (
         <MenuItem
           data-testid="option"
           key={metadata.kind + metadata.spec.name}
