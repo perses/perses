@@ -14,6 +14,7 @@
 import { Box } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
 import { ReactElement, Suspense } from 'react';
+import { ReactRouterProvider } from '@perses-dev/plugin-system';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import { SignInRoute, SignUpRoute } from './model/route';
@@ -47,9 +48,11 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        <Suspense fallback={<PersesLoader />}>
-          <Outlet />
-        </Suspense>
+        <ReactRouterProvider>
+          <Suspense fallback={<PersesLoader />}>
+            <Outlet />
+          </Suspense>
+        </ReactRouterProvider>
       </Box>
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>
