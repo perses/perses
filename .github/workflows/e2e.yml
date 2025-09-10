@@ -54,3 +54,9 @@ jobs:
           path: |
             ui/e2e/playwright-report/
             ui/e2e/test-results/
+      - name: Create tarballs of all packages
+        run: cd ./ui && npm pack -ws
+      - name: Replace Perses dependencies in examples folder with built packages
+        run: for example in ./examples/*/; do (cd "$example"; npm install ../../ui/perses-dev-*.tgz); done
+      - name: Verify all examples build successfully
+        run: cd ./examples && ./test.sh
