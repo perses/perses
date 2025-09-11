@@ -26,6 +26,8 @@ import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { SearchList } from './SearchList';
+import IconButton from '@mui/material/IconButton';
+import Close from 'mdi-material-ui/Close';
 
 function shortcutCTRL(): string {
   return isAppleDevice() ? '⌘' : 'ctrl';
@@ -160,6 +162,11 @@ export function SearchBar(): ReactElement {
               ),
               endAdornment: (
                 <InputAdornment position="end">
+                  {query && (
+                    <IconButton size="small" onClick={() => setQuery('')}>
+                      <Close fontSize="small" />
+                    </IconButton>
+                  )}
                   <Chip label="esc" size="small" onClick={handleClose} />
                 </InputAdornment>
               ),
