@@ -14,8 +14,7 @@
 import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import { ReactElement, ReactNode } from 'react';
-import { ExploreManager } from '../../components';
-import { ExplorerManagerProviderWithQueryParams } from '../../components/ExploreManager/ExplorerManagerProviderWithQueryParams';
+import { ExploreManager, ExplorerManagerProviderWithQueryParams } from '../../components';
 
 export interface ViewAppProps {
   exploreTitleComponent?: ReactNode;
