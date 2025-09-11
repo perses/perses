@@ -152,10 +152,14 @@ export function insertPanelInLayout(
 }
 
 /**
+ * @deprecated
+ *
  * Get a valid panel key, where a valid key:
  * - does not include invalid characters
  * - is unique
+ * TODO: It is not clear why too much complexity is needed for generating a panel key
  */
+
 export function getValidPanelKey(panelKey: string, panels: Record<string, PanelDefinition>): string {
   const uniquePanelKeys = getUniquePanelKeys(panels);
   let normalizedPanelKey = getPanelKeyParts(removeWhiteSpaces(panelKey)).name;
