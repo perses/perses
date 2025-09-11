@@ -45,8 +45,6 @@ jobs:
           # Playwright. Useful for understanding if something failing there
           # breaks the tests.
           DEBUG: pw:webserver
-          HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
-          HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -63,9 +63,8 @@ const config: PlaywrightTestConfig = {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Keep this in sync with the setting in `.happo.js` for consistency for
-        // canvas elements, which are converted into images when run in playwright
-        // and sent to happo.
+        // Keep this in sync with settings in visual test (happo/playbook/...) for consistency for
+        // canvas elements, which are converted into images when run in playwright and sent to them.
         viewport: { width: 1200, height: 1000 },
       },
     },
