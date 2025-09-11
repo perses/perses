@@ -145,7 +145,6 @@ export function LegendOptionsEditor({
     <OptionsEditorGroup title="Legend">
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl label="Show" control={<Switch checked={!!value} onChange={handleLegendShowChange} />} />
-      
       {value && (
         <>
           <OptionsEditorControl
@@ -169,6 +168,7 @@ export function LegendOptionsEditor({
                 color="primary"
                 exclusive
                 value={currentMode}
+                aria-label="Mode"
                 onChange={(__, newValue) => {
                   onChange({
                     ...value,
