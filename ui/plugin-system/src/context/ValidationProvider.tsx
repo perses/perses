@@ -39,7 +39,7 @@ export const ValidationSchemasContext = createContext<ValidationSchemas | undefi
 
 export function useValidationSchemas(): ValidationSchemas {
   const ctx = useContext(ValidationSchemasContext);
-  if (ctx === undefined) {
+  if (!ctx) {
     throw new Error('No ValidationSchemasContext found. Did you forget a Provider?');
   }
   return ctx;

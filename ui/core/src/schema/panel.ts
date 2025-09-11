@@ -16,7 +16,10 @@ import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, Quer
 import { PluginSchema, pluginSchema } from './plugin';
 
 export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
-  name: z.string().min(1, { message: 'Required' }),
+  name: z
+    .string()
+    .min(1, { message: 'Required' })
+    .regex(/^[a-zA-Z0-9 _-]+$/, { message: 'Name must only contain alphanumeric characters, underscores, or dashes' }),
   description: z.string().optional(),
 });
 
