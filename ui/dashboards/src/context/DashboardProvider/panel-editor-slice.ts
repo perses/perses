@@ -13,7 +13,7 @@
 
 import { Action, PanelEditorValues, PanelGroupId } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { getYForNewRow, getValidPanelKey } from '../../utils';
+import { getYForNewRow } from '../../utils';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import {
   PanelGroupSlice,
@@ -186,9 +186,7 @@ export function createPanelEditorSlice(): StateCreator<
           panelDefinition: get().initialValues?.panelDefinition ?? createPanelDefinition(),
         },
         applyChanges: (next) => {
-          const name = next.panelDefinition.spec.display.name;
-          const panelKey = getValidPanelKey(name, get().panels);
-
+          const panelKey = crypto.randomUUID().replaceAll('-', '');
           set((state) => {
             // Add a panel
             state.panels[panelKey] = next.panelDefinition;
