@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Switch, SwitchProps } from '@mui/material';
+import { Switch, SwitchProps, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
 import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement, useMemo } from 'react';
@@ -33,15 +33,6 @@ type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['
 const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS_CONFIG).map(([id, config]) => {
   return {
     id: id as LegendSpecOptions['position'],
-    ...config,
-  };
-});
-
-type LegendModeOption = LegendSingleSelectConfig & { id: Required<LegendSpecOptions>['mode'] };
-
-const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
-  return {
-    id: id as Required<LegendSpecOptions>['mode'],
     ...config,
   };
 });
@@ -83,14 +74,6 @@ export function LegendOptionsEditor({
     });
   };
 
-  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption): void => {
-    onChange({
-      ...value,
-      position: currentPosition,
-      mode: newValue.id,
-    });
-  };
-
   const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption): void => {
     onChange({
       ...value,
@@ -114,7 +97,6 @@ export function LegendOptionsEditor({
   const legendPositionConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
 
   const currentMode = getLegendMode(value?.mode);
-  const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
 
   const currentSize = getLegendSize(value?.size);
   const legendSizeConfig = LEGEND_SIZE_CONFIG[currentSize];
@@ -163,75 +145,94 @@ export function LegendOptionsEditor({
     <OptionsEditorGroup title="Legend">
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl label="Show" control={<Switch checked={!!value} onChange={handleLegendShowChange} />} />
-      <OptionsEditorControl
-        label="Position"
-        control={
-          <SettingsAutocomplete
-            value={{
-              ...legendPositionConfig,
-              id: currentPosition,
-            }}
-            options={POSITION_OPTIONS}
-            onChange={handleLegendPositionChange}
-            disabled={value === undefined}
-            disableClearable
-          ></SettingsAutocomplete>
-        }
-      />
-      <OptionsEditorControl
-        label="Mode"
-        control={
-          <SettingsAutocomplete
-            value={{
-              ...legendModeConfig,
-              id: currentMode,
-            }}
-            options={MODE_OPTIONS}
-            onChange={handleLegendModeChange}
-            disabled={!value}
-            disableClearable
-          ></SettingsAutocomplete>
-        }
-      />
-      <OptionsEditorControl
-        label="Size"
-        control={
-          <SettingsAutocomplete
-            value={{
-              ...legendSizeConfig,
-              id: currentSize,
-            }}
-            options={SIZE_OPTIONS}
-            onChange={handleLegendSizeChange}
-            // TODO: enable sizes for list mode when we normalize the layout of
-            // lists to more closely match tables.
-            disabled={!value || currentMode !== 'table'}
-            disableClearable
-          ></SettingsAutocomplete>
-        }
-      />
-      {showValuesEditor && (
-        <OptionsEditorControl
-          label="Values"
-          control={
-            // For some reason, the inferred option type doesn't always seem to work
-            // quite right when `multiple` is true. Explicitly setting the generics
-            // to work around this.
-            <SettingsAutocomplete<LegendValueOption, true, true>
-              multiple={true}
-              disableCloseOnSelect
-              disableClearable
-              value={legendValuesConfig}
-              options={valueOptions}
-              onChange={handleLegendValueChange}
-              disabled={!value || currentMode !== 'table'}
-              limitTags={1}
-              ChipProps={{
-                size: 'small',
-              }}
-            />
-          }
-        />
+      
+      {value && (
+        <>
+          <OptionsEditorControl
+            label="Position"
+            control={
+              <SettingsAutocomplete
+                value={{
+                  ...legendPositionConfig,
+                  id: currentPosition,
+                }}
+                options={POSITION_OPTIONS}
+                onChange={handleLegendPositionChange}
+                disableClearable
+              ></SettingsAutocomplete>
+            }
+          />
+          <OptionsEditorControl
+            label="Mode"
+            control={
+              <ToggleButtonGroup
+                color="primary"
+                exclusive
+                value={currentMode}
+                onChange={(__, newValue) => {
+                  onChange({
+                    ...value,
+                    position: currentPosition,
+                    mode: newValue,
+                  });
+                }}
+              >
+                {Object.entries(LEGEND_MODE_CONFIG).map(([modeId, config]) => (
+                  <ToggleButton
+                    key={modeId}
+                    value={modeId}
+                    selected={currentMode === modeId}
+                    aria-label={`display ${modeId} mode`}
+                  >
+                    {config.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            }
+          />
+          {currentMode === 'table' && (
+            <>
+              <OptionsEditorControl
+                label="Size"
+                control={
+                  <SettingsAutocomplete
+                    value={{
+                      ...legendSizeConfig,
+                      id: currentSize,
+                    }}
+                    options={SIZE_OPTIONS}
+                    onChange={handleLegendSizeChange}
+                    // TODO: enable sizes for list mode when we normalize the layout of
+                    // lists to more closely match tables.
+                    disableClearable
+                  ></SettingsAutocomplete>
+                }
+              />
+              {showValuesEditor && (
+                <OptionsEditorControl
+                  label="Values"
+                  control={
+                    // For some reason, the inferred option type doesn't always seem to work
+                    // quite right when `multiple` is true. Explicitly setting the generics
+                    // to work around this.
+                    <SettingsAutocomplete<LegendValueOption, true, true>
+                      multiple={true}
+                      disableCloseOnSelect
+                      disableClearable
+                      value={legendValuesConfig}
+                      options={valueOptions}
+                      onChange={handleLegendValueChange}
+                      limitTags={1}
+                      ChipProps={{
+                        size: 'small',
+                      }}
+                    />
+                  }
+                />
+              )}
+            </>
+          )}
+        </>
       )}
     </OptionsEditorGroup>
   );
