@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { useCallback, useState } from 'react';
-import { parseAsString, useQueryStates } from 'nuqs';
+import { useQueryParams } from 'use-query-params';
 
 export function useSetProjectParams(enabledURLParams = true): {
   project: string;
   setProject: (project: string) => void;
 } {
-  const [query, setQuery] = useQueryStates({ project: parseAsString }, { history: 'replace' });
+  const [query, setQuery] = useQueryParams({ project: '' }, { updateType: 'replaceIn' });
 
   const [projectState, setProjectState] = useState<string>('none');
 

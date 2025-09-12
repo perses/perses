@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,13 @@
 import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 
 interface ExplorerState<T> {
-  explorer: string | null;
+  explorer?: string;
   data: T;
 }
 
 interface ExplorerManagerContextType<T> {
   /** observability signal, for example metrics or traces */
-  explorer: string | null;
+  explorer?: string;
   data: T;
   setExplorer: (explorer: string) => void;
   setData: (data: T) => void;
@@ -42,7 +42,7 @@ export function ExplorerManagerProvider({
     Record<string, Omit<ExplorerState<unknown>, 'explorer'>>
   >({});
   // local store in case external store is not provided by prop
-  const localStore = useState<ExplorerState<unknown>>({ explorer: null, data: {} });
+  const localStore = useState<ExplorerState<unknown>>({ explorer: undefined, data: {} });
   // use store provided by 'store' prop if available, otherwise use local store
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
   const { explorer, data } = explorerState;
