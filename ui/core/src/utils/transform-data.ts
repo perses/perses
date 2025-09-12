@@ -145,7 +145,7 @@ export function applyMergeIndexedColumnsTransform(
 
   for (const entry of data) {
     const indexedColumns = Object.keys(entry).filter((k) =>
-      new RegExp('^(' + column + ' #\\d+)|(' + column + ')$').test(k)
+      new RegExp('^((' + column + ' #\\d+)|(' + column + '))$').test(k)
     );
     const indexedColumnValues: Record<string, unknown> = {};
 
