@@ -27,6 +27,7 @@ import { ToolMenu } from './ToolMenu';
 import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
 import { SearchBar } from './SearchBar/SearchBar';
+import { BannerInfo } from '../BannerInfo';
 
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();
@@ -131,6 +132,7 @@ export default function Header(): JSX.Element {
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>
+      <BannerInfo/>
     </AppBar>
   );
 }
