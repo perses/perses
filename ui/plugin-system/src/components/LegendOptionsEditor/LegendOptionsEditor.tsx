@@ -158,7 +158,7 @@ export function LegendOptionsEditor({
                 options={POSITION_OPTIONS}
                 onChange={handleLegendPositionChange}
                 disableClearable
-              ></SettingsAutocomplete>
+              />
             }
           />
           <OptionsEditorControl
@@ -205,7 +205,7 @@ export function LegendOptionsEditor({
                     // TODO: enable sizes for list mode when we normalize the layout of
                     // lists to more closely match tables.
                     disableClearable
-                  ></SettingsAutocomplete>
+                  />
                 }
               />
               {showValuesEditor && (
