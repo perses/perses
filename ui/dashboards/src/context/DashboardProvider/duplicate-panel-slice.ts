@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { getValidPanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
+import { insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
 import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -68,7 +68,7 @@ export function createDuplicatePanelSlice(): StateCreator<
           throw new Error(`Cannot find layout for Panel with key '${panelKey}'`);
         }
 
-        const dupePanelKey = getValidPanelKey(panelKey, panels);
+        const dupePanelKey = crypto.randomUUID().replaceAll('-', '');
 
         state.panels[dupePanelKey] = panelToDupe;
 
