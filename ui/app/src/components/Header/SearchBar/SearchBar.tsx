@@ -18,6 +18,8 @@ import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { isProjectMetadata } from '@perses-dev/core';
+import IconButton from '@mui/material/IconButton';
+import Close from 'mdi-material-ui/Close';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList } from '../../../model/dashboard-client';
@@ -160,6 +162,11 @@ export function SearchBar(): ReactElement {
               ),
               endAdornment: (
                 <InputAdornment position="end">
+                  {query && (
+                    <IconButton size="small" onClick={() => setQuery('')}>
+                      <Close fontSize="small" />
+                    </IconButton>
+                  )}
                   <Chip label="esc" size="small" onClick={handleClose} />
                 </InputAdornment>
               ),
