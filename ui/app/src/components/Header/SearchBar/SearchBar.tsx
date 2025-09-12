@@ -18,6 +18,8 @@ import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { isProjectMetadata } from '@perses-dev/core';
+import IconButton from '@mui/material/IconButton';
+import Close from 'mdi-material-ui/Close';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList } from '../../../model/dashboard-client';
@@ -26,8 +28,6 @@ import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { SearchList } from './SearchList';
-import IconButton from '@mui/material/IconButton';
-import Close from 'mdi-material-ui/Close';
 
 function shortcutCTRL(): string {
   return isAppleDevice() ? '⌘' : 'ctrl';
