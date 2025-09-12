@@ -12,19 +12,10 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
-import happoPlaywright from 'happo-playwright';
 import { AppProjectPage, DashboardPage } from '../pages';
 
 test.describe('ProjectView', () => {
   const project = 'perses';
-
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
 
   test('can navigate to a dashboard', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
