@@ -66,6 +66,11 @@ test.describe('Dashboard: Variables', () => {
     await expect(variableEditor.tableRowHeadings).toContainText(['list_var']);
 
     await variableEditor.applyChanges();
+    const discardChangesConfirmationDialog = dashboardPage.getDialog('Discard Changes');
+    await expect(discardChangesConfirmationDialog).toBeVisible();
+
+    // clicking "Cancel" should do nothing and keep current changes
+    await discardChangesConfirmationDialog.getByRole('button', { name: 'Cancel' }).click();
     await dashboardPage.saveChanges();
 
     await expect(dashboardPage.variableList).toHaveCount(initialCount + 1);

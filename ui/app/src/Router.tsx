@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,27 +11,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Suspense, lazy, ReactElement } from 'react';
-import { Navigate, useLocation, createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
-// Default route is eagerly loaded
-import HomeView from './views/home/HomeView';
-import SignInView from './views/auth/SignInView';
-import SignUpView from './views/auth/SignUpView';
+import { SnackbarProvider } from '@perses-dev/components';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { lazy, ReactElement, Suspense } from 'react';
+import { CookiesProvider } from 'react-cookie';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import { PersesLoader } from './components/PersesLoader';
+import { AuthorizationProvider } from './context/Authorization';
+import {
+  ConfigContextProvider,
+  useIsAuthEnabled,
+  useIsEphemeralDashboardEnabled,
+  useIsExplorerEnabled,
+} from './context/Config';
+import { DarkModeContextProvider } from './context/DarkMode';
+import { NavHistoryProvider } from './context/DashboardNavHistory';
+import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 import {
   AdminRoute,
   ConfigRoute,
-  ProjectRoute,
+  ExploreRoute,
+  getBasePathName,
   ImportRoute,
+  ProfileRoute,
+  ProjectRoute,
   SignInRoute,
   SignUpRoute,
-  ExploreRoute,
-  ProfileRoute,
-  getBasePathName,
 } from './model/route';
-import { useIsAuthEnabled, useIsEphemeralDashboardEnabled, useIsExplorerEnabled } from './context/Config';
-import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
+import SignInView from './views/auth/SignInView';
+import SignUpView from './views/auth/SignUpView';
+import HomeView from './views/home/HomeView';
+// Default route is eagerly loaded
 import App from './App';
-import { PersesLoader } from './components/PersesLoader';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -46,12 +59,46 @@ const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboa
 const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
 const ProfileView = lazy(() => import('./views/profile/ProfileView'));
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      // react-query uses a default of 3 retries.
+      // This sets the default to 0 retries.
+      // If needed, the number of retries can be overridden in individual useQuery calls.
+      retry: 0,
+    },
+  },
+});
+
+function AppProviders(): ReactElement {
+  return (
+    <CookiesProvider>
+      <QueryClientProvider client={queryClient}>
+        <DarkModeContextProvider>
+          <ConfigContextProvider>
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+              <NavHistoryProvider>
+                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                  <AuthorizationProvider>
+                    <App />
+                  </AuthorizationProvider>
+                </SnackbarProvider>
+              </NavHistoryProvider>
+            </QueryParamProvider>
+          </ConfigContextProvider>
+        </DarkModeContextProvider>
+      </QueryClientProvider>
+    </CookiesProvider>
+  );
+}
+
 function Router(): ReactElement {
   const router = createBrowserRouter(
     [
       {
         path: '/',
-        Component: App,
+        Component: AppProviders,
         children: [
           {
             path: '',

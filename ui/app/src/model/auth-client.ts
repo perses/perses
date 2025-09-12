@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
 import { useEffect, useState } from 'react';
-import { useQueryState } from 'nuqs';
+import { useQueryParam } from 'use-query-params';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -51,7 +51,7 @@ export function useIsAccessTokenExist(): boolean {
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
 export function useRedirectQueryParam(): string {
-  const [path] = useQueryState('name');
+  const [path] = useQueryParam<string | undefined>('name');
   return path ?? '/';
 }
 

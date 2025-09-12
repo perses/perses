@@ -34,9 +34,9 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "immer": "^10.1.1",
-    "nuqs": "^2.5.1",
     "react-hook-form": "^7.46.1",
     "use-immer": "^0.11.0",
+    "use-query-params": "^2.2.1",
     "zod": "^3.22.2"
   },
   "peerDependencies": {
