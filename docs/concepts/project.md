@@ -1,54 +1,34 @@
 # Project
 
-## What it is
+A project serves as a workspace or namespace where users can create and manage resources such as dashboards, variables, and data sources. Every dashboard must belong to a project. Projects can be either personal or collaborative, depending on the intended usage and access permissions.
 
-A project can be defined as a workspace and it can be both personal or collaborative.
+## Working with Projects
 
-## Why you will need it
+### Using the UI
 
-It's the place where users spend most of their time creating dashboards, variables and datasources.
-You have to own a project to be able to create a dashboard in Perses.
+You can search among the existing projects using the search bar:
 
-## How it can be used
+![search project](../images/project/search.png)
 
-### In the Perses UI:
+If server permissions allow, you also have the possibility to create your own project:
 
-#### Search for a project
+![create project](../images/project/add.png)
 
-Retrieve and display all available projects using the search bar.
+![create project pop-up](../images/project/add_popup.png)
 
-![search project](https://github.com/user-attachments/assets/6f0f0b96-db18-4c31-999f-5e0d88b5d29c)
-
-#### Create a project
-
-To create your project:
--  Use directly the ADD PROJECT button.
-
-![create project](https://github.com/user-attachments/assets/b0716b24-4fc5-42d9-9834-c7af52527168)
-
-- The Add Project pop-up will be displayed and you can provide a name for your new project and click on Add.
-
-![add project](https://github.com/user-attachments/assets/e8123a57-3e82-4508-b7de-52729a92e29b)
-
-You will then be redirected in your newly created project workspace.
+You will then be redirected to your newly created project workspace.
  
- ![project workspace](https://github.com/user-attachments/assets/0d642482-d3dc-4177-89e2-cbbaae9c7ebc)
+ ![project page](../images/project/page.png)
 
-#### Edit Project
+Once there you have the options to rename or delete your project.
 
-When you are inside your project, you have the options to rename or delete your project by clicking to the equivalent buttons.
+![rename delete project](../images/project/update.png)
 
-![rename delete project](https://github.com/user-attachments/assets/3d18082a-5790-43ec-8ad4-df1deeaa6d3a)
+### Using the CLI
 
-### In the CLI:
-
-You can create, read, update, or delete projects using the CLI. Refer to the [Project API](../api/project.md) documentation for the data model.
+You can create, read, update, or delete projects using the [CLI](../cli.md). Refer to the [Project API documentation](../api/project.md) for details on the data model and available endpoints.
 
 ### Project Permissions
 
-When a user creates a project, they are automatically assigned the Owner role for that project.
-Users with the owner role can edit, rename and delete a project.
-
-## Related Documentation
-[Project API](../api/project.md)
-[Perses CLI](../cli.md)
+When a user creates a project, they are automatically assigned the Owner role for it.
+Owners have full control over the project to edit, rename or delete it.
