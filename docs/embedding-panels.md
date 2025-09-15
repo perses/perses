@@ -195,7 +195,7 @@ export default App;
 
 You should now see a Perses panel in your app's UI:
 
-![embedded_panel](./images/embedded-panel-screenshot.png)
+![embedded_panel](./images/embedded-panel.png)
 
 ## Definitions by provider
 

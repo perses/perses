@@ -2,7 +2,7 @@
 
 A **variable** in Perses is a dynamic configuration element that allows you to create interactive and reusable dashboards. Variables act as parameters that can be modified by users to filter data, change query scopes, or customize dashboard views without editing the underlying dashboard configuration.
 
-![variables](https://github.com/user-attachments/assets/62d5d94b-7ceb-4bfc-ad38-a577a724b419)
+![variables](../images/variable_dropdown.png)
 
 ## Variable types
 
