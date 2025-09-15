@@ -38,7 +38,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var pluginSpecAsMapInterface map[string]interface{}
+	var pluginSpecAsMapInterface map[string]any
 	if err := json.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestUnmarshalYAMLLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var pluginSpecAsMapInterface map[string]interface{}
+	var pluginSpecAsMapInterface map[string]any
 	if err := yaml.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
 		t.Fatal(err)
 	}

@@ -229,7 +229,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 		return err
 	}
 	var sqlQuery string
-	var args []interface{}
+	var args []any
 	var queryGeneratorErr error
 	if !isExist {
 		sqlQuery, args, queryGeneratorErr = d.generateInsertQuery(entity)
@@ -290,7 +290,7 @@ func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([]json.Ra
 	return nil, fmt.Errorf("raw metadata query not implemented")
 }
 
-func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
+func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)
 	// to avoid any miss usage when using this method, slice should be a pointer to a slice.

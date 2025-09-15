@@ -25,7 +25,7 @@ import (
 )
 
 // simple wrapper to json.Marshal for testing, to ensure the test gets aborted in case of error
-func JSONMarshalStrict(obj interface{}) []byte {
+func JSONMarshalStrict(obj any) []byte {
 	data, err := json.Marshal(obj)
 	if err != nil {
 		panic(err)
@@ -34,19 +34,19 @@ func JSONMarshalStrict(obj interface{}) []byte {
 }
 
 // simple wrapper to json.Unmarshal for testing, to ensure the test gets aborted in case of error
-func JSONUnmarshal(src []byte, dst interface{}) {
+func JSONUnmarshal(src []byte, dst any) {
 	if err := json.Unmarshal(src, dst); err != nil {
 		panic(err)
 	}
 }
 
-func JSONUnmarshalFromFile(filepath string, dst interface{}) {
+func JSONUnmarshalFromFile(filepath string, dst any) {
 	data := ReadFile(filepath)
 	JSONUnmarshal(data, dst)
 }
 
 // simple wrapper to yaml.Unmarshal for testing, to ensure the test gets aborted in case of error
-func YAMLMarshalStrict(obj interface{}) []byte {
+func YAMLMarshalStrict(obj any) []byte {
 	data, err := yaml.Marshal(obj)
 	if err != nil {
 		panic(err)
@@ -54,13 +54,13 @@ func YAMLMarshalStrict(obj interface{}) []byte {
 	return data
 }
 
-func YAMLUnmarshal(src []byte, dst interface{}) {
+func YAMLUnmarshal(src []byte, dst any) {
 	if err := yaml.Unmarshal(src, dst); err != nil {
 		panic(err)
 	}
 }
 
-func YAMLUnmarshalFromFile(filepath string, dst interface{}) {
+func YAMLUnmarshalFromFile(filepath string, dst any) {
 	data := ReadFile(filepath)
 	YAMLUnmarshal(data, dst)
 }

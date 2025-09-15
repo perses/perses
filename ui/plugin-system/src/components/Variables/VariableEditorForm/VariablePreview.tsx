@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import { Alert, Box, Card, Chip, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
 import { InfoTooltip, useSnackbar } from '@perses-dev/components';
-import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { ListVariableDefinition } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../../constants';
@@ -24,13 +23,12 @@ const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 interface VariablePreviewProps {
   values?: string[];
-  onRefresh?: () => void;
   isLoading?: boolean;
   error?: string;
 }
 
 export function VariablePreview(props: VariablePreviewProps): ReactElement {
-  const { values, onRefresh, isLoading, error } = props;
+  const { values, isLoading, error } = props;
   const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
   const { infoSnackbar } = useSnackbar();
   const showAll = (): void => {
@@ -46,13 +44,6 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
     <Box>
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
         <Typography variant="h4">Preview Values</Typography>
-        {onRefresh && (
-          <InfoTooltip description={TOOLTIP_TEXT.refreshVariableValues}>
-            <IconButton onClick={onRefresh} size="small">
-              <Refresh />
-            </IconButton>
-          </InfoTooltip>
-        )}
         <InfoTooltip description={TOOLTIP_TEXT.copyVariableValues}>
           <IconButton
             onClick={async () => {
@@ -86,20 +77,17 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
 
 interface VariableListPreviewProps {
   definition: ListVariableDefinition;
-  onRefresh: () => void;
 }
 
 export function VariableListPreview(props: VariableListPreviewProps): ReactElement {
-  const { definition, onRefresh } = props;
+  const { definition } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
 
-  return (
-    <VariablePreview
-      values={data?.map((val) => val.value) || []}
-      onRefresh={onRefresh}
-      isLoading={isFetching}
-      error={errorMessage}
-    />
+  const variablePreview = useMemo(
+    () => <VariablePreview values={data?.map((val) => val.value) || []} isLoading={isFetching} error={errorMessage} />,
+    [errorMessage, isFetching, data]
   );
+
+  return variablePreview;
 }

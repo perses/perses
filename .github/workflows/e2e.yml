@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v5
-      - uses: perses/github-actions@v0.10.0
+      - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -45,8 +45,6 @@ jobs:
           # Playwright. Useful for understanding if something failing there
           # breaks the tests.
           DEBUG: pw:webserver
-          HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
-          HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,3 +52,9 @@ jobs:
           path: |
             ui/e2e/playwright-report/
             ui/e2e/test-results/
+      - name: Create tarballs of all packages
+        run: cd ./ui && npm pack -ws
+      - name: Replace Perses dependencies in examples folder with built packages
+        run: for example in ./examples/*/; do (cd "$example"; npm install ../../ui/perses-dev-*.tgz); done
+      - name: Verify all examples build successfully
+        run: cd ./examples && ./test.sh

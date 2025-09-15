@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, CardHeaderProps, Stack, Typography } from '@mui/material';
+import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
 import { Link } from '@perses-dev/core';
 import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
+import { PanelOptions } from './Panel';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
@@ -32,6 +33,8 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
   pluginActions?: ReactNode[]; // Add pluginActions prop
+  showIcons: PanelOptions['showIcons'];
+  dimension?: { width: number };
 }
 
 export function PanelHeader({
@@ -45,7 +48,9 @@ export function PanelHeader({
   sx,
   extra,
   pluginActions,
+  showIcons,
   viewQueriesHandler,
+  dimension,
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -53,6 +58,15 @@ export function PanelHeader({
 
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
+
+  const textRef = useRef<HTMLDivElement>(null);
+  const [isEllipsisActive, setIsEllipsisActive] = useState(false);
+
+  useEffect(() => {
+    if (textRef.current && dimension?.width) {
+      setIsEllipsisActive(textRef.current.scrollWidth > textRef.current.clientWidth);
+    }
+  }, [title, dimension?.width]);
 
   return (
     <CardHeader
@@ -63,21 +77,24 @@ export function PanelHeader({
       disableTypography
       title={
         <Stack direction="row" alignItems="center" height="var(--panel-header-height, 30px)">
-          <Typography
-            id={titleElementId}
-            variant="subtitle1"
-            sx={{
-              // `minHeight` guarantees that the header has the correct height
-              // when there is no title (i.e. in the preview)
-              lineHeight: '24px',
-              minHeight: '26px',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {title}
-          </Typography>
+          <Tooltip title={title} disableHoverListener={!isEllipsisActive}>
+            <Typography
+              id={titleElementId}
+              variant="subtitle1"
+              ref={textRef}
+              sx={{
+                // `minHeight` guarantees that the header has the correct height
+                // when there is no title (i.e. in the preview)
+                lineHeight: '24px',
+                minHeight: '26px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {title}
+            </Typography>
+          </Tooltip>
           <PanelActions
             title={title}
             description={description}
@@ -89,6 +106,7 @@ export function PanelHeader({
             extra={extra}
             queryResults={queryResults}
             pluginActions={pluginActions}
+            showIcons={showIcons}
           />
         </Stack>
       }

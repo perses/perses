@@ -19,7 +19,7 @@ Perses is first and foremost a dashboard tool that you can use to display a vari
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-![img.png](https://perses.dev/assets/images/perses_overview.gif)
+![img.png](https://perses.dev/assets/images/home/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 
@@ -44,7 +44,9 @@ We are providing an online demo available at **https://demo.perses.dev**, where 
    * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/cli.md)
    * Two SDKs (in Golang and in Cuelang) are available for coding dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
      These SDKs will likely evolve based on the feedback we receive. However, changes are expected to focus on adding utility functions rather than introducing breaking changes.
-3. *Coming soon!* A revamped plugin architecture will enable the externalization of both plugin loading and implementation.
+3. A plugin architecture:
+   * Enables the externalization of both plugin loading and implementation.
+   * The core plugins are maintained in [perses/plugins](https://github.com/perses/plugins) repository.
 
 ## What's next
 

@@ -153,7 +153,7 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiIn
 		}
 		return result, nil
 	}
-	return []interface{}{}, nil
+	return []any{}, nil
 }
 
 func (t *toolbox[T, K, V]) metadataOrFullList(parameters apiInterface.Parameters, query V) (any, error) {

@@ -36,7 +36,7 @@ func (edsb *EphemeralDashboardSpecBase) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (edsb *EphemeralDashboardSpecBase) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (edsb *EphemeralDashboardSpecBase) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp EphemeralDashboardSpecBase
 	type plain EphemeralDashboardSpecBase
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -73,7 +73,7 @@ func (eds *EphemeralDashboardSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (eds *EphemeralDashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (eds *EphemeralDashboardSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	// Call UnmarshalYAML methods of the embedded structs
 	var ephemeralDashboardSpecBaseTmp EphemeralDashboardSpecBase
 	if err := ephemeralDashboardSpecBaseTmp.UnmarshalYAML(unmarshal); err != nil {
@@ -106,7 +106,7 @@ func (e *EphemeralDashboard) GetKind() string {
 	return string(e.Kind)
 }
 
-func (e *EphemeralDashboard) GetSpec() interface{} {
+func (e *EphemeralDashboard) GetSpec() any {
 	return e.Spec
 }
 
@@ -123,7 +123,7 @@ func (e *EphemeralDashboard) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (e *EphemeralDashboard) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (e *EphemeralDashboard) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp EphemeralDashboard
 	type plain EphemeralDashboard
 	if err := unmarshal((*plain)(&tmp)); err != nil {

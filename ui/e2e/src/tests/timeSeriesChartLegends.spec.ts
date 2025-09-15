@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import happoPlaywright from 'happo-playwright';
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
@@ -22,17 +21,8 @@ test.use({
 });
 
 test.describe('Dashboard: Time Series Chart Legends', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   ['bottom table', 'right table', 'bottom list', 'right list'].forEach((panelName) => {
     test(`on mouse over ${panelName} legend item highlights the associated line`, async ({
-      page,
       dashboardPage,
       mockNow,
     }) => {
@@ -50,7 +40,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/-/healthy',
                       },
@@ -59,7 +49,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/api/v1/alerts',
                       },
@@ -68,7 +58,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                     {
                       metric: {
                         __name__: 'prometheus_http_requests_total',
-                        instance: 'ddemo.do.prometheus.io:9090',
+                        instance: 'demo.do.prometheus.io:9090',
                         job: 'prometheus',
                         handler: '/api/v1/labels',
                       },
@@ -84,9 +74,8 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
         ],
       });
 
-      await dashboardPage.forEachTheme(async (themeName) => {
+      await dashboardPage.forEachTheme(async () => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
-        await timeSeriesPanel.container.scrollIntoViewIfNeeded();
         await timeSeriesPanel.isLoaded();
         await waitForStableCanvas(timeSeriesPanel.canvas);
 
@@ -94,11 +83,6 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
 
         const legendItems = timeSeriesPanel.container.getByRole(legendItemRole);
         await legendItems.nth(2).hover();
-
-        await happoPlaywright.screenshot(page, timeSeriesPanel.parent, {
-          component: 'Time Series Chart Legends',
-          variant: `${panelName} item hover [${themeName}]`,
-        });
       });
     });
   });

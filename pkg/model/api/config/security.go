@@ -95,12 +95,12 @@ func (s *SameSite) UnmarshalText(text []byte) error {
 }
 
 // MarshalYAML implements the yaml.Marshaler interface.
-func (s SameSite) MarshalYAML() (interface{}, error) {
+func (s SameSite) MarshalYAML() (any, error) {
 	return s.String(), nil
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface.
-func (s *SameSite) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *SameSite) UnmarshalYAML(unmarshal func(any) error) error {
 	var str string
 	if err := unmarshal(&str); err != nil {
 		return err

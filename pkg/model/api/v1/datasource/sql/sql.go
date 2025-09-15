@@ -74,7 +74,7 @@ func (p *PostgresConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PostgresConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *PostgresConfig) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp PostgresConfig
 	type plain PostgresConfig
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -131,7 +131,7 @@ func (s *Config) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *Config) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Config
 	type plain Config
 	if err := unmarshal((*plain)(&tmp)); err != nil {

@@ -56,7 +56,7 @@ func (d *dao) Upsert(entity modelAPI.Entity) error {
 func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	return d.client.Get(kind, metadata, entity)
 }
-func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
+func (d *dao) Query(query databaseModel.Query, slice any) error {
 	return d.client.Query(query, slice)
 }
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
@@ -71,7 +71,7 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 	result := make([]json.RawMessage, 0, len(raws))
 	for _, raw := range raws {
 		metadata := gjson.GetBytes(raw, "metadata").String()
-		result = append(result, []byte(fmt.Sprintf(`{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata)))
+		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
 	return result, nil
 }

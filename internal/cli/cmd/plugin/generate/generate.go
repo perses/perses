@@ -242,7 +242,7 @@ func (o *generateOptions) Execute() error {
 		}
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"ModuleName":              GetKebabCase(o.pluginModuleName),
 		"ModulePascalName":        GetPascalCase(o.pluginModuleName),
 		"ModuleOrg":               GetKebabCase(o.pluginModuleOrg),

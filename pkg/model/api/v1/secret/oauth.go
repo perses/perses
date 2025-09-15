@@ -77,7 +77,7 @@ func (o *OAuth) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o *OAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *OAuth) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp OAuth
 	type plain OAuth
 	if err := unmarshal((*plain)(&tmp)); err != nil {

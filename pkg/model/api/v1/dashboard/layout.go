@@ -44,7 +44,7 @@ func (k *LayoutKind) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (k *LayoutKind) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (k *LayoutKind) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp LayoutKind
 	type plain LayoutKind
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -80,21 +80,23 @@ type GridLayoutCollapse struct {
 }
 
 type GridLayoutDisplay struct {
-	Title    string              `json:"title" yaml:"title"`
+	Title string `json:"title" yaml:"title"`
+	// If Collapse is defined, the grid layout will be rendered in a collapsible group.
+	// If not defined, the grid layout will be rendered expanded without the ability to collapse it.
 	Collapse *GridLayoutCollapse `json:"collapse,omitempty" yaml:"collapse,omitempty"`
 }
 
 type GridLayoutSpec struct {
-	Display *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
-	Items   []GridItem         `json:"items" yaml:"items"`
+	Display        *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+	Items          []GridItem         `json:"items" yaml:"items"`
+	RepeatVariable string             `json:"repeatVariable,omitempty" yaml:"repeatVariable,omitempty"`
 }
 
-type LayoutSpec interface {
-}
+type LayoutSpec any
 
 type tmpDashboardLayout struct {
-	Kind LayoutKind             `json:"kind" yaml:"kind"`
-	Spec map[string]interface{} `json:"spec" yaml:"spec"`
+	Kind LayoutKind     `json:"kind" yaml:"kind"`
+	Spec map[string]any `json:"spec" yaml:"spec"`
 }
 
 type Layout struct {
@@ -105,17 +107,17 @@ type Layout struct {
 }
 
 func (d *Layout) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(panel interface{}) error {
+	jsonUnmarshalFunc := func(panel any) error {
 		return json.Unmarshal(data, panel)
 	}
 	return d.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (d *Layout) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *Layout) UnmarshalYAML(unmarshal func(any) error) error {
 	return d.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (d *Layout) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (d *Layout) unmarshal(unmarshal func(any) error, staticMarshal func(any) ([]byte, error), staticUnmarshal func([]byte, any) error) error {
 	var tmpLayout tmpDashboardLayout
 	if err := unmarshal(&tmpLayout); err != nil {
 		return err
@@ -130,7 +132,7 @@ func (d *Layout) unmarshal(unmarshal func(interface{}) error, staticMarshal func
 	if err != nil {
 		return err
 	}
-	var spec interface{}
+	var spec any
 	switch tmpLayout.Kind {
 	case KindGridLayout:
 		spec = &GridLayoutSpec{}

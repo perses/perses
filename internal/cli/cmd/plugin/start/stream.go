@@ -26,7 +26,7 @@ type prefixedStream struct {
 	prefix string
 	buff   *bytes.Buffer
 	writer io.Writer
-	color  func(a ...interface{}) string
+	color  func(a ...any) string
 }
 
 func newPrefixedStream(prefix string, writer io.Writer, c *color.Color) *prefixedStream {

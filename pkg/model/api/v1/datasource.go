@@ -68,7 +68,7 @@ func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *GlobalDatasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *GlobalDatasource) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp GlobalDatasource
 	type plain GlobalDatasource
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -103,7 +103,7 @@ func (d *GlobalDatasource) GetDatasourceSpec() DatasourceSpec {
 	return d.Spec
 }
 
-func (d *GlobalDatasource) GetSpec() interface{} {
+func (d *GlobalDatasource) GetSpec() any {
 	return d.Spec
 }
 
@@ -129,7 +129,7 @@ func (d *Datasource) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *Datasource) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *Datasource) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Datasource
 	type plain Datasource
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -164,6 +164,6 @@ func (d *Datasource) GetDatasourceSpec() DatasourceSpec {
 	return d.Spec
 }
 
-func (d *Datasource) GetSpec() interface{} {
+func (d *Datasource) GetSpec() any {
 	return d.Spec
 }

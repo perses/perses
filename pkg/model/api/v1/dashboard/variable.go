@@ -53,7 +53,7 @@ func (v *TextVariableSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *TextVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *TextVariableSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp TextVariableSpec
 	type plain TextVariableSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -101,7 +101,7 @@ func (v *ListVariableSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *ListVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *ListVariableSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp ListVariableSpec
 	type plain ListVariableSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -131,21 +131,21 @@ type Variable struct {
 
 type tmpVariable struct {
 	Kind variable.Kind `json:"kind" yaml:"kind"`
-	Spec interface{}   `json:"spec" yaml:"spec"`
+	Spec any           `json:"spec" yaml:"spec"`
 }
 
 func (v *Variable) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(variable interface{}) error {
+	jsonUnmarshalFunc := func(variable any) error {
 		return json.Unmarshal(data, variable)
 	}
 	return v.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (v *Variable) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *Variable) UnmarshalYAML(unmarshal func(any) error) error {
 	return v.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (v *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (v *Variable) unmarshal(unmarshal func(any) error, staticMarshal func(any) ([]byte, error), staticUnmarshal func([]byte, any) error) error {
 	var tmp tmpVariable
 	if err := unmarshal(&tmp); err != nil {
 		return err

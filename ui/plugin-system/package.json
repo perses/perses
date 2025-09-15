@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.52.0-beta.5",
+  "version": "0.52.0",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -28,15 +28,15 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^0.18.0",
-    "@perses-dev/components": "0.52.0-beta.5",
-    "@perses-dev/core": "0.52.0-beta.5",
+    "@module-federation/enhanced": "^0.19.1",
+    "@perses-dev/components": "0.52.0",
+    "@perses-dev/core": "0.52.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "immer": "^10.1.1",
     "react-hook-form": "^7.46.1",
     "use-immer": "^0.11.0",
-    "use-query-params": "^2.1.2",
+    "use-query-params": "^2.2.1",
     "zod": "^3.22.2"
   },
   "peerDependencies": {

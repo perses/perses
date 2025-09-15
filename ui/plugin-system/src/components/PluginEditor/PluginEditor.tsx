@@ -14,11 +14,11 @@
 import { Box, Button } from '@mui/material';
 import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { forwardRef, ReactElement, useCallback, useImperativeHandle, useMemo, useState } from 'react';
 import { UnknownSpec } from '@perses-dev/core';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
-import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
+import { PluginEditorProps, PluginEditorRef, usePluginEditor } from './plugin-editor-api';
 
 /**
  * A combination `PluginKindSelect` and `PluginSpecEditor` component. This is meant for editing the `plugin` property
@@ -28,24 +28,34 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  * previous plugin's spec state. If you just want this behavior, but in a different UI layout from this, try the
  * `usePluginEditor` hook that powers this component.
  */
-export function PluginEditor(props: PluginEditorProps): ReactElement {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+
+export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((props, ref): ReactElement => {
+  const {
+    value,
+    withRunQueryButton = true,
+    pluginTypes,
+    pluginKindLabel,
+    onChange: _,
+    isReadonly,
+    postExecuteRunQuery: refresh,
+    ...others
+  } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
 
   /* 
-    We could technically merge the watchedQuery, watchedOtherSpecs into a single watched-object,
-    because at the end of the day, they are all specs.
-    However, let's have them separated to keep the code simple and readable.
-    Reason: Only Query string field is common between all of them. Other specs may be different
-    Example: Legend, and MinSteps
-   */
+     We could technically merge the watchedQuery, watchedOtherSpecs into a single watched-object,
+     because at the end of the day, they are all specs.
+     However, let's have them separated to keep the code simple and readable.
+     Reason: Only Query string field is common between all of them. Other specs may be different
+     Example: Legend, and MinSteps
+    */
   const [watchedQuery, setWatchQuery] = useState<string>(value.spec['query'] as string);
   const [watchedOtherSpecs, setWatchOtherSpecs] = useState<UnknownSpec>(value.spec);
 
   const runQueryHandler = useCallback((): void => {
     onSpecChange({ ...value.spec, ...watchedOtherSpecs, query: watchedQuery });
-  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs]);
+    refresh?.();
+  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs, refresh]);
 
   const queryHandlerSettings = useMemo(() => {
     return withRunQueryButton
@@ -61,31 +71,36 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
       : undefined;
   }, [withRunQueryButton]);
 
+  useImperativeHandle(ref, () => ({ flushChanges: runQueryHandler }));
+
   return (
     <Box {...others}>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1,
+          mb: 1,
+        }}
+      >
         <PluginKindSelect
           fullWidth={false}
-          sx={{ mb: 2, minWidth: 120 }}
+          sx={{ minWidth: 120 }}
           margin="dense"
           label={pluginKindLabel}
           pluginTypes={pluginTypes}
           disabled={isLoading}
           value={pendingSelection ? pendingSelection : value.selection}
-          InputProps={{ readOnly: isReadonly }}
+          slotProps={{ input: { readOnly: isReadonly } }}
           error={!!error}
           helperText={error?.message}
           onChange={onSelectionChange}
         />
 
         {withRunQueryButton && !isLoading && (
-          <Button
-            data-testid="run_query_button"
-            variant="contained"
-            sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
-            startIcon={<Reload />}
-            onClick={runQueryHandler}
-          >
+          <Button data-testid="run_query_button" variant="contained" startIcon={<Reload />} onClick={runQueryHandler}>
             Run Query
           </Button>
         )}
@@ -102,4 +117,6 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
       </ErrorBoundary>
     </Box>
   );
-}
+});
+
+PluginEditor.displayName = 'PluginEditor';
