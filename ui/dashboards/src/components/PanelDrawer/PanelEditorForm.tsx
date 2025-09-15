@@ -30,6 +30,7 @@ import {
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDashboard, useListPanelGroups } from '../../context';
+import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEditorProvider';
 import { PanelPreview } from './PanelPreview';
 import { usePanelEditor } from './usePanelEditor';
 
@@ -129,153 +130,156 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   return (
     <TimeRangeProvider timeRange={timeRange}>
       <FormProvider {...form}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: (theme) => theme.spacing(1, 2),
-            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="h2">{titleAction} Panel</Typography>
-          <Stack direction="row" spacing={1} marginLeft="auto">
-            <Button variant="contained" disabled={!form.formState.isValid} onClick={handleSubmit}>
-              {submitText}
-            </Button>
-            <Button color="secondary" variant="outlined" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </Stack>
-        </Box>
-        <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <Controller
-                control={form.control}
-                name="panelDefinition.spec.display.name"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label="Name"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    value={watchedName ?? ''}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setName(event.target.value);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                control={form.control}
-                name="groupId"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    select
-                    {...field}
-                    required
-                    fullWidth
-                    label="Group"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                    }}
-                  >
-                    {panelGroups.map((panelGroup, index) => (
-                      <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                        {panelGroup.title ?? `Group ${index + 1}`}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item xs={8}>
-              <Controller
-                control={form.control}
-                name="panelDefinition.spec.display.description"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Description"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    value={watchedDescription ?? ''}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setDescription(event.target.value);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                control={form.control}
-                name="panelDefinition.spec.plugin.kind"
-                render={({ field, fieldState }) => (
-                  <PluginKindSelect
-                    {...field}
-                    pluginTypes={['Panel']}
-                    required
-                    fullWidth
-                    label="Type"
-                    disabled={pluginEditor.isLoading}
-                    error={!!pluginEditor.error || !!fieldState.error}
-                    helperText={pluginEditor.error?.message ?? fieldState.error?.message}
-                    value={{ type: 'Panel', kind: watchedPluginKind }}
-                    onChange={(event) => {
-                      field.onChange(event.kind);
-                      pluginEditor.onSelectionChange(event);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h4" marginBottom={1}>
-                Preview
-              </Typography>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <PanelPreview panelDefinition={panelDefinition} />
-              </ErrorBoundary>
-            </Grid>
-            <Grid item xs={12}>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <PanelSpecEditor
-                  ref={pluginEditorRef}
+        <PanelEditorProvider>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: (theme) => theme.spacing(1, 2),
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h2">{titleAction} Panel</Typography>
+            <Stack direction="row" spacing={1} marginLeft="auto">
+              <Button variant="contained" disabled={!form.formState.isValid} onClick={handleSubmit}>
+                {submitText}
+              </Button>
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </Stack>
+          </Box>
+          <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
+            <Grid container spacing={2}>
+              <Grid item xs={8}>
+                <Controller
                   control={form.control}
-                  panelDefinition={panelDefinition}
-                  onJSONChange={handlePanelDefinitionChange}
-                  onQueriesChange={(queries) => {
-                    setQueries(queries);
-                  }}
-                  onPluginSpecChange={(spec) => {
-                    pluginEditor.onSpecChange(spec);
-                  }}
+                  name="panelDefinition.spec.display.name"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      label="Name"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      value={watchedName ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event);
+                        setName(event.target.value);
+                      }}
+                    />
+                  )}
                 />
-              </ErrorBoundary>
+              </Grid>
+              <Grid item xs={4}>
+                <Controller
+                  control={form.control}
+                  name="groupId"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      select
+                      {...field}
+                      required
+                      fullWidth
+                      label="Group"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(event) => {
+                        field.onChange(event);
+                      }}
+                    >
+                      {panelGroups.map((panelGroup, index) => (
+                        <MenuItem key={panelGroup.id} value={panelGroup.id}>
+                          {panelGroup.title ?? `Group ${index + 1}`}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid item xs={8}>
+                <Controller
+                  control={form.control}
+                  name="panelDefinition.spec.display.description"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Description"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      value={watchedDescription ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event);
+                        setDescription(event.target.value);
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <Controller
+                  control={form.control}
+                  name="panelDefinition.spec.plugin.kind"
+                  render={({ field, fieldState }) => (
+                    <PluginKindSelect
+                      {...field}
+                      pluginTypes={['Panel']}
+                      required
+                      fullWidth
+                      label="Type"
+                      disabled={pluginEditor.isLoading}
+                      error={!!pluginEditor.error || !!fieldState.error}
+                      helperText={pluginEditor.error?.message ?? fieldState.error?.message}
+                      value={{ type: 'Panel', kind: watchedPluginKind }}
+                      onChange={(event) => {
+                        field.onChange(event.kind);
+                        pluginEditor.onSelectionChange(event);
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="h4" marginBottom={1}>
+                  Preview
+                </Typography>
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <PanelPreview panelDefinition={panelDefinition} />
+                </ErrorBoundary>
+              </Grid>
+              <Grid item xs={12}>
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <PanelSpecEditor
+                    ref={pluginEditorRef}
+                    control={form.control}
+                    panelDefinition={panelDefinition}
+                    onJSONChange={handlePanelDefinitionChange}
+                    onQueriesChange={(queries) => {
+                      setQueries(queries);
+                    }}
+                    onPluginSpecChange={(spec) => {
+                      pluginEditor.onSpecChange(spec);
+                    }}
+                  />
+                </ErrorBoundary>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-        <DiscardChangesConfirmationDialog
-          description="You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered."
-          isOpen={isDiscardDialogOpened}
-          onCancel={() => {
-            setDiscardDialogOpened(false);
-          }}
-          onDiscardChanges={() => {
-            setDiscardDialogOpened(false);
-            onClose();
-          }}
-        />
+          </Box>
+          <DiscardChangesConfirmationDialog
+            description="You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered."
+            isOpen={isDiscardDialogOpened}
+            onCancel={() => {
+              setDiscardDialogOpened(false);
+            }}
+            onDiscardChanges={() => {
+              setDiscardDialogOpened(false);
+              onClose();
+            }}
+          />
+        </PanelEditorProvider>
       </FormProvider>
     </TimeRangeProvider>
   );
