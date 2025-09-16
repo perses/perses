@@ -17,6 +17,8 @@ This is a list of presentations, papers, poadcasts, and other materials related 
   with **Augustin Husson**, *Perses Maintainer*, PromCon 2024.
 - [Perses: The CNCF candidate for observability visualisation](https://www.youtube.com/watch?v=7G_0TCrcVyg&t=10s),
   with **Antoine Thebaud** and **Augustin Husson**, *Perses Maintainers*, PromCon 2023.
+- [Introduction to Perses - The open dashboard tool for Prometheus (CNCF Project)](https://www.youtube.com/watch?v=4JOe9Y7GZzY&t=1s),
+  with **Saiyam Pathak** - Founder of *kubesimplify*, September 1 2025.
 
 ## Podcasts
 
