@@ -11,9 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider } from '@mui/material';
+import { Box, Divider } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { DataQueriesProvider, PluginSpecEditor, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import {
+  DataQueriesProvider,
+  PluginSpecEditor,
+  UnifiedDialog,
+  usePlugin,
+  useSuggestedStepMs,
+} from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
@@ -119,10 +125,6 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     return queryItems;
   }, [queries]);
 
-  const onCloseHandler = (): void => {
-    setOpenQueryViewer(false);
-  };
-
   return (
     <Box
       ref={ref}
@@ -131,27 +133,15 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
         height: '100%',
       }}
     >
-      <Dialog
-        fullWidth
-        PaperProps={{
-          sx: {
-            margin: '10px',
-            width: 'calc(100% - 20px)',
-          },
-        }}
+      <UnifiedDialog
         maxWidth="lg"
+        fullWidth
         open={openQueryViewer}
+        setOpenDialog={setOpenQueryViewer}
+        title="Query Viewer"
       >
-        <DialogTitle>Query Viewer</DialogTitle>
-        <DialogContent>
-          <Box sx={{ padding: '5px' }}>{queryRows}</Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={onCloseHandler} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Box sx={{ padding: '5px' }}>{queryRows}</Box>
+      </UnifiedDialog>
       <DataQueriesProvider
         definitions={definitions}
         options={{ suggestedStepMs, ...pluginQueryOptions }}
