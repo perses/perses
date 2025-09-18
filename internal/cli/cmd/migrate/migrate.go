@@ -169,9 +169,10 @@ func (o *option) Execute() error {
 
 func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
 	return o.apiClient.Migrate(&modelAPI.Migrate{
-		Input:            o.input,
-		GrafanaDashboard: grafanaDashboard,
-	}, o.useDefaultDatasource)
+		Input:                o.input,
+		GrafanaDashboard:     grafanaDashboard,
+		UseDefaultDatasource: o.useDefaultDatasource,
+	})
 }
 
 func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {

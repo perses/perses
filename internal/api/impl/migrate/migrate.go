@@ -50,15 +50,12 @@ func (e *endpoint) Migrate(ctx echo.Context) error {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 
-	// Convert default-datasource query parameter from string to bool
-	useDefaultDatasource := ctx.QueryParam("default-datasource") == "true"
-
 	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
 	grafanaDashboard := &migrate.SimplifiedDashboard{}
 	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard, useDefaultDatasource)
+	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard, body.UseDefaultDatasource)
 	if err != nil {
 		return err
 	}

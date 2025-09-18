@@ -19,8 +19,9 @@ import (
 )
 
 type Migrate struct {
-	Input            map[string]string `json:"input,omitempty"`
-	GrafanaDashboard json.RawMessage   `json:"grafanaDashboard"`
+	Input                map[string]string `json:"input,omitempty"`
+	GrafanaDashboard     json.RawMessage   `json:"grafanaDashboard"`
+	UseDefaultDatasource bool              `json:"useDefaultDatasource,omitempty"`
 }
 
 func (m *Migrate) UnmarshalJSON(data []byte) error {
