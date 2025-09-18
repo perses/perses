@@ -59,6 +59,7 @@ func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
 		Body(body).
 		Do().
 		Object(result)
+
 	return result, err
 }
 

@@ -179,7 +179,7 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
@@ -224,7 +224,7 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
@@ -242,7 +242,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 		},
 	}
 
-	panels, err := m.migratePanels(grafanaDashboard)
+	panels, err := m.migratePanels(grafanaDashboard, useDefaultDatasource)
 	if err != nil {
 		return nil, err
 	}

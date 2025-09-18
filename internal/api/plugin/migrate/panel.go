@@ -67,19 +67,19 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
 	return persesLinks
 }
 
-func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
+func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
 		if p.Type == grafanaPanelRowType {
 			for j, innerPanel := range p.Panels {
-				panel, err := m.migratePanel(innerPanel)
+				panel, err := m.migratePanel(innerPanel, useDefaultDatasource)
 				if err != nil {
 					return nil, err
 				}
 				panels[fmt.Sprintf("%d_%d", i, j)] = panel
 			}
 		} else {
-			panel, err := m.migratePanel(p)
+			panel, err := m.migratePanel(p, useDefaultDatasource)
 			if err != nil {
 				return nil, err
 			}
@@ -89,7 +89,7 @@ func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard)
 	return panels, nil
 }
 
-func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
+func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasource bool) (*v1.Panel, error) {
 	result := &v1.Panel{
 		Kind: string(plugin.KindPanel),
 		Spec: v1.PanelSpec{
@@ -123,6 +123,19 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel) (*v1.Panel, error) 
 	}
 	m.migrateQueries(grafanaPanel.Targets, result)
 	result.Spec.Links = convertGrafanaLinksToPerses(grafanaPanel.Links)
+
+	// Apply datasource cleaning if the flag is set
+	if useDefaultDatasource {
+		// Clean datasource references on all queries in this panel
+		for _, query := range result.Spec.Queries {
+			if pluginSpec, ok := query.Spec.Plugin.Spec.(map[string]any); ok {
+				if datasourceRef, ok := pluginSpec["datasource"].(map[string]any); ok {
+					// Remove explicit datasource references to use default datasource
+					delete(datasourceRef, "name")
+				}
+			}
+		}
+	}
 
 	return result, nil
 }

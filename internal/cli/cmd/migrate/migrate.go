@@ -73,16 +73,17 @@ type option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.OutputOption
-	writer          io.Writer
-	errWriter       io.Writer
-	rowInput        []string
-	input           map[string]string
-	project         string
-	pluginPath      string
-	online          bool
-	mig             migrate.Migration
-	apiClient       api.ClientInterface
-	migrationFormat migrationFormat
+	writer               io.Writer
+	errWriter            io.Writer
+	rowInput             []string
+	input                map[string]string
+	project              string
+	pluginPath           string
+	online               bool
+	useDefaultDatasource bool
+	mig                  migrate.Migration
+	apiClient            api.ClientInterface
+	migrationFormat      migrationFormat
 }
 
 func (o *option) Complete(args []string) error {
@@ -135,6 +136,10 @@ func (o *option) Validate() error {
 	if o.migrationFormat != nativeFormat && o.migrationFormat != customResourceFormat && o.migrationFormat != customResourceShortFormat {
 		return fmt.Errorf("invalid value for flag --format: %s", o.migrationFormat)
 	}
+
+	if !o.online && o.mig == nil {
+		return fmt.Errorf("offline migration requires --plugin.path to be specified, or use --online for server-side migration")
+	}
 	return nil
 }
 
@@ -154,6 +159,7 @@ func (o *option) Execute() error {
 		return err
 	}
 	persesDashboard.Metadata.Project = o.project
+
 	if o.migrationFormat == customResourceFormat || o.migrationFormat == customResourceShortFormat {
 		customResource := createCustomResource(persesDashboard)
 		return output.Handle(o.writer, o.Output, customResource)
@@ -163,8 +169,9 @@ func (o *option) Execute() error {
 
 func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
 	return o.apiClient.Migrate(&modelAPI.Migrate{
-		Input:            o.input,
-		GrafanaDashboard: grafanaDashboard,
+		Input:                o.input,
+		GrafanaDashboard:     grafanaDashboard,
+		UseDefaultDatasource: o.useDefaultDatasource,
 	})
 }
 
@@ -174,7 +181,7 @@ func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Da
 	if err := json.Unmarshal(rawGrafanaDashboard, dash); err != nil {
 		return nil, err
 	}
-	return o.mig.Migrate(dash)
+	return o.mig.Migrate(dash, o.useDefaultDatasource)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -203,7 +210,8 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	opt.MarkFileFlagAsMandatory(cmd)
 	cmd.Flags().StringVar((*string)(&o.migrationFormat), "format", string(nativeFormat), "The format of the migration. Can be 'native' or 'custom-resource' or shorter 'cr'.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
-	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
+	cmd.Flags().BoolVar(&o.online, "online", false, "When enabled, it can request the API to use it to perform the migration")
+	cmd.Flags().BoolVar(&o.useDefaultDatasource, "use-default-datasource", false, "When enabled, the default Perses datasource will be used for all panels. This will remove any reference to a specific datasource in the migrated dashboard.")
 	cmd.Flags().StringVar(&o.project, "project", "", "The project to use for the migration. If not set, then the field 'project' in the dashboard will not be set. When the format 'cr' is used, the project will be set to the namespace of the custom resource.")
 	// When "online" flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.
 	// So no need to use / load the schemas with the CLI.
