@@ -56,18 +56,14 @@ func (c *client) V1() v1.ClientInterface {
 
 func (c *client) Migrate(body *api.Migrate, useDefaultDatasource bool) (*modelV1.Dashboard, error) {
 	result := &modelV1.Dashboard{}
-	request := c.restClient.Post().
+	err := c.restClient.Post().
 		APIVersion("").
 		Resource("migrate").
-		Body(body)
+		Body(body).
+		Query(&migrateQuery{defaultDatasource: useDefaultDatasource}).
+		Do().
+		Object(result)
 
-	queryValues := migrateQuery{
-		defaultDatasource: useDefaultDatasource,
-	}
-
-	request = request.Query(&queryValues)
-
-	err := request.Do().Object(result)
 	return result, err
 }
 
