@@ -21,6 +21,7 @@ const resource = 'migrate';
 export interface MigrateBodyRequest {
   input?: Record<string, string>;
   grafanaDashboard: Record<string, unknown>;
+  useDefaultDatasource?: boolean;
 }
 
 export function useMigrate(): UseMutationResult<DashboardResource, StatusError, MigrateBodyRequest> {
@@ -33,7 +34,7 @@ export function useMigrate(): UseMutationResult<DashboardResource, StatusError, 
         headers: HTTPHeader,
         body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${JSON.stringify(
           body.grafanaDashboard
-        )}}`,
+        )}, "useDefaultDatasource": ${body.useDefaultDatasource ? 'true' : 'false'}}`,
       });
     },
   });

@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Autocomplete, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Autocomplete,
+  Button,
+  CircularProgress,
+  Stack,
+  TextField,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material';
 import { ReactElement, useState } from 'react';
 import Import from 'mdi-material-ui/Import';
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +58,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
+  const [useDefaultDatasource, setUseDefaultDatasource] = useState<boolean>(false);
   const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
@@ -100,16 +111,32 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           structure.
         </Typography>
       </Alert>
-      <Button
-        variant="contained"
-        disabled={migrateMutation.isPending}
-        startIcon={<AutoFix />}
-        onClick={() => {
-          migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: dashboard ?? {} });
-        }}
-      >
-        Migrate
-      </Button>
+      <Stack direction="row" alignItems="center" gap={2} flexWrap="wrap">
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={useDefaultDatasource}
+              onChange={(e) => setUseDefaultDatasource(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Use default datasource in Perses"
+        />
+        <Button
+          variant="contained"
+          disabled={migrateMutation.isPending}
+          startIcon={<AutoFix />}
+          onClick={() => {
+            migrateMutation.mutate({
+              input: grafanaInput,
+              grafanaDashboard: dashboard ?? {},
+              useDefaultDatasource: useDefaultDatasource,
+            });
+          }}
+        >
+          Migrate
+        </Button>
+      </Stack>
       {migrateMutation.isPending && <CircularProgress sx={{ alignSelf: 'center' }} />}
       {migrateMutation.isError && (
         <Alert variant="outlined" severity="error">
