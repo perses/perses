@@ -111,7 +111,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           structure.
         </Typography>
       </Alert>
-      <Stack direction="row" alignItems="center" gap={2} flexWrap="wrap">
+      <Stack direction="column" gap={1} width="100%">
         <FormControlLabel
           control={
             <Checkbox
@@ -120,9 +120,10 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
               color="primary"
             />
           }
-          label="Use default datasource in Perses"
+          label="Select this box to use the default datasource for all the panels in the migrated dashboard"
         />
         <Button
+          fullWidth
           variant="contained"
           disabled={migrateMutation.isPending}
           startIcon={<AutoFix />}
@@ -166,10 +167,12 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
               })}
             />
             <Button
+              fullWidth
               variant="contained"
               disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
+              sx={{ alignSelf: 'stretch' }}
             >
               Import
             </Button>
