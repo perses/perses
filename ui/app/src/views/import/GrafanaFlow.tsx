@@ -120,7 +120,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
               color="primary"
             />
           }
-          label="Select this box to use the default datasource for all the panels in the migrated dashboard"
+          label="Use default datasource in Perses"
         />
         <Button
           fullWidth
