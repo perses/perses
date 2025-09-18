@@ -18,7 +18,7 @@ import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 import { PluginLoaderComponent } from './PluginLoaderComponent';
 import * as PluginRuntime from './PluginRuntime';
 
-global.fetch = jest.fn(() => Promise.resolve({ ok: true } as Response));
+globalThis.fetch = jest.fn(() => Promise.resolve({ ok: true } as Response));
 
 jest.mock('@module-federation/enhanced/runtime', () => ({
   init: jest.fn(() => ({
