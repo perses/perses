@@ -15,6 +15,7 @@ package api
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/perses/perses/pkg/client/api/auth"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
@@ -60,20 +61,24 @@ func (c *client) Migrate(body *api.Migrate, useDefaultDatasource bool) (*modelV1
 		Resource("migrate").
 		Body(body)
 
-	if useDefaultDatasource {
-		query := url.Values{}
-		query.Set("default-datasource", "true")
-		request = request.Query(queryValues(query))
+	queryValues := migrateQuery{
+		defaultDatasource: useDefaultDatasource,
 	}
+
+	request = request.Query(&queryValues)
 
 	err := request.Do().Object(result)
 	return result, err
 }
 
-type queryValues url.Values
+type migrateQuery struct {
+	defaultDatasource bool
+}
 
-func (q queryValues) GetValues() url.Values {
-	return url.Values(q)
+func (q *migrateQuery) GetValues() url.Values {
+	return url.Values{
+		"default-datasource": []string{strconv.FormatBool(q.defaultDatasource)},
+	}
 }
 
 func (c *client) Validate() validate.Interface {
