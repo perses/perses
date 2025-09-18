@@ -61,23 +61,19 @@ func (c *client) Migrate(body *api.Migrate, useDefaultDatasource bool) (*modelV1
 		Body(body)
 
 	if useDefaultDatasource {
-		request = request.Query(&migrateQuery{values: map[string][]string{"default-datasource": {"true"}}})
+		query := url.Values{}
+		query.Set("default-datasource", "true")
+		request = request.Query(queryValues(query))
 	}
 
 	err := request.Do().Object(result)
 	return result, err
 }
 
-type migrateQuery struct {
-	values map[string][]string
-}
+type queryValues url.Values
 
-func (q *migrateQuery) GetValues() url.Values {
-	result := make(url.Values)
-	for k, v := range q.values {
-		result[k] = v
-	}
-	return result
+func (q queryValues) GetValues() url.Values {
+	return url.Values(q)
 }
 
 func (c *client) Validate() validate.Interface {
