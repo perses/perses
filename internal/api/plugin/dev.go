@@ -67,6 +67,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 		p.mutex.Lock()
 		p.devLoaded[manifest.Name] = pluginLoaded
 		p.mutex.Unlock()
+		logrus.Debugf("plugin %q has been loaded in development mode", manifest.Name)
 	}
 	return p.storeLoadedList()
 }
@@ -103,5 +104,6 @@ func (p *pluginFile) UnLoadDevPlugin(name string) error {
 	p.mig.UnLoadDevPlugin(plg.Module)
 	delete(p.devLoaded, name)
 	p.mutex.Unlock()
+	logrus.Debugf("plugin %q has been unloaded from development mode", name)
 	return p.storeLoadedList()
 }
