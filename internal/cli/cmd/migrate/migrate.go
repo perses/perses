@@ -160,21 +160,6 @@ func (o *option) Execute() error {
 	}
 	persesDashboard.Metadata.Project = o.project
 
-	// Apply datasource cleaning if the flag is set
-	if o.useDefaultDatasource {
-		// Clean datasource references on all queries in all panels
-		for _, panel := range persesDashboard.Spec.Panels {
-			for _, query := range panel.Spec.Queries {
-				if pluginSpec, ok := query.Spec.Plugin.Spec.(map[string]any); ok {
-					if datasourceRef, ok := pluginSpec["datasource"].(map[string]any); ok {
-						// Remove the "name" property to use default datasource
-						delete(datasourceRef, "name")
-					}
-				}
-			}
-		}
-	}
-
 	if o.migrationFormat == customResourceFormat || o.migrationFormat == customResourceShortFormat {
 		customResource := createCustomResource(persesDashboard)
 		return output.Handle(o.writer, o.Output, customResource)
@@ -186,7 +171,7 @@ func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Das
 	return o.apiClient.Migrate(&modelAPI.Migrate{
 		Input:            o.input,
 		GrafanaDashboard: grafanaDashboard,
-	})
+	}, o.useDefaultDatasource)
 }
 
 func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
@@ -195,7 +180,7 @@ func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Da
 	if err := json.Unmarshal(rawGrafanaDashboard, dash); err != nil {
 		return nil, err
 	}
-	return o.mig.Migrate(dash)
+	return o.mig.Migrate(dash, o.useDefaultDatasource)
 }
 
 func (o *option) SetWriter(writer io.Writer) {

@@ -14,6 +14,8 @@
 package api
 
 import (
+	"net/url"
+
 	"github.com/perses/perses/pkg/client/api/auth"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/api/validate"
@@ -26,7 +28,7 @@ import (
 type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	V1() v1.ClientInterface
-	Migrate(body *api.Migrate) (*modelV1.Dashboard, error)
+	Migrate(body *api.Migrate, useDefaultDatasource bool) (*modelV1.Dashboard, error)
 	Validate() validate.Interface
 	Auth() auth.Interface
 	Config() (*apiConfig.Config, error)
@@ -51,15 +53,31 @@ func (c *client) V1() v1.ClientInterface {
 	return v1.NewWithClient(c.restClient)
 }
 
-func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
+func (c *client) Migrate(body *api.Migrate, useDefaultDatasource bool) (*modelV1.Dashboard, error) {
 	result := &modelV1.Dashboard{}
-	err := c.restClient.Post().
+	request := c.restClient.Post().
 		APIVersion("").
 		Resource("migrate").
-		Body(body).
-		Do().
-		Object(result)
+		Body(body)
+
+	if useDefaultDatasource {
+		request = request.Query(&migrateQuery{values: map[string][]string{"default-datasource": {"true"}}})
+	}
+
+	err := request.Do().Object(result)
 	return result, err
+}
+
+type migrateQuery struct {
+	values map[string][]string
+}
+
+func (q *migrateQuery) GetValues() url.Values {
+	result := make(url.Values)
+	for k, v := range q.values {
+		result[k] = v
+	}
+	return result
 }
 
 func (c *client) Validate() validate.Interface {

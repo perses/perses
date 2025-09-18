@@ -80,7 +80,7 @@ func TestMig_Migrate(t *testing.T) {
 			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
-			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard)
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
 			if err != nil {
 				t.Fatal(err)
 			}
