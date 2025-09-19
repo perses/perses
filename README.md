@@ -72,6 +72,13 @@ You can launch a Perses container for trying it out with:
 docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 ```
 
+### Homebrew
+
+We have [a Homebrew tap](https://github.com/perses/homebrew-tap) so macOS and Linux users can install with:
+
+`brew install perses/tap/perses` for the server and web UI
+`brew install perses/tap/percli` for the CLI tool
+
 ### Building from source
 
 To build Perses from source code, You need:
