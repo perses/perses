@@ -21,6 +21,7 @@ import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useDatasourceApi } from '../../../model/datasource-api';
+import { getBasePathName } from '../../../model/route';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -62,7 +63,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <PluginRegistry pluginLoader={remotePluginLoader()}>
+      <PluginRegistry pluginLoader={remotePluginLoader(getBasePathName())}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}

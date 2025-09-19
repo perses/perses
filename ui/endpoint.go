@@ -21,6 +21,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"regexp"
 	"strings"
 
@@ -78,6 +79,27 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	e.GET(f.apiPrefix+"/plugins/*", f.servePluginFiles)
 }
 
+func (f *frontend) loadPluginFile(c echo.Context, path string, find string, replace string) error {
+	assetFile, err := os.Open(path)
+	if err != nil {
+		logrus.WithError(err).Errorf("Unable to open the file %s", path)
+		return apiinterface.NotFoundError
+	}
+	defer assetFile.Close()
+	data, err := io.ReadAll(assetFile)
+	if err != nil {
+		logrus.WithError(err).Errorf("Error reading file %s", path)
+		return apiinterface.HandleError(err)
+	}
+	data = bytes.ReplaceAll(data, []byte(find), []byte(replace))
+	_, err = c.Response().Write(data)
+	if err != nil {
+		logrus.WithError(err).Errorf("Error writing response for %s", path)
+		return apiinterface.HandleError(err)
+	}
+	return nil
+}
+
 func (f *frontend) servePluginFiles(c echo.Context) error {
 	// We are going to serve a plugin from a dev environment, let's set up the proxy to redirect the traffic.
 	req := c.Request()
@@ -97,6 +119,15 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		// In that case, we need to read the requested files from the file system.
 		// The First thing to do is to replace the URL path with the local path of the plugin.
 		localPath := strings.Replace(req.URL.Path, fmt.Sprintf("%s/plugins/%s", f.apiPrefix, pluginName), loaded.LocalPath, 1)
+		// If the request is for the mf-manifest.json file, then we need to replace the value of "publicPath" with the
+		// proper API prefix so the React app is able to find the static files of the plugin.
+		if strings.HasSuffix(localPath, "mf-manifest.json") {
+			return f.loadPluginFile(c, localPath, `"publicPath": "/`, `"publicPath": "`+f.apiPrefix+"/")
+		}
+		// Same for js files, we need to prefix the `/plugins` URL with the API prefix
+		if strings.Contains(localPath, ".js") {
+			return f.loadPluginFile(c, localPath, `"/plugins`, `"`+f.apiPrefix+`/plugins`)
+		}
 		// Then we just need to rely on the echo router to serve the file.
 		return c.File(localPath)
 	}
