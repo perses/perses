@@ -18,7 +18,7 @@ import { QueryEditorContainer } from './QueryEditorContainer';
 
 describe('QueryEditorContainer', () => {
   beforeEach(() => {
-    global.fetch = jest.fn(() =>
+    globalThis.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
       })

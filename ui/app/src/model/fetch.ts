@@ -22,8 +22,8 @@ function deleteCookie(name: string): void {
 }
 
 export function enableRefreshFetch(): void {
-  global.fetch = new Proxy(global.fetch, {
-    apply: async function (target, that, args: Parameters<typeof global.fetch>): Promise<Response> {
+  globalThis.fetch = new Proxy(globalThis.fetch, {
+    apply: async function (target, that, args: Parameters<typeof globalThis.fetch>): Promise<Response> {
       return target
         .apply(that, args)
         .then((res) => {
