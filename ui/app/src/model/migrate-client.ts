@@ -29,12 +29,15 @@ export function useMigrate(): UseMutationResult<DashboardResource, StatusError, 
     mutationKey: [resource],
     mutationFn: (body) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });
+      const requestBody = {
+        input: body.input || {},
+        grafanaDashboard: body.grafanaDashboard,
+        useDefaultDatasource: !!body.useDefaultDatasource,
+      };
       return fetchJson<DashboardResource>(url, {
         method: HTTPMethodPOST,
         headers: HTTPHeader,
-        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${JSON.stringify(
-          body.grafanaDashboard
-        )}, "useDefaultDatasource": ${body.useDefaultDatasource ? 'true' : 'false'}}`,
+        body: JSON.stringify(requestBody),
       });
     },
   });
