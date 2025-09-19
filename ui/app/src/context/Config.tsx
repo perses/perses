@@ -17,7 +17,7 @@ import DOMPurify from 'dompurify';
 import { DashboardSelector, DurationString } from '@perses-dev/core';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
-import { ConfigModel, useConfig } from '../model/config-client';
+import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
 
 interface ConfigContextType {
@@ -130,6 +130,29 @@ export function useInformation(): string {
     [config.frontend.information]
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
+}
+
+export function useBanner(): Banner | undefined {
+  const { config } = useConfigContext();
+
+  const html = useMemo(
+    () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
+    [config.frontend.banner?.message]
+  );
+
+  const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);
+
+  const banner = useMemo(() => {
+    if (!config.frontend.banner?.message || !config.frontend.banner?.severity) {
+      return undefined;
+    }
+    return {
+      severity: config.frontend.banner.severity,
+      message: sanitizedHtml,
+    };
+  }, [config.frontend.banner?.message, config.frontend.banner?.severity, sanitizedHtml]);
+
+  return banner;
 }
 
 export function useIsNativeProviderEnabled(): boolean {
