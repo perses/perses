@@ -22,8 +22,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f h1:KUppIJq7/+
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nexucis/lamenv v0.5.2 h1:tK/u3XGhCq9qIoVNcXsK9LZb8fKopm0A5weqSRvHd7M=
 github.com/nexucis/lamenv v0.5.2/go.mod h1:HusJm6ltmmT7FMG8A750mOLuME6SHCsr2iFYxp5fFi0=
-github.com/perses/plugins/prometheus v0.53.2 h1:IANFswHxxHhs5jHzCRHpQKUr42887RywyIihhBrEqlQ=
-github.com/perses/plugins/prometheus v0.53.2/go.mod h1:pE2Lx0zYOA2Ebbi1aWP2Fw/byecYAT1vpBKZzvmBKew=
+github.com/perses/plugins/prometheus v0.53.3 h1:A3ehfF56VgauUWBjQziY3M9sJYC3rgBJzHwTW4ZdHzI=
+github.com/perses/plugins/prometheus v0.53.3/go.mod h1:pE2Lx0zYOA2Ebbi1aWP2Fw/byecYAT1vpBKZzvmBKew=
 github.com/perses/plugins/timeserieschart v0.10.0 h1:37klEOTPYyOaFPAf/GLfUBPjl4T15GMXNN5JZo6H3+c=
 github.com/perses/plugins/timeserieschart v0.10.0/go.mod h1:oRM0III0DbdhTVMJspukz1NSoO3BZzfKR889+Sk/LHE=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
