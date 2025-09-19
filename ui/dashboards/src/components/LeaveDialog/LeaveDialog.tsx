@@ -15,6 +15,7 @@ import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'
 import { ReactElement, ReactNode, useEffect } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import type { BlockerFunction } from '@remix-run/router';
 
 const handleRouteChange = (event: BeforeUnloadEvent): string => {
   event.preventDefault();
@@ -23,7 +24,7 @@ const handleRouteChange = (event: BeforeUnloadEvent): string => {
 };
 
 export interface LeaveDialogProps {
-  isBlocked: boolean;
+  isBlocked: BlockerFunction | boolean;
   message: string;
 }
 
@@ -71,10 +72,15 @@ export function LeaveDialog({
   original: DashboardResource | EphemeralDashboardResource | undefined;
   current: DashboardResource | EphemeralDashboardResource;
 }): ReactNode {
-  return (
-    <Prompt
-      isBlocked={JSON.stringify(original) !== JSON.stringify(current)}
-      message="You have unsaved changes, are you sure you want to leave?"
-    />
-  );
+  const handleIsBlocked: BlockerFunction = (ctx) => {
+    if (JSON.stringify(original) !== JSON.stringify(current)) {
+      // Only block navigation if the pathname is changing (=> ignore search params changes)
+      if (ctx.currentLocation.pathname !== ctx.nextLocation.pathname) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return <Prompt isBlocked={handleIsBlocked} message="You have unsaved changes, are you sure you want to leave?" />;
 }
