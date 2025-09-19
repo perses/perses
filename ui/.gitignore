@@ -28,6 +28,9 @@ typedoc
 # Ignore turborepo cache
 .turbo
 
+# Ignore test coverage output
+coverage
+
 # ignore file copied during the release process of the UI
 LICENSE
 CHANGELOG.md
