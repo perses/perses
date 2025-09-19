@@ -68,7 +68,7 @@ export const remotePluginLoader = (baseURL?: string): PluginLoader => {
       const pluginModule: RemotePluginModule = {};
 
       for (const plugin of resource.spec.plugins) {
-        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name, baseURL);
+        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name, baseURL + '/plugins');
 
         const remotePlugin = remotePluginModule?.[plugin.spec.name];
         if (remotePlugin) {

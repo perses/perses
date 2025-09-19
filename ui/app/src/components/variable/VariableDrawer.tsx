@@ -26,6 +26,7 @@ import { ReactElement, useMemo, useState } from 'react';
 import { useDatasourceApi } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { getBasePathName } from '../../model/route';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -71,7 +72,7 @@ export function VariableDrawer<T extends Variable>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={remotePluginLoader()}>
+        <PluginRegistry pluginLoader={remotePluginLoader(getBasePathName())}>
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>

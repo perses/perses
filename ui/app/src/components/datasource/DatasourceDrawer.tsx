@@ -22,6 +22,7 @@ import {
 import { ReactElement, useState } from 'react';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { getBasePathName } from '../../model/route';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
@@ -56,7 +57,7 @@ export function DatasourceDrawer<T extends Datasource>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={remotePluginLoader()}>
+        <PluginRegistry pluginLoader={remotePluginLoader(getBasePathName())}>
           <ValidationProvider>
             {isOpen && (
               <DatasourceEditorForm
