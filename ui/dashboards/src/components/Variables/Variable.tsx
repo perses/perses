@@ -42,6 +42,34 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
   }
   return options.value;
 }
+// LOGZ.IO CHANGE START:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
+function canonicalizeVariableValue(value: VariableValue | undefined): VariableValue | undefined {
+  if (Array.isArray(value)) {
+    if (value.includes(DEFAULT_ALL_VALUE)) {
+      return [DEFAULT_ALL_VALUE];
+    }
+    return [...value].sort();
+  }
+  return value;
+}
+
+function valuesEqualConsideringAll(a: VariableValue | undefined, b: VariableValue | undefined): boolean {
+  const ax = canonicalizeVariableValue(a);
+  const bx = canonicalizeVariableValue(b);
+  const isAll = (v: VariableValue | undefined): boolean => v === DEFAULT_ALL_VALUE;
+  const isAllArray = (v: VariableValue | undefined): boolean =>
+    Array.isArray(v) && v.length === 1 && v[0] === DEFAULT_ALL_VALUE;
+  if ((isAllArray(ax) && isAll(bx)) || (isAll(ax) && isAllArray(bx))) return true;
+  if (Array.isArray(ax) && Array.isArray(bx)) {
+    if (ax.length !== bx.length) return false;
+    for (let i = 0; i < ax.length; i++) {
+      if (ax[i] !== bx[i]) return false;
+    }
+    return true;
+  }
+  return ax === bx;
+}
+// LOGZ.IO CHANGE END:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
 
 export function Variable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
@@ -199,10 +227,11 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
 
   // Update value when changed
   useEffect(() => {
-    if (value) {
+    // LOGZ.IO CHANGE:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
+    if (value && !valuesEqualConsideringAll(value, ctx.state?.value)) {
       setVariableValue(name, value, source);
     }
-  }, [setVariableValue, name, value, source]);
+  }, [setVariableValue, name, value, source, ctx.state?.value]); // LOGZ.IO CHANGE:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
 
   // Update loading when changed
   useEffect(() => {
