@@ -190,6 +190,7 @@ export interface DatasourceConfig {
 }
 
 export interface ConfigModel {
+  api_prefix?: string;
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;

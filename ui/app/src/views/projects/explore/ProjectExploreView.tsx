@@ -15,12 +15,13 @@ import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
-import { PluginRegistry, ProjectStoreProvider, useProjectStore, remotePluginLoader } from '@perses-dev/plugin-system';
+import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo } from 'react';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useDatasourceApi } from '../../../model/datasource-api';
+import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 
 export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
@@ -40,6 +41,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
   const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
 
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
@@ -62,7 +64,7 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <PluginRegistry pluginLoader={remotePluginLoader()}>
+      <PluginRegistry pluginLoader={pluginLoader}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}
