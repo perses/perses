@@ -44,3 +44,6 @@ validators:
   # code 999
   - regex: 'linkedin\.com'
     type: 'ignore'
+  # getting 403 forbidden in the CI
+  - regex: 'npmjs\.com'
+    type: 'ignore'
