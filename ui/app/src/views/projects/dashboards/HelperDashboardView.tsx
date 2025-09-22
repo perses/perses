@@ -29,6 +29,7 @@ import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useIsLocalDatasourceEnabled, useIsLocalVariableEnabled } from '../../../context/Config';
+import { getBasePathName } from '../../../model/route';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -91,7 +92,11 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
         >
           <ValidationProvider>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
+              <UsageMetricsProvider
+                apiPrefix={getBasePathName()}
+                project={project.metadata.name}
+                dashboard={dashboardResource.metadata.name}
+              >
                 <ViewDashboard
                   dashboardResource={dashboardResource}
                   datasourceApi={datasourceApi}

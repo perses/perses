@@ -23,11 +23,13 @@ interface UsageMetrics {
   renderDurationMs: number;
   renderErrorCount: number;
   pendingQueries: Map<string, QueryState>;
+  apiPrefix?: string;
 }
 
 interface UsageMetricsProps {
   project: string;
   dashboard: string;
+  apiPrefix?: string;
   children: ReactNode;
 }
 
@@ -73,7 +75,7 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
 };
 
 const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
-  await fetch('/api/v1/view', {
+  await fetch(`${stats.apiPrefix ?? ''}/api/v1/view`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -87,14 +89,15 @@ const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
   });
 };
 
-export const UsageMetricsProvider = ({ project, dashboard, children }: UsageMetricsProps): ReactElement => {
-  const ctx = {
+export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement => {
+  const ctx: UsageMetrics = {
     project: project,
     dashboard: dashboard,
     renderErrorCount: 0,
     startRenderTime: Date.now(),
     renderDurationMs: 0,
     pendingQueries: new Map(),
+    apiPrefix,
   };
 
   return <UsageMetricsContext.Provider value={ctx}>{children}</UsageMetricsContext.Provider>;
