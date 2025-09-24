@@ -136,7 +136,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
         ) : (
           <VariablePreview isLoading={true} />
         )}
-
         <Stack>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
