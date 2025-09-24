@@ -40,6 +40,21 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
     notShown = values.length - maxValues;
   }
 
+  const variablePreviewState = useMemo((): JSX.Element | null => {
+    if (isLoading) {
+      return (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      );
+    } else if (error) {
+      return <Alert severity="error">{error}</Alert>;
+    } else if (!values?.length) {
+      return <Alert severity="info">No results</Alert>;
+    }
+    return null;
+  }, [error, isLoading, values]);
+
   return (
     <Box>
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
@@ -60,13 +75,7 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
       </Stack>
       <Card variant="outlined">
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, m: 2 }}>
-          {error && <Alert severity="error">{error}</Alert>}
-          {values?.length === 0 && <Alert severity="info">No results</Alert>}
-          {isLoading && (
-            <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-              <CircularProgress />
-            </Stack>
-          )}
+          {variablePreviewState}
           {values?.slice(0, maxValues).map((val, index) => <Chip size="small" key={index} label={val} />)}
           {notShown > 0 && <Chip onClick={showAll} variant="outlined" size="small" label={`+${notShown} more`} />}
         </Box>
@@ -83,9 +92,8 @@ export function VariableListPreview(props: VariableListPreviewProps): ReactEleme
   const { definition } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
-
   const variablePreview = useMemo(
-    () => <VariablePreview values={data?.map((val) => val.value) || []} isLoading={isFetching} error={errorMessage} />,
+    () => <VariablePreview values={data?.map((val) => val.value)} isLoading={isFetching} error={errorMessage} />,
     [errorMessage, isFetching, data]
   );
 
