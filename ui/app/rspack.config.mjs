@@ -98,6 +98,7 @@ export default defineConfig({
   plugins: [
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.API_PREFIX': JSON.stringify(isDev ? '' : 'PREFIX_PATH_PLACEHOLDER'),
     }),
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({

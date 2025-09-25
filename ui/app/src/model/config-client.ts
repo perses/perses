@@ -14,6 +14,7 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
+import { PERSES_APP_CONFIG } from '../config';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -214,6 +215,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiPrefix: '/api' });
+  const url = buildURL({ resource: resource, apiPrefix: `${PERSES_APP_CONFIG.api_prefix}/api` });
   return fetchJson<ConfigModel>(url);
 }
