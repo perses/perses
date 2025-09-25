@@ -119,6 +119,10 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.allowMultiple', false);
   }
 
+  if (!values.spec.plugin) {
+    form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
+  }
+
   const { refresh } = useTimeRange();
 
   return (
@@ -127,15 +131,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
         List Options
       </Typography>
       <Stack spacing={2} mb={2}>
-        {kind ? (
-          <Box>
-            <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-              <VariableListPreview definition={previewSpec} />
-            </ErrorBoundary>
-          </Box>
-        ) : (
-          <VariablePreview isLoading={true} />
-        )}
+        <Box>
+          <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
+            <VariableListPreview definition={previewSpec} />
+          </ErrorBoundary>
+        </Box>
         <Stack>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
