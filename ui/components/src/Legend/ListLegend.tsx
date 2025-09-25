@@ -43,7 +43,6 @@ export function ListLegend({
 }: ListLegendProps): ReactElement {
   // show full labels on hover when there are many total series
   const truncateLabels = items.length > 5;
-
   return (
     <Virtuoso
       style={{ height, width }}

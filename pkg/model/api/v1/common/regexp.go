@@ -51,7 +51,7 @@ func (re *Regexp) UnmarshalJSON(data []byte) error {
 	return re.validate(s)
 }
 
-func (re *Regexp) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (re *Regexp) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err != nil {
 		return err
@@ -66,7 +66,7 @@ func (re Regexp) MarshalJSON() ([]byte, error) {
 	return nil, nil
 }
 
-func (re Regexp) MarshalYAML() (interface{}, error) {
+func (re Regexp) MarshalYAML() (any, error) {
 	if len(re.original) > 0 {
 		return re.original, nil
 	}

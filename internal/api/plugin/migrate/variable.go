@@ -134,7 +134,7 @@ func migrateListVar(varInstances map[string]*build.Instance, v TemplateVar, spec
 	// So there is no easy way to know in advance which migration script to use.
 	// A simple way to handle this is to execute all the migration scripts and keep the first one that returns a non-empty plugin.
 	for _, variableInstance := range varInstances {
-		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(variableInstance, v.RawMessage)
+		plugin, variableMigrationIsEmpty, err := ExecuteVariableScript(variableInstance, v.RawMessage)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute variable migration script")
 			continue
@@ -176,6 +176,6 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 	}
 }
 
-func executeVariableMigrationScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaVariableData, "#var", "variable")
+func ExecuteVariableScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
+	return executeCuelangScript(cueScript, grafanaVariableData, "#var", "variable")
 }

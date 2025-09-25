@@ -29,7 +29,7 @@ const goldenRatioConjugate = 0.618033988749895
 // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 func generateColors(n int) []*color.Color {
 	var result []*color.Color
-	for i := 0; i < n; i++ {
+	for range n {
 		h := rand.Float64() + goldenRatioConjugate // nolint: gosec // We don't need a secure random number here.
 		h = math.Mod(h, 1.0)                       // Normalize the value to keep only the decimal value.
 		r, g, b := gohsv.HSVtoRGB(h*360, 0.5, 0.95)

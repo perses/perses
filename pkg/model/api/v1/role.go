@@ -51,7 +51,7 @@ func (g *GlobalRole) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (g *GlobalRole) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (g *GlobalRole) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp GlobalRole
 	type plain GlobalRole
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -86,7 +86,7 @@ func (g *GlobalRole) GetRoleSpec() RoleSpec {
 	return g.Spec
 }
 
-func (g *GlobalRole) GetSpec() interface{} {
+func (g *GlobalRole) GetSpec() any {
 	return g.Spec
 }
 
@@ -111,7 +111,7 @@ func (r *Role) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *Role) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (r *Role) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Role
 	type plain Role
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -151,6 +151,6 @@ func (r *Role) GetKind() string {
 	return string(r.Kind)
 }
 
-func (r *Role) GetSpec() interface{} {
+func (r *Role) GetSpec() any {
 	return r.Spec
 }

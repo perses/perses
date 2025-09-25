@@ -717,8 +717,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="CA"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',
@@ -761,8 +763,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="Cert"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',
@@ -805,8 +809,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="Key"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',

@@ -43,7 +43,7 @@ func (s *Subject) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Subject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *Subject) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Subject
 	type plain Subject
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -95,7 +95,7 @@ func (r *RoleBindingSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *RoleBindingSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (r *RoleBindingSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp RoleBindingSpec
 	type plain RoleBindingSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -138,7 +138,7 @@ func (g *GlobalRoleBinding) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (g *GlobalRoleBinding) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (g *GlobalRoleBinding) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp GlobalRoleBinding
 	type plain GlobalRoleBinding
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -173,7 +173,7 @@ func (g *GlobalRoleBinding) GetRoleBindingSpec() RoleBindingSpec {
 	return g.Spec
 }
 
-func (g *GlobalRoleBinding) GetSpec() interface{} {
+func (g *GlobalRoleBinding) GetSpec() any {
 	return g.Spec
 }
 
@@ -198,7 +198,7 @@ func (r *RoleBinding) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *RoleBinding) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (r *RoleBinding) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp RoleBinding
 	type plain RoleBinding
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -229,6 +229,6 @@ func (r *RoleBinding) GetKind() string {
 	return string(r.Kind)
 }
 
-func (r *RoleBinding) GetSpec() interface{} {
+func (r *RoleBinding) GetSpec() any {
 	return r.Spec
 }

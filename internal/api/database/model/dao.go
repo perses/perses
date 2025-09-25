@@ -38,7 +38,7 @@ type DAO interface {
 	Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error
 	// Query will find a list of resource that is matching the query passed in parameter. The list found will be set in slice.
 	// slice is an interface for casting simplification. But slice must be a pointer to a slice of modelAPI.Metadata
-	Query(query Query, slice interface{}) error
+	Query(query Query, slice any) error
 	RawQuery(query Query) ([]json.RawMessage, error)
 	RawMetadataQuery(query Query, kind modelV1.Kind) ([]json.RawMessage, error)
 	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error

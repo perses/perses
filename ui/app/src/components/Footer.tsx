@@ -45,7 +45,7 @@ export default function Footer(): ReactElement {
             <Github sx={{ verticalAlign: 'bottom' }} />
           </a>
         </li>
-        <li data-happo-hide>
+        <li>
           {isLoading ? (
             <CircularProgress size="1rem" />
           ) : data !== undefined && data.version !== '' ? (

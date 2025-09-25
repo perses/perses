@@ -95,7 +95,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema,
 		// We could try to enforce the convention that the migration script is a subfolder of the schema folder of the plugin it is supposed to migrate.
 		// But it's not certain you have the migration script, and besides, it's almost certain user won't respect this convention.
 		// Finally, reading the migration script to determinate the kind of plugin is not that complicated, we have just a couple of rules to follow, and it's the most flexible way.
-		pluginKind, err := getPluginKind(migrateFilePath)
+		pluginKind, err := GetPluginKind(migrateFilePath)
 		if err != nil {
 			return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
 		}
@@ -119,7 +119,8 @@ func isPackageMigrate(file string) (bool, error) {
 	return strings.Contains(string(data), "package migrate"), nil
 }
 
-func getPluginKind(migrateFile string) (plugin.Kind, error) {
+// GetPluginKind guesses the plugin kind from a migration file based on expected patterns
+func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	data, err := os.ReadFile(migrateFile) //nolint: gosec
 	if err != nil {
 		return "", err
@@ -133,7 +134,8 @@ func getPluginKind(migrateFile string) (plugin.Kind, error) {
 	return plugin.KindQuery, nil
 }
 
-func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
+// executeCuelangScript executes a CUE migration script against grafana data
+func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -157,6 +159,7 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 	return convertToPlugin(finalVal)
 }
 
+// convertToPlugin converts a CUE value to a common.Plugin struct
 func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if migrateValue.IsNull() {
 		return nil, true, nil
@@ -176,7 +179,7 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
@@ -221,7 +224,7 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
@@ -239,7 +242,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 		},
 	}
 
-	panels, err := m.migratePanels(grafanaDashboard)
+	panels, err := m.migratePanels(grafanaDashboard, useDefaultDatasource)
 	if err != nil {
 		return nil, err
 	}
@@ -251,17 +254,24 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 
 func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
-	defaultSpec := &dashboard.GridLayoutSpec{}
-	defaultLayout := dashboard.Layout{
+	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
+	// Thus we have to create a first grid to gather the eventual orphans found at the beginning of the
+	// Grafana dashboard.
+	orphansGridSpec := &dashboard.GridLayoutSpec{
+		Display: &dashboard.GridLayoutDisplay{
+			Title: "Panel Group 1", // placeholder value since we don't want an empty string.
+		},
+	}
+	orphansGrid := dashboard.Layout{
 		Kind: dashboard.KindGridLayout,
-		Spec: defaultSpec,
+		Spec: orphansGridSpec,
 	}
 
-	result = append(result, defaultLayout)
+	result = append(result, orphansGrid)
 
 	for i, panel := range grafanaDashboard.Panels {
 		if panel.Type != grafanaPanelRowType {
-			defaultSpec.Items = append(defaultSpec.Items, dashboard.GridItem{
+			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
 				X:      panel.GridPosition.X,
@@ -272,7 +282,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				},
 			})
 		} else {
-			spec := &dashboard.GridLayoutSpec{
+			gridSpec := &dashboard.GridLayoutSpec{
 				Display: &dashboard.GridLayoutDisplay{
 					Title: panel.Title,
 					Collapse: &dashboard.GridLayoutCollapse{
@@ -280,12 +290,12 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					},
 				},
 			}
-			layout := dashboard.Layout{
+			grid := dashboard.Layout{
 				Kind: dashboard.KindGridLayout,
-				Spec: spec,
+				Spec: gridSpec,
 			}
 			for j, innerPanel := range panel.Panels {
-				spec.Items = append(spec.Items, dashboard.GridItem{
+				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
 					X:      innerPanel.GridPosition.X,
@@ -296,13 +306,13 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					},
 				})
 			}
-			if len(spec.Items) > 0 {
-				result = append(result, layout)
+			if len(gridSpec.Items) > 0 {
+				result = append(result, grid)
 			}
 		}
 	}
-	if len(defaultSpec.Items) == 0 {
-		// Since there are no items, we should remove the default layout
+	if len(orphansGridSpec.Items) == 0 {
+		// Since no orphan panel was found, we can remove the orphans grid
 		result = result[1:]
 	}
 	return result
@@ -473,8 +483,8 @@ func (m *mig) remove(kind plugin.Kind, name string) {
 			delete(m.panels, name)
 		case plugin.KindVariable:
 			delete(m.variables, name)
-		case plugin.KindDatasource:
-			// No migration script for datasource, so nothing to remove
+		case plugin.KindDatasource, plugin.KindExplore:
+		// No migration script for datasource or explorer, so nothing to remove
 		default:
 			logrus.Warnf("unable to remove migration script for %q: kind %q not supported", name, kind)
 		}

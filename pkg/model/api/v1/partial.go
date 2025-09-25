@@ -29,7 +29,7 @@ func (p *PartialEntity) GetKind() string {
 	return string(p.Kind)
 }
 
-func (p *PartialEntity) GetSpec() interface{} {
+func (p *PartialEntity) GetSpec() any {
 	return p.Spec
 }
 
@@ -47,6 +47,6 @@ func (p *PartialProjectEntity) GetKind() string {
 	return string(p.Kind)
 }
 
-func (p *PartialProjectEntity) GetSpec() interface{} {
+func (p *PartialProjectEntity) GetSpec() any {
 	return p.Spec
 }

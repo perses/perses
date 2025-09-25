@@ -132,7 +132,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 			return nil, getPasswordErr
 		}
 		httpClient = c.Client(ctx, &oauth2.Token{
-			AccessToken: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BasicAuth.Username, password))),
+			AccessToken: base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", config.BasicAuth.Username, password)),
 			TokenType:   "basic",
 		})
 	}

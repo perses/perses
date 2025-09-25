@@ -184,6 +184,13 @@ describe('FormatControls', () => {
     });
   });
 
+  describe('with a currency unit selected', () => {
+    it('allows the user to modify the decimal places', () => {
+      renderFormatControls({ unit: 'eur' });
+      expect(getDecimalPlacesSelector()).toBeEnabled();
+    });
+  });
+
   it('should not show an option for disabled units', () => {
     const onChange = jest.fn();
     renderFormatControls({ unit: 'decimal' }, onChange);

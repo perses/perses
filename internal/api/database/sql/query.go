@@ -39,7 +39,7 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-func generateProjectResourceInsertQuery(tableName string, id string, rowJSONDoc []byte, metadata *modelV1.ProjectMetadata) (string, []interface{}) {
+func generateProjectResourceInsertQuery(tableName string, id string, rowJSONDoc []byte, metadata *modelV1.ProjectMetadata) (string, []any) {
 	return sqlbuilder.NewInsertBuilder().
 		InsertInto(tableName).
 		Cols(colID, colName, colProject, colDoc).
@@ -47,7 +47,7 @@ func generateProjectResourceInsertQuery(tableName string, id string, rowJSONDoc 
 		Build()
 }
 
-func generateResourceInsertQuery(tableName string, id string, rowJSONDoc []byte, metadata *modelV1.Metadata) (string, []interface{}) {
+func generateResourceInsertQuery(tableName string, id string, rowJSONDoc []byte, metadata *modelV1.Metadata) (string, []any) {
 	return sqlbuilder.NewInsertBuilder().
 		InsertInto(tableName).
 		Cols(colID, colName, colDoc).
@@ -55,7 +55,7 @@ func generateResourceInsertQuery(tableName string, id string, rowJSONDoc []byte,
 		Build()
 }
 
-func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}, error) {
+func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []any, error) {
 	id, tableName, idErr := d.getIDAndTableName(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if idErr != nil {
 		return "", nil, idErr
@@ -65,7 +65,7 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}
 		return "", nil, unmarshalErr
 	}
 	var sql string
-	var args []interface{}
+	var args []any
 	switch m := entity.GetMetadata().(type) {
 	case *modelV1.ProjectMetadata:
 		sql, args = generateProjectResourceInsertQuery(tableName, id, rowJSONDoc, m)
@@ -75,7 +75,7 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}
 	return sql, args, nil
 }
 
-func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}, error) {
+func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []any, error) {
 	id, tableName, idErr := d.getIDAndTableName(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if idErr != nil {
 		return "", nil, idErr
@@ -91,7 +91,7 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	return sql, args, nil
 }
 
-func (d *DAO) generateSelectQuery(tableName string, project string, name string) (string, []interface{}) {
+func (d *DAO) generateSelectQuery(tableName string, project string, name string) (string, []any) {
 	p := project
 	n := name
 	if !d.CaseSensitive {
@@ -110,9 +110,9 @@ func (d *DAO) generateSelectQuery(tableName string, project string, name string)
 	return queryBuilder.Build()
 }
 
-func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, error) {
+func (d *DAO) buildQuery(query databaseModel.Query) (string, []any, error) {
 	var sqlQuery string
-	var args []interface{}
+	var args []any
 	switch qt := query.(type) {
 	case *dashboard.Query:
 		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
@@ -150,7 +150,7 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 	return sqlQuery, args, nil
 }
 
-func (d *DAO) generateDeleteQuery(tableName string, project string, name string) (string, []interface{}) {
+func (d *DAO) generateDeleteQuery(tableName string, project string, name string) (string, []any) {
 	p := project
 	n := name
 	if !d.CaseSensitive {
@@ -169,9 +169,9 @@ func (d *DAO) generateDeleteQuery(tableName string, project string, name string)
 	return queryBuilder.Build()
 }
 
-func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}, error) {
+func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []any, error) {
 	var sqlQuery string
-	var args []interface{}
+	var args []any
 	switch qt := query.(type) {
 	case *dashboard.Query:
 		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)

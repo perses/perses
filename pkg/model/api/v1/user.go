@@ -55,7 +55,7 @@ func (u *User) GetKind() string {
 	return string(u.Kind)
 }
 
-func (u *User) GetSpec() interface{} {
+func (u *User) GetSpec() any {
 	return u.Spec
 }
 

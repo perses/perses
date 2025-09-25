@@ -1,0 +1,18 @@
+{
+  "name": "@test/foo-chart-plugin",
+  "version": "1.0.0",
+  "perses": {
+    "schemasPath": "schemas",
+    "plugins": [
+      {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Foo Chart"
+          },
+          "name": "FooChart"
+        }
+      }
+    ]
+  }
+}

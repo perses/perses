@@ -463,7 +463,7 @@ function createVariableDefinitionStore({
     )
   );
 
-  return store as unknown as StoreApi<VariableDefinitionStore>; // TODO: @Gladorme check if we can avoid this cast
+  return store as StoreApi<VariableDefinitionStore>;
 }
 
 /**

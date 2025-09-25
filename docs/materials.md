@@ -5,6 +5,10 @@ This is a list of presentations, papers, poadcasts, and other materials related 
 
 ## Presentations
 
+- [Introduction to Perses - The open dashboard tool for Prometheus (CNCF Project)](https://www.youtube.com/watch?v=4JOe9Y7GZzY&t=1s),
+  with **Saiyam Pathak** - Founder of *kubesimplify*, September 1 2025.
+- [Hands-on Introduction to Perses | Rawkode Live](https://www.youtube.com/live/BJ4AgfGtj-8?si=meIKjZMGpoFMwxAt&t=138)
+  with **David Flanagan** (*Founder of the Rawkode Academy*) and **Nicolas Takashi** (*Perses Maintainer*), 21 July 2025.
 - [Limitless Possibilities, Consistent Design: Crafting Dashboards with Perses DAC](https://www.youtube.com/watch?v=7h70Olo5Uzk),
   with **Nicolas Takashi** and **Antoine Thebaud**, *Perses Maintainers*, KubeCon + CloudNativeCon Europe 2025.
 - [How to manage thousands of dashboards easily](https://www.youtube.com/watch?v=-2itamJhMXw&t=1s),
@@ -24,7 +28,7 @@ This is a list of presentations, papers, poadcasts, and other materials related 
   with **Saim Safdar** (*CNCF Ambassador*) and **Augustin Husson** (*Perses Maintainer*), 20 Sept 2024.
 - [Enlightning - Meet the New Kid in the Sandbox: Perses](https://www.youtube.com/watch?v=eG-E9DboFcM),
   with **Whitney Lee** (*CNCF Ambassador*) and **Eric Schabell** (*CNCF Ambassador*), 13 Sept 2024.
-- [PromCon Recap: Unveiling Perses and Prometheus Ecosystem Updates](https://www.youtube.com/watch?v=MzQZagfgIKk),
+- [PromCon Recap: Unveiling Perses and Prometheus Ecosystem Updates](https://www.youtube.com/watch?v=MzQZagfgIKk&list=PLd57eY2edRXz4djMETYTm-2p8WGTdoX3D&index=25&t=2464s),
   with **Dotan Horovits** (*CNCF Ambassador*) and **Augustin Husson** (*Perses Maintainer*), 4 Oct 2023.
 
 ## Papers

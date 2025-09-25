@@ -21,6 +21,7 @@ const resource = 'migrate';
 export interface MigrateBodyRequest {
   input?: Record<string, string>;
   grafanaDashboard: Record<string, unknown>;
+  useDefaultDatasource?: boolean;
 }
 
 export function useMigrate(): UseMutationResult<DashboardResource, StatusError, MigrateBodyRequest> {
@@ -28,12 +29,15 @@ export function useMigrate(): UseMutationResult<DashboardResource, StatusError, 
     mutationKey: [resource],
     mutationFn: (body) => {
       const url = buildURL({ apiPrefix: '/api', resource: resource });
+      const requestBody = {
+        input: body.input || {},
+        grafanaDashboard: body.grafanaDashboard,
+        useDefaultDatasource: !!body.useDefaultDatasource,
+      };
       return fetchJson<DashboardResource>(url, {
         method: HTTPMethodPOST,
         headers: HTTPHeader,
-        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${JSON.stringify(
-          body.grafanaDashboard
-        )}}`,
+        body: JSON.stringify(requestBody),
       });
     },
   });

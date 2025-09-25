@@ -28,10 +28,12 @@ import (
 
 // expected user inputs
 #panels: [...v1.#Panel]
-#title:      string
-#groupIndex: number
-#cols:       >0 & <=#gridCols
-#height:     number | *6
+#title:           string
+#isCollapsed?:    bool
+#repeatVariable?: string
+#groupIndex:      number
+#cols:            >0 & <=#gridCols
+#height:          number | *6
 
 // intermediary compute
 #gridCols: 24
@@ -46,7 +48,12 @@ import (
 // output: the final layout & panels as map.
 layout: v1Dashboard.#Layout & {
 	spec: v1Dashboard.#GridLayoutSpec & {
-		display: title: #title
+		display: {
+			title: #title
+			if #isCollapsed != _|_ {
+				isCollapsed: #isCollapsed
+			}
+		}
 		items: [for i, panel in #panels {
 			x:      #panelsX[i]
 			y:      #panelsY[i]
@@ -56,6 +63,9 @@ layout: v1Dashboard.#Layout & {
 				"$ref": "#/spec/panels/\(#groupIndex)_\(i)"
 			}
 		}]
+		if #repeatVariable != _|_ {
+			repeatVariable: #repeatVariable
+		}
 	}
 }
 

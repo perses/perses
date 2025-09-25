@@ -47,7 +47,7 @@ func TestValidateAndExtract(t *testing.T) {
 
 	validSpec := testSpec{URL: "https://test.com"}
 	validSQLSpec := testSQLSpec{Driver: "postgres", Host: "test.com", Database: "test", Postgres: &sql.PostgresConfig{SSLMode: "disable"}}
-	validSpecMap := map[string]interface{}{"url": "https://test.com"}
+	validSpecMap := map[string]any{"url": "https://test.com"}
 
 	testURL, err := url.Parse("https://test.com")
 	assert.NoError(t, err)
@@ -61,9 +61,9 @@ func TestValidateAndExtract(t *testing.T) {
 	testCases := []struct {
 		name           string
 		expectedKind   string
-		pluginSpec     interface{}
-		config         interface{}
-		expectedConfig interface{}
+		pluginSpec     any
+		config         any
+		expectedConfig any
 		expectError    bool
 		expectedError  string
 	}{
@@ -80,7 +80,7 @@ func TestValidateAndExtract(t *testing.T) {
 		},
 		{
 			name:         "simple map",
-			pluginSpec:   map[string]interface{}{"kind": "SQLProxy", "spec": validSQLSpec},
+			pluginSpec:   map[string]any{"kind": "SQLProxy", "spec": validSQLSpec},
 			expectedKind: "sqlproxy",
 			expectedConfig: &sql.Config{
 				Driver:   "postgres",
@@ -99,7 +99,7 @@ func TestValidateAndExtract(t *testing.T) {
 		},
 		{
 			name:           "nested map",
-			pluginSpec:     map[string]interface{}{"proxy": map[string]interface{}{"kind": "HTTPProxy", "spec": validSpecMap}},
+			pluginSpec:     map[string]any{"proxy": map[string]any{"kind": "HTTPProxy", "spec": validSpecMap}},
 			expectedKind:   "httpproxy",
 			expectedConfig: validHTTPConfig,
 		},

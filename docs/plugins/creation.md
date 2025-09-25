@@ -140,6 +140,8 @@ The implementation is mostly similar across all plugin types.
 
 Test your plugin using the `percli plugin start` command. This will start a local server that will serve your plugin and allow you to test it in the Perses UI.
 
+Optionally, for the backend part, you can define unit tests to ensure that your CUE model accepts (or rejects) the intended data. For more information, see the `percli plugin test-schemas` command.
+
 ### Build
 
 Build your plugin using the `percli plugin build` command. This will create an archive file containing your plugin ready for distribution.

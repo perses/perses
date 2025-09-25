@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useState } from 'react';
-import { Button, FormControlLabel, MenuItem, Stack, Switch, TextField } from '@mui/material';
+import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { Button, CircularProgress, FormControlLabel, MenuItem, Stack, Switch, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -92,32 +92,52 @@ interface DuplicationFormProps {
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
 }
 
+/* TODO: Why does it receive an array of projects and not a single project?! */
 const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => {
   const { projects, hideProjectSelect, onClose, onSuccess } = props;
 
-  const dashboardSchemaValidation = useDashboardValidationSchema();
+  const { schema: dashboardSchemaValidation, isSchemaLoading: isDashboardSchemaValidationLoading } =
+    useDashboardValidationSchema(projects[0]?.metadata.name);
 
   const dashboardForm = useForm<CreateDashboardValidationType>({
-    resolver: zodResolver(dashboardSchemaValidation),
+    resolver: dashboardSchemaValidation ? zodResolver(dashboardSchemaValidation) : undefined,
     mode: 'onBlur',
     defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '' },
   });
 
-  const processDashboardForm: SubmitHandler<CreateDashboardValidationType> = (data) => {
-    onClose();
-    if (onSuccess) {
-      onSuccess({ project: data.projectName, dashboard: data.dashboardName } as DashboardSelector);
-    }
-  };
+  const handleProcessDashboardForm = useCallback((): SubmitHandler<CreateDashboardValidationType> => {
+    return (data) => {
+      onClose();
+      if (onSuccess) {
+        onSuccess({ project: data.projectName, dashboard: data.dashboardName } as DashboardSelector);
+      }
+    };
+  }, [onClose, onSuccess]);
 
   const handleClose = (): void => {
     onClose();
     dashboardForm.reset();
   };
 
+  if (!isDashboardSchemaValidationLoading)
+    return (
+      <Stack
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          width: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <CircularProgress />
+      </Stack>
+    );
+
   return (
     <FormProvider {...dashboardForm}>
-      <form onSubmit={dashboardForm.handleSubmit(processDashboardForm)}>
+      <form onSubmit={dashboardForm.handleSubmit(handleProcessDashboardForm())}>
         <Dialog.Content sx={{ width: '100%' }}>
           <Stack gap={1}>
             {!hideProjectSelect && (

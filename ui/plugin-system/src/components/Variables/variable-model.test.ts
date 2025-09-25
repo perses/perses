@@ -117,7 +117,11 @@ describe('useListVariablePluginValues', () => {
       timeRange: expect.any(Object),
     };
 
-    expect(getVariableOptionsMock).toHaveBeenCalledWith(definition.spec.plugin.spec, expectedCtx);
+    expect(getVariableOptionsMock).toHaveBeenCalledWith(
+      definition.spec.plugin.spec,
+      expectedCtx,
+      expect.any(AbortSignal)
+    );
   });
 
   it('should filter self variable from deps and ctx when dependsOn is passed', () => {
@@ -154,6 +158,10 @@ describe('useListVariablePluginValues', () => {
       timeRange: expect.any(Object),
     };
 
-    expect(getVariableOptionsMock).toHaveBeenCalledWith(definition.spec.plugin.spec, expectedCtx);
+    expect(getVariableOptionsMock).toHaveBeenCalledWith(
+      definition.spec.plugin.spec,
+      expectedCtx,
+      expect.any(AbortSignal)
+    );
   });
 });

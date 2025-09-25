@@ -19,13 +19,13 @@ Perses is first and foremost a dashboard tool that you can use to display a vari
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-![img.png](https://perses.dev/assets/images/perses_overview.gif)
+![img.png](https://perses.dev/assets/images/home/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 
 - **Open specification for dashboards**. Perses is also an initiative to define a standardized dashboard specification, fostering interoperability across observability tools.
 - **Integrability**. Perses provides various npm packages that allow developers to embed panels and dashboards into their own UIs, benefiting from the work done in Perses. For instance, these packages could be used in the future to enhance data visualization in the Prometheus UI.
-- **Extensibility**. Perses is soon to support plugins, enabling users to extend the tool’s native capabilities to suit specific needs.
+- **Extensibility**. Perses supports multiple kinds of plugins, enabling users to extend the tool’s native capabilities to suit specific needs.
 - **GitOps-friendly**. SDKs, CI/CD libraries, static validation, native CLI.. Perses provides everything you need for a great Dashboard-as-Code experience.
 - **Kubernetes-native mode**. Dashboard definitions will be deployable into and readable from individual application namespaces using Custom Resource Definitions (CRDs). For more information on that topic you can take a look at the [Perses Operator](https://github.com/perses/perses-operator).
 
@@ -44,7 +44,9 @@ We are providing an online demo available at **https://demo.perses.dev**, where 
    * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/cli.md)
    * Two SDKs (in Golang and in Cuelang) are available for coding dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
      These SDKs will likely evolve based on the feedback we receive. However, changes are expected to focus on adding utility functions rather than introducing breaking changes.
-3. *Coming soon!* A revamped plugin architecture will enable the externalization of both plugin loading and implementation.
+3. A plugin architecture:
+   * Enables the externalization of both plugin loading and implementation.
+   * The core plugins are maintained in [perses/plugins](https://github.com/perses/plugins) repository.
 
 ## What's next
 
@@ -69,6 +71,13 @@ You can launch a Perses container for trying it out with:
 ```bash
 docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 ```
+
+### Homebrew
+
+We have [a Homebrew tap](https://github.com/perses/homebrew-tap) so macOS and Linux users can install with:
+
+`brew install perses/tap/perses` for the server and web UI
+`brew install perses/tap/percli` for the CLI tool
 
 ### Building from source
 

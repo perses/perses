@@ -34,7 +34,7 @@ describe('LegendOptionsEditor', () => {
   };
 
   const getLegendModeSelector = (): HTMLElement => {
-    return screen.getByRole('combobox', { name: 'Mode' });
+    return screen.getByRole('group', { name: 'Mode' });
   };
 
   const getLegendValuesSelector = (): HTMLElement => {
@@ -44,7 +44,7 @@ describe('LegendOptionsEditor', () => {
   it('can change legend visibility by clicking', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor(undefined, onChange);
-    expect(getLegendPositionSelector()).toBeDisabled();
+    expect(screen.queryByRole('combobox', { name: 'Position' })).not.toBeInTheDocument();
     userEvent.click(getLegendShowSwitch());
     expect(onChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
@@ -64,12 +64,11 @@ describe('LegendOptionsEditor', () => {
   it('should allow changing legend mode', () => {
     const onChange = jest.fn();
     renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
-    expect(getLegendModeSelector()).toBeEnabled();
-    userEvent.click(getLegendModeSelector());
-    const tableModeOption = screen.getByRole('option', {
-      name: 'Table',
+    expect(getLegendModeSelector()).toBeInTheDocument();
+    const tableModeButton = screen.getByRole('button', {
+      name: 'display table mode',
     });
-    userEvent.click(tableModeOption);
+    userEvent.click(tableModeButton);
     expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table' });
   });
 
@@ -110,15 +109,15 @@ describe('LegendOptionsEditor', () => {
   });
 
   describe('when legend mode is "list"', () => {
-    test('legend values should be disabled', () => {
+    test('legend values should not be visible', () => {
       const onChange = jest.fn();
       renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
-      expect(getLegendValuesSelector()).toBeDisabled();
+      expect(screen.queryByRole('combobox', { name: 'Values' })).not.toBeInTheDocument();
     });
   });
 
-  describe('when legend mode is "list"', () => {
-    test('legend values should be enabled', () => {
+  describe('when legend mode is "table"', () => {
+    test('legend values should be present & enabled', () => {
       const onChange = jest.fn();
       renderLegendOptionsEditor({ position: 'bottom', mode: 'table' }, onChange);
       expect(getLegendValuesSelector()).toBeEnabled();

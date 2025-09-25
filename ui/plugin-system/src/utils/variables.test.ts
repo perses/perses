@@ -97,3 +97,164 @@ describe('replaceVariables()', () => {
     });
   });
 });
+
+describe('replaceVariables() with custom formats', () => {
+  const tests = [
+    // csv
+    {
+      text: 'hello ${var1:csv} ${var2:csv}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses,prometheus world',
+    },
+    // distributed
+    {
+      text: 'hello ${var1:distributed} ${var2:distributed}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses,var1=prometheus world',
+    },
+    {
+      text: 'hello ${var1:distributed} ${var2:distributed}',
+      state: {
+        var1: { value: ['perses', 'prometheus', 'timeseries'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses,var1=prometheus,var1=timeseries world',
+    },
+    // doublequote
+    {
+      text: 'hello ${var1:doublequote} ${var2:doublequote}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello "perses","prometheus" "world"',
+    },
+    // glob
+    {
+      text: 'hello ${var1:glob} ${var2:glob}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello {perses,prometheus} {world}',
+    },
+    // json
+    {
+      text: 'hello ${var1:json} ${var2:json}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello ["perses","prometheus"] ["world"]',
+    },
+    // lucene
+    {
+      text: 'hello ${var1:lucene} ${var2:lucene}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello ("perses" OR "prometheus") ("world")',
+    },
+    // percentencode
+    {
+      text: 'hello ${var1:percentencode} ${var2:percentencode}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses%2Cprometheus world',
+    },
+    // pipe
+    {
+      text: 'hello ${var1:pipe} ${var2:pipe}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses|prometheus world',
+    },
+    // raw
+    {
+      text: 'hello ${var1:raw} ${var2:raw}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses,prometheus world',
+    },
+    // regex
+    {
+      text: 'hello ${var1:regex} ${var2:regex}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello (perses|prometheus) (world)',
+    },
+    {
+      text: 'hello ${var1:regex} ${var2:regex}',
+      state: {
+        var1: { value: ['perses.', 'prometheus$'], loading: false },
+        var2: { value: 'world.', loading: false },
+      },
+      expected: 'hello (perses\\.|prometheus\\$) (world\\.)',
+    },
+    // singlequote
+    {
+      text: 'hello ${var1:singlequote} ${var2:singlequote}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: "hello 'perses','prometheus' 'world'",
+    },
+    // sqlstring
+    {
+      text: 'hello ${var1:sqlstring} ${var2:sqlstring}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: "hello 'perses','prometheus' 'world'",
+    },
+    {
+      text: 'hello ${var1:sqlstring} ${var2:sqlstring}',
+      state: {
+        var1: { value: ["perses'", 'prometheus'], loading: false },
+        var2: { value: "world'", loading: false },
+      },
+      expected: "hello 'perses''','prometheus' 'world'''",
+    },
+    // text
+    {
+      text: 'hello ${var1:text} ${var2:text}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello perses + prometheus world',
+    },
+    // queryparam
+    {
+      text: 'hello ${var1:queryparam} ${var2:queryparam}',
+      state: {
+        var1: { value: ['perses', 'prometheus'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello var1=perses&var1=prometheus var2=world',
+    },
+  ];
+
+  tests.forEach(({ text, state, expected }) => {
+    it(`replaces ${text} ${JSON.stringify(state)}`, () => {
+      expect(replaceVariables(text, state)).toEqual(expected);
+    });
+  });
+});

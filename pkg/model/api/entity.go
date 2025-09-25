@@ -21,5 +21,5 @@ type Metadata interface {
 type Entity interface {
 	GetKind() string
 	GetMetadata() Metadata
-	GetSpec() interface{}
+	GetSpec() any
 }

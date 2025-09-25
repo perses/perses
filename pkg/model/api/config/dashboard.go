@@ -57,7 +57,7 @@ func (c *CustomLintRule) Verify() error {
 	return nil
 }
 
-func (c *CustomLintRule) Evaluate(data map[string]interface{}) error {
+func (c *CustomLintRule) Evaluate(data map[string]any) error {
 	if c.jsonEval == nil {
 		if err := c.evaluateAndLoadJSONExpression(); err != nil {
 			return err
@@ -74,7 +74,7 @@ func (c *CustomLintRule) Evaluate(data map[string]interface{}) error {
 	if err != nil {
 		return fmt.Errorf("error while evaluating the jsonpath expression for the rule %q: %w", c.Name, err)
 	}
-	out, _, err := c.celProgram.Eval(map[string]interface{}{"value": value})
+	out, _, err := c.celProgram.Eval(map[string]any{"value": value})
 	if err != nil {
 		return fmt.Errorf("error while evaluating the CEL program for the rule %q: %w", c.Name, err)
 	}

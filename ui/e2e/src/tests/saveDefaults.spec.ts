@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { test, expect } from '../fixtures/dashboardTest';
 
 const TEXT_VARIABLE_UPDATED_VALUE = 'new';
+const SAVE_DEFAULTS_DIALOG_TEXT =
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
 
 test.use({
   dashboardName: 'Defaults',
@@ -60,7 +61,7 @@ test.describe('Dashboard: Defaults', () => {
     await page.evaluate(() => {
       window.location.search = '';
     });
-    await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+    await dashboardPage.refreshDashboard();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.getVariable('interval')).toHaveValue('5m');

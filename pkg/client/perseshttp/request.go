@@ -118,7 +118,7 @@ func (r *Request) Query(query QueryInterface) *Request {
 
 // Body defines the body in the HTTP request.
 // The body shall be json compatible
-func (r *Request) Body(obj interface{}) *Request {
+func (r *Request) Body(obj any) *Request {
 	data, err := json.Marshal(obj)
 	if err != nil {
 		r.err = err
@@ -330,7 +330,7 @@ func (r *Response) Error() error {
 }
 
 // Object stores the result into respObj.
-func (r *Response) Object(respObj interface{}) error {
+func (r *Response) Object(respObj any) error {
 	err := r.Error()
 
 	if err != nil {
