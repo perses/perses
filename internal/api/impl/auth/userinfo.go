@@ -19,8 +19,8 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-// externalUserInfoProfile is a subset of oidc.UserInfoProfile structure with only the interesting information.
-type externalUserInfoProfile struct {
+// ExternalUserInfoProfile is a subset of oidc.UserInfoProfile structure with only the interesting information.
+type ExternalUserInfoProfile struct {
 	Name              string `json:"name,omitempty"`
 	GivenName         string `json:"given_name,omitempty"`
 	FamilyName        string `json:"family_name,omitempty"`
@@ -37,7 +37,7 @@ type externalUserInfo interface {
 	// GetLogin returns the login designating the ``metadata.name`` of the user entity.
 	GetLogin() string
 	// GetProfile returns various user information that may be set in the ``specs`` of the user entity.
-	GetProfile() externalUserInfoProfile
+	GetProfile() ExternalUserInfoProfile
 	// GetProviderContext returns the provider context. It identifies the external provider used to collect this user
 	// information, as well as the identity of the user in that context.
 	GetProviderContext() v1.OAuthProvider

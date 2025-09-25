@@ -17,13 +17,16 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/golang-jwt/jwt/v5"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 )
+
+type whoamiOption interface {
+	Whoami() (string, error)
+}
 
 type option struct {
 	persesCMD.Option
@@ -47,30 +50,25 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	if o.showToken {
-		if err := output.HandleString(o.writer, fmt.Sprintf("Token used: %s", o.authorization.Credentials)); err != nil {
-			return err
-		}
-	}
 	if o.showURL {
 		if err := output.HandleString(o.writer, fmt.Sprintf("Authenticated to the server: %s", config.Global.RestClientConfig.URL)); err != nil {
 			return err
 		}
 	}
-	login, err := o.extractLogin()
+	if o.showToken {
+		if err := output.HandleString(o.writer, fmt.Sprintf("Token used: %s", o.authorization.Credentials)); err != nil {
+			return err
+		}
+	}
+	whoamiOption, err := o.newWhoamiOption()
 	if err != nil {
 		return err
 	}
-	return output.HandleString(o.writer, fmt.Sprintf("User used: %s", login))
-}
-
-func (o *option) extractLogin() (string, error) {
-	claims := &jwt.RegisteredClaims{}
-	token, _, err := jwt.NewParser().ParseUnverified(o.authorization.Credentials, claims)
+	username, err := whoamiOption.Whoami()
 	if err != nil {
-		return "", err
+		return err
 	}
-	return token.Claims.(*jwt.RegisteredClaims).Subject, nil
+	return output.HandleString(o.writer, fmt.Sprintf("User used: %s", username))
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -79,6 +77,21 @@ func (o *option) SetWriter(writer io.Writer) {
 
 func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
+}
+
+func (o *option) newWhoamiOption() (whoamiOption, error) {
+	if config.Global.RestClientConfig.K8sAuth != nil {
+		apiClient, err := config.Global.GetAPIClient()
+		if err != nil {
+			return nil, err
+		}
+		return &k8sWhoami{
+			apiClient: apiClient,
+		}, nil
+	}
+	return &nativeWhoami{
+		credentials: o.authorization.Credentials,
+	}, nil
 }
 
 func NewCMD() *cobra.Command {

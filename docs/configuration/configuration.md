@@ -82,21 +82,21 @@ Generic placeholders are defined as follows:
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
-# Use it in case you want to prefix the API path. By default the API is served with the path /api. 
+# Use it in case you want to prefix the API path. By default the API is served with the path /api.
 # With this config, it will be served with the path <api_prefix>/api
 api_prefix: <string> # Optional
-  
+
 # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
 security: <Security config> # Optional
 
-# Database configuration 
+# Database configuration
 database: <Database config> # Optional
 
 # Dashboard configuration
 dashboard: <Dashboard config> # Optional
 
 # The configuration to access the CUE schemas
-# This config is deprecated. It will be removed in the future. Please remove it from your config. 
+# This config is deprecated. It will be removed in the future. Please remove it from your config.
 schemas: <Schemas config> # Optional
 
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
@@ -119,7 +119,7 @@ ephemeral_dashboard: < EphemeralDashboard config > # Optional
 # Any configuration related to the UI itself
 frontend: <Frontend config> # Optional
 
-# The configuration to access and load the runtime plugins 
+# The configuration to access and load the runtime plugins
 plugin: <Plugin config> # Optional
 ```
 
@@ -129,10 +129,10 @@ plugin: <Plugin config> # Optional
 # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
 # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
 readonly: <boolean> | default = false # Optional
-  
+
 # Cookie configuration
 cookie: <Cookie config> # Optional
-  
+
 # It contains the config regarding the time to live of the refresh/access token.
 authentication: <Authentication config> # Optional
 
@@ -201,6 +201,8 @@ oidc:
 # List of the OIDC authentication providers
 oauth:
   - <OAuth provider> # Optional
+kubernetes:
+  - <Kubernetes provider> # Optional
 ```
 
 ##### OIDC provider
@@ -324,6 +326,16 @@ device_auth_url: <string> # Optional
 custom_login_property: <string> # Optional
 ```
 
+##### Kubernetes provider
+
+```yaml
+# Determines if the Kubernetes authentication provider is enabled. This provider must be enabled
+# alongside the kubernetes authorization provider, and cannot be used alongside any other
+# authentication providers
+enable: <boolean>
+
+```
+
 ###### Authentication provider HTTP Config
 
 ```yaml
@@ -356,7 +368,7 @@ kubernetes:
 ```yaml
 # Determines if the native provider is enabled. If security.enable_auth is set to true and no other
 # providers are set then this value will be automatically set to true
-enabled: <boolean> #Optional
+enable: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 check_latest_update_interval: <duration> | default = 30s> # Optional
 
@@ -384,7 +396,7 @@ scopes:
 enabled: <boolean>
 # File path to a local kubeconfig file. The current logged in user's bearer token will be used
 # for both the backend and as the user being logged into Perses. The user should have "create"
-# permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
+# permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't
 # available the pods service account token will be used. This parameter should not be set in production
 kubeconfig: <string> # Optional
 # query per second (QPS) the k8s client will use with the apiserver
@@ -417,7 +429,7 @@ allow_origins: <string[]> | default = ["*"] # Optional
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
 allow_methods: <string[]> | default = [] # Optional
 
-# Configure the value of the Access-Control-Allow-Headers response header. 
+# Configure the value of the Access-Control-Allow-Headers response header.
 # See also: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
 allow_headers: <string[]> | default = [] # Optional
 
@@ -751,10 +763,10 @@ enable: <boolean> | default = false # Optional
 
 # Name of the container the target address points to.
 container_name: <string> # Optional
-  
+
 # Name of the container port.
 container_port_name: <string> # Optional
-  
+
 # Number of the container port.
 container_port_number: <string> # Optional
 ```
@@ -815,7 +827,7 @@ dashboard: <string>
 # The default value depends if Perses is running in a container or not.
 path: <path> | default = ("plugins" | "/etc/perses/plugins") # Optional
 
-# The path to the folder containing the plugins archive. 
+# The path to the folder containing the plugins archive.
 # When Perses is starting, it will extract the content of the archive in the folder specified in the `folder` attribute.
 archive_path: <path> | default = ("plugins-archive" | "/etc/perses/plugins-archive") # Optional
 
@@ -842,11 +854,11 @@ name: <string>
 # The target of the custom lint rule. It is a JSONPath expression.
 target: <string>
 
-# The assertion of the custom lint rule. It is a valid CEL expression. 
+# The assertion of the custom lint rule. It is a valid CEL expression.
 # The value is the result of the target. The result of the assertion must be a boolean.
 assertion: <string>
 
-# The message to display when the assertion is false. 
+# The message to display when the assertion is false.
 message: <string>
 
 # If set to true, the custom lint rule is disabled.

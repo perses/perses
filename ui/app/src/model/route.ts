@@ -14,6 +14,7 @@
 export const AdminRoute = '/admin';
 export const SignInRoute = '/sign-in';
 export const SignUpRoute = '/sign-up';
+export const ExternalSignInRoute = '/external-sign-in';
 export const ConfigRoute = '/config';
 export const ImportRoute = '/import';
 export const ProjectRoute = '/projects';
@@ -24,6 +25,7 @@ const paths = [
   AdminRoute,
   SignInRoute,
   SignUpRoute,
+  ExternalSignInRoute,
   ConfigRoute,
   ImportRoute,
   ProjectRoute,

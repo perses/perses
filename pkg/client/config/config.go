@@ -38,6 +38,7 @@ type PublicRestConfigClient struct {
 	NativeAuth *api.PublicAuth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
 	Oauth      *secret.PublicOAuth     `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
 	BasicAuth  *secret.PublicBasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	K8sAuth    *secret.PublicK8sAuth   `json:"k8s_auth,omitempty" yaml:"k8s_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -55,6 +56,7 @@ func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient
 		NativeAuth:    api.NewPublicAuth(config.NativeAuth),
 		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
 		Oauth:         secret.NewPublicOAuth(config.OAuth),
+		K8sAuth:       secret.NewPublicK8sAuth(config.K8sAuth),
 		Authorization: secret.NewPublicAuthorization(config.Authorization),
 		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
 		Headers:       config.Headers,
@@ -67,6 +69,7 @@ type RestConfigClient struct {
 	NativeAuth *api.Auth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
 	OAuth      *secret.OAuth     `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	K8sAuth    *secret.K8sAuth   `json:"k8s_auth,omitempty" yaml:"k8s_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -86,6 +89,9 @@ func (c *RestConfigClient) Validate() error {
 		nbAuthConfigured++
 	}
 	if c.BasicAuth != nil {
+		nbAuthConfigured++
+	}
+	if c.K8sAuth != nil {
 		nbAuthConfigured++
 	}
 	if c.Authorization != nil {
@@ -164,6 +170,16 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		}
 
 		httpClient = oauthConfig.Client(ctx)
+	}
+	if config.K8sAuth != nil {
+		token, getTokenErr := config.K8sAuth.GetToken()
+		if getTokenErr != nil {
+			return nil, getTokenErr
+		}
+		if len(config.Headers) == 0 {
+			config.Headers = map[string]string{}
+		}
+		config.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
 	}
 
 	if httpClient == nil {

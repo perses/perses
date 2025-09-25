@@ -35,7 +35,7 @@ func useNewIfPresent(old, new string) (string, bool) { // nolint: revive
 
 // saveProfileInfo build a user spec merging the old spec with a given user profile
 // Return a boolean saying if the result is different from old value.
-func saveProfileInfo(old v1.UserSpec, uInfoProfile externalUserInfoProfile) (v1.UserSpec, bool) {
+func saveProfileInfo(old v1.UserSpec, uInfoProfile ExternalUserInfoProfile) (v1.UserSpec, bool) {
 	firstChanged := false
 	lastChanged := false
 	old.FirstName, firstChanged = useNewIfPresent(old.FirstName, uInfoProfile.GivenName)

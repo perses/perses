@@ -18,20 +18,24 @@ import (
 	"io"
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/cmd/login"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	persesCMD.Option
-	writer    io.Writer
-	errWriter io.Writer
-	apiClient api.ClientInterface
+	writer       io.Writer
+	errWriter    io.Writer
+	apiClient    api.ClientInterface
+	externalAuth bool
 }
 
 func (o *option) Complete(args []string) error {
+	// if config.Global
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'refresh'")
 	}
@@ -40,17 +44,30 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
+
+	apiConfig, err := apiClient.Config()
+	if err != nil {
+		return err
+	}
+	if apiConfig.Security.Authentication.Providers.KubernetesProvider.Enable {
+		// If the kubernetes provider is enabled then we are using an external auth system
+		o.externalAuth = true
+	}
+
 	return nil
 }
 
 func (o *option) Validate() error {
-	if len(config.Global.RefreshToken) == 0 {
+	if !o.externalAuth && len(config.Global.RefreshToken) == 0 {
 		return fmt.Errorf("refresh_token doesn't exist in the config, please use the command login to get one")
 	}
 	return nil
 }
 
 func (o *option) Execute() error {
+	if o.externalAuth {
+		return o.externalRefresh()
+	}
 	response, err := o.apiClient.Auth().Refresh(config.Global.RefreshToken)
 	if err != nil {
 		return err
@@ -59,6 +76,33 @@ func (o *option) Execute() error {
 		return writeErr
 	}
 	return output.HandleString(o.writer, "access token has been refreshed")
+}
+
+func (o *option) externalRefresh() error {
+	// If the k8sAuth secret hasn't been set yet then we know that the user hasn't attempted to log in
+	if config.Global.RestClientConfig.K8sAuth == nil {
+		return fmt.Errorf("kubeconfig location has not been set yet, please use the command login to set it")
+	}
+
+	k8sRefresh := login.NewK8sLogin(o.apiClient, config.Global.RestClientConfig.K8sAuth.KubeconfigFile)
+
+	tok, err := k8sRefresh.Refresh()
+	if err != nil {
+		return err
+	}
+
+	config.Global.RestClientConfig.K8sAuth = &secret.K8sAuth{
+		KubeconfigFile: tok.AccessToken,
+	}
+
+	if writeErr := config.WriteFromScratch(&config.Config{
+		RestClientConfig: config.Global.RestClientConfig,
+		RefreshToken:     "",
+	}); writeErr != nil {
+		return writeErr
+	}
+
+	return output.HandleString(o.writer, "kubeconfig has been refreshed")
 }
 
 func (o *option) SetWriter(writer io.Writer) {

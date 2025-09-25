@@ -16,8 +16,11 @@ package login
 import (
 	"fmt"
 	"io"
+	"os/user"
+	"path/filepath"
 
 	"github.com/charmbracelet/huh"
+	"github.com/nexucis/lamenv"
 	"github.com/perses/perses/internal/api/utils"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
@@ -36,6 +39,7 @@ type externalAuthKind string
 const (
 	externalAuthKindOAuth externalAuthKind = utils.AuthKindOAuth
 	externalAuthKindOIDC  externalAuthKind = utils.AuthKindOIDC
+	externalAuthKindK8s   externalAuthKind = utils.AuthKindKubernetes
 )
 
 const (
@@ -44,7 +48,12 @@ const (
 	errSlowDown             = "slow_down"
 	errAccessDenied         = "access_denied"
 	errExpiredToken         = "expired_token"
+	defaultKubeconfig       = "default_kubeconfig"
 )
+
+type kubeconfigStruct struct {
+	Kubeconfig string
+}
 
 type loginOption interface {
 	Login() (*oauth2.Token, error)
@@ -65,6 +74,8 @@ type option struct {
 	externalAuthProvider string
 	accessToken          string
 	refreshToken         string
+	kubeconfig           string
+	useKubeconfig        bool
 	insecureTLS          bool
 	apiClient            api.ClientInterface
 	restConfig           clientConfig.RestConfigClient
@@ -127,6 +138,12 @@ func (o *option) Validate() error {
 	if (len(o.username) > 0 || len(o.accessToken) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
 		return fmt.Errorf("you can not set --username or --token at the same time than --client-id or --client-secret or --provider")
 	}
+	if o.useKubeconfig && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
+		return fmt.Errorf("you can not set --kubeconfig at the same time than --client-id or --client-secret or --provider")
+	}
+	if (len(o.username) > 0 || len(o.accessToken) > 0) && o.useKubeconfig {
+		return fmt.Errorf("you can not set --username or --token at the same time than --kubeconfig")
+	}
 
 	// check if based on the API config, flags can be used
 	providers := o.remoteConfig.Security.Authentication.Providers
@@ -151,6 +168,9 @@ func (o *option) Validate() error {
 			return fmt.Errorf("provider %q does not exist", o.externalAuthProvider)
 		}
 	}
+	if providers.KubernetesProvider.Enable {
+		return o.validateKubernetes(providers)
+	}
 	return nil
 }
 
@@ -174,6 +194,11 @@ func (o *option) Execute() error {
 		}
 		o.accessToken = token.AccessToken
 		o.refreshToken = token.RefreshToken
+	}
+	if o.useKubeconfig {
+		o.restConfig.K8sAuth = &secret.K8sAuth{
+			KubeconfigFile: o.kubeconfig,
+		}
 	}
 	if len(o.accessToken) > 0 {
 		o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
@@ -214,6 +239,12 @@ func (o *option) newLoginOption() (loginOption, error) {
 				clientSecret:         o.clientSecret,
 				apiClient:            o.apiClient,
 			}, nil
+		}
+		if o.externalAuthKind == externalAuthKindK8s {
+			if !o.useKubeconfig {
+				return nil, fmt.Errorf("cannot log into a cluster without setting the kubeconfig")
+			}
+			return NewK8sLogin(o.apiClient, o.kubeconfig), nil
 		}
 		return &deviceCodeLogin{
 			writer:               o.writer,
@@ -262,6 +293,15 @@ func (o *option) selectAndSetProvider() error {
 		}
 	}
 
+	if providers.KubernetesProvider.Enable {
+		optKey := "Kubernetes"
+		optValue := string(externalAuthKindK8s)
+		options = append(options, huh.NewOption(optKey, optValue))
+		modifiers[optValue] = func() {
+			o.setExternalAuthProvider(externalAuthKindK8s, string(externalAuthKindK8s))
+		}
+	}
+
 	// In case there is only one item available, prompt selection is not necessary
 	if len(options) == 1 {
 		modifiers[options[0].Value]()
@@ -299,6 +339,35 @@ func (o *option) setExternalAuthProvider(kind externalAuthKind, slugID string) {
 	o.externalAuthProvider = slugID
 }
 
+func (o *option) validateKubernetes(providers backendConfig.AuthProviders) error {
+	if !providers.KubernetesProvider.Enable {
+		return fmt.Errorf("--kubeconfig input is forbidden as backend does not support kubernetes auth provider")
+	}
+	// the useKubeconfig value CAN be set as empty when `percli login` is
+	// called without the --kubeconfig value
+	o.useKubeconfig = true
+	if len(o.kubeconfig) == 0 {
+		// Load KUBECONFIG env variable if "--kubeconfig" didn't receive a location
+		var kubeconfigEnv kubeconfigStruct
+		err := lamenv.Unmarshal(&kubeconfigEnv, []string{})
+		if err != nil {
+			return err
+		}
+		o.kubeconfig = kubeconfigEnv.Kubeconfig
+
+		// If KUBECONFIG isn't set, then attempt to load from the well known "~/.kube/config" location
+		if len(o.kubeconfig) == 0 {
+			usr, _ := user.Current()
+			dir := usr.HomeDir
+			path := filepath.Join(dir, ".kube/config")
+
+			o.kubeconfig = path
+		}
+	}
+
+	return nil
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
@@ -312,6 +381,11 @@ percli login https://demo.perses.dev
 percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id> --client-secret <client-secret>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			kubeconfigFlag := cmd.Flags().Lookup("kubeconfig").Value.String()
+			if kubeconfigFlag == defaultKubeconfig {
+				o.useKubeconfig = true
+				o.kubeconfig = ""
+			}
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
@@ -321,6 +395,8 @@ percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id
 	cmd.Flags().StringVar(&o.clientID, "client-id", "", "Client ID used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.clientSecret, "client-secret", "", "Client Secret used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
+	cmd.Flags().StringVar(&o.kubeconfig, "kubeconfig", "", "Kubeconfig file location to load Kubernetes token from. Defaults to KUBECONFIG env variable, then HOME/.kube/config if empty")
+	cmd.Flags().Lookup("kubeconfig").NoOptDefVal = defaultKubeconfig
 	cmd.Flags().StringVar(&o.externalAuthProvider, "provider", "", "External authentication provider identifier. (slug_id)")
 	return cmd
 }

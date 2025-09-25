@@ -19,6 +19,7 @@ import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
 import { ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
+import { ExternalAuthProviders } from '../model/auth-client';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -102,6 +103,17 @@ export function useIsAuthEnabled(): boolean {
   return config.security.enable_auth;
 }
 
+export function useIsNativeAuth(): boolean {
+  const { config } = useConfigContext();
+  return !!config.security.authorization.provider.native?.enable;
+}
+
+export function useIsExternalAuth(): boolean {
+  const { config } = useConfigContext();
+  // check if any of the external authentication options are enabled. Currently only kubernetes
+  return !!config.security.authentication.providers.kubernetes?.enable;
+}
+
 export function useIsSignUpDisable(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.disable_sign_up;
@@ -142,4 +154,15 @@ export function useIsExternalProviderEnabled(): boolean {
   return (
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
+}
+
+// Need to determine better variable naming to differentiate between "external" auth like oauth
+// and oidc which is still completed through perses and "external" auth like kubernetes
+// which perses only passes the token around to check
+export function useExternalProvider(): ExternalAuthProviders {
+  const { config } = useConfigContext();
+  if (config.security.authentication.providers.kubernetes?.enable) {
+    return 'kubernetes';
+  }
+  return 'none';
 }
