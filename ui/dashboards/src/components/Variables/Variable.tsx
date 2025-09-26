@@ -21,7 +21,13 @@ import {
   VariableName,
   VariableValue,
 } from '@perses-dev/core';
-import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
+import {
+  SORT_METHODS,
+  SortMethodName,
+  useListVariablePluginValues,
+  VariableOption,
+  VariableState,
+} from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
 import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
@@ -88,23 +94,8 @@ export function useListVariableState(
     const opts = options ? [...options] : [];
 
     if (!sort || sort === 'none') return opts;
-
-    switch (sort) {
-      case 'alphabetical-asc':
-        return opts.sort((a, b) => (a.label > b.label ? 1 : -1));
-      case 'alphabetical-desc':
-        return opts.sort((a, b) => (a.label > b.label ? -1 : 1));
-      case 'numerical-asc':
-        return opts.sort((a, b) => (parseInt(a.label) > parseInt(b.label) ? 1 : -1));
-      case 'numerical-desc':
-        return opts.sort((a, b) => (parseInt(a.label) < parseInt(b.label) ? 1 : -1));
-      case 'alphabetical-ci-asc':
-        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
-      case 'alphabetical-ci-desc':
-        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
-      default:
-        return opts;
-    }
+    const sortMethod = SORT_METHODS[sort as SortMethodName];
+    return !sortMethod ? opts : sortMethod.sort(opts);
   }, [options, sort]);
 
   const viewOptions = useMemo(() => {

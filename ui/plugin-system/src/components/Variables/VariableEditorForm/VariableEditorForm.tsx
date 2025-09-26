@@ -23,6 +23,7 @@ import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';
 import { useTimeRange } from '../../../runtime';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
+import { SORT_METHODS, SortMethodName } from './variable-editor-form-model';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;
@@ -108,6 +109,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.allowAllValue',
   });
 
+  const sortMethod = useWatch<VariableDefinition, 'spec.sort'>({
+    control: control,
+    name: 'spec.sort',
+  }) as SortMethodName;
+
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
   const values = form.getValues() as ListVariableDefinition;
@@ -123,6 +129,10 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
   }
 
+  if (!values.spec.sort) {
+    form.setValue('spec.sort', 'none');
+  }
+
   const { refresh } = useTimeRange();
 
   return (
@@ -133,7 +143,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
       <Stack spacing={2} mb={2}>
         <Box>
           <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-            <VariableListPreview definition={previewSpec} />
+            <VariableListPreview sortMethod={sortMethod} definition={previewSpec} />
           </ErrorBoundary>
         </Box>
         <Stack>
@@ -219,13 +229,15 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   field.onChange(event);
                 }}
               >
-                <MenuItem value="none">None</MenuItem>
-                <MenuItem value="alphabetical-asc">Alphabetical, asc</MenuItem>
-                <MenuItem value="alphabetical-desc">Alphabetical, desc</MenuItem>
-                <MenuItem value="numerical-asc">Numerical, asc</MenuItem>
-                <MenuItem value="numerical-desc">Numerical, desc</MenuItem>
-                <MenuItem value="alphabetical-ci-asc">Alphabetical, case-insensitive, asc</MenuItem>
-                <MenuItem value="alphabetical-ci-desc">Alphabetical, case-insensitive, desc</MenuItem>
+                {Object.keys(SORT_METHODS).map((key) => {
+                  if (!SORT_METHODS[key as SortMethodName]) return null;
+                  const { label } = SORT_METHODS[key as SortMethodName];
+                  return (
+                    <MenuItem key={key} value={key}>
+                      {label}
+                    </MenuItem>
+                  );
+                })}
               </TextField>
             )}
           />
