@@ -215,6 +215,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiPrefix: `${PERSES_APP_CONFIG.api_prefix}/api` });
+  const url = buildURL({ resource: resource, apiUrl: '/api', apiPrefix: PERSES_APP_CONFIG.api_prefix });
   return fetchJson<ConfigModel>(url);
 }
