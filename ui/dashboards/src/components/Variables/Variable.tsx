@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { LinearProgress, TextField, Autocomplete, Popper, PopperProps } from '@mui/material';
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { LinearProgress, TextField, Popper, PopperProps, Checkbox, Autocomplete } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -31,6 +31,7 @@ import {
 import { UseQueryResult } from '@tanstack/react-query';
 import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
+import { ListVariableListBoxProvider, ListVariableListBox } from './ListVariableListBox';
 
 type VariableProps = {
   name: VariableName;
@@ -207,56 +208,105 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
     }
   }, [setVariableOptions, name, options, source]);
 
-  return (
-    <>
-      <Autocomplete
-        disablePortal
-        disableCloseOnSelect={allowMultiple}
-        multiple={allowMultiple}
-        fullWidth
-        limitTags={3}
-        size="small"
-        disableClearable
-        slots={{ popper: StyledPopper }}
-        renderInput={(params) => {
-          return allowMultiple ? (
-            <TextField {...params} label={title} onChange={(e) => setInputValue(e.target.value)} />
-          ) : (
-            <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
-          );
-        }}
-        sx={{
-          '& .MuiInputBase-root': {
-            minHeight: '38px',
-          },
-          '& .MuiAutocomplete-tag': {
-            margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
-          },
-        }}
-        value={selectedOptions}
-        onChange={(_, value) => {
-          if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
-            setVariableValue(name, DEFAULT_ALL_VALUE, source);
-          } else {
-            setVariableValue(name, variableOptionToVariableValue(value), source);
-          }
-        }}
-        inputValue={allowMultiple ? inputValue : undefined}
-        onInputChange={(_, newInputValue) => {
-          if (!allowMultiple) {
-            setInputWidth(getWidthPx(newInputValue, 'list'));
-          }
-        }}
-        onBlur={() => {
-          if (allowMultiple) {
-            setInputValue('');
-          }
-        }}
-        options={viewOptions}
-      />
-      {loading && <LinearProgress />}
-    </>
+  const handleGlobalSelect = useCallback(
+    (options: VariableOption[]): void => {
+      setVariableValue(name, variableOptionToVariableValue(options), source);
+    },
+    [name, setVariableValue, source]
   );
+
+  const listBoxProviderValue = useMemo(
+    () => ({
+      selectedOptions: selectedOptions as VariableOption[], // Only used when allowMultiple is true => selectedOptions is always an array
+      options: viewOptions,
+      allowAllValue,
+      onChange: handleGlobalSelect,
+    }),
+    [allowAllValue, handleGlobalSelect, selectedOptions, viewOptions]
+  );
+
+  const autocompleteComponent = useMemo(() => {
+    return (
+      <>
+        <Autocomplete
+          disablePortal
+          disableCloseOnSelect={allowMultiple}
+          multiple={allowMultiple}
+          fullWidth
+          limitTags={3}
+          size="small"
+          disableClearable
+          slotProps={{ listbox: { component: allowMultiple ? ListVariableListBox : undefined } }}
+          slots={{ popper: StyledPopper }}
+          sx={{
+            '& .MuiInputBase-root': {
+              minHeight: '38px',
+            },
+            '& .MuiAutocomplete-tag': {
+              margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
+            },
+          }}
+          options={viewOptions}
+          value={selectedOptions}
+          onChange={(_, value) => {
+            if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
+              setVariableValue(name, DEFAULT_ALL_VALUE, source);
+            } else {
+              setVariableValue(name, variableOptionToVariableValue(value as VariableOption), source);
+            }
+          }}
+          inputValue={allowMultiple ? inputValue : undefined}
+          onInputChange={(_, newInputValue) => {
+            if (!allowMultiple) {
+              setInputWidth(getWidthPx(newInputValue, 'list'));
+            }
+          }}
+          onBlur={() => {
+            if (allowMultiple) {
+              setInputValue('');
+            }
+          }}
+          renderInput={(params) => {
+            return allowMultiple ? (
+              <TextField {...params} label={title} onChange={(e) => setInputValue(e.target.value)} />
+            ) : (
+              <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
+            );
+          }}
+          renderOption={(props, option, { selected }) => {
+            const { key, ...optionProps } = props;
+            return (
+              <li key={key} {...optionProps}>
+                <Checkbox style={{ marginRight: 8 }} checked={selected} />
+                {option.label}
+              </li>
+            );
+          }}
+        />
+        {loading && <LinearProgress />}
+      </>
+    );
+  }, [
+    allowAllValue,
+    allowMultiple,
+    inputValue,
+    inputWidth,
+    loading,
+    name,
+    selectedOptions,
+    setVariableValue,
+    source,
+    title,
+    viewOptions,
+  ]);
+
+  if (allowMultiple) {
+    return (
+      <ListVariableListBoxProvider value={listBoxProviderValue}>{autocompleteComponent}</ListVariableListBoxProvider>
+    );
+  }
+
+  return autocompleteComponent;
 }
 
 function TextVariable({ name, source }: VariableProps): ReactElement {
