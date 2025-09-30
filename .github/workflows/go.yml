@@ -175,6 +175,20 @@ jobs:
         run: make install-default-plugins
       - name: validate all data from dev/data
         run: make validate-data
+  validate-cue:
+    name: "validate CUE files"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: true
+          cue_version: "v0.14.0"
+      - name: validate CUE files against corresponding test files
+        run: make validate-cue
   check-cue-gen:
     name: "check generated CUE files"
     runs-on: ubuntu-latest
