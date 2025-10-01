@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"regexp"
+	"strconv"
 
 	"github.com/fatih/color"
 	"github.com/perses/common/async"
@@ -37,18 +39,61 @@ type devserver struct {
 	rsbuildScriptName string
 	writer            io.Writer
 	errWriter         io.Writer
+	portChan          chan int
+}
+
+type portCapturingWriter struct {
+	writer    io.Writer
+	portChan  chan int
+	portSent  bool
+	portRegex *regexp.Regexp
+}
+
+func newPortCapturingWriter(writer io.Writer, portChan chan int) *portCapturingWriter {
+	// Matches patterns like "Local:	http://localhost:3000" or "Local: http://127.0.0.1:3000"
+	portRegex := regexp.MustCompile(`(?m)Local:\s*https?://(?:localhost|127\.0\.0\.1):(\d+)`)
+
+	return &portCapturingWriter{
+		writer:    writer,
+		portChan:  portChan,
+		portRegex: portRegex,
+	}
+}
+
+func (p *portCapturingWriter) Write(data []byte) (int, error) {
+	n, err := p.writer.Write(data)
+
+	// Only extract port once
+	if !p.portSent {
+		if matches := p.portRegex.FindSubmatch(data); len(matches) > 1 {
+			if port, err := strconv.Atoi(string(matches[1])); err == nil {
+				p.portChan <- port
+				p.portSent = true
+			}
+		}
+	}
+
+	return n, err
+}
+
+func (d *devserver) GetPort() <-chan int {
+	return d.portChan
 }
 
 func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errWriter io.Writer, c *color.Color) *devserver {
+	portChan := make(chan int)
+
 	streamWriter := newPrefixedStream(pluginName, writer, c)
 	streamErrWriter := newPrefixedStream(pluginName, errWriter, c)
+	portCapturingWriter := newPortCapturingWriter(streamWriter, portChan)
 
 	return &devserver{
 		pluginName:        pluginName,
 		pluginPath:        pluginPath,
 		rsbuildScriptName: rsbuildScriptName,
-		writer:            streamWriter,
+		writer:            portCapturingWriter,
 		errWriter:         streamErrWriter,
+		portChan:          portChan,
 	}
 }
 
@@ -61,6 +106,8 @@ func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
 		return err
 	}
 	<-ctx.Done()
+	// Close the port channel when the dev server is shutting down
+	close(d.portChan)
 	if err := cmd.Wait(); err != nil {
 		// As the dev server is a task that doesn't stop, killing the process with a SIGKILL signal is causing d.cmd.Wait to return an error.
 		// So most of the time it is safe to ignore the error. It is interesting to log it for debug purpose.
