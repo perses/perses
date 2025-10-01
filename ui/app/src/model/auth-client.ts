@@ -101,7 +101,7 @@ export function useNativeAuthMutation(): UseMutationResult<void, Error, NativeAu
 }
 
 export function nativeAuth(body: NativeAuthBody): Promise<void> {
-  const url = buildURL({ resource: `${authResource}/providers/native/login`, apiPrefix: '/api' });
+  const url = buildURL({ resource: `${authResource}/providers/native/login`, apiURL: '/api' });
   return fetchJson<void>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
@@ -110,7 +110,7 @@ export function nativeAuth(body: NativeAuthBody): Promise<void> {
 }
 
 export function refreshToken(): Promise<Response> {
-  const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
+  const url = buildURL({ resource: `${authResource}/refresh`, apiURL: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,

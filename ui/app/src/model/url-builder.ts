@@ -22,12 +22,12 @@ export type URLParams = {
   pathSuffix?: string[];
   queryParams?: URLSearchParams;
   apiPrefix?: string;
-  apiUrl?: string;
+  apiURL?: string;
 };
 
 export default function buildURL(params: URLParams): string {
   const basePath = params.apiPrefix !== undefined ? params.apiPrefix : getBasePathName();
-  let url = params.apiUrl === undefined ? apiUrl : params.apiUrl;
+  let url = params.apiURL === undefined ? apiUrl : params.apiURL;
   if (params.project !== undefined && params.project.length > 0) {
     url = `${url}/projects/${encodeURIComponent(params.project)}`;
   }

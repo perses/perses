@@ -28,7 +28,7 @@ export function useMigrate(): UseMutationResult<DashboardResource, StatusError, 
   return useMutation<DashboardResource, StatusError, MigrateBodyRequest>({
     mutationKey: [resource],
     mutationFn: (body) => {
-      const url = buildURL({ apiPrefix: '/api', resource: resource });
+      const url = buildURL({ resource: resource, apiURL: '/api' });
       const requestBody = {
         input: body.input || {},
         grafanaDashboard: body.grafanaDashboard,
