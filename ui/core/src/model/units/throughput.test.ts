@@ -62,6 +62,16 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
   },
   { value: 0, format: { unit: 'counts/sec' }, expected: '0 counts/sec' },
   { value: 1, format: { unit: 'ops/sec' }, expected: '1 ops/sec' },
+  {
+    value: 1000,
+    format: { unit: 'bytes/sec' },
+    expected: '1 KiB/s',
+  },
+  {
+    value: 1024,
+    format: { unit: 'bytes-binary/sec' },
+    expected: '1 KiB/s',
+  }
 ];
 
 describe('formatValue', () => {

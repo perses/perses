@@ -307,6 +307,49 @@ const BYTES_TESTS: UnitTestCase[] = [
     format: { unit: 'bytes' },
     expected: '1 EB',
   },
+  // Binary (IEC) bytes tests - base 1024
+  {
+    value: 1024,
+    format: { unit: 'bytes-binary' },
+    expected: '1 KiB',
+  },
+  {
+    value: 1024,
+    format: { unit: 'bytes-binary', shortValues: false },
+    expected: '1,024 bytes',
+  },
+  {
+    value: 1536,
+    format: { unit: 'bytes-binary' },
+    expected: '1.5 KiB',
+  },
+  {
+    value: 1048576,
+    format: { unit: 'bytes-binary' },
+    expected: '1 MiB',
+  },
+  {
+    value: 1073741824,
+    format: { unit: 'bytes-binary' },
+    expected: '1 GiB',
+  },
+  {
+    value: 1099511627776,
+    format: { unit: 'bytes-binary' },
+    expected: '1 TiB',
+  },
+  // Test threshold behavior for binary
+  {
+    value: 1024,
+    format: { unit: 'bytes-binary', shortValues: true },
+    expected: '1 KiB',
+  },
+  // Negative values for binary
+  {
+    value: -1024,
+    format: { unit: 'bytes-binary' },
+    expected: '-1 KiB',
+  },
 ];
 
 describe('formatValue', () => {

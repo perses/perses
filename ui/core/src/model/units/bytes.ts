@@ -18,16 +18,25 @@ import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
 /**
- * We consider the units for bytes to be powers of 1000.
- * In other words:
+ * We support both SI (decimal) and IEC (binary) units for bytes:
+ * 
+ * SI/decimal (unit: 'bytes'):
  * 1 KB = 1000 bytes (1000^1 bytes)
  * 1 MB = 1,000,000 bytes (1000^2 bytes)
+ * etc.
+ * 
+ * IEC/binary (unit: 'bytes-binary'):
+ * 1 KiB = 1024 bytes (1024^1 bytes)
+ * 1 MiB = 1,048,576 bytes (1024^2 bytes)
  * etc.
  */
 
 const DEFAULT_NUMBRO_MANTISSA = 2;
 
-type BytesUnit = 'bytes';
+type BytesUnit = 
+  | 'bytes' 
+  | 'bytes-binary';
+
 export type BytesFormatOptions = {
   unit?: BytesUnit;
   decimalPlaces?: number;
@@ -41,13 +50,20 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnit, UnitConfig>> = {
   bytes: {
     group: 'Bytes',
-    label: 'Bytes',
+    label: 'Bytes (SI)',
+  },
+  'bytes-binary': {
+    group: 'Bytes',
+    label: 'Bytes (IEC)',
   },
 };
 
-export function formatBytes(bytes: number, { shortValues, decimalPlaces }: BytesFormatOptions): string {
+export function formatBytes(bytes: number, { unit = 'bytes', shortValues, decimalPlaces }: BytesFormatOptions): string {
+  const isBinary = unit === 'bytes-binary';
+  const threshold = isBinary ? 1024 : 1000;
+  
   // If we're showing the entire value, we can use Intl.NumberFormat.
-  if (!shouldShortenValues(shortValues) || Math.abs(bytes) < 1000) {
+  if (!shouldShortenValues(shortValues) || Math.abs(bytes) < threshold) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
@@ -59,7 +75,7 @@ export function formatBytes(bytes: number, { shortValues, decimalPlaces }: Bytes
       formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
       formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
     } else {
-      // This can happen if bytes is between -1000 and 1000
+      // This can happen if bytes is between -threshold and threshold (1000 for SI, 1024 for IEC)
       if (shouldShortenValues(shortValues)) {
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
@@ -72,7 +88,7 @@ export function formatBytes(bytes: number, { shortValues, decimalPlaces }: Bytes
   // numbro is able to add units like KB, MB, GB, etc. correctly.
   return numbro(bytes).format({
     output: 'byte',
-    base: 'decimal',
+    base: isBinary ? 'binary' : 'decimal',
     spaceSeparated: true,
     mantissa: hasDecimalPlaces(decimalPlaces) ? decimalPlaces : DEFAULT_NUMBRO_MANTISSA,
     // trimMantissa trims trailing 0s
