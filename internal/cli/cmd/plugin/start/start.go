@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -165,9 +166,37 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
+	servers, pluginInDev, err := o.prepareAllPlugins()
+	if err != nil {
+		return err
+	}
+
+	// Create the primary context that must be shared by every task
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Start all dev servers
+	o.startDevServers(ctx, cancel, servers)
+
+	// Discover and update ports from dev server output
+	o.discoverAndUpdatePorts(ctx, servers, pluginInDev)
+
+	// Wait for dev servers to be ready and register plugins
+	if err := o.waitAndRegisterPlugins(ctx, cancel, pluginInDev); err != nil {
+		return err
+	}
+
+	// Wait for graceful shutdown and cleanup
+	o.waitForShutdownAndCleanup(ctx, buildDevServerTasks(servers), pluginInDev)
+	return nil
+}
+
+// prepareAllPlugins prepares all plugins and creates dev servers for them
+func (o *option) prepareAllPlugins() ([]*devserver, []*v1.PluginInDevelopment, error) {
 	var servers []*devserver
 	var pluginInDev []*v1.PluginInDevelopment
 	colors := generateColors(len(o.pluginList))
+
 	for i, pluginName := range o.pluginList {
 		s, cfg, err := o.preparePlugin(pluginName, colors[i])
 		if err != nil {
@@ -178,39 +207,99 @@ func (o *option) Execute() error {
 		pluginInDev = append(pluginInDev, cfg)
 	}
 
-	devServerTasks := buildDevServerTasks(servers)
-	waitDevServerTasks := buildWaitDevServerTasks(pluginInDev)
+	if len(servers) == 0 {
+		return nil, nil, errors.New("no plugins could be prepared")
+	}
 
-	// create the primary context that must be shared by every task
-	ctx, cancel := context.WithCancel(context.Background())
-	// in any case, call the cancel method to release any possible resources.
-	defer cancel()
-	// launch every devserver in a goroutine
+	return servers, pluginInDev, nil
+}
+
+// startDevServers starts all dev server tasks
+func (o *option) startDevServers(ctx context.Context, cancel context.CancelFunc, servers []*devserver) {
+	devServerTasks := buildDevServerTasks(servers)
 	for _, task := range devServerTasks {
 		taskhelper.Run(ctx, cancel, task)
 	}
+}
+
+// discoverAndUpdatePorts captures ports from dev server output and updates plugin URLs
+func (o *option) discoverAndUpdatePorts(ctx context.Context, servers []*devserver, pluginInDev []*v1.PluginInDevelopment) {
+	const portDiscoveryTimeout = 10 * time.Second
+	const overallTimeout = 15 * time.Second
+
+	portWaitGroup := make(chan struct{})
+	go func() {
+		var wg sync.WaitGroup
+		for i, server := range servers {
+			wg.Add(1)
+			go o.capturePortForPlugin(ctx, &wg, server, pluginInDev[i], portDiscoveryTimeout)
+		}
+		wg.Wait()
+		close(portWaitGroup)
+	}()
+
+	// Wait for all ports to be captured or timeout
+	select {
+	case <-portWaitGroup:
+		logrus.Info("All dev server ports have been captured")
+	case <-time.After(overallTimeout):
+		logrus.Warn("Timeout waiting for all dev server ports")
+	case <-ctx.Done():
+	}
+}
+
+// capturePortForPlugin captures the port for a single plugin from its dev server output
+func (o *option) capturePortForPlugin(ctx context.Context, wg *sync.WaitGroup, server *devserver, plugin *v1.PluginInDevelopment, timeout time.Duration) {
+	defer wg.Done()
+
+	select {
+	case port := <-server.GetPort():
+		logrus.Infof("Dev server for %s detected on port %d", plugin.Name, port)
+		plugin.URL = common.MustParseURL(fmt.Sprintf("http://localhost:%d", port))
+	case <-time.After(timeout):
+		logrus.Warnf("Timeout waiting for port from dev server %s, using configured port", plugin.Name)
+	case <-ctx.Done():
+	}
+}
+
+// waitAndRegisterPlugins waits for dev servers to be ready and registers them with the API
+func (o *option) waitAndRegisterPlugins(ctx context.Context, cancel context.CancelFunc, pluginInDev []*v1.PluginInDevelopment) error {
+	waitDevServerTasks := buildWaitDevServerTasks(pluginInDev)
+
 	for _, task := range waitDevServerTasks {
 		taskhelper.Run(ctx, cancel, task)
 	}
 	taskhelper.WaitAll(time.Second*60, waitDevServerTasks)
-	// Register the plugin in development
+
+	// Register the plugins in development
 	if apiErr := o.apiClient.V1().Plugin().PushDevPlugin(pluginInDev); apiErr != nil {
 		logrus.WithError(apiErr).Error("failed to register the plugin in development")
 		cancel()
-	} else {
-		// If the registration is successful, we can start watching the plugin schema.
-		for _, plg := range pluginInDev {
-			// Start watching the plugin schema
-			if err := o.watchPluginSchema(ctx, plg); err != nil {
-				logrus.WithError(err).Errorf("failed to watch the plugin schema for the plugin %q", plg.Name)
-			} else {
-				logrus.Infof("watching the plugin schema for %q", plg.Name)
-			}
+		return apiErr
+	}
+
+	// Start watching the plugin schemas
+	o.startWatchingPluginSchemas(ctx, pluginInDev)
+	return nil
+}
+
+// startWatchingPluginSchemas starts watching the plugin schemas for changes
+func (o *option) startWatchingPluginSchemas(ctx context.Context, pluginInDev []*v1.PluginInDevelopment) {
+	for _, plg := range pluginInDev {
+		if err := o.watchPluginSchema(ctx, plg); err != nil {
+			logrus.WithError(err).Errorf("failed to watch the plugin schema for the plugin %q", plg.Name)
+		} else {
+			logrus.Infof("watching the plugin schema for %q", plg.Name)
 		}
 	}
+}
+
+// waitForShutdownAndCleanup waits for shutdown signal and unregisters plugins
+func (o *option) waitForShutdownAndCleanup(ctx context.Context, devServerTasks []taskhelper.Helper, pluginInDev []*v1.PluginInDevelopment) {
 	// Wait for context to be canceled or tasks to be ended and wait for graceful stop
 	taskhelper.JoinAll(ctx, time.Second*30, devServerTasks)
-	// if the context is canceled, we need to unregister the plugin from the remote server
+
+	// Unregister plugins from the remote server
 	for _, plg := range pluginInDev {
 		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(plg.Name); err != nil {
 			logrus.WithError(err).Errorf("failed to unregister the plugin %q from the remote server", plg.Name)
@@ -218,7 +307,6 @@ func (o *option) Execute() error {
 			logrus.Infof("plugin %q has been unregistered from the remote server", plg.Name)
 		}
 	}
-	return nil
 }
 
 func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *v1.PluginInDevelopment, error) {
