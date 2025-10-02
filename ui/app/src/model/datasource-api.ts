@@ -14,9 +14,9 @@
 import { DatasourceSelector } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 import { useCallback } from 'react';
+import { PERSES_APP_CONFIG } from '../config';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
-import { getBasePathName } from './route';
 
 export function buildProxyUrl({
   project,
@@ -27,7 +27,7 @@ export function buildProxyUrl({
   dashboard?: string;
   name: string;
 }): string {
-  const basePath = getBasePathName();
+  const basePath = PERSES_APP_CONFIG.api_prefix;
   let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
   if (dashboard) {
     url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;

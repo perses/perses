@@ -33,7 +33,6 @@ import {
   AdminRoute,
   ConfigRoute,
   ExploreRoute,
-  getBasePathName,
   ImportRoute,
   ProfileRoute,
   ProjectRoute,
@@ -45,6 +44,7 @@ import SignUpView from './views/auth/SignUpView';
 import HomeView from './views/home/HomeView';
 // Default route is eagerly loaded
 import App from './App';
+import { PERSES_APP_CONFIG } from './config';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -163,7 +163,7 @@ function Router(): ReactElement {
       },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
-    { basename: getBasePathName() }
+    { basename: PERSES_APP_CONFIG.api_prefix }
   );
 
   return (

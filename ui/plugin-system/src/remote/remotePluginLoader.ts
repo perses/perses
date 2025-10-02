@@ -51,7 +51,7 @@ type RemotePluginLoaderOptions = {
    * The base URL for loading plugin assets (e.g., JavaScript files). Used to construct the full URL to the `/plugins` directory
    * @default ''
    **/
-  baseUrl?: string;
+  baseURL?: string;
 };
 
 type ParsedPluginOptions = {
@@ -72,7 +72,7 @@ const paramToOptions = (options?: RemotePluginLoaderOptions): ParsedPluginOption
 
   return {
     pluginsApiPath: `${options?.apiPrefix ?? ''}${DEFAULT_PLUGINS_API_PATH}`,
-    pluginsAssetsPath: `${options?.baseUrl ?? ''}${DEFAULT_PLUGINS_ASSETS_PATH}`,
+    pluginsAssetsPath: `${options?.baseURL ?? ''}${DEFAULT_PLUGINS_ASSETS_PATH}`,
   };
 };
 

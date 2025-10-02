@@ -52,11 +52,6 @@ export function useConfigContext(): ConfigContextType {
   return ctx;
 }
 
-export function useApiPrefix(): string {
-  const { config } = useConfigContext();
-  return config.api_prefix ?? '';
-}
-
 export function useIsGlobalDatasourceEnabled(): boolean {
   const { config } = useConfigContext();
   return !config.datasource.global.disable;

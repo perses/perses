@@ -24,8 +24,8 @@ import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useIsLocalDatasourceEnabled, useIsLocalVariableEnabled } from '../../../context/Config';
-import { getBasePathName } from '../../../model/route';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
+import { PERSES_APP_CONFIG } from '../../../config';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -90,7 +90,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
           <ValidationProvider>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <UsageMetricsProvider
-                apiPrefix={getBasePathName()}
+                apiPrefix={PERSES_APP_CONFIG.api_prefix}
                 project={project.metadata.name}
                 dashboard={dashboardResource.metadata.name}
               >
