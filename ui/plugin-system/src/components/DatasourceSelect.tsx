@@ -64,7 +64,7 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
  * the input deal with a `DatasourceSelector`.
  */
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
-  const { datasourcePluginKind, value, project, onChange, ...others } = props;
+  const { datasourcePluginKind, value, project, readOnly, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   const variables = useVariableValues();
 
@@ -137,6 +137,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
 
   return (
     <Autocomplete<DataSourceOption>
+      readOnly={readOnly}
       options={options}
       renderInput={(params) => <TextField {...params} label={others.label} placeholder="" />}
       groupBy={(option) => option.groupLabel || 'No group'}

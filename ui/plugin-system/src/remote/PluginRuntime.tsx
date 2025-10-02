@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FederationHost, init, loadRemote } from '@module-federation/enhanced/runtime';
+import { createInstance, ModuleFederation } from '@module-federation/enhanced/runtime';
+
 import * as ReactQuery from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -20,11 +21,11 @@ import * as ReactHookForm from 'react-hook-form';
 import * as ReactRouterDOM from 'react-router-dom';
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
-let instance: FederationHost | null = null;
+let instance: ModuleFederation | null = null;
 
-const getPluginRuntime = (): FederationHost => {
+const getPluginRuntime = (): ModuleFederation => {
   if (instance === null) {
-    const pluginRuntime = init({
+    const pluginRuntime = createInstance({
       name: '@perses/perses-ui-host',
       remotes: [], // all remotes are loaded dynamically
       shared: {
@@ -221,11 +222,13 @@ export const loadPlugin = async (
 ): Promise<RemotePluginModule | null> => {
   registerRemote(moduleName, baseURL);
 
-  return loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
+  const pluginRuntime = getPluginRuntime();
+
+  return pluginRuntime.loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
 };
 
 export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
-  pluginRuntime: FederationHost;
+  pluginRuntime: ModuleFederation;
   loadPlugin: () => Promise<RemotePluginModule | null>;
 } {
   return {

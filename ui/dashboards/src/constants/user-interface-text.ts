@@ -34,6 +34,7 @@ export const TOOLTIP_TEXT = {
   // Variable editor buttons
   refreshVariableValues: 'Refresh values',
   copyVariableValues: 'Copy values to clipboard',
+  queryView: 'Open query view',
 };
 
 export const ARIA_LABEL_TEXT = {
@@ -50,4 +51,5 @@ export const ARIA_LABEL_TEXT = {
   deletePanel: (panelName: string): string => `delete panel ${panelName}`,
   showPanelActions: (panelName: string): string => `show panel actions for ${panelName}`,
   movePanel: (panelName: string): string => `move panel ${panelName}`,
+  openQueryView: (panelName: string): string => `open query view for panel ${panelName}`,
 };

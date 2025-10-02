@@ -1,0 +1,120 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "panel-links-test",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Panel Links Test Dashboard"
+    },
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "CPU Usage",
+            "description": "CPU usage percentage"
+          },
+          "plugin": {
+            "kind": "BarChart",
+            "spec": {
+              "nested": {
+                "iwas": "stat"
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "migration_from_grafana_not_supported"
+                  }
+                }
+              }
+            }
+          ],
+          "links": [
+            {
+              "name": "Prometheus",
+              "url": "https://prometheus.${region}.example.com/graph?g0.range_input=1h&g0.expr=cpu_usage_percent",
+              "targetBlank": true,
+              "renderVariables": true
+            },
+            {
+              "name": "Static Dashboard",
+              "url": "https://grafana.example.com/d/cpu-dashboard"
+            }
+          ]
+        }
+      },
+      "1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Memory Usage",
+            "description": "Memory usage without links"
+          },
+          "plugin": {
+            "kind": "BarChart",
+            "spec": {
+              "nested": {
+                "iwas": "stat"
+              }
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "migration_from_grafana_not_supported"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Panel Group 1"
+          },
+          "items": [
+            {
+              "width": 6,
+              "height": 4,
+              "x": 0,
+              "y": 0,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              }
+            },
+            {
+              "width": 6,
+              "height": 4,
+              "x": 6,
+              "y": 0,
+              "content": {
+                "$ref": "#/spec/panels/1"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}

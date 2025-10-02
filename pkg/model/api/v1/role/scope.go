@@ -53,7 +53,7 @@ func (k *Scope) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (k *Scope) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (k *Scope) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Scope
 	type plain Scope
 	if err := unmarshal((*plain)(&tmp)); err != nil {

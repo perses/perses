@@ -31,21 +31,21 @@ type VariableInterface interface {
 type VariableSpec struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind variable.Kind `json:"kind" yaml:"kind"`
-	Spec interface{}   `json:"spec" yaml:"spec"`
+	Spec any           `json:"spec" yaml:"spec"`
 }
 
 func (v *VariableSpec) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(variable interface{}) error {
+	jsonUnmarshalFunc := func(variable any) error {
 		return json.Unmarshal(data, variable)
 	}
 	return v.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (v *VariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *VariableSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	return v.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (v *VariableSpec) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (v *VariableSpec) unmarshal(unmarshal func(any) error, staticMarshal func(any) ([]byte, error), staticUnmarshal func([]byte, any) error) error {
 	var tmp VariableSpec
 	type plain VariableSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -55,7 +55,7 @@ func (v *VariableSpec) unmarshal(unmarshal func(interface{}) error, staticMarsha
 	if err != nil {
 		return err
 	}
-	var spec interface{}
+	var spec any
 	switch tmp.Kind {
 	case variable.KindList:
 		spec = &variable.ListSpec{}
@@ -91,7 +91,7 @@ func (v *GlobalVariable) GetVarSpec() VariableSpec {
 	return v.Spec
 }
 
-func (v *GlobalVariable) GetSpec() interface{} {
+func (v *GlobalVariable) GetSpec() any {
 	return v.Spec
 }
 
@@ -115,7 +115,7 @@ func (v *Variable) GetVarSpec() VariableSpec {
 	return v.Spec
 }
 
-func (v *Variable) GetSpec() interface{} {
+func (v *Variable) GetSpec() any {
 	return v.Spec
 }
 

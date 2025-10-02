@@ -16,6 +16,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -37,10 +38,8 @@ type OAuthOverride struct {
 // appendIfMissing will append the value in the slice, only if not already present.
 // Will return a boolean saying if the value has been appended or not.
 func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
-	for _, e := range slice {
-		if e == value {
-			return slice, false
-		}
+	if slices.Contains(slice, value) {
+		return slice, false
 	}
 	return append(slice, value), true
 }

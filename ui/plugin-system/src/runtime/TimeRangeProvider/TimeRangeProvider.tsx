@@ -73,6 +73,13 @@ export function useSuggestedStepMs(width?: number): number {
 export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
+  /**
+   * TODO: The hook needs refactor. There is a bug here with refreshKey. If the refreshInterval is not set,
+   * refreshKey string includes an undefined xx:yy:zz:undefined:0
+   * I think exposing refresh functionality also is very risky. A careless usage of refresh may cause
+   * infinite rendering loop.
+   */
+
   const [localTimeRange, setLocalTimeRange] = useState<TimeRangeValue>(timeRange);
   const [localRefreshInterval, setLocalRefreshInterval] = useState<DurationString | undefined>(refreshInterval);
 

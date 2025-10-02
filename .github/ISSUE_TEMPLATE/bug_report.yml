@@ -20,11 +20,6 @@ body:
   - type: textarea
     attributes:
       label: What did you expect to see?
-  - type: textarea
-    attributes:
-      label: What did you see instead? Under which circumstances?
-    validations:
-      required: true
   - type: markdown
     attributes:
       value: |

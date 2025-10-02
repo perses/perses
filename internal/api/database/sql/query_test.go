@@ -25,28 +25,28 @@ func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 		project  string
 		name     string
 		sqlQuery string
-		sqlArgs  []interface{}
+		sqlArgs  []any
 	}{
 		{
 			title:    "no project with a prefix name",
 			project:  "",
 			name:     "test",
 			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
-			sqlArgs:  []interface{}{"test%"},
+			sqlArgs:  []any{"test%"},
 		},
 		{
 			title:    "with a prefix name",
 			project:  "",
 			name:     "test",
 			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
-			sqlArgs:  []interface{}{"test%"},
+			sqlArgs:  []any{"test%"},
 		},
 		{
 			title:    "a project with a prefix name",
 			project:  "foo",
 			name:     "bar",
 			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ? AND project = ?",
-			sqlArgs:  []interface{}{"bar%", "foo"},
+			sqlArgs:  []any{"bar%", "foo"},
 		},
 		{
 			title:    "empty query",

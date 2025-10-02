@@ -51,21 +51,21 @@ type MergeSeriesSpec struct {
 
 type Transform struct {
 	Kind TransformKind `json:"kind" yaml:"kind"`
-	Spec interface{}   `json:"spec" yaml:"spec"`
+	Spec any           `json:"spec" yaml:"spec"`
 }
 
 func (t *Transform) UnmarshalJSON(data []byte) error {
-	jsonUnmarshalFunc := func(variable interface{}) error {
+	jsonUnmarshalFunc := func(variable any) error {
 		return json.Unmarshal(data, variable)
 	}
 	return t.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
 }
 
-func (t *Transform) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (t *Transform) UnmarshalYAML(unmarshal func(any) error) error {
 	return t.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
 }
 
-func (t *Transform) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+func (t *Transform) unmarshal(unmarshal func(any) error, staticMarshal func(any) ([]byte, error), staticUnmarshal func([]byte, any) error) error {
 	var tmp Transform
 	type plain Transform
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -75,7 +75,7 @@ func (t *Transform) unmarshal(unmarshal func(interface{}) error, staticMarshal f
 	if err != nil {
 		return err
 	}
-	var spec interface{}
+	var spec any
 	switch tmp.Kind {
 	case JoinByColumValueKind:
 		spec = &JoinByColumnValueSpec{}

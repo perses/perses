@@ -145,7 +145,7 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 }
 
 func (j *jwtImpl) ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(_ *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(_ *jwt.Token) (any, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {

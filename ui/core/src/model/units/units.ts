@@ -32,6 +32,7 @@ import {
   THROUGHPUT_UNIT_CONFIG,
   ThroughputFormatOptions,
 } from './throughput';
+import { formatCurrency, CURRENCY_GROUP_CONFIG, CURRENCY_UNIT_CONFIG, CurrencyFormatOptions } from './currency';
 
 /**
  * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
@@ -47,6 +48,7 @@ export const UNIT_GROUP_CONFIG: Readonly<Record<UnitGroup, UnitGroupConfig>> = {
   Decimal: DECIMAL_GROUP_CONFIG,
   Bytes: BYTES_GROUP_CONFIG,
   Throughput: THROUGHPUT_GROUP_CONFIG,
+  Currency: CURRENCY_GROUP_CONFIG,
 };
 export const UNIT_CONFIG = {
   ...TIME_UNIT_CONFIG,
@@ -54,6 +56,7 @@ export const UNIT_CONFIG = {
   ...DECIMAL_UNIT_CONFIG,
   ...BYTES_UNIT_CONFIG,
   ...THROUGHPUT_UNIT_CONFIG,
+  ...CURRENCY_UNIT_CONFIG,
 } as const;
 
 export type FormatOptions =
@@ -61,7 +64,8 @@ export type FormatOptions =
   | PercentFormatOptions
   | DecimalFormatOptions
   | BytesFormatOptions
-  | ThroughputFormatOptions;
+  | ThroughputFormatOptions
+  | CurrencyFormatOptions;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
@@ -89,6 +93,10 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 
   if (isThroughputUnit(formatOptions)) {
     return formatThroughput(value, formatOptions);
+  }
+
+  if (isCurrencyUnit(formatOptions)) {
+    return formatCurrency(value, formatOptions);
   }
 
   const exhaustive: never = formatOptions;
@@ -142,4 +150,8 @@ export function isUnitWithShortValues(formatOptions: FormatOptions): formatOptio
 
 export function isThroughputUnit(formatOptions: FormatOptions): formatOptions is ThroughputFormatOptions {
   return getUnitGroup(formatOptions) === 'Throughput';
+}
+
+export function isCurrencyUnit(formatOptions: FormatOptions): formatOptions is CurrencyFormatOptions {
+  return getUnitGroup(formatOptions) === 'Currency';
 }

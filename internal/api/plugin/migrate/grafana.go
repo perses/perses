@@ -30,6 +30,12 @@ type GridPosition struct {
 	Y      int `json:"y"`
 }
 
+type GrafanaLink struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	TargetBlank bool   `json:"targetBlank"`
+}
+
 type Panel struct {
 	Type         string            `json:"type"`
 	Title        string            `json:"title"`
@@ -38,6 +44,7 @@ type Panel struct {
 	Panels       []Panel           `json:"panels"`
 	GridPosition GridPosition      `json:"gridPos"`
 	Targets      []json.RawMessage `json:"targets"`
+	Links        []GrafanaLink     `json:"links"`
 	json.RawMessage
 }
 
@@ -76,6 +83,12 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		delete(tmp, "targets")
+	}
+	if links, ok := tmp["links"]; ok {
+		if err := json.Unmarshal(links, &panel.Links); err != nil {
+			return err
+		}
+		delete(tmp, "links")
 	}
 	var err error
 	panel.RawMessage, err = json.Marshal(tmp)

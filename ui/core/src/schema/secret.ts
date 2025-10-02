@@ -97,7 +97,7 @@ export const secretSpecSchema = z
         certFile: z.string().optional(),
         keyFile: z.string().optional(),
         serverName: z.string().optional(),
-        insecureSkipVerify: z.boolean(),
+        insecureSkipVerify: z.boolean().optional(),
       })
       .superRefine((val, ctx) => {
         if (val.ca && val.ca.length > 0 && val.caFile && val.caFile.length > 0) {

@@ -34,7 +34,7 @@ func getCurrentCommit() string {
 
 func join(elems []string, sep string) string {
 	var sb strings.Builder
-	for i := 0; i < len(elems); i++ {
+	for i := range elems {
 		el := elems[i]
 		if len(el) == 0 {
 			continue

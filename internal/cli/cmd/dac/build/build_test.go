@@ -29,7 +29,7 @@ func TestDacBuildCMD(t *testing.T) {
 	separator := string(os.PathSeparator)
 
 	// os-specific error strings are required for the "file not found" cases
-	winSpecificErrStr := "CreateFile %s: The system cannot find the file specified."
+	winSpecificErrStr := "GetFileAttributesEx %s: The system cannot find the file specified."
 	linuxSpecificErrStr := "stat %s: no such file or directory"
 	unknownFileName := "idontexist.cue"
 	unknownDirName := "idontexist"

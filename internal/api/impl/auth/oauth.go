@@ -87,7 +87,7 @@ func newOAuthConfig(provider config.OAuthProvider, override *config.OAuthOverrid
 
 type oauthUserInfo struct {
 	externalUserInfoProfile
-	RawProperties map[string]interface{}
+	RawProperties map[string]any
 	loginKeys     []string
 	authURL       url.URL
 }

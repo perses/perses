@@ -43,6 +43,7 @@ type Loaded struct {
 type Plugin interface {
 	Load() error
 	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
+	RefreshDevPlugin(name string) error
 	UnLoadDevPlugin(name string) error
 	List() ([]byte, error)
 	UnzipArchives() error

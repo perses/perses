@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { expect } from '@playwright/test';
-import happoPlaywright from 'happo-playwright';
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 import { test } from '../fixtures/dashboardTest';
 import { DashboardPage } from '../pages';
@@ -24,32 +23,19 @@ test.use({
 });
 
 test.describe('Dashboard: Gauge Chart Panel', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
-  test(`displays as expected`, async ({ page, dashboardPage, mockNow }) => {
+  test(`displays as expected`, async ({ dashboardPage, mockNow }) => {
     await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
 
-    await dashboardPage.forEachTheme(async (themeName) => {
+    await dashboardPage.forEachTheme(async () => {
       const panel = dashboardPage.getPanelByName('Single Gauge');
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);
-
-      await happoPlaywright.screenshot(page, panel.parent, {
-        component: 'Gauge Chart Panel',
-        variant: `Single Gauge [${themeName}]`,
-      });
     });
   });
 
   test.describe('Thresholds', () => {
-    test('should be able to add absolute threshold', async ({ page, dashboardPage, mockNow }) => {
+    test('should be able to add absolute threshold', async ({ dashboardPage, mockNow }) => {
       await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
 
       await dashboardPage.startEditing();
@@ -63,16 +49,9 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);
-
-      await dashboardPage.forEachTheme(async (themeName) => {
-        await happoPlaywright.screenshot(page, panel.parent, {
-          component: 'Gauge Chart Panel',
-          variant: `Single Gauge with Absolute Thresholds [${themeName}]`,
-        });
-      });
     });
 
-    test('should be able to add percent threshold', async ({ page, dashboardPage, mockNow }) => {
+    test('should be able to add percent threshold', async ({ dashboardPage, mockNow }) => {
       await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
@@ -85,12 +64,6 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);
-      await dashboardPage.forEachTheme(async (themeName) => {
-        await happoPlaywright.screenshot(page, panel.parent, {
-          component: 'Gauge Chart Panel',
-          variant: `Single Gauge with Percent Thresholds [${themeName}]`,
-        });
-      });
     });
 
     test('should be able to delete threshold', async ({ dashboardPage, mockNow }) => {
@@ -124,12 +97,6 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);
-      await dashboardPage.forEachTheme(async (themeName) => {
-        await happoPlaywright.screenshot(page, panel.parent, {
-          component: 'Gauge Chart Panel',
-          variant: `Single Gauge with Purple Threshold [${themeName}]`,
-        });
-      });
     });
 
     test('should be able to change default threshold color', async ({ page, dashboardPage, mockNow }) => {
@@ -149,12 +116,6 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await panel.isLoaded();
       // Wait for gauge animation to finish before taking a screenshot.
       await waitForStableCanvas(panel.canvas);
-      await dashboardPage.forEachTheme(async (themeName) => {
-        await happoPlaywright.screenshot(page, panel.parent, {
-          component: 'Gauge Chart Panel',
-          variant: `Single Gauge with New Default Threshold Color [${themeName}]`,
-        });
-      });
     });
   });
 });

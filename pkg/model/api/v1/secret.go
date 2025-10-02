@@ -44,7 +44,7 @@ func (s *SecretSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *SecretSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *SecretSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp SecretSpec
 	type plain SecretSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -78,7 +78,7 @@ func (g *GlobalSecret) GetKind() string {
 	return string(g.Kind)
 }
 
-func (g *GlobalSecret) GetSpec() interface{} {
+func (g *GlobalSecret) GetSpec() any {
 	return g.Spec
 }
 
@@ -96,6 +96,6 @@ func (s *Secret) GetKind() string {
 	return string(s.Kind)
 }
 
-func (s *Secret) GetSpec() interface{} {
+func (s *Secret) GetSpec() any {
 	return s.Spec
 }

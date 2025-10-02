@@ -61,7 +61,7 @@ func (p *Plugin) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Plugin) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Plugin
 	type plain Plugin
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -108,7 +108,7 @@ func (m *ModuleSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *ModuleSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (m *ModuleSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp ModuleSpec
 	type plain ModuleSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {

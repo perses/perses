@@ -58,7 +58,7 @@ func (b *BasicAuth) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (b *BasicAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (b *BasicAuth) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp BasicAuth
 	type plain BasicAuth
 	if err := unmarshal((*plain)(&tmp)); err != nil {

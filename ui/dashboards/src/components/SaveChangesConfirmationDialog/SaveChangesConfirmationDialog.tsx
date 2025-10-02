@@ -14,9 +14,12 @@
 import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
+import { isRelativeTimeRange } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
+
+const SAVE_DEFAULTS_DIALOG_TEXT =
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
 
 export const SaveChangesConfirmationDialog = (): ReactElement => {
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();

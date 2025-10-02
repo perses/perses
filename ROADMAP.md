@@ -1,54 +1,31 @@
 # ROADMAP
 
-## Plugin system
+## More data sources
 
-When this document was created (in March 2024), we mentioned that we were going to entirely review the plugin system.
+Since the release v0.51 and its revamped plugin architecture, we have unblocked the possibility to support other data
+sources. New plugins to handle Loki for logs & Pyroscope for profiles have been released in v0.52, and we are still
+considering other technologies like Opensearch, Jaeger and Splunk.
 
-Indeed, this has been reviewed but not yet released. We are very close to providing a first version.
-We are still working on this as we are missing a few things, like documentation, the ability to use it in the explorer,
-and basically cleaning the old system.
-
-You can follow this issue to get updates on where we stand: https://github.com/perses/perses/issues/1543
-
-### Plugin Versioning
-
-In the second version of the new plugin system, we are going to tackle the topic of how plugins can be versioned and
-upgraded.
-
-Discussion is already ongoing on this topic: https://github.com/perses/perses/discussions/1186
-
-### More data-sources to come
-
-Once the new plugin system is released, we will unblock the possibility to support other data sources besides Prometheus
-and Tempo.
-
-1. We are going to support Logs Datasource, starting with OpenSearch and Loki.
-
-2. We are currently discussing whether we should support ClickHouse in the core plugins or if we should let ClickHouse
-   support Perses on their own side.
-   Please follow [this issue](https://github.com/perses/perses/issues/1778)
-   if you are interested in this topic or if you want to give your opinion.
-
-3. We are also considering supporting Jaeger as a data source.
-   This is still in the discussion phase. If you are interested, please let us know.
-
-### More panels to come
-
-We are willing to add more panels.
-For the moment we are considering adding a panel to display native
-histogram: https://github.com/perses/perses/issues/2601
+Clickhouse plugin has been implemented by @appscode and will be available in the next release v0.53.
 
 ## Marketplace
 
-At some point, Perses will need a Marketplace to share which plugins, dashboards, and Dashboard as Code libraries are
-available.
+A plugin and dashboard marketplace is planned to facilitate community sharing of:
 
-We haven't started working on it yet. Discussion is ongoing here: https://github.com/perses/perses/discussions/2439
+- Plugins
+- Dashboards
+- Dashboard-as-Code libraries
 
-## Alert view
+Development hasn't started yet. Join the discussion: https://github.com/perses/perses/discussions/2439
 
-We are considering creating an alert view in the Perses application. There is no current work in this area at the
-moment. It will come once the above goals are finished.
+## Alert View
 
-If you would like to start working on that, no worries, probably opening a discussion to propose a design would be a
-start.
+An integrated alert view is under consideration for future releases. This feature will be prioritized after completing
+the current roadmap items.
+
+Interested in contributing? Start by opening a discussion with your design proposal.
+
+## Dropping support for React 17
+
+We are planning to drop support for React 17 the 15th of July 2026. It will help us to keep our dependencies up to date
+and to be able to use libraries that only support React 18 and above.

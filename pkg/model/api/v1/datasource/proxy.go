@@ -30,7 +30,7 @@ const (
 
 // ValidateAndExtract finds a proxy in the pluginSpec
 // It then unmarshals the corresponding 'spec' field into the config interace{}.
-func ValidateAndExtract(pluginSpec interface{}) (interface{}, string, error) {
+func ValidateAndExtract(pluginSpec any) (any, string, error) {
 	finder := &configFinder{}
 	finder.find(reflect.ValueOf(pluginSpec))
 
@@ -42,7 +42,7 @@ type configFinder struct {
 	found     bool
 	foundKind string
 
-	config interface{}
+	config any
 }
 
 func (c *configFinder) find(v reflect.Value) {

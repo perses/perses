@@ -211,6 +211,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactEle
               width="100%"
               pluginTypes={['Datasource']}
               pluginKindLabel="Source"
+              withRunQueryButton={false}
               value={{
                 selection: {
                   type: 'Datasource',

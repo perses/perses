@@ -53,6 +53,13 @@ func Collapsed(isCollapsed bool) Option {
 	}
 }
 
+func RepeatVariable(variable string) Option {
+	return func(builder *Builder) error {
+		builder.RepeatVariable = variable
+		return nil
+	}
+}
+
 func PanelsPerLine(panelsPerLine int) Option {
 	return func(builder *Builder) error {
 		if panelsPerLine < 1 || panelsPerLine > 24 {

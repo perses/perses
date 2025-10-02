@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,6 @@ import TerserPlugin from 'terser-webpack-plugin';
 import { defineConfig } from '@rspack/cli';
 
 const isDev = process.env.NODE_ENV === 'development';
-
 export default defineConfig({
   output: {
     path: resolve(import.meta.dirname, './dist'),
@@ -29,6 +28,10 @@ export default defineConfig({
   entry: './src/bundle.ts',
   resolve: {
     extensions: ['...', '.ts', '.tsx', '.jsx'],
+    tsConfig: {
+      configFile: resolve(import.meta.dirname, './tsconfig.json'),
+      references: 'auto',
+    },
   },
   experiments: {
     css: true,
@@ -48,29 +51,27 @@ export default defineConfig({
       },
       {
         test: /\.(jsx?|tsx?)$/,
-        use: [
-          {
-            loader: 'builtin:swc-loader',
-            options: {
-              jsc: {
-                parser: {
-                  syntax: 'typescript',
-                  tsx: true,
-                },
-                transform: {
-                  react: {
-                    runtime: 'automatic',
-                    development: isDev,
-                    refresh: isDev,
-                  },
-                },
-              },
-              env: {
-                targets: ['chrome >= 87', 'edge >= 88', 'firefox >= 78', 'safari >= 14'],
+        exclude: [/node_modules/],
+        type: 'javascript/auto',
+        loader: 'builtin:swc-loader',
+        options: {
+          jsc: {
+            parser: {
+              syntax: 'typescript',
+              tsx: true,
+            },
+            transform: {
+              react: {
+                runtime: 'automatic',
+                development: isDev,
+                refresh: isDev,
               },
             },
           },
-        ],
+          env: {
+            targets: ['chrome >= 87', 'edge >= 88', 'firefox >= 78', 'safari >= 14'],
+          },
+        },
       },
     ],
   },

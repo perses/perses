@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
+import { LogData, ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {
@@ -74,6 +74,28 @@ export const MOCK_TRACE_DATA: TraceData = {
   },
 };
 
+export const MOCK_LOG_DATA: LogData = {
+  totalCount: 2,
+  entries: [
+    {
+      timestamp: 1666479357903,
+      line: 'Error: Something went wrong',
+      labels: {
+        level: 'error',
+        service: 'backend',
+      },
+    },
+    {
+      timestamp: 1666479382282,
+      line: 'Info: Request processed successfully',
+      labels: {
+        level: 'info',
+        service: 'frontend',
+      },
+    },
+  ],
+};
+
 export const MOCK_PROFILE_DATA: ProfileData = {
   profile: {
     stackTrace: {
@@ -92,5 +114,138 @@ export const MOCK_PROFILE_DATA: ProfileData = {
     sampleRate: 1000000000,
     units: 'samples',
     name: 'cpu',
+  },
+};
+
+// Remote Plugin Loader Test Fixtures
+export const MOCK_VALID_PLUGIN_METADATA = {
+  kind: 'Panel' as const,
+  spec: {
+    name: 'testPlugin',
+    display: {
+      name: 'Test Plugin',
+      description: 'A test plugin for unit testing',
+    },
+  },
+};
+
+export const MOCK_VALID_PLUGIN_MODULE_RESOURCE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'test-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [MOCK_VALID_PLUGIN_METADATA],
+  },
+};
+
+export const MOCK_INVALID_PLUGIN_MODULE = {
+  // Missing required fields
+  metadata: {
+    name: 'invalid-module',
+  },
+  spec: {
+    plugins: [
+      {
+        // Missing required fields
+        kind: 'Panel',
+      },
+    ],
+  },
+};
+
+export const MOCK_MIXED_VALIDITY_PLUGIN_MODULES = [
+  MOCK_VALID_PLUGIN_MODULE_RESOURCE,
+  MOCK_INVALID_PLUGIN_MODULE,
+  {
+    kind: 'PluginModule' as const,
+    metadata: {
+      name: 'another-valid-module',
+      version: '2.0.0',
+    },
+    spec: {
+      plugins: [
+        {
+          kind: 'Variable' as const,
+          spec: {
+            name: 'anotherPlugin',
+            display: {
+              name: 'Another Plugin',
+            },
+          },
+        },
+      ],
+    },
+  },
+];
+
+export const MOCK_REMOTE_PLUGIN_MODULE = {
+  testPlugin: {
+    component: (): null => null,
+    createDefaultOptions: (): Record<string, unknown> => ({}),
+  },
+};
+
+export const MOCK_MULTI_PLUGIN_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'multi-plugin-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [
+      {
+        kind: 'Panel' as const,
+        spec: {
+          name: 'plugin1',
+          display: { name: 'Plugin 1' },
+        },
+      },
+      {
+        kind: 'Variable' as const,
+        spec: {
+          name: 'plugin2',
+          display: { name: 'Plugin 2' },
+        },
+      },
+    ],
+  },
+};
+
+export const MOCK_PARTIAL_FAILURE_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'partial-failure-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [
+      {
+        kind: 'Panel' as const,
+        spec: {
+          name: 'workingPlugin',
+          display: { name: 'Working Plugin' },
+        },
+      },
+      {
+        kind: 'Variable' as const,
+        spec: {
+          name: 'failingPlugin',
+          display: { name: 'Failing Plugin' },
+        },
+      },
+    ],
+  },
+};
+
+export const MOCK_EMPTY_PLUGIN_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'empty-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [],
   },
 };

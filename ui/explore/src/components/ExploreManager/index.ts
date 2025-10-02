@@ -13,4 +13,5 @@
 
 export * from './ExploreManager';
 export * from './ExplorerManagerProvider';
+export * from './ExplorerManagerProviderWithQueryParams';
 export * from './query-params';

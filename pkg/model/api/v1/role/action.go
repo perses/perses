@@ -42,7 +42,7 @@ func (k *Action) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (k *Action) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (k *Action) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Action
 	type plain Action
 	if err := unmarshal((*plain)(&tmp)); err != nil {

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { useQueryParams, QueryParamConfig } from 'use-query-params';
+import { QueryParamConfig, useQueryParams } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
 import {
   TimeRangeValue,
@@ -99,6 +99,7 @@ export const refreshIntervalQueryConfig = {
 export function useInitialTimeRange(dashboardDuration: DurationString): TimeRangeValue {
   const [query] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
   const { start, end } = query;
+
   return useMemo(() => {
     let initialTimeRange: TimeRangeValue = { pastDuration: dashboardDuration };
     if (!start) {
@@ -119,7 +120,6 @@ export function useInitialTimeRange(dashboardDuration: DurationString): TimeRang
  */
 export function useTimeRangeParams(initialTimeRange: TimeRangeValue): Pick<TimeRange, 'timeRange' | 'setTimeRange'> {
   const [query, setQuery] = useQueryParams(timeRangeQueryConfig, { updateType: 'replaceIn' });
-
   // determine whether initial param had previously been populated to fix back btn
   const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
 

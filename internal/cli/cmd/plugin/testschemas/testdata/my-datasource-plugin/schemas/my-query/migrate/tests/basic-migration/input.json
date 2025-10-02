@@ -1,0 +1,9 @@
+{
+  "datasource": {
+    "type": "mydatasource",
+    "uid": "${datasource}"
+  },
+  "expr": "return timeseries from the database",
+  "intervalFactor": 15,
+  "format": "time_series"
+}

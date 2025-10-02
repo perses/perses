@@ -43,7 +43,7 @@ func (v *View) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *View) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *View) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp View
 	type plain View
 

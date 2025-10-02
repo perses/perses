@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import happoPlaywright from 'happo-playwright';
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({
@@ -20,14 +19,6 @@ test.use({
 });
 
 test.describe('Dashboard: Panels can be duplicated', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   test('multiple times', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     const panelGroup = dashboardPage.getPanelGroup('single panel with space to right');
@@ -74,7 +65,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     for (const [i, duplicatePanel] of duplicatePanels.entries()) {
       await dashboardPage.editPanel(duplicatePanel, async (panelEditor) => {
         await panelEditor.nameInput.clear();
-        await panelEditor.nameInput.type(`Duplicate panel ${i + 1}`);
+        await panelEditor.nameInput.fill(`Duplicate panel ${i + 1}`);
       });
     }
 
@@ -97,7 +88,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     'multiple panels with space not next to original',
     'multiple panels w/o space & more panels below',
   ].forEach((panelGroupName) => {
-    test(`with ${panelGroupName}`, async ({ dashboardPage, page }) => {
+    test(`with ${panelGroupName}`, async ({ dashboardPage }) => {
       await dashboardPage.startEditing();
       const panelGroup = dashboardPage.getPanelGroup(panelGroupName);
       await panelGroup.expand();
@@ -113,17 +104,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
       // Wait for new panel to be added and loaded.
       await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(orignalPanelCount + 1);
       const newPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated', nth: 1 });
-      await newPanel.container.scrollIntoViewIfNeeded();
       await newPanel.isLoaded();
-
-      // Take a screenshot of each duplicate case because it's easier to look
-      // at than to try to write a bunch of complex assertions about placement.
-      // Take a picture of the root instead of the individual group because the
-      // background color and placement are dependent on it to render.
-      await happoPlaywright.screenshot(page, dashboardPage.root, {
-        component: 'Duplicate panel',
-        variant: panelGroupName,
-      });
     });
   });
 });

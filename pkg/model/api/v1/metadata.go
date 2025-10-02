@@ -91,7 +91,7 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *Metadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (m *Metadata) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Metadata
 	type plain Metadata
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -125,7 +125,7 @@ func (p *ProjectMetadataWrapper) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *ProjectMetadataWrapper) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *ProjectMetadataWrapper) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp ProjectMetadataWrapper
 	type plain ProjectMetadataWrapper
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -161,7 +161,7 @@ func (pm *ProjectMetadata) UnmarshalJSON(data []byte) error {
 }
 
 // This method is needed in the case of YAML otherwise the validation part is not triggered when unmarshalling
-func (pm *ProjectMetadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (pm *ProjectMetadata) UnmarshalYAML(unmarshal func(any) error) error {
 	// Call UnmarshalYAML methods of the embedded structs
 	var metadataTmp Metadata
 	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {

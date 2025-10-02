@@ -169,6 +169,19 @@ export function useAllVariableValues(names?: string[]): VariableStateMap {
   }, [variableValues, builtinVariableValues]);
 }
 
+// Simple wrapper around replaceVariables() with support for extra string variables.
+export function replaceVariablesInString(
+  text: string,
+  variableValues: VariableStateMap,
+  extraVariables?: Record<string, string>
+): string {
+  const vars = { ...variableValues }; // shallow clone to avoid modifying the original object
+  for (const [key, value] of Object.entries(extraVariables ?? {})) {
+    vars[key] = { value, loading: false };
+  }
+  return replaceVariables(text, vars);
+}
+
 // Convenience hook for replacing variables in a string
 export function useReplaceVariablesInString(str: string | undefined): string | undefined {
   const variablesInString = str ? parseVariables(str) : [];

@@ -256,12 +256,12 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 	for _, bench := range benchSuites {
 		mockCache := generateMockCache(bench.userCount, bench.projectCountByUser)
 		b.Run(fmt.Sprintf("HasPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				mockCache.hasPermission("user0", role.CreateAction, "project0", role.DashboardScope)
 			}
 		})
 		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				mockCache.hasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
 			}
 		})
