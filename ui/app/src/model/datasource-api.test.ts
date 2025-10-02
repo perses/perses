@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PERSES_APP_CONFIG } from '../config';
 import { buildProxyUrl } from './datasource-api';
 
 interface TestData {
@@ -24,7 +23,6 @@ interface TestData {
 }
 
 describe('buildProxyUrl', () => {
-  PERSES_APP_CONFIG.api_prefix = '';
   test.each([
     {
       title: 'should build global datasource proxy url',

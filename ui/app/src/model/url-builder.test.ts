@@ -11,11 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PERSES_APP_CONFIG } from '../config';
 import buildURL from './url-builder';
 
 describe('buildURL', () => {
-  PERSES_APP_CONFIG.api_prefix = '';
   const testSuite = [
     {
       title: 'if no params, should return no params in the uri',
