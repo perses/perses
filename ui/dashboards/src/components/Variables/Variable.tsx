@@ -12,7 +12,15 @@
 // limitations under the License.
 
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { LinearProgress, TextField, Popper, PopperProps, Checkbox, Autocomplete } from '@mui/material';
+import {
+  LinearProgress,
+  TextField,
+  Popper,
+  PopperProps,
+  Checkbox,
+  Autocomplete,
+  createFilterOptions,
+} from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -189,6 +197,13 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   const allowMultiple = definition?.spec.allowMultiple === true;
   const allowAllValue = definition?.spec.allowAllValue === true;
 
+  const filterOptions = createFilterOptions<VariableOption>({});
+
+  const filteredOptions = useMemo(
+    () => filterOptions(viewOptions, { inputValue, getOptionLabel: (o) => o.label }),
+    [inputValue, viewOptions, filterOptions]
+  );
+
   // Update value when changed
   useEffect(() => {
     if (value) {
@@ -217,12 +232,13 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
 
   const listBoxProviderValue = useMemo(
     () => ({
-      selectedOptions: selectedOptions as VariableOption[], // Only used when allowMultiple is true => selectedOptions is always an array
       options: viewOptions,
+      selectedOptions: selectedOptions as VariableOption[], // Only used when allowMultiple is true => selectedOptions is always an array
+      filteredOptions: filteredOptions,
       allowAllValue,
       onChange: handleGlobalSelect,
     }),
-    [allowAllValue, handleGlobalSelect, selectedOptions, viewOptions]
+    [allowAllValue, filteredOptions, handleGlobalSelect, selectedOptions, viewOptions]
   );
 
   const autocompleteComponent = useMemo(() => {
@@ -246,6 +262,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
               margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
             },
           }}
+          filterOptions={filterOptions}
           options={viewOptions}
           value={selectedOptions}
           onChange={(_, value) => {
@@ -289,6 +306,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   }, [
     allowAllValue,
     allowMultiple,
+    filterOptions,
     inputValue,
     inputWidth,
     loading,

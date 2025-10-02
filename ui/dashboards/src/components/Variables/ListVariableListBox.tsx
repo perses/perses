@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,8 +18,9 @@ import { DEFAULT_ALL_VALUE } from '@perses-dev/core';
 
 // TODO: handle filtered options
 export interface ListVariableListBoxContextValue {
-  selectedOptions: VariableOption[];
   options: VariableOption[];
+  selectedOptions: VariableOption[];
+  filteredOptions: VariableOption[];
   allowAllValue: boolean;
   onChange: (selectedOptions: VariableOption[]) => void;
 }
@@ -32,36 +33,69 @@ export function useListVariableListBoxContext(): ListVariableListBoxContextValue
   return ctx;
 }
 
+/*
+ * Handles the logic for toggling the global select checkbox in the ListBox header.
+ *
+ * If all options are selected, it will deselect all options.
+ * Except if filteredOptions is a subset of options, then it will only deselect the filtered options.
+ *
+ * If some options are selected, it will select all filtered options.
+ *
+ * If no options are selected, it will select all filtered options.
+ * Should be not possible since a ListVariable has always at least one value.
+ *
+ * If allowAllValue is true, it will handle the special "All" option logic.
+ * Main difference is if some options are selected and there is no filter, it will select the "All" option
+ */
 function handleGlobalSelectToggle(
-  selectedOptions: VariableOption[],
   options: VariableOption[],
+  selectedOptions: VariableOption[],
+  filteredOptions: VariableOption[],
   isIndeterminate: boolean,
   isAllSelected: boolean,
   allowAllValue: boolean,
   onChange: (selectedOptions: VariableOption[]) => void
 ): void {
   if (isAllSelected) {
-    console.log('test2');
-    onChange([]);
+    if (filteredOptions.length !== options.length) {
+      onChange(selectedOptions.filter((o) => !filteredOptions.includes(o)));
+    } else {
+      onChange([]);
+    }
     return;
   }
 
   if (isIndeterminate) {
     if (allowAllValue) {
-      if (selectedOptions[0]?.value === DEFAULT_ALL_VALUE) {
-        onChange(options.slice(1));
+      if (filteredOptions.length === options.length) {
+        if (selectedOptions[0]?.value === DEFAULT_ALL_VALUE) {
+          onChange(options.filter((o) => o.value !== DEFAULT_ALL_VALUE));
+        } else {
+          onChange([{ label: DEFAULT_ALL_VALUE, value: DEFAULT_ALL_VALUE }]);
+        }
       } else {
-        onChange([{ label: DEFAULT_ALL_VALUE, value: DEFAULT_ALL_VALUE }]);
+        if (filteredOptions.every((o) => selectedOptions.includes(o))) {
+          onChange(selectedOptions.filter((o) => !filteredOptions.includes(o)));
+        } else {
+          onChange([...selectedOptions, ...filteredOptions.filter((o) => o.value !== DEFAULT_ALL_VALUE)]);
+        }
       }
     } else {
-      console.log('test');
-      onChange(options);
+      if (filteredOptions.length === options.length) {
+        onChange(options);
+      } else {
+        if (filteredOptions.every((o) => selectedOptions.includes(o))) {
+          onChange(selectedOptions.filter((o) => !filteredOptions.includes(o)));
+        } else {
+          onChange([...selectedOptions, ...filteredOptions]);
+        }
+      }
     }
     return;
   }
 
-  // Nothing selected, so select all options
-  onChange(options);
+  // Nothing selected, so select filtered options
+  onChange(filteredOptions);
 }
 
 export function ListVariableListBoxProvider({
@@ -79,7 +113,7 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
   ref: ForwardedRef<HTMLUListElement>
 ) {
   const { children, ...rest } = props;
-  const { selectedOptions, options, allowAllValue, onChange } = useListVariableListBoxContext();
+  const { options, selectedOptions, filteredOptions, allowAllValue, onChange } = useListVariableListBoxContext();
 
   // Derived selection metadata for context listbox header
   const selectedCount = useMemo(() => selectedOptions.length, [selectedOptions]);
@@ -97,7 +131,15 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
           checked={isAllSelected}
           // intentionally not passing event to underlying handler to mimic previous behavior
           onChange={() =>
-            handleGlobalSelectToggle(selectedOptions, options, isIndeterminate, isAllSelected, allowAllValue, onChange)
+            handleGlobalSelectToggle(
+              options,
+              selectedOptions,
+              filteredOptions,
+              isIndeterminate,
+              isAllSelected,
+              allowAllValue,
+              onChange
+            )
           }
           sx={{ ml: 2 }}
         />
