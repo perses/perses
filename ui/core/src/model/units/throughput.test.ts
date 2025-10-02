@@ -64,12 +64,12 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
   { value: 1, format: { unit: 'ops/sec' }, expected: '1 ops/sec' },
   {
     value: 1000,
-    format: { unit: 'bytes/sec' },
+    format: { unit: 'decbytes/sec' },
     expected: '1 KiB/s',
   },
   {
     value: 1024,
-    format: { unit: 'bytes-binary/sec' },
+    format: { unit: 'bytes/sec' },
     expected: '1 KiB/s',
   }
 ];

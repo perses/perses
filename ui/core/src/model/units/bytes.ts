@@ -20,12 +20,12 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 /**
  * We support both SI (decimal) and IEC (binary) units for bytes:
  * 
- * SI/decimal (unit: 'bytes'):
+ * SI/decimal (unit: 'decbytes'):
  * 1 KB = 1000 bytes (1000^1 bytes)
  * 1 MB = 1,000,000 bytes (1000^2 bytes)
  * etc.
  * 
- * IEC/binary (unit: 'bytes-binary'):
+ * IEC/binary (unit: 'bytes'):
  * 1 KiB = 1024 bytes (1024^1 bytes)
  * 1 MiB = 1,048,576 bytes (1024^2 bytes)
  * etc.
@@ -35,7 +35,7 @@ const DEFAULT_NUMBRO_MANTISSA = 2;
 
 type BytesUnit = 
   | 'bytes' 
-  | 'bytes-binary';
+  | 'decbytes';
 
 export type BytesFormatOptions = {
   unit?: BytesUnit;
@@ -50,18 +50,18 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnit, UnitConfig>> = {
   bytes: {
     group: 'Bytes',
-    label: 'Bytes (SI)',
-  },
-  'bytes-binary': {
-    group: 'Bytes',
     label: 'Bytes (IEC)',
+  },
+  'decbytes': {
+    group: 'Bytes',
+    label: 'Bytes (SI)',
   },
 };
 
 export function formatBytes(bytes: number, { unit = 'bytes', shortValues, decimalPlaces }: BytesFormatOptions): string {
-  const isBinary = unit === 'bytes-binary';
-  const threshold = isBinary ? 1024 : 1000;
-  
+  const isDecimal = unit === 'decbytes';
+  const threshold = isDecimal ? 1000 : 1024;
+
   // If we're showing the entire value, we can use Intl.NumberFormat.
   if (!shouldShortenValues(shortValues) || Math.abs(bytes) < threshold) {
     const formatterOptions: Intl.NumberFormatOptions = {
@@ -88,7 +88,7 @@ export function formatBytes(bytes: number, { unit = 'bytes', shortValues, decima
   // numbro is able to add units like KB, MB, GB, etc. correctly.
   return numbro(bytes).format({
     output: 'byte',
-    base: isBinary ? 'binary' : 'decimal',
+    base: isDecimal ? 'decimal' : 'binary',
     spaceSeparated: true,
     mantissa: hasDecimalPlaces(decimalPlaces) ? decimalPlaces : DEFAULT_NUMBRO_MANTISSA,
     // trimMantissa trims trailing 0s

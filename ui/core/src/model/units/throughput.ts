@@ -19,7 +19,7 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 type ThroughputUnit =
   | 'bits/sec'
   | 'bytes/sec'
-  | 'bytes-binary/sec'
+  | 'decbytes/sec'
   | 'counts/sec'
   | 'events/sec'
   | 'messages/sec'
@@ -49,7 +49,7 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
     group: THROUGHPUT_GROUP,
     label: 'Bytes/sec (SI)',
   },
-  'bytes-binary/sec': {
+  'decbytes/sec': {
     group: THROUGHPUT_GROUP,
     label: 'Bytes/sec (IEC)',
   },
@@ -103,9 +103,9 @@ export function formatThroughput(value: number, { unit, shortValues, decimalPlac
     return formatBytes(value, { unit: 'bytes', shortValues, decimalPlaces }) + '/' + denominator;
   }
 
-  if (unit === 'bytes-binary/sec') {
+  if (unit === 'decbytes/sec') {
     const denominator = Math.abs(value) < 1024 ? 'sec' : 's';
-    return formatBytes(value, { unit: 'bytes-binary', shortValues, decimalPlaces }) + '/' + denominator;
+    return formatBytes(value, { unit: 'decbytes', shortValues, decimalPlaces }) + '/' + denominator;
   }
 
   const formatterOptions: Intl.NumberFormatOptions = {

@@ -32,13 +32,13 @@ package common
 }
 
 #bytesFormat: {
-	unit?:          "bytes" | "bytes-binary"
+	unit?:          "bytes" | "decbytes"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
 
 #throughputFormat: {
-	unit?:          "bits/sec" | "bytes/sec" | "bytes-binary/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
+	unit?:          "bits/sec" | "bytes/sec" | "decbytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
