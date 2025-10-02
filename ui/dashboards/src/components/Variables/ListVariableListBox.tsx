@@ -16,7 +16,6 @@ import { Checkbox, Divider } from '@mui/material';
 import { VariableOption } from '@perses-dev/plugin-system';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/core';
 
-// TODO: handle filtered options
 export interface ListVariableListBoxContextValue {
   options: VariableOption[];
   selectedOptions: VariableOption[];
@@ -141,7 +140,6 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
               onChange
             )
           }
-          sx={{ ml: 2 }}
         />
         <span>
           <strong>{selectedCount}</strong> Selected

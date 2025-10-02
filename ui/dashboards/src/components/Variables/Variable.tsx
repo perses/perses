@@ -12,15 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  LinearProgress,
-  TextField,
-  Popper,
-  PopperProps,
-  Checkbox,
-  Autocomplete,
-  createFilterOptions,
-} from '@mui/material';
+import { TextField, Popper, PopperProps, Checkbox, Autocomplete, createFilterOptions } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -243,65 +235,63 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
 
   const autocompleteComponent = useMemo(() => {
     return (
-      <>
-        <Autocomplete
-          disablePortal
-          disableCloseOnSelect={allowMultiple}
-          multiple={allowMultiple}
-          fullWidth
-          limitTags={3}
-          size="small"
-          disableClearable
-          slotProps={{ listbox: { component: allowMultiple ? ListVariableListBox : undefined } }}
-          slots={{ popper: StyledPopper }}
-          sx={{
-            '& .MuiInputBase-root': {
-              minHeight: '38px',
-            },
-            '& .MuiAutocomplete-tag': {
-              margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
-            },
-          }}
-          filterOptions={filterOptions}
-          options={viewOptions}
-          value={selectedOptions}
-          onChange={(_, value) => {
-            if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
-              setVariableValue(name, DEFAULT_ALL_VALUE, source);
-            } else {
-              setVariableValue(name, variableOptionToVariableValue(value as VariableOption), source);
-            }
-          }}
-          inputValue={allowMultiple ? inputValue : undefined}
-          onInputChange={(_, newInputValue) => {
-            if (!allowMultiple) {
-              setInputWidth(getWidthPx(newInputValue, 'list'));
-            }
-          }}
-          onBlur={() => {
-            if (allowMultiple) {
-              setInputValue('');
-            }
-          }}
-          renderInput={(params) => {
-            return allowMultiple ? (
-              <TextField {...params} label={title} onChange={(e) => setInputValue(e.target.value)} />
-            ) : (
-              <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
-            );
-          }}
-          renderOption={(props, option, { selected }) => {
-            const { key, ...optionProps } = props;
-            return (
-              <li key={key} {...optionProps}>
-                <Checkbox style={{ marginRight: 8 }} checked={selected} />
-                {option.label}
-              </li>
-            );
-          }}
-        />
-        {loading && <LinearProgress />}
-      </>
+      <Autocomplete
+        disablePortal
+        loading={loading}
+        disableCloseOnSelect={allowMultiple}
+        multiple={allowMultiple}
+        fullWidth
+        limitTags={3}
+        size="small"
+        disableClearable
+        slotProps={{ listbox: { component: allowMultiple ? ListVariableListBox : undefined } }}
+        slots={{ popper: StyledPopper }}
+        sx={{
+          '& .MuiInputBase-root': {
+            minHeight: '38px',
+          },
+          '& .MuiAutocomplete-tag': {
+            margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
+          },
+        }}
+        filterOptions={filterOptions}
+        options={viewOptions}
+        value={selectedOptions}
+        onChange={(_, value) => {
+          if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
+            setVariableValue(name, DEFAULT_ALL_VALUE, source);
+          } else {
+            setVariableValue(name, variableOptionToVariableValue(value as VariableOption), source);
+          }
+        }}
+        inputValue={allowMultiple ? inputValue : undefined}
+        onInputChange={(_, newInputValue) => {
+          if (!allowMultiple) {
+            setInputWidth(getWidthPx(newInputValue, 'list'));
+          }
+        }}
+        onBlur={() => {
+          if (allowMultiple) {
+            setInputValue('');
+          }
+        }}
+        renderInput={(params) => {
+          return allowMultiple ? (
+            <TextField {...params} label={title} onChange={(e) => setInputValue(e.target.value)} />
+          ) : (
+            <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
+          );
+        }}
+        renderOption={(props, option, { selected }) => {
+          const { key, ...optionProps } = props;
+          return (
+            <li key={key} {...optionProps} style={{ padding: 0 }}>
+              <Checkbox style={{ marginRight: 8 }} checked={selected} />
+              {option.label}
+            </li>
+          );
+        }}
+      />
     );
   }, [
     allowAllValue,
