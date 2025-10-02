@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { FormEvent, ReactElement } from 'react';
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Dialog } from '@perses-dev/components';
+import { Button } from '@mui/material';
 import { useDeletePanelGroupDialog, useViewPanel } from '../../context';
 
 export const DeletePanelGroupDialog = (): ReactElement => {
@@ -33,31 +33,21 @@ export const DeletePanelGroupDialog = (): ReactElement => {
 
   return (
     <Dialog open={deletePanelGroupDialog !== undefined}>
-      <DialogTitle>Delete Panel Group</DialogTitle>
-      <IconButton
-        aria-label="Close"
-        onClick={() => closeDeletePanelGroupDialog()}
-        sx={(theme) => ({
-          position: 'absolute',
-          top: theme.spacing(0.5),
-          right: theme.spacing(0.5),
-        })}
-      >
-        <CloseIcon />
-      </IconButton>
+      <Dialog.Header>Delete Panel Group</Dialog.Header>
+
       <form onSubmit={handleDelete}>
-        <DialogContent dividers sx={{ width: '500px' }}>
+        <Dialog.Content dividers sx={{ width: '500px' }}>
           Are you sure you want to delete {deletePanelGroupDialog?.panelGroupName ?? 'panel group'}? This will delete
           all the panels within the group.
-        </DialogContent>
-        <DialogActions>
+        </Dialog.Content>
+        <Dialog.Actions>
           <Button variant="contained" type="submit">
             Delete
           </Button>
           <Button variant="outlined" color="secondary" onClick={() => closeDeletePanelGroupDialog()}>
             Cancel
           </Button>
-        </DialogActions>
+        </Dialog.Actions>
       </form>
     </Dialog>
   );
