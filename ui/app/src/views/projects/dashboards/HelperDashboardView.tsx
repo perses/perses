@@ -34,13 +34,22 @@ export interface GenericDashboardViewProps {
   isReadonly: boolean;
   isEditing: boolean;
   isCreating?: boolean;
+  isLeavingConfirmDialogEnabled?: boolean;
 }
 
 /**
  * The View for displaying a Dashboard.
  */
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
-  const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
+  const {
+    dashboardResource,
+    onSave,
+    onDiscard,
+    isReadonly,
+    isEditing,
+    isCreating,
+    isLeavingConfirmDialogEnabled = true,
+  } = props;
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
@@ -112,7 +121,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   isEditing={isEditing}
                   isCreating={isCreating}
-                  isLeavingConfirmDialogEnabled={true}
+                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
                 />
               </UsageMetricsProvider>
             </ErrorBoundary>
