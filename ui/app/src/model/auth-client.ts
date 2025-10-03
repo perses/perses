@@ -51,7 +51,7 @@ export function useIsAccessTokenExist(): boolean {
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
 export function useRedirectQueryParam(): string {
-  const [path] = useQueryParam<string | undefined>('name');
+  const [path] = useQueryParam<string | undefined>(redirectQueryParam);
   return path ?? '/';
 }
 
