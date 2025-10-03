@@ -65,7 +65,7 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
   {
     value: 1000,
     format: { unit: 'decbytes/sec' },
-    expected: '1 KiB/s',
+    expected: '1 KB/s',
   },
   {
     value: 1024,

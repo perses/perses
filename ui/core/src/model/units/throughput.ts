@@ -47,11 +47,11 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
   },
   'bytes/sec': {
     group: THROUGHPUT_GROUP,
-    label: 'Bytes/sec (SI)',
+    label: 'Bytes/sec (IEC)',
   },
   'decbytes/sec': {
     group: THROUGHPUT_GROUP,
-    label: 'Bytes/sec (IEC)',
+    label: 'Bytes/sec (SI)',
   },
 
   'counts/sec': {
@@ -98,14 +98,14 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
 
 export function formatThroughput(value: number, { unit, shortValues, decimalPlaces }: ThroughputFormatOptions): string {
   // special case for data throughput
-  if (unit === 'bytes/sec') {
+  if (unit === 'decbytes/sec') {
     const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
-    return formatBytes(value, { unit: 'bytes', shortValues, decimalPlaces }) + '/' + denominator;
+    return formatBytes(value, { unit: 'decbytes', shortValues, decimalPlaces }) + '/' + denominator;
   }
 
-  if (unit === 'decbytes/sec') {
+  if (unit === 'bytes/sec') {
     const denominator = Math.abs(value) < 1024 ? 'sec' : 's';
-    return formatBytes(value, { unit: 'decbytes', shortValues, decimalPlaces }) + '/' + denominator;
+    return formatBytes(value, { unit: 'bytes', shortValues, decimalPlaces }) + '/' + denominator;
   }
 
   const formatterOptions: Intl.NumberFormatOptions = {

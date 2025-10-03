@@ -23,50 +23,51 @@ type (
 	PercentageUnit string
 	ThroughputUnit string
 	CurrencyUnit   string
+	BytesUnit      string
 )
 
 const (
-	MilliSecondsUnit          TimeUnit       = "milliseconds"
-	SecondsUnit               TimeUnit       = "seconds"
-	MinutesUnit               TimeUnit       = "minutes"
-	HoursUnit                 TimeUnit       = "hours"
-	DaysUnit                  TimeUnit       = "days"
-	WeeksUnit                 TimeUnit       = "weeks"
-	MonthsUnit                TimeUnit       = "months"
-	YearsUnit                 TimeUnit       = "years"
-	PercentUnit               PercentageUnit = "percent"
-	PercentDecimalUnit        PercentageUnit = "percent-decimal"
-	DecimalUnit               string         = "decimal"
-	BytesUnit                 string         = "bytes"
-	BytesDecimalUnit          string         = "decbytes"
-	BitsPerSecondsUnit        ThroughputUnit = "bits/sec"
-	BytesPerSecondsUnit       ThroughputUnit = "bytes/sec"
-	BytesDecPerSecondsUnit 	  ThroughputUnit = "decbytes/sec"
-	CountsPerSecondsUnit      ThroughputUnit = "counts/sec"
-	EventsPerSecondsUnit      ThroughputUnit = "events/sec"
-	MessagesPerSecondsUnit    ThroughputUnit = "messages/sec"
-	OpsPerSecondsUnit         ThroughputUnit = "ops/sec"
-	PacketsPerSecondsUnit     ThroughputUnit = "packets/sec"
-	ReadsPerSecondsUnit       ThroughputUnit = "reads/sec"
-	RecordsPerSecondsUnit     ThroughputUnit = "records/sec"
-	RequestsPerSecondsUnit    ThroughputUnit = "requests/sec"
-	RowsPerSecondsUnit        ThroughputUnit = "rows/sec"
-	WritesPerSecondsUnit      ThroughputUnit = "writes/sec"
-	AustralianDollarUnit      CurrencyUnit   = "aud"
-	CanadianDollarUnit        CurrencyUnit   = "cad"
-	SwissFrancUnit            CurrencyUnit   = "chf"
-	RenminbiUnit              CurrencyUnit   = "cny"
-	EuroUnit                  CurrencyUnit   = "eur"
-	PoundUnit                 CurrencyUnit   = "gbp"
-	HongKongDollarUnit        CurrencyUnit   = "hkd"
-	IndianRupeeUniit          CurrencyUnit   = "inr"
-	YenUnit                   CurrencyUnit   = "jpy"
-	SouthKoreanWonUnit        CurrencyUnit   = "krw"
-	NorwegianKroneUnit        CurrencyUnit   = "nok"
-	NewZealandDollarUnit      CurrencyUnit   = "nzd"
-	SwedishKronaDollarUnit    CurrencyUnit   = "sek"
-	SingaporeDollarUnit       CurrencyUnit   = "sgd"
-	USDollarUnit              CurrencyUnit   = "usd"
+	MilliSecondsUnit       TimeUnit       = "milliseconds"
+	SecondsUnit            TimeUnit       = "seconds"
+	MinutesUnit            TimeUnit       = "minutes"
+	HoursUnit              TimeUnit       = "hours"
+	DaysUnit               TimeUnit       = "days"
+	WeeksUnit              TimeUnit       = "weeks"
+	MonthsUnit             TimeUnit       = "months"
+	YearsUnit              TimeUnit       = "years"
+	PercentUnit            PercentageUnit = "percent"
+	PercentDecimalUnit     PercentageUnit = "percent-decimal"
+	DecimalUnit            string         = "decimal"
+	BinaryBytesUnit        BytesUnit      = "bytes"
+	DecimalBytesUnit       BytesUnit      = "decbytes"
+	BitsPerSecondsUnit     ThroughputUnit = "bits/sec"
+	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
+	BytesDecPerSecondsUnit ThroughputUnit = "decbytes/sec"
+	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
+	EventsPerSecondsUnit   ThroughputUnit = "events/sec"
+	MessagesPerSecondsUnit ThroughputUnit = "messages/sec"
+	OpsPerSecondsUnit      ThroughputUnit = "ops/sec"
+	PacketsPerSecondsUnit  ThroughputUnit = "packets/sec"
+	ReadsPerSecondsUnit    ThroughputUnit = "reads/sec"
+	RecordsPerSecondsUnit  ThroughputUnit = "records/sec"
+	RequestsPerSecondsUnit ThroughputUnit = "requests/sec"
+	RowsPerSecondsUnit     ThroughputUnit = "rows/sec"
+	WritesPerSecondsUnit   ThroughputUnit = "writes/sec"
+	AustralianDollarUnit   CurrencyUnit   = "aud"
+	CanadianDollarUnit     CurrencyUnit   = "cad"
+	SwissFrancUnit         CurrencyUnit   = "chf"
+	RenminbiUnit           CurrencyUnit   = "cny"
+	EuroUnit               CurrencyUnit   = "eur"
+	PoundUnit              CurrencyUnit   = "gbp"
+	HongKongDollarUnit     CurrencyUnit   = "hkd"
+	IndianRupeeUniit       CurrencyUnit   = "inr"
+	YenUnit                CurrencyUnit   = "jpy"
+	SouthKoreanWonUnit     CurrencyUnit   = "krw"
+	NorwegianKroneUnit     CurrencyUnit   = "nok"
+	NewZealandDollarUnit   CurrencyUnit   = "nzd"
+	SwedishKronaDollarUnit CurrencyUnit   = "sek"
+	SingaporeDollarUnit    CurrencyUnit   = "sgd"
+	USDollarUnit           CurrencyUnit   = "usd"
 )
 
 type Format struct {
@@ -108,7 +109,7 @@ func (f *Format) validate() error {
 	switch *f.Unit {
 	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
-		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, BytesUnit, BytesDecimalUnit,
+		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBytesUnit), string(DecimalBytesUnit),
 		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
