@@ -13,14 +13,11 @@
 
 import { PluginLoader, remotePluginLoader } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
-import { useApiPrefix } from '../context/Config';
-import { getBasePathName } from './route';
+import { PERSES_APP_CONFIG } from '../config';
 
 export function useRemotePluginLoader(): PluginLoader {
-  const apiPrefix = useApiPrefix();
-  const baseUrl = getBasePathName();
-
-  const pluginLoader = useMemo(() => remotePluginLoader({ baseUrl, apiPrefix }), [apiPrefix, baseUrl]);
-
-  return pluginLoader;
+  return useMemo(
+    () => remotePluginLoader({ baseURL: PERSES_APP_CONFIG.api_prefix, apiPrefix: PERSES_APP_CONFIG.api_prefix }),
+    []
+  );
 }

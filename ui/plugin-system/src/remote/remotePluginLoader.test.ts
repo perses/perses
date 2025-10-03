@@ -135,14 +135,14 @@ describe('remotePluginLoader', () => {
 
     it('should handle options object variations', async () => {
       const testCases: Array<{
-        options?: { apiPrefix?: string; baseUrl?: string };
+        options?: { apiPrefix?: string; baseURL?: string };
         expected: string;
       }> = [
         // object with baseUrl only
-        { options: { baseUrl: 'https://example.com' }, expected: 'https://example.com/plugins' },
-        { options: { baseUrl: 'https://example.com/' }, expected: 'https://example.com//plugins' },
-        { options: { baseUrl: 'http://localhost:3000' }, expected: 'http://localhost:3000/plugins' },
-        { options: { baseUrl: '' }, expected: '/plugins' },
+        { options: { baseURL: 'https://example.com' }, expected: 'https://example.com/plugins' },
+        { options: { baseURL: 'https://example.com/' }, expected: 'https://example.com//plugins' },
+        { options: { baseURL: 'http://localhost:3000' }, expected: 'http://localhost:3000/plugins' },
+        { options: { baseURL: '' }, expected: '/plugins' },
         // object with nothing or undefined
         { options: {}, expected: '/plugins' },
         { options: undefined, expected: '/plugins' },

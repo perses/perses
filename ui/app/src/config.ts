@@ -13,7 +13,7 @@
 
 // Variables here are injected at build time by rspack, see `rspack.config.ts`
 export const PERSES_APP_CONFIG = {
-  api_prefix: process.env.API_PREFIX,
+  api_prefix: process.env.API_PREFIX ? process.env.API_PREFIX : '',
 };
 
 // Make it available in the global window for non-module code
