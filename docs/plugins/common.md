@@ -43,7 +43,7 @@ shortValues: <boolean> | default = false # Optional
 ### Bytes format
 
 ```yaml
-unit: "bytes"
+unit: < enum = "bytes" | "decbytes" >
 decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```

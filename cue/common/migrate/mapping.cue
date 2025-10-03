@@ -33,7 +33,7 @@ package migrate
 		// TODO
 		// bytes units
 		bytes:    "bytes"
-		decbytes: "bytes"
+		decbytes: "decbytes"
 		// throughput units
 		bps: "bits/sec"
 		Bps: "bytes/sec"
