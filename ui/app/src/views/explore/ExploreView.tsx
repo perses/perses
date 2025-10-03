@@ -11,50 +11,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Compass from 'mdi-material-ui/Compass';
+import React, { ReactElement, useMemo } from 'react';
+import { PluginRegistry } from '@perses-dev/plugin-system';
+import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
-import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
-import React, { ReactElement, useMemo } from 'react';
-import { useGlobalVariableList } from '../../../model/global-variable-client';
-import { useVariableList } from '../../../model/variable-client';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { useDatasourceApi } from '../../../model/datasource-api';
-import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
+import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import { useDatasourceApi } from '../../model/datasource-api';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
+import { useGlobalVariableList } from '../../model/global-variable-client';
+import { buildGlobalVariableDefinition } from '../../utils/variables';
 
-export interface ProjectExploreViewProps {
-  exploreTitleComponent?: React.ReactNode;
-}
-
-function ProjectExploreView(props: ProjectExploreViewProps): ReactElement {
+function ExploreView(): ReactElement {
   return (
-    <ProjectStoreProvider enabledURLParams={true}>
-      <HelperExploreView {...props} />
-    </ProjectStoreProvider>
+    <HelperExploreView
+      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize="large" />} />}
+    />
   );
 }
 
-function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
+export interface HelperExploreViewProps {
+  exploreTitleComponent?: React.ReactNode;
+}
+
+function HelperExploreView(props: HelperExploreViewProps): ReactElement {
   const { exploreTitleComponent } = props;
-  const { project } = useProjectStore();
-  const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
   // Collect the Project variables and setup external variables from it
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
-  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
-    () => [
-      buildProjectVariableDefinition(projectName || '', projectVars ?? []),
-      buildGlobalVariableDefinition(globalVars ?? []),
-    ],
-    [projectName, projectVars, globalVars]
+    () => [buildGlobalVariableDefinition(globalVars ?? [])],
+    [globalVars]
   );
 
-  if (isLoadingProjectVars || isLoadingGlobalVars) {
+  if (isLoadingGlobalVars) {
     return (
       <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress />
@@ -77,4 +72,4 @@ function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   );
 }
 
-export default ProjectExploreView;
+export default ExploreView;
