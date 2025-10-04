@@ -62,7 +62,6 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
             display="flex"
             flexWrap={!isSticky && isBiggerThanMd ? 'wrap' : 'nowrap'}
             maxWidth={isSticky || !isBiggerThanMd ? '100vw' : '100%'}
-            maxHeight="150px" // Limit the vertical space used to ~3 rows of variables
             pt={1}
             pl={isSticky ? 1 : 0}
             mt={isSticky && isBiggerThanMd ? 0.5 : 0}
