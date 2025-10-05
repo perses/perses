@@ -172,6 +172,10 @@ build-cli:
 generate: assets-compress install-default-plugins
 	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
 
+.PHONY: extract-plugins
+extract-plugins: generate
+	$(GO) run ./scripts/extract-plugins/extract-plugins.go
+
 .PHONY: extract-changelog
 extract-changelog:
 	$(GO) run ./scripts/extract-changelog/extract-changelog.go --version="${VERSION}"
