@@ -19,12 +19,12 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 
 /**
  * We support both SI (decimal) and IEC (binary) units for bytes:
- * 
+ *
  * SI/decimal (unit: 'decbytes'):
  * 1 KB = 1000 bytes (1000^1 bytes)
  * 1 MB = 1,000,000 bytes (1000^2 bytes)
  * etc.
- * 
+ *
  * IEC/binary (unit: 'bytes'):
  * 1 KiB = 1024 bytes (1024^1 bytes)
  * 1 MiB = 1,048,576 bytes (1024^2 bytes)
@@ -33,9 +33,7 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './uti
 
 const DEFAULT_NUMBRO_MANTISSA = 2;
 
-type BytesUnit = 
-  | 'bytes' 
-  | 'decbytes';
+type BytesUnit = 'bytes' | 'decbytes';
 
 export type BytesFormatOptions = {
   unit?: BytesUnit;
@@ -52,7 +50,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnit, UnitConfig>> = {
     group: 'Bytes',
     label: 'Bytes (IEC)',
   },
-  'decbytes': {
+  decbytes: {
     group: 'Bytes',
     label: 'Bytes (SI)',
   },

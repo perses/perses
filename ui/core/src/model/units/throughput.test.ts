@@ -71,7 +71,7 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
     value: 1024,
     format: { unit: 'bytes/sec' },
     expected: '1 KiB/s',
-  }
+  },
 ];
 
 describe('formatValue', () => {
