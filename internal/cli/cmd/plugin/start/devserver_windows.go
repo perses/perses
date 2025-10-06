@@ -50,8 +50,8 @@ type portCapturingWriter struct {
 }
 
 func newPortCapturingWriter(writer io.Writer, portChan chan int) *portCapturingWriter {
-	// Matches patterns like "Local:	http://localhost:3000" or "Local: http://127.0.0.1:3000"
-	portRegex := regexp.MustCompile(`(?m)Local:\s*https?://(?:localhost|127\.0\.0\.1):(\d+)`)
+	// Matches patterns like "Local:	http://localhost:3000" or "Local: http://127.0.0.1:3000" or [PERSES_PLUGIN] NAME="Test" PORT="3009" PROTOCOL="https"
+	portRegex := regexp.MustCompile(`(?m)(?:Local:\s*https?://(?:localhost|127\.0\.0\.1):|\[PERSES_PLUGIN\]\s*PORT=")(\d+)`)
 
 	return &portCapturingWriter{
 		writer:    writer,
