@@ -13,8 +13,8 @@
 
 import { Box, Alert } from '@mui/material';
 import { ReactElement, useMemo } from 'react';
+import { useLocalStorage } from '@perses-dev/components';
 import { useBanner } from '../context/Config';
-import { useLocalStorage } from '../utils/browser-storage';
 
 /*
  * Banner displays if there is information regarding outages

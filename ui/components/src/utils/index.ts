@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './axis';
+export * from './browser-storage';
 export * from './chart-actions';
 export * from './combine-sx';
 export * from './component-ids';
