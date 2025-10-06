@@ -150,6 +150,18 @@ func TestPortCapturingWriter(t *testing.T) {
 			expectedPort: 0,
 			shouldDetect: false,
 		},
+		{
+			name:         "output with network only",
+			output:       `[PERSES_PLUGIN] PORT="3009"`,
+			expectedPort: 3009,
+			shouldDetect: true,
+		},
+		{
+			name:         "output with network only",
+			output:       `[PERSES_PLUGIN]`,
+			expectedPort: 0,
+			shouldDetect: false,
+		},
 	}
 
 	for _, tt := range testSuite {
