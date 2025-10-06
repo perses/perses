@@ -13,7 +13,7 @@
 
 import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import { ReactElement } from 'react';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
@@ -58,7 +58,7 @@ export function ImportantDashboards(): ReactElement {
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
-        <ViewDashboardIcon />
+        <StarFourPointsOutline />
         <h2>Important Dashboards</h2>
       </Stack>
       {isLoading ? (
