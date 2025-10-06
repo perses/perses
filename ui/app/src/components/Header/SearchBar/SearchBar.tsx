@@ -39,9 +39,20 @@ interface ResourceListProps {
 }
 
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
+
+  if (projectListError)
+    return (
+      <Box sx={{ margin: 1 }}>
+        <Alert severity="error">
+          <p>Failed to load projects! Error:</p>
+          {projectListError?.message && <p>{projectListError.message}</p>}
+        </Alert>
+      </Box>
+    );
+
   return SearchList({
-    list: projectsQueryResult.data ?? [],
+    list: projectList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: Archive,
@@ -49,9 +60,22 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
+  const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
+    refetchOnMount: false,
+  });
+
+  if (globalDatasourceListError)
+    return (
+      <Box sx={{ margin: 1 }}>
+        <Alert severity="error">
+          <p>Failed to load global datasources! Error:</p>
+          {globalDatasourceListError?.message && <p>{globalDatasourceListError.message}</p>}
+        </Alert>
+      </Box>
+    );
+
   return SearchList({
-    list: globalDatasourceQueryResult.data ?? [],
+    list: globalDatasourceList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: DatabaseIcon,
@@ -111,9 +135,20 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
+  const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
+
+  if (datasourceListError)
+    return (
+      <Box sx={{ margin: 1 }}>
+        <Alert severity="error">
+          <p>Failed to load datasources! Error:</p>
+          {datasourceListError?.message && <p>{datasourceListError.message}</p>}
+        </Alert>
+      </Box>
+    );
+
   return SearchList({
-    list: datasourceQueryResult.data ?? [],
+    list: datasourceList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: DatabaseIcon,
