@@ -21,7 +21,7 @@ import {
   DashboardSpec,
   EphemeralDashboardResource,
 } from '@perses-dev/core';
-import { ReactElement, useCallback } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -67,20 +67,24 @@ function CreateDashboardView(): ReactElement | null {
     },
   };
 
+  const [isLeavingConfirmDialogEnabled, setIsLeavingConfirmDialogEnabled] = useState(true);
+
   const handleDashboardSave = useCallback(
     (data: DashboardResource | EphemeralDashboardResource) => {
       if (data.kind !== 'Dashboard') {
         throw new Error('Invalid kind');
       }
+      setIsLeavingConfirmDialogEnabled(false); // Disable the leaving dialog before navigating
+
       return createDashboardMutation.mutateAsync(data, {
         onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(
             `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
           );
           navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
-          return createdDashboard;
         },
         onError: (err) => {
+          setIsLeavingConfirmDialogEnabled(true); // Re-enable the leaving dialog if there was an error
           exceptionSnackbar(err);
           throw err;
         },
@@ -103,6 +107,7 @@ function CreateDashboardView(): ReactElement | null {
       isReadonly={false}
       isEditing={true}
       isCreating={true}
+      isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
     />
   );
 }
