@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -85,6 +86,8 @@ func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errW
 	cmd.Stdout = portCapturingWriter
 	cmd.Stderr = streamErrWriter
 	cmd.Dir = pluginPath
+	// PERSES_CLI indicates to the plugin dev server that it is run by the perses CLI
+	cmd.Env = append(os.Environ(), "PERSES_CLI=true")
 	// Request the OS to assign a process group to the new process, to which all its children will belong
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
