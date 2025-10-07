@@ -38,19 +38,24 @@ interface ResourceListProps {
   onClick: () => void;
 }
 
+function SearchErrorAlert({ error, message }: { error: unknown; message: string }): ReactElement | null {
+  if (!error) return null;
+  // Try to extract error message if possible
+  const errorMsg =
+    error && typeof error === 'object' && 'message' in error ? (error as { message: string }).message : undefined;
+  return (
+    <Box sx={{ margin: 1 }}>
+      <Alert severity="error">
+        <p>{message}</p>
+        {errorMsg && <p>{errorMsg}</p>}
+      </Alert>
+    </Box>
+  );
+}
+
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
-
-  if (projectListError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load projects! Error:</p>
-          {projectListError?.message && <p>{projectListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
+  if (projectListError) return <SearchErrorAlert error={projectListError} message="Failed to load projects! Error:" />;
   return SearchList({
     list: projectList ?? [],
     query: props.query,
@@ -63,17 +68,8 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
     refetchOnMount: false,
   });
-
   if (globalDatasourceListError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load global datasources! Error:</p>
-          {globalDatasourceListError?.message && <p>{globalDatasourceListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
+    return <SearchErrorAlert error={globalDatasourceListError} message="Failed to load global datasources! Error:" />;
   return SearchList({
     list: globalDatasourceList ?? [],
     query: props.query,
@@ -106,7 +102,6 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
             importantDashboard.metadata.name === d.metadata.name &&
             importantDashboard.metadata.project === d.metadata.project
         );
-
         return { ...d, highlight };
       }) || []
     );
@@ -114,13 +109,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 
   if (dashboardListError || importantDashboardsError)
     return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
+      <SearchErrorAlert
+        error={dashboardListError || importantDashboardsError}
+        message="Failed to load dashboards! Error:"
+      />
     );
 
   return dashboardListLoading || importantDashboardsLoading
@@ -136,17 +128,8 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
-
   if (datasourceListError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load datasources! Error:</p>
-          {datasourceListError?.message && <p>{datasourceListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
+    return <SearchErrorAlert error={datasourceListError} message="Failed to load datasources! Error:" />;
   return SearchList({
     list: datasourceList ?? [],
     query: props.query,
