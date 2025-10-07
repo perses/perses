@@ -237,7 +237,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           links={definition.spec.links}
           pluginActions={pluginActions}
           showIcons={showIcons}
-          sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
+          sx={{ py: '2px', pl: `${chartsTheme.container.padding.default}px`, pr: '2px' }}
           dimension={contentDimensions}
         />
       )}
