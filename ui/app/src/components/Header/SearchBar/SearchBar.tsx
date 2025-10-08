@@ -50,7 +50,7 @@ function SearchErrorAlert({ error }: { error: StatusError }): ReactElement {
           alignItems: 'center', // Ensures the icon and text are vertically aligned
         }}
       >
-        <p>Something went wrong: {errorMsg}</p>
+        <p>{errorMsg}</p>
       </Alert>
     </Box>
   );
