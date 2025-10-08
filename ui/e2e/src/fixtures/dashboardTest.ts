@@ -146,7 +146,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
   ignoresConsoleErrors: [],
   dashboardPage: async (
     { page, projectName, dashboardName, modifiesDashboard, mockNow, ignoresConsoleErrors },
-    use,
+    usingPage,
     testInfo
   ) => {
     let testDashboardName: string = dashboardName;
@@ -177,7 +177,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     const dashboardPage = new DashboardPage(page);
 
     // Use the fixture value in the test.
-    await use(dashboardPage);
+    await usingPage(dashboardPage);
 
     await dashboardPage.cleanupMockRequests();
 
