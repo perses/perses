@@ -113,7 +113,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
 
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Single Line', async (panelEditor) => {
-      await panelEditor.selectTab('Settings');
+      await panelEditor.selectTab('General Settings');
       await panelEditor.addThreshold();
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '50');
