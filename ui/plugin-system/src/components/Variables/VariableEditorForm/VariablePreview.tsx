@@ -98,7 +98,13 @@ export function VariableListPreview(props: VariableListPreviewProps): ReactEleme
   const result = !sortMethod || sortMethod === 'none' || !data ? data : SORT_METHODS[sortMethod].sort(data);
 
   const variablePreview = useMemo(
-    () => <VariablePreview values={result?.map((val) => val.value)} isLoading={isFetching} error={errorMessage} />,
+    () => (
+      <VariablePreview
+        values={result?.map((val) => val.label || val.value)}
+        isLoading={isFetching}
+        error={errorMessage}
+      />
+    ),
     [errorMessage, isFetching, result]
   );
 
