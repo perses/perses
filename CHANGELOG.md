@@ -1,5 +1,60 @@
 # Changelog
 
+## 0.53.0-beta.0 / 2025-10-07
+
+### Core & UI
+
+- [FEATURE] dasboards - ListVariable Select: add checkbox and global checkbox for options (#3415)
+- [FEATURE] Implement port capturing for dev servers and enhance plugin management (#3411)
+- [FEATURE] Add system-wide Banner component for status notifications (#3289) (#3290)
+- [FEATURE] Add Panel Editor Context (#3346)
+- [ENHANCEMENT] Add label value for the variable preview (#3438)
+- [ENHANCEMENT] add PERSES_CLI env var for plugin dev server (#3435)
+- [ENHANCEMENT] Highlight the important dashboards (#3426)
+- [ENHANCEMENT] add custom pattern for matching plugin ports (#3425)
+- [ENHANCEMENT] CLI/LINT: extract plugin archive when provided (#3424)
+- [ENHANCEMENT] Added ByteUnits for SI and IEC standard (#3421)
+- [ENHANCEMENT] All dialogs should use Perses Dialog wrapper (#3417)
+- [ENHANCEMENT] add a public path function for plugins generation for reverse proxies (#3408)
+- [ENHANCEMENT] Improve display of error messages returned by the backend (#3405)
+- [ENHANCEMENT] Allow UI to select default datasource during migration (#3373)
+- [ENHANCEMENT] Improve percli migrate command to support default datasource (#3358)
+- [BUGFIX] Grafana migration: handle "transparent" color (#3439)
+- [BUGFIX] explore: re-enable collapse state stored in localStorage (#3427)
+- [BUGFIX] Fix navigation after creating a new dashboard (#3422)
+- [BUGFIX] app: fix redirection after login (#3419)
+- [BUGFIX] Add sort functionality to the Variables (#3389)
+- [BUGFIX] Add default spec plugin kind (#3388)
+- [BUGFIX] Variable Preview Check the data to assure the data is not undefined (#3387)
+- [BUGFIX] Remove var_preview values default value empty array (#3386)
+- [BUGFIX] pass baseUrl to loadPlugin (#3374)
+- [BUGFIX] Add abort signal to datasource variables query (#3376)
+- [BUGFIX] dashboards: Leave dialog: ignore query params change when editing dashboard (#3367)
+- [BUGFIX] use globalThis object over global (#3372)
+- [BUGFIX] Add abort signal to plugin get time series data (#3369)
+- [BUGFIX] Fix TLS Config CA, Cert, and Key fields to support multiline input (#3364)
+- [BREAKINGCHANGE] Improve support for reverse proxy configuration (#3377)
+- [DOC] Add warning about the usage api_prefix config (#3410)
+- [DOC] Add doc to install perses using package manager (#3366)
+- [DOC] Adds new YouTube material for Perses (#3355)
+- [DOC] Update some concept docs & fix images (#3349)
+- [DOC] Document Homebrew installation option (#3370)
+
+### Plugins improvements
+
+- [FEATURE] TimeSeriesChart: support opacity & line style overrides (perses/plugins#386)
+- [FEATURE] TimeSeriesChart: Line style customization (perses/plugins#347)
+- [ENHANCEMENT] TimeSeriesChart Schema fix + additional tests (perses/plugins#380)
+- [ENHANCEMENT] TimeSeriesChart: Visual: hide useless controls instead of disabling (perses/plugins#345)
+- [ENHANCEMENT] TimeSeriesChart: migration: support lineStyle & opacity override (perses/plugins#387)
+- [ENHANCEMENT] Tempo: TempoExplorer: always show panel actions (download icon) (perses/plugins#379)
+- [ENHANCEMENT] TraceTable: sort by trace start time by default (perses/plugins#321)
+- [ENHANCEMENT] StaticListVariable: allow empty value (perses/plugins#398)
+- [ENHANCEMENT] StaticListVariable: migration: handle the "no options" case (perses/plugins#390)
+- [ENHANCEMENT] StatChart: improve Grafana migration (perses/plugins#281)
+- [BUGFIX] Table: fix validation for panel embedding (perses/plugins#320)
+- [BUGFIX] DatasourceVariable: fix grafana migration logic (perses/plugins#317)
+
 ## 0.52.0 / 2025-09-15
 
 The release of Perses v0.52.0 introduces significant new features and improvements.
