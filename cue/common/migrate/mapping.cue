@@ -111,6 +111,8 @@ package migrate
 		"yellow":             "#fade2a"
 		"light-yellow":       "#ffee52"
 		"super-light-yellow": "#fff899"
+
+		"transparent": "#00000000"
 	}
 }
 #defaultCalc: "last"
