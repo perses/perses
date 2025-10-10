@@ -44,6 +44,7 @@ import { EChartsTheme } from '../model';
 
 // Loading the ECharts extensions should happen in the respective plugins.
 // This is a workaround for https://github.com/perses/plugins/issues/83.
+// eslint-disable-next-line react-hooks/rules-of-hooks
 use([
   DatasetComponent,
   DataZoomComponent,

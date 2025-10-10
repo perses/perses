@@ -50,6 +50,8 @@ export function ExplorerManagerProvider({
   function setExplorer(newExplorer: string): void {
     if (explorer) {
       // store current explorer state
+      // TODO: improve logic to remove this eslint-disable-next-line
+      // eslint-disable-next-line react-hooks/immutability
       explorerStateCache[explorer] = { data };
       setExplorerStateCache(explorerStateCache);
     }

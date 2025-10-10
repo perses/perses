@@ -16,7 +16,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
+    'plugin:react-hooks/recommended-legacy',
     'plugin:jsx-a11y/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
@@ -51,18 +51,12 @@ module.exports = {
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'error',
-
-    'prettier/prettier': 'error',
     '@typescript-eslint/array-type': [
       'error',
       {
         default: 'array-simple',
       },
     ],
-    eqeqeq: ['error', 'always'],
-    'import/order': 'error',
-    // you must disable the base rule as it can report incorrect errors
-    'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -71,17 +65,33 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
       },
     ],
+    // you must disable the base rule as it can report incorrect errors
+    'no-unused-vars': 'off',
 
-    'react/prop-types': 'off',
-    'react-hooks/exhaustive-deps': 'error',
-    // Not necessary in React 17
-    'react/react-in-jsx-scope': 'off',
-    'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never', propElementValues: 'always' }],
+    'prettier/prettier': 'error',
+
+    eqeqeq: ['error', 'always'],
 
     // We use this rule instead of the core eslint `no-duplicate-imports`
     // because it avoids false errors on cases where we have a regular
-    // import and an `import type`.
+    // import and an `import type`
     'import/no-duplicates': 'error',
+    'import/order': 'error',
+
+    // Not necessary in React 17
+    'react/react-in-jsx-scope': 'off',
+    'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never', propElementValues: 'always' }],
+    'react-hooks/exhaustive-deps': 'error',
+    'react-hooks/error-boundaries': 'error',
+    'react-hooks/globals': 'error',
+    'react-hooks/immutability': 'error',
+    'react-hooks/purity': 'error',
+    'react-hooks/refs': 'error',
+    'react-hooks/set-state-in-effect': 'error',
+    'react-hooks/set-state-in-render': 'error',
+    'react-hooks/static-components': 'error',
+    'react-hooks/unsupported-syntax': 'error',
+    'react-hooks/use-memo': 'error',
 
     'no-restricted-imports': [
       'error',
