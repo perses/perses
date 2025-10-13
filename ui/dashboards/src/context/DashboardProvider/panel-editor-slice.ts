@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, PanelEditorValues, PanelGroupId } from '@perses-dev/core';
-import { StateCreator } from 'zustand';
-import { getYForNewRow } from '../../utils';
-import { generateId, Middleware, createPanelDefinition } from './common';
 import {
-  PanelGroupSlice,
+  Action,
+  PanelEditorValues,
+  PanelGroupId,
   PanelGroupItemId,
   PanelGroupDefinition,
   PanelGroupItemLayout,
-  addPanelGroup,
-  createEmptyPanelGroup,
-} from './panel-group-slice';
+} from '@perses-dev/core';
+import { StateCreator } from 'zustand';
+import { getYForNewRow } from '../../utils';
+import { generateId, Middleware, createPanelDefinition } from './common';
+import { PanelGroupSlice, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**

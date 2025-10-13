@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,9 +15,9 @@ import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
+import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core';
+import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
-import { isPanelGroupItemIdEqual } from '../../context/DashboardProvider/panel-group-slice';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 
 export interface GridItemContentProps {

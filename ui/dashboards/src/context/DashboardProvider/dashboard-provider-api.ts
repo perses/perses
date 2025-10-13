@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,9 +18,11 @@ import {
   EphemeralDashboardResource,
   PanelDefinition,
   PanelGroupId,
+  PanelGroupDefinition,
+  PanelGroupItemId,
+  PanelGroupItemLayout,
 } from '@perses-dev/core';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
-import { PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from './panel-group-slice';
 import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
 import { PanelGroupEditor } from './panel-group-editor-slice';
 import { PanelEditorState } from './panel-editor-slice';

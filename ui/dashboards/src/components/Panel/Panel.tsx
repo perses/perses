@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,11 +13,10 @@
 
 import { Card, CardContent, CardProps } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, combineSx, useId } from '@perses-dev/components';
-import { PanelDefinition } from '@perses-dev/core';
+import { PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
 import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { PanelGroupItemId } from '../../context';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
