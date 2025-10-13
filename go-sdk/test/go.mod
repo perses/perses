@@ -8,7 +8,7 @@ require (
 	github.com/perses/perses v0.52.0
 	github.com/perses/plugins/prometheus v0.53.4
 	github.com/perses/plugins/staticlistvariable v0.5.2
-	github.com/perses/plugins/table v0.8.1
+	github.com/perses/plugins/table v0.9.0
 	github.com/perses/plugins/timeserieschart v0.10.2
 	github.com/stretchr/testify v1.11.1
 )
