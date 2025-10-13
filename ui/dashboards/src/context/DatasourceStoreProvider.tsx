@@ -17,7 +17,6 @@ import {
   DashboardSpec,
   DatasourceSelector,
   DatasourceSpec,
-  useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
   DatasourceApi,
@@ -28,6 +27,7 @@ import {
   DatasourceStore,
   DatasourceSelectItemGroup,
   usePluginRegistry,
+  useEvent,
   DatasourceClient,
   DatasourceSelectItem,
 } from '@perses-dev/plugin-system';
