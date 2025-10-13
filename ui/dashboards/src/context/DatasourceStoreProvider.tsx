@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,13 +15,13 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
-  DatasourceResource,
   DatasourceSelector,
   DatasourceSpec,
-  GlobalDatasourceResource,
   useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
+  DatasourceApi,
+  BuildDatasourceProxyUrlParams,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -39,25 +39,6 @@ export interface DatasourceStoreProviderProps {
   children?: ReactNode;
   savedDatasources?: Record<string, DatasourceSpec>;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
-}
-
-export type BuildDatasourceProxyUrlParams = {
-  project?: string;
-  dashboard?: string;
-  name: string;
-};
-
-export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => string;
-
-/**
- * The external API for fetching datasource resources
- */
-export interface DatasourceApi {
-  buildProxyUrl?: BuildDatasourceProxyUrlFunc;
-  getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
-  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
-  listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
-  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
 }
 
 /**
