@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Transform } from '@perses-dev/core';
-import { useMemo } from 'react';
 
 /*
  * Join: Regroup rows with equal cell value in a column.
@@ -253,11 +252,4 @@ export function transformData(
       }, {});
   });
   return result;
-}
-
-export function useTransformData(
-  data: Array<Record<string, unknown>>,
-  transforms: Transform[]
-): Array<Record<string, unknown>> {
-  return useMemo(() => transformData(data, transforms), [data, transforms]);
 }
