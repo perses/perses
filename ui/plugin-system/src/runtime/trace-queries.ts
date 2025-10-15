@@ -23,14 +23,6 @@ import { filterVariableStateMap, getVariableValuesKey } from './utils';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
-  const { start, end } = timeRange;
-  return {
-    start: Math.ceil(getUnixTime(start)),
-    end: Math.ceil(getUnixTime(end)),
-  };
-}
-
 /**
  * Run a trace query using a TraceQuery plugin and return the results
  * @param definitions: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
