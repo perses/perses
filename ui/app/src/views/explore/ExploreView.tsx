@@ -14,7 +14,7 @@
 import Compass from 'mdi-material-ui/Compass';
 import React, { ReactElement, useMemo } from 'react';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import { ExternalVariableDefinition } from '@perses-dev/core';
 import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ViewExplore } from '@perses-dev/explore';
