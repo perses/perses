@@ -101,8 +101,8 @@ export function VirtualizedTable<TableData>({
       },
       TableHead,
       TableFoot,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      TableRow: ({ item, ...props }): ReactElement | null => {
+      TableRow: (props): ReactElement | null => {
+        // eslint-disable-next-line react/prop-types
         const index = props['data-index'];
         const row = rows[index];
         if (!row) {

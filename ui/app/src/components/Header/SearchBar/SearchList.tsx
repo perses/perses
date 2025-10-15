@@ -63,6 +63,9 @@ export function SearchList(props: SearchListProps): ReactElement {
   useEffect(() => {
     // Reset the size of the filtered list when query or the actual list change.
     // Otherwise, we would keep the old size that can have been changed using the button to see more data.
+
+    // TODO: improve logic to avoid this eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentSizeList(sizeList);
   }, [props.query, props.list]);
 

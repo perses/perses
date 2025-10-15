@@ -28,10 +28,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
+import { Simulate } from 'react-dom/test-utils';
 import { useMigrate } from '../../model/migrate-client';
 import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';
+import input = Simulate.input;
 
 type Input = {
   name: string;
@@ -66,12 +68,11 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
 
   // initialize the map with the provided input values if exist
   dashboard?.__inputs?.map((input) => {
-    grafanaInput[input.name] = input.value ?? '';
+    setGrafanaInput((prev) => ({ ...prev, [input.name]: input.value ?? '' }));
   });
 
   const setInput = (key: string, value: string): void => {
-    grafanaInput[key] = value;
-    setGrafanaInput(grafanaInput);
+    setGrafanaInput((prev) => ({ ...prev, [input.name]: value }));
   };
 
   const importOnClick = (): void => {
@@ -79,8 +80,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
     if (dashboard === undefined) {
       return;
     }
-    dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    dashboardMutation.mutate({ ...dashboard, metadata: { ...dashboard.metadata, project: projectName } });
   };
 
   if (error) {

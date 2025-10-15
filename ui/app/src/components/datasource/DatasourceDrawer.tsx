@@ -43,10 +43,8 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   const handleSave = (def: DatasourceDefinition): void => {
-    datasource.spec = def.spec;
-    datasource.metadata.name = def.name;
     if (onSave) {
-      onSave(datasource);
+      onSave({ ...datasource, metadata: { ...datasource.metadata, name: def.name }, spec: def.spec });
     }
   };
 

@@ -56,14 +56,15 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
   const updateEphemeralDashboardMutation = useUpdateEphemeralDashboardMutation();
 
   const processForm: SubmitHandler<UpdateEphemeralDashboardValidationType> = (data) => {
-    if (ephemeralDashboard.spec.display) {
-      ephemeralDashboard.spec.display.name = data.dashboardName;
+    const result = { ...ephemeralDashboard };
+    if (result.spec.display) {
+      result.spec.display.name = data.dashboardName;
     } else {
-      ephemeralDashboard.spec.display = { name: data.dashboardName };
+      result.spec.display = { name: data.dashboardName };
     }
-    ephemeralDashboard.spec.ttl = data.ttl as DurationString;
+    result.spec.ttl = data.ttl as DurationString;
 
-    updateEphemeralDashboardMutation.mutate(ephemeralDashboard, {
+    updateEphemeralDashboardMutation.mutate(result, {
       onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
         successSnackbar(
           `Ephemeral Dashboard ${getResourceExtendedDisplayName(

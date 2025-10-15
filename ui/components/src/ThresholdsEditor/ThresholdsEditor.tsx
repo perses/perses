@@ -46,6 +46,8 @@ export function ThresholdsEditor({
 
   const [steps, setSteps] = useState(thresholds?.steps);
   useEffect(() => {
+    // TODO: improve logic to remove setState in useEffect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSteps(thresholds?.steps);
   }, [thresholds?.steps]);
 

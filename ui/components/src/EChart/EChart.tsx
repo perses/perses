@@ -184,6 +184,8 @@ export const EChart = memo(function EChart<T>({
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
     if (_instance !== undefined) {
+      // TODO: improve logic to remove this eslint-disable-next-line
+      // eslint-disable-next-line react-hooks/immutability
       _instance.current = chartElement.current;
     }
     return (): void => {

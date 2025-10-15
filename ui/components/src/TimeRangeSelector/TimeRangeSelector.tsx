@@ -14,7 +14,7 @@
 import { Box, MenuItem, Popover, Select } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
-import { ReactElement, useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, MouseEvent, useState } from 'react';
 import { useTimeZone } from '../context';
 import { TimeOption } from '../model';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
@@ -60,7 +60,13 @@ export function TimeRangeSelector({
 }: TimeRangeSelectorProps): ReactElement {
   const { timeZone } = useTimeZone();
 
-  const anchorEl = useRef(); // Used to position the absolute time range picker
+  // Control the open state of the select component to prevent the menu from closing when the custom date picker is
+  // opened.
+  //
+  // Note that the value state of the select is here for display only. The real value (the one from props) is managed
+  // by click events on each menu item.
+  // This is a trick to get around the limitation of select with menu item that doesn't support objects as value.
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   // Control the open state of the absolute time range picker
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
@@ -78,18 +84,16 @@ export function TimeRangeSelector({
     [value, timeZone]
   );
 
-  // Control the open state of the select component to prevent the menu from closing when the custom date picker is
-  // opened.
-  //
-  // Note that the value state of the select is here for display only. The real value (the one from props) is managed
-  // by click events on each menu item.
-  // This is a trick to get around the limitation of select with menu item that doesn't support objects as value...
-  const [open, setOpen] = useState(false);
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+
+  const open = Boolean(anchorEl);
 
   return (
     <>
       <Popover
-        anchorEl={anchorEl.current}
+        anchorEl={anchorEl}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'center',
@@ -105,16 +109,16 @@ export function TimeRangeSelector({
           onChange={(value: AbsoluteTimeRange) => {
             onChange(value);
             setShowCustomDateSelector(false);
-            setOpen(false);
+            setAnchorEl(null);
           }}
           onCancel={() => setShowCustomDateSelector(false)}
         />
       </Popover>
-      <Box ref={anchorEl}>
+      <Box>
         <Select
           open={open}
           value={formatTimeRange(value, timeZone)}
-          onClick={() => setOpen(!open)}
+          onClick={handleClick}
           IconComponent={Calendar}
           inputProps={{
             'aria-label': `Select time range. Currently set to ${value}`,

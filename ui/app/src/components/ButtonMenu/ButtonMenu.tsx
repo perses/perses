@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material';
-import { useState, useRef, ReactElement } from 'react';
+import { useState, MouseEvent, ReactElement } from 'react';
 import MenuDown from 'mdi-material-ui/MenuDown';
 
 export interface ButtonMenuProps {
@@ -26,18 +26,20 @@ export interface ButtonMenuProps {
 const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
   const primary = children[0];
   const menuEntries = children.slice(1);
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = (): void => {
-    setOpen((prevOpen) => !prevOpen);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
   };
+
+  const open = Boolean(anchorEl);
 
   return (
     <>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="split button">
+      <ButtonGroup variant="contained" aria-label="split button">
         {primary}
-        <Button size="small" aria-expanded={open ? 'true' : undefined} aria-haspopup="menu" onClick={handleToggle}>
+        <Button size="small" aria-expanded={open ? 'true' : undefined} aria-haspopup="menu" onClick={handleClick}>
           <MenuDown />
         </Button>
       </ButtonGroup>
@@ -46,7 +48,7 @@ const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
           zIndex: 1,
         }}
         open={open}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         transition
         disablePortal
       >
@@ -58,7 +60,7 @@ const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
             }}
           >
             <Paper>
-              <ClickAwayListener onClickAway={() => setOpen(false)}>
+              <ClickAwayListener onClickAway={() => setAnchorEl(null)}>
                 <MenuList id="split-button-menu" autoFocusItem>
                   {menuEntries}
                 </MenuList>

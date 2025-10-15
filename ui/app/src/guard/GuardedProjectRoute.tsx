@@ -28,6 +28,9 @@ function GuardedProjectRoute(): ReactElement {
     if (projectName === undefined || projectName === '') {
       return;
     }
+
+    // TODO: improve logic to remove the setState from useEffect
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProjectPromise(
       getProject(projectName).catch((err) => {
         exceptionSnackbar(err);

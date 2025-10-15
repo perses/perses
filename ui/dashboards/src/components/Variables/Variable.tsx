@@ -282,8 +282,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
             <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
           );
         }}
-        renderOption={(props, option, { selected }) => {
-          const { key, ...optionProps } = props;
+        renderOption={({ key, ...optionProps }, option, { selected }) => {
           return (
             <li key={key} {...optionProps} style={{ padding: 0 }}>
               <Checkbox style={{ marginRight: 8 }} checked={selected} />

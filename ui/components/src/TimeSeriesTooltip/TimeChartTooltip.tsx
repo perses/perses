@@ -63,12 +63,16 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
+  // TODO: improve logic to remove this eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/refs
   const chart = chartRef.current;
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
 
+  // TODO: improve logic to remove this eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/refs
   transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
   // Get series nearby the cursor and pass into tooltip content children.
@@ -93,6 +97,8 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
         ref={tooltipRef}
         sx={(theme) => getTooltipStyles(theme, pinnedPos, maxHeight)}
         style={{
+          // TODO: improve logic to remove this eslint-disable-next-line
+          // eslint-disable-next-line react-hooks/refs
           transform: transform.current,
         }}
       >

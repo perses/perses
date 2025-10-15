@@ -54,10 +54,8 @@ export function VariableDrawer<T extends Variable>({
   }, [variable]);
 
   const handleSave = (definition: VariableDefinition): void => {
-    variable.spec = definition;
-    variable.metadata.name = definition.spec.name;
     if (onSave) {
-      onSave(variable);
+      onSave({ ...variable, metadata: { ...variable.metadata, name: definition.spec.name }, spec: definition.spec });
     }
   };
 
