@@ -56,7 +56,6 @@ export function Row({
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
   const theme = useTheme();
   const viewPanelItemId = useViewPanelGroup();
-
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
 
   const hasViewPanel =
