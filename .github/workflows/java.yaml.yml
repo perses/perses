@@ -1,0 +1,32 @@
+name: java
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - snapshot/*
+    tags:
+      - v*
+  pull_request:
+  merge_group:
+
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+
+      - name: Run Unit Tests
+        run: mvn test
