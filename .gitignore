@@ -49,4 +49,4 @@ dev/extra/tempo-data
 !.gitkeep
 
 # For Java
-/target
+/java-sdk/target

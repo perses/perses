@@ -24,9 +24,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+          cache-dependency-path: 'java-sdk/pom.xml'
 
       - name: Build with Maven
-        run: mvn clean install -DskipTests
+        run: cd java-sdk && mvn clean install -DskipTests
 
       - name: Run Unit Tests
-        run: mvn test
+        run: cd java-sdk && mvn test
