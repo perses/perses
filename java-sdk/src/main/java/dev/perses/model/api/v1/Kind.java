@@ -13,21 +13,38 @@
 
 package dev.perses.model.api.v1;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum Kind {
+    @JsonProperty("Dashboard")
     DASHBOARD("Dashboard"),
+    @JsonProperty("Datasource")
     DATASOURCE("Datasource"),
+    @JsonProperty("EphemeralDashboard")
     EPHEMERAL_DASHBOARD("EphemeralDashboard"),
+    @JsonProperty("Folder")
     FOLDER("Folder"),
+    @JsonProperty("GlobalDatasource")
     GLOBAL_DATASOURCE("GlobalDatasource"),
+    @JsonProperty("GlobalRole")
     GLOBAL_ROLE("GlobalRole"),
+    @JsonProperty("GlobalRoleBinding")
     GLOBAL_ROLE_BINDING("GlobalRoleBinding"),
+    @JsonProperty("GlobalSecret")
     GLOBAL_SECRET("GlobalSecret"),
+    @JsonProperty("GlobalVariable")
     GLOBAL_VARIABLE("GlobalVariable"),
+    @JsonProperty("Project")
     PROJECT("Project"),
+    @JsonProperty("Role")
     ROLE("Role"),
+    @JsonProperty("RoleBinding")
     ROLE_BINDING("RoleBinding"),
+    @JsonProperty("Secret")
     SECRET("Secret"),
+    @JsonProperty("User")
     USER("User"),
+    @JsonProperty("Variable")
     VARIABLE("Variable");
 
     private final String kind;
