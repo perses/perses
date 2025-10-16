@@ -112,8 +112,10 @@ export function getTooltipStyles(
     border: `1px solid ${theme.palette.grey['200']}`,
     boxShadow: theme.shadows[4],
     // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
-    // Ensure pinned tooltip shows behind edit panel drawer and sticky header
-    zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
+    // LOGZ.IO CHANGE START:: Custom Drilldown preview [APPZ-709]
+    // Ensure pinned tooltip shows on top of all content, especially in panel editor
+    zIndex: pinnedPos !== null ? theme.zIndex.modal + 1 : theme.zIndex.tooltip,
+    // LOGZ.IO CHANGE END:: Custom Drilldown preview [APPZ-709]
     overflow: 'hidden',
     '&:hover': {
       overflowY: 'auto',

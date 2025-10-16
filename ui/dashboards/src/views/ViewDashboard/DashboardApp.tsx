@@ -13,7 +13,7 @@
 
 import { ReactElement, useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme, useChartsContext } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
@@ -62,6 +62,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   } = props;
 
   const chartsTheme = useChartsTheme();
+  const parentChartsContext = useChartsContext(); // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
 
   const { isEditMode, setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
@@ -146,8 +147,9 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         </ErrorBoundary>
         <ChartsProvider
           chartsTheme={chartsTheme}
-          enablePinning={false}
+          enablePinning={true} // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
           enableSyncGrouping={false} // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
+          pointActions={parentChartsContext.pointActions || []} // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
         >
           <PanelDrawer />
         </ChartsProvider>
