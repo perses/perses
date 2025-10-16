@@ -23,6 +23,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
+import type { ECharts as EChartsInstance } from 'echarts/core';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 
@@ -41,17 +42,33 @@ export interface PieChartProps {
   data: PieChartData[] | null;
   label?: string;
   legend?: LegendComponentOption;
+  // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Pie Chart
+  useDefaultTooltip?: boolean;
+  _instance?: React.MutableRefObject<EChartsInstance | undefined>;
+  // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Pie Chart
 }
 
 export function PieChart(props: PieChartProps): ReactElement {
-  const { width, height, data, label } = props;
+  const {
+    width,
+    height,
+    data,
+    label,
+    // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Pie Chart
+    _instance,
+    useDefaultTooltip = true,
+    // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Pie Chart
+  } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = {
-    tooltip: {
-      trigger: 'item',
-      formatter: label ? '{a} <br/>{b} : {c} ({d}%)' : '{b} : {c} ({d}%)',
-    },
+    // LOGZ.IO CHANGE: APPZ-1218 US2 – Pie Chart
+    tooltip: useDefaultTooltip
+      ? {
+          trigger: 'item',
+          formatter: label ? '{a} <br/>{b} : {c} ({d}%)' : '{b} : {c} ({d}%)',
+        }
+      : undefined,
     axisLabel: {
       overflow: 'truncate',
       width: width / 3,
@@ -94,6 +111,8 @@ export function PieChart(props: PieChartProps): ReactElement {
         }}
         option={option}
         theme={chartsTheme.echartsTheme}
+        // LOGZ.IO CHANGE: APPZ-1218 US2 – Pie Chart
+        _instance={_instance}
       />
     </Box>
   );

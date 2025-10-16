@@ -13,7 +13,7 @@
 
 import { ReactElement, useMemo } from 'react';
 import { FormatOptions, formatValue } from '@perses-dev/core';
-import { use, EChartsCoreOption } from 'echarts/core';
+import { use, EChartsCoreOption, ECharts as EChartsInstance } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -39,10 +39,24 @@ export interface BarChartProps {
   data: BarChartData[] | null;
   format?: FormatOptions;
   mode?: ModeOption;
+  // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Bar Chart
+  useDefaultTooltip?: boolean;
+  _instance?: React.MutableRefObject<EChartsInstance | undefined>;
+  // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Bar Chart
 }
 
 export function BarChart(props: BarChartProps): ReactElement {
-  const { width, height, data, format = { unit: 'decimal' }, mode = 'value' } = props;
+  const {
+    width,
+    height,
+    data,
+    format = { unit: 'decimal' },
+    mode = 'value',
+    // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Bar Chart
+    _instance,
+    useDefaultTooltip = true,
+    // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Bar Chart
+  } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -100,19 +114,22 @@ export function BarChart(props: BarChartProps): ReactElement {
           color: chartsTheme.echartsTheme[0],
         },
       },
-      tooltip: {
-        appendToBody: true,
-        confine: true,
-        formatter: (params: { name: string; data: number[] }) =>
-          params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], format)}`,
-      },
+      // LOGZ.IO CHANGE: APPZ-1218 US2 – Bar Chart
+      tooltip: useDefaultTooltip
+        ? {
+            appendToBody: true,
+            confine: true,
+            formatter: (params: { name: string; data: number[] }) =>
+              params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], format)}`,
+          }
+        : undefined,
       // increase distance between grid and container to prevent y axis labels from getting cut off
       grid: {
         left: '5%',
         right: '5%',
       },
     };
-  }, [data, chartsTheme, width, mode, format]);
+  }, [data, chartsTheme, width, mode, format, useDefaultTooltip]);
 
   return (
     <Box
@@ -129,6 +146,8 @@ export function BarChart(props: BarChartProps): ReactElement {
         }}
         option={option}
         theme={chartsTheme.echartsTheme}
+        // LOGZ.IO CHANGE: APPZ-1218 US2 – Bar Chart
+        _instance={_instance}
       />
     </Box>
   );
