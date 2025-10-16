@@ -208,6 +208,7 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddOutputFlags(cmd, &o.OutputOption)
 	opt.MarkFileFlagAsMandatory(cmd)
+	cmd.Flags().StringArrayVar(&o.rowInput, "input", o.rowInput, "Grafana input values. Syntax supported is InputName=InputValue")
 	cmd.Flags().StringVar((*string)(&o.migrationFormat), "format", string(nativeFormat), "The format of the migration. Can be 'native' or 'custom-resource' or shorter 'cr'.")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the Perses plugins.")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enabled, it can request the API to use it to perform the migration")
