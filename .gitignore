@@ -47,3 +47,6 @@ dev/extra/tempo-data
 /prometheus
 
 !.gitkeep
+
+# For Java
+/target
