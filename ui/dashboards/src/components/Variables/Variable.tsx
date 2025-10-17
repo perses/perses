@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { TextField, Popper, PopperProps, Checkbox, Autocomplete, createFilterOptions } from '@mui/material';
+import { TextField, Popper, PopperProps, Checkbox, Autocomplete, createFilterOptions, Chip, Box } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -289,6 +289,31 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
               <Checkbox style={{ marginRight: 8 }} checked={selected} />
               {option.label}
             </li>
+          );
+        }}
+        renderTags={(value, getTagProps, ownerState) => {
+          // When focused, if there are too much value selected, it will use all screen place. Putting limit to 200px (~6 lines of chips)
+          if (ownerState.focused) {
+            return (
+              <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                {value.map((option, index) => (
+                  <Chip {...getTagProps({ index })} key={index} label={option.label} size="small" />
+                ))}
+              </Box>
+            );
+          }
+
+          const limitTags: number | undefined = ownerState.limitTags;
+          const numTags: number = value.length;
+
+          return (
+            <>
+              {value.slice(0, limitTags).map((option, index) => (
+                <Chip {...getTagProps({ index })} key={index} label={option.label} size="small" />
+              ))}
+
+              {limitTags && numTags > limitTags && ` +${numTags - limitTags}`}
+            </>
           );
         }}
       />
