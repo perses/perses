@@ -15,7 +15,7 @@ import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/ma
 import { combineSx } from '@perses-dev/components';
 import { Link } from '@perses-dev/core';
 import { QueryData, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, useRef } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
 import { PanelActions, PanelActionsProps } from './PanelActions';
 import { PanelOptions } from './Panel';
@@ -60,13 +60,9 @@ export function PanelHeader({
   const description = useReplaceVariablesInString(rawDescription);
 
   const textRef = useRef<HTMLDivElement>(null);
-  const [isEllipsisActive, setIsEllipsisActive] = useState(false);
 
-  useEffect(() => {
-    if (textRef.current && dimension?.width) {
-      setIsEllipsisActive(textRef.current.scrollWidth > textRef.current.clientWidth);
-    }
-  }, [title, dimension?.width]);
+  const isEllipsisActive =
+    textRef.current && dimension?.width ? textRef.current.scrollWidth > textRef.current.clientWidth : false;
 
   return (
     <CardHeader
