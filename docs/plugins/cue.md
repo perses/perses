@@ -132,8 +132,6 @@ package migrate
 
 #target: _
 
-// NB we would need `if` to support short-circuit in order to avoid code duplication here.
-//    See https://github.com/cue-lang/cue/issues/2232
 if (*#target.datasource.type | null) == "prometheus" && #target.expr != _|_ {
 	kind: "PrometheusTimeSeriesQuery"
 	spec: {
@@ -162,7 +160,7 @@ if (*#target.datasource.type | null) == "prometheus" && #target.expr != _|_ {
     - The body consists of field assignments, using the content of `#target`. The end result must match the model of the considered Perses query plugin.
 
 !!! warning
-    Ensure that your file evaluates to an empty result if the provided `#target` value does not match the expected type.
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#target` value does not match the expected type.
 
 ### Variable
 
@@ -192,4 +190,4 @@ if #var.type == "custom" || #var.type == "interval" {
     - The body consists of field assignments, using the content of `#var`. The end result must match the model of the considered Perses variable plugin.
 
 !!! warning
-    Ensure that your file evaluates to an empty result if the provided `#var` value does not match the expected type.
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#var` value does not match the expected type.
