@@ -33,7 +33,7 @@
 - name: "Tempo"
   version: "0.54.0"
 - name: "TimeSeriesChart"
-  version: "0.11.0"
+  version: "0.11.1"
 - name: "TimeSeriesTable"
   version: "0.10.0"
 - name: "TraceTable"
