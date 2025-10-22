@@ -98,15 +98,6 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   }, [setRefreshCounter]);
 
   const refreshIntervalInMs = getRefreshIntervalInMs(localRefreshInterval);
-  useEffect(() => {
-    if (refreshIntervalInMs > 0) {
-      const interval = setInterval(() => {
-        refresh();
-      }, refreshIntervalInMs);
-
-      return (): void => clearInterval(interval);
-    }
-  }, [refresh, refreshIntervalInMs]);
 
   const ctx = useMemo(() => {
     const absoluteTimeRange = isRelativeTimeRange(localTimeRange)
