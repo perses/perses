@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dev.perses.model.api.v1.common;
+package dev.perses.model.api.v1.common.duration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -95,5 +96,26 @@ public class DurationTest {
         BigInteger tooLarge = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         String s = tooLarge.toString() + "ms";
         assertThrows(IllegalArgumentException.class, () -> Duration.parse(s));
+    }
+
+    public static class Payload {
+        public Duration duration;
+    }
+
+    @Test
+    public void testUnmarshalledDuration() throws Exception {
+        final String jsonDuration = "{\"duration\": \"1h30m\"}";
+        ObjectMapper mapper = new ObjectMapper();
+        Payload payload = mapper.readValue(jsonDuration, Payload.class);
+        assertEquals(90 * Duration.MINUTE, payload.duration.getDuration().toMillis());
+    }
+
+    @Test
+    public void testMarshalledDuration() throws Exception {
+        Payload payload = new Payload();
+        payload.duration = new Duration(java.time.Duration.ofMillis(2 * Duration.HOUR + 15 * Duration.MINUTE));
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonDuration = mapper.writeValueAsString(payload);
+        assertEquals("{\"duration\":\"2h15m\"}", jsonDuration);
     }
 }

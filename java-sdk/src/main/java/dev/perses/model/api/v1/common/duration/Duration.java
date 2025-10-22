@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dev.perses.model.api.v1.common;
+package dev.perses.model.api.v1.common.duration;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.math.BigInteger;
 import java.util.Map;
 
+@JsonDeserialize(using = Deserializer.class)
+@JsonSerialize(using = Serializer.class)
 public record Duration(java.time.Duration internalDuration) {
     public final static long YEAR = 365L * 24 * 60 * 60 * 1000;
     public final static long WEEK = 7L * 24 * 60 * 60 * 1000;
