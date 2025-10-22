@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright 2021 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,19 +15,18 @@ package dev.perses.model.api.v1;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.perses.model.api.v1.dashboard.Spec;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Dashboard {
-    @JsonProperty(value = "kind", required = true, defaultValue = "Dashboard")
+public class GlobalDatasource {
+    @JsonProperty(value = "kind", required = true, defaultValue = "GlobalDatasource")
     public Kind kind;
 
     @JsonProperty(value = "metadata", required = true)
-    public ProjectMetadata metadata;
+    public Metadata metadata;
 
     @JsonProperty(value = "spec", required = true)
-    public Spec spec;
+    public DatasourceSpec spec;
 
-    public Dashboard() {
+    public GlobalDatasource() {
     }
 }
