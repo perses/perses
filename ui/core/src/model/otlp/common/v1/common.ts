@@ -23,7 +23,7 @@ export type AnyValue =
   | { intValue: string }
   | { doubleValue: number }
   | { boolValue: boolean }
-  | { arrayValue: { values: AnyValue[] } };
+  | { arrayValue: { values?: AnyValue[] } };
 
 export interface InstrumentationScope {
   name?: string;
