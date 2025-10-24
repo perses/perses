@@ -48,7 +48,7 @@ function getQueryOptions({
   queryKey: QueryKey;
   queryEnabled: boolean;
 } {
-  const { timeRange, datasourceStore, suggestedStepMs, mode, variableState, refreshKey } = context;
+  const { datasourceStore, suggestedStepMs, mode, variableState } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
@@ -56,15 +56,7 @@ function getQueryOptions({
   // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const queryKey = [
-    definition,
-    timeRange,
-    datasourceStore,
-    suggestedStepMs,
-    mode,
-    variablesValueKey,
-    refreshKey,
-  ] as const;
+  const queryKey = [definition, datasourceStore, suggestedStepMs, mode, variablesValueKey] as const;
 
   // Determine queryEnabled
   let waitToLoad = false;
@@ -90,7 +82,9 @@ export const useTimeSeriesQuery = (
 ): UseQueryResult<TimeSeriesData> => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
+  const { refreshIntervalInMs } = useTimeRange();
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+
   return useQuery({
     enabled: (queryOptions?.enabled ?? true) || queryEnabled,
     queryKey: queryKey,
@@ -103,6 +97,9 @@ export const useTimeSeriesQuery = (
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx, signal);
     },
+    refetchInterval: refreshIntervalInMs > 0 ? refreshIntervalInMs : 0,
+    refetchIntervalInBackground: false,
+    keepPreviousData: true,
   });
 };
 
@@ -115,6 +112,7 @@ export function useTimeSeriesQueries(
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
 ): Array<UseQueryResult<TimeSeriesData>> {
   const { getPlugin } = usePluginRegistry();
+  const { refreshIntervalInMs } = useTimeRange();
   const context = {
     ...useTimeSeriesQueryContext(),
     // We need mode to be part query key because this drives the type of query done (instant VS range query)
@@ -144,6 +142,10 @@ export function useTimeSeriesQueries(
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx, signal);
           return data;
         },
+        refetchInterval: refreshIntervalInMs > 0 ? refreshIntervalInMs + Math.floor(Math.random() * 1000) : 0,
+        refetchIntervalInBackground: false,
+        keepPreviousData: true,
+        structuralSharing: false,
       } as QueryObserverOptions<unknown>;
     }),
   }) as Array<UseQueryResult<TimeSeriesData>>;
@@ -153,7 +155,7 @@ export function useTimeSeriesQueries(
  * Build the time series query context object from data available at runtime
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  const { absoluteTimeRange, refreshKey } = useTimeRange();
+  const { absoluteTimeRange } = useTimeRange();
   const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -161,7 +163,6 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     timeRange: absoluteTimeRange,
     variableState,
     datasourceStore,
-    refreshKey,
   };
 }
 
