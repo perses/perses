@@ -40,6 +40,7 @@ import (
 const (
 	grafanaType     = "#grafanaType"
 	migrationFolder = "migrate"
+	varDefID        = "#grafanaVar"
 )
 
 var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
@@ -128,7 +129,7 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	if strings.Contains(string(data), grafanaType) {
 		return plugin.KindPanel, nil
 	}
-	if strings.Contains(string(data), "#var.type") {
+	if strings.Contains(string(data), varDefID) {
 		return plugin.KindVariable, nil
 	}
 	return plugin.KindQuery, nil
@@ -442,7 +443,7 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 
 func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
 	// The idea here is to know the query instance name we are dealing with.
-	// Then based on that, we will loop other the plugins listed in the module to get the high level query kind.
+	// Then based on that, we will loop over the plugins listed in the module to get the high level query kind.
 	// It will be useful to know which query plugin to use when migrating the Grafana dashboard.
 	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
 	if err != nil {

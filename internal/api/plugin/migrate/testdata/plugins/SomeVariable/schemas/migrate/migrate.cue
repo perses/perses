@@ -2,14 +2,13 @@ package migrate
 
 import "strings"
 
-#var: {
-	type: string
+#grafanaVar: {
+	type: "custom"
+	query: string
 	...
 }
 
-if #var.type == "custom" {
-	kind: "SomeVariable"
-	spec: {
-		values: strings.Split(#var.query, ",")
-	}
+kind: "SomeVariable"
+spec: {
+	values: strings.Split(#grafanaVar.query, ",")
 }
