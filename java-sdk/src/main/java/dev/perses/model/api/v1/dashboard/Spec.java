@@ -16,6 +16,7 @@ package dev.perses.model.api.v1.dashboard;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.perses.model.api.v1.DatasourceSpec;
+import dev.perses.model.api.v1.common.duration.Duration;
 import dev.perses.model.api.v1.dashboard.panel.Panel;
 import dev.perses.model.api.v1.common.Display;
 
@@ -40,10 +41,10 @@ public class Spec {
     public List<Layout> layouts;
 
     @JsonProperty(value = "duration", required = true)
-    public String duration;
+    public Duration duration;
 
     @JsonProperty("refreshInterval")
-    public String refreshInterval;
+    public Duration refreshInterval;
 
     public Spec() {
     }
