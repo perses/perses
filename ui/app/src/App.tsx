@@ -11,11 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, useTheme } from '@mui/material';
+import { Box } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
-import { ReactElement, Suspense, useMemo } from 'react';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/overlayscrollbars.css';
+import { ReactElement, Suspense } from 'react';
 import { ReactRouterProvider } from '@perses-dev/plugin-system';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
@@ -28,11 +26,18 @@ function isDashboardViewRoute(pathname: string): boolean {
 
 function App(): ReactElement {
   const location = useLocation();
-  const theme = useTheme();
-  const isOverlayScrollExcluded = [SignInRoute, SignUpRoute].includes(location.pathname);
 
-  const appContent = useMemo(() => {
-    const actualContent = (
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: ({ palette }) => palette.background.default,
+      }}
+    >
+      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+
       <Box
         sx={{
           flex: 1,
@@ -49,35 +54,6 @@ function App(): ReactElement {
           </Suspense>
         </ReactRouterProvider>
       </Box>
-    );
-    return !isOverlayScrollExcluded ? (
-      <OverlayScrollbarsComponent
-        options={{
-          scrollbars: {
-            autoHide: 'never',
-            theme: theme.palette.mode === 'dark' ? 'os-theme-light' : 'os-theme-dark',
-          },
-        }}
-        style={{ flex: 1, display: 'flex' }}
-      >
-        {actualContent}
-      </OverlayScrollbarsComponent>
-    ) : (
-      actualContent
-    );
-  }, [isOverlayScrollExcluded, theme.palette.mode]);
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        backgroundColor: ({ palette }) => palette.background.default,
-      }}
-    >
-      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-      {appContent}
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>
   );
