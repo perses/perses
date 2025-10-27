@@ -67,6 +67,7 @@ const queryClient = new QueryClient({
       // This sets the default to 0 retries.
       // If needed, the number of retries can be overridden in individual useQuery calls.
       retry: 0,
+      keepPreviousData: true,
     },
   },
 });
