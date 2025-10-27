@@ -50,7 +50,7 @@ jobs:
         working-directory: ./ui
         run: npm run build
       - name: store react production build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ui-libs
           path: |
@@ -73,7 +73,7 @@ jobs:
       - name: Build the typedoc docs
         run: cd ./ui && npm run build && npm run typedoc
       - name: store typedoc build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: typedoc
           path: ui/typedoc
