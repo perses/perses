@@ -1,0 +1,18 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "empty-dashboard",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "empty_dashboard"
+    },
+    "panels": {},
+    "layouts": [],
+    "duration": "1h"
+  }
+}

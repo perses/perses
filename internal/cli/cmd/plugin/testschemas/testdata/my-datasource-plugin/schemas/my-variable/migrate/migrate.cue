@@ -2,14 +2,13 @@ package migrate
 
 import "strings"
 
-#var: {
-	type: string
+#grafanaVar: {
+	type: "custom"
+	options: string
 	...
 }
 
-if #var.type == "custom" {
-	kind: "MyVariable"
-	spec: {
-		options: strings.Split(#var.options, ",")
-	}
+kind: "MyVariable"
+spec: {
+	options: strings.Split(#grafanaVar.options, ",")
 }

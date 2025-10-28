@@ -37,11 +37,13 @@ func TestMigrateEndpoint(t *testing.T) {
 		resultDashboardPath  string
 	}{
 		{
-			// here we reuse some test data from the API but since real plugins are used here,
-			// we have to use another JSON file for the expected result.
+			// Since we already have unit tests that check a migration scenario involving multiple (fake) plugins,
+			// we just want here to validate the end-to-end flow without depending on real plugins, otherwise
+			// in case of breaking change affecting the migration logic of plugins we'd end up in "snake biting
+			// its own tail" situation.
 			title:                "basic grafana dashboard containing some vars & panels",
-			initialDashboardPath: filepath.Join(testUtils.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "dashboards", "basic_grafana_dashboard.json"),
-			resultDashboardPath:  filepath.Join("testdata", "basic_perses_dashboard.json"),
+			initialDashboardPath: filepath.Join("testdata", "empty_grafana_dashboard.json"),
+			resultDashboardPath:  filepath.Join("testdata", "empty_perses_dashboard.json"),
 		},
 	}
 	for _, test := range testSuite {
