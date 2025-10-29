@@ -18,6 +18,7 @@ import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
 
 export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'onChange' | 'children'> {
+  filteredQueryPlugins?: string[];
   pluginTypes: PluginType[];
   value?: PluginEditorSelection;
   onChange?: (s: PluginEditorSelection) => void;
@@ -31,13 +32,18 @@ export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'o
  * when the user changes the plugin type (it fires at start for the default value.)
  */
 export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): ReactElement => {
-  const { pluginTypes, value: propValue, onChange, ...others } = props;
+  const { pluginTypes, value: propValue, onChange, filteredQueryPlugins, ...others } = props;
   const { data, isLoading } = useListPluginMetadata(pluginTypes);
 
-  const sortedData = useMemo(
-    () => data?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name)),
-    [data]
-  );
+  const sortedData = useMemo(() => {
+    if (filteredQueryPlugins?.length) {
+      return data
+        ?.filter((i) => filteredQueryPlugins.includes(i.spec.name))
+        ?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
+    }
+
+    return data?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
+  }, [data, filteredQueryPlugins]);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = !propValue || isLoading ? '' : selectionToOptionValue(propValue);
