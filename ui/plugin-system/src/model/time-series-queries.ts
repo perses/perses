@@ -46,7 +46,6 @@ export interface TimeSeriesQueryContext {
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
-  refreshKey: string;
 }
 
 export type TimeSeriesDataQuery = Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;

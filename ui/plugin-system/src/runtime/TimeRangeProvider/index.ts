@@ -12,6 +12,6 @@
 // limitations under the License.
 
 export * from './TimeRangeProvider';
-export * from './TimeRangeProviderWithQueryParams';
+export * from './TimeRangeProviders';
 export * from './TimeRangeSettingsProvider';
 export * from './query-params';
