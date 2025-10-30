@@ -20,13 +20,14 @@ import {
   toAbsoluteTimeRange,
   getSuggestedStepMs,
 } from '@perses-dev/core';
+import { useQueryClient } from '@tanstack/react-query';
 import { getRefreshIntervalInMs } from './refresh-interval';
 
 export interface TimeRangeProviderProps {
   timeRange: TimeRangeValue;
   refreshInterval?: DurationString;
-  setTimeRange?: (value: TimeRangeValue) => void;
-  setRefreshInterval?: (value: DurationString) => void;
+  setTimeRange: (value: TimeRangeValue) => void;
+  setRefreshInterval: (value: DurationString) => void;
   children?: React.ReactNode;
 }
 
@@ -35,7 +36,6 @@ export interface TimeRange {
   absoluteTimeRange: AbsoluteTimeRange; // resolved absolute time for plugins to use
   setTimeRange: (value: TimeRangeValue) => void;
   refresh: () => void;
-  refreshKey: string;
   refreshInterval?: DurationString;
   refreshIntervalInMs: number;
   setRefreshInterval: (value: DurationString) => void;
@@ -73,64 +73,53 @@ export function useSuggestedStepMs(width?: number): number {
 export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
-  /**
-   * TODO: The hook needs refactor. There is a bug here with refreshKey. If the refreshInterval is not set,
-   * refreshKey string includes an undefined xx:yy:zz:undefined:0
-   * I think exposing refresh functionality also is very risky. A careless usage of refresh may cause
-   * infinite rendering loop.
-   */
+  const queryClient = useQueryClient();
+  const [absolutTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(
+    isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange
+  );
 
-  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeValue>(timeRange);
-  const [localRefreshInterval, setLocalRefreshInterval] = useState<DurationString | undefined>(refreshInterval);
-
-  const [refreshCounter, setRefreshCounter] = useState(0);
-
-  useEffect(() => {
-    setLocalTimeRange(timeRange);
-  }, [timeRange, refreshCounter]);
-
-  useEffect(() => {
-    setLocalRefreshInterval(refreshInterval);
-  }, [refreshInterval]);
-
+  // Refresh is called when clicking on the refresh button, it refreshes all queries including variables
   const refresh = useCallback(() => {
-    setRefreshCounter((counter) => counter + 1);
-  }, [setRefreshCounter]);
+    setAbsoluteTimeRange(isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange);
+    queryClient
+      .invalidateQueries({ queryKey: ['query'] })
+      .finally(() => queryClient.removeQueries({ queryKey: ['query'], type: 'inactive' }));
+    queryClient
+      .invalidateQueries({ queryKey: ['variable'] })
+      .finally(() => queryClient.removeQueries({ queryKey: ['variable'], type: 'inactive' }));
+  }, [queryClient, timeRange]);
 
-  const refreshIntervalInMs = getRefreshIntervalInMs(localRefreshInterval);
+  // Auto refresh is only refreshing queries of panels
+  const autoRefresh = useCallback(() => {
+    setAbsoluteTimeRange(isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange);
+    queryClient.invalidateQueries({ queryKey: ['query'] }).finally(() => {
+      queryClient.removeQueries({ queryKey: ['query'], type: 'inactive' });
+      queryClient.removeQueries({ queryKey: ['variable'], type: 'inactive' }); // Timerange is in queryKey, can lead to memory leak when using relative timerange
+    });
+  }, [queryClient, timeRange]);
+
+  const refreshIntervalInMs = useMemo(() => getRefreshIntervalInMs(refreshInterval), [refreshInterval]);
   useEffect(() => {
     if (refreshIntervalInMs > 0) {
       const interval = setInterval(() => {
-        refresh();
+        autoRefresh();
       }, refreshIntervalInMs);
 
       return (): void => clearInterval(interval);
     }
-  }, [refresh, refreshIntervalInMs]);
+  }, [autoRefresh, refreshIntervalInMs]);
 
   const ctx = useMemo(() => {
-    const absoluteTimeRange = isRelativeTimeRange(localTimeRange)
-      ? toAbsoluteTimeRange(localTimeRange)
-      : localTimeRange;
     return {
-      timeRange: localTimeRange,
-      setTimeRange: setTimeRange ?? setLocalTimeRange,
-      absoluteTimeRange,
+      timeRange: timeRange,
+      setTimeRange: setTimeRange,
+      absoluteTimeRange: absolutTimeRange,
       refresh,
-      refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${localRefreshInterval}:${refreshCounter}`,
-      refreshInterval: localRefreshInterval,
+      refreshInterval: refreshInterval,
       refreshIntervalInMs: refreshIntervalInMs,
-      setRefreshInterval: setRefreshInterval ?? setLocalRefreshInterval,
+      setRefreshInterval: setRefreshInterval,
     };
-  }, [
-    localTimeRange,
-    setTimeRange,
-    refresh,
-    localRefreshInterval,
-    refreshCounter,
-    refreshIntervalInMs,
-    setRefreshInterval,
-  ]);
+  }, [absolutTimeRange, refresh, refreshInterval, refreshIntervalInMs, setRefreshInterval, setTimeRange, timeRange]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
