@@ -16,17 +16,39 @@ import React, { ReactElement } from 'react';
 import { TimeRangeProvider } from './TimeRangeProvider';
 import { useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
 
-export interface TimeRangeFromQueryProps {
+export interface TimeRangeProvidersProps {
   initialTimeRange: TimeRangeValue;
   initialRefreshInterval?: DurationString;
   children?: React.ReactNode;
 }
 
-export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps): ReactElement {
-  const { initialTimeRange, initialRefreshInterval, children } = props;
-
+export function TimeRangeProviderWithQueryParams({
+  initialTimeRange,
+  initialRefreshInterval,
+  children,
+}: TimeRangeProvidersProps): ReactElement {
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);
+
+  return (
+    <TimeRangeProvider
+      timeRange={timeRange}
+      refreshInterval={refreshInterval}
+      setTimeRange={setTimeRange}
+      setRefreshInterval={setRefreshInterval}
+    >
+      {children}
+    </TimeRangeProvider>
+  );
+}
+
+export function TimeRangeProviderBasic({
+  initialTimeRange,
+  initialRefreshInterval,
+  children,
+}: TimeRangeProvidersProps): ReactElement {
+  const [timeRange, setTimeRange] = React.useState<TimeRangeValue>(initialTimeRange);
+  const [refreshInterval, setRefreshInterval] = React.useState<DurationString | undefined>(initialRefreshInterval);
 
   return (
     <TimeRangeProvider

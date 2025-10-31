@@ -39,7 +39,7 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
   }
 
   const { data: decodedToken } = useAuthToken();
-  const username = decodedToken?.sub || '';
+  const username = decodedToken?.sub ?? '';
   const { data } = useUserPermissions(username);
   const userPermissions: Record<string, Permission[]> = useMemo(() => {
     if (!data) {

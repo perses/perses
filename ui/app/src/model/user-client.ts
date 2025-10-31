@@ -173,5 +173,6 @@ export function useUserPermissions(username: string): UseQueryResult<Record<stri
     queryFn: () => {
       return getUserPermissions(username);
     },
+    enabled: !!username,
   });
 }
