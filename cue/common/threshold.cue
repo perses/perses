@@ -23,4 +23,5 @@ package common
 	mode?:         "percent" | "absolute"
 	defaultColor?: string
 	steps?: [...#stepOption]
+	colorMode?: *"value" | "background_solid" | "none"
 }
