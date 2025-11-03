@@ -144,16 +144,16 @@ export interface Banner {
 }
 
 export interface TimeRangeConfig {
-  disable_custom: boolean;
-  disable_zoom: boolean;
-  options: DurationString[];
+  disable_custom?: boolean;
+  disable_zoom?: boolean;
+  options?: DurationString[];
 }
 
 export interface FrontendConfig {
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
-  time_range: TimeRangeConfig;
+  time_range?: TimeRangeConfig;
   banner?: Banner;
 }
 
