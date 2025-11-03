@@ -3619,6 +3619,161 @@
         "name": "table"
       },
       "panels": {
+        "Table-2": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Timestamp Table"
+            },
+            "plugin": {
+              "kind": "Table",
+              "spec": {
+                "columnSettings": [
+                  {
+                    "format": {
+                      "unit": "datetime-iso"
+                    },
+                    "header": "Datetime (GMT)",
+                    "name": "value #1"
+                  },
+                  {
+                    "format": {
+                      "unit": "datetime-us"
+                    },
+                    "name": "value #7",
+                    "header": "Datetime (US-East)"
+                  },
+                  {
+                    "format": {
+                      "unit": "datetime-local"
+                    },
+                    "header": "Datetime (Local Browser)",
+                    "name": "value #2"
+                  },
+                  {
+                    "format": {
+                      "unit": "relative-time"
+                    },
+                    "header": "relative time",
+                    "name": "value #3"
+                  },
+                  {
+                    "format": {
+                      "unit": "unix-timestamp-ms"
+                    },
+                    "header": "unix ms",
+                    "name": "value #4"
+                  },
+                  {
+                    "format": {
+                      "unit": "unix-timestamp"
+                    },
+                    "header": "unix",
+                    "name": "value #5"
+                  },
+                  {
+                    "format": {
+                      "unit": "date-local"
+                    },
+                    "header": "Date (Local Browser)",
+                    "name": "value #6"
+                  },
+                  {
+                    "name": "timestamp",
+                    "hide": true
+                  }
+                ],
+                "density": "standard",
+                "enableFiltering": false,
+                "transforms": [
+                  {
+                    "kind": "MergeSeries",
+                    "spec": {}
+                  }
+                ]
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              },
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "vector(1761720119)"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
         "Table": {
           "kind": "Panel",
           "spec": {
@@ -3718,6 +3873,15 @@
                 "height": 9,
                 "content": {
                   "$ref": "#/spec/panels/Table-1"
+                }
+              },
+              {
+                "x": 0,
+                "y": 18,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/59f846b172aa4cdb9d0bd803293647eb"
                 }
               }
             ]

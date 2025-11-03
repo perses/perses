@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #dateFormat
 
 #timeFormat: {
 	unit?:          "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
@@ -46,4 +46,8 @@ package common
 #currencyFormat: {
 	unit?:          "aud" | "cad" | "chf" | "cny" | "eur" | "gbp" | "hkd" | "inr" | "jpy" | "krw" | "nok" | "nzd" | "sek" | "sgd" | "usd"
 	decimalPlaces?: number
+}
+
+#dateFormat: {
+	unit?: "datetime-iso" | "datetime-us" | "datetime-local" | "date-iso" | "date-us" | "date-local" | "time-local" | "time-iso" | "time-us" | "relative-time" | "unix-timestamp" | "unix-timestamp-ms"
 }
