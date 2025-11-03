@@ -3719,15 +3719,6 @@
                 "content": {
                   "$ref": "#/spec/panels/Table-1"
                 }
-              },
-              {
-                "x": 0,
-                "y": 18,
-                "width": 24,
-                "height": 9,
-                "content": {
-                  "$ref": "#/spec/panels/59f846b172aa4cdb9d0bd803293647eb"
-                }
               }
             ]
           }
