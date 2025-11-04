@@ -144,6 +144,7 @@ QueryEditorContainer.displayName = 'QueryEditorContainer';
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
+  filteredQueryPlugins?: string[];
   value: QueryDefinition;
   queryResult?: QueryData;
   filteredQueryPlugins?: string[];
@@ -187,6 +188,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
         filteredQueryPlugins={filteredQueryPlugins}
         onQueryRefresh={queryResult?.refetch}
         onChange={handlePluginChange}
+        filteredQueryPlugins={filteredQueryPlugins}
       />
     </Box>
   );

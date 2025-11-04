@@ -156,6 +156,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
+            filteredQueryPlugins={filteredQueryPlugins}
           />
         ))}
       </Stack>
