@@ -74,8 +74,16 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
   const queryClient = useQueryClient();
-  const [absolutTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(
+  const [absoluteTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(
     isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange
+  );
+
+  const handleSetTimeRange = useCallback(
+    (value: TimeRangeValue) => {
+      setTimeRange(value);
+      setAbsoluteTimeRange(isRelativeTimeRange(value) ? toAbsoluteTimeRange(value) : value);
+    },
+    [setTimeRange]
   );
 
   // Refresh is called when clicking on the refresh button, it refreshes all queries including variables
@@ -112,14 +120,22 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const ctx = useMemo(() => {
     return {
       timeRange: timeRange,
-      setTimeRange: setTimeRange,
-      absoluteTimeRange: absolutTimeRange,
+      setTimeRange: handleSetTimeRange,
+      absoluteTimeRange: absoluteTimeRange,
       refresh,
       refreshInterval: refreshInterval,
       refreshIntervalInMs: refreshIntervalInMs,
       setRefreshInterval: setRefreshInterval,
     };
-  }, [absolutTimeRange, refresh, refreshInterval, refreshIntervalInMs, setRefreshInterval, setTimeRange, timeRange]);
+  }, [
+    absoluteTimeRange,
+    handleSetTimeRange,
+    refresh,
+    refreshInterval,
+    refreshIntervalInMs,
+    setRefreshInterval,
+    timeRange,
+  ]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
