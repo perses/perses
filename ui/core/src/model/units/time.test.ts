@@ -25,6 +25,16 @@ import { UnitTestCase } from './types';
 const TIME_TESTS: UnitTestCase[] = [
   {
     value: 0,
+    format: { unit: 'nanoseconds' },
+    expected: '0s',
+  },
+  {
+    value: 0,
+    format: { unit: 'microseconds' },
+    expected: '0s',
+  },
+  {
+    value: 0,
     format: { unit: 'milliseconds' },
     expected: '0s',
   },
@@ -62,6 +72,16 @@ const TIME_TESTS: UnitTestCase[] = [
     value: 0,
     format: { unit: 'years' },
     expected: '0s',
+  },
+  {
+    value: 0.001,
+    format: { unit: 'nanoseconds' },
+    expected: '0.001ns',
+  },
+  {
+    value: 0.001,
+    format: { unit: 'microseconds' },
+    expected: '1ns',
   },
   {
     value: 0.001,
@@ -105,6 +125,16 @@ const TIME_TESTS: UnitTestCase[] = [
   },
   {
     value: 1,
+    format: { unit: 'nanoseconds' },
+    expected: '1ns',
+  },
+  {
+    value: 1,
+    format: { unit: 'microseconds' },
+    expected: '1μs',
+  },
+  {
+    value: 1,
     format: { unit: 'milliseconds' },
     expected: '1ms',
   },
@@ -142,6 +172,16 @@ const TIME_TESTS: UnitTestCase[] = [
     value: 1,
     format: { unit: 'years' },
     expected: '1 year',
+  },
+  {
+    value: 100,
+    format: { unit: 'nanoseconds' },
+    expected: '100ns',
+  },
+  {
+    value: 100,
+    format: { unit: 'microseconds' },
+    expected: '100μs',
   },
   {
     value: 100,
