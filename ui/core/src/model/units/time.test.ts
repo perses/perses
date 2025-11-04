@@ -86,7 +86,7 @@ const TIME_TESTS: UnitTestCase[] = [
   {
     value: 0.001,
     format: { unit: 'milliseconds' },
-    expected: '0.001ms',
+    expected: '1μs',
   },
   {
     value: 0.001,
