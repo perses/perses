@@ -49,36 +49,27 @@ describe('remotePluginLoader', () => {
   });
 
   describe('getInstalledPlugins', () => {
-    it('should fetch plugins from correct endpoint without baseURL', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
-      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
-
-      const loader = remotePluginLoader();
-      await loader.getInstalledPlugins();
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/v1/plugins');
-    });
-
-    it('should fetch plugins from correct endpoint with baseURL', async () => {
-      const baseURL = 'https://example.com';
-      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
-      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
-
-      const loader = remotePluginLoader(baseURL);
-      await loader.getInstalledPlugins();
-
-      expect(mockFetch).toHaveBeenCalledWith(`${baseURL}/api/v1/plugins`);
-    });
-
-    it('should return valid plugin modules when fetch succeeds', async () => {
+    it('should fetch plugins from correct endpoint without options', async () => {
       const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
       const result = await loader.getInstalledPlugins();
 
+      expect(mockFetch).toHaveBeenCalledWith('/api/v1/plugins');
       expect(result).toEqual([MOCK_VALID_PLUGIN_MODULE_RESOURCE]);
       expect(mockConsoleError).not.toHaveBeenCalled();
+    });
+
+    it('should fetch plugins from correct endpoint with apiPrefix', async () => {
+      const apiPrefix = 'https://example.com';
+      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
+
+      const loader = remotePluginLoader({ apiPrefix });
+      await loader.getInstalledPlugins();
+
+      expect(mockFetch).toHaveBeenCalledWith(`${apiPrefix}/api/v1/plugins`);
     });
 
     it('should filter out invalid plugin modules and return only valid ones', async () => {
@@ -137,40 +128,38 @@ describe('remotePluginLoader', () => {
       const loader = remotePluginLoader();
       const result = await loader.importPluginModule(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
 
-      expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', undefined);
+      expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', '/plugins');
       expect(result).toEqual(MOCK_REMOTE_PLUGIN_MODULE);
       expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
-    it('should pass baseURL to loadPlugin when provided', async () => {
-      const baseURL = 'https://example.com';
-      mockLoadPlugin.mockResolvedValue(MOCK_REMOTE_PLUGIN_MODULE);
-
-      const loader = remotePluginLoader(baseURL);
-      const result = await loader.importPluginModule(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
-
-      expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', baseURL);
-      expect(result).toEqual(MOCK_REMOTE_PLUGIN_MODULE);
-    });
-
-    it('should handle different baseURL formats', async () => {
-      const testCases = [
-        { baseURL: 'https://example.com', expected: 'https://example.com/api/v1/plugins' },
-        { baseURL: 'https://example.com/', expected: 'https://example.com//api/v1/plugins' },
-        { baseURL: 'http://localhost:3000', expected: 'http://localhost:3000/api/v1/plugins' },
-        { baseURL: '', expected: '/api/v1/plugins' },
+    it('should handle options object variations', async () => {
+      const testCases: Array<{
+        options?: { apiPrefix?: string; baseURL?: string };
+        expected: string;
+      }> = [
+        // object with baseUrl only
+        { options: { baseURL: 'https://example.com' }, expected: 'https://example.com/plugins' },
+        { options: { baseURL: 'https://example.com/' }, expected: 'https://example.com//plugins' },
+        { options: { baseURL: 'http://localhost:3000' }, expected: 'http://localhost:3000/plugins' },
+        { options: { baseURL: '' }, expected: '/plugins' },
+        // object with nothing or undefined
+        { options: {}, expected: '/plugins' },
+        { options: undefined, expected: '/plugins' },
       ];
 
+      mockLoadPlugin.mockResolvedValue(MOCK_REMOTE_PLUGIN_MODULE);
+
       for (const testCase of testCases) {
-        const mockResponse = { json: jest.fn().mockResolvedValue([]) };
-        mockFetch.mockResolvedValue(mockResponse as unknown as Response);
+        const loader = remotePluginLoader(testCase.options);
+        const result = await loader.importPluginModule(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
 
-        const loader = remotePluginLoader(testCase.baseURL || undefined);
-        await loader.getInstalledPlugins();
-
-        expect(mockFetch).toHaveBeenCalledWith(testCase.expected);
-        mockFetch.mockClear();
+        expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', testCase.expected);
+        expect(result).toEqual(MOCK_REMOTE_PLUGIN_MODULE);
+        expect(mockConsoleError).not.toHaveBeenCalled();
       }
+
+      mockLoadPlugin.mockClear();
     });
 
     it('should handle multiple plugins in a module', async () => {
@@ -185,8 +174,8 @@ describe('remotePluginLoader', () => {
       const result = await loader.importPluginModule(multiPluginModule);
 
       expect(mockLoadPlugin).toHaveBeenCalledTimes(2);
-      expect(mockLoadPlugin).toHaveBeenNthCalledWith(1, 'multi-plugin-module', 'plugin1', undefined);
-      expect(mockLoadPlugin).toHaveBeenNthCalledWith(2, 'multi-plugin-module', 'plugin2', undefined);
+      expect(mockLoadPlugin).toHaveBeenNthCalledWith(1, 'multi-plugin-module', 'plugin1', '/plugins');
+      expect(mockLoadPlugin).toHaveBeenNthCalledWith(2, 'multi-plugin-module', 'plugin2', '/plugins');
       expect(result).toEqual({
         plugin1: { component: expect.any(Function) },
         plugin2: { component: expect.any(Function) },

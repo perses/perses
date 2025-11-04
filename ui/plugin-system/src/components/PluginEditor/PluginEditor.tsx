@@ -38,6 +38,7 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
     onChange: _,
     isReadonly,
     postExecuteRunQuery: refresh,
+    filteredQueryPlugins,
     ...others
   } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
@@ -97,6 +98,7 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
           error={!!error}
           helperText={error?.message}
           onChange={onSelectionChange}
+          filteredQueryPlugins={filteredQueryPlugins}
         />
 
         {withRunQueryButton && !isLoading && (

@@ -18,6 +18,7 @@ import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { ListVariableDefinition } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues } from '../variable-model';
+import { SORT_METHODS } from './variable-editor-form-model';
 
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
@@ -86,15 +87,25 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
 
 interface VariableListPreviewProps {
   definition: ListVariableDefinition;
+  sortMethod?: keyof typeof SORT_METHODS;
 }
 
 export function VariableListPreview(props: VariableListPreviewProps): ReactElement {
-  const { definition } = props;
+  const { definition, sortMethod } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
+
+  const result = !sortMethod || sortMethod === 'none' || !data ? data : SORT_METHODS[sortMethod].sort(data);
+
   const variablePreview = useMemo(
-    () => <VariablePreview values={data?.map((val) => val.value)} isLoading={isFetching} error={errorMessage} />,
-    [errorMessage, isFetching, data]
+    () => (
+      <VariablePreview
+        values={result?.map((val) => val.label || val.value)}
+        isLoading={isFetching}
+        error={errorMessage}
+      />
+    ),
+    [errorMessage, isFetching, result]
   );
 
   return variablePreview;

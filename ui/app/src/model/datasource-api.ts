@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
-import { DatasourceApi } from '@perses-dev/dashboards';
+import { DatasourceApi, DatasourceSelector } from '@perses-dev/core';
 import { useCallback } from 'react';
+import { PERSES_APP_CONFIG } from '../config';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
-import { getBasePathName } from './route';
 
 export function buildProxyUrl({
   project,
@@ -27,7 +26,7 @@ export function buildProxyUrl({
   dashboard?: string;
   name: string;
 }): string {
-  const basePath = getBasePathName();
+  const basePath = PERSES_APP_CONFIG.api_prefix;
   let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
   if (dashboard) {
     url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;

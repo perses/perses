@@ -88,10 +88,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    },
-    "time_range": {
-      "disable_custom": false,
-      "disable_zoom": false
     }
   },
   "plugin": {
@@ -161,21 +157,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    },
-    "time_range": {
-      "disable_custom": false,
-      "disable_zoom": false,
-      "options": [
-        "5m",
-        "15m",
-        "30m",
-        "1h",
-        "6h",
-        "12h",
-        "1d",
-        "1w",
-        "2w"
-      ]
     }
   },
   "plugin": {
@@ -272,7 +253,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "information": "# Hello World\n## File Database setup"
   },
-  "plugin": { 
+  "plugin": {
     "path": "plugins",
     "archive_path": "plugins-archive"
 	},
@@ -527,10 +508,6 @@ plugin:
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
-					TimeRange: TimeRange{
-						DisableCustomTimeRange: false,
-						Options:                defaultTimeRangeOptions,
-					},
 				},
 				Plugin: Plugin{
 					Path:        "custom/plugins",

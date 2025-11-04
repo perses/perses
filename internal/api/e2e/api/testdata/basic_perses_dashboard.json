@@ -79,7 +79,7 @@
               "thresholds": {
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "#f2495c",
                     "value": 80
                   }
                 ]
@@ -154,12 +154,11 @@
               "format": {
                 "unit": "decimal"
               },
-              "metricLabel": "",
               "sparkline": {},
               "thresholds": {
                 "steps": [
                   {
-                    "color": "red",
+                    "color": "#f2495c",
                     "value": 80
                   }
                 ]

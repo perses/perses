@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
 import { ReactElement, useState } from 'react';
 import { useVariableValues } from '@perses-dev/plugin-system';
+import { Dialog } from '@perses-dev/components';
+import { Button } from '@mui/material';
 import { usePanelGroupEditor } from '../../context';
 import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps } from './PanelGroupEditorForm';
 
@@ -51,33 +51,22 @@ export function PanelGroupDialog(): ReactElement {
     <Dialog open={isOpen} TransitionProps={{ onExited: handleExited }}>
       {panelGroupEditor !== undefined && (
         <>
-          <DialogTitle>{panelGroupEditor.mode} Panel Group</DialogTitle>
-          <IconButton
-            aria-label="Close"
-            onClick={panelGroupEditor.close}
-            sx={(theme) => ({
-              position: 'absolute',
-              top: theme.spacing(0.5),
-              right: theme.spacing(0.5),
-            })}
-          >
-            <CloseIcon />
-          </IconButton>
-          <DialogContent dividers sx={{ width: '500px' }}>
+          <Dialog.Header>{panelGroupEditor.mode} Panel Group</Dialog.Header>
+          <Dialog.Content dividers sx={{ width: '500px' }}>
             <PanelGroupEditorForm
               initialValues={panelGroupEditor.initialValues}
               variables={Object.keys(variables)}
               onSubmit={handleSubmit}
             />
-          </DialogContent>
-          <DialogActions>
+          </Dialog.Content>
+          <Dialog.Actions>
             <Button variant="contained" type="submit" form={panelGroupEditorFormId}>
               {panelGroupEditor.mode === 'Edit' ? 'Apply' : 'Add'}
             </Button>
             <Button variant="outlined" color="secondary" onClick={panelGroupEditor.close}>
               Cancel
             </Button>
-          </DialogActions>
+          </Dialog.Actions>
         </>
       )}
     </Dialog>

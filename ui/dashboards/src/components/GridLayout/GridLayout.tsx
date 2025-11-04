@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,15 +12,9 @@
 // limitations under the License.
 import { ReactElement, useState } from 'react';
 import { Layouts, Layout } from 'react-grid-layout';
-import { PanelGroupId } from '@perses-dev/core';
+import { PanelGroupId, PanelGroupDefinition } from '@perses-dev/core';
 import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
-import {
-  useEditMode,
-  usePanelGroup,
-  usePanelGroupActions,
-  useViewPanelGroup,
-  PanelGroupDefinition,
-} from '../../context';
+import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelOptions } from '../Panel';
 import { Row, RowProps } from './Row';

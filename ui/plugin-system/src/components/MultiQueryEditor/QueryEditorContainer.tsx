@@ -28,6 +28,7 @@ interface QueryEditorContainerProps {
   queryTypes: QueryPluginType[];
   index: number;
   query: QueryDefinition;
+  filteredQueryPlugins?: string[];
   onChange: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
@@ -49,7 +50,7 @@ interface QueryEditorContainerProps {
 
 export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorContainerProps>(
   (props, ref): ReactElement => {
-    const { queryTypes, index, query, isCollapsed, onDelete, onChange, onCollapseExpand } = props;
+    const { queryTypes, filteredQueryPlugins, index, query, isCollapsed, onDelete, onChange, onCollapseExpand } = props;
     return (
       <Stack key={index} spacing={1}>
         <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
@@ -69,7 +70,13 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
           </IconButton>
         </Stack>
         {!isCollapsed && (
-          <QueryEditor ref={ref} queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />
+          <QueryEditor
+            filteredQueryPlugins={filteredQueryPlugins}
+            ref={ref}
+            queryTypes={queryTypes}
+            value={query}
+            onChange={(next) => onChange(index, next)}
+          />
         )}
       </Stack>
     );
@@ -83,6 +90,7 @@ QueryEditorContainer.displayName = 'QueryEditorContainer';
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
+  filteredQueryPlugins?: string[];
   value: QueryDefinition;
   onChange: (next: QueryDefinition) => void;
 }
@@ -96,7 +104,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { value, onChange, queryTypes, ...others } = props;
+  const { value, onChange, queryTypes, filteredQueryPlugins, ...others } = props;
   const { refresh } = useTimeRange();
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
@@ -124,6 +132,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
           spec: value.spec.plugin.spec,
         }}
         onChange={handlePluginChange}
+        filteredQueryPlugins={filteredQueryPlugins}
       />
     </Box>
   );
