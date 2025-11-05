@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.53.0-beta.1 / 2025-11-05
+
+Dear user, among other changes, we are breaking the way the migration of the variables are working.
+
+From this version, the migration of the variables will be done using the new variable migration format that is more flexible and allows to cover more use cases.
+This release will allow us to update the plugins depending on this new format. While the plugins are not updated yet, the variable migration is broken.
+That's why we are kindly asking user to avoid using this beta release until we are releasing a new one. The beta.2 will contain the plugins updates and will be available really quickly after this beta.1.
+
+- [ENHANCEMENT] app: enable keepPreviousData by default (#3512)
+- [ENHANCEMENT] otlpcommonv1.AnyValue: add doubleValue (#3496)
+- [ENHANCEMENT] Reduce panel header size (#3436)
+- [ENHANCEMENT] Refactor panel header elipssis (#3482)
+- [BUGFIX] make time range config optional (#3513)
+- [BUGFIX] Apply plugin filter over Multi Query Editor (#3514)
+- [BUGFIX] Save the refresh interval changes from UI (#3507)
+- [BUGFIX] Fix otlpcommonv1.AnyValue: arrayValue.values is optional (#3495)
+- [BUGFIX] dashboard - ListVariable: limiting the max height with a lot of selected values (#3468)
+- [BUGFIX] CLI/Migrate: put back flag --input that has been removed (#3471)
+- [BREAKINGCHANGE] Grafana migration: change variable migration format for more flexibility (#3486)
+- [BREAKINGCHANGE] Re organize core package to contain interfaces only (#3449)
+- [BREAKINGCHANGE] Remove support of windows/arm (#3442)
+
 ## 0.53.0-beta.0 / 2025-10-07
 
 ### Core & UI
