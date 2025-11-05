@@ -21,8 +21,9 @@ export interface KeyValue {
 export type AnyValue =
   | { stringValue: string }
   | { intValue: string }
+  | { doubleValue: number }
   | { boolValue: boolean }
-  | { arrayValue: { values: AnyValue[] } };
+  | { arrayValue: { values?: AnyValue[] } };
 
 export interface InstrumentationScope {
   name?: string;

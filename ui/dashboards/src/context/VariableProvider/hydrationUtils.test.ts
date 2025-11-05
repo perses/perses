@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_ALL_VALUE, VariableDefinition } from '@perses-dev/core';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import { DEFAULT_ALL_VALUE, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
 import { hydrateVariableDefinitionStates } from './hydrationUtils';
 
 describe('hydrateVariableStates', () => {

@@ -173,7 +173,7 @@ func (d *DAO) GetLatestUpdateTime(kinds []modelV1.Kind) (*string, error) {
 		whereConditions = append(whereConditions, sb.Equal("TABLE_NAME", tableName))
 	}
 	sb.Where(sb.Equal("TABLE_SCHEMA", d.SchemaName), sb.Or(whereConditions...))
-	sb.OrderBy("UPDATE_TIME").Desc()
+	sb.OrderByDesc("UPDATE_TIME")
 	query, args := sb.Build()
 
 	r, err := d.DB.Query(query, args...)

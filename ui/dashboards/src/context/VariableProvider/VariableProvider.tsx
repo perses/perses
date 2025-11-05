@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -37,6 +37,7 @@ import {
   BuiltinVariableDefinition,
   TextVariableDefinition,
   ListVariableDefinition,
+  ExternalVariableDefinition,
 } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
@@ -474,15 +475,7 @@ function createVariableDefinitionStore({
  * You can define one list of variable definition by source and as many source as you want.
  * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
  */
-export type ExternalVariableDefinition = {
-  source: string;
-  tooltip?: {
-    title?: string;
-    description?: string;
-  };
-  editLink?: string;
-  definitions: VariableDefinition[];
-};
+// ExternalVariableDefinition is now imported from @perses-dev/core
 
 export interface VariableProviderProps {
   children: ReactNode;

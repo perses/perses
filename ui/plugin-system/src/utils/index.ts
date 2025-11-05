@@ -12,4 +12,5 @@
 // limitations under the License.
 
 export * from './action';
+export * from './event';
 export * from './variables';

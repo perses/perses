@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec, useEvent } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/core';
 import { useRef, useCallback, useMemo, ReactNode, ReactElement } from 'react';
 import {
   PluginModuleResource,
@@ -22,6 +22,7 @@ import {
   DefaultPluginKinds,
 } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
+import { useEvent } from '../../utils';
 import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {

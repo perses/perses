@@ -92,7 +92,7 @@ jobs:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.14.0"
-      - uses: ikalnytskyi/action-setup-postgres@v7
+      - uses: ikalnytskyi/action-setup-postgres@v8
         with:
           username: user
           password: password
