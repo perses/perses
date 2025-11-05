@@ -111,13 +111,18 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
         .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map((e) => e.message)
         .join('\n');
 
       return (
         <InfoTooltip description={errorTexts}>
           <HeaderIconButton aria-label="panel errors" size="small">
-            <AlertIcon fontSize="inherit" />
+            <AlertIcon
+              fontSize="inherit"
+              sx={{
+                color: (theme) => theme.palette.error.main,
+              }}
+            />
           </HeaderIconButton>
         </InfoTooltip>
       );

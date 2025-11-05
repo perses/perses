@@ -37,13 +37,12 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
     pluginKindLabel,
     onChange: _,
     isReadonly,
-    postExecuteRunQuery: refresh,
+    onQueryRefresh,
     filteredQueryPlugins,
     ...others
   } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
-
-  /* 
+  /*
      We could technically merge the watchedQuery, watchedOtherSpecs into a single watched-object,
      because at the end of the day, they are all specs.
      However, let's have them separated to keep the code simple and readable.
@@ -55,8 +54,8 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
 
   const runQueryHandler = useCallback((): void => {
     onSpecChange({ ...value.spec, ...watchedOtherSpecs, query: watchedQuery });
-    refresh?.();
-  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs, refresh]);
+    onQueryRefresh?.();
+  }, [onQueryRefresh, onSpecChange, value.spec, watchedOtherSpecs, watchedQuery]);
 
   const queryHandlerSettings = useMemo(() => {
     return withRunQueryButton
