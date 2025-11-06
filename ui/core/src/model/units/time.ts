@@ -15,7 +15,17 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
-type TimeUnits = 'milliseconds' | 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
+type TimeUnits =
+  | 'nanoseconds'
+  | 'microseconds'
+  | 'milliseconds'
+  | 'seconds'
+  | 'minutes'
+  | 'hours'
+  | 'days'
+  | 'weeks'
+  | 'months'
+  | 'years';
 export type TimeFormatOptions = {
   unit?: TimeUnits;
   decimalPlaces?: number;
@@ -26,6 +36,14 @@ export const TIME_GROUP_CONFIG: UnitGroupConfig = {
   decimalPlaces: true,
 };
 export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnits, UnitConfig>> = {
+  nanoseconds: {
+    group: TIME_GROUP,
+    label: 'Nanoseconds',
+  },
+  microseconds: {
+    group: TIME_GROUP,
+    label: 'Microseconds',
+  },
   milliseconds: {
     group: TIME_GROUP,
     label: 'Milliseconds',
@@ -63,6 +81,8 @@ export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnits, UnitConfig>> = {
 // Mapping of time units to what Intl.NumberFormat formatter expects
 // https://v8.dev/features/intl-numberformat#units
 export enum PersesTimeToIntlTime {
+  nanoseconds = 'nanosecond',
+  microseconds = 'microsecond',
   milliseconds = 'millisecond',
   seconds = 'second',
   minutes = 'minute',
@@ -88,6 +108,8 @@ const TIME_UNITS_IN_SECONDS: Record<TimeUnits, number> = {
   minutes: 60,
   seconds: 1,
   milliseconds: 0.001,
+  microseconds: 0.000001,
+  nanoseconds: 0.000000001,
 };
 
 const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnits[] = [
@@ -99,6 +121,8 @@ const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnits[] = [
   'minutes',
   'seconds',
   'milliseconds',
+  'microseconds',
+  'nanoseconds',
 ];
 
 /**

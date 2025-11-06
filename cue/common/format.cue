@@ -16,7 +16,7 @@ package common
 #format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #dateFormat
 
 #timeFormat: {
-	unit?:          "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
+	unit?:          "nanoseconds" | "microseconds" | "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 	decimalPlaces?: number
 }
 

@@ -27,6 +27,8 @@ type (
 )
 
 const (
+	NanoSecondsUnit        TimeUnit       = "nanoseconds"
+	MicroSecondsUnit       TimeUnit       = "microseconds"
 	MilliSecondsUnit       TimeUnit       = "milliseconds"
 	SecondsUnit            TimeUnit       = "seconds"
 	MinutesUnit            TimeUnit       = "minutes"
@@ -107,7 +109,7 @@ func (f *Format) validate() error {
 		return nil
 	}
 	switch *f.Unit {
-	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
+	case string(NanoSecondsUnit), string(MicroSecondsUnit), string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
 		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBytesUnit), string(DecimalBytesUnit),
 		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
