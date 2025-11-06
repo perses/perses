@@ -523,39 +523,7 @@ interval: <duration> | default = 1h # Optional
 
 ### TLS config
 
-A TLS config allows configuring TLS connections.
-
-```yaml
-# CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
-ca: <string> # Optional
-ca_file: <filename> # Optional
-
-# Certificate and key for client cert authentication to the server.
-# At most one of cert and cert_file is allowed.
-# At most one of key and key_file is allowed.
-cert: <string> # Optional
-cert_file: <filename> # Optional
-key: <secret> # Optional
-key_file: <filename> # Optional
-
-# ServerName extension to indicate the name of the server.
-# https://tools.ietf.org/html/rfc4366#section-3.1
-server_name: <string> # Optional
-
-# Disable validation of the server certificate.
-insecure_skip_verify: <boolean> # Optional
-
-# Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default minimum version, which is TLS 1.2.
-# See MinVersion in https://pkg.go.dev/crypto/tls#Config.
-min_version: <string> # Optional
-# Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default maximum version, which is TLS 1.3.
-# See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
-max_version: <string> # Optional
-```
+See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ### Provisioning config
 
@@ -638,7 +606,7 @@ oauth: <Oauth specification> # Optional
 authorization: <Authorization specification> # Optional
 
 # Config used to connect to the targets.
-tls_config: <TLS Config specification> # Optional
+tls_config: <TLS config> # Optional
 
 headers:
   <string>: <string> # Optional
@@ -664,10 +632,6 @@ See the [BasicAuth](../api/secret.md#basic-auth-specification) specification.
 ###### Authorization specification
 
 See the [Authorization](../api/secret.md#authorization-specification) specification.
-
-###### TLS Config specification
-
-See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ##### KubernetesSD Config
 

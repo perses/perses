@@ -19,17 +19,16 @@ import (
 	"fmt"
 	"time"
 
-	modelAPI "github.com/perses/perses/pkg/model/api"
-	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/tidwall/gjson"
-
 	"github.com/go-sql-driver/mysql"
 	databaseFile "github.com/perses/perses/internal/api/database/file"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/database/sql"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
-	promConfig "github.com/prometheus/common/config"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 )
 
 type dao struct {
@@ -127,7 +126,7 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 
 		// (OPTIONAL) Configure TLS
 		if c.TLSConfig != nil {
-			tlsConfig, parseErr := promConfig.NewTLSConfig(c.TLSConfig)
+			tlsConfig, parseErr := secret.BuildTLSConfig(c.TLSConfig)
 			if parseErr != nil {
 				logrus.WithError(parseErr).Error("Failed to parse TLS from configuration")
 				return nil, parseErr
