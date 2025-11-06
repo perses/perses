@@ -17,7 +17,7 @@ import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { isProjectMetadata, Resource } from '@perses-dev/core';
+import { isProjectMetadata, Resource, StatusError } from '@perses-dev/core';
 import IconButton from '@mui/material/IconButton';
 import Close from 'mdi-material-ui/Close';
 import { useIsMobileSize } from '../../../utils/browser-size';
@@ -38,10 +38,29 @@ interface ResourceListProps {
   onClick: () => void;
 }
 
+function SearchErrorAlert({ error }: { error: StatusError }): ReactElement {
+  const errorMsg = error.message || 'Unknown error';
+
+  return (
+    <Box sx={{ margin: 1 }}>
+      <Alert
+        severity="error"
+        sx={{
+          display: 'flex',
+          alignItems: 'center', // Ensures the icon and text are vertically aligned
+        }}
+      >
+        <p>{errorMsg}</p>
+      </Alert>
+    </Box>
+  );
+}
+
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
+  if (projectListError) return <SearchErrorAlert error={projectListError} />;
   return SearchList({
-    list: projectsQueryResult.data ?? [],
+    list: projectList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: Archive,
@@ -49,9 +68,12 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
+  const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
+    refetchOnMount: false,
+  });
+  if (globalDatasourceListError) return <SearchErrorAlert error={globalDatasourceListError} />;
   return SearchList({
-    list: globalDatasourceQueryResult.data ?? [],
+    list: globalDatasourceList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: DatabaseIcon,
@@ -82,22 +104,15 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
             importantDashboard.metadata.name === d.metadata.name &&
             importantDashboard.metadata.project === d.metadata.project
         );
-
         return { ...d, highlight };
       }) || []
     );
   }, [importantDashboards, dashboardList]);
 
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
+  if (dashboardListError || importantDashboardsError) {
+    const error = dashboardListError || importantDashboardsError;
+    return <SearchErrorAlert error={error!} />;
+  }
 
   return dashboardListLoading || importantDashboardsLoading
     ? null
@@ -111,9 +126,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
+  const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
+  if (datasourceListError) return <SearchErrorAlert error={datasourceListError} />;
   return SearchList({
-    list: datasourceQueryResult.data ?? [],
+    list: datasourceList ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: DatabaseIcon,
