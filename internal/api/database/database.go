@@ -26,7 +26,6 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
@@ -126,7 +125,7 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 
 		// (OPTIONAL) Configure TLS
 		if c.TLSConfig != nil {
-			tlsConfig, parseErr := secret.BuildTLSConfig(c.TLSConfig)
+			tlsConfig, parseErr := c.TLSConfig.BuildTLSConfig()
 			if parseErr != nil {
 				logrus.WithError(parseErr).Error("Failed to parse TLS from configuration")
 				return nil, parseErr
