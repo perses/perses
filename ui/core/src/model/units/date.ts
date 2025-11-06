@@ -22,45 +22,9 @@ export interface DateTime extends Date {
   valueOf(): number;
 }
 
-export interface RawTimeRange {
-  from: DateTime | string;
-  to: DateTime | string;
-}
-
-export interface TimeRange {
-  from: DateTime;
-  to: DateTime;
-  raw: RawTimeRange;
-}
-
-export interface UnixTimeRange {
-  from: number;
-  to: number;
-}
-
-export interface IntervalValues {
-  interval: string; // 10s,5m
-  intervalMs: number;
-}
-
-export type TimeZoneUtc = 'utc';
-export type TimeZoneBrowser = 'browser';
-export type TimeZone = TimeZoneBrowser | TimeZoneUtc | string;
+export type TimeZone = 'browser' | 'utc' | string;
 
 export const DefaultTimeZone: TimeZone = 'browser';
-
-export interface TimeOption {
-  from: string;
-  to: string;
-  display: string;
-  section: number;
-}
-
-export interface TimeOptions {
-  [key: string]: TimeOption[];
-}
-
-export type TimeFragment = string | DateTime;
 
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -485,75 +449,4 @@ export function dateTime(input?: number | string | Date): DateTime {
   };
 
   return extendedDate;
-}
-
-export function getDefaultTimeRange(): TimeRange {
-  const now = dateTime();
-
-  return {
-    from: dateTime(now).subtract(6, 'hours'),
-    to: now,
-    raw: { from: 'now-6h', to: 'now' },
-  };
-}
-
-// Time zone utilities
-export function getTimeZone(timeZone?: TimeZone): string {
-  if (!timeZone || timeZone === 'browser') {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }
-
-  if (timeZone === 'utc') {
-    return 'UTC';
-  }
-
-  return timeZone;
-}
-
-// Parse relative time strings like "now-6h", "now-1d", etc.
-export function parseTimeRange(from: string, to: string): TimeRange {
-  const parseRelativeTime = (timeStr: string, relativeTo: DateTime = dateTime()): DateTime => {
-    if (timeStr === 'now') {
-      return relativeTo;
-    }
-
-    const match = timeStr.match(/^now-(\d+)([smhdwMy])$/);
-    if (match && match[1] && match[2]) {
-      const amount = parseInt(match[1], 10);
-      const unit = match[2];
-
-      const unitMap: { [key: string]: string } = {
-        s: 'seconds',
-        m: 'minutes',
-        h: 'hours',
-        d: 'days',
-        w: 'weeks',
-        M: 'months',
-        y: 'years',
-      };
-
-      return relativeTo.subtract(amount, unitMap[unit] || unit);
-    }
-
-    // Try to parse as absolute time
-    return dateTime(timeStr);
-  };
-
-  const now = dateTime();
-  const fromTime = parseRelativeTime(from, now);
-  const toTime = parseRelativeTime(to, now);
-
-  return {
-    from: fromTime,
-    to: toTime,
-    raw: { from, to },
-  };
-}
-
-// Convert TimeRange to UnixTimeRange (Unix timestamps)
-export function convertTimeRangeToUnix(timeRange: TimeRange): UnixTimeRange {
-  return {
-    from: timeRange.from.unix(),
-    to: timeRange.to.unix(),
-  };
 }
