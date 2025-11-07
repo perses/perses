@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat | #dateFormat
 
 #timeFormat: {
 	unit?:          "nanoseconds" | "microseconds" | "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
@@ -51,4 +51,8 @@ package common
 #temperatureFormat: {
 	unit: "celsius" | "fahrenheit"
 	decimalPlaces?: number
+}
+
+#dateFormat: {
+	unit?: "datetime-iso" | "datetime-us" | "datetime-local" | "date-iso" | "date-us" | "date-local" | "time-local" | "time-iso" | "time-us" | "relative-time" | "unix-timestamp" | "unix-timestamp-ms"
 }
