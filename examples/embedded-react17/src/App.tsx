@@ -16,7 +16,7 @@ import {
   DataQueriesProvider,
   dynamicImportPluginLoader,
   PluginRegistry,
-  TimeRangeProvider,
+  TimeRangeProviderBasic,
 } from '@perses-dev/plugin-system';
 import { Box, ThemeProvider } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -102,7 +102,7 @@ function App() {
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
+              <TimeRangeProviderBasic initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '30m' }}>
                 <VariableProvider>
                   <DatasourceStoreProvider dashboardResource={fakeDashboard} datasourceApi={fakeDatasourceApi}>
                     <DataQueriesProvider
@@ -135,7 +135,7 @@ function App() {
                     </DataQueriesProvider>
                   </DatasourceStoreProvider>
                 </VariableProvider>
-              </TimeRangeProvider>
+              </TimeRangeProviderBasic>
             </QueryClientProvider>
           </PluginRegistry>
         </SnackbarProvider>

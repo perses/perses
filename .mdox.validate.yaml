@@ -50,3 +50,6 @@ validators:
   # code 0
   - regex: 'cuelang\.org'
     type: 'ignore'
+  # code 403: forbidden
+  - regex: 'webpack\.js\.org'
+    type: 'ignore'
