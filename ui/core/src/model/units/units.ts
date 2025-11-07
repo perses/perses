@@ -39,6 +39,7 @@ import {
   ThroughputFormatOptions,
 } from './throughput';
 import { formatCurrency, CURRENCY_GROUP_CONFIG, CURRENCY_UNIT_CONFIG, CurrencyFormatOptions } from './currency';
+import { formatDate, DateFormatOptions, DATE_GROUP_CONFIG, DATE_UNIT_CONFIG } from './date';
 
 /**
  * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
@@ -56,6 +57,7 @@ export const UNIT_GROUP_CONFIG: Readonly<Record<UnitGroup, UnitGroupConfig>> = {
   Throughput: THROUGHPUT_GROUP_CONFIG,
   Currency: CURRENCY_GROUP_CONFIG,
   Temperature: TEMPERATURE_GROUP_CONFIG,
+  Date: DATE_GROUP_CONFIG,
 };
 export const UNIT_CONFIG = {
   ...TIME_UNIT_CONFIG,
@@ -65,6 +67,7 @@ export const UNIT_CONFIG = {
   ...THROUGHPUT_UNIT_CONFIG,
   ...CURRENCY_UNIT_CONFIG,
   ...TEMPERATURE_UNIT_CONFIG,
+  ...DATE_UNIT_CONFIG,
 } as const;
 
 export type FormatOptions =
@@ -74,7 +77,8 @@ export type FormatOptions =
   | BytesFormatOptions
   | ThroughputFormatOptions
   | CurrencyFormatOptions
-  | TemperatureFormatOptions;
+  | TemperatureFormatOptions
+  | DateFormatOptions;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
@@ -106,6 +110,10 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 
   if (isCurrencyUnit(formatOptions)) {
     return formatCurrency(value, formatOptions);
+  }
+
+  if (isDateUnit(formatOptions)) {
+    return formatDate(value, formatOptions);
   }
 
   if (isTemperatureUnit(formatOptions)) {
@@ -167,6 +175,10 @@ export function isThroughputUnit(formatOptions: FormatOptions): formatOptions is
 
 export function isCurrencyUnit(formatOptions: FormatOptions): formatOptions is CurrencyFormatOptions {
   return getUnitGroup(formatOptions) === 'Currency';
+}
+
+export function isDateUnit(formatOptions: FormatOptions): formatOptions is DateFormatOptions {
+  return getUnitGroup(formatOptions) === 'Date';
 }
 
 export function isTemperatureUnit(formatOptions: FormatOptions): formatOptions is TemperatureFormatOptions {
