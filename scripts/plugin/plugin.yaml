@@ -12,6 +12,8 @@
   version: "0.10.0"
 - name: "HeatMapChart"
   version: "0.3.0"
+- name: "LogsTable"
+  version: "0.1.0"
 - name: "Loki"
   version: "0.2.0"
 - name: "Markdown"
