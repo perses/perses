@@ -13,15 +13,11 @@
 
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Datasource, DatasourceDefinition } from '@perses-dev/core';
-import {
-  DatasourceEditorForm,
-  PluginRegistry,
-  ValidationProvider,
-  remotePluginLoader,
-} from '@perses-dev/plugin-system';
+import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
@@ -38,6 +34,7 @@ export function DatasourceDrawer<T extends Datasource>({
   onDelete,
 }: DatasourceDrawerProps<T>): ReactElement {
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+  const pluginLoader = useRemotePluginLoader();
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
@@ -56,7 +53,7 @@ export function DatasourceDrawer<T extends Datasource>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={remotePluginLoader()}>
+        <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
             {isOpen && (
               <DatasourceEditorForm

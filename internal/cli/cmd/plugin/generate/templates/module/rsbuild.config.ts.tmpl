@@ -12,7 +12,13 @@ const exposedModules: ModuleFederationOptions["exposes"] = [
 ];
 
 export default defineConfig({
-  server: { port: 3119 },
+  server: { 
+    port: 3119,
+    printUrls: ({ urls, port }) => {
+      console.log(`[PERSES_PLUGIN] PORT="${port}"`);
+      return urls;
+    },
+  },
   dev: { assetPrefix },
   source: { entry: { main: "./src/index-federation.ts" } },
   output: {
@@ -54,6 +60,7 @@ export default defineConfig({
       },
       dts: false,
       runtime: false,
+      getPublicPath: `function() { return (window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || "") + "${assetPrefix}"; }`,
     }),
   ],
   tools: {

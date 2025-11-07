@@ -33,7 +33,6 @@ import {
   AdminRoute,
   ConfigRoute,
   ExploreRoute,
-  getBasePathName,
   ImportRoute,
   ProfileRoute,
   ProjectRoute,
@@ -45,6 +44,7 @@ import SignUpView from './views/auth/SignUpView';
 import HomeView from './views/home/HomeView';
 // Default route is eagerly loaded
 import App from './App';
+import { PERSES_APP_CONFIG } from './config';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -54,7 +54,7 @@ const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
 const ProjectView = lazy(() => import('./views/projects/ProjectView'));
 const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
 const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
-const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
+const ExploreView = lazy(() => import('./views/explore/ExploreView'));
 const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboards/CreateEphemeralDashboardView'));
 const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
 const ProfileView = lazy(() => import('./views/profile/ProfileView'));
@@ -67,6 +67,7 @@ const queryClient = new QueryClient({
       // This sets the default to 0 retries.
       // If needed, the number of retries can be overridden in individual useQuery calls.
       retry: 0,
+      keepPreviousData: true,
     },
   },
 });
@@ -163,7 +164,7 @@ function Router(): ReactElement {
       },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
-    { basename: getBasePathName() }
+    { basename: PERSES_APP_CONFIG.api_prefix }
   );
 
   return (

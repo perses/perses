@@ -22,6 +22,8 @@ export default defineConfig({
   output: {
     path: resolve(import.meta.dirname, './dist'),
     publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
+    filename: '[name].[contenthash].js',
+    clean: true,
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
@@ -89,7 +91,7 @@ export default defineConfig({
         client: {
           // By default, the error overlay is not shown because it can get in the
           // way of e2e tests and can be annoying for some developer workflows.
-          // If you like the overlay, you can enable it by setting the the specified
+          // If you like the overlay, you can enable it by setting the specified
           // env var.
           overlay: process.env.ERROR_OVERLAY === 'true',
         },
@@ -98,6 +100,7 @@ export default defineConfig({
   plugins: [
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.API_PREFIX': JSON.stringify(isDev ? '' : 'PREFIX_PATH_PLACEHOLDER'),
     }),
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({

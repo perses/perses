@@ -18,6 +18,7 @@ import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { ListVariableDefinition } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues } from '../variable-model';
+import { SORT_METHODS } from './variable-editor-form-model';
 
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
@@ -40,7 +41,7 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
     notShown = values.length - maxValues;
   }
 
-  const variablePreviewState = useMemo((): JSX.Element | null => {
+  const variablePreviewState = useMemo((): ReactElement | null => {
     if (isLoading) {
       return (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -76,7 +77,10 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
       <Card variant="outlined">
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, m: 2 }}>
           {variablePreviewState}
-          {values?.slice(0, maxValues).map((val, index) => <Chip size="small" key={index} label={val} />)}
+          {values
+            ?.slice(0, maxValues)
+            .filter((val) => val)
+            .map((val, index) => <Chip size="small" key={index} label={val} />)}
           {notShown > 0 && <Chip onClick={showAll} variant="outlined" size="small" label={`+${notShown} more`} />}
         </Box>
       </Card>
@@ -86,15 +90,25 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
 
 interface VariableListPreviewProps {
   definition: ListVariableDefinition;
+  sortMethod?: keyof typeof SORT_METHODS;
 }
 
 export function VariableListPreview(props: VariableListPreviewProps): ReactElement {
-  const { definition } = props;
+  const { definition, sortMethod } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
+
+  const result = !sortMethod || sortMethod === 'none' || !data ? data : SORT_METHODS[sortMethod].sort(data);
+
   const variablePreview = useMemo(
-    () => <VariablePreview values={data?.map((val) => val.value)} isLoading={isFetching} error={errorMessage} />,
-    [errorMessage, isFetching, data]
+    () => (
+      <VariablePreview
+        values={result?.map((val) => val.label || val.value)}
+        isLoading={isFetching}
+        error={errorMessage}
+      />
+    ),
+    [errorMessage, isFetching, result]
   );
 
   return variablePreview;

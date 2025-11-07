@@ -25,7 +25,6 @@ interface RefreshIntervalPickerProps {
 
 export function RefreshIntervalPicker(props: RefreshIntervalPickerProps): ReactElement {
   const { value, onChange, timeOptions, height } = props;
-  const formattedValue = value;
 
   // If the dashboard refresh interval is not provided in timeOptions, it will create a specific option for the select
   const customInterval = useMemo(() => {
@@ -39,13 +38,13 @@ export function RefreshIntervalPicker(props: RefreshIntervalPickerProps): ReactE
       <Box>
         <Select
           id="refreshInterval"
-          value={formattedValue}
+          value={value}
           onChange={(event) => {
             const duration = event.target.value as DurationString;
             onChange(duration);
           }}
           inputProps={{
-            'aria-label': `Select refresh interval. Currently set to ${formattedValue}`,
+            'aria-label': `Select refresh interval. Currently set to ${value}`,
           }}
           sx={{
             '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},

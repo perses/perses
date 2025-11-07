@@ -16,17 +16,22 @@ import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
 export interface MultiQueryEditorProps {
   queryTypes: QueryPluginType[];
+  filteredQueryPlugins?: string[];
   queries?: QueryDefinition[];
+  queryResults?: QueryData[];
   onChange: (queries: QueryDefinition[]) => void;
 }
 
-function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
+function useDefaultQueryDefinition(
+  queryTypes: QueryPluginType[],
+  filteredQueryPlugins?: string[]
+): {
   defaultInitialQueryDefinition: QueryDefinition;
   isLoading: boolean;
 } {
@@ -35,12 +40,18 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
 
   // Firs the default query type
   const defaultQueryType = queryTypes[0]!;
-
   // Then the default plugin kind
   // Use as default the plugin kind explicitly set as default or the first in the list
   const { data: queryPlugins, isLoading } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
-  const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
+
+  let defaultQueryKind: string = '';
+
+  if (filteredQueryPlugins?.length) {
+    defaultQueryKind = queryPlugins?.find((i) => filteredQueryPlugins.includes(i.spec.name))!.spec.name ?? '';
+  } else {
+    defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
+  }
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
     useErrorBoundary: true,
@@ -69,8 +80,8 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
  */
 
 export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, queries = [], onChange } = props;
-  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
+  const { queryTypes, queries = [], queryResults, filteredQueryPlugins, onChange } = props;
+  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
@@ -139,6 +150,8 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             key={i}
             index={i}
             query={query}
+            queryResult={queryResults?.[i]}
+            filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}

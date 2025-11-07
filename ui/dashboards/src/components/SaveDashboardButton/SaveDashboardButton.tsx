@@ -38,7 +38,7 @@ export const SaveDashboardButton = ({
   const { dashboard, setDashboard } = useDashboard();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { isSavedVariableModified } = getSavedVariablesStatus();
-  const { timeRange } = useTimeRange();
+  const { timeRange, refreshInterval } = useTimeRange();
   const { setEditMode } = useEditMode();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
 
@@ -46,18 +46,23 @@ export const SaveDashboardButton = ({
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
+    const isSavedRefreshIntervalModified = dashboard.spec.refreshInterval !== refreshInterval;
+
     // Save dashboard
     // - if active timeRange from plugin-system is relative and different from currently saved
     // - or if the saved variables are different from currently saved
-    if (isSavedDurationModified || isSavedVariableModified) {
+    if (isSavedDurationModified || isSavedVariableModified || isSavedRefreshIntervalModified) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {
-          if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange === true) {
+        onSaveChanges: (saveDefaultTimeRange, saveDefaultRefreshInterval, saveDefaultVariables) => {
+          if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange) {
             dashboard.spec.duration = timeRange.pastDuration;
           }
-          if (saveDefaultVariables === true) {
+          if (saveDefaultVariables) {
             const variables = setVariableDefaultValues();
             dashboard.spec.variables = variables;
+          }
+          if (saveDefaultRefreshInterval && isSavedRefreshIntervalModified) {
+            dashboard.spec.refreshInterval = refreshInterval;
           }
           setDashboard(dashboard);
           saveDashboard();
@@ -67,6 +72,7 @@ export const SaveDashboardButton = ({
         },
         isSavedDurationModified,
         isSavedVariableModified,
+        isSavedRefreshIntervalModified,
       });
     } else {
       saveDashboard();

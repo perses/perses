@@ -14,7 +14,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
-import { DataQueriesProvider, TimeRangeProvider, useDataQueriesContext } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { renderWithContext } from '../../test';
 import { VariableProvider } from '../../context';
@@ -120,7 +120,7 @@ describe('Panel', () => {
 
     renderWithContext(
       <ThemeProvider theme={testTheme}>
-        <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
+        <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1h' }}>
           <VariableProvider
             initialVariableDefinitions={[
               {
@@ -136,7 +136,7 @@ describe('Panel', () => {
               <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
             </DataQueriesProvider>
           </VariableProvider>
-        </TimeRangeProvider>
+        </TimeRangeProviderBasic>
       </ThemeProvider>
     );
   };

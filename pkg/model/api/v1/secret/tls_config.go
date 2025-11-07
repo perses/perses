@@ -34,6 +34,33 @@ type PublicTLSConfig struct {
 	MaxVersion         string `yaml:"maxVersion,omitempty" json:"maxVersion,omitempty"`
 }
 
+func (c *PublicTLSConfig) BuildTLSConfig() (*tls.Config, error) {
+	if c == nil {
+		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
+	}
+	minVersion := promConfig.TLSVersions["TLS12"]
+	maxVersion := promConfig.TLSVersions["TLS13"]
+	if len(c.MinVersion) == 0 {
+		minVersion = promConfig.TLSVersions[c.MinVersion]
+	}
+	if len(c.MaxVersion) == 0 {
+		maxVersion = promConfig.TLSVersions[c.MaxVersion]
+	}
+	preConfig := &promConfig.TLSConfig{
+		CA:                 string(c.CA),
+		Cert:               string(c.Cert),
+		Key:                promConfig.Secret(c.Key),
+		CAFile:             c.CAFile,
+		CertFile:           c.CertFile,
+		KeyFile:            c.KeyFile,
+		ServerName:         c.ServerName,
+		InsecureSkipVerify: c.InsecureSkipVerify,
+		MinVersion:         minVersion,
+		MaxVersion:         maxVersion,
+	}
+	return promConfig.NewTLSConfig(preConfig)
+}
+
 func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
 	if t == nil {
 		return nil
@@ -50,33 +77,6 @@ func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
 		MinVersion:         t.MinVersion,
 		MaxVersion:         t.MaxVersion,
 	}
-}
-
-func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
-	if cfg == nil {
-		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
-	}
-	minVersion := promConfig.TLSVersions["TLS12"]
-	maxVersion := promConfig.TLSVersions["TLS13"]
-	if len(cfg.MinVersion) == 0 {
-		minVersion = promConfig.TLSVersions[cfg.MinVersion]
-	}
-	if len(cfg.MaxVersion) == 0 {
-		maxVersion = promConfig.TLSVersions[cfg.MaxVersion]
-	}
-	preConfig := &promConfig.TLSConfig{
-		CA:                 cfg.CA,
-		Cert:               cfg.Cert,
-		Key:                promConfig.Secret(cfg.Key),
-		CAFile:             cfg.CAFile,
-		CertFile:           cfg.CertFile,
-		KeyFile:            cfg.KeyFile,
-		ServerName:         cfg.ServerName,
-		InsecureSkipVerify: cfg.InsecureSkipVerify,
-		MinVersion:         minVersion,
-		MaxVersion:         maxVersion,
-	}
-	return promConfig.NewTLSConfig(preConfig)
 }
 
 type TLSConfig struct {
@@ -106,18 +106,45 @@ type TLSConfig struct {
 	MaxVersion string `yaml:"maxVersion,omitempty" json:"maxVersion,omitempty"`
 }
 
+func (c *TLSConfig) BuildTLSConfig() (*tls.Config, error) {
+	if c == nil {
+		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
+	}
+	minVersion := promConfig.TLSVersions["TLS12"]
+	maxVersion := promConfig.TLSVersions["TLS13"]
+	if len(c.MinVersion) == 0 {
+		minVersion = promConfig.TLSVersions[c.MinVersion]
+	}
+	if len(c.MaxVersion) == 0 {
+		maxVersion = promConfig.TLSVersions[c.MaxVersion]
+	}
+	preConfig := &promConfig.TLSConfig{
+		CA:                 c.CA,
+		Cert:               c.Cert,
+		Key:                promConfig.Secret(c.Key),
+		CAFile:             c.CAFile,
+		CertFile:           c.CertFile,
+		KeyFile:            c.KeyFile,
+		ServerName:         c.ServerName,
+		InsecureSkipVerify: c.InsecureSkipVerify,
+		MinVersion:         minVersion,
+		MaxVersion:         maxVersion,
+	}
+	return promConfig.NewTLSConfig(preConfig)
+}
+
 // Verify checks if the TLSConfig is valid.
 // It also set the default value if needed
 // This method is called when Perses is loading the configuration.
-func (t *TLSConfig) Verify() error {
-	if t == nil {
+func (c *TLSConfig) Verify() error {
+	if c == nil {
 		return nil
 	}
-	if len(t.MinVersion) == 0 {
-		t.MinVersion = "TLS12"
+	if len(c.MinVersion) == 0 {
+		c.MinVersion = "TLS12"
 	}
-	if len(t.MaxVersion) == 0 {
-		t.MaxVersion = "TLS13"
+	if len(c.MaxVersion) == 0 {
+		c.MaxVersion = "TLS13"
 	}
 	return nil
 }

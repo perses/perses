@@ -20,7 +20,6 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -53,7 +52,7 @@ func (f *File) Verify() error {
 
 type SQL struct {
 	// TLS configuration
-	TLSConfig *config.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
+	TLSConfig *secret.PublicTLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	// Username
 	User secret.Hidden `json:"user,omitempty" yaml:"user,omitempty"`
 	// Password (requires User)

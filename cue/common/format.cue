@@ -13,10 +13,10 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat | #dateFormat
 
 #timeFormat: {
-	unit?:          "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
+	unit?:          "nanoseconds" | "microseconds" | "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 	decimalPlaces?: number
 }
 
@@ -32,13 +32,13 @@ package common
 }
 
 #bytesFormat: {
-	unit?:          "bytes"
+	unit?:          "bytes" | "decbytes"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
 
 #throughputFormat: {
-	unit?:          "bits/sec" | "bytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
+	unit?:          "bits/sec" | "bytes/sec" | "decbytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
@@ -46,4 +46,13 @@ package common
 #currencyFormat: {
 	unit?:          "aud" | "cad" | "chf" | "cny" | "eur" | "gbp" | "hkd" | "inr" | "jpy" | "krw" | "nok" | "nzd" | "sek" | "sgd" | "usd"
 	decimalPlaces?: number
+}
+
+#temperatureFormat: {
+	unit: "celsius" | "fahrenheit"
+	decimalPlaces?: number
+}
+
+#dateFormat: {
+	unit?: "datetime-iso" | "datetime-us" | "datetime-local" | "date-iso" | "date-us" | "date-local" | "time-local" | "time-iso" | "time-us" | "relative-time" | "unix-timestamp" | "unix-timestamp-ms"
 }

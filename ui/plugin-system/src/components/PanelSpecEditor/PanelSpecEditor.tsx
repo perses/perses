@@ -15,7 +15,7 @@ import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
-import { QueryCountProvider, usePlugin } from '../../runtime';
+import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
@@ -33,6 +33,8 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
   const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
+
+  const { queryResults } = useDataQueriesContext();
 
   if (error) {
     return <ErrorAlert error={error} />;
@@ -61,6 +63,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
               ref={ref}
               queryTypes={plugin.supportedQueryTypes ?? []}
               queries={panelDefinition.spec.queries ?? []}
+              queryResults={queryResults}
               onChange={(queries) => {
                 field.onChange(queries);
                 onQueriesChange(queries);
