@@ -77,7 +77,7 @@ export type FormatOptions =
   | BytesFormatOptions
   | ThroughputFormatOptions
   | CurrencyFormatOptions
-  | TemperatureFormatOptions;
+  | TemperatureFormatOptions
   | DateFormatOptions;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
@@ -114,6 +114,8 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 
   if (isDateUnit(formatOptions)) {
     return formatDate(value, formatOptions);
+  }
+
   if (isTemperatureUnit(formatOptions)) {
     return formatTemperature(value, formatOptions);
   }
@@ -177,6 +179,8 @@ export function isCurrencyUnit(formatOptions: FormatOptions): formatOptions is C
 
 export function isDateUnit(formatOptions: FormatOptions): formatOptions is DateFormatOptions {
   return getUnitGroup(formatOptions) === 'Date';
+}
+
 export function isTemperatureUnit(formatOptions: FormatOptions): formatOptions is TemperatureFormatOptions {
   return getUnitGroup(formatOptions) === 'Temperature';
 }
