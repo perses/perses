@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #dateFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat | #dateFormat
 
 #timeFormat: {
 	unit?:          "nanoseconds" | "microseconds" | "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
@@ -45,6 +45,11 @@ package common
 
 #currencyFormat: {
 	unit?:          "aud" | "cad" | "chf" | "cny" | "eur" | "gbp" | "hkd" | "inr" | "jpy" | "krw" | "nok" | "nzd" | "sek" | "sgd" | "usd"
+	decimalPlaces?: number
+}
+
+#temperatureFormat: {
+	unit: "celsius" | "fahrenheit"
 	decimalPlaces?: number
 }
 

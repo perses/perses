@@ -38,25 +38,24 @@ interface ResourceListProps {
   onClick: () => void;
 }
 
-function SearchProjectList(props: ResourceListProps): ReactElement | null {
+function SearchProjectList(props: ResourceListProps): ReactElement {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
-  return SearchList({
-    list: projectsQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: Archive,
-  });
+  return (
+    <SearchList list={projectsQueryResult.data ?? []} query={props.query} onClick={props.onClick} icon={Archive} />
+  );
 }
 
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
+function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
-  return SearchList({
-    list: globalDatasourceQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: DatabaseIcon,
-    buildRouting: () => `${AdminRoute}/datasources`,
-  });
+  return (
+    <SearchList
+      list={globalDatasourceQueryResult.data ?? []}
+      query={props.query}
+      onClick={props.onClick}
+      icon={DatabaseIcon}
+      buildRouting={() => `${AdminRoute}/datasources`}
+    />
+  );
 }
 
 function SearchDashboardList(props: ResourceListProps): ReactElement | null {
@@ -99,28 +98,25 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       </Box>
     );
 
-  return dashboardListLoading || importantDashboardsLoading
-    ? null
-    : SearchList({
-        list,
-        query: props.query,
-        onClick: props.onClick,
-        icon: ViewDashboardIcon,
-        chip: true,
-      });
+  return dashboardListLoading || importantDashboardsLoading ? null : (
+    <SearchList list={list} query={props.query} onClick={props.onClick} icon={ViewDashboardIcon} chip={true} />
+  );
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
-  return SearchList({
-    list: datasourceQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: DatabaseIcon,
-    chip: true,
-    buildRouting: (resource) =>
-      `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`,
-  });
+  return (
+    <SearchList
+      list={datasourceQueryResult.data ?? []}
+      query={props.query}
+      onClick={props.onClick}
+      icon={DatabaseIcon}
+      chip={true}
+      buildRouting={(resource) =>
+        `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
+      }
+    />
+  );
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
