@@ -82,8 +82,16 @@ Generic placeholders are defined as follows:
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
-# Use it in case you want to prefix the API path. By default the API is served with the path /api. 
+# Use it in case you want to prefix the API path. By default, the API is served with the path /api. 
 # With this config, it will be served with the path <api_prefix>/api
+# Warning: This parameter does not work anymore since the version v0.51.0. The functionality has been broken when changing the plugin system and it will be fixed in a future version.
+# Until then, please avoid using it and avoid using a reverse proxy with a path prefix to serve Perses.
+# Issues raised about this:
+# - https://github.com/perses/perses/issues/3166
+# - https://github.com/perses/perses/issues/2579
+# - https://github.com/perses/perses/issues/2589
+# - https://github.com/perses/perses/issues/3384
+# - https://github.com/perses/perses/issues/3396
 api_prefix: <string> # Optional
   
 # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
@@ -560,39 +568,7 @@ interval: <duration> | default = 1h # Optional
 
 ### TLS config
 
-A TLS config allows configuring TLS connections.
-
-```yaml
-# CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
-ca: <string> # Optional
-ca_file: <filename> # Optional
-
-# Certificate and key for client cert authentication to the server.
-# At most one of cert and cert_file is allowed.
-# At most one of key and key_file is allowed.
-cert: <string> # Optional
-cert_file: <filename> # Optional
-key: <secret> # Optional
-key_file: <filename> # Optional
-
-# ServerName extension to indicate the name of the server.
-# https://tools.ietf.org/html/rfc4366#section-3.1
-server_name: <string> # Optional
-
-# Disable validation of the server certificate.
-insecure_skip_verify: <boolean> # Optional
-
-# Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default minimum version, which is TLS 1.2.
-# See MinVersion in https://pkg.go.dev/crypto/tls#Config.
-min_version: <string> # Optional
-# Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default maximum version, which is TLS 1.3.
-# See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
-max_version: <string> # Optional
-```
+See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ### Provisioning config
 
@@ -675,7 +651,7 @@ oauth: <Oauth specification> # Optional
 authorization: <Authorization specification> # Optional
 
 # Config used to connect to the targets.
-tls_config: <TLS Config specification> # Optional
+tls_config: <TLS config> # Optional
 
 headers:
   <string>: <string> # Optional
@@ -701,10 +677,6 @@ See the [BasicAuth](../api/secret.md#basic-auth-specification) specification.
 ###### Authorization specification
 
 See the [Authorization](../api/secret.md#authorization-specification) specification.
-
-###### TLS Config specification
-
-See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ##### KubernetesSD Config
 

@@ -15,7 +15,7 @@
 
 ## Overview
 
-Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics & Tempo traces, with plans to expand its capabilities in the future to include logging, profiling, additional technologies for monitoring and tracing, and more.
+Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics, Tempo traces, Loki for logs, Pyroscope for profiling, bringing together all four observability pillars in one place. As the project continues to evolve, it will expand support for additional tools to give users even more flexibility and insight.
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Collapse, useTheme } from '@mui/material';
-import { PanelGroupId } from '@perses-dev/core';
-import { PanelGroupDefinition, PanelGroupItemLayout, PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
+import { PanelGroupId, PanelGroupDefinition, PanelGroupItemLayout } from '@perses-dev/core';
+import { PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';

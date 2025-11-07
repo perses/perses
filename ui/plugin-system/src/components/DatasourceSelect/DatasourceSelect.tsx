@@ -32,8 +32,8 @@ import {
   useListDatasourceSelectItems,
   useVariableValues,
   VariableStateMap,
-} from '../runtime';
-import { parseVariables } from '../utils';
+} from '../../runtime';
+import { parseVariables } from '../../utils';
 
 const DATASOURCE_VARIABLE_VALUE_PREFIX = '__DATASOURCE_VARIABLE_VALUE__';
 const VARIABLE_IDENTIFIER = '$';

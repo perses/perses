@@ -19,7 +19,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"syscall"
 
 	"github.com/fatih/color"
@@ -31,22 +34,67 @@ type devserver struct {
 	async.SimpleTask
 	cmd        *exec.Cmd
 	pluginName string
+	portChan   chan int
+}
+
+type portCapturingWriter struct {
+	writer    io.Writer
+	portChan  chan int
+	portSent  bool
+	portRegex *regexp.Regexp
+}
+
+func newPortCapturingWriter(writer io.Writer, portChan chan int) *portCapturingWriter {
+	// Matches patterns like "Local:	http://localhost:3000" or "Local: http://127.0.0.1:3000" or [PERSES_PLUGIN] NAME="Test" PORT="3009" PROTOCOL="https"
+	portRegex := regexp.MustCompile(`(?m)(?:Local:\s*https?://(?:localhost|127\.0\.0\.1):|\[PERSES_PLUGIN\]\s*PORT=")(\d+)`)
+
+	return &portCapturingWriter{
+		writer:    writer,
+		portChan:  portChan,
+		portRegex: portRegex,
+	}
+}
+
+func (p *portCapturingWriter) Write(data []byte) (int, error) {
+	n, err := p.writer.Write(data)
+
+	// Only extract port once
+	if !p.portSent {
+		if matches := p.portRegex.FindSubmatch(data); len(matches) > 1 {
+			if port, err := strconv.Atoi(string(matches[1])); err == nil {
+				p.portChan <- port
+				p.portSent = true
+			}
+		}
+	}
+
+	return n, err
+}
+
+func (d *devserver) GetPort() <-chan int {
+	return d.portChan
 }
 
 func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errWriter io.Writer, c *color.Color) *devserver {
+	portChan := make(chan int)
+
 	streamWriter := newPrefixedStream(pluginName, writer, c)
 	streamErrWriter := newPrefixedStream(pluginName, errWriter, c)
+	portCapturingWriter := newPortCapturingWriter(streamWriter, portChan)
 
 	cmd := exec.Command("npm", "run", rsbuildScriptName)
-	cmd.Stdout = streamWriter
+	cmd.Stdout = portCapturingWriter
 	cmd.Stderr = streamErrWriter
 	cmd.Dir = pluginPath
+	// PERSES_CLI indicates to the plugin dev server that it is run by the perses CLI
+	cmd.Env = append(os.Environ(), "PERSES_CLI=true")
 	// Request the OS to assign a process group to the new process, to which all its children will belong
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	return &devserver{
 		cmd:        cmd,
 		pluginName: pluginName,
+		portChan:   portChan,
 	}
 }
 
@@ -55,6 +103,8 @@ func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
 		return err
 	}
 	<-ctx.Done()
+	// Close the port channel when the dev server is shutting down
+	close(d.portChan)
 	// Send kill signal to the process group instead of a single process
 	// (it gets the same value as the PID, only negative)
 	// This will ensure the process and all its children are killed.

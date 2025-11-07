@@ -11,6 +11,9 @@ builds:
       - amd64
       - arm
       - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
     env:
       - CGO_ENABLED=0
     ldflags:
@@ -26,6 +29,9 @@ builds:
       - amd64
       - arm
       - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
     env:
       - CGO_ENABLED=0
     ldflags:

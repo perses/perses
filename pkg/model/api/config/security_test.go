@@ -232,10 +232,6 @@ security:
 				Frontend: Frontend{
 					ImportantDashboards: nil,
 					Information:         "",
-					TimeRange: TimeRange{
-						DisableCustomTimeRange: false,
-						Options:                defaultTimeRangeOptions,
-					},
 				},
 				Plugin: Plugin{
 					Path:        "plugins",
