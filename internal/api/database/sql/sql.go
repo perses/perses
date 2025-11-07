@@ -14,10 +14,12 @@
 package databasesql
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/huandu/go-sqlbuilder"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -392,7 +394,9 @@ func (d *DAO) DeleteByQuery(query databaseModel.Query) error {
 }
 
 func (d *DAO) HealthCheck() bool {
-	if err := d.DB.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	if err := d.DB.PingContext(ctx); err != nil {
 		logrus.WithError(err).Error("unable to ping the database")
 		return false
 	}
