@@ -77,7 +77,10 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
       <Card variant="outlined">
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, m: 2 }}>
           {variablePreviewState}
-          {values?.slice(0, maxValues).map((val, index) => <Chip size="small" key={index} label={val} />)}
+          {values
+            ?.slice(0, maxValues)
+            .filter((val) => val)
+            .map((val, index) => <Chip size="small" key={index} label={val} />)}
           {notShown > 0 && <Chip onClick={showAll} variant="outlined" size="small" label={`+${notShown} more`} />}
         </Box>
       </Card>
