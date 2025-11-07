@@ -18,7 +18,6 @@ import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@pe
 import {
   PluginKindSelect,
   usePluginEditor,
-  PanelSpecEditor,
   getTitleAction,
   getSubmitText,
   useValidationSchemas,
@@ -28,8 +27,8 @@ import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'reac
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEditorProvider';
-import { PanelPreview } from './PanelPreview';
 import { usePanelEditor } from './usePanelEditor';
+import { PanelQueriesSharedControls } from './PanelQueriesSharedControls';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -234,30 +233,16 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
             </Grid>
 
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <Grid item xs={12}>
-                <Typography variant="h4" marginBottom={1}>
-                  Preview
-                </Typography>
-                <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <PanelPreview panelDefinition={panelDefinition} />
-                </ErrorBoundary>
-              </Grid>
-              <Grid item xs={12}>
-                <ErrorBoundary FallbackComponent={ErrorAlert}>
-                  <PanelSpecEditor
-                    ref={pluginEditorRef}
-                    control={form.control}
-                    panelDefinition={panelDefinition}
-                    onJSONChange={handlePanelDefinitionChange}
-                    onQueriesChange={(queries) => {
-                      setQueries(queries);
-                    }}
-                    onPluginSpecChange={(spec) => {
-                      pluginEditor.onSpecChange(spec);
-                    }}
-                  />
-                </ErrorBoundary>
-              </Grid>
+              <PanelQueriesSharedControls
+                control={form.control}
+                plugin={plugin}
+                panelDefinition={panelDefinition}
+                onQueriesChange={(q) => setQueries(q)}
+                onPluginSpecChange={(spec) => {
+                  pluginEditor.onSpecChange(spec);
+                }}
+                onJSONChange={handlePanelDefinitionChange}
+              />
             </ErrorBoundary>
           </Grid>
         </Box>

@@ -39,7 +39,7 @@ export interface UseDataQueryResults<T> extends Omit<DataQueriesContextType, 'qu
 export type QueryData<T = QueryDataType> = {
   data?: T;
   definition: QueryDefinition;
-  error: unknown;
+  error: Error;
   isFetching: boolean;
   isLoading: boolean;
   refetch?: () => void;

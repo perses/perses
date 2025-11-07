@@ -16,7 +16,7 @@ import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
@@ -24,6 +24,7 @@ export interface MultiQueryEditorProps {
   queryTypes: QueryPluginType[];
   filteredQueryPlugins?: string[];
   queries?: QueryDefinition[];
+  queryResults?: QueryData[];
   onChange: (queries: QueryDefinition[]) => void;
 }
 
@@ -79,7 +80,7 @@ function useDefaultQueryDefinition(
  */
 
 export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, queries = [], filteredQueryPlugins, onChange } = props;
+  const { queryTypes, queries = [], queryResults, filteredQueryPlugins, onChange } = props;
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
@@ -149,11 +150,12 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             key={i}
             index={i}
             query={query}
+            queryResult={queryResults?.[i]}
+            filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
-            filteredQueryPlugins={filteredQueryPlugins}
           />
         ))}
       </Stack>

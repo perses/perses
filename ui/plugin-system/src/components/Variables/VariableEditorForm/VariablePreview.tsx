@@ -41,7 +41,7 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
     notShown = values.length - maxValues;
   }
 
-  const variablePreviewState = useMemo((): JSX.Element | null => {
+  const variablePreviewState = useMemo((): ReactElement | null => {
     if (isLoading) {
       return (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>

@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useState } from 'react';
+import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';
-import { useTimeRange } from '../../../runtime';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { SORT_METHODS, SortMethodName } from './variable-editor-form-model';
 
@@ -94,6 +94,7 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
 
 function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   const form = useFormContext<VariableDefinition>();
+  const queryClient = useQueryClient();
   /** We use `previewSpec` to know when to explicitly update the
    * spec that will be used for preview. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
@@ -114,6 +115,10 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.sort',
   }) as SortMethodName;
 
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['variable', previewSpec] });
+  }, [previewSpec, queryClient]);
+
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
   const values = form.getValues() as ListVariableDefinition;
@@ -132,8 +137,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
   if (!values.spec.sort) {
     form.setValue('spec.sort', 'none');
   }
-
-  const { refresh } = useTimeRange();
 
   return (
     <>
@@ -154,7 +157,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
               render={({ field }) => {
                 return (
                   <PluginEditor
-                    postExecuteRunQuery={refresh}
                     withRunQueryButton
                     width="100%"
                     pluginTypes={['Variable']}
@@ -170,6 +172,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                     onChange={(v) => {
                       field.onChange({ kind: v.selection.kind, spec: v.spec });
                     }}
+                    onQueryRefresh={handleRefresh}
                   />
                 );
               }}
