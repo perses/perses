@@ -19,7 +19,7 @@
 - name: "Markdown"
   version: "0.10.0"
 - name: "PieChart"
-  version: "0.11.0"
+  version: "0.12.0"
 - name: "Prometheus"
   version: "0.55.0"
 - name: "Pyroscope"
