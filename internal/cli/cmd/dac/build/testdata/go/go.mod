@@ -5,9 +5,9 @@ go 1.25.1
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.0-beta.0
-	github.com/perses/plugins/prometheus v0.54.0
-	github.com/perses/plugins/timeserieschart v0.11.0
+	github.com/perses/perses v0.53.0-beta.2
+	github.com/perses/plugins/prometheus v0.55.0
+	github.com/perses/plugins/timeserieschart v0.11.1
 )
 
 require (
@@ -20,13 +20,13 @@ require (
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.67.1 // indirect
-	github.com/prometheus/procfs v0.16.1 // indirect
+	github.com/prometheus/common v0.67.2 // indirect
+	github.com/prometheus/procfs v0.17.0 // indirect
 	github.com/zitadel/oidc/v3 v3.45.0 // indirect
 	github.com/zitadel/schema v1.3.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.45.0 // indirect
-	golang.org/x/oauth2 v0.32.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
