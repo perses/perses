@@ -26,8 +26,8 @@ github.com/perses/plugins/prometheus v0.54.0 h1:LP7T7nxlqUd4mmkwRMLNL8V3/AWIbLny
 github.com/perses/plugins/prometheus v0.54.0/go.mod h1:d0JGjIVe1fughL0RcfY18qsWuhgG9PLMnpIFhMQez00=
 github.com/perses/plugins/staticlistvariable v0.6.0 h1:gnMi30xuSJH6Ow06y0+x1BoUO9INmmy8lAslIA02L1Q=
 github.com/perses/plugins/staticlistvariable v0.6.0/go.mod h1:GZ68DtcxErw/6JUYEvMkp/WFg8NZ6VMEoyrA1QsrCt4=
-github.com/perses/plugins/table v0.9.0 h1:8natKWY4O4q1BYNpDDZ8mqiimm7w1VUn/qQWNh9VimY=
-github.com/perses/plugins/table v0.9.0/go.mod h1:LmHEcY2yveCi04hYyEHG7X+sQM+BFc2eP9pnDkNfEbM=
+github.com/perses/plugins/table v0.10.0 h1:MjMYtczARp2KVi0LbmorDn1uuzydN2+3MnR8c19JH6g=
+github.com/perses/plugins/table v0.10.0/go.mod h1:mqBHdpnhlQqT0hiENgG39oN3tz+06CQEnHY6qpajJ/0=
 github.com/perses/plugins/timeserieschart v0.11.0 h1:OtPTGnFs25MUgEMBro5dymPCiBWbbNrW+ql1sctc7ZE=
 github.com/perses/plugins/timeserieschart v0.11.0/go.mod h1:AI/4l74zbPuZxKf41z584SxnCe/Z98ulXxwpkPNRq3g=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
