@@ -74,18 +74,19 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   } = useImportantDashboardList();
 
   const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    return (
-      dashboardList?.map((d) => {
+    if (props.query.length && dashboardList) {
+      return dashboardList.map((d) => {
         const highlight = !!importantDashboards.some(
           (importantDashboard) =>
             importantDashboard.metadata.name === d.metadata.name &&
             importantDashboard.metadata.project === d.metadata.project
         );
-
         return { ...d, highlight };
-      }) || []
-    );
-  }, [importantDashboards, dashboardList]);
+      });
+    } else {
+      return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
+    }
+  }, [importantDashboards, dashboardList, props.query]);
 
   if (dashboardListError || importantDashboardsError)
     return (
