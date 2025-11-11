@@ -34,4 +34,8 @@ public class Metadata {
 
     public Metadata() {
     }
+
+    public Metadata(String name) {
+        this.name = name;
+    }
 }

@@ -29,5 +29,8 @@ public class Dashboard {
     public Spec spec;
 
     public Dashboard() {
+        this.kind = Kind.DASHBOARD;
+        this.spec = new Spec();
+        this.metadata = new ProjectMetadata();
     }
 }

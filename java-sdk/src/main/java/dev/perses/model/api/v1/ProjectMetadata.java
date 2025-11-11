@@ -23,4 +23,13 @@ public class ProjectMetadata extends Metadata {
 
     public ProjectMetadata() {
     }
+
+    public ProjectMetadata(String name, String project) {
+        this.name = name;
+        this.project = project;
+    }
+
+    public ProjectMetadata(String name) {
+        super(name);
+    }
 }

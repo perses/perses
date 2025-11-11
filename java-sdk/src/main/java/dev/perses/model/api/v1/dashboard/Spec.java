@@ -20,6 +20,8 @@ import dev.perses.model.api.v1.common.duration.Duration;
 import dev.perses.model.api.v1.dashboard.panel.Panel;
 import dev.perses.model.api.v1.common.Display;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,5 +49,7 @@ public class Spec {
     public Duration refreshInterval;
 
     public Spec() {
+        this.layouts = new ArrayList<>();
+        this.panels = new HashMap<>();
     }
 }
