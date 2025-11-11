@@ -49,6 +49,7 @@ export interface SearchListProps {
   icon: typeof Archive;
   chip?: boolean;
   buildRouting?: (resource: Resource) => string;
+  isResource?: (isAvailable: boolean) => void;
 }
 
 export function SearchList(props: SearchListProps): ReactElement | null {
@@ -73,8 +74,14 @@ export function SearchList(props: SearchListProps): ReactElement | null {
     setCurrentSizeList(SIZE_LIST);
   }, [props.query, props.list]);
 
-  return !filteredList.length ? null : (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+  useEffect(() => {
+    props.isResource?.(!!filteredList.length);
+  }, [filteredList.length, props]);
+
+  if (!filteredList.length) return null;
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', flexShrink: 0, height: 'auto', minHeight: 0, minWidth: 0 }}>
       <Box
         sx={{
           display: 'flex',
