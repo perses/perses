@@ -13,11 +13,14 @@
 
 import { Box, Button, Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
 import { PluginLoaderComponent, useListPluginMetadata } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useMemo } from 'react';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import ChevronLeft from 'mdi-material-ui/ChevronLeft';
+import { useLocalStorage } from '@perses-dev/components';
 import { ExploreToolbar } from '../ExploreToolbar';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
+
+const EXPLORE_TABS_COLLAPSED_KEY = 'PERSES_EXPLORE_TABS_COLLAPSED';
 
 export interface ExploreManagerProps {
   exploreTitleComponent?: ReactNode;
@@ -30,7 +33,7 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
   const plugins = useListPluginMetadata(['Explore']);
 
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(EXPLORE_TABS_COLLAPSED_KEY, false);
 
   const explorerPluginsMap = useMemo(
     () =>

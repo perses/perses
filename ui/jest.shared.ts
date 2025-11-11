@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -35,7 +35,7 @@ const config: Config.InitialOptions = {
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(lodash-es|yaml|nuqs|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror))',
+    'node_modules/(?!(lodash-es|yaml|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror))',
   ],
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the

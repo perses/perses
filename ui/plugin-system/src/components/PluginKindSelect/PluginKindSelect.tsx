@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
-import { forwardRef, ReactElement, useCallback } from 'react';
+import { forwardRef, ReactElement, useCallback, useMemo } from 'react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
 
 export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'onChange' | 'children'> {
+  filteredQueryPlugins?: string[];
   pluginTypes: PluginType[];
   value?: PluginEditorSelection;
   onChange?: (s: PluginEditorSelection) => void;
@@ -31,8 +32,18 @@ export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'o
  * when the user changes the plugin type (it fires at start for the default value.)
  */
 export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): ReactElement => {
-  const { pluginTypes, value: propValue, onChange, ...others } = props;
+  const { pluginTypes, value: propValue, onChange, filteredQueryPlugins, ...others } = props;
   const { data, isLoading } = useListPluginMetadata(pluginTypes);
+
+  const sortedData = useMemo(() => {
+    if (filteredQueryPlugins?.length) {
+      return data
+        ?.filter((i) => filteredQueryPlugins.includes(i.spec.name))
+        ?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
+    }
+
+    return data?.sort((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
+  }, [data, filteredQueryPlugins]);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = !propValue || isLoading ? '' : selectionToOptionValue(propValue);
@@ -47,9 +58,10 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
         return '';
       }
       const selectedValue = optionValueToSelection(selected as string);
-      return data?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display.name;
+      return sortedData?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display
+        .name;
     },
-    [data]
+    [sortedData]
   );
 
   // TODO: Does this need a loading indicator of some kind?
@@ -65,7 +77,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       data-testid="plugin-kind-select"
     >
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
-      {data?.map((metadata) => (
+      {sortedData?.map((metadata) => (
         <MenuItem
           data-testid="option"
           key={metadata.kind + metadata.spec.name}

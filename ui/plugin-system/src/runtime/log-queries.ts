@@ -37,7 +37,7 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
 
   return useQueries({
     queries: definitions.map((definition) => {
-      const queryKey = [definition, datasourceStore, absoluteTimeRange, variableValues] as const;
+      const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variableValues] as const;
       const logQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,

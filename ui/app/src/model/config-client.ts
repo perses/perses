@@ -14,6 +14,7 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
+import { PERSES_APP_CONFIG } from '../config';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -135,17 +136,25 @@ export interface ExplorerConfig {
   enable: boolean;
 }
 
+export type Severity = 'warning' | 'info' | 'error';
+
+export interface Banner {
+  severity?: Severity;
+  message: string;
+}
+
 export interface TimeRangeConfig {
-  disable_custom: boolean;
-  disable_zoom: boolean;
-  options: DurationString[];
+  disable_custom?: boolean;
+  disable_zoom?: boolean;
+  options?: DurationString[];
 }
 
 export interface FrontendConfig {
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
-  time_range: TimeRangeConfig;
+  time_range?: TimeRangeConfig;
+  banner?: Banner;
 }
 
 export interface EphemeralDashboardConfig {
@@ -182,6 +191,7 @@ export interface DatasourceConfig {
 }
 
 export interface ConfigModel {
+  api_prefix?: string;
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
@@ -205,6 +215,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiPrefix: '/api' });
+  const url = buildURL({ resource: resource, apiURL: '/api', apiPrefix: PERSES_APP_CONFIG.api_prefix });
   return fetchJson<ConfigModel>(url);
 }

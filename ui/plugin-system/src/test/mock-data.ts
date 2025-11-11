@@ -116,3 +116,136 @@ export const MOCK_PROFILE_DATA: ProfileData = {
     name: 'cpu',
   },
 };
+
+// Remote Plugin Loader Test Fixtures
+export const MOCK_VALID_PLUGIN_METADATA = {
+  kind: 'Panel' as const,
+  spec: {
+    name: 'testPlugin',
+    display: {
+      name: 'Test Plugin',
+      description: 'A test plugin for unit testing',
+    },
+  },
+};
+
+export const MOCK_VALID_PLUGIN_MODULE_RESOURCE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'test-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [MOCK_VALID_PLUGIN_METADATA],
+  },
+};
+
+export const MOCK_INVALID_PLUGIN_MODULE = {
+  // Missing required fields
+  metadata: {
+    name: 'invalid-module',
+  },
+  spec: {
+    plugins: [
+      {
+        // Missing required fields
+        kind: 'Panel',
+      },
+    ],
+  },
+};
+
+export const MOCK_MIXED_VALIDITY_PLUGIN_MODULES = [
+  MOCK_VALID_PLUGIN_MODULE_RESOURCE,
+  MOCK_INVALID_PLUGIN_MODULE,
+  {
+    kind: 'PluginModule' as const,
+    metadata: {
+      name: 'another-valid-module',
+      version: '2.0.0',
+    },
+    spec: {
+      plugins: [
+        {
+          kind: 'Variable' as const,
+          spec: {
+            name: 'anotherPlugin',
+            display: {
+              name: 'Another Plugin',
+            },
+          },
+        },
+      ],
+    },
+  },
+];
+
+export const MOCK_REMOTE_PLUGIN_MODULE = {
+  testPlugin: {
+    component: (): null => null,
+    createDefaultOptions: (): Record<string, unknown> => ({}),
+  },
+};
+
+export const MOCK_MULTI_PLUGIN_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'multi-plugin-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [
+      {
+        kind: 'Panel' as const,
+        spec: {
+          name: 'plugin1',
+          display: { name: 'Plugin 1' },
+        },
+      },
+      {
+        kind: 'Variable' as const,
+        spec: {
+          name: 'plugin2',
+          display: { name: 'Plugin 2' },
+        },
+      },
+    ],
+  },
+};
+
+export const MOCK_PARTIAL_FAILURE_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'partial-failure-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [
+      {
+        kind: 'Panel' as const,
+        spec: {
+          name: 'workingPlugin',
+          display: { name: 'Working Plugin' },
+        },
+      },
+      {
+        kind: 'Variable' as const,
+        spec: {
+          name: 'failingPlugin',
+          display: { name: 'Failing Plugin' },
+        },
+      },
+    ],
+  },
+};
+
+export const MOCK_EMPTY_PLUGIN_MODULE = {
+  kind: 'PluginModule' as const,
+  metadata: {
+    name: 'empty-module',
+    version: '1.0.0',
+  },
+  spec: {
+    plugins: [],
+  },
+};

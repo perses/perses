@@ -44,6 +44,12 @@ func TestMigrateCMD(t *testing.T) {
 			ExpectedMessage: "no args are supported by the command 'migrate'",
 		},
 		{
+			Title:           "offline migration without plugin path",
+			Args:            []string{"-f", pathToGrafanaDashboard},
+			IsErrorExpected: true,
+			ExpectedMessage: "offline migration requires --plugin.path to be specified, or use --online for server-side migration",
+		},
+		{
 			Title:           "migrate with native format",
 			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
@@ -54,6 +60,18 @@ func TestMigrateCMD(t *testing.T) {
 			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(createCustomResource(dashboard))) + "\n",
+		},
+		{
+			Title:           "migrate with native format and use default datasource",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--use-default-datasource=true", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
+		},
+		{
+			Title:           "migrate with native format and do not use default datasource",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--use-default-datasource=false", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

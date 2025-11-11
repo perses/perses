@@ -98,7 +98,7 @@ func (c *RestConfigClient) Validate() error {
 }
 
 func NewRoundTripper(timeout time.Duration, tlsConfig *secret.TLSConfig) (http.RoundTripper, error) {
-	tlsCfg, err := secret.BuildTLSConfig(tlsConfig)
+	tlsCfg, err := tlsConfig.BuildTLSConfig()
 	if err != nil {
 		return nil, err
 	}

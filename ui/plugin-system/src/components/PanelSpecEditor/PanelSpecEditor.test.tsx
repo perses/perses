@@ -16,15 +16,31 @@ import { useForm } from 'react-hook-form';
 import { PanelEditorValues } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { renderWithContext } from '../../test';
+import { DataQueriesContext } from '../../runtime';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {
   const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>): void => {
+    const DataQueriesProviderMock = (childProps: { children: ReactElement }): ReactElement => {
+      const ctx = {
+        queryResults: [],
+        refetchAll: (): void => {},
+        isFetching: false,
+        isLoading: false,
+        errors: [],
+      };
+      return <DataQueriesContext.Provider value={ctx}>{childProps.children}</DataQueriesContext.Provider>;
+    };
+
     // Intermediary component to wrap the PanelSpecEditor with a form
     const Component = (props: Omit<PanelSpecEditorProps, 'control'>): ReactElement => {
       const form = useForm<PanelEditorValues>();
 
-      return <PanelSpecEditor {...props} control={form.control} />;
+      return (
+        <DataQueriesProviderMock>
+          <PanelSpecEditor {...props} control={form.control} />
+        </DataQueriesProviderMock>
+      );
     };
 
     renderWithContext(<Component {...props} />);

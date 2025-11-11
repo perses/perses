@@ -18,7 +18,8 @@ import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
-import { NuqsAdapter } from 'nuqs/adapters/react-router/v6';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { DatasourceStoreProvider } from '../context';
 import { defaultDatasourceProps } from '../test';
 import { MOCK_PLUGINS } from './plugin-registry';
@@ -63,9 +64,9 @@ export function renderWithContext(
   const mockRegistry = mockPluginRegistry(...MOCK_PLUGINS);
 
   const BaseRender = (): ReactElement => (
-    <NuqsAdapter>
-      <CustomRouter history={customHistory}>
-        <QueryClientProvider client={queryClient}>
+    <CustomRouter history={customHistory}>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
           <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
             <ChartsProvider chartsTheme={testChartsTheme}>
               <PluginRegistry
@@ -76,9 +77,9 @@ export function renderWithContext(
               </PluginRegistry>
             </ChartsProvider>
           </SnackbarProvider>
-        </QueryClientProvider>
-      </CustomRouter>
-    </NuqsAdapter>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </CustomRouter>
   );
 
   return render(<BaseRender />, options);

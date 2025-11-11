@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import happoPlaywright from 'happo-playwright';
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
 import { test } from '../fixtures/dashboardTest';
 import { DashboardPage } from '../pages';
@@ -23,30 +22,17 @@ test.use({
 });
 
 test.describe('Dashboard: Stat Chart Panel', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   [
     'Single Stat with Sparkline',
     'Single Stat without Sparkline',
     'Multi-Series Stat with Sparkline',
     'Multi-Series Stat without Sparkline',
   ].forEach((panelName) => {
-    test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
+    test(`displays ${panelName} as expected`, async ({ dashboardPage, mockNow }) => {
       await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
-      await dashboardPage.forEachTheme(async (themeName) => {
+      await dashboardPage.forEachTheme(async () => {
         const panel = dashboardPage.getPanelByName(panelName);
         await panel.isLoaded();
-
-        await happoPlaywright.screenshot(page, panel.parent, {
-          component: 'Stat Chart Panel',
-          variant: `${panelName} [${themeName}]`,
-        });
       });
     });
   });
@@ -69,12 +55,6 @@ test.describe('Dashboard: Stat Chart Panel', () => {
     const panel = dashboardPage.getPanelByName('Single Stat with Sparkline');
     await panel.isLoaded();
     await waitForStableCanvas(panel.canvas);
-    await dashboardPage.forEachTheme(async (themeName) => {
-      await happoPlaywright.screenshot(page, panel.parent, {
-        component: 'Stat Chart Panel',
-        variant: `Single Stat with Threshold [${themeName}]`,
-      });
-    });
   });
 });
 

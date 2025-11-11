@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { styled } from '@mui/material/styles';
 import {
   SnackbarProvider as NotistackProvider,
   ProviderContext as NotistackContext,
@@ -19,6 +20,7 @@ import {
   SnackbarMessage,
   OptionsObject,
   SnackbarKey,
+  MaterialDesignContent,
 } from 'notistack';
 
 export interface SnackbarContext extends NotistackContext {
@@ -40,8 +42,27 @@ type SnackbarOptions = Omit<OptionsObject, 'variant'>;
 
 /**
  * Application-wide provider for showing snackbars/toasts.
+ * Customized to preserve formatting in error messages.
  */
-export { NotistackProvider as SnackbarProvider };
+export function SnackbarProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NotistackProvider>): React.ReactElement {
+  return (
+    <NotistackProvider
+      {...props}
+      Components={{
+        error: styled(MaterialDesignContent)(() => ({
+          '&.notistack-MuiContent-error': {
+            whiteSpace: 'pre-wrap',
+          },
+        })),
+      }}
+    >
+      {children}
+    </NotistackProvider>
+  );
+}
 
 /**
  * Gets the SnackbarContext with methods for displaying snackbars/toasts.

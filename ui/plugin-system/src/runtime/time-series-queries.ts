@@ -48,7 +48,7 @@ function getQueryOptions({
   queryKey: QueryKey;
   queryEnabled: boolean;
 } {
-  const { timeRange, datasourceStore, suggestedStepMs, mode, variableState, refreshKey } = context;
+  const { timeRange, suggestedStepMs, mode, variableState } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
@@ -56,14 +56,15 @@ function getQueryOptions({
   // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+
   const queryKey = [
+    'query',
+    TIME_SERIES_QUERY_KEY,
     definition,
     timeRange,
-    datasourceStore,
+    variablesValueKey,
     suggestedStepMs,
     mode,
-    variablesValueKey,
-    refreshKey,
   ] as const;
 
   // Determine queryEnabled
@@ -90,19 +91,18 @@ export const useTimeSeriesQuery = (
 ): UseQueryResult<TimeSeriesData> => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
-
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
     enabled: (queryOptions?.enabled ?? true) || queryEnabled,
     queryKey: queryKey,
-    queryFn: () => {
+    queryFn: ({ signal }) => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
         throw new Error('Expected plugin to be loaded');
       }
       // Keep options out of query key so we don't re-run queries because suggested step changes
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
-      return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
+      return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx, signal);
     },
   });
 };
@@ -118,8 +118,8 @@ export function useTimeSeriesQueries(
   const { getPlugin } = usePluginRegistry();
   const context = {
     ...useTimeSeriesQueryContext(),
-    // We need mode to be part query key because this drives the type of query done (instant VS range query)
     mode: options?.mode,
+    suggestedStepMs: options?.suggestedStepMs,
   };
 
   const pluginLoaderResponse = usePlugins(
@@ -132,29 +132,24 @@ export function useTimeSeriesQueries(
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        ...(queryOptions as QueryObserverOptions<TimeSeriesData>),
+        ...queryOptions,
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
-        queryFn: async (): Promise<TimeSeriesData> => {
-          const ctx: TimeSeriesQueryContext = {
-            ...context,
-            // Keep suggested step changes out of the query key, so we don´t have to run again query when it changes
-            suggestedStepMs: options?.suggestedStepMs,
-          };
+        queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
-          const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
+          const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
           return data;
         },
-      };
+      } as QueryObserverOptions;
     }),
-  });
+  }) as Array<UseQueryResult<TimeSeriesData>>;
 }
 
 /**
  * Build the time series query context object from data available at runtime
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  const { absoluteTimeRange, refreshKey } = useTimeRange();
+  const { absoluteTimeRange } = useTimeRange();
   const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -162,7 +157,6 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     timeRange: absoluteTimeRange,
     variableState,
     datasourceStore,
-    refreshKey,
   };
 }
 

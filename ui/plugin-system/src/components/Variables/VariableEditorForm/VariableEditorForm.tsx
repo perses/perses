@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useState } from 'react';
+import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';
-import { useTimeRange } from '../../../runtime';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
+import { SORT_METHODS, SortMethodName } from './variable-editor-form-model';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;
@@ -93,16 +94,12 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
 
 function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   const form = useFormContext<VariableDefinition>();
+  const queryClient = useQueryClient();
   /** We use `previewSpec` to know when to explicitly update the
    * spec that will be used for preview. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
    */
-  const [previewSpec, setPreviewSpec] = useState<ListVariableDefinition>(form.getValues() as ListVariableDefinition);
-  const { refresh } = useTimeRange();
-  const refreshPreview = (): void => {
-    refresh();
-    setPreviewSpec(form.getValues() as ListVariableDefinition);
-  };
+  const previewSpec = form.getValues() as ListVariableDefinition;
 
   const plugin = useWatch<VariableDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
   const kind = plugin?.kind;
@@ -112,6 +109,15 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     control: control,
     name: 'spec.allowAllValue',
   });
+
+  const sortMethod = useWatch<VariableDefinition, 'spec.sort'>({
+    control: control,
+    name: 'spec.sort',
+  }) as SortMethodName;
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['variable', previewSpec] });
+  }, [previewSpec, queryClient]);
 
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
@@ -124,22 +130,25 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.allowMultiple', false);
   }
 
+  if (!values.spec.plugin) {
+    form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
+  }
+
+  if (!values.spec.sort) {
+    form.setValue('spec.sort', 'none');
+  }
+
   return (
     <>
       <Typography py={1} variant="subtitle1">
         List Options
       </Typography>
       <Stack spacing={2} mb={2}>
-        {kind ? (
-          <Box>
-            <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-              <VariableListPreview definition={previewSpec} onRefresh={refreshPreview} />
-            </ErrorBoundary>
-          </Box>
-        ) : (
-          <VariablePreview isLoading={true} />
-        )}
-
+        <Box>
+          <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
+            <VariableListPreview sortMethod={sortMethod} definition={previewSpec} />
+          </ErrorBoundary>
+        </Box>
         <Stack>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <Controller
@@ -157,12 +166,13 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                         type: 'Variable',
                         kind: kind ?? 'StaticListVariable',
                       },
-                      spec: pluginSpec ?? { values: [] },
+                      spec: pluginSpec ?? {},
                     }}
                     isReadonly={action === 'read'}
                     onChange={(v) => {
                       field.onChange({ kind: v.selection.kind, spec: v.spec });
                     }}
+                    onQueryRefresh={handleRefresh}
                   />
                 );
               }}
@@ -222,13 +232,15 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   field.onChange(event);
                 }}
               >
-                <MenuItem value="none">None</MenuItem>
-                <MenuItem value="alphabetical-asc">Alphabetical, asc</MenuItem>
-                <MenuItem value="alphabetical-desc">Alphabetical, desc</MenuItem>
-                <MenuItem value="numerical-asc">Numerical, asc</MenuItem>
-                <MenuItem value="numerical-desc">Numerical, desc</MenuItem>
-                <MenuItem value="alphabetical-ci-asc">Alphabetical, case-insensitive, asc</MenuItem>
-                <MenuItem value="alphabetical-ci-desc">Alphabetical, case-insensitive, desc</MenuItem>
+                {Object.keys(SORT_METHODS).map((key) => {
+                  if (!SORT_METHODS[key as SortMethodName]) return null;
+                  const { label } = SORT_METHODS[key as SortMethodName];
+                  return (
+                    <MenuItem key={key} value={key}>
+                      {label}
+                    </MenuItem>
+                  );
+                })}
               </TextField>
             )}
           />

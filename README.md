@@ -15,11 +15,11 @@
 
 ## Overview
 
-Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics & Tempo traces, with plans to expand its capabilities in the future to include logging, profiling, additional technologies for monitoring and tracing, and more.
+Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics, Tempo traces, Loki for logs, Pyroscope for profiling, bringing together all four observability pillars in one place. As the project continues to evolve, it will expand support for additional tools to give users even more flexibility and insight.
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-![img.png](https://perses.dev/assets/images/perses_overview.gif)
+![img.png](https://perses.dev/assets/images/home/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 
@@ -71,6 +71,13 @@ You can launch a Perses container for trying it out with:
 ```bash
 docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 ```
+
+### Homebrew
+
+We have [a Homebrew tap](https://github.com/perses/homebrew-tap) so macOS and Linux users can install with:
+
+`brew install perses/tap/perses` for the server and web UI
+`brew install perses/tap/percli` for the CLI tool
 
 ### Building from source
 

@@ -30,11 +30,19 @@ import { PluginEditorProps, PluginEditorRef, usePluginEditor } from './plugin-ed
  */
 
 export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((props, ref): ReactElement => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, withRunQueryButton = true, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const {
+    value,
+    withRunQueryButton = true,
+    pluginTypes,
+    pluginKindLabel,
+    onChange: _,
+    isReadonly,
+    onQueryRefresh,
+    filteredQueryPlugins,
+    ...others
+  } = props;
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
-
-  /* 
+  /*
      We could technically merge the watchedQuery, watchedOtherSpecs into a single watched-object,
      because at the end of the day, they are all specs.
      However, let's have them separated to keep the code simple and readable.
@@ -46,7 +54,8 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
 
   const runQueryHandler = useCallback((): void => {
     onSpecChange({ ...value.spec, ...watchedOtherSpecs, query: watchedQuery });
-  }, [value.spec, onSpecChange, watchedQuery, watchedOtherSpecs]);
+    onQueryRefresh?.();
+  }, [onQueryRefresh, onSpecChange, value.spec, watchedOtherSpecs, watchedQuery]);
 
   const queryHandlerSettings = useMemo(() => {
     return withRunQueryButton
@@ -66,29 +75,33 @@ export const PluginEditor = forwardRef<PluginEditorRef, PluginEditorProps>((prop
 
   return (
     <Box {...others}>
-      <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1,
+          mb: 1,
+        }}
+      >
         <PluginKindSelect
           fullWidth={false}
-          sx={{ mb: 2, minWidth: 120 }}
+          sx={{ minWidth: 120 }}
           margin="dense"
           label={pluginKindLabel}
           pluginTypes={pluginTypes}
           disabled={isLoading}
           value={pendingSelection ? pendingSelection : value.selection}
-          InputProps={{ readOnly: isReadonly }}
+          slotProps={{ input: { readOnly: isReadonly } }}
           error={!!error}
           helperText={error?.message}
           onChange={onSelectionChange}
+          filteredQueryPlugins={filteredQueryPlugins}
         />
 
         {withRunQueryButton && !isLoading && (
-          <Button
-            data-testid="run_query_button"
-            variant="contained"
-            sx={{ marginTop: 1.5, marginBottom: 1.5, paddingTop: 0.5, marginLeft: 'auto' }}
-            startIcon={<Reload />}
-            onClick={runQueryHandler}
-          >
+          <Button data-testid="run_query_button" variant="contained" startIcon={<Reload />} onClick={runQueryHandler}>
             Run Query
           </Button>
         )}

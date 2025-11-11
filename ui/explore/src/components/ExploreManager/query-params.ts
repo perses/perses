@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQueryStates, createSerializer, parseAsString, parseAsJson } from 'nuqs';
-import { parseAsTimeRangeValue } from '@perses-dev/plugin-system';
-import { z } from 'zod';
+import { encodeQueryParams, JsonParam, StringParam, useQueryParams } from 'use-query-params';
+import { TimeRangeParam } from '@perses-dev/plugin-system';
+import { stringify } from 'qs';
 
-export const parseAsExplorerQueryConfig = {
-  refresh: parseAsTimeRangeValue,
-  start: parseAsTimeRangeValue,
-  end: parseAsTimeRangeValue,
-  explorer: parseAsString,
-  data: parseAsJson(z.unknown()),
+export const explorerQueryConfig = {
+  refresh: TimeRangeParam,
+  start: TimeRangeParam,
+  end: TimeRangeParam,
+  explorer: StringParam,
+  data: JsonParam,
 };
 
 interface ExplorerQueryData {
@@ -33,7 +33,6 @@ interface ExplorerQueryData {
 
 // Provide a query string for the explorer page using the given inputs, but also including any existing query params
 export function useExplorerQueryParams(inputs: ExplorerQueryData): string {
-  const [query] = useQueryStates(parseAsExplorerQueryConfig, { history: 'replace' });
-  const serialize = createSerializer(parseAsExplorerQueryConfig);
-  return serialize({ ...query, ...inputs });
+  const [query] = useQueryParams(explorerQueryConfig, { updateType: 'replaceIn' });
+  return stringify(encodeQueryParams(explorerQueryConfig, { ...query, ...inputs }));
 }

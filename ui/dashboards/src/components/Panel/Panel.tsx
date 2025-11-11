@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { Card, CardContent, CardProps } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, combineSx, useChartsTheme, useId } from '@perses-dev/components';
-import { PanelDefinition } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary, combineSx, useId } from '@perses-dev/components';
+import { PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
 import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { PanelGroupItemId } from '../../context';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
@@ -93,8 +92,6 @@ export const Panel = memo(function Panel(props: PanelProps) {
     if (width === undefined || height === undefined) return undefined;
     return { width, height };
   }, [width, height]);
-
-  const chartsTheme = useChartsTheme();
 
   const { queryResults } = useDataQueriesContext();
   const { getPlugin } = usePluginRegistry();
@@ -237,7 +234,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           links={definition.spec.links}
           pluginActions={pluginActions}
           showIcons={showIcons}
-          sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
+          sx={{ py: '2px', pl: '8px', pr: '2px' }}
           dimension={contentDimensions}
         />
       )}

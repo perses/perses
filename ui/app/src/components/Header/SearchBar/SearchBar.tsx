@@ -11,16 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
-import { isProjectMetadata } from '@perses-dev/core';
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { isProjectMetadata, Resource } from '@perses-dev/core';
+import IconButton from '@mui/material/IconButton';
+import Close from 'mdi-material-ui/Close';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
-import { useDashboardList } from '../../../model/dashboard-client';
+import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useProjectList } from '../../../model/project-client';
 import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
@@ -38,47 +40,84 @@ interface ResourceListProps {
 
 function SearchProjectList(props: ResourceListProps): ReactElement {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
-  return SearchList({
-    list: projectsQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: Archive,
-  });
+  return (
+    <SearchList list={projectsQueryResult.data ?? []} query={props.query} onClick={props.onClick} icon={Archive} />
+  );
 }
 
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
-  return SearchList({
-    list: globalDatasourceQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: DatabaseIcon,
-    buildRouting: () => `${AdminRoute}/datasources`,
-  });
+  return (
+    <SearchList
+      list={globalDatasourceQueryResult.data ?? []}
+      query={props.query}
+      onClick={props.onClick}
+      icon={DatabaseIcon}
+      buildRouting={() => `${AdminRoute}/datasources`}
+    />
+  );
 }
 
-function SearchDashboardList(props: ResourceListProps): ReactElement {
-  const dashboardQueryResult = useDashboardList({ metadataOnly: true, refetchOnMount: false });
-  return SearchList({
-    list: dashboardQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: ViewDashboardIcon,
-    chip: true,
+function SearchDashboardList(props: ResourceListProps): ReactElement | null {
+  const {
+    data: dashboardList,
+    isLoading: dashboardListLoading,
+    error: dashboardListError,
+  } = useDashboardList({
+    metadataOnly: true,
+    refetchOnMount: false,
   });
+  const {
+    data: importantDashboards,
+    isLoading: importantDashboardsLoading,
+    error: importantDashboardsError,
+  } = useImportantDashboardList();
+
+  const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
+    if (props.query.length && dashboardList) {
+      return dashboardList.map((d) => {
+        const highlight = !!importantDashboards.some(
+          (importantDashboard) =>
+            importantDashboard.metadata.name === d.metadata.name &&
+            importantDashboard.metadata.project === d.metadata.project
+        );
+        return { ...d, highlight };
+      });
+    } else {
+      return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
+    }
+  }, [importantDashboards, dashboardList, props.query]);
+
+  if (dashboardListError || importantDashboardsError)
+    return (
+      <Box sx={{ margin: 1 }}>
+        <Alert severity="error">
+          <p>Failed to load dashboards! Error:</p>
+          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
+          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
+        </Alert>
+      </Box>
+    );
+
+  return dashboardListLoading || importantDashboardsLoading ? null : (
+    <SearchList list={list} query={props.query} onClick={props.onClick} icon={ViewDashboardIcon} chip={true} />
+  );
 }
 
-function SearchDatasourceList(props: ResourceListProps): ReactElement {
+function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
-  return SearchList({
-    list: datasourceQueryResult.data ?? [],
-    query: props.query,
-    onClick: props.onClick,
-    icon: DatabaseIcon,
-    chip: true,
-    buildRouting: (resource) =>
-      `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`,
-  });
+  return (
+    <SearchList
+      list={datasourceQueryResult.data ?? []}
+      query={props.query}
+      onClick={props.onClick}
+      icon={DatabaseIcon}
+      chip={true}
+      buildRouting={(resource) =>
+        `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
+      }
+    />
+  );
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
@@ -160,6 +199,11 @@ export function SearchBar(): ReactElement {
               ),
               endAdornment: (
                 <InputAdornment position="end">
+                  {query && (
+                    <IconButton size="small" onClick={() => setQuery('')}>
+                      <Close fontSize="small" />
+                    </IconButton>
+                  )}
                   <Chip label="esc" size="small" onClick={handleClose} />
                 </InputAdornment>
               ),

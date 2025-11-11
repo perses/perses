@@ -21,7 +21,7 @@ type StorageTuple<T> = [T, (next: T) => void];
  * storage does not have any data yet.
  */
 export function useLocalStorage<T>(key: string, initialValue: T): StorageTuple<T> {
-  const { value, setValueAndStore } = useStorage(global.localStorage, key, initialValue);
+  const { value, setValueAndStore } = useStorage(window.localStorage, key, initialValue);
   return [value, setValueAndStore];
 }
 

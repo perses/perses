@@ -14,6 +14,8 @@
 package config
 
 import (
+	"fmt"
+	"slices"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -35,9 +37,28 @@ type Explorer struct {
 	Enable bool `json:"enable" yaml:"enable"`
 }
 
+type Banner struct {
+	Severity string `json:"severity" yaml:"severity"`
+	Message  string `json:"message" yaml:"message"`
+}
+
+func (b *Banner) Verify() error {
+	allowedSeverities := []string{"error", "warning", "info"}
+	if len(b.Severity) == 0 {
+		b.Severity = "info"
+	}
+	if !slices.Contains(allowedSeverities, b.Severity) {
+		return fmt.Errorf("invalid banner severity value '%s'. Must be one of: error, warning, info", b.Severity)
+	}
+	if len(b.Message) == 0 {
+		return fmt.Errorf("frontend.banner.message is required when banner is filled")
+	}
+	return nil
+}
+
 type TimeRange struct {
 	DisableCustomTimeRange bool              `json:"disable_custom" yaml:"disable_custom"`
-	DisableZoomTimeRange   bool              `json:"disable_zoom" yaml:"disable_zoom"`
+	DisableZoomTimeRange   bool              `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
 	Options                []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
@@ -59,5 +80,7 @@ type Frontend struct {
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
-	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
+	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
 }

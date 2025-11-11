@@ -80,7 +80,9 @@ type GridLayoutCollapse struct {
 }
 
 type GridLayoutDisplay struct {
-	Title    string              `json:"title" yaml:"title"`
+	Title string `json:"title" yaml:"title"`
+	// If Collapse is defined, the grid layout will be rendered in a collapsible group.
+	// If not defined, the grid layout will be rendered expanded without the ability to collapse it.
 	Collapse *GridLayoutCollapse `json:"collapse,omitempty" yaml:"collapse,omitempty"`
 }
 

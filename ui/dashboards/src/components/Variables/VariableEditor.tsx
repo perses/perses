@@ -34,7 +34,7 @@ import {
   AccordionDetails,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { Action, BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { Action, BuiltinVariableDefinition, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
@@ -46,7 +46,7 @@ import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
 import { ValidationProvider, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
-import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
+import { useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 

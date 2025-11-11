@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupDefinition, PanelGroupItemId } from '@perses-dev/dashboards';
-import { PanelGroupId } from '@perses-dev/core';
+import { PanelGroupDefinition, PanelGroupItemId, PanelGroupId } from '@perses-dev/core';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 

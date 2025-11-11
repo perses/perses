@@ -413,9 +413,9 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
 	if h.secret == nil {
-		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
+		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
 	}
-	return secretModel.BuildTLSConfig(h.secret.TLSConfig)
+	return h.secret.TLSConfig.BuildTLSConfig()
 }
 
 type sqlQuery struct {
@@ -513,9 +513,9 @@ func (s *sqlProxy) setupAuthentication() error {
 
 func (s *sqlProxy) prepareTLSConfig() (*tls.Config, error) {
 	if s.secret == nil {
-		return nil, nil
+		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
 	}
-	return secretModel.BuildTLSConfig(s.secret.TLSConfig)
+	return s.secret.TLSConfig.BuildTLSConfig()
 }
 
 // SQLOpen opens a database specified by its database driver in the address

@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { isProjectMetadata, Resource } from '@perses-dev/core';
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
+import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { ProjectRoute } from '../../../model/route';
 
@@ -27,7 +28,7 @@ const kvSearchConfig: KVSearchConfiguration = {
   excludedChars: [' '],
 };
 
-const sizeList = 10;
+const SIZE_LIST = 10;
 
 function buildBoxSearchKey(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
@@ -42,7 +43,7 @@ function buildRouting(resource: Resource): string {
 }
 
 export interface SearchListProps {
-  list: Resource[];
+  list: Array<Resource & { highlight?: boolean }>;
   query: string;
   onClick: () => void;
   icon: typeof Archive;
@@ -50,25 +51,29 @@ export interface SearchListProps {
   buildRouting?: (resource: Resource) => string;
 }
 
-export function SearchList(props: SearchListProps): ReactElement {
-  const [currentSizeList, setCurrentSizeList] = useState<number>(sizeList);
-  const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
-  const filteredList: Array<KVSearchResult<Resource>> = useMemo(() => {
-    if (props.query) {
-      return kvSearch.filter(props.query, props.list);
-    } else {
-      return [];
+export function SearchList(props: SearchListProps): ReactElement | null {
+  const [currentSizeList, setCurrentSizeList] = useState<number>(SIZE_LIST);
+  const kvSearch = useRef(new KVSearch<Resource>(kvSearchConfig)).current;
+  const filteredList: Array<KVSearchResult<Resource & { highlight?: boolean }>> = useMemo(() => {
+    if (!props.query && props.list?.[0]?.kind === 'Dashboard') {
+      return props.list.map((item, idx) => ({
+        original: item,
+        rendered: item,
+        score: 0,
+        index: idx,
+        matched: [],
+      }));
     }
+    return kvSearch.filter(props.query, props.list);
   }, [kvSearch, props.list, props.query]);
+
   useEffect(() => {
     // Reset the size of the filtered list when query or the actual list change.
     // Otherwise, we would keep the old size that can have been changed using the button to see more data.
-    setCurrentSizeList(sizeList);
+    setCurrentSizeList(SIZE_LIST);
   }, [props.query, props.list]);
 
-  return filteredList.length === 0 ? (
-    <></>
-  ) : (
+  return !filteredList.length ? null : (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box
         sx={{
@@ -94,6 +99,21 @@ export function SearchList(props: SearchListProps): ReactElement {
             marginBottom: 1,
             marginLeft: 1,
             marginRight: 1,
+            backgroundColor: (theme) =>
+              search.original.highlight
+                ? theme.palette.mode === 'dark'
+                  ? 'rgba(255, 165, 0, 0.2)'
+                  : 'rgba(255, 223, 186, 0.3)'
+                : 'inherit',
+            borderColor: (theme) =>
+              search.original.highlight ? (theme.palette.mode === 'dark' ? 'orange' : 'darkorange') : 'inherit',
+            fontWeight: search.original.highlight ? 'bold' : 'normal',
+            color: (theme) =>
+              search.original.highlight
+                ? theme.palette.mode === 'dark'
+                  ? theme.palette.warning.light
+                  : 'inherit'
+                : 'inherit',
           }}
           component={RouterLink}
           onClick={props.onClick}
@@ -101,6 +121,7 @@ export function SearchList(props: SearchListProps): ReactElement {
           key={`${buildBoxSearchKey(search.original)}`}
         >
           <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
+            {search.original.highlight && <MiddleAlertIcon sx={{ marginRight: 0.5 }} />}
             <span
               dangerouslySetInnerHTML={{
                 __html: kvSearch.render(search.original, search.matched, {

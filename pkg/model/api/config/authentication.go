@@ -14,6 +14,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"slices"
@@ -47,6 +48,28 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 type HTTP struct {
 	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
 	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+}
+
+func (h HTTP) MarshalYAML() (any, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return struct {
+		Timeout   common.Duration         `json:"timeout" yaml:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config" yaml:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	}, nil
+}
+
+func (h HTTP) MarshalJSON() ([]byte, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return json.Marshal(struct {
+		Timeout   common.Duration         `json:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	})
 }
 
 func (h *HTTP) Verify() error {

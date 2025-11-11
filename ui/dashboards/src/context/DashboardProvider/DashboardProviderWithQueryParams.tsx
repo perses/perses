@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,46 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { ReactElement, useCallback, useMemo } from 'react';
-import { parseAsJson, useQueryState } from 'nuqs';
+import { ReactElement } from 'react';
+import { JsonParam, useQueryParam } from 'use-query-params';
 import { DashboardProvider, DashboardProviderProps } from './DashboardProvider';
-import { VirtualPanelRef } from './view-panel-slice';
 
 export function DashboardProviderWithQueryParams({ children, initialState }: DashboardProviderProps): ReactElement {
-  const [viewPanelRef, setViewPanelRef] = useQueryState(
-    'viewPanelRef',
-    parseAsJson(
-      z
-        .object({
-          ref: z.string(),
-          repeatVariable: z.tuple([z.string(), z.string()]).optional(),
-        })
-        .optional()
-    )
-  );
-
-  // nuqs returns null when the query param is not present, but our state expects undefined when not present
-  const viewPanelRefNotNull = useMemo(() => {
-    return viewPanelRef ?? undefined;
-  }, [viewPanelRef]);
-
-  const handleSetViewPanelRef = useCallback(
-    (panelRef: VirtualPanelRef | undefined) => {
-      if (panelRef) {
-        return setViewPanelRef(panelRef);
-      }
-      return setViewPanelRef(null);
-    },
-    [setViewPanelRef]
-  );
+  const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', JsonParam);
 
   return (
     <DashboardProvider
       initialState={{
         ...initialState,
-        viewPanelRef: viewPanelRefNotNull,
-        setViewPanelRef: handleSetViewPanelRef,
+        viewPanelRef: viewPanelRef ?? undefined, // viewPanelRef can be null, forcing to undefined
+        setViewPanelRef: setViewPanelRef,
       }}
     >
       {children}

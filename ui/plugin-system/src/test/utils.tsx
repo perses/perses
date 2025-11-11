@@ -13,8 +13,10 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
+import { DEFAULT_DASHBOARD_DURATION } from '@perses-dev/core';
 import { PluginRegistry } from '../components';
 import { DefaultPluginKinds } from '../model';
+import { TimeRangeProviderBasic } from '../runtime';
 import { testPluginLoader } from './test-plugins';
 
 export type ContextOptions = {
@@ -26,20 +28,23 @@ export function getTestContextWrapper(contextOptions?: ContextOptions) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
   });
+  const timeRange = { start: new Date(Date.now() - Number(DEFAULT_DASHBOARD_DURATION)), end: new Date() };
 
   return function Wrapper({ children }: { children: ReactNode }): ReactNode {
     return (
       <QueryClientProvider client={queryClient}>
-        <PluginRegistry
-          pluginLoader={testPluginLoader}
-          defaultPluginKinds={
-            contextOptions?.defaultPluginKinds ?? {
-              TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+        <TimeRangeProviderBasic initialTimeRange={timeRange}>
+          <PluginRegistry
+            pluginLoader={testPluginLoader}
+            defaultPluginKinds={
+              contextOptions?.defaultPluginKinds ?? {
+                TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+              }
             }
-          }
-        >
-          {children}
-        </PluginRegistry>
+          >
+            {children}
+          </PluginRegistry>
+        </TimeRangeProviderBasic>
       </QueryClientProvider>
     );
   };

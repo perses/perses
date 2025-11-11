@@ -17,7 +17,7 @@ import { DurationString } from '@perses-dev/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';
-import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
+import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
 import { TimeRangeControls } from './TimeRangeControls';
 
 /**
@@ -51,9 +51,12 @@ describe('TimeRangeControls', () => {
             <TimeRangeControls />
           </TimeRangeProviderWithQueryParams>
         ) : (
-          <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
+          <TimeRangeProviderBasic
+            initialRefreshInterval={testDefaultRefreshInterval}
+            initialTimeRange={testDefaultTimeRange}
+          >
             <TimeRangeControls />
-          </TimeRangeProvider>
+          </TimeRangeProviderBasic>
         )}
       </>,
       undefined

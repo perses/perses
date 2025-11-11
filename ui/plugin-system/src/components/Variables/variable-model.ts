@@ -43,7 +43,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition):
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();
-  const { absoluteTimeRange: timeRange, refreshKey } = useTimeRange();
+  const { absoluteTimeRange: timeRange } = useTimeRange();
 
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
 
@@ -69,10 +69,10 @@ export function useListVariablePluginValues(definition: ListVariableDefinition):
   const variablesValueKey = getVariableValuesKey(variables);
 
   return useQuery({
-    queryKey: [definition, variablesValueKey, timeRange, refreshKey],
-    queryFn: async () => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
-      if (resp === undefined) {
+    queryKey: ['variable', definition, timeRange, variablesValueKey],
+    queryFn: async ({ signal }) => {
+      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange }, signal);
+      if (!resp?.data?.length) {
         return [];
       }
       if (!capturingRegexp) {
