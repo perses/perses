@@ -13,7 +13,6 @@
 
 import {
   useQuery,
-  useQueries,
   useQueryClient,
   Query,
   QueryCache,
@@ -23,6 +22,7 @@ import {
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
+import { useStableQueries } from '../hooks';
 import { useAllVariableValues } from './variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
@@ -127,7 +127,7 @@ export function useTimeSeriesQueries(
     definitions.map((d) => ({ kind: d.spec.plugin.kind }))
   );
 
-  return useQueries({
+  return useStableQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
@@ -142,6 +142,7 @@ export function useTimeSeriesQueries(
           };
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
+
           return data;
         },
       };

@@ -14,7 +14,7 @@
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { isPanelGroupItemIdEqual } from '../../context/DashboardProvider/panel-group-slice';
@@ -32,7 +32,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { panelGroupItemId, width } = props;
   const panelDefinition = usePanel(panelGroupItemId);
   const {
-    spec: { queries },
+    spec: { queries = [] },
   } = panelDefinition;
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
@@ -69,18 +69,24 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
 
-  const queryDefinitions = queries ?? [];
-  const definitions = queryDefinitions.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
-  const pluginQueryOptions =
-    typeof plugin?.queryOptions === 'function'
-      ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
-      : plugin?.queryOptions;
+  const definitions = useMemo(
+    () =>
+      queries.map((query) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      }),
+    [queries]
+  );
 
+  const pluginQueryOptions = useMemo(
+    () =>
+      typeof plugin?.queryOptions === 'function'
+        ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
+        : plugin?.queryOptions,
+    [plugin, panelDefinition.spec.plugin.spec]
+  );
   return (
     <Box
       ref={ref}

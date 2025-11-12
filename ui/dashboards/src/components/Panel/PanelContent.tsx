@@ -13,7 +13,7 @@
 
 import { usePlugin, PanelProps, QueryData, PanelPlugin } from '@perses-dev/plugin-system';
 import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/core';
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { LoadingOverlay } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
 import { PanelPluginLoader } from './PanelPluginLoader';
@@ -32,6 +32,13 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   const { panelPluginKind, definition, queryResults, spec, contentDimensions } = props;
   const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { throwOnError: true });
 
+  // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
+  // Loading indicator or errors of other queries are shown in the panel header.
+  const queryResultsWithData = useMemo(
+    () => queryResults.flatMap((q) => (q.data ? [{ data: q.data, definition: q.definition }] : [])),
+    [queryResults]
+  );
+
   // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {
     return (
@@ -44,11 +51,6 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     );
   }
 
-  // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
-  // Loading indicator or errors of other queries are shown in the panel header.
-  const queryResultsWithData = queryResults.flatMap((q) =>
-    q.data ? [{ data: q.data, definition: q.definition }] : []
-  );
   if (queryResultsWithData.length > 0 || queryResults.length === 0) {
     return (
       <PanelPluginLoader
