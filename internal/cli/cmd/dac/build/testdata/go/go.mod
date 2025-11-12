@@ -5,8 +5,8 @@ go 1.25.1
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.0-beta.0
-	github.com/perses/plugins/prometheus v0.54.0
+	github.com/perses/perses v0.53.0-beta.1
+	github.com/perses/plugins/prometheus v0.55.0
 	github.com/perses/plugins/timeserieschart v0.11.0
 )
 
