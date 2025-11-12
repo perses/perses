@@ -285,7 +285,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
-        {divider} {noticesIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions}
           {readActions}
@@ -308,7 +308,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
-        {divider} {noticesIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions}
           {viewQueryAction}
