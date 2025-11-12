@@ -51,7 +51,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		roleBindingDAO:       roleBindingDAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
-		guestPermissions:     conf.Security.Authorization.GuestPermissions,
+		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
 		accessKey:            key,
 	}, err
 }
