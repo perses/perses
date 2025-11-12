@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat | #dateFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bitsFormat | #bytesFormat | #throughputFormat | #currencyFormat | #temperatureFormat | #dateFormat
 
 #timeFormat: {
 	unit?:          "nanoseconds" | "microseconds" | "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
