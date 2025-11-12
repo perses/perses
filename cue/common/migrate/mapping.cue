@@ -31,6 +31,9 @@ package migrate
 		none:  "decimal"
 		short: "decimal"
 		// TODO
+		// bits units
+		bits:    "bits"
+		decbits: "decbits"
 		// bytes units
 		bytes:    "bytes"
 		decbytes: "decbytes"

@@ -31,6 +31,12 @@ package common
 	shortValues?:   bool
 }
 
+#bitsFormat: {
+	unit?:          "bits" | "decbits"
+	decimalPlaces?: number
+	shortValues?:   bool
+}
+
 #bytesFormat: {
 	unit?:          "bytes" | "decbytes"
 	decimalPlaces?: number
@@ -38,7 +44,7 @@ package common
 }
 
 #throughputFormat: {
-	unit?:          "bits/sec" | "bytes/sec" | "decbytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
+	unit?:          "bits/sec" | "decbits/sec" | "bytes/sec" | "decbytes/sec" | "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
