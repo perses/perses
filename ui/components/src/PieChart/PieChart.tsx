@@ -25,8 +25,8 @@ import { Box } from '@mui/material';
 import { ReactElement } from 'react';
 import type { ECharts as EChartsInstance } from 'echarts/core';
 import { useChartsTheme } from '../context/ChartsProvider';
-import { EChart } from '../EChart';
-
+// LOGZ.IO CHANGE:: Tooltip is not behaving correctly [APPZ-1418]
+import { EChart, OnEventsType } from '../EChart';
 use([EChartsPieChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const PIE_WIN_WIDTH = 12;
@@ -45,6 +45,7 @@ export interface PieChartProps {
   // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Pie Chart
   useDefaultTooltip?: boolean;
   _instance?: React.MutableRefObject<EChartsInstance | undefined>;
+  onEvents?: OnEventsType<unknown>;
   // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Pie Chart
 }
 
@@ -57,6 +58,7 @@ export function PieChart(props: PieChartProps): ReactElement {
     // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Pie Chart
     _instance,
     useDefaultTooltip = true,
+    onEvents,
     // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Pie Chart
   } = props;
   const chartsTheme = useChartsTheme();
@@ -111,8 +113,10 @@ export function PieChart(props: PieChartProps): ReactElement {
         }}
         option={option}
         theme={chartsTheme.echartsTheme}
-        // LOGZ.IO CHANGE: APPZ-1218 US2 – Pie Chart
+        // LOGZ.IO CHANGE START:: APPZ-1218 US2 – Pie Chart
         _instance={_instance}
+        onEvents={onEvents}
+        // LOGZ.IO CHANGE END:: APPZ-1218 US2 – Pie Chart
       />
     </Box>
   );

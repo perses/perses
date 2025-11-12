@@ -99,7 +99,8 @@ describe('getYBuffer', () => {
   });
 
   it('should return area to search for larger interval', () => {
-    expect(getYBuffer({ yInterval: 10, totalSeries: 10, showAllSeries: false })).toBe(30);
+    // LOGZ.IO CHANGE:: Tooltip is not behaving correctly [APPZ-1418]
+    expect(getYBuffer({ yInterval: 10, totalSeries: 10, showAllSeries: false })).toBe(10);
   });
 
   it('should return entire canvas for larger interval', () => {

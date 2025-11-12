@@ -13,7 +13,7 @@
 
 import { ReactElement, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { NearbySeriesArray } from './nearby-series';
+import { NearbySeriesArray } from './types';
 import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {

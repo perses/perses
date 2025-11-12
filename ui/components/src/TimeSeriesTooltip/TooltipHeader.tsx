@@ -15,7 +15,7 @@ import { Box, Typography, Stack, Switch, IconButton } from '@mui/material';
 import { memo, ReactElement } from 'react';
 import Close from 'mdi-material-ui/Close';
 import { getDateAndTime } from '../utils';
-import { NearbySeriesArray } from './nearby-series';
+import { NearbySeriesArray } from './types';
 import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 export interface TooltipHeaderProps {
