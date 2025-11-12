@@ -39,7 +39,9 @@ package migrate
 		decbytes: "decbytes"
 		// throughput units
 		bps: "bits/sec"
+		binbps: "decbits/sec"
 		Bps: "bytes/sec"
+		binBps: "decbytes/sec"
 		cps: "counts/sec"
 		mps: "messages/sec"
 		recps: "records/sec"
