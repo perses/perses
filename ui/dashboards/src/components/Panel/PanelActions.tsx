@@ -23,6 +23,7 @@ import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
 import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
+import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import { Link } from '@perses-dev/core';
 import {
@@ -108,6 +109,30 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <InfoTooltip description={errorTexts}>
           <HeaderIconButton aria-label="panel errors" size="small">
             <AlertIcon fontSize="inherit" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      );
+    }
+  }, [queryResults]);
+
+  const noticesIndicator = useMemo(() => {
+    const notices = queryResults.flatMap((q) => {
+      return q.data?.metadata?.notices ?? [];
+    });
+
+    if (notices.length > 0) {
+      const lastNotice = notices[notices.length - 1]!;
+
+      return (
+        <InfoTooltip description={lastNotice.message}>
+          <HeaderIconButton aria-label="panel notices" size="small">
+            {lastNotice.type === 'warning' ? (
+              <AlertIcon fontSize="inherit" color="warning" />
+            ) : lastNotice.type === 'info' ? (
+              <InformationOutlineIcon fontSize="inherit" color="info" />
+            ) : (
+              <AlertCircleIcon color="error" />
+            )}
           </HeaderIconButton>
         </InfoTooltip>
       );
@@ -214,7 +239,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {readActions}{' '}
+            {editActions}
           </OverflowMenu>
           {moveAction}
         </OnHover>
@@ -232,6 +258,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {divider} {noticesIndicator}
         <OnHover>
           {extraActions} {readActions}
           <OverflowMenu title={title}>{editActions}</OverflowMenu>
@@ -251,6 +278,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {divider} {noticesIndicator}
         <OnHover>
           {extraActions} {readActions} {editActions} {moveAction}
         </OnHover>
