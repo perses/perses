@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CSSProperties, memo, useEffect, useLayoutEffect, useRef } from 'react';
+import { CSSProperties, memo, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect, use } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import isEqual from 'lodash/isEqual';
@@ -211,25 +211,38 @@ export const EChart = memo(function EChart<T>({
     };
   }, [onEvents]);
 
+  const updateSize = useMemo(
+    () =>
+      debounce(
+        () => {
+          if (!chartElement.current) return;
+          chartElement.current.resize();
+        },
+        200,
+        { leading: true }
+      ),
+    []
+  );
+
   // TODO: re-evaluate how this is triggered. It's technically working right
   // now because the sx prop is an object that gets re-created, but that also
   // means it runs unnecessarily some of the time and theoretically might
   // not run in some other cases. Maybe it should use a resize observer?
   useEffect(() => {
-    // TODO: fix this debouncing. This likely isn't working as intended because
-    // the debounced function is re-created every time this useEffect is called.
-    const updateSize = debounce(
-      () => {
-        if (!chartElement.current) return;
-        chartElement.current.resize();
-      },
-      200,
-      {
-        leading: true,
-      }
-    );
-    updateSize();
-  }, [sx, style]);
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateSize();
+    });
+
+    if (parent) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return (): void => {
+      resizeObserver.disconnect();
+    };
+  }, [updateSize]);
 
   return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });
