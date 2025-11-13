@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
 import { Virtuoso } from 'react-virtuoso';
+import { isNil } from 'lodash';
 import { TooltipContentProps } from './TooltipContent';
 import { SeriesInfo } from './SeriesInfo';
 
@@ -49,7 +50,7 @@ export const VirtualizedSeries: React.FC<VirtualizedSeriesProps> = ({
         totalCount={sortedFocusedSeries.length}
         data={sortedFocusedSeries}
         itemContent={(index, data) => {
-          if (!data.datumIdx || !data.seriesIdx) return null;
+          if (isNil(data.datumIdx) || isNil(data.seriesIdx)) return null;
 
           const key = data.seriesIdx.toString() + data.datumIdx.toString();
 
