@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { NearbySeriesArray } from './nearby-series';
 import { VirtualizedSeries } from './VirtualizedSeries';
+import { NearbySeriesArray } from './types';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;

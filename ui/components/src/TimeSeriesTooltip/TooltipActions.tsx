@@ -21,7 +21,7 @@ import {
   TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_WIDTH,
 } from './tooltip-model';
-import { NearbySeriesInfo } from './nearby-series';
+import { NearbySeriesInfo } from './types';
 
 export interface TooltipActionProps {
   actions: PointAction[];
