@@ -53,8 +53,10 @@ import {
 } from "@perses-dev/dashboards";
 import {
   DashboardResource,
+  DurationString,
   GlobalDatasourceResource,
   DatasourceResource,
+  TimeRangeValue,
 } from "@perses-dev/core";
 import { DatasourceApi } from "@perses-dev/dashboards";
 import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
@@ -104,6 +106,9 @@ export const fakeDashboard = {
 } as DashboardResource;
 
 function App() {
+  const [timeRange, setTimeRange] = React.useState<TimeRangeValue>({ pastDuration: "30m" });
+  const [refreshInterval, setRefreshInterval] = React.useState<DurationString>("0s");
+
   const muiTheme = getTheme("light");
   const chartsTheme = generateChartsTheme(muiTheme, {});
   const pluginLoader = dynamicImportPluginLoader([
@@ -141,10 +146,7 @@ function App() {
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <TimeRangeProvider
-                refreshInterval="0s"
-                timeRange={{ pastDuration: "30m" }}
-              >
+              <TimeRangeProvider timeRange={timeRange} refreshInterval={refreshInterval} setTimeRange={setTimeRange} setRefreshInterval={setRefreshInterval}>
                 <VariableProvider>
                   <DatasourceStoreProvider
                     dashboardResource={fakeDashboard}
