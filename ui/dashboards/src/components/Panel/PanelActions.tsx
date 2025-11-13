@@ -26,7 +26,7 @@ import MenuIcon from 'mdi-material-ui/Menu';
 import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import { Link, Notice } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -37,6 +37,12 @@ import {
 import { HeaderIconButton } from './HeaderIconButton';
 import { PanelLinks } from './PanelLinks';
 import { PanelOptions } from './Panel';
+
+const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
+  error: <AlertCircleIcon color="error" />,
+  warning: <AlertIcon fontSize="inherit" color="warning" />,
+  info: <InformationOutlineIcon fontSize="inherit" color="info" />,
+};
 
 export interface PanelActionsProps {
   title: string;
@@ -141,13 +147,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       return (
         <InfoTooltip description={lastNotice.message}>
           <HeaderIconButton aria-label="panel notices" size="small">
-            {lastNotice.type === 'warning' ? (
-              <AlertIcon fontSize="inherit" color="warning" />
-            ) : lastNotice.type === 'info' ? (
-              <InformationOutlineIcon fontSize="inherit" color="info" />
-            ) : (
-              <AlertCircleIcon color="error" />
-            )}
+            {noticeTypeToIcon[lastNotice.type]}
           </HeaderIconButton>
         </InfoTooltip>
       );
