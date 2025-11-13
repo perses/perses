@@ -48,7 +48,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -77,7 +77,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: test
         run: make integration-test
   test-windows:
@@ -91,7 +91,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - uses: ikalnytskyi/action-setup-postgres@v8
         with:
           username: user
@@ -137,7 +137,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -186,7 +186,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: validate CUE files against corresponding test files
         run: make validate-cue
   check-cue-gen:
@@ -200,7 +200,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: generate .cue model files
         run: make cue-gen
       - name: check for changes
