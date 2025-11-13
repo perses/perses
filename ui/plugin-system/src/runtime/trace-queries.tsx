@@ -37,9 +37,7 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number;
  * @param definitions: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
  * Documentation for TraceQL: https://grafana.com/docs/tempo/latest/traceql/
  */
-export function useTraceQueries(
-  definitions: TraceQueryDefinition[]
-): Array<UseQueryResult<TraceData & { isSliced: boolean }>> {
+export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQueryResult<TraceData>> {
   const { getPlugin } = usePluginRegistry();
   const context = useTraceQueryContext();
 
@@ -59,10 +57,10 @@ export function useTraceQueries(
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
-        queryFn: async (): Promise<TraceData & { isSliced: boolean }> => {
+        queryFn: async (): Promise<TraceData> => {
           const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context);
-          return { ...data, isSliced: false };
+          return data;
         },
       };
     }),
