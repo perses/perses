@@ -50,6 +50,7 @@ export function useTraceQueries(
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
+  // LOGZ.IO CHANGE:: Performance optimization [APPZ-359] useStableQueries()
   return useStableQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;

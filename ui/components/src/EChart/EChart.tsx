@@ -211,6 +211,7 @@ export const EChart = memo(function EChart<T>({
     };
   }, [onEvents]);
 
+  // LOGZ.IO CHANGE START:: APPZ-359-unidash-performance-issues-when-loading-high-number-of-serieses
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -232,6 +233,7 @@ export const EChart = memo(function EChart<T>({
       cancelAnimationFrame(rafId);
     };
   }, []);
+  // LOGZ.IO CHANGE END:: APPZ-359-unidash-performance-issues-when-loading-high-number-of-serieses
 
   return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });

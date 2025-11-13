@@ -127,6 +127,7 @@ export function useTimeSeriesQueries(
     definitions.map((d) => ({ kind: d.spec.plugin.kind }))
   );
 
+  // LOGZ.IO CHANGE:: Performance optimization [APPZ-359] useStableQueries()
   return useStableQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;

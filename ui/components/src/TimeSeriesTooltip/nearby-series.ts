@@ -146,6 +146,11 @@ export function checkforNearbyTimeSeries(
                 });
               } else {
                 nonEmphasizedSeriesIndexes.push(seriesIdx);
+                // ensure series far away from cursor are not highlighted
+                chart.dispatchAction({
+                  type: 'downplay',
+                  seriesIndex: seriesIdx,
+                });
               }
               const formattedY = formatValue(yValue, format);
               currentNearbySeriesData.push({

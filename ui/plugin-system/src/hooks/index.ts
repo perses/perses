@@ -11,5 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// LOGZ.IO CHANGE FILE:: Performance optimization [APPZ-359]
+
 export * from './array-memo';
 export * from './stable-queries';

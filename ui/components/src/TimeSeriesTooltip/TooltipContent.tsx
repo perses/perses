@@ -42,7 +42,7 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
   if (series === null || sortedFocusedSeries === null) {
     return null;
   }
-  // TODO: use react-virtuoso to improve performance
+  // LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
   return (
     <VirtualizedSeries
       allowActions={allowActions}
@@ -51,4 +51,5 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
       onSelected={onSelected}
     />
   );
+  // LOGZ.IO CHANGE END:: Performance optimization [APPZ-359]
 }

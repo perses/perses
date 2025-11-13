@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// LOGZ.IO CHANGE FILE:: Performance optimization [APPZ-359]
+
 import { useEffect, useRef } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
