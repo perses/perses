@@ -265,6 +265,12 @@ disable_pkce: <boolean> | default = false # Optional
 # The additional url params that will be appended to /authorize provider's endpoint
 url_params:
   <string>: <string> # Optional
+
+# Logout is the configuration used to perform OIDC logout
+logout:
+  # Setting this to true will redirect the user to the provider's logout endpoint after the logout process.
+  # If false, the user will be logged out from Perses only.
+  enabled: <boolean> | default = false # Optional
 ```
 
 ##### OAuth provider

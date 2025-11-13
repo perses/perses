@@ -103,7 +103,18 @@ func (n *native) GetUsername(ctx echo.Context) (string, error) {
 	if usr == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
 	}
-	return usr.(jwt.Claims).GetSubject()
+	return usr.(*crypto.JWTClaims).GetSubject()
+}
+
+func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) {
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return crypto.ProviderInfo{}, err
+	}
+	if usr == nil {
+		return crypto.ProviderInfo{}, nil // No user found in the context, this is an anonymous endpoint
+	}
+	return usr.(*crypto.JWTClaims).ProviderInfo, nil
 }
 
 func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
@@ -125,7 +136,7 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
 		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return &jwt.RegisteredClaims{}
+			return &crypto.JWTClaims{}
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
 		SigningKey:    n.accessKey,
