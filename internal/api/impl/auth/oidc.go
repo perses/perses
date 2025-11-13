@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gorilla/securecookie"
@@ -151,9 +152,10 @@ type oIDCEndpoint struct {
 	urlParams              map[string]string
 	issuer                 string
 	svc                    service
+	logout                 config.OIDCLogout
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -183,6 +185,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
+		logout:                 provider.Logout,
 	}, nil
 }
 
@@ -196,6 +199,28 @@ func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
 	// Add routes for device code flow and token exchange
 	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathDeviceCode), e.deviceCode, true)
 	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathToken), e.token, true)
+}
+
+func (e *oIDCEndpoint) GetLogoutHandler() echo.HandlerFunc {
+	if !e.logout.Enabled {
+		return nil
+	}
+	return func(ctx echo.Context) error {
+		endSessionURL, _ := url.Parse(e.relyingParty.GetEndSessionEndpoint())
+		queryParams := endSessionURL.Query()
+		rd := getRootURL(ctx.Request())
+		queryParams.Add("post_logout_redirect_uri", rd.String())
+		endSessionURL.RawQuery = queryParams.Encode()
+		return ctx.Redirect(302, endSessionURL.String())
+	}
+}
+
+func (e *oIDCEndpoint) GetAuthKind() string {
+	return utils.AuthKindOIDC
+}
+
+func (e *oIDCEndpoint) GetSlugID() string {
+	return e.slugID
 }
 
 // auth is the http handler on Perses side that triggers the "Authorization Code"
@@ -346,12 +371,12 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
-	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	accessToken, err := e.tokenManagement.accessToken(username, utils.AuthKindOIDC, e.slugID, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, utils.AuthKindOIDC, e.slugID, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err

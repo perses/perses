@@ -25,8 +25,8 @@ type tokenManagement struct {
 	jwt crypto.JWT
 }
 
-func (tm *tokenManagement) accessToken(login string, setCookie func(cookie *http.Cookie)) (string, error) {
-	accessToken, err := tm.jwt.SignedAccessToken(login)
+func (tm *tokenManagement) accessToken(login, providerKind, providerID string, setCookie func(cookie *http.Cookie)) (string, error) {
+	accessToken, err := tm.jwt.SignedAccessToken(login, providerKind, providerID)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the access token")
 		return "", apiinterface.InternalError
@@ -37,8 +37,8 @@ func (tm *tokenManagement) accessToken(login string, setCookie func(cookie *http
 	return accessToken, nil
 }
 
-func (tm *tokenManagement) refreshToken(login string, setCookie func(cookie *http.Cookie)) (string, error) {
-	refreshToken, err := tm.jwt.SignedRefreshToken(login)
+func (tm *tokenManagement) refreshToken(login, providerKind, providerID string, setCookie func(cookie *http.Cookie)) (string, error) {
+	refreshToken, err := tm.jwt.SignedRefreshToken(login, providerKind, providerID)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the refresh token")
 		return "", apiinterface.InternalError
