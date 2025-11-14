@@ -132,22 +132,27 @@ export function Row({
           onWidthChange={onWidthChange}
           allowOverlap={hasViewPanel} // Enabling overlap when viewing a specific panel because panel in front of the viewed panel will add empty spaces (empty row height)
         >
-          {itemLayouts.map(({ i, w }) => (
-            <div
-              key={i}
-              style={{
-                display: itemLayoutViewed ? (itemLayoutViewed === i ? 'unset' : 'none') : 'unset',
-              }}
-            >
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <GridItemContent
-                  panelOptions={panelOptions}
-                  panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i, repeatVariable }}
-                  width={calculateGridItemWidth(w, gridColWidth)}
-                />
-              </ErrorBoundary>
-            </div>
-          ))}
+          {itemLayouts.map(({ i, w }) => {
+            const shouldHideLayout = itemLayoutViewed && itemLayoutViewed !== i;
+            const displayValue = shouldHideLayout ? 'none' : 'unset';
+
+            return (
+              <div
+                key={i}
+                style={{
+                  display: displayValue,
+                }}
+              >
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <GridItemContent
+                    panelOptions={panelOptions}
+                    panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i, repeatVariable }}
+                    width={calculateGridItemWidth(w, gridColWidth)}
+                  />
+                </ErrorBoundary>
+              </div>
+            );
+          })}
         </ResponsiveGridLayout>
       </Collapse>
     </GridContainer>
