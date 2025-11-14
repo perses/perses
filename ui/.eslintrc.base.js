@@ -71,7 +71,8 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
       },
     ],
-
+    
+    'no-nested-ternary': 'error',
     'react/prop-types': 'off',
     'react-hooks/exhaustive-deps': 'error',
     // Not necessary in React 17

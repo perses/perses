@@ -24,6 +24,32 @@ const style: SxProps<Theme> = {
   },
 };
 
+function VersionInfo({
+  isLoading,
+  data,
+}: {
+  isLoading: boolean;
+  data?: { version?: string; commit?: string };
+}): ReactElement {
+  if (isLoading) {
+    return <CircularProgress size="1rem" />;
+  }
+
+  if (!data?.version) {
+    return <>development version</>;
+  }
+
+  const href = data.version.startsWith('main')
+    ? `https://github.com/perses/perses/tree/${data.commit}`
+    : `https://github.com/perses/perses/releases/tag/v${data.version}`;
+
+  return (
+    <Link color="inherit" underline="hover" target="_blank" rel="noreferrer" href={href}>
+      {data.version}
+    </Link>
+  );
+}
+
 export default function Footer(): ReactElement {
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading, error } = useHealth();
@@ -46,25 +72,7 @@ export default function Footer(): ReactElement {
           </a>
         </li>
         <li>
-          {isLoading ? (
-            <CircularProgress size="1rem" />
-          ) : data !== undefined && data.version !== '' ? (
-            <Link
-              color="inherit"
-              underline="hover"
-              target="_blank"
-              rel="noreferrer"
-              href={
-                data.version.startsWith('main')
-                  ? `https://github.com/perses/perses/tree/${data.commit}`
-                  : `https://github.com/perses/perses/releases/tag/v${data.version}`
-              }
-            >
-              {data.version}
-            </Link>
-          ) : (
-            'development version'
-          )}
+          <VersionInfo isLoading={isLoading} data={data} />
         </li>
       </ul>
     </Box>
