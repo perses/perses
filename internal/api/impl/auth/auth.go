@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
@@ -47,24 +48,28 @@ const (
 	redirectURIQueryParam = "redirect_uri"
 )
 
-func getRedirectURI(r *http.Request, authKind string, slugID string) string {
-	rd := url.URL{}
+func getRootURL(r *http.Request) url.URL {
+	u := url.URL{}
 
 	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
-	rd.Host = r.Header.Get(xForwardedHost)
-	if rd.Host == "" {
-		rd.Host = r.Host
+	u.Host = r.Header.Get(xForwardedHost)
+	if u.Host == "" {
+		u.Host = r.Host
 	}
 
 	// Get the scheme trying first the X-Forwarded-Proto header, otherwise take it from request
-	rd.Scheme = r.Header.Get(xForwardedProto)
-	if rd.Scheme == "" {
-		rd.Scheme = "http"
+	u.Scheme = r.Header.Get(xForwardedProto)
+	if u.Scheme == "" {
+		u.Scheme = "http"
 		if r.TLS != nil {
-			rd.Scheme = "https"
+			u.Scheme = "https"
 		}
 	}
+	return u
+}
 
+func getRedirectURI(r *http.Request, authKind string, slugID string) string {
+	rd := getRootURL(r)
 	rd.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
 	return rd.String()
 }
@@ -81,8 +86,15 @@ func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
 	}, nil
 }
 
+type authEndpoint interface {
+	route.Endpoint
+	GetAuthKind() string
+	GetSlugID() string
+	GetLogoutHandler() echo.HandlerFunc
+}
+
 type endpoint struct {
-	endpoints       []route.Endpoint
+	endpoints       []authEndpoint
 	jwt             crypto.JWT
 	tokenManagement tokenManagement
 	isAuthEnable    bool
@@ -129,7 +141,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 		ep.CollectRoutes(providersGroup)
 	}
 	g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
-	g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, true)
+	g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, false)
 }
 
 func (e *endpoint) refresh(ctx echo.Context) error {
@@ -153,7 +165,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	accessToken, err := e.tokenManagement.accessToken(claims.Subject, ctx.SetCookie)
+	accessToken, err := e.tokenManagement.accessToken(claims.Subject, claims.ProviderKind, claims.ProviderID, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -169,6 +181,19 @@ func (e *endpoint) logout(ctx echo.Context) error {
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
+
+	//TODO: More control ?
+	token, _ := ctx.Get("user").(*jwt.Token)
+	providerKind := token.Claims.(*crypto.JWTClaims).ProviderKind
+	providerID := token.Claims.(*crypto.JWTClaims).ProviderID
+
+	for _, ep := range e.endpoints {
+		if ep.GetAuthKind() == providerKind && ep.GetSlugID() == providerID {
+			if logoutHandler := ep.GetLogoutHandler(); logoutHandler != nil {
+				return logoutHandler(ctx)
+			}
+		}
+	}
 
 	return ctx.Redirect(302, "/")
 }

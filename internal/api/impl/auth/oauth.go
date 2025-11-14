@@ -140,7 +140,19 @@ type oAuthEndpoint struct {
 	loginProps      []string
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
+func (e *oAuthEndpoint) GetLogoutHandler() echo.HandlerFunc {
+	return nil // No specific logout handler for native auth
+}
+
+func (e *oAuthEndpoint) GetAuthKind() string {
+	return utils.AuthKindOAuth
+}
+
+func (e *oAuthEndpoint) GetSlugID() string {
+	return e.slugID
+}
+
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -445,12 +457,12 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
-	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	accessToken, err := e.tokenManagement.accessToken(username, utils.AuthKindOAuth, e.slugID, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, utils.AuthKindOAuth, e.slugID, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err

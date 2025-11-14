@@ -125,7 +125,7 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
 		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return &jwt.RegisteredClaims{}
+			return &crypto.JWTClaims{}
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
 		SigningKey:    n.accessKey,
