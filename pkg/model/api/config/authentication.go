@@ -104,6 +104,10 @@ func (p *Provider) Verify() error {
 	return nil
 }
 
+type K8sAuthnProvider struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
@@ -142,9 +146,11 @@ func (p *OAuthProvider) Verify() error {
 }
 
 type AuthProviders struct {
-	EnableNative bool            `json:"enable_native" yaml:"enable_native"`
-	OAuth        []OAuthProvider `json:"oauth,omitempty" yaml:"oauth,omitempty"`
-	OIDC         []OIDCProvider  `json:"oidc,omitempty" yaml:"oidc,omitempty"`
+	EnableNative bool `json:"enable_native" yaml:"enable_native"`
+	// +optional
+	KubernetesProvider K8sAuthnProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	OAuth              []OAuthProvider  `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OIDC               []OIDCProvider   `json:"oidc,omitempty" yaml:"oidc,omitempty"`
 }
 
 func (p *AuthProviders) Verify() error {

@@ -15,7 +15,8 @@ import { Button, LinearProgress, Link, TextField, Typography } from '@mui/materi
 import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useNativeAuthMutation, useRedirectQueryParam } from '../../model/auth-client';
+import { useNativeAuthMutation } from '../../model/auth/native-auth-client';
+import { useRedirectQueryParam } from '../../model/auth/auth-client';
 import { SignUpRoute } from '../../model/route';
 import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';

@@ -17,12 +17,14 @@ import AccountCircle from 'mdi-material-ui/AccountCircle';
 import AccountBox from 'mdi-material-ui/AccountBox';
 import Logout from 'mdi-material-ui/Logout';
 import { Link as RouterLink } from 'react-router-dom';
-import { useAuthToken } from '../../model/auth-client';
+import { useUsername } from '../../model/auth/auth-client';
 import { ProfileRoute } from '../../model/route';
+import { useAuthorizationProvider } from '../../context/Config';
 import { ThemeSwitch } from './ThemeSwitch';
 
 export function AccountMenu(): ReactElement {
-  const { data: decodedToken } = useAuthToken();
+  const username = useUsername();
+  const authorizationProvider = useAuthorizationProvider();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>): void => {
@@ -57,7 +59,7 @@ export function AccountMenu(): ReactElement {
           <ListItemIcon>
             <AccountCircle />
           </ListItemIcon>
-          {decodedToken?.sub}
+          {username}
         </MenuItem>
         <Divider />
         <ThemeSwitch isAuthEnabled />
@@ -67,12 +69,16 @@ export function AccountMenu(): ReactElement {
           </ListItemIcon>
           Profile
         </MenuItem>
-        <MenuItem component="a" href="/api/auth/logout">
-          <ListItemIcon>
-            <Logout />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
+        {/* Since perses doesn't have control over external auth providers, don't show the
+          logout button */}
+        {authorizationProvider !== 'external' && (
+          <MenuItem component="a" href="/api/auth/logout">
+            <ListItemIcon>
+              <Logout />
+            </ListItemIcon>
+            Logout
+          </MenuItem>
+        )}
       </Menu>
     </>
   );

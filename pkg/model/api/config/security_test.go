@@ -72,7 +72,8 @@ enable_auth: true
 authentication:
   disable_sign_up: true
   providers:
-    enable_native: true
+    kubernetes:
+      enable: true
 authorization:
   provider:
     kubernetes:

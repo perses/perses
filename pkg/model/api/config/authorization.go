@@ -28,7 +28,7 @@ var (
 	DefaultKubernetesAuthenticationTTL     = time.Minute * 2
 )
 
-type KubernetesProvider struct {
+type KubernetesAuthorizationProvider struct {
 	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// File path to a local kubeconfig file used for local testing/development. The current logged in
 	// user's bearer token will be used for both the backend and as the user being logged into Perses.
@@ -48,7 +48,7 @@ type KubernetesProvider struct {
 	AuthenticatorTTL common.Duration `json:"authenticator_ttl,omitempty" yaml:"authenticator_ttl,omitempty"`
 }
 
-func (k *KubernetesProvider) Verify() error {
+func (k *KubernetesAuthorizationProvider) Verify() error {
 	if !k.Enable {
 		return nil
 	}
@@ -92,16 +92,19 @@ func (n *NativeAuthorizationProvider) Verify() error {
 }
 
 type AuthorizationProvider struct {
-	Kubernetes KubernetesProvider          `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
-	Native     NativeAuthorizationProvider `json:"native,omitzero" yaml:"native,omitempty"`
+	// +optional
+	Kubernetes KubernetesAuthorizationProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	// +optional
+	Native NativeAuthorizationProvider `json:"native,omitzero" yaml:"native,omitempty"`
 }
 
 type AuthorizationConfig struct {
 	// DEPRECATED: use NativeAuthorizationProvider.CheckLatestUpdateInterval instead.
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// DEPRECATED: use NativeAuthorizationProvider.GuestPermissions instead.
-	GuestPermissions []*role.Permission    `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
-	Provider         AuthorizationProvider `json:"provider,omitzero" yaml:"provider,omitempty"`
+	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	// +optional
+	Provider AuthorizationProvider `json:"provider,omitzero" yaml:"provider,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {

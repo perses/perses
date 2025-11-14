@@ -6,6 +6,8 @@
 *.launch
 .settings/
 *.sublime-workspace
+.zed/*
+__debug*
 
 # IDE - VSCode
 .vscode/*

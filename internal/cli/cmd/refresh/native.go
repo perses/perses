@@ -11,12 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const AdminRoute = '/admin';
-export const SignInRoute = '/sign-in';
-export const SignUpRoute = '/sign-up';
-export const ExternalSignInRoute = '/external-sign-in';
-export const ConfigRoute = '/config';
-export const ImportRoute = '/import';
-export const ProjectRoute = '/projects';
-export const ExploreRoute = '/explore';
-export const ProfileRoute = '/profile';
+package refresh
+
+import (
+	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/pkg/client/api"
+)
+
+type nativeRefresh struct {
+	apiClient api.ClientInterface
+}
+
+func (n *nativeRefresh) Refresh() error {
+	response, err := n.apiClient.Auth().Refresh(config.Global.RefreshToken)
+	if err != nil {
+		return err
+	}
+	if writeErr := config.SetAccessToken(response.AccessToken); writeErr != nil {
+		return writeErr
+	}
+	return nil
+}
