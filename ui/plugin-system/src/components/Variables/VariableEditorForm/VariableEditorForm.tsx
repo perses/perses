@@ -115,7 +115,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.sort',
   }) as SortMethodName;
 
-  const handleRefresh = useCallback(async () => {
+  const handleRunQuery = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['variable', previewSpec] });
   }, [previewSpec, queryClient]);
 
@@ -172,7 +172,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                     onChange={(v) => {
                       field.onChange({ kind: v.selection.kind, spec: v.spec });
                     }}
-                    onQueryRefresh={handleRefresh}
+                    onRunQuery={handleRunQuery}
                   />
                 );
               }}

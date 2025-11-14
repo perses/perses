@@ -148,20 +148,21 @@ describe('PluginEditor', () => {
     describe('When withRunQueryButton is true', () => {
       ['TimeSeriesQuery', 'TraceQuery', 'ProfileQuery'].forEach((type) => {
         it(`should render the run query button for ${type}`, () => {
-          const onChangeHandler = jest.fn();
+          const onRunQueryHandler = jest.fn();
           renderWithContext(
             <PluginEditor
               pluginTypes={[type] as unknown as PluginEditorProps['pluginTypes']}
               pluginKindLabel="Variable Type"
               withRunQueryButton
               value={{ selection: { type: type as PluginType, kind: '' }, spec: {} }}
-              onChange={onChangeHandler}
+              onChange={jest.fn}
+              onRunQuery={onRunQueryHandler}
             />
           );
           const queryButton = screen.getByTestId('run_query_button');
           expect(queryButton).toBeInTheDocument();
           userEvent.click(queryButton);
-          expect(onChangeHandler).toHaveBeenCalledTimes(1);
+          expect(onRunQueryHandler).toHaveBeenCalledTimes(1);
         });
       });
     });

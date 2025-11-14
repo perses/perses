@@ -17,7 +17,7 @@ import { PanelEditorContext, PanelPreview } from '@perses-dev/dashboards';
 import { DataQueriesProvider, PanelSpecEditor, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control } from 'react-hook-form';
-import { ReactElement, useContext } from 'react';
+import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -41,23 +41,39 @@ export function PanelQueriesSharedControls({
   const { data: pluginPreview } = usePlugin('Panel', plugin.kind);
   const panelEditorContext = useContext(PanelEditorContext);
 
-  const pluginQueryOptions =
-    typeof pluginPreview?.queryOptions === 'function'
-      ? pluginPreview?.queryOptions(panelDefinition.spec.plugin.spec)
-      : pluginPreview?.queryOptions;
-
   const suggestedStepMs = useSuggestedStepMs(panelEditorContext?.preview.previewPanelWidth);
 
-  const definitions =
-    panelDefinition.spec.queries?.map((query) => {
-      return {
-        kind: query.spec.plugin.kind,
-        spec: query.spec.plugin.spec,
+  const pluginQueryOptions = useMemo(
+    () =>
+      typeof pluginPreview?.queryOptions === 'function'
+        ? pluginPreview?.queryOptions(panelDefinition.spec.plugin.spec)
+        : pluginPreview?.queryOptions,
+    [panelDefinition.spec.plugin.spec, pluginPreview]
+  );
+
+  const [previewDefinition, setPreviewDefinition] = useState(
+    () =>
+      panelDefinition.spec.queries?.map((query) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      }) ?? []
+  );
+
+  const handleQueryRun = useCallback((index: number, newDef: QueryDefinition) => {
+    setPreviewDefinition((prev) => {
+      const newDefinitions = [...prev];
+      newDefinitions[index] = {
+        kind: newDef.spec.plugin.kind,
+        spec: newDef.spec.plugin.spec,
       };
-    }) ?? [];
+      return newDefinitions;
+    });
+  }, []);
 
   return (
-    <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, ...pluginQueryOptions }}>
+    <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
       <Grid item xs={12}>
         <Typography variant="h4" marginBottom={1}>
           Preview
@@ -73,6 +89,7 @@ export function PanelQueriesSharedControls({
             panelDefinition={panelDefinition}
             onJSONChange={onJSONChange}
             onQueriesChange={onQueriesChange}
+            onQueryRun={handleQueryRun}
             onPluginSpecChange={onPluginSpecChange}
           />
         </ErrorBoundary>

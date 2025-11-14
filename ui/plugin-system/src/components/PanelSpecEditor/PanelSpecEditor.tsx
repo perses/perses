@@ -25,12 +25,13 @@ export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
   panelDefinition: PanelDefinition;
   onQueriesChange: (queries: QueryDefinition[]) => void;
+  onQueryRun: (index: number, query: QueryDefinition) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
+  const { control, panelDefinition, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -67,6 +68,9 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
               onChange={(queries) => {
                 field.onChange(queries);
                 onQueriesChange(queries);
+              }}
+              onQueryRun={(index, query) => {
+                onQueryRun(index, query);
               }}
             />
           )}

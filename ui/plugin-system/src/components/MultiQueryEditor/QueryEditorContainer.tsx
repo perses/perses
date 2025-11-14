@@ -17,7 +17,7 @@ import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { forwardRef, ReactElement } from 'react';
+import { forwardRef, ReactElement, useCallback } from 'react';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '../../runtime';
@@ -33,6 +33,7 @@ interface QueryEditorContainerProps {
   queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (index: number, query: QueryDefinition) => void;
+  onQueryRun: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
   onDelete?: (index: number) => void;
@@ -62,6 +63,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       isCollapsed,
       onDelete,
       onChange,
+      onQueryRun,
       onCollapseExpand,
     } = props;
     return (
@@ -130,6 +132,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             queryResult={queryResult}
             filteredQueryPlugins={filteredQueryPlugins}
             onChange={(next) => onChange(index, next)}
+            onQueryRun={() => onQueryRun(index, query)}
           />
         )}
       </Stack>
@@ -148,6 +151,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
+  onQueryRun?: () => void;
 }
 
 /**
@@ -159,7 +163,13 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { value, onChange, queryTypes, queryResult, filteredQueryPlugins, ...others } = props;
+  const { queryTypes, value, queryResult, filteredQueryPlugins, onChange, onQueryRun, ...others } = props;
+
+  const handleRunQuery = useCallback(() => {
+    queryResult?.refetch?.();
+    onQueryRun?.();
+  }, [onQueryRun, queryResult]);
+
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
@@ -174,7 +184,6 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
     <Box {...others}>
       <PluginEditor
         ref={ref}
-        withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{
@@ -185,7 +194,8 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
           spec: value.spec.plugin.spec,
         }}
         filteredQueryPlugins={filteredQueryPlugins}
-        onQueryRefresh={queryResult?.refetch}
+        withRunQueryButton
+        onRunQuery={handleRunQuery}
         onChange={handlePluginChange}
       />
     </Box>

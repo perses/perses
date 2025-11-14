@@ -43,7 +43,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   withRunQueryButton?: boolean;
   filteredQueryPlugins?: string[];
   onChange: (next: PluginEditorValue) => void;
-  onQueryRefresh?: () => void;
+  onRunQuery?: () => void;
 }
 
 export interface PluginEditorRef {
