@@ -29,6 +29,8 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
   const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', kind, { useErrorBoundary: true });
   const PanelComponent = plugin?.PanelComponent;
   const supportedQueryTypes = plugin?.supportedQueryTypes || [];
+  // Clear out the queryResults parameter for plugins which don't support any query types
+  const supportedQueryResults = supportedQueryTypes.length > 0 ? queryResults : [];
 
   // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {
@@ -46,7 +48,7 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
     throw new Error(`Missing PanelComponent from panel plugin for kind '${kind}'`);
   }
 
-  for (const queryResult of queryResults) {
+  for (const queryResult of supportedQueryResults) {
     if (!supportedQueryTypes.includes(queryResult.definition.kind)) {
       throw new Error(
         `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`
@@ -59,7 +61,7 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
       spec={spec}
       contentDimensions={contentDimensions}
       definition={definition}
-      queryResults={queryResults}
+      queryResults={supportedQueryResults}
     />
   );
 }
