@@ -134,11 +134,15 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
   };
 
   // show one query input if queries is empty
-  const queryDefinitions: QueryDefinition[] = queries.length
-    ? queries
-    : !isLoading
-      ? [defaultInitialQueryDefinition]
-      : [];
+  const queryDefinitions: QueryDefinition[] = ((): QueryDefinition[] => {
+    if (queries.length) {
+      return queries;
+    }
+    if (!isLoading) {
+      return [defaultInitialQueryDefinition];
+    }
+    return [];
+  })();
 
   return (
     <>

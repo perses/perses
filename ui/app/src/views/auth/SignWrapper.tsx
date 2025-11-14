@@ -138,6 +138,15 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const socialProviders = [...oidcProviders, ...oauthProviders];
   const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
   const path = useRedirectQueryParam();
+  let logo: ReactNode;
+
+  if (!isLaptopSize) {
+    logo = <PersesLogoCropped />;
+  } else if (isDarkModeEnabled) {
+    logo = <DarkThemePersesLogo />;
+  } else {
+    logo = <LightThemePersesLogo />;
+  }
 
   return (
     <Stack
@@ -147,7 +156,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
       justifyContent="center"
       gap={2}
     >
-      {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
+      {logo}
       <Divider
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"
