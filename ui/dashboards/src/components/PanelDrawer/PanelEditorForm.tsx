@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -21,7 +21,6 @@ import {
   getTitleAction,
   getSubmitText,
   useValidationSchemas,
-  PluginEditorRef,
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,7 +38,6 @@ export interface PanelEditorFormProps {
 
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, onSave, onClose } = props;
-  const pluginEditorRef = useRef<PluginEditorRef>(null);
   const panelGroups = useListPanelGroups();
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialValues.panelDefinition);
@@ -114,7 +112,6 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const watchedPluginKind = useWatch({ control: form.control, name: 'panelDefinition.spec.plugin.kind' });
 
   const handleSubmit = useCallback(() => {
-    pluginEditorRef.current?.flushChanges?.();
     form.handleSubmit(processForm)();
   }, [form, processForm]);
 

@@ -60,6 +60,7 @@ describe('PanelSpecEditor', () => {
         },
       },
       onQueriesChange: jest.fn(),
+      onQueryRun: jest.fn(),
       onPluginSpecChange: jest.fn(),
       onJSONChange: jest.fn(),
     });
@@ -85,6 +86,7 @@ describe('PanelSpecEditor', () => {
         },
       },
       onQueriesChange: jest.fn(),
+      onQueryRun: jest.fn(),
       onPluginSpecChange: jest.fn(),
       onJSONChange: jest.fn(),
     });

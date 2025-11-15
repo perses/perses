@@ -68,6 +68,7 @@ describe('QueryEditorContainer', () => {
           isCollapsed={false}
           onDelete={jest.fn()}
           onChange={jest.fn()}
+          onQueryRun={jest.fn()}
           onCollapseExpand={jest.fn()}
         />
       );
