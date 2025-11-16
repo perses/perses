@@ -12,9 +12,8 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { Box } from '@mui/material';
+import { VirtualizedSeries } from './VirtualizedSeries';
 import { NearbySeriesArray } from './types';
-import { SeriesInfo } from './SeriesInfo';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
@@ -43,42 +42,14 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
   if (series === null || sortedFocusedSeries === null) {
     return null;
   }
-  // TODO: use react-virtuoso to improve performance
+  // LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
   return (
-    <Box
-      sx={(theme) => ({
-        padding: theme.spacing(0.5, 2),
-        // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
-        maxHeight: '300px',
-        overflow: 'auto',
-        borderBottom: allowActions ? `1px solid ${theme.palette.divider}` : undefined,
-        // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
-      })}
-    >
-      {sortedFocusedSeries.map(
-        ({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor, isSelected, metadata }) => {
-          if (datumIdx === null || seriesIdx === null) return null;
-          const key = seriesIdx.toString() + datumIdx.toString();
-
-          return (
-            <SeriesInfo
-              key={key}
-              seriesName={seriesName}
-              y={y}
-              formattedY={formattedY}
-              markerColor={markerColor}
-              totalSeries={sortedFocusedSeries.length}
-              wrapLabels={wrapLabels}
-              emphasizeText={isClosestToCursor}
-              // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
-              isSelected={isSelected}
-              isSelectable={metadata?.isSelectable ?? true}
-              onSelected={onSelected ? (): void => onSelected(seriesIdx) : undefined}
-              // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
-            />
-          );
-        }
-      )}
-    </Box>
+    <VirtualizedSeries
+      allowActions={allowActions}
+      sortedFocusedSeries={sortedFocusedSeries}
+      wrapLabels={wrapLabels}
+      onSelected={onSelected}
+    />
   );
+  // LOGZ.IO CHANGE END:: Performance optimization [APPZ-359]
 }

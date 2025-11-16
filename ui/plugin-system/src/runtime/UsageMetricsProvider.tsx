@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetch, QueryDefinition } from '@perses-dev/core';
-import { createContext, ReactElement, ReactNode, useContext } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';
 
@@ -44,32 +44,37 @@ export const useUsageMetricsContext = (): UsageMetrics | undefined => {
 export const useUsageMetrics = (): UseUsageMetricsResults => {
   const ctx = useUsageMetricsContext();
 
-  return {
-    markQuery: (definition: QueryDefinition, newState: QueryState): void => {
-      if (ctx === undefined) {
-        return;
-      }
-
-      const definitionKey = JSON.stringify(definition);
-      if (ctx.pendingQueries.has(definitionKey) && newState === 'pending') {
-        // Never allow transitions back to pending, to avoid re-sending stats on a re-render.
-        return;
-      }
-
-      if (ctx.pendingQueries.get(definitionKey) !== newState) {
-        ctx.pendingQueries.set(definitionKey, newState);
-        if (newState === 'error') {
-          ctx.renderErrorCount += 1;
+  const usageMetrics = useMemo(
+    () => ({
+      markQuery: (definition: QueryDefinition, newState: QueryState): void => {
+        if (ctx === undefined) {
+          return;
         }
 
-        const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
-        if (ctx.renderDurationMs === 0 && allDone) {
-          ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
-          submitMetrics(ctx);
+        const definitionKey = JSON.stringify(definition);
+        if (ctx.pendingQueries.has(definitionKey) && newState === 'pending') {
+          // Never allow transitions back to pending, to avoid re-sending stats on a re-render.
+          return;
         }
-      }
-    },
-  };
+
+        if (ctx.pendingQueries.get(definitionKey) !== newState) {
+          ctx.pendingQueries.set(definitionKey, newState);
+          if (newState === 'error') {
+            ctx.renderErrorCount += 1;
+          }
+
+          const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
+          if (ctx.renderDurationMs === 0 && allDone) {
+            ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
+            submitMetrics(ctx);
+          }
+        }
+      },
+    }),
+    [ctx]
+  );
+
+  return usageMetrics;
 };
 
 const submitMetrics = async (stats: UsageMetrics): Promise<void> => {

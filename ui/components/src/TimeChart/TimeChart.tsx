@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { forwardRef, MouseEvent, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, SxProps, Theme } from '@mui/material';
 import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
@@ -70,6 +70,10 @@ use([
   CanvasRenderer,
 ]);
 
+const SX: SxProps<Theme> = {
+  width: '100%',
+  height: '100%',
+};
 export interface TimeChartProps {
   height: number;
   data: TimeSeries[];
@@ -451,10 +455,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           />
         )}
       <EChart
-        sx={{
-          width: '100%',
-          height: '100%',
-        }}
+        sx={SX}
         option={option}
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}

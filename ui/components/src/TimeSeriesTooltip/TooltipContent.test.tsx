@@ -13,12 +13,20 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
+import { VirtuosoMockContext } from 'react-virtuoso';
 import { TooltipContent, TooltipContentProps } from './TooltipContent';
 import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
+const MOCK_VIEWPORT_HEIGHT = 1000;
+const MOCK_ITEM_HEIGHT = 50;
+
 describe('TooltipContent', () => {
   const renderComponent = (props: TooltipContentProps): void => {
-    render(<TooltipContent {...props} />);
+    render(
+      <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
+        <TooltipContent {...props} />
+      </VirtuosoMockContext.Provider>
+    );
   };
 
   it('should display a single series name', () => {

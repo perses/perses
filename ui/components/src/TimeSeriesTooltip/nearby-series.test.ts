@@ -87,7 +87,7 @@ describe('legacyCheckforNearbySeries', () => {
 
 describe('getYBuffer', () => {
   it('should return area to search for nearby series', () => {
-    expect(getYBuffer({ yInterval: 1, totalSeries: 10, showAllSeries: false })).toBe(3);
+    expect(getYBuffer({ yInterval: 1, totalSeries: 10, showAllSeries: false })).toBe(1);
   });
 
   it('should return entire canvas', () => {

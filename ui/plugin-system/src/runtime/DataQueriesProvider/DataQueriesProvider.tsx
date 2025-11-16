@@ -40,12 +40,19 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
   const ctx = useDataQueriesContext();
 
   // Filter the query results based on the specified query type
-  const filteredQueryResults = ctx.queryResults.filter(
-    (queryResult) => queryResult?.definition?.kind === queryType
-  ) as Array<QueryData<QueryType[T]>>;
+  const filteredQueryResults = useMemo(
+    () =>
+      ctx.queryResults.filter((queryResult) => queryResult?.definition?.kind === queryType) as Array<
+        QueryData<QueryType[T]>
+      >,
+    [ctx.queryResults, queryType]
+  );
 
   // Filter the errors based on the specified query type
-  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType);
+  const filteredErrors = useMemo(
+    () => ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType),
+    [ctx.errors, queryType, ctx.queryResults]
+  );
 
   // Create a new context object with the filtered results and errors
   const filteredCtx = {
@@ -65,26 +72,32 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   // Returns a query kind, for example "TimeSeriesQuery" = getQueryType("PrometheusTimeSeriesQuery")
   const getQueryType = useQueryType();
 
-  const queryDefinitions = definitions.map((definition) => {
-    const type = getQueryType(definition.kind);
-    return {
-      kind: type,
-      spec: {
-        plugin: definition,
-      },
-    };
-  });
-
+  const queryDefinitions = useMemo(
+    () =>
+      definitions.map((definition) => {
+        const type = getQueryType(definition.kind);
+        return {
+          kind: type,
+          spec: {
+            plugin: definition,
+          },
+        };
+      }),
+    [definitions, getQueryType]
+  );
   const usageMetrics = useUsageMetrics();
 
   // Filter definitions for time series query and other future query plugins
-  const timeSeriesQueries = queryDefinitions.filter(
-    (definition) => definition.kind === 'TimeSeriesQuery'
-  ) as TimeSeriesQueryDefinition[];
+  const timeSeriesQueries = useMemo(
+    () => queryDefinitions.filter((definition) => definition.kind === 'TimeSeriesQuery') as TimeSeriesQueryDefinition[],
+    [queryDefinitions]
+  );
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
-  const traceQueries = queryDefinitions.filter(
-    (definition) => definition.kind === 'TraceQuery'
-  ) as TraceQueryDefinition[];
+
+  const traceQueries = useMemo(
+    () => queryDefinitions.filter((definition) => definition.kind === 'TraceQuery') as TraceQueryDefinition[],
+    [queryDefinitions]
+  );
   const traceResults = useTraceQueries(traceQueries);
 
   const refetchAll = useCallback(() => {

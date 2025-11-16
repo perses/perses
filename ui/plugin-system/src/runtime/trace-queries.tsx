@@ -13,8 +13,9 @@
 
 import { getUnixTime } from 'date-fns';
 import { QueryDefinition, UnknownSpec, AbsoluteTimeRange, TraceData } from '@perses-dev/core';
-import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+import { QueryKey, UseQueryResult } from '@tanstack/react-query';
 import { TraceQueryContext, TraceQueryPlugin } from '../model';
+import { useStableQueries } from '../hooks';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
@@ -47,7 +48,8 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
-  return useQueries({
+  // LOGZ.IO CHANGE:: Performance optimization [APPZ-359] useStableQueries()
+  return useStableQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });

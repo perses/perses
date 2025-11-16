@@ -23,8 +23,9 @@ import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
 import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
+import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import { Link, Notice } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -34,6 +35,14 @@ import {
 } from '../../constants';
 import { HeaderIconButton } from './HeaderIconButton';
 import { PanelLinks } from './PanelLinks';
+
+// LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
+const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
+  error: <AlertCircleIcon color="error" />,
+  warning: <AlertIcon fontSize="inherit" color="warning" />,
+  info: <InformationOutlineIcon fontSize="inherit" color="info" />,
+};
+// LOGZ.IO CHANGE END:: Performance optimization [APPZ-359]
 
 export interface PanelActionsProps {
   title: string;
@@ -113,6 +122,26 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       );
     }
   }, [queryResults]);
+
+  // LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
+  const noticesIndicator = useMemo(() => {
+    const notices = queryResults.flatMap((q) => {
+      return q.data?.metadata?.notices ?? [];
+    });
+
+    if (notices.length > 0) {
+      const lastNotice = notices[notices.length - 1]!;
+
+      return (
+        <InfoTooltip description={lastNotice.message}>
+          <HeaderIconButton aria-label="panel notices" size="small">
+            {noticeTypeToIcon[lastNotice.type]}
+          </HeaderIconButton>
+        </InfoTooltip>
+      );
+    }
+  }, [queryResults]);
+  // LOGZ.IO CHANGE END:: Performance optimization [APPZ-359]
 
   const readActions = useMemo(() => {
     if (readHandlers !== undefined) {
@@ -214,7 +243,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {readActions} {editActions}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {readActions}{' '}
+            {editActions}
           </OverflowMenu>
           {moveAction}
         </OnHover>
@@ -232,6 +262,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions} {readActions}
           <OverflowMenu title={title}>{editActions}</OverflowMenu>
@@ -251,6 +282,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions} {readActions} {editActions} {moveAction}
         </OnHover>

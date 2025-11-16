@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useRef } from 'react';
+import { ReactElement, useMemo, useRef } from 'react';
 import { Box } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '@perses-dev/core';
@@ -22,6 +22,21 @@ const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
 
 export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>): ReactElement | null {
   const boxRef = useRef<HTMLDivElement>(null);
+
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const definitions = useMemo(() => {
+    const queries = panelDefinition.spec.queries ?? [];
+
+    return queries.length
+      ? queries.map((query) => {
+          return {
+            kind: query.spec.plugin.kind,
+            spec: query.spec.plugin.spec,
+          };
+        })
+      : [];
+  }, [panelDefinition.spec.queries]);
+
   let width = PANEL_PREVIEW_DEFAULT_WIDTH;
   if (boxRef.current !== null) {
     width = boxRef.current.getBoundingClientRect().width;
@@ -36,18 +51,6 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
   if (panelDefinition.spec.plugin.kind === '') {
     return null;
   }
-
-  const queries = panelDefinition.spec.queries ?? [];
-
-  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
 
   return (
     <Box ref={boxRef} height={PANEL_PREVIEW_HEIGHT}>

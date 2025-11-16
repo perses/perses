@@ -211,25 +211,29 @@ export const EChart = memo(function EChart<T>({
     };
   }, [onEvents]);
 
-  // TODO: re-evaluate how this is triggered. It's technically working right
-  // now because the sx prop is an object that gets re-created, but that also
-  // means it runs unnecessarily some of the time and theoretically might
-  // not run in some other cases. Maybe it should use a resize observer?
+  // LOGZ.IO CHANGE START:: APPZ-359-unidash-performance-issues-when-loading-high-number-of-serieses
   useEffect(() => {
-    // TODO: fix this debouncing. This likely isn't working as intended because
-    // the debounced function is re-created every time this useEffect is called.
-    const updateSize = debounce(
-      () => {
-        if (!chartElement.current) return;
-        chartElement.current.resize();
-      },
-      200,
-      {
-        leading: true,
+    if (!containerRef.current) return;
+
+    let rafId: number;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (chartElement.current) {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          chartElement.current?.resize();
+        });
       }
-    );
-    updateSize();
-  }, [sx, style]);
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return (): void => {
+      resizeObserver.disconnect();
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+  // LOGZ.IO CHANGE END:: APPZ-359-unidash-performance-issues-when-loading-high-number-of-serieses
 
   return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });
