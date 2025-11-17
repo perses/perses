@@ -61,7 +61,7 @@ export function PanelQueriesSharedControls({
       }) ?? []
   );
 
-  const handleQueryRun = useCallback((index: number, newDef: QueryDefinition) => {
+  const handleRunQuery = useCallback((index: number, newDef: QueryDefinition) => {
     setPreviewDefinition((prev) => {
       const newDefinitions = [...prev];
       newDefinitions[index] = {
@@ -89,7 +89,7 @@ export function PanelQueriesSharedControls({
             panelDefinition={panelDefinition}
             onJSONChange={onJSONChange}
             onQueriesChange={onQueriesChange}
-            onQueryRun={handleQueryRun}
+            onQueryRun={handleRunQuery}
             onPluginSpecChange={onPluginSpecChange}
           />
         </ErrorBoundary>

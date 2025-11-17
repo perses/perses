@@ -71,6 +71,10 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
               }}
               onQueryRun={(index, query) => {
                 onQueryRun(index, query);
+                // If spec has not changed, refetch to update the data
+                if (JSON.stringify(panelDefinition.spec.queries?.[index]) === JSON.stringify(query)) {
+                  queryResults[index]?.refetch?.();
+                }
               }}
             />
           )}

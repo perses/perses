@@ -17,7 +17,7 @@ import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { forwardRef, ReactElement, useCallback } from 'react';
+import { forwardRef, ReactElement } from 'react';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '../../runtime';
@@ -129,7 +129,6 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             ref={ref}
             queryTypes={queryTypes}
             value={query}
-            queryResult={queryResult}
             filteredQueryPlugins={filteredQueryPlugins}
             onChange={(next) => onChange(index, next)}
             onQueryRun={() => onQueryRun(index, query)}
@@ -148,10 +147,9 @@ type OmittedMuiProps = 'children' | 'value' | 'onChange';
 interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
   value: QueryDefinition;
-  queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
-  onQueryRun?: () => void;
+  onQueryRun: () => void;
 }
 
 /**
@@ -163,12 +161,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, value, queryResult, filteredQueryPlugins, onChange, onQueryRun, ...others } = props;
-
-  const handleRunQuery = useCallback(() => {
-    queryResult?.refetch?.();
-    onQueryRun?.();
-  }, [onQueryRun, queryResult]);
+  const { queryTypes, value, filteredQueryPlugins, onChange, onQueryRun, ...others } = props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
@@ -195,7 +188,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
         }}
         filteredQueryPlugins={filteredQueryPlugins}
         withRunQueryButton
-        onRunQuery={handleRunQuery}
+        onRunQuery={onQueryRun}
         onChange={handlePluginChange}
       />
     </Box>
