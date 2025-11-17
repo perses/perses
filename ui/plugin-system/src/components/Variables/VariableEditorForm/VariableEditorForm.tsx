@@ -95,11 +95,22 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
 function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   const form = useFormContext<VariableDefinition>();
   const queryClient = useQueryClient();
-  /** We use `previewSpec` to know when to explicitly update the
-   * spec that will be used for preview. The reason why we do this is to avoid
+
+  const values = form.getValues() as ListVariableDefinition;
+  /* We use `previewDefinition` to explicitly update the spec
+   * that will be used for preview when running query. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
+   * Using structuredClone to not have reference issues with nested objects.
    */
-  const previewSpec = form.getValues() as ListVariableDefinition;
+  const [previewDefinition, setPreviewDefinition] = useState(structuredClone(values));
+
+  const handleRunQuery = useCallback(async () => {
+    if (JSON.stringify(previewDefinition) === JSON.stringify(values)) {
+      await queryClient.invalidateQueries({ queryKey: ['variable', previewDefinition] });
+    } else {
+      setPreviewDefinition(structuredClone(values));
+    }
+  }, [previewDefinition, queryClient, values]);
 
   const plugin = useWatch<VariableDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
   const kind = plugin?.kind;
@@ -115,13 +126,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.sort',
   }) as SortMethodName;
 
-  const handleRunQuery = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['variable', previewSpec] });
-  }, [previewSpec, queryClient]);
-
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
-  const values = form.getValues() as ListVariableDefinition;
   if (values.spec.allowAllValue === undefined) {
     form.setValue('spec.allowAllValue', false);
   }
@@ -145,8 +151,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
       </Typography>
       <Stack spacing={2} mb={2}>
         <Box>
-          <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-            <VariableListPreview sortMethod={sortMethod} definition={previewSpec} />
+          <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewDefinition]}>
+            <VariableListPreview sortMethod={sortMethod} definition={previewDefinition} />
           </ErrorBoundary>
         </Box>
         <Stack>
