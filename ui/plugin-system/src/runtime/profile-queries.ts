@@ -37,7 +37,7 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
   return useQueries({
     queries: definitions.map((definition) => {
-      const queryKey = [definition, datasourceStore, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
+      const queryKey = ['query', PROFILE_QUERY_KEY, definition, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
       const profileQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,

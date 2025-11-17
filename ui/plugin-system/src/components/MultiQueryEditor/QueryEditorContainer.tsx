@@ -33,6 +33,7 @@ interface QueryEditorContainerProps {
   queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (index: number, query: QueryDefinition) => void;
+  onQueryRun: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
   onDelete?: (index: number) => void;
@@ -62,6 +63,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       isCollapsed,
       onDelete,
       onChange,
+      onQueryRun,
       onCollapseExpand,
     } = props;
     return (
@@ -127,9 +129,9 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             ref={ref}
             queryTypes={queryTypes}
             value={query}
-            queryResult={queryResult}
             filteredQueryPlugins={filteredQueryPlugins}
             onChange={(next) => onChange(index, next)}
+            onQueryRun={() => onQueryRun(index, query)}
           />
         )}
       </Stack>
@@ -145,9 +147,9 @@ type OmittedMuiProps = 'children' | 'value' | 'onChange';
 interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
   value: QueryDefinition;
-  queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
+  onQueryRun: () => void;
 }
 
 /**
@@ -159,7 +161,8 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { value, onChange, queryTypes, queryResult, filteredQueryPlugins, ...others } = props;
+  const { queryTypes, value, filteredQueryPlugins, onChange, onQueryRun, ...others } = props;
+
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
@@ -174,7 +177,6 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
     <Box {...others}>
       <PluginEditor
         ref={ref}
-        withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{
@@ -185,7 +187,8 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
           spec: value.spec.plugin.spec,
         }}
         filteredQueryPlugins={filteredQueryPlugins}
-        onQueryRefresh={queryResult?.refetch}
+        withRunQueryButton
+        onRunQuery={onQueryRun}
         onChange={handlePluginChange}
       />
     </Box>
