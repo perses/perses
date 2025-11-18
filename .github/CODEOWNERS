@@ -1,0 +1,7 @@
+/cue @AntoineThebaud
+/go-sdk @Gladorme
+/internal @Nexucis
+/internal/api/impl/auth @Nexucis @celian-garcia
+/internal/api/plugin/migrate @Nexucis @AntoineThebaud
+/internal/api/plugin/schema @Nexucis @AntoineThebaud
+/ui @Gladorme @jgbernalp @shahrokni
