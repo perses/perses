@@ -144,7 +144,16 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
             onUnpinClick={onUnpinClick}
           />
           {/* LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377] */}
-          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
+          <TooltipContent
+            onSelected={
+              hasPointMenuItems
+                ? (seriesIdx): void => setSelectedSeriesIdx((prev) => (prev === seriesIdx ? null : seriesIdx))
+                : undefined
+            }
+            series={nearbySeries}
+            wrapLabels={wrapLabels}
+            allowActions={allowActions}
+          />
           {allowActions && (
             <TooltipActions
               selectedSeries={selectedSeries}

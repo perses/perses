@@ -15,7 +15,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { Theme } from '@mui/material';
 import { formatValue, TimeSeries, TimeSeriesMetadata, FormatOptions } from '@perses-dev/core';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
-import { DatapointInfo, TimeChartSeriesMapping, TimeSeriesOption } from '../model';
+import { DatapointInfo, TimeChartSeriesMapping } from '../model';
 import {
   CursorCoordinates,
   CursorData,
@@ -233,7 +233,6 @@ export function createBarGroupCandidates({
   hoveredBarInfo,
   selectedSeriesIdx,
   seriesMetadata,
-  timestampIdx,
 }: {
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
@@ -241,7 +240,6 @@ export function createBarGroupCandidates({
   hoveredBarInfo: { seriesIdx: number; distance: number };
   selectedSeriesIdx?: number | null;
   seriesMetadata?: TimeSeriesMetadata[];
-  timestampIdx: number;
 }): Candidate[] {
   const candidates: Candidate[] = [];
   const totalSeries = data.length;
@@ -256,15 +254,17 @@ export function createBarGroupCandidates({
       const hasValidDataset = currentDataset !== undefined && currentDataset !== null;
       const hasDatasetValues = currentDataset?.values !== undefined && currentDataset?.values !== null;
 
-      if (hasValidDataset && hasDatasetValues && timestampIdx < currentDataset.values.length) {
-        const datumAtTimestamp = currentDataset.values[timestampIdx];
-        const hasDatumAtTimestamp = datumAtTimestamp !== undefined && datumAtTimestamp[0] === closestTimestamp;
+      if (hasValidDataset && hasDatasetValues) {
+        const datumAtTimestamp = currentDataset.values.find(([ts]) => ts === closestTimestamp);
+        const hasDatumAtTimestamp = datumAtTimestamp !== undefined;
 
         if (hasDatumAtTimestamp) {
           const [xValue, yValue] = datumAtTimestamp;
           const hasValidYValue = yValue !== null && yValue !== undefined;
 
           if (hasValidYValue) {
+            const datumIdx = currentDataset.values.findIndex(([ts]) => ts === closestTimestamp);
+
             const hasSelectedSeriesIdx = selectedSeriesIdx !== null && selectedSeriesIdx !== undefined;
             const isSelected = hasSelectedSeriesIdx && seriesIdx === selectedSeriesIdx;
 
@@ -300,7 +300,7 @@ export function createBarGroupCandidates({
 
             candidates.push({
               seriesIdx,
-              datumIdx: timestampIdx,
+              datumIdx,
               seriesName,
               date: closestTimestamp,
               markerColor,
@@ -375,100 +375,12 @@ export function gatherCandidates({
 
   let hoveredBarInfo: { seriesIdx: number; distance: number } | null = null;
 
-  const isBarSeries = (option: TimeSeriesOption | undefined): option is BarSeriesOption => option?.type === 'bar';
-  const isStackedBarMode = seriesMapping.some((series) => isBarSeries(series) && series.stack === 'all');
+  const barSeriesOrder: number[] = seriesMapping.reduce((acc: number[], series, idx) => {
+    if ((series as { type?: string }).type === 'bar') acc.push(idx);
+    return acc;
+  }, []);
 
   const firstTimeSeriesValues = data[0]?.values;
-  const timestampIdx = firstTimeSeriesValues?.findIndex(([ts]) => ts === closestTimestamp) ?? -1;
-
-  if (isStackedBarMode) {
-    if (timestampIdx === -1) {
-      return lineCandidates;
-    }
-
-    let cumulativePositiveY = 0;
-    let cumulativeNegativeY = 0;
-    let selectedSeriesIdxForStack: number | null = null;
-
-    for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
-      const currentSeries = seriesMapping[seriesIdx];
-      if (!isBarSeries(currentSeries)) continue;
-
-      const currentDataset = data[seriesIdx];
-      if (!currentDataset?.values || timestampIdx >= currentDataset.values.length) continue;
-
-      const datumAtTimestamp = currentDataset.values[timestampIdx];
-      if (!datumAtTimestamp || datumAtTimestamp[0] !== closestTimestamp) continue;
-
-      const yValue = datumAtTimestamp[1];
-      if (typeof yValue !== 'number') continue;
-
-      let segmentStartY: number;
-      let segmentEndY: number;
-      if (yValue >= 0) {
-        segmentStartY = cumulativePositiveY;
-        segmentEndY = cumulativePositiveY + yValue;
-        cumulativePositiveY = segmentEndY;
-      } else {
-        segmentStartY = cumulativeNegativeY + yValue;
-        segmentEndY = cumulativeNegativeY;
-        cumulativeNegativeY = segmentStartY;
-      }
-
-      const segmentMinY = Math.min(segmentStartY, segmentEndY);
-      const segmentMaxY = Math.max(segmentStartY, segmentEndY);
-
-      if (cursorY >= segmentMinY && cursorY <= segmentMaxY) {
-        selectedSeriesIdxForStack = seriesIdx;
-        break;
-      }
-    }
-
-    if (selectedSeriesIdxForStack !== null && mousePixelX !== undefined) {
-      const selectedDataset = data[selectedSeriesIdxForStack];
-      if (selectedDataset?.values && timestampIdx < selectedDataset.values.length) {
-        const datumAtTimestamp = selectedDataset.values[timestampIdx];
-        if (datumAtTimestamp && datumAtTimestamp[0] === closestTimestamp) {
-          const [xValue] = datumAtTimestamp;
-          const timestampCenterX = getPixelXFromGrid(chart, xValue);
-
-          let prevTimestamp: number | undefined;
-          if (timestampIdx > 0) {
-            prevTimestamp = firstTimeSeriesValues?.[timestampIdx - 1]?.[0];
-          }
-
-          let nextTimestamp: number | undefined;
-          const firstTimeSeriesLength = firstTimeSeriesValues?.length ?? 0;
-          if (timestampIdx < firstTimeSeriesLength - 1) {
-            nextTimestamp = firstTimeSeriesValues?.[timestampIdx + 1]?.[0];
-          }
-
-          const bandwidth = calculateBarBandwidth({
-            timestampCenterX,
-            prevTimestamp,
-            nextTimestamp,
-            chart,
-          });
-
-          const groupLeft = timestampCenterX - bandwidth / 2;
-          const groupRight = timestampCenterX + bandwidth / 2;
-          const isWithinXBounds = mousePixelX >= groupLeft && mousePixelX <= groupRight;
-
-          if (isWithinXBounds) {
-            const distance = Math.abs(mousePixelX - timestampCenterX);
-            hoveredBarInfo = { seriesIdx: selectedSeriesIdxForStack, distance };
-          }
-        }
-      }
-    }
-  }
-
-  const barSeriesOrder: number[] = isStackedBarMode
-    ? []
-    : seriesMapping.reduce((acc: number[], series, idx) => {
-        if ((series as { type?: string }).type === 'bar') acc.push(idx);
-        return acc;
-      }, []);
 
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentSeries = seriesMapping[seriesIdx];
@@ -541,7 +453,7 @@ export function gatherCandidates({
                   metadata: currentMetadata,
                 });
               }
-            } else if (seriesType === 'bar' && !isStackedBarMode) {
+            } else if (seriesType === 'bar') {
               const hasValidMousePixelX = mousePixelX !== undefined;
 
               if (hasValidMousePixelX) {
@@ -619,15 +531,13 @@ export function gatherCandidates({
   }
 
   if (hoveredBarInfo !== null) {
-    const effectiveSelectedSeriesIdx = isStackedBarMode ? hoveredBarInfo.seriesIdx : selectedSeriesIdx;
     return createBarGroupCandidates({
       data,
       seriesMapping,
       closestTimestamp,
       hoveredBarInfo,
-      selectedSeriesIdx: effectiveSelectedSeriesIdx,
+      selectedSeriesIdx,
       seriesMetadata,
-      timestampIdx,
     });
   }
 

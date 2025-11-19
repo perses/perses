@@ -16,8 +16,10 @@ import { formatValue, FormatOptions, TimeSeries, TimeSeriesMetadata } from '@per
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
-import { NearbySeriesArray } from './types';
 import { gatherCandidates, findClosestCandidate, processCandidates } from './utils';
+import { NearbySeriesArray } from './types';
+
+// LOGZ.IO CHANGE START:: Tooltip is not behaving correctly [APPZ-1418]
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_NEARBY_SERIES_MULTIPLIER = 1; // adjusts how many series show in tooltip (higher == more series shown)
@@ -34,9 +36,9 @@ export function checkforNearbyTimeSeries(
   pointInGrid: number[],
   yBuffer: number,
   chart: EChartsInstance,
-  format?: FormatOptions,
   mousePixelX?: number,
   seriesMetadata?: TimeSeriesMetadata[],
+  format?: FormatOptions,
   selectedSeriesIdx?: number | null
 ): NearbySeriesArray {
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -48,6 +50,7 @@ export function checkforNearbyTimeSeries(
 
   if (!Array.isArray(data)) return EMPTY_TOOLTIP_DATA;
 
+  // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
   const firstTimeSeriesValues = data[0]?.values;
   const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
 
@@ -68,10 +71,12 @@ export function checkforNearbyTimeSeries(
   });
 
   if (candidates.length === 0) {
+    batchDispatchNearbySeriesActions(chart, [], [], [], [], []);
     return EMPTY_TOOLTIP_DATA;
   }
 
   const winner = findClosestCandidate(candidates);
+
   const {
     currentNearbySeriesData,
     emphasizedSeriesIndexes,
@@ -80,6 +85,8 @@ export function checkforNearbyTimeSeries(
     duplicateDatapoints,
     nearbySeriesIndexes,
   } = processCandidates(candidates, winner, format);
+
+  // LOGZ.IO CHANGE END:: Tooltip is not behaving correctly [APPZ-1418]
 
   batchDispatchNearbySeriesActions(
     chart,
@@ -165,7 +172,7 @@ export function legacyCheckforNearbySeries(
                 formattedY: formattedY,
                 markerColor: markerColor.toString(),
                 isClosestToCursor,
-                isSelected: false,
+                isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
               });
               nearbySeriesIndexes.push(seriesIdx);
             }
@@ -217,9 +224,10 @@ export function getNearbySeriesData({
   chart,
   format,
   showAllSeries = false,
-  // LOGZ.IO CHANGE:: annotate series with metadata and selection state
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   seriesMetadata,
   selectedSeriesIdx,
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
@@ -228,8 +236,10 @@ export function getNearbySeriesData({
   chart?: EChartsInstance;
   format?: FormatOptions;
   showAllSeries?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
   seriesMetadata?: TimeSeriesMetadata[];
   selectedSeriesIdx?: number | null;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
 
@@ -265,18 +275,19 @@ export function getNearbySeriesData({
     const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-    const base = checkforNearbyTimeSeries(
+    return checkforNearbyTimeSeries(
       data,
       seriesMapping,
       pointInGrid,
       yBuffer,
       chart,
-      format,
+      // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
       mousePos.plotCanvas.x,
       seriesMetadata,
+      format,
       selectedSeriesIdx
+      // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
     );
-    return base;
   }
 
   // no nearby series found
