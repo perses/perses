@@ -36,6 +36,7 @@ export type Candidate = Omit<NearbySeriesInfo, 'isClosestToCursor' | 'seriesIdx'
   visualY: number;
   distance: number;
   isSelected: boolean;
+  isStacked?: boolean;
 };
 
 export type CalculateVisualYForSeriesParams = {
@@ -57,6 +58,7 @@ export type CalculateBarSegmentBoundsParams = {
   bandwidth: number;
   seriesIdx: number;
   barSeriesOrder: number[];
+  isStacked: boolean;
 };
 
 export type BarSegmentBounds = {

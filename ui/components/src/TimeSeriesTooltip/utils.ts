@@ -36,6 +36,14 @@ import {
   NearbySeriesArray,
 } from './types';
 
+function isBarSeriesOption(series: LineSeriesOption | BarSeriesOption): series is BarSeriesOption {
+  return series.type === 'bar';
+}
+
+function isLineSeriesOption(series: LineSeriesOption | BarSeriesOption): series is LineSeriesOption {
+  return series.type === 'line' || series.type === undefined;
+}
+
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
  */
@@ -203,8 +211,17 @@ export function calculateBarSegmentBounds({
   bandwidth,
   seriesIdx,
   barSeriesOrder,
+  isStacked,
 }: CalculateBarSegmentBoundsParams): BarSegmentBounds {
   const groupLeft = timestampCenterX - bandwidth / 2;
+
+  if (isStacked) {
+    return {
+      segLeft: groupLeft,
+      segRight: groupLeft + bandwidth,
+    };
+  }
+
   const barsInGroup = barSeriesOrder.length || 1;
   const idxInBars = Math.max(0, barSeriesOrder.indexOf(seriesIdx));
   const segmentWidth = bandwidth / barsInGroup;
@@ -275,7 +292,11 @@ export function createBarGroupCandidates({
               distance = Infinity;
             }
 
-            const stackId = (currentSeries as LineSeriesOption | BarSeriesOption).stack;
+            let stackId: string | undefined;
+            if (isBarSeriesOption(currentSeries)) {
+              stackId = currentSeries.stack;
+            }
+
             const visualY = calculateVisualYForSeries({
               rawY: yValue,
               stackId,
@@ -311,6 +332,7 @@ export function createBarGroupCandidates({
               distance,
               isSelected,
               metadata: currentMetadata,
+              isStacked: stackId !== undefined,
             });
           }
         }
@@ -423,7 +445,11 @@ export function gatherCandidates({
             }
 
             if (seriesType === 'line') {
-              const stackId = (currentSeries as LineSeriesOption).stack;
+              let stackId: string | undefined;
+              if (isLineSeriesOption(currentSeries)) {
+                stackId = currentSeries.stack;
+              }
+
               const visualY = calculateVisualYForSeries({
                 rawY: yValue,
                 stackId,
@@ -451,6 +477,7 @@ export function gatherCandidates({
                   distance: verticalDistance,
                   isSelected,
                   metadata: currentMetadata,
+                  isStacked: stackId !== undefined,
                 });
               }
             } else if (seriesType === 'bar') {
@@ -486,21 +513,28 @@ export function gatherCandidates({
                   chart,
                 });
 
+                let stackId: string | undefined;
+                let isStackedBar = false;
+
+                if (isBarSeriesOption(currentSeries)) {
+                  stackId = currentSeries.stack;
+                  isStackedBar = stackId !== undefined;
+                }
+
                 const { segLeft, segRight } = calculateBarSegmentBounds({
                   timestampCenterX,
                   bandwidth,
                   seriesIdx,
                   barSeriesOrder,
+                  isStacked: isStackedBar,
                 });
 
                 const isWithinXBounds = mousePixelX >= segLeft && mousePixelX <= segRight;
 
                 if (isWithinXBounds) {
-                  const stackId = (currentSeries as BarSeriesOption).stack;
-                  const hasStackId = stackId !== undefined;
                   let isHoveringYBounds = true;
 
-                  if (hasStackId) {
+                  if (isStackedBar && stackId !== undefined) {
                     const visualY = calculateVisualYForSeries({ rawY: yValue, stackId, stackTotals });
                     const { lower, upper } = calculateBarYBounds({
                       visualY,
@@ -569,7 +603,8 @@ export function processCandidates(
 
   for (const candidate of candidates) {
     const isClosestToCursor = candidate === winner;
-    const formattedY = formatValue(candidate.y, format);
+    const valueToFormat = candidate.isStacked ? candidate.visualY : candidate.y;
+    const formattedY = formatValue(valueToFormat, format);
 
     if (isClosestToCursor) {
       emphasizedSeriesIndexes.push(candidate.seriesIdx);
@@ -603,7 +638,7 @@ export function processCandidates(
       seriesName: candidate.seriesName,
       date: candidate.date,
       x: candidate.x,
-      y: candidate.y,
+      y: valueToFormat,
       formattedY,
       markerColor: candidate.markerColor,
       isClosestToCursor,
