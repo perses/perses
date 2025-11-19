@@ -14,7 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
-import { NearbySeriesArray } from './nearby-series';
+import { NearbySeriesArray } from './types';
 
 describe('TooltipHeader', () => {
   const renderComponent = (props: TooltipHeaderProps): void => {
