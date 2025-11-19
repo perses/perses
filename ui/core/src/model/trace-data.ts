@@ -47,6 +47,8 @@ export interface TraceData {
 }
 
 export interface TraceMetaData extends BaseMetadata {
+  /** this field indicates if there are more traces matching the search query, however not all traces were returned */
+  hasMoreResults?: boolean;
   [key: string]: unknown;
 }
 
