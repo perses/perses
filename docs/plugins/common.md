@@ -40,6 +40,14 @@ decimalPlaces: <int> # Optional
 shortValues: <boolean> | default = false # Optional
 ```
 
+### Bits format
+
+```yaml
+unit: < enum = "bits" | "decbits" >
+decimalPlaces: <int> # Optional
+shortValues: <boolean> | default = false # Optional
+```
+
 ### Bytes format
 
 ```yaml
