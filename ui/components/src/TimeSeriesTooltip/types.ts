@@ -36,7 +36,6 @@ export type Candidate = Omit<NearbySeriesInfo, 'isClosestToCursor' | 'seriesIdx'
   visualY: number;
   distance: number;
   isSelected: boolean;
-  isStacked?: boolean;
 };
 
 export type CalculateVisualYForSeriesParams = {

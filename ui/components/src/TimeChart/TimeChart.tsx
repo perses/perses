@@ -320,62 +320,50 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           return;
         }
 
-        // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
-          // Pin tooltip and update shared charts context to remember these coordinates.
-          const pinnedPos: CursorCoordinates = {
-            page: {
-              x: e.pageX,
-              y: e.pageY,
-            },
-            client: {
-              x: e.clientX,
-              y: e.clientY,
-            },
-            plotCanvas: {
-              x: e.nativeEvent.offsetX,
-              y: e.nativeEvent.offsetY,
-            },
-            target: e.target,
-          };
+          const isCurrentlyPinned = tooltipPinnedCoords !== null;
 
-          setTooltipPinnedCoords((current) => {
-            if (current === null) {
-              return pinnedPos;
-            } else {
-              setPinnedCrosshair(null);
-              return null;
+          if (isCurrentlyPinned) {
+            setTooltipPinnedCoords(null);
+            setPinnedCrosshair(null);
+          } else {
+            const pinnedPos: CursorCoordinates = {
+              page: {
+                x: e.pageX,
+                y: e.pageY,
+              },
+              client: {
+                x: e.clientX,
+                y: e.clientY,
+              },
+              plotCanvas: {
+                x: e.nativeEvent.offsetX,
+                y: e.nativeEvent.offsetY,
+              },
+              target: e.target,
+            };
+
+            setTooltipPinnedCoords(pinnedPos);
+
+            const cursorX = pointInGrid[0];
+            const firstTimeSeriesValues = data[0]?.values;
+            const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
+
+            const pinnedCrosshair = merge({}, DEFAULT_PINNED_CROSSHAIR, {
+              markLine: {
+                data: [
+                  {
+                    xAxis: closestTimestamp,
+                  },
+                ],
+              },
+            } as LineSeriesOption);
+
+            setPinnedCrosshair(pinnedCrosshair);
+
+            if (!isControlKeyPressed) {
+              setLastTooltipPinnedCoords(pinnedPos);
             }
-          });
-
-          setPinnedCrosshair((current) => {
-            // Only add pinned crosshair line series when there is not one already in seriesMapping.
-            if (current === null) {
-              const cursorX = pointInGrid[0];
-
-              // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
-              const firstTimeSeriesValues = data[0]?.values;
-              const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
-
-              // Crosshair snaps to nearest timestamp since cursor may be slightly to left or right
-              const pinnedCrosshair = merge({}, DEFAULT_PINNED_CROSSHAIR, {
-                markLine: {
-                  data: [
-                    {
-                      xAxis: closestTimestamp,
-                    },
-                  ],
-                },
-              } as LineSeriesOption);
-              return pinnedCrosshair;
-            } else {
-              // Clear previously set pinned crosshair
-              return null;
-            }
-          });
-
-          if (!isControlKeyPressed) {
-            setLastTooltipPinnedCoords(pinnedPos);
           }
         }
       }}

@@ -332,7 +332,6 @@ export function createBarGroupCandidates({
               distance,
               isSelected,
               metadata: currentMetadata,
-              isStacked: stackId !== undefined,
             });
           }
         }
@@ -477,7 +476,6 @@ export function gatherCandidates({
                   distance: verticalDistance,
                   isSelected,
                   metadata: currentMetadata,
-                  isStacked: stackId !== undefined,
                 });
               }
             } else if (seriesType === 'bar') {
@@ -603,7 +601,7 @@ export function processCandidates(
 
   for (const candidate of candidates) {
     const isClosestToCursor = candidate === winner;
-    const valueToFormat = candidate.isStacked ? candidate.visualY : candidate.y;
+    const valueToFormat = candidate.y;
     const formattedY = formatValue(valueToFormat, format);
 
     if (isClosestToCursor) {

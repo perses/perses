@@ -76,7 +76,11 @@ export const PINNED_CROSSHAIR_SERIES_NAME = 'Pinned Crosshair';
 export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
   name: PINNED_CROSSHAIR_SERIES_NAME,
   type: 'line',
-  // https://echarts.apache.org/en/option.html#series-line.markLine
+  data: [],
+  showSymbol: false,
+  lineStyle: {
+    opacity: 0,
+  },
   markLine: {
     data: [],
     lineStyle: {
