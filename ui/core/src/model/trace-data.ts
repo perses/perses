@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { BaseMetadata } from './base-metadata';
 import { TracesData } from './otlp/trace/v1/trace';
 
 /**
@@ -45,8 +46,10 @@ export interface TraceData {
   metadata?: TraceMetaData;
 }
 
-export interface TraceMetaData {
-  executedQueryString?: string;
+export interface TraceMetaData extends BaseMetadata {
+  /** this field indicates if there are more traces matching the search query, however not all traces were returned */
+  hasMoreResults?: boolean;
+  [key: string]: unknown;
 }
 
 export function isValidTraceId(traceId: string): boolean {

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { BaseMetadata } from './base-metadata';
+
 /**
  * A stackTrace
  * It corresponds to a function called during a program execution.
@@ -59,7 +61,7 @@ export interface ProfileData {
   metadata?: ProfileMetaData;
 }
 
-export interface ProfileMetaData {
+export interface ProfileMetaData extends BaseMetadata {
   spyName: string; // Name of the spy / profiler used to generate the profile, if any
   sampleRate: number; // Sample rate at which the profiler was operating
   units: string; // The unit of measurement for the profiled data

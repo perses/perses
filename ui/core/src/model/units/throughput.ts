@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { formatBytes } from './bytes';
+import { formatBits } from './bits';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
 type ThroughputUnit =
   | 'bits/sec'
+  | 'decbits/sec'
   | 'bytes/sec'
   | 'decbytes/sec'
   | 'counts/sec'
@@ -43,7 +45,11 @@ const THROUGHPUT_GROUP = 'Throughput';
 export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>> = {
   'bits/sec': {
     group: THROUGHPUT_GROUP,
-    label: 'Bits/sec',
+    label: 'Bits/sec (IEC)',
+  },
+  'decbits/sec': {
+    group: THROUGHPUT_GROUP,
+    label: 'Bits/sec (SI)',
   },
   'bytes/sec': {
     group: THROUGHPUT_GROUP,
@@ -98,6 +104,16 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
 
 export function formatThroughput(value: number, { unit, shortValues, decimalPlaces }: ThroughputFormatOptions): string {
   // special case for data throughput
+  if (unit === 'bits/sec') {
+    const denominator = Math.abs(value) < 1024 ? 'sec' : 's';
+    return formatBits(value, { unit: 'bits', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
+  if (unit === 'decbits/sec') {
+    const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
+    return formatBits(value, { unit: 'decbits', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
   if (unit === 'decbytes/sec') {
     const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
     return formatBytes(value, { unit: 'decbytes', shortValues, decimalPlaces }) + '/' + denominator;
