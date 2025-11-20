@@ -36,6 +36,7 @@ type externalAuthKind string
 const (
 	externalAuthKindOAuth externalAuthKind = utils.AuthKindOAuth
 	externalAuthKindOIDC  externalAuthKind = utils.AuthKindOIDC
+	externalAuthKindK8s   externalAuthKind = utils.AuthKindKubernetes
 )
 
 const (
@@ -65,6 +66,8 @@ type option struct {
 	externalAuthProvider string
 	accessToken          string
 	refreshToken         string
+	kube                 bool
+	kubeconfig           string
 	insecureTLS          bool
 	apiClient            api.ClientInterface
 	restConfig           clientConfig.RestConfigClient
@@ -120,14 +123,11 @@ func (o *option) Validate() error {
 		// there is no need to verify that the flags are correctly used since they are all being ignored.
 		return nil
 	}
-	// check if all parameters are properly set and if exclusive flags are not used
-	if len(o.username) > 0 && len(o.accessToken) > 0 {
-		return fmt.Errorf("--token and --username are mutually exclusive")
+	// check if exclusive flags are used together
+	err := o.validateExclusiveFlags()
+	if err != nil {
+		return err
 	}
-	if (len(o.username) > 0 || len(o.accessToken) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
-		return fmt.Errorf("you can not set --username or --token at the same time than --client-id or --client-secret or --provider")
-	}
-
 	// check if based on the API config, flags can be used
 	providers := o.remoteConfig.Security.Authentication.Providers
 	if !providers.EnableNative && (len(o.username) > 0 || len(o.password) > 0) {
@@ -150,6 +150,9 @@ func (o *option) Validate() error {
 		if len(o.externalAuthKind) == 0 {
 			return fmt.Errorf("provider %q does not exist", o.externalAuthProvider)
 		}
+	}
+	if providers.KubernetesProvider.Enable {
+		return o.validateKubernetes(providers)
 	}
 	return nil
 }
@@ -174,6 +177,11 @@ func (o *option) Execute() error {
 		}
 		o.accessToken = token.AccessToken
 		o.refreshToken = token.RefreshToken
+	}
+	if o.kube {
+		o.restConfig.K8sAuth = &clientConfig.K8sAuth{
+			KubeconfigFile: o.kubeconfig,
+		}
 	}
 	if len(o.accessToken) > 0 {
 		o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
@@ -214,6 +222,9 @@ func (o *option) newLoginOption() (loginOption, error) {
 				clientSecret:         o.clientSecret,
 				apiClient:            o.apiClient,
 			}, nil
+		}
+		if o.externalAuthKind == externalAuthKindK8s {
+			return NewK8sLogin(o.apiClient, o.kubeconfig), nil
 		}
 		return &deviceCodeLogin{
 			writer:               o.writer,
@@ -262,6 +273,15 @@ func (o *option) selectAndSetProvider() error {
 		}
 	}
 
+	if providers.KubernetesProvider.Enable {
+		optKey := "Kubernetes"
+		optValue := string(externalAuthKindK8s)
+		options = append(options, huh.NewOption(optKey, optValue))
+		modifiers[optValue] = func() {
+			o.setExternalAuthProvider(externalAuthKindK8s, string(externalAuthKindK8s))
+		}
+	}
+
 	// In case there is only one item available, prompt selection is not necessary
 	if len(options) == 1 {
 		modifiers[options[0].Value]()
@@ -299,6 +319,39 @@ func (o *option) setExternalAuthProvider(kind externalAuthKind, slugID string) {
 	o.externalAuthProvider = slugID
 }
 
+func (o *option) validateExclusiveFlags() error {
+	if len(o.username) > 0 && len(o.accessToken) > 0 {
+		return fmt.Errorf("--token and --username are mutually exclusive")
+	}
+	if (len(o.username) > 0 || len(o.accessToken) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
+		return fmt.Errorf("you can not set --username or --token at the same time than --client-id or --client-secret or --provider")
+	}
+	if (o.kube || len(o.kubeconfig) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
+		return fmt.Errorf("you can not set --kube or --kubeconfig-location at the same time than --client-id or --client-secret or --provider")
+	}
+	if (len(o.username) > 0 || len(o.accessToken) > 0) && (o.kube || len(o.kubeconfig) > 0) {
+		return fmt.Errorf("you can not set --username or --token at the same time as --kube or --kubeconfig-location")
+	}
+	return nil
+}
+
+func (o *option) validateKubernetes(providers backendConfig.AuthProviders) error {
+	if !providers.KubernetesProvider.Enable {
+		return fmt.Errorf("--kubeconfig-file input is forbidden as backend does not support kubernetes auth provider")
+	}
+	if len(o.kubeconfig) > 0 && !o.kube {
+		return fmt.Errorf("--kubeconfig-file cannot be used without --kube")
+	}
+
+	kubeconfig, err := getKubeconfigPath(o.kubeconfig)
+	if err != nil {
+		return err
+	}
+	o.kubeconfig = kubeconfig
+
+	return nil
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
@@ -312,6 +365,9 @@ percli login https://demo.perses.dev
 percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id> --client-secret <client-secret>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !o.kube {
+				o.kubeconfig = ""
+			}
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
@@ -321,6 +377,9 @@ percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id
 	cmd.Flags().StringVar(&o.clientID, "client-id", "", "Client ID used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.clientSecret, "client-secret", "", "Client Secret used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
+	cmd.Flags().BoolVar(&o.kube, "kube", false, "Sets if the login should use the users login")
+	cmd.Flags().StringVar(&o.kubeconfig, "kubeconfig-file", "", "Kubeconfig file location to load Kubernetes token from. Defaults to KUBECONFIG env variable, then HOME/.kube/config if empty")
+
 	cmd.Flags().StringVar(&o.externalAuthProvider, "provider", "", "External authentication provider identifier. (slug_id)")
 	return cmd
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
@@ -39,15 +40,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 	authenticationclient "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 func New(conf config.Config) (*k8sImpl, error) {
 	if !conf.Security.Authorization.Provider.Kubernetes.Enable {
 		return nil, fmt.Errorf("kubernetes authorization is not enabled")
 	}
-	kubeconfig, err := initKubeConfig(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig)
+	kubeconfig, err := clientConfig.InitKubeConfig(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +77,6 @@ func New(conf config.Config) (*k8sImpl, error) {
 	return &k8sImpl{
 		authenticator: kubernetesAuthenticator,
 		authorizer:    k8sAuthorizer,
-		kubeconfig:    kubeconfig,
 		kubeClient:    kubeClient,
 	}, nil
 }
@@ -86,13 +84,17 @@ func New(conf config.Config) (*k8sImpl, error) {
 type k8sImpl struct {
 	authenticator authenticator.Request
 	authorizer    authorizer.Authorizer
-	kubeconfig    *rest.Config
-	kubeClient    *kubernetes.Clientset
+	kubeClient    kubernetes.Interface
 }
 
 // IsEnabled implements [Authorization]
 func (k *k8sImpl) IsEnabled() bool {
 	return true
+}
+
+// IsNative implements [Authorization]
+func (k *k8sImpl) IsNative() bool {
+	return false
 }
 
 // GetUser implements [Authorization]
@@ -105,6 +107,12 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 
 	if utils.IsAnonymous(ctx) {
 		return nil, nil
+	}
+
+	// Since we know that kubernetes expects the authorization header, we should check and return a
+	// specific error if it doesn't exist
+	if len(ctx.Request().Header.Get("Authorization")) == 0 {
+		return nil, errors.New("missing authorization header")
 	}
 
 	// At this point, we are sure that the context is not nil and the user is not anonymous.
@@ -130,13 +138,27 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 	if userStruct == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
 	}
-	k8sUser, err := getK8sUser(userStruct)
+	k8sUser, err := GetK8sUser(userStruct)
 	if err != nil {
 		// this case should not happen, as the getK8sUser function should just be used to unwrap any
 		// into the appropriate struct
 		return "", err
 	}
 	return k8sUser.GetName(), nil
+}
+
+// GetPublicUser implements [Authorization]
+func (k *k8sImpl) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+	username, err := k.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.PublicUser{
+		Kind:     v1.KindUser,
+		Metadata: *v1.NewMetadata(username),
+		Spec:     v1.PublicUserSpec{},
+	}, nil
 }
 
 // Middleware implements [Authorization]
@@ -146,6 +168,7 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			if skipper(ctx) {
 				return next(ctx)
 			}
+
 			_, err := k.GetUser(ctx)
 			if err != nil {
 				return apiInterface.HandleUnauthorizedError("invalid authorization header")
@@ -169,7 +192,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 		return nil, err
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +225,7 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 		return false
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return false
 	}
@@ -258,7 +281,7 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 		return nil, apiInterface.InternalError
 	}
 
-	kubernetesUser, err := getK8sUser(usr)
+	kubernetesUser, err := GetK8sUser(usr)
 	if err != nil {
 		return nil, err
 	}
@@ -420,25 +443,6 @@ func (k *k8sImpl) getNamespaceList() []string {
 	return namespaces
 }
 
-// Returns initialized config, allows local usage (outside cluster) based on provided kubeconfig or in-cluster
-// service account usage
-func initKubeConfig(kcLocation string) (*rest.Config, error) {
-	if kcLocation != "" {
-		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kcLocation)
-		if err != nil {
-			return nil, fmt.Errorf("unable to build rest config based on provided path to kubeconfig file: %w", err)
-		}
-		return kubeConfig, nil
-	}
-
-	kubeConfig, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, fmt.Errorf("cannot find service account in pod to build in-cluster rest config: %w", err)
-	}
-
-	return kubeConfig, nil
-}
-
 // getK8sAPIVersion is used to determine which API version the authorization request should use, v1
 // for namespaces and v1alpha1 for all other perses related kubernetes resources
 func getK8sAPIVersion(scope k8sScope) string {
@@ -463,7 +467,7 @@ func getK8sAPIGroup(scope k8sScope) string {
 
 // helper function to convert any type into a user.Info. This function should not error, and it is
 // expected that the struct being passed in is user.Info
-func getK8sUser(userStruct any) (user.Info, error) {
+func GetK8sUser(userStruct any) (user.Info, error) {
 	if k8sUser, ok := userStruct.(user.Info); ok {
 		return k8sUser, nil
 	}
@@ -472,7 +476,7 @@ func getK8sUser(userStruct any) (user.Info, error) {
 }
 
 // newAuthorizer creates an authorizer compatible with the kubelet's needs
-func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf config.KubernetesProvider) (authorizer.Authorizer, error) {
+func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf config.KubernetesAuthorizationProvider) (authorizer.Authorizer, error) {
 	if client == nil {
 		return nil, errors.New("no client provided, cannot use webhook authorization")
 	}
@@ -486,7 +490,7 @@ func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf con
 }
 
 // newAuthenticator creates an authenticator compatible with the kubelets needs
-func newAuthenticator(client authenticationclient.AuthenticationV1Interface, conf config.KubernetesProvider) (authenticator.Request, error) {
+func newAuthenticator(client authenticationclient.AuthenticationV1Interface, conf config.KubernetesAuthorizationProvider) (authenticator.Request, error) {
 	if client == nil {
 		return nil, errors.New("tokenaccessreview client not provided, cannot use webhook authentication")
 	}

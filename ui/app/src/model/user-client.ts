@@ -17,11 +17,11 @@ import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildQueryKey from './querykey-builder';
 
-const resource = 'users';
+export const userResource = 'users';
 export const userKey = 'user';
 
 function createUser(entity: UserResource): Promise<UserResource> {
-  const url = buildURL({ resource });
+  const url = buildURL({ resource: userResource });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
@@ -30,7 +30,7 @@ function createUser(entity: UserResource): Promise<UserResource> {
 }
 
 function getUser(name: string): Promise<UserResource> {
-  const url = buildURL({ resource, name });
+  const url = buildURL({ resource: userResource, name });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
@@ -38,7 +38,7 @@ function getUser(name: string): Promise<UserResource> {
 }
 
 function getUsers(): Promise<UserResource[]> {
-  const url = buildURL({ resource });
+  const url = buildURL({ resource: userResource });
   return fetchJson<UserResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
@@ -47,7 +47,7 @@ function getUsers(): Promise<UserResource[]> {
 
 function updateUser(entity: UserResource): Promise<UserResource> {
   const name = entity.metadata.name;
-  const url = buildURL({ resource, name });
+  const url = buildURL({ resource: userResource, name });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodPUT,
     headers: HTTPHeader,
@@ -56,7 +56,7 @@ function updateUser(entity: UserResource): Promise<UserResource> {
 }
 function deleteUser(entity: UserResource): Promise<Response> {
   const name = entity.metadata.name;
-  const url = buildURL({ resource, name });
+  const url = buildURL({ resource: userResource, name });
   return fetch(url, {
     method: HTTPMethodDELETE,
     headers: HTTPHeader,
@@ -64,7 +64,7 @@ function deleteUser(entity: UserResource): Promise<Response> {
 }
 
 function getUserPermissions(username: string): Promise<Record<string, Permission[]>> {
-  const url = buildURL({ resource, name: username, pathSuffix: ['permissions'] });
+  const url = buildURL({ resource: userResource, name: username, pathSuffix: ['permissions'] });
   // If username is empty it's useless to request API
   if (!username) {
     return Promise.resolve({});
@@ -81,7 +81,7 @@ function getUserPermissions(username: string): Promise<Record<string, Permission
  */
 export function useUser(name: string): UseQueryResult<UserResource, StatusError> {
   return useQuery<UserResource, StatusError>({
-    queryKey: buildQueryKey({ resource, name }),
+    queryKey: buildQueryKey({ resource: userResource, name }),
     queryFn: () => {
       return getUser(name);
     },
@@ -94,7 +94,7 @@ export function useUser(name: string): UseQueryResult<UserResource, StatusError>
  */
 export function useUserList(): UseQueryResult<UserResource[], StatusError> {
   return useQuery<UserResource[], StatusError>({
-    queryKey: buildQueryKey({ resource }),
+    queryKey: buildQueryKey({ resource: userResource }),
     queryFn: () => {
       return getUsers();
     },
@@ -107,7 +107,7 @@ export function useUserList(): UseQueryResult<UserResource[], StatusError> {
  */
 export function useCreateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
@@ -126,7 +126,7 @@ export function useCreateUserMutation(): UseMutationResult<UserResource, StatusE
  */
 export function useUpdateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
@@ -148,7 +148,7 @@ export function useUpdateUserMutation(): UseMutationResult<UserResource, StatusE
  */
 export function useDeleteUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,

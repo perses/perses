@@ -26,6 +26,9 @@ type disabledImpl struct {
 func (r *disabledImpl) IsEnabled() bool {
 	return false
 }
+func (r *disabledImpl) IsNative() bool {
+	return true
+}
 
 func (r *disabledImpl) GetUser(_ echo.Context) (any, error) {
 	return nil, nil

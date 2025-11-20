@@ -17,7 +17,7 @@ import { ReactElement, Suspense } from 'react';
 import { ReactRouterProvider } from '@perses-dev/plugin-system';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
-import { SignInRoute, SignUpRoute } from './model/route';
+import { ExternalSignInRoute, SignInRoute, SignUpRoute } from './model/route';
 import { PersesLoader } from './components/PersesLoader';
 
 function isDashboardViewRoute(pathname: string): boolean {
@@ -36,7 +36,9 @@ function App(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+      {location.pathname !== SignInRoute &&
+        location.pathname !== SignUpRoute &&
+        location.pathname !== ExternalSignInRoute && <Header />}
 
       <Box
         sx={{

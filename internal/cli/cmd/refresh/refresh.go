@@ -24,11 +24,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type refreshOption interface {
+	Refresh() error
+}
+
 type option struct {
 	persesCMD.Option
-	writer    io.Writer
-	errWriter io.Writer
-	apiClient api.ClientInterface
+	writer       io.Writer
+	errWriter    io.Writer
+	apiClient    api.ClientInterface
+	externalAuth bool
 }
 
 func (o *option) Complete(args []string) error {
@@ -40,25 +45,38 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
+
+	apiConfig, err := apiClient.Config()
+	if err != nil {
+		return err
+	}
+	if apiConfig.Security.Authentication.Providers.KubernetesProvider.Enable {
+		o.externalAuth = true
+	}
+
 	return nil
 }
 
 func (o *option) Validate() error {
-	if len(config.Global.RefreshToken) == 0 {
+	if !o.externalAuth && len(config.Global.RefreshToken) == 0 {
 		return fmt.Errorf("refresh_token doesn't exist in the config, please use the command login to get one")
+	}
+	if o.externalAuth && len(config.Global.RestClientConfig.K8sAuth.KubeconfigFile) == 0 {
+		return fmt.Errorf("kubeconfig location has not been set, please use the command login to set it")
 	}
 	return nil
 }
 
 func (o *option) Execute() error {
-	response, err := o.apiClient.Auth().Refresh(config.Global.RefreshToken)
+	refreshOption, err := o.newRefreshOption()
 	if err != nil {
 		return err
 	}
-	if writeErr := config.SetAccessToken(response.AccessToken); writeErr != nil {
-		return writeErr
+	err = refreshOption.Refresh()
+	if err != nil {
+		return err
 	}
-	return output.HandleString(o.writer, "access token has been refreshed")
+	return output.HandleString(o.writer, "token has been refreshed")
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -67,6 +85,21 @@ func (o *option) SetWriter(writer io.Writer) {
 
 func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
+}
+
+func (o *option) newRefreshOption() (refreshOption, error) {
+	apiClient, err := config.Global.GetAPIClient()
+	if err != nil {
+		return nil, err
+	}
+	if config.Global.RestClientConfig.K8sAuth != nil {
+		return &k8sRefresh{
+			apiClient: apiClient,
+		}, nil
+	}
+	return &nativeRefresh{
+		apiClient: apiClient,
+	}, nil
 }
 
 func NewCMD() *cobra.Command {

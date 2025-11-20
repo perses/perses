@@ -19,6 +19,7 @@ import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
 import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
+import { ExternalAuthProviders } from '../model/auth/external-auth-client';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -102,6 +103,21 @@ export function useIsAuthEnabled(): boolean {
   return config.security.enable_auth;
 }
 
+export function useAuthorizationProvider(): 'native' | 'external' | 'none' {
+  const { config } = useConfigContext();
+
+  if (config.security.authorization.provider?.native?.enable) {
+    return 'native';
+  }
+
+  // Currently only k8s are supported as an external authorization provider
+  if (config.security.authorization.provider?.kubernetes?.enable) {
+    return 'external';
+  }
+
+  return 'none';
+}
+
 export function useIsSignUpDisable(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.disable_sign_up;
@@ -165,4 +181,12 @@ export function useIsExternalProviderEnabled(): boolean {
   return (
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
+}
+
+export function useExternalProvider(): ExternalAuthProviders {
+  const { config } = useConfigContext();
+  if (config.security.authentication.providers.kubernetes?.enable) {
+    return 'kubernetes';
+  }
+  return 'none';
 }
