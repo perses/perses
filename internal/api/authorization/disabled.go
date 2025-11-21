@@ -16,6 +16,7 @@ package authorization
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/crypto"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
@@ -33,6 +34,10 @@ func (r *disabledImpl) GetUser(_ echo.Context) (any, error) {
 
 func (r *disabledImpl) GetUsername(_ echo.Context) (string, error) {
 	return "", nil
+}
+
+func (r *disabledImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+	return crypto.ProviderInfo{}, nil
 }
 
 func (r *disabledImpl) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
