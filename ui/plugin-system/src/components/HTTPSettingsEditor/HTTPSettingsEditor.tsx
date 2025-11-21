@@ -92,7 +92,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
               />
             )}
           />
-          <Typography variant="h4" mb={2}>
+          <Typography variant="h5" mb={2}>
             Allowed endpoints
           </Typography>
           <Grid container spacing={2} mb={2}>
@@ -244,7 +244,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
               </IconButton>
             </Grid>
           </Grid>
-          <Typography variant="h4" mb={2}>
+          <Typography variant="h5" mb={2}>
             Request Headers
           </Typography>
           <Grid container spacing={2} mb={2}>
