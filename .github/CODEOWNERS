@@ -1,7 +1,11 @@
+/cue-test @AntoineThebaud
 /cue @AntoineThebaud
+/docs @AntoineThebaud
 /go-sdk @Gladorme
 /internal @Nexucis
 /internal/api/impl/auth @Nexucis @celian-garcia
 /internal/api/plugin/migrate @Nexucis @AntoineThebaud
 /internal/api/plugin/schema @Nexucis @AntoineThebaud
+/pkg/client @Nexucis @celian-garcia
+/pkg/model @Nexucis @AntoineThebaud
 /ui @Gladorme @jgbernalp @shahrokni
