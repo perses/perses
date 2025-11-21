@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.53.0-beta.3 / 2025-11-21
+
+### Core & UI
+
+- [FEATURE] Add notices to panel header (#3577)
+- [FEATURE] Display default dashboards when query is empty (#3572)
+- [ENHANCEMENT] Error handling for Search Bar and dynamic Search List (#3575)
+- [BUGFIX] PanelEditor + VariableEditor: queries changes are not saved (#3590)
+- [BUGFIX] Fix embedding markdown panels in tables (#3588)
+- [BUGFIX] Add bits/sec convertion to human-readable sizes, add bits units(#3441) (#3583)
+- [BUGFIX] Fix navigation after creating a new ephemeral dashboard (#3584)
+- [BUGFIX] CLI/PLUGIN: Avoid re-building dev server tasks to shut down correctly the start plugin command (#3579)
+- [BUGFIX] Add back piechart removed by mistake (#3552)
+- [DOC] Fix deprecated list of supported data-sources (#3601)
+- [DOC] Add a concept doc about the open-specification and being compatible with Perses (#3598)
+
+### Plugins improvements
+
+- [FEATURE] StatChart: Add Color Mode (perses/plugins#433)
+- [ENHANCEMENT] ScatterChart: remove time label, reduce chart padding, reduce amount of y axis labels (perses/plugins#476)
+- [ENHANCEMENT] ScatterChart: sync xAxis with time range provider (perses/plugins#477)
+- [BUGFIX] For all plugins : allow __mf/js/async assets to use proxy (perses/plugins#419 & perses/plugins#467)
+- [BUGFIX] HistoryChart: Show no data when query result is empty (perses/plugins#465 & perses/plugins#468)
+- [BUGFIX] TimeSeriesTable: Show No data accordingly (perses/plugins#466)
+- [BUGFIX] StatChart: Add showLegend option with auto/on/off modes (perses/plugins#471)
+- [BREAKINGCHANGE] datasources: Removing queryHandlers (perses/plugins#472)
+
+## 0.53.0-beta.2 / 2025-11-07
+
+This new beta release is fixing the variable migration issue introduced in beta.1 by updating all plugins to support the new variable migration format.
+
+We are also introducing another breaking change in the TLS config to simplify the configuration.
+The previous version was mixing two syntaxes to set TLS across the various possible configuration that could lead to confusion (camelCase and snake_case).
+This breaking change is impacting only the **SQL database configuration**.
+
+In the SQL configuration, if the tls_config is used, then you should change your config like that:
+
+```
+ca_file -> caFile
+cert_file -> certFile
+key_file -> keyFile
+server_name -> serverName
+insecure_skip_verify -> insecureSkipVerify
+min_version -> minVersion (values: TLS10, TLS11, TLS12, TLS13)
+max_version -> maxVersion (values: TLS10, TLS11, TLS12, TLS13)
+```
+
+This will ensure a consistent configuration across all datasources supporting TLS.
+
+On top of that, this release is also introducing two new major features: a LogsTable panel and two new plugins: VictoriaLogs and ClickHouse provided directly by the community.
+
+Note that since these two data-sources are provided by the community, they are not officially supported by the Perses team.
+And as such, soon we will come with a governance model to manage community plugins. In later release, these plugins might be removed in the main images, depending on the governance adopted.
+
+### Core & UI
+
+- [FEATURE] Add LogsTable (#3542)
+- [FEATURE] Add VictoriaLogs & ClickHouse plugins (#3540)
+- [FEATURE] Add temperature units (#3531)
+- [ENHANCEMENT] Add error next to query in editor + refreshing a query only refresh the targeted query (#3532)
+- [ENHANCEMENT] Added DateTime formatting (#3520)
+- [ENHANCEMENT] Preventing DB Ping from hanging forever (#3541)
+- [ENHANCEMENT] Add support for nanoseconds and microseconds in yAxis settings (#3528)
+- [BUGFIX] Fix empty value in create variable form (#3517)
+- [BUGFIX] search: refactor plain text functions to JSX (#3538)
+- [BREAKINGCHANGE] Use only secret tls config in the config (#3535)
+- [BUGFIX/BREAKINGCHANGE] Remove memory leak on refresh + remove refreshKey trick (#3518)
+
+### Plugins improvements
+
+- [FEATURE] PieChart: multiple enhancements & bug fixes (perses/plugins#425)
+- [FEATURE] Table: conditional format & filtering at column level (perses/plugins#415)
+- [ENHANCEMENT] table: add option for hiding column by default + fix transformData + add missing SDK methods (perses/plugins#413)
+- [ENHANCEMENT] TracingGanttChart: support span attributes with type double (perses/plugins#421)
+- [ENHANCEMENT] Tempo: Use absolute time from TimeRangeProvider for TraceQL auto-completion (perses/plugins#409)
+- [ENHANCEMENT] Tempo: use default MUI checkbox icons (perses/plugins#404)
+- [ENHANCEMENT] GaugeChart: improve responsiveness (perses/plugins#399)
+- [BUGFIX] Tempo: Do not fetch filter bar values on every re-render (perses/plugins#408)
+- [BUGFIX] StatChart & StatusHistoryChart: Grafana migration: fix expected field missing (perses/plugins#411)
+- [BUGFIX] Prometheus: Add plugins filter to query editor from prometheus explorer (perses/plugins#428)
+- [BUGFIX] Prometheus: make variables compatible with datasource references (perses/plugins#422)
+- [BUGFIX] timeseries plugin sdk: palette value is optional (perses/plugins#417)
+- [BUGFIX] TimeSeriesChart: migration: handle lineWidth as string (perses/plugins#401)
+
 ## 0.53.0-beta.1 / 2025-11-05
 
 Dear user, among other changes, we are breaking the way the migration of the variables are working.
