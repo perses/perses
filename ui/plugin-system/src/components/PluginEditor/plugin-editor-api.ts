@@ -121,7 +121,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     if (!pendingSelection) return;
 
     // Can't get spec value until we have a plugin
-    if (plugin === undefined) return;
+    if (plugin === undefined || isFetching) return;
 
     // Fire an onChange to change to the pending kind with initial values from the plugin
     rememberCurrentSpecState();
@@ -138,7 +138,16 @@ export function usePluginEditor(props: UsePluginEditorProps): {
       }
     }
     setPendingSelection(undefined);
-  }, [pendingSelection, plugin, rememberCurrentSpecState, onChange, onHideQuery, hideQueryState, value.selection]);
+  }, [
+    pendingSelection,
+    plugin,
+    isFetching,
+    rememberCurrentSpecState,
+    onChange,
+    onHideQuery,
+    hideQueryState,
+    value.selection,
+  ]);
 
   /**
    * When the user tries to change the plugin kind, make sure we have the correct spec for that plugin kind before we
