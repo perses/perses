@@ -30,3 +30,24 @@ func TestGetRedirectURI(t *testing.T) {
 		Host: "localhost:8080",
 	}, utils.AuthKindOIDC, "azure"))
 }
+
+// Test for encodeOAuthState: ensures the state is correctly formatted and contains the redirect path.
+func TestEncodeOAuthState(t *testing.T) {
+	redirect := "/dashboard"
+	state := encodeOAuthState(redirect)
+	assert.Contains(t, state, "##/dashboard")
+	assert.Len(t, state, 16+2+10)
+}
+
+// Test for decodeOAuthState: ensures correct extraction and empty string for invalid formats.
+func TestDecodeOAuthState(t *testing.T) {
+	redirect := "/dashboard"
+	state := "1234567890abcdef##" + redirect
+	assert.Equal(t, redirect, decodeOAuthState(state))
+
+	state = "invalidformat"
+	assert.Equal(t, "", decodeOAuthState(state))
+
+	state = "short##"
+	assert.Equal(t, "", decodeOAuthState(state))
+}
