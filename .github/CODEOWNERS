@@ -2,9 +2,10 @@
 /cue @AntoineThebaud
 /docs @AntoineThebaud
 /go-sdk @Gladorme
-/internal @Nexucis @celian-garcia
+/internal/api @Nexucis @celian-garcia
 /internal/api/plugin/migrate @Nexucis @AntoineThebaud
 /internal/api/plugin/schema @Nexucis @AntoineThebaud
-/pkg @Nexucis @celian-garcia
+/internal/cli @Nexucis
+/pkg/client @Nexucis @celian-garcia
 /pkg/model @Nexucis @AntoineThebaud
 /ui @Gladorme @jgbernalp @shahrokni
