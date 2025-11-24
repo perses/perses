@@ -14,6 +14,8 @@
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
 import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
+import { QueryData } from '@perses-dev/plugin-system';
+import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -21,7 +23,6 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
-import { QueryData } from '@perses-dev/plugin-system';
 import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
@@ -35,6 +36,7 @@ import {
 } from '../../constants';
 import { HeaderIconButton } from './HeaderIconButton';
 import { PanelLinks } from './PanelLinks';
+import { PanelOptions } from './Panel';
 
 // LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
 const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
@@ -59,7 +61,12 @@ export interface PanelActionsProps {
     isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
+  viewQueriesHandler?: {
+    onClick: () => void;
+  };
   queryResults: QueryData[];
+  pluginActions?: ReactNode[];
+  showIcons: PanelOptions['showIcons'];
 }
 
 const ConditionalBox = styled(Box)({
@@ -72,14 +79,17 @@ const ConditionalBox = styled(Box)({
 export const PanelActions: React.FC<PanelActionsProps> = ({
   editHandlers,
   readHandlers,
+  viewQueriesHandler,
   extra,
   title,
   description,
   descriptionTooltipId,
   links,
   queryResults,
+  pluginActions = [],
+  showIcons,
 }) => {
-  const descriptionAction = useMemo(() => {
+  const descriptionAction = useMemo((): ReactNode | undefined => {
     if (description && description.trim().length > 0) {
       return (
         <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
@@ -96,27 +106,32 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     }
     return undefined;
   }, [descriptionTooltipId, description]);
+
   const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
   const extraActions = editHandlers === undefined && extra;
 
-  const queryStateIndicator = useMemo(() => {
+  const queryStateIndicator = useMemo((): ReactNode | undefined => {
     const hasData = queryResults.some((q) => q.data);
     const isFetching = queryResults.some((q) => q.isFetching);
     const queryErrors = queryResults.filter((q) => q.error);
+
     if (isFetching && hasData) {
-      // If the panel has no data, the panel content will show the loading overlay.
-      // Therefore, show the circular loading indicator only in case the panel doesn't display the loading overlay already.
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
         .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map((e) => e.message)
         .join('\n');
 
       return (
         <InfoTooltip description={errorTexts}>
           <HeaderIconButton aria-label="panel errors" size="small">
-            <AlertIcon fontSize="inherit" />
+            <AlertIcon
+              fontSize="inherit"
+              sx={{
+                color: (theme) => theme.palette.error.main,
+              }}
+            />
           </HeaderIconButton>
         </InfoTooltip>
       );
@@ -164,7 +179,22 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
-  const editActions = useMemo(() => {
+  const viewQueryAction = useMemo(() => {
+    if (!viewQueriesHandler?.onClick) return null;
+    return (
+      <InfoTooltip description={TOOLTIP_TEXT.queryView}>
+        <HeaderIconButton
+          aria-label={ARIA_LABEL_TEXT.openQueryView(title)}
+          size="small"
+          onClick={viewQueriesHandler.onClick}
+        >
+          <DatabaseSearch fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }, [viewQueriesHandler, title]);
+
+  const editActions = useMemo((): ReactNode | undefined => {
     if (editHandlers !== undefined) {
       // If there are edit handlers, always just show the edit buttons
       return (
@@ -209,7 +239,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [editHandlers, title]);
 
-  const moveAction = useMemo(() => {
+  const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
         <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
@@ -224,13 +254,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   const divider = <Box sx={{ flexGrow: 1 }}></Box>;
 
-  // if the panel is in non-editing, non-fullscreen mode, show certain icons only on hover
+  // By default, the panel header shows certain icons only on hover if the panel is in non-editing, non-fullscreen mode
   const OnHover = ({ children }: PropsWithChildren): ReactNode =>
-    editHandlers === undefined && !readHandlers?.isPanelViewed ? (
-      <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box>
-    ) : (
-      <>{children}</>
-    );
+    showIcons === 'hover' ? <Box sx={{ display: 'var(--panel-hover, none)' }}>{children}</Box> : <>{children}</>;
 
   return (
     <>
@@ -243,7 +269,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {readActions}{' '}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
+            {readActions} {pluginActions}
             {editActions}
           </OverflowMenu>
           {moveAction}
@@ -264,8 +291,11 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider} {queryStateIndicator}
         {noticesIndicator}
         <OnHover>
-          {extraActions} {readActions}
-          <OverflowMenu title={title}>{editActions}</OverflowMenu>
+          {extraActions}
+          {readActions}
+          <OverflowMenu title={title}>
+            {editActions} {viewQueryAction} {pluginActions}
+          </OverflowMenu>
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -284,7 +314,12 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider} {queryStateIndicator}
         {noticesIndicator}
         <OnHover>
-          {extraActions} {readActions} {editActions} {moveAction}
+          {extraActions}
+          {viewQueryAction}
+          {readActions} {editActions}
+          {/* Show plugin actions inside a menu if it gets crowded */}
+          {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
+          {moveAction}
         </OnHover>
       </ConditionalBox>
     </>
@@ -297,14 +332,14 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
   if (!hasContent) {
-    return undefined;
+    return null;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): undefined => {
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorPosition(event.currentTarget.getBoundingClientRect());
   };
 
-  const handleClose = (): undefined => {
+  const handleClose = (): void => {
     setAnchorPosition(undefined);
   };
 

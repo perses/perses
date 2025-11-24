@@ -49,7 +49,7 @@ func (p *PanelDisplay) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *PanelDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *PanelDisplay) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp PanelDisplay
 	type plain PanelDisplay
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -116,7 +116,7 @@ func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *DashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *DashboardSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp DashboardSpec
 	type plain DashboardSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -161,7 +161,7 @@ func (d *Dashboard) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *Dashboard) GetSpec() interface{} {
+func (d *Dashboard) GetSpec() any {
 	return d.Spec
 }
 
@@ -178,7 +178,7 @@ func (d *Dashboard) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (d *Dashboard) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (d *Dashboard) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Dashboard
 	type plain Dashboard
 	if err := unmarshal((*plain)(&tmp)); err != nil {

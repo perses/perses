@@ -12,18 +12,9 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
-import happoPlaywright from 'happo-playwright';
 import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
 test.describe('homeView', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   test('can navigate to a dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
@@ -97,14 +88,9 @@ test.describe('homeView', () => {
 
     const dashboardPage = new DashboardPage(page);
 
-    await dashboardPage.forEachTheme(async (themeName) => {
+    await dashboardPage.forEachTheme(async () => {
       // Should see empty state
       await expect(page.getByRole('main')).toContainText("Let's get started");
-
-      await happoPlaywright.screenshot(page, dashboardPage.root, {
-        component: 'Empty State',
-        variant: themeName,
-      });
     });
 
     // Use empty state to add a new panel

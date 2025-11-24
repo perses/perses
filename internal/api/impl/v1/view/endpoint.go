@@ -17,11 +17,10 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/view"
-	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -31,13 +30,13 @@ import (
 type endpoint struct {
 	dashboardService dashboard.Service
 	service          view.Service
-	rbac             rbac.RBAC
+	authz            authorization.Authorization
 }
 
-func NewEndpoint(service view.Service, rbac rbac.RBAC, dashboardService dashboard.Service) route.Endpoint {
+func NewEndpoint(service view.Service, authz authorization.Authorization, dashboardService dashboard.Service) route.Endpoint {
 	return &endpoint{
 		service:          service,
-		rbac:             rbac,
+		authz:            authz,
 		dashboardService: dashboardService,
 	}
 }
@@ -47,28 +46,23 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) view(ctx echo.Context) error {
-	view := v1.View{}
-	if err := ctx.Bind(&view); err != nil {
+	result := v1.View{}
+	if err := ctx.Bind(&result); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 
-	if e.rbac.IsEnabled() {
-		claims := crypto.ExtractJWTClaims(ctx)
-		if claims == nil {
-			return apiInterface.HandleUnauthorizedError("missing claims")
-		}
-
-		if ok := e.rbac.HasPermission(claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
-			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
+	if e.authz.IsEnabled() {
+		if ok := e.authz.HasPermission(ctx, role.ReadAction, result.Project, role.DashboardScope); !ok {
+			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, result.Project, role.DashboardScope))
 		}
 	}
 
-	if _, err := e.dashboardService.Get(apiInterface.NewPersesContext(ctx), apiInterface.Parameters{
-		Project: view.Project,
-		Name:    view.Dashboard,
+	if _, err := e.dashboardService.Get(apiInterface.Parameters{
+		Project: result.Project,
+		Name:    result.Dashboard,
 	}); err != nil {
 		return apiInterface.HandleNotFoundError(err.Error())
 	}
 
-	return e.service.View(&view)
+	return e.service.View(&result)
 }

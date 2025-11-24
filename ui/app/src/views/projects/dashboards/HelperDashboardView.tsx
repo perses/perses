@@ -13,27 +13,24 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
-import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import {
-  PluginRegistry,
-  UsageMetricsProvider,
-  ValidationProvider,
-  remotePluginLoader,
-} from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+  DashboardResource,
+  EphemeralDashboardResource,
+  getResourceDisplayName,
+  ExternalVariableDefinition,
+} from '@perses-dev/core';
+import { OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
+import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
+import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import {
-  useIsGlobalDatasourceEnabled,
-  useIsLocalDatasourceEnabled,
-  useIsLocalVariableEnabled,
-  useIsProjectDatasourceEnabled,
-} from '../../../context/Config';
+import { useIsLocalDatasourceEnabled, useIsLocalVariableEnabled } from '../../../context/Config';
+import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
+import { PERSES_APP_CONFIG } from '../../../config';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -42,30 +39,27 @@ export interface GenericDashboardViewProps {
   isReadonly: boolean;
   isEditing: boolean;
   isCreating?: boolean;
+  isLeavingConfirmDialogEnabled?: boolean;
 }
 
 /**
  * The View for displaying a Dashboard.
  */
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
-  const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
+  const {
+    dashboardResource,
+    onSave,
+    onDiscard,
+    isReadonly,
+    isEditing,
+    isCreating,
+    isLeavingConfirmDialogEnabled = true,
+  } = props;
 
-  const isGlobalDatasourceEnabled = useIsGlobalDatasourceEnabled();
-  const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
-
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
-
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    if (isProjectDatasourceEnabled) {
-      datasourceApi.listDatasources(dashboardResource.metadata.project);
-    }
-    if (isGlobalDatasourceEnabled) {
-      datasourceApi.listGlobalDatasources();
-    }
-  }, [datasourceApi, dashboardResource, isProjectDatasourceEnabled, isGlobalDatasourceEnabled]);
+  const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
 
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
@@ -101,7 +95,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     >
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
-          pluginLoader={remotePluginLoader()}
+          pluginLoader={pluginLoader}
           defaultPluginKinds={{
             Panel: 'TimeSeriesChart',
             TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
@@ -109,7 +103,11 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
         >
           <ValidationProvider>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
+              <UsageMetricsProvider
+                apiPrefix={PERSES_APP_CONFIG.api_prefix}
+                project={project.metadata.name}
+                dashboard={dashboardResource.metadata.name}
+              >
                 <ViewDashboard
                   dashboardResource={dashboardResource}
                   datasourceApi={datasourceApi}
@@ -122,12 +120,13 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   }}
                   onSave={onSave}
                   onDiscard={onDiscard}
-                  initialVariableIsSticky={true}
+                  isInitialVariableSticky={true}
                   isReadonly={isReadonly}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   isEditing={isEditing}
                   isCreating={isCreating}
+                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
                 />
               </UsageMetricsProvider>
             </ErrorBoundary>

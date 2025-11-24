@@ -13,3 +13,4 @@
 
 export * from './VariableEditorForm';
 export * from './VariablePreview';
+export * from './variable-editor-form-model';

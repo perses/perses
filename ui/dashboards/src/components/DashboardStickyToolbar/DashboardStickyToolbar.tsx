@@ -26,9 +26,9 @@ import {
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
-import { VariableDefinition } from '@perses-dev/core';
+import { ExternalVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import { VariableList } from '../Variables';
-import { ExternalVariableDefinition, useExternalVariableDefinitions, useVariableDefinitions } from '../../context';
+import { useExternalVariableDefinitions, useVariableDefinitions } from '../../context';
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
@@ -72,7 +72,6 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
             display="flex"
             flexWrap={!isSticky && isBiggerThanMd ? 'wrap' : 'nowrap'}
             maxWidth={isSticky || !isBiggerThanMd ? '100vw' : '100%'}
-            maxHeight="150px" // Limit the vertical space used to ~3 rows of variables
             pt={1}
             pl={isSticky ? 1 : 0}
             mt={isSticky && isBiggerThanMd ? 0.5 : 0}

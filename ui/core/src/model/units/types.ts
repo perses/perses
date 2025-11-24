@@ -18,7 +18,7 @@ import { Duration } from 'date-fns';
 import { AbsoluteTimeRange, DurationString } from '../time';
 import { FormatOptions } from './units';
 
-export type UnitGroup = 'Time' | 'Percent' | 'Decimal' | 'Bytes' | 'Throughput';
+export type UnitGroup = 'Time' | 'Percent' | 'Decimal' | 'Bytes' | 'Throughput' | 'Currency' | 'Temperature' | 'Date';
 
 /**
  * Configuration for rendering units that are part of a group.
@@ -45,7 +45,7 @@ export type UnitConfig = {
   /**
    * The group the unit is part of. This will inform common rendering behavior.
    */
-  group: UnitGroup;
+  group?: UnitGroup;
 
   /**
    * When true, this unit will not be displayed in the unit selector. This is

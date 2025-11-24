@@ -44,7 +44,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'list'")
+		return fmt.Errorf("no args are supported by the command 'plugin list'")
 	}
 	// Complete the output only if it has been set by the user
 	// NB: In the case of the `get` command, the default output format is/should be a table, not json
@@ -97,8 +97,7 @@ func (o *option) Execute() error {
 			fmt.Sprintf("%t", status.InDev),
 		})
 	}
-	output.HandlerTable(o.writer, columnHeader, matrix)
-	return nil
+	return output.HandlerTable(o.writer, columnHeader, matrix)
 }
 
 func (o *option) SetWriter(writer io.Writer) {

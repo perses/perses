@@ -38,7 +38,7 @@ func (v *DefaultValue) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *DefaultValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (v *DefaultValue) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	var slice []string
 	if unmarshalStringErr := unmarshal(&s); unmarshalStringErr != nil {
@@ -58,7 +58,7 @@ func (v *DefaultValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.SliceValues)
 }
 
-func (v *DefaultValue) MarshalYAML() (interface{}, error) {
+func (v *DefaultValue) MarshalYAML() (any, error) {
 	if len(v.SingleValue) > 0 {
 		return v.SingleValue, nil
 	}
@@ -100,7 +100,7 @@ func (s *Sort) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *Sort) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *Sort) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Sort
 	type plain Sort
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -145,7 +145,15 @@ func (v *ListSpec) Validate() error {
 	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
 		return fmt.Errorf("customAllValue cannot be set if allowAllValue is not set to true")
 	}
+
 	if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 && !v.AllowMultiple {
+		// If the default value list has only one element, convert it to a single value
+		if len(v.DefaultValue.SliceValues) == 1 {
+			v.DefaultValue.SingleValue = v.DefaultValue.SliceValues[0]
+			v.DefaultValue.SliceValues = nil
+
+			return nil
+		}
 		return fmt.Errorf("you can not use a list of default values if allowMultiple is set to false")
 	}
 

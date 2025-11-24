@@ -21,14 +21,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
-	"github.com/perses/perses/internal/api/rbac"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	promclient "github.com/prometheus/client_model/go"
@@ -36,18 +36,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var _ = rbac.RBAC(&testRBAC{})
+var _ = authorization.Authorization(&testRBAC{})
 var _ = dashboard.Service(&mockDashboardService{})
 
 type testRBAC struct {
 	allow bool
 }
 
-func (t *testRBAC) GetPermissions(_ string) map[string][]*role.Permission {
-	return map[string][]*role.Permission{}
+func (t *testRBAC) GetUser(_ echo.Context) (any, error) {
+	return nil, nil
 }
 
-func (t *testRBAC) HasPermission(_ string, _ role.Action, _ string, _ role.Scope) bool {
+func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
+	return "", nil
+}
+
+func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			return next(c)
+		}
+	}
+}
+
+func (t *testRBAC) GetPermissions(_ echo.Context) (map[string][]*role.Permission, error) {
+	return map[string][]*role.Permission{}, nil
+}
+
+func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
 	return t.allow
 }
 
@@ -55,11 +71,11 @@ func (t *testRBAC) IsEnabled() bool {
 	return true
 }
 
-func (t *testRBAC) Refresh() error {
-	panic("unimplemented")
+func (t *testRBAC) RefreshPermissions() error {
+	return nil
 }
 
-func (t *testRBAC) GetUserProjects(_ string, _ role.Action, _ role.Scope) []string {
+func (t *testRBAC) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
 	panic("unimplemented")
 }
 
@@ -71,14 +87,19 @@ func (*mockDashboardService) Validate(_ *v1.Dashboard) error {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) Create(_ apiInterface.PersesContext, _ *v1.Dashboard) (*v1.Dashboard, error) {
-	panic("unimplemented")
-}
-func (*mockDashboardService) Delete(_ apiInterface.PersesContext, _ apiInterface.Parameters) error {
+func (*mockDashboardService) Create(_ echo.Context, _ *v1.Dashboard) (*v1.Dashboard, error) {
 	panic("unimplemented")
 }
 
-func (m *mockDashboardService) Get(_ apiInterface.PersesContext, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+func (*mockDashboardService) Update(_ echo.Context, _ *v1.Dashboard, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) Delete(_ echo.Context, _ apiInterface.Parameters) error {
+	panic("unimplemented")
+}
+
+func (m *mockDashboardService) Get(_ apiInterface.Parameters) (*v1.Dashboard, error) {
 	if m.dashboard != nil {
 		return m.dashboard, nil
 	}
@@ -86,23 +107,19 @@ func (m *mockDashboardService) Get(_ apiInterface.PersesContext, _ apiInterface.
 	return nil, fmt.Errorf("not found")
 }
 
-func (*mockDashboardService) List(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]*v1.Dashboard, error) {
+func (*mockDashboardService) List(_ *dashboard.Query, _ apiInterface.Parameters) ([]*v1.Dashboard, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (*mockDashboardService) RawList(_ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) MetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (*mockDashboardService) MetadataList(_ *dashboard.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawMetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
-	panic("unimplemented")
-}
-
-func (*mockDashboardService) Update(_ apiInterface.PersesContext, _ *v1.Dashboard, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+func (*mockDashboardService) RawMetadataList(_ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 
@@ -115,7 +132,7 @@ func TestEndpoint(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)
@@ -142,7 +159,7 @@ func TestNotAllowed(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)
@@ -159,7 +176,7 @@ func TestDashboardDoesntExist(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.Set("user", &jwt.Token{
-		Claims: &crypto.JWTCustomClaims{},
+		Claims: &jwt.RegisteredClaims{},
 	})
 
 	err := endpoint.view(ctx)

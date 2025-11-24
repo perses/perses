@@ -38,6 +38,7 @@ export const VirtualizedSeries: React.FC<VirtualizedSeriesProps> = ({
     <Box
       sx={(theme) => ({
         padding: theme.spacing(0.5, 2),
+        width: 500,
         // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
         borderBottom: allowActions ? `1px solid ${theme.palette.divider}` : undefined,
         // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]

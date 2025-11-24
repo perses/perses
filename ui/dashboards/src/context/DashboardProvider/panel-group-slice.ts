@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef, LayoutDefinition, PanelGroupId } from '@perses-dev/core';
+import { getPanelKeyFromRef, LayoutDefinition, PanelGroupId, PanelGroupDefinition } from '@perses-dev/core';
 
-import { Layout } from 'react-grid-layout';
 import { StateCreator } from 'zustand';
 import { WritableDraft } from 'immer';
 import { generateId, Middleware } from './common';
@@ -41,35 +40,6 @@ export interface PanelGroupSlice {
    * Update the item layouts for a panel group when, for example, a panel is moved or resized.
    */
   updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
-}
-
-export interface PanelGroupDefinition {
-  id: PanelGroupId;
-  isCollapsed: boolean;
-  title?: string;
-  itemLayouts: PanelGroupItemLayout[];
-  itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
-}
-
-export interface PanelGroupItemLayout extends Layout {
-  i: PanelGroupItemLayoutId;
-}
-
-export type PanelGroupItemLayoutId = string;
-
-/**
- * Uniquely identifies an item in a PanelGroup.
- */
-export interface PanelGroupItemId {
-  panelGroupId: PanelGroupId;
-  panelGroupItemLayoutId: PanelGroupItemLayoutId;
-}
-
-/*
- * Check if two PanelGroupItemId are equal
- */
-export function isPanelGroupItemIdEqual(a?: PanelGroupItemId, b?: PanelGroupItemId): boolean {
-  return a?.panelGroupId === b?.panelGroupId && a?.panelGroupItemLayoutId === b?.panelGroupItemLayoutId;
 }
 
 /**
@@ -141,6 +111,7 @@ export function convertLayoutsToPanelGroups(
     panelGroups[panelGroupId] = {
       id: panelGroupId,
       isCollapsed: layout.spec.display?.collapse?.open === false,
+      repeatVariable: layout.spec.repeatVariable,
       title: layout.spec.display?.title,
       itemLayouts,
       itemPanelKeys,

@@ -12,6 +12,64 @@
 // limitations under the License.
 
 import { ListVariableSpec, TextVariableDefinition, TextVariableSpec, VariableDefinition } from '@perses-dev/core';
+import { VariableOption } from '../../../model';
+
+export type SortMethodName =
+  | 'none'
+  | 'alphabetical-asc'
+  | 'alphabetical-desc'
+  | 'numerical-asc'
+  | 'numerical-desc'
+  | 'alphabetical-ci-asc'
+  | 'alphabetical-ci-desc';
+
+export const SORT_METHODS: Record<
+  SortMethodName,
+  { label: string; sort: (input: VariableOption[]) => VariableOption[] }
+> = {
+  none: {
+    label: 'None',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice();
+    },
+  },
+  'alphabetical-asc': {
+    label: 'Alphabetical, asc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (a.label > b.label ? 1 : -1));
+    },
+  },
+  'alphabetical-desc': {
+    label: 'Alphabetical, desc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (a.label > b.label ? -1 : 1));
+    },
+  },
+  'numerical-asc': {
+    label: 'Numerical, asc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (parseInt(a.label) > parseInt(b.label) ? 1 : -1));
+    },
+  },
+  'numerical-desc': {
+    label: 'Numerical, desc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (parseInt(a.label) < parseInt(b.label) ? 1 : -1));
+    },
+  },
+  'alphabetical-ci-asc': {
+    label: 'Alphabetical, case-insensitive, asc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
+    },
+  },
+  'alphabetical-ci-desc': {
+    label: 'Alphabetical, case-insensitive, desc',
+    sort: (input: VariableOption[]): VariableOption[] => {
+      return input.slice().sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+    },
+  },
+};
 
 export type VariableEditorState = {
   name: string;

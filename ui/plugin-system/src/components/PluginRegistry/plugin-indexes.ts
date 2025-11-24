@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEvent } from '@perses-dev/core';
 import { useCallback, useRef } from 'react';
 import { PluginLoader, PluginMetadataWithModule, PluginModuleResource, PluginType } from '../../model';
+import { useEvent } from '../../utils';
 
 export interface PluginIndexes {
   // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)

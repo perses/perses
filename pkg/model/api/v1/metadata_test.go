@@ -93,7 +93,7 @@ func TestProjectMetadata_UpdateVersion(t *testing.T) {
 	}
 	// The idea here is to verify if we update multiple times a ProjectMetadata based on a previous version of the struct,
 	// we will have the correct version number.
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		old := m
 		// We reset the version of the current ProjectMetadata to simulate the fact the version should come from the previous struct
 		// and then being increased.

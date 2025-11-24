@@ -17,20 +17,6 @@ import { gcd } from './mathjs';
 export const MIN_STEP_INTERVAL_MS = 10;
 
 /**
- * Given a common time scale (see `getCommonTimeScale`), generates an array of
- * timestamp values in ms for the x axis of a graph.
- */
-export function getXValues(timeScale: TimeScale): number[] {
-  const xValues: number[] = [];
-  let timestamp = timeScale.startMs;
-  while (timestamp <= timeScale.endMs) {
-    xValues.push(timestamp);
-    timestamp += timeScale.stepMs;
-  }
-  return xValues;
-}
-
-/**
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
  * processes the time series values, filling in any timestamps that are missing
  * from the time series data with `null` values.
@@ -60,37 +46,6 @@ export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale): T
   }
 
   return processedValues;
-}
-
-/**
- * [DEPRECATED] Used for legacy LineChart 'category' axis approach.
- * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
- * gets the values for the y axis of a graph, filling in any timestamps that are
- * missing from the time series data with `null` values.
- */
-export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<number | null> {
-  let timestamp = timeScale.startMs;
-
-  const yValues: Array<number | null> = [];
-  for (const valueTuple of series.values) {
-    // Fill in values up to the current series value timestamp with nulls
-    while (timestamp < valueTuple[0]) {
-      yValues.push(null);
-      timestamp += timeScale.stepMs;
-    }
-
-    // Now add the current value since timestamp should match
-    yValues.push(valueTuple[1]);
-    timestamp += timeScale.stepMs;
-  }
-
-  // Add null values at the end of the series if necessary
-  while (timestamp <= timeScale.endMs) {
-    yValues.push(null);
-    timestamp += timeScale.stepMs;
-  }
-
-  return yValues;
 }
 
 /**

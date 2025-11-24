@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 import { ReactElement, useState } from 'react';
 import { renderWithContext } from '../../test';
-import { DefaultPluginKinds } from '../../model';
+import { DefaultPluginKinds, PluginType } from '../../model';
 import { PluginEditor } from './PluginEditor';
 import { PluginEditorProps } from './plugin-editor-api';
 
@@ -141,6 +141,29 @@ describe('PluginEditor', () => {
       // Wait for specified panel kind to load.
       const pluginKind = screen.getByLabelText('Variable Type');
       await waitFor(() => expect(pluginKind).toHaveTextContent('Ernie Variable 2'));
+    });
+  });
+
+  describe('Run Query Button', () => {
+    describe('When withRunQueryButton is true', () => {
+      ['TimeSeriesQuery', 'TraceQuery', 'ProfileQuery'].forEach((type) => {
+        it(`should render the run query button for ${type}`, () => {
+          const onChangeHandler = jest.fn();
+          renderWithContext(
+            <PluginEditor
+              pluginTypes={[type] as unknown as PluginEditorProps['pluginTypes']}
+              pluginKindLabel="Variable Type"
+              withRunQueryButton
+              value={{ selection: { type: type as PluginType, kind: '' }, spec: {} }}
+              onChange={onChangeHandler}
+            />
+          );
+          const queryButton = screen.getByTestId('run_query_button');
+          expect(queryButton).toBeInTheDocument();
+          userEvent.click(queryButton);
+          expect(onChangeHandler).toHaveBeenCalledTimes(1);
+        });
+      });
     });
   });
 });

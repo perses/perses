@@ -1,7 +1,9 @@
 # Authorization
 
-Perses uses a Role-based access control (RBAC) system to regulate access to resources based on user roles.  
-The RBAC API includes four kinds of resources: `GlobalRole`, `Role`, `GlobalRoleBinding`, and `RoleBinding`.  
+Perses uses a Role-based access control (RBAC) system to regulate access to resources based on user roles.
+
+The RBAC API includes four kinds of resources: `GlobalRole`, `Role`, `GlobalRoleBinding`, and `RoleBinding`.
+
 The RBAC implementation in Perses is heavily inspired by Kubernetes' RBAC model.
 
 ## Role and GlobalRole
@@ -12,7 +14,7 @@ no "deny" permissions.
 - A `Role` specifies permissions within a specific project. The project must be defined when the `Role` is created.
 - A `GlobalRole` applies to resources globally and is not limited to a project scope.
 
-### Role Example
+### Role example
 
 This example defines a `Role` in the "MySuperProject" project that grants edit access to dashboards:
 

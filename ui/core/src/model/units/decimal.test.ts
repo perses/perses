@@ -317,6 +317,21 @@ const DECIMAL_TESTS: UnitTestCase[] = [
     format: { unit: 'decimal', shortValues: true, decimalPlaces: 4 },
     expected: '1.0101B',
   },
+  {
+    value: 1234,
+    format: { shortValues: true },
+    expected: '1.23K',
+  },
+  {
+    value: 1234,
+    format: { shortValues: false },
+    expected: '1,234',
+  },
+  {
+    value: 1234,
+    format: { shortValues: true, decimalPlaces: 2 },
+    expected: '1.23K',
+  },
 ];
 
 describe('formatValue', () => {

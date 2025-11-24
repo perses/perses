@@ -12,14 +12,9 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { VariableDefinition, VariableSpec } from '@perses-dev/core';
+import { VariableDefinition, VariableSpec, ExternalVariableDefinition } from '@perses-dev/core';
 import { ReactElement } from 'react';
-import {
-  ExternalVariableDefinition,
-  useExternalVariableDefinitions,
-  useVariableDefinitionAndState,
-  useVariableDefinitions,
-} from '../../context';
+import { useExternalVariableDefinitions, useVariableDefinitionAndState, useVariableDefinitions } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
 import { Variable } from './Variable';
 
@@ -51,14 +46,14 @@ export function VariableListItem({ spec, source }: { spec: VariableSpec; source?
   }
   return (
     <Box
-      key={spec.name + source ?? ''}
+      key={spec.name + (source ?? '')}
       display={spec.display?.hidden ? 'none' : undefined}
       minWidth={`${MIN_VARIABLE_WIDTH}px`}
       maxWidth={`${MAX_VARIABLE_WIDTH}px`}
       flexShrink={0}
       data-testid={'variable-' + spec.name}
     >
-      <Variable key={spec.name + source ?? ''} name={spec.name} source={source} />
+      <Variable key={spec.name + (source ?? '')} name={spec.name} source={source} />
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,9 +14,11 @@
 export * from './calculations';
 export * from './dashboard';
 export * from './datasource';
+export * from './datasource-api';
 export * from './definitions';
 export * from './display';
 export * from './ephemeraldashboard';
+export * from './external-variable';
 export * from './http';
 export * from './http-proxy';
 export * from './kind';
@@ -24,6 +26,7 @@ export * from './layout';
 export * from './legend';
 export * from './notice';
 export * from './otlp';
+export * from './panel-group';
 export * from './panels';
 export * from './project';
 export * from './query';
@@ -36,6 +39,8 @@ export * from './time';
 export * from './time-series-data';
 export * from './time-series-queries';
 export * from './trace-data';
+export * from './profile-data';
+export * from './log-data';
 export * from './transforms';
 export * from './units';
 export * from './user';

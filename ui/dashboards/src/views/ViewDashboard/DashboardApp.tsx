@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, useEffect } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme, useChartsContext } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
@@ -27,37 +27,41 @@ import {
   EmptyDashboardProps,
   EditJsonDialog,
   SaveChangesConfirmationDialog,
+  LeaveDialog,
 } from '../../components';
 import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
-  emptyDashboardProps?: Partial<EmptyDashboardProps>;
   dashboardResource: DashboardResource | EphemeralDashboardResource;
-  dashboardTitleComponent?: JSX.Element;
-  onSave?: OnSaveDashboard;
-  onDashboardChange?: (dashboard: DashboardResource) => void; // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
-  onDiscard?: (entity: DashboardResource) => void;
-  initialVariableIsSticky?: boolean;
+  emptyDashboardProps?: Partial<EmptyDashboardProps>;
   isReadonly: boolean;
   isVariableEnabled: boolean;
   isDatasourceEnabled: boolean;
   isCreating?: boolean;
-  dashboardControlsComponent?: JSX.Element;
+  dashboardControlsComponent?: JSX.Element; // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
+  isInitialVariableSticky?: boolean;
+  // If true, browser confirmation dialog will be shown when navigating away with unsaved changes (closing tab, ...).
+  isLeavingConfirmDialogEnabled?: boolean;
+  dashboardTitleComponent?: ReactNode;
+  onSave?: OnSaveDashboard;
+  onDiscard?: (entity: DashboardResource) => void;
+  onDashboardChange?: (dashboard: DashboardResource) => void; // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
 }
 
 export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const {
     dashboardResource,
-    dashboardTitleComponent,
     emptyDashboardProps,
-    onSave,
-    onDiscard,
-    initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,
     isDatasourceEnabled,
     isCreating,
-    dashboardControlsComponent,
+    isInitialVariableSticky,
+    isLeavingConfirmDialogEnabled,
+    dashboardTitleComponent,
+    onSave,
+    onDiscard,
+    dashboardControlsComponent, // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
     onDashboardChange, // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
   } = props;
 
@@ -127,7 +131,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
       <DashboardToolbar
         dashboardName={dashboardResource.metadata.name}
         dashboardTitleComponent={dashboardTitleComponent}
-        initialVariableIsSticky={initialVariableIsSticky}
+        initialVariableIsSticky={isInitialVariableSticky}
         onSave={onSave}
         isReadonly={isReadonly}
         isVariableEnabled={isVariableEnabled}
@@ -159,6 +163,9 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         <DashboardDiscardChangesConfirmationDialog />
         <EditJsonDialog isReadonly={!isEditMode} disableMetadataEdition={!isCreating} />
         <SaveChangesConfirmationDialog />
+        {isLeavingConfirmDialogEnabled && isEditMode && (
+          <LeaveDialog original={originalDashboard} current={dashboard} />
+        )}
       </Box>
     </Box>
   );

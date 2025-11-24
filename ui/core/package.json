@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.51.0-rc.0",
+  "version": "0.53.0-beta.2",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -18,8 +18,8 @@
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
-    "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
-    "build:esm": "swc ./src -d dist --config-file ../.swcrc",
+    "build:cjs": "swc ./src -d dist/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
+    "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
@@ -34,10 +34,6 @@
     "mathjs": "^10.6.4",
     "numbro": "^2.3.6",
     "zod": "^3.21.4"
-  },
-  "peerDependencies": {
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16"

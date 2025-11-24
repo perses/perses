@@ -98,7 +98,7 @@ func (c *RestConfigClient) Validate() error {
 }
 
 func NewRoundTripper(timeout time.Duration, tlsConfig *secret.TLSConfig) (http.RoundTripper, error) {
-	tlsCfg, err := secret.BuildTLSConfig(tlsConfig)
+	tlsCfg, err := tlsConfig.BuildTLSConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 			return nil, getPasswordErr
 		}
 		httpClient = c.Client(ctx, &oauth2.Token{
-			AccessToken: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", config.BasicAuth.Username, password))),
+			AccessToken: base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", config.BasicAuth.Username, password)),
 			TokenType:   "basic",
 		})
 	}

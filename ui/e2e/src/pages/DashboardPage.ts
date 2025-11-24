@@ -68,6 +68,7 @@ export class DashboardPage {
 
   readonly toolbar: Locator;
   readonly timePicker: Locator;
+  readonly refreshButton: Locator;
   readonly refreshIntervalPicker: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
@@ -95,8 +96,9 @@ export class DashboardPage {
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
     this.timePicker = page.getByRole('combobox', { name: 'Select time range' });
+    this.refreshButton = page.getByRole('button', { name: 'Refresh', exact: true });
     this.refreshIntervalPicker = page.getByRole('combobox', { name: 'Select refresh interval' });
-    this.editButton = this.toolbar.getByRole('button', { name: /Edit$/ });
+    this.editButton = this.toolbar.getByRole('button', { name: 'Edit', exact: true });
     this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
     this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });
     this.addPanelGroupButton = this.toolbar.getByRole('button', { name: 'Add Panel Group' });
@@ -126,7 +128,18 @@ export class DashboardPage {
   async saveChanges(): Promise<void> {
     await this.saveButton.click();
     await this.editButton.isVisible();
+
+    // Check if validation dialog is present and confirm it
+    const saveConfirmButton = this.page.getByRole('button', { name: 'Save Changes' });
+    if (await saveConfirmButton.isVisible()) {
+      await saveConfirmButton.click();
+    }
+
     await expect(this.alert).toContainText('success');
+  }
+
+  async refreshDashboard(): Promise<void> {
+    await this.refreshButton.click();
   }
 
   getDialog(name: string): Locator {
@@ -201,7 +214,7 @@ export class DashboardPage {
     const dialog = this.getDialog('edit panel group');
     const nameInput = dialog.getByLabel('Name');
     await nameInput.clear();
-    await nameInput.type(name);
+    await nameInput.fill(name);
     await dialog.getByRole('button', { name: 'Apply' }).click();
   }
 

@@ -13,4 +13,8 @@
 
 package common
 
-#calculation: "first" | *"last" | "first-number" | "last-number" | "mean" | "sum" | "min" | "max"
+#calculation: #calculationAggregation // kind-of default value defined for retro-compatibility. Please rather use below types directly for new plugins.
+
+#calculationAggregation: "first" | *"last" | "first-number" | "last-number" | "mean" | "sum" | "min" | "max"
+
+#calculationComparison: "abs" | "relative"

@@ -1,76 +1,263 @@
 # Changelog
 
-## 0.51.0-rc.0 / 2025-05-12
+## 0.53.0-beta.2 / 2025-11-07
 
-We are finally reaching the release candidate for the 0.51.0 version.
-We are reaching a confident level of stability, and we should not expect any major changes before the final release.
+This new beta release is fixing the variable migration issue introduced in beta.1 by updating all plugins to support the new variable migration format.
 
-In this new release, we are introducing new features and enhancements, including:
+We are also introducing another breaking change in the TLS config to simplify the configuration.
+The previous version was mixing two syntaxes to set TLS across the various possible configuration that could lead to confusion (camelCase and snake_case).
+This breaking change is impacting only the **SQL database configuration**.
 
-- A new plugin list page in the UI, allowing users to view and manage installed plugins.
-- The ability to configure CORS settings for the application.
-- Improvements to the CLI, including a command to list installed plugins and enhancements to the plugin development process.
-- The addition of zoom in/zoom out buttons.
+In the SQL configuration, if the tls_config is used, then you should change your config like that:
 
-- [FEATURE] Add zoom in/zoom out buttons (#2810)
-- [FEATURE] CLI: list the plugins (#2889)
-- [FEATURE] Allows configuring CORS (#2861)
-- [FEATURE] Implement plugin list display page (#2842)
-- [FEATURE] Table: add optional pagination (#2811)
-- [ENHANCEMENT] Plugin: add a status to know if the plugin is loaded and in dev (#2898)
-- [ENHANCEMENT] Enable Datasource Variables (#2876)
-- [ENHANCEMENT] Remove the `cue login` step (#2867)
-- [ENHANCEMENT] Add histograms typing (#2858)
-- [ENHANCEMENT] Add OAuth auth type to Secret UI (#2838)
-- [ENHANCEMENT] use singleton and lazy initialization for plugin runtime (#2833)
-- [ENHANCEMENT] Add kubebuilder annotation to common.URL (#2891)
-- [BUGFIX] Config: hide secret in the datasource discovery (#2888)
-- [BUGFIX] Adjust mousemove listener to fix navigator undef error (#2886)
-- [BUGFIX] timeseries tooltip: new assembleTransform logic for tooltip position (#2878)
-- [BUGFIX] Dashboard import: fix wrong form reset + UX improvements (#2881)
-- [BUGFIX] Fix improper state update in `GridLayout` useMemo (#2846)
-- [BUGFIX] Read clientSecretFile when configuring rest client with oauth (#2863)
-- [BUGFIX] Fix OAuth struct parse errors + typo in json (#2862)
-- [BUGFIX] StatChart: remove unnecessary scrollbars due to rounding (#2839)
-- [BUGFIX] `dac preview`: fix nil pointer error for brand new dashboards (#2817)
-- [BREAKINGCHANGE] CLI/PLUGIN: implement start command and deep review of how to load a dev plugin (#2831)
-- [BREAKINGCHANGE] core: switch the trace data model to OpenTelemetry (OTLP) (#2873)
-- [DOC] Update embedding panels guide with the latest recommendations (#2899)
-- [DOC] Document some of the not-resource-related API endpoints (#2874)
-- [DOC] Add kubecon pres to the list of materials (#2872)
-- [DOC] Remove duplicated section (#2837)
-- [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
-- [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
+```
+ca_file -> caFile
+cert_file -> certFile
+key_file -> keyFile
+server_name -> serverName
+insecure_skip_verify -> insecureSkipVerify
+min_version -> minVersion (values: TLS10, TLS11, TLS12, TLS13)
+max_version -> maxVersion (values: TLS10, TLS11, TLS12, TLS13)
+```
 
-## 0.51.0-beta.1 / 2025-03-21
+This will ensure a consistent configuration across all datasources supporting TLS.
 
-This new beta version is mostly improving the CLI command around the plugin development.
-We saw issues when building plugins with the CLI specially when cuelang required downloading dependencies.
-We improved the way to handle this, and now the plugin build should be more reliable.
+On top of that, this release is also introducing two new major features: a LogsTable panel and two new plugins: VictoriaLogs and ClickHouse provided directly by the community.
 
-We have also upgraded every plugin to the latest version.
+Note that since these two data-sources are provided by the community, they are not officially supported by the Perses team.
+And as such, soon we will come with a governance model to manage community plugins. In later release, these plugins might be removed in the main images, depending on the governance adopted.
 
-- [FEATURE] Publish CUE module to Central Registry (#2761)
-  [ENHANCEMENT] adding extra args support dac build (#2801)
-- [ENHANCEMENT] CLI/DAC: ignore a list of pre-defined folder when building dashboard (#2800)
-- [ENHANCEMENT] CLI/PLUGIN: build includes the version in the archive name (#2804)
-- [ENHANCEMENT] CLI/PLUGIN: Improve the way to vendor cue dependencies and rely on cue default caching (#2795)
-- [ENHANCEMENT] CLI/PLUGIN: Use cue mod tidy to download cue deps (#2752)
-- [ENHANCEMENT] Upgrade dependency version shared to the plugin (#2750)
-- [BUGFIX] CUE SDK: fix "cannot reference optional field" error (#2812)
-- [BUGFIX] Implement workaround to fix ScatterPlot plugin (#2760)
-- [BUGFIX] CLI: plugin build should consider all subfolder when getting the cue dependencies (#2748)
-- [BREAKINGCHANGE] Plugin: when extracting plugin archive, perses includes the archive name as at top folder (#2806)
-- [BREAKINGCHANGE] `percli dac setup`: rely on CUE's new modules for deps installation (#2724)
-- [DOC] Mention plugin builders in CUE SDK doc (#2769)
-- [DOC] Add HTTP Proxy documentation (#2788)
-- [DOC] Add (back) common package doc (#2781)
-- [DOC] Remove dac docs about prometheus (#2728)
-- [DOC] Referencing various materials talking about Perses (#2756)
-- [DOC] DaC: document the base List variable + Remove static list variable (moved to perses/plugins) (#2753)
-- [DOC] Update requirement when building perses (#2754)
+### Core & UI
 
-## 0.51.0-beta.0 / 2025-03-10
+- [FEATURE] Add LogsTable (#3542)
+- [FEATURE] Add VictoriaLogs & ClickHouse plugins (#3540)
+- [FEATURE] Add temperature units (#3531)
+- [ENHANCEMENT] Add error next to query in editor + refreshing a query only refresh the targeted query (#3532)
+- [ENHANCEMENT] Added DateTime formatting (#3520)
+- [ENHANCEMENT] Preventing DB Ping from hanging forever (#3541)
+- [ENHANCEMENT] Add support for nanoseconds and microseconds in yAxis settings (#3528)
+- [BUGFIX] Fix empty value in create variable form (#3517)
+- [BUGFIX] search: refactor plain text functions to JSX (#3538)
+- [BREAKINGCHANGE] Use only secret tls config in the config (#3535)
+- [BUGFIX/BREAKINGCHANGE] Remove memory leak on refresh + remove refreshKey trick (#3518)
+
+### Plugins improvements
+
+- [FEATURE] PieChart: multiple enhancements & bug fixes (perses/plugins#425)
+- [FEATURE] Table: conditional format & filtering at column level (perses/plugins#415)
+- [ENHANCEMENT] table: add option for hiding column by default + fix transformData + add missing SDK methods (perses/plugins#413)
+- [ENHANCEMENT] TracingGanttChart: support span attributes with type double (perses/plugins#421)
+- [ENHANCEMENT] Tempo: Use absolute time from TimeRangeProvider for TraceQL auto-completion (perses/plugins#409)
+- [ENHANCEMENT] Tempo: use default MUI checkbox icons (perses/plugins#404)
+- [ENHANCEMENT] GaugeChart: improve responsiveness (perses/plugins#399)
+- [BUGFIX] Tempo: Do not fetch filter bar values on every re-render (perses/plugins#408)
+- [BUGFIX] StatChart & StatusHistoryChart: Grafana migration: fix expected field missing (perses/plugins#411)
+- [BUGFIX] : Add plugins filter to query editor from prometheus explorer (perses/plugins#428)
+- [BUGFIX] Prometheus: make variables compatible with datasource references (perses/plugins#422)
+- [BUGFIX] timeseries plugin sdk: palette value is optional (perses/plugins#417)
+- [BUGFIX] TimeSeriesChart: migration: handle lineWidth as string (perses/plugins#401)
+
+## 0.53.0-beta.1 / 2025-11-05
+
+Dear user, among other changes, we are breaking the way the migration of the variables are working.
+
+From this version, the migration of the variables will be done using the new variable migration format that is more flexible and allows to cover more use cases.
+This release will allow us to update the plugins depending on this new format. While the plugins are not updated yet, the variable migration is broken.
+That's why we are kindly asking user to avoid using this beta release until we are releasing a new one. The beta.2 will contain the plugins updates and will be available really quickly after this beta.1.
+
+- [ENHANCEMENT] app: enable keepPreviousData by default (#3512)
+- [ENHANCEMENT] otlpcommonv1.AnyValue: add doubleValue (#3496)
+- [ENHANCEMENT] Reduce panel header size (#3436)
+- [ENHANCEMENT] Refactor panel header elipssis (#3482)
+- [BUGFIX] make time range config optional (#3513)
+- [BUGFIX] Apply plugin filter over Multi Query Editor (#3514)
+- [BUGFIX] Save the refresh interval changes from UI (#3507)
+- [BUGFIX] Fix otlpcommonv1.AnyValue: arrayValue.values is optional (#3495)
+- [BUGFIX] dashboard - ListVariable: limiting the max height with a lot of selected values (#3468)
+- [BUGFIX] CLI/Migrate: put back flag --input that has been removed (#3471)
+- [BREAKINGCHANGE] Grafana migration: change variable migration format for more flexibility (#3486)
+- [BREAKINGCHANGE] Re organize core package to contain interfaces only (#3449)
+- [BREAKINGCHANGE] Remove support of windows/arm (#3442)
+
+## 0.53.0-beta.0 / 2025-10-07
+
+### Core & UI
+
+- [FEATURE] dasboards - ListVariable Select: add checkbox and global checkbox for options (#3415)
+- [FEATURE] Implement port capturing for dev servers and enhance plugin management (#3411)
+- [FEATURE] Add system-wide Banner component for status notifications (#3289) (#3290)
+- [FEATURE] Add Panel Editor Context (#3346)
+- [ENHANCEMENT] Add label value for the variable preview (#3438)
+- [ENHANCEMENT] add PERSES_CLI env var for plugin dev server (#3435)
+- [ENHANCEMENT] Highlight the important dashboards (#3426)
+- [ENHANCEMENT] add custom pattern for matching plugin ports (#3425)
+- [ENHANCEMENT] CLI/LINT: extract plugin archive when provided (#3424)
+- [ENHANCEMENT] Added ByteUnits for SI and IEC standard (#3421)
+- [ENHANCEMENT] All dialogs should use Perses Dialog wrapper (#3417)
+- [ENHANCEMENT] add a public path function for plugins generation for reverse proxies (#3408)
+- [ENHANCEMENT] Improve display of error messages returned by the backend (#3405)
+- [ENHANCEMENT] Allow UI to select default datasource during migration (#3373)
+- [ENHANCEMENT] Improve percli migrate command to support default datasource (#3358)
+- [BUGFIX] Grafana migration: handle "transparent" color (#3439)
+- [BUGFIX] explore: re-enable collapse state stored in localStorage (#3427)
+- [BUGFIX] Fix navigation after creating a new dashboard (#3422)
+- [BUGFIX] app: fix redirection after login (#3419)
+- [BUGFIX] Add sort functionality to the Variables (#3389)
+- [BUGFIX] Add default spec plugin kind (#3388)
+- [BUGFIX] Variable Preview Check the data to assure the data is not undefined (#3387)
+- [BUGFIX] Remove var_preview values default value empty array (#3386)
+- [BUGFIX] pass baseUrl to loadPlugin (#3374)
+- [BUGFIX] Add abort signal to datasource variables query (#3376)
+- [BUGFIX] dashboards: Leave dialog: ignore query params change when editing dashboard (#3367)
+- [BUGFIX] use globalThis object over global (#3372)
+- [BUGFIX] Add abort signal to plugin get time series data (#3369)
+- [BUGFIX] Fix TLS Config CA, Cert, and Key fields to support multiline input (#3364)
+- [BREAKINGCHANGE] Improve support for reverse proxy configuration (#3377)
+- [DOC] Add warning about the usage api_prefix config (#3410)
+- [DOC] Add doc to install perses using package manager (#3366)
+- [DOC] Adds new YouTube material for Perses (#3355)
+- [DOC] Update some concept docs & fix images (#3349)
+- [DOC] Document Homebrew installation option (#3370)
+
+### Plugins improvements
+
+- [FEATURE] TimeSeriesChart: support opacity & line style overrides (perses/plugins#386)
+- [FEATURE] TimeSeriesChart: Line style customization (perses/plugins#347)
+- [ENHANCEMENT] TimeSeriesChart Schema fix + additional tests (perses/plugins#380)
+- [ENHANCEMENT] TimeSeriesChart: Visual: hide useless controls instead of disabling (perses/plugins#345)
+- [ENHANCEMENT] TimeSeriesChart: migration: support lineStyle & opacity override (perses/plugins#387)
+- [ENHANCEMENT] Tempo: TempoExplorer: always show panel actions (download icon) (perses/plugins#379)
+- [ENHANCEMENT] TraceTable: sort by trace start time by default (perses/plugins#321)
+- [ENHANCEMENT] StaticListVariable: allow empty value (perses/plugins#398)
+- [ENHANCEMENT] StaticListVariable: migration: handle the "no options" case (perses/plugins#390)
+- [ENHANCEMENT] StatChart: improve Grafana migration (perses/plugins#281)
+- [BUGFIX] Table: fix validation for panel embedding (perses/plugins#320)
+- [BUGFIX] DatasourceVariable: fix grafana migration logic (perses/plugins#317)
+
+## 0.52.0 / 2025-09-15
+
+The release of Perses v0.52.0 introduces significant new features and improvements.
+
+This update expands Perses' observability capabilities by introducing support for logging and continuous profiling,
+along with new plugins for Pyroscope, Flame Chart, Loki, and log visualization.
+
+Additional enhancements include a heatmap panel for Prometheus histograms, a quick query viewer, panel group variable repeat,
+usability improvements, and upgraded CLI commands to streamline plugin development and schema testing.
+
+- [FEATURE] Add Pyroscope and FlameChart plugin (#3154)
+- [FEATURE] Add currency value formatting (#3132)
+- [FEATURE] TimeSeries export functionality for plugins (#3129)
+- [FEATURE] Add HeatMap plugin (#3143)
+- [FEATURE] Support LogQuery type (#3104) (#3163)
+- [FEATURE] Support SQL queries on the Perses proxy (#3061)
+- [FEATURE] CLI/PLUGIN: Unregister plugin from dev environment (#3069)
+- [FEATURE] Explorer: allow users to collapse tabs menu (#3064)
+- [FEATURE] Add user profile (#2984)
+- [FEATURE] Core: Add ProfileQuery (#2959) (#3017)
+- [FEATURE] Dashboard: leave confirmation dialog with unsaved changes works with react-router navigation (#3286) (#3339) (#3268)
+- [FEATURE] Add Quick Query Viewer (#3214)
+- [FEATURE] Add Grafana panel links migration support (#3259)
+- [FEATURE] Add tool tip in case of panel header ellipsis (#3255)
+- [FEATURE] Enhance variable replacement with custom formats (#3250)
+- [FEATURE] Dashboard: add optional confirmation dialog on unsaved leave (#3243)
+- [FEATURE] Dashboard: add panel group repeat based on a variable (#3106)
+- [FEATURE] Plugins/TracingGanttChart: show span links (perses/plugins#214)
+- [FEATURE] Plugins/TracingGanttChart: support downloading traces as JSON (perses/plugins#179)
+- [FEATURE] Plugins/TimeSeriesChart: Add CSV export functionality (perses/plugins#208)
+- [FEATURE] Plugins/Tempo: add attribute filter search (perses/plugins#194)
+- [FEATURE] CLI: new command `plugin test-schemas` (#3168)
+- [ENHANCEMENT] Allow direct datasource queries without trailing path (#3217)
+- [ENHANCEMENT] adds more mappings for throughput units (#3267)
+- [ENHANCEMENT] Legend: hide useless controls instead of disabling (#3334)
+- [ENHANCEMENT] Add clear button to search bar (#3337)
+- [ENHANCEMENT] PluginEditor: improve layout + responsive (#3331)
+- [ENHANCEMENT] Sort PluginKindSelect options (#3321)
+- [ENHANCEMENT] Add readonly prop to the data source select (#3317)
+- [ENHANCEMENT] Plugins/Tempo: add missing limit to the query in sdk/go (perses/plugins#270)
+- [ENHANCEMENT] Plugins/Tempo: convert base64-encoded trace IDs and span IDs to hex-encoding (perses/plugins#191)
+- [ENHANCEMENT] Plugins/TimeSeriesChart: Grafana migration: migrate byName-based fixedColor overrides (perses/plugins#275)
+- [ENHANCEMENT] Plugins/TimeSeriesChart: migration: Y axis: support label + new data model for min & max (perses/plugins#340)
+- [ENHANCEMENT] Plugins/TimeSeriesChart: improve migration to tackle byRegexp color overrides (perses/plugins#334)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show trace metadata on top of chart (perses/plugins#193)
+- [ENHANCEMENT] Plugins/TracingGanttChart: show span metadata in attribute pane (perses/plugins#192)
+- [ENHANCEMENT] Plugins/TracingGanttChart: support linking to Gantt Chart with a span selected (perses/plugins#282)
+- [ENHANCEMENT] Plugins/TracingGanttChart: add number of events and links in tab (perses/plugins#341)
+- [ENHANCEMENT] Plugins/TraceTable: sort by trace start time by default (perses/plugins#321)
+- [ENHANCEMENT] Plugins/StaticListVariable migration: handle escaped commas in query values (perses/plugins#277)
+- [ENHANCEMENT] Plugins/Prometheus: Redesign metric finder filters (perses/plugins#175)
+- [ENHANCEMENT] Plugins/Prometheus: Increase size of the finder tab datasource dropdown in the Explorer view (perses/plugins#195)
+- [ENHANCEMENT] Plugins/Prometheus: Round the promql response time (perses/plugins#206)
+- [ENHANCEMENT] Plugins/Prometheus: add expand/reduce next at the top of the list (perses/plugins#343)
+- [ENHANCEMENT] Plugins/Prometheus: improve explorer filters (perses/plugins#342)
+- [ENHANCEMENT] bump all plugin version and add Loki plugin (#3260)
+- [ENHANCEMENT] update ListSpec validation to handle single default value conversion (#3239)
+- [ENHANCEMENT] CLI/PLUGIN: schema files are watched and reloaded when modified (#3190)
+- [ENHANCEMENT] CLI/PLUGIN: improve the condition to run npm ci (#3206)
+- [ENHANCEMENT] CLI/PLUGIN: improve output of the cmd test-schemas (#3194)
+- [ENHANCEMENT] create RouterProvider to remove hard dependency on react-router in plugins (#3140)
+- [ENHANCEMENT] Spec: make `unit` field in `format` optional (#3035)
+- [ENHANCEMENT] Plugins List: sort plugins (#3099)
+- [ENHANCEMENT] Configuration: Check the default plugin path instead of checking environment (#3070)
+- [ENHANCEMENT] stronger plugin format validation (#3020)
+- [ENHANCEMENT] Go SDK: Allow passing description as a dashboard option (#2998)
+- [ENHANCEMENT] Explorer: Add Execute Query Button to query editors (#3049)
+- [BREAKINGCHANGE] Cleanup spec editor before the form is submitted (#3269)
+- [BREAKINGCHANGE] Plugins/TracingGanttChart: configure attribute links in panel spec instead of panel props (perses/plugins#210)
+- [BREAKINGCHANGE] Plugins/TraceTable: configure link in panel spec (perses/plugins#211)
+- [BREAKINGCHANGE] ScatterChart: configure link in panel spec (perses/plugins#212)
+- [BREAKINGCHANGE] Watch the changes of the unknown specs in all Editor Plugins (#3203)
+- [BUGFIX] fix merge indexed columns regex (#3341)
+- [BUGFIX] Simplify the panels management (#3332)
+- [BUGFIX] Readd ReactRouterProvider (#3327)
+- [BUGFIX] Grafana migration: fix invisible group generated for orphan panels (#3271)
+- [BUGFIX] Remove Variable Preview refresh button (#3298)
+- [BUGFIX] Force a refresh time range when the Run Query Button is clicked every time (#3287)
+- [BUGFIX] Plugins/Tempo: do not escape raw strings in TraceQL auto-complete (perses/plugins#324)
+- [BUGFIX] Plugins/Tempo filter bar: escape backslash (perses/plugins#279)
+- [BUGFIX] Plugins/Tempo TraceQL editor: escape label values and support backticks (perses/plugins#278)
+- [BUGFIX] Plugins/Table: prevent failing migration on undefined fields (perses/plugins#274)
+- [BUGFIX] Plugins/Prometheus: handle datasource as a variable in the cue schema (perses/plugins#237)
+- [BUGFIX] Plugins/Prometheus: fix wrong usage of close() in schema (perses/plugins#159)
+- [BUGFIX] Plugins/Prometheus: CUE SDK: fix "incomplete value string" error (perses/plugins#100)
+- [BUGFIX] Plugins/Prometheus: Set the time range end according to the step and start (perses/plugins#213)
+- [BUGFIX] Plugins/Prometheus: move PromQL Expression label higher to avoid overlap with editor (perses/plugins#189)
+- [BUGFIX] Plugins/Prometheus: query-editor: use readonly instead of disabled (perses/plugins#374)
+- [BUGFIX] Plugins/PieChart: Add multi-column feature to the legend table (perses/plugins#238)
+- [BUGFIX] Plugins/PieChart: Remove the static text Access from the tooltip (perses/plugins#207)
+- [BUGFIX] Plugins/StatChart: Fix color for zero values (perses/plugins#224)
+- [BUGFIX] Fix typo in error message (#3257)
+- [BUGFIX] Remove Click away to avoid unnecessary endpoint call (#3238)
+- [BUGFIX] Add refresh token to the variable fetch (#3231)
+- [BUGFIX] Interaction with controls should not update spec directly (perses/plugins#326)
+- [BUGFIX] Add watch_query_changes to fix run query button issue (#3192)
+- [BUGFIX] Show Run Query Button accordingly (#3185)
+- [BUGFIX] Fix Piechart legend value (#3162)
+- [BUGFIX] set default panel header height to avoid layout shift (#3165)
+- [BUGFIX] Avoid dashboard name duplication from the front-end side (#3141)
+- [BUGFIX] Add optional validation to the insecure skip verify (#3136)
+- [BUGFIX] Handle Piechart tooltip overlap with legend (#3128)
+- [BUGFIX] UI: remove cookies on token refresh fail (#3115)
+- [BUGFIX] UI: After selecting a project in import dashboard import button stays disabled unless clicked outside (#3083)
+- [BUGFIX] Spec: update datasource selector to include datasourcevariable (#3111)
+- [BUGFIX] CLI/migrate: replace `project` by `namespace` when migrating to CR (#3073)
+- [BUGFIX] UI: use YAML 1.1 spec to export dashboards (#3072)
+- [BUGFIX] Explorer: Fix tabs in random order (#3043)
+- [DOC] Add some hyperlinks in Plugin concept doc (#3295)
+- [DOC] User Documentation on project concept (#3293)
+- [DOC] add variable interpolation format docs (#3256)
+- [DOC] Add concept doc for Variable + few patches (#3138)
+- [DOC] update materials with the Rawkode live (#3127)
+- [DOC] patch datasource discovery doc (#3130)
+- [DOC] docs: fix wrong redirect_url in examples (#3148)
+- [DOC] Add link to the API specs in the provisioning doc (#3032)
+- [DOC] Improve datasources concept doc (#3007)
+- [DOC] Add concept doc for Datasources (#3004)
+- [DOC] remove plugin development configuration doc (#3002)
+- [DOC] Fix docs for plugin configuration (#3000)
+- [DOC] Add model doc for missing common defs (#2987)
+- [DOC] Fix format issue for mkdocs syntax (#2985)
+
+## 0.51.0 / 2025-06-06
 
 This release is one of the biggest releases we ever made.
 On top of many features and improvements, we are introducing a new plugin architecture that allows you to develop external plugins and load them in Perses.
@@ -78,15 +265,28 @@ As part of this change we are introducing a new repository `perses/plugins` cont
 
 We have also improved the documentation, highlighting features that were implemented some time ago already but not well advertised (like datasource discovery and ephemeral dashboards)
 
-Even if we already have tested this version and received constructive feedback from the community, we prefer to provide a beta version to ensure that everything is working as expected.
-We will continue to improve the documentation and the plugins in the coming weeks.
-
+- [FEATURE] Add zoom in/zoom out buttons (#2810)
+- [FEATURE] CLI: list the plugins (#2889)
+- [FEATURE] Allows configuring CORS (#2861)
+- [FEATURE] Implement plugin list display page (#2842)
+- [FEATURE] Table: add optional pagination (#2811)
+- [FEATURE] Support Datasource Variables (#2876)
+- [FEATURE] Publish CUE module to Central Registry (#2761)
 - [FEATURE] By configuration, disable datasource and variable (#2673)
 - [FEATURE] Support Custom Lint rules to validate dashboard (#2684)
-- [FEATURE] Add OAuth secret type for Datasources (#2631)
+- [FEATURE] Add OAuth secret type for Datasources (#2631) (#2838)
 - [FEATURE] Add YAML and Custom Resource support when downloading dashboard formats (#2658)
 - [FEATURE] Label metrics in stat chart (#2574)
 - [FEATURE] Value mapping settings for Status History and Stat Chart (#2462)
+- [ENHANCEMENT] add perses-dev core package to shared modules, upgrade versions (#2980)
+- [ENHANCEMENT] CLI: improve the "no args are supported" feedback for several commands (#2974)
+- [ENHANCEMENT] pass rest of options from queryOptions (#2948)
+- [ENHANCEMENT] data source settings editor: use proxy mode by default (#2915)
+- [ENHANCEMENT] Invalid content type when it is not JSON (#2920)
+- [ENHANCEMENT] Add histograms typing (#2858)
+- [ENHANCEMENT] Add kubebuilder annotation to common.URL (#2891)
+- [ENHANCEMENT] adding extra args support dac build (#2801)
+- [ENHANCEMENT] CLI/DAC: ignore a list of pre-defined folder when building dashboard (#2800)
 - [ENHANCEMENT] Adds a way to skip the installation of the npm deps (#2720)
 - [ENHANCEMENT] CLI/Migrate: support CR as a migration format (#2682)
 - [ENHANCEMENT] Support conditional queryOptions for panels (#2662)
@@ -103,6 +303,18 @@ We will continue to improve the documentation and the plugins in the coming week
 - [ENHANCEMENT] `percli dac diff`: add output + avoid early return when processing a directory (#2500)
 - [ENHANCEMENT] DaC CUE SDK: accurate constraints for duration attributes (#2525)
 - [ENHANCEMENT] DaC CUE SDK: add datasource param to the var group builder (#2524)
+- [BUGFIX] ListVariable Infinite Re-render (#2939)
+- [BUGFIX] Fix missing Echart extensions & cleanup GaugeChart (#2925)
+- [BUGFIX] Config: hide secret in the datasource discovery (#2888)
+- [BUGFIX] Adjust mousemove listener to fix navigator undef error (#2886)
+- [BUGFIX] timeseries tooltip: new assembleTransform logic for tooltip position (#2878)
+- [BUGFIX] Dashboard import: fix wrong form reset and UX improvements (#2881)
+- [BUGFIX] Fix improper state update in `GridLayout` useMemo (#2846)
+- [BUGFIX] Read clientSecretFile when configuring REST client with oauth (#2863)
+- [BUGFIX] Fix OAuth struct parse errors and typo in json (#2862)
+- [BUGFIX] StatChart: remove unnecessary scrollbars due to rounding (#2839)
+- [BUGFIX] `dac preview`: fix nil pointer error for brand new dashboards (#2817)
+- [BUGFIX] Implement workaround to fix ScatterPlot plugin (#2760)
 - [BUGFIX] HTTPSettingsEditor: remove directUrl/proxy of previous value (#2739)
 - [BUGFIX] Table: fix reorder columns button tooltip (#2722)
 - [BUGFIX] Discovery: Fix label selector builder and empty value in cuelang (#2723)
@@ -125,8 +337,22 @@ We will continue to improve the documentation and the plugins in the coming week
 - [BUGFIX] Redirect to the desired page after login success (#2354)
 - [BUGFIX] DaC CUE SDK: Fix inconsistencies in mandatory vs optional attributes in dashboard lib (#2540)
 - [BUGFIX] `percli dac setup`: fix useless requirement of go CLI when using CUE (#2544)
-- [BREAKINGCHANGE] Changes the plugin architecture to support remote plugins. (#2154) (#2511) (#2526) (#2545) (#2567) (#2578) (#2582) (#2593) (#2598) (#2606) (#2609) (#2613) (#2616) (#2626) (#2637) (#2660) (#2645) (#2690) (#2695) (#2719)
+- [BREAKINGCHANGE] Changes the plugin architecture to support remote plugins. (#2154) (#2511) (#2526) (#2545) (#2567) (#2578) (#2582) (#2593) (#2598) (#2606) (#2609) (#2613) (#2616) (#2626) (#2637) (#2660) (#2645) (#2690) (#2695) (#2719) (#2748) (#2750) (#2752) (#2795) (#2804) (#2806) (#2812) (#2831) (#2833) (#2898) (#2918) (#2953) (#2958) (#2981)
+- [BREAKINGCHANGE] core: switch the trace data model to OpenTelemetry (OTLP) (#2873)
+- [BREAKINGCHANGE] `percli dac setup`: rely on CUE's new modules for deps installation (#2724)
 - [BREAKINGCHANGE] Rename field in the service discovery config and add a concept doc about SD (#2665)
+- [DOC] Update embedding panels guide with the latest recommendations (#2899)
+- [DOC] Document some of the not-resource-related API endpoints (#2874)
+- [DOC] Add kubecon pres to the list of materials (#2872)
+- [DOC] Remove duplicated section (#2837)
+- [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
+- [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
+- [DOC] Mention plugin builders in CUE SDK doc (#2769)
+- [DOC] Add HTTP Proxy documentation (#2788)
+- [DOC] Add (back) common package doc (#2781)
+- [DOC] Referencing various materials talking about Perses (#2756)
+- [DOC] DaC: document the base List variable + Remove static list variable (moved to perses/plugins) (#2753)
+- [DOC] Update requirement when building perses (#2754)
 - [DOC] Fix typo in ListVariable spec (#2691)
 - [DOC] Fix doc about TLS config and the TLS secret spec (#2685)
 - [DOC] Add documentation about how to migrate from Grafana (#2680) (#2687)

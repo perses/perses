@@ -15,15 +15,10 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
 import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
-import {
-  ExternalVariableDefinition,
-  useExternalVariableDefinitions,
-  useVariableDefinitionActions,
-  useVariableDefinitions,
-} from '../../context';
+import { useExternalVariableDefinitions, useVariableDefinitionActions, useVariableDefinitions } from '../../context';
 import { VariableEditor } from './VariableEditor';
 
 export interface EditVariablesButtonProps extends Pick<ButtonProps, 'fullWidth'> {

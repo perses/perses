@@ -16,9 +16,10 @@ package build
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/perses/perses/internal/cli/file"
 )
 
 func (o *option) executeNPMSteps() error {
@@ -32,19 +33,40 @@ func (o *option) executeNPMInstall() error {
 	if o.skipNPMInstall {
 		return nil
 	}
-	if _, err := os.Stat(filepath.Join(o.cfg.FrontendPath, "node_modules")); os.IsNotExist(err) {
-		// Then run `npm ci` to install the dependencies
-		cmd := exec.Command("npm", "ci")
-		cmd.Dir = o.cfg.FrontendPath
-		// to get a more comprehensive error message, we need to capture the stdout & stderr.
-		var stdoutBuffer bytes.Buffer
-		cmd.Stdout = &stdoutBuffer
-		var stderrBuffer bytes.Buffer
-		cmd.Stderr = &stderrBuffer
-		cmd.Dir = o.cfg.FrontendPath
-		if execErr := cmd.Run(); execErr != nil {
-			return fmt.Errorf("unable to install the frontend dependencies: %w, stdout: %s, stderr: %s", execErr, stdoutBuffer.String(), stderrBuffer.String())
-		}
+	exist, err := file.Exists(filepath.Join(o.cfg.FrontendPath, "node_modules"))
+	if err != nil {
+		return fmt.Errorf("unable to check if node_modules exists: %w", err)
+	}
+	if exist {
+		// If the node_modules folder already exists, we do not need to run `npm ci`
+		return nil
+	}
+	// If the node_modules folder does not exist, perhaps it is in the root folder because this is a npm workspace / monorepo.
+	// We check if the node_modules folder exists in the root folder.
+	// If it does not exist, we will run `npm ci` to install the dependencies
+	// If it exists, we assume that the dependencies are already installed, and we do not need to do it.
+	rootFolder := filepath.Dir(o.cfg.FrontendPath)
+	if rootFolder == "." || rootFolder == "" {
+		rootFolder = ".."
+	}
+	exist, err = file.Exists(filepath.Join(rootFolder, "node_modules"))
+	if err != nil {
+		return fmt.Errorf("unable to check if node_modules exists in the root folder: %w", err)
+	}
+	if exist {
+		return nil
+	}
+	// Then run `npm ci` to install the dependencies
+	cmd := exec.Command("npm", "ci")
+	cmd.Dir = o.cfg.FrontendPath
+	// to get a more comprehensive error message, we need to capture the stdout & stderr.
+	var stdoutBuffer bytes.Buffer
+	cmd.Stdout = &stdoutBuffer
+	var stderrBuffer bytes.Buffer
+	cmd.Stderr = &stderrBuffer
+	cmd.Dir = o.cfg.FrontendPath
+	if execErr := cmd.Run(); execErr != nil {
+		return fmt.Errorf("unable to install the frontend dependencies: %w, stdout: %s, stderr: %s", execErr, stdoutBuffer.String(), stderrBuffer.String())
 	}
 	return nil
 }

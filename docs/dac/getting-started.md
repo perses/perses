@@ -47,7 +47,7 @@ You should then have a look at the [CUE SDK documentation](../dac/cue/README.md)
 
 You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/test/dac/input.cue).
 
-For each [plugin](../concepts/plugins.md) you would like to use in your DaC, it is strongly recommended to import its module so that you benefit from its schema validation locally. Optionally the plugin could also provide additional helpers (kind-of SDK additional piece) to help using it. Check the list of available plugins & their corresponding module name at https://github.com/perses/plugins.
+For each [plugin](../concepts/plugin.md) you would like to use in your DaC, it is strongly recommended to import its module so that you benefit from its schema validation locally. Optionally the plugin could also provide additional helpers (kind-of SDK additional piece) to help using it. Check the list of available plugins & their corresponding module name at https://github.com/perses/plugins.
 
 !!! note
 	To resolve the dependencies added after the initial setup, use `cue mod tidy`.
@@ -107,7 +107,7 @@ You can also check an example of DaC usage [here](https://github.com/perses/pers
 !!! warning
 	Do not log / print on the standard stdout! It would break the output of the `dac build` command.
 
-For each [plugin](../concepts/plugins.md) you would like to use in your DaC, you first have to check if it provides the corresponding piece of the Golang SDK* (it's always the case for official plugins). You will then have to import the corresponding dependency in order to be able to use it. Check the list of official plugins & their corresponding module name at https://github.com/perses/plugins.
+For each [plugin](../concepts/plugin.md) you would like to use in your DaC, you first have to check if it provides the corresponding piece of the Golang SDK* (it's always the case for official plugins). You will then have to import the corresponding dependency in order to be able to use it. Check the list of official plugins & their corresponding module name at https://github.com/perses/plugins.
 
 !!! warning
 	*As already mentioned in the [DaC introduction](../concepts/dashboard-as-code.md), outside official plugins, it is not guaranteed that all plugins would provide such piece of the Golang SDK. It's basically up to each plugin developer to provide a Go package to enable the DaC use case. This statement applies also to any other language we might have a SDK for in the future.

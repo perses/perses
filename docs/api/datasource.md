@@ -90,7 +90,7 @@ So if by any chance you have a local datasource that is named exactly like a Pro
 we will consider that the user intentionally wanted to override the upper datasource. We will use the one with the
 smallest scope.
 
-### How to use the Perses' proxy
+### How to use the Perses' HTTP proxy
 
 As described before, you can provide a proxy configuration that will be used by the Perses server to redirect any
 queries to the datasource.
@@ -116,6 +116,21 @@ datasource is used.
     if datasource.kind == 'GlobalDatasource'; then 
       url= '/proxy/globaldatasources/' + datasource.metadata.name 
   ```
+
+### How to use the Perses' SQL proxy
+
+When using the `SQLProxy` kind, the Perses server takes the request body from the FE and executes the query
+against the datasource's SQL database as opposed to redirecting the request like the `HTTPProxy` kind.
+
+The FE can determine the URL for the SQL proxy the same way as the [HTTP proxy](#how-to-use-the-perses-http-proxy).
+
+The method needs to be `POST` with the body in the request and the JSON schema should look like this:
+
+```
+  {
+    "query": "select * from table limit 5"
+  }
+```  
 
 ## API definition
 

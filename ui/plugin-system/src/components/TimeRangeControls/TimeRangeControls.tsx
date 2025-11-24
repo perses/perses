@@ -100,7 +100,7 @@ export function TimeRangeControls({
     const duration = parseDurationString(strDuration);
     const millis =
       // eslint-disable-next-line prettier/prettier
-        ((duration.seconds ?? 0) +
+      ((duration.seconds ?? 0) +
         (duration.minutes ?? 0) * 60 +
         (duration.hours ?? 0) * 3600 +
         (duration.days ?? 0) * 86400 +
@@ -108,7 +108,7 @@ export function TimeRangeControls({
         (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom purposes
         (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom purposes
       // eslint-disable-next-line prettier/prettier
-        1000; // to milliseconds
+      1000; // to milliseconds
     return millis;
   };
 
@@ -200,7 +200,16 @@ export function TimeRangeControls({
         <InfoTooltip description={TOOLTIP_TEXT.refreshInterval}>
           <RefreshIntervalPicker
             timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
-            value={refreshInterval}
+            value={
+              /* TODO: There is a bug here which should be fixed in a proper way. (This is only a quick remedy)
+                 display: 1m has the pastDuration of 60s. Initially (if the persisted value is 1m) when the page is loaded, instead of 60s, 1m is passed down.              
+                 This only happens for 1m, because for other items the display and the pastDuration are the same.  Example 30s-30s
+                 HERE The value MUST always be pastDuration, otherwise the component would not work as expected. 
+              */
+              DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.value.pastDuration === refreshInterval)
+                ? refreshInterval
+                : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
+            }
             onChange={handleRefreshIntervalChange}
             height={height}
           />

@@ -18,11 +18,17 @@ import (
 	"fmt"
 )
 
-type TimeUnit string
-type PercentageUnit string
-type ThroughputUnit string
+type (
+	TimeUnit       string
+	PercentageUnit string
+	ThroughputUnit string
+	CurrencyUnit   string
+	BytesUnit      string
+)
 
 const (
+	NanoSecondsUnit        TimeUnit       = "nanoseconds"
+	MicroSecondsUnit       TimeUnit       = "microseconds"
 	MilliSecondsUnit       TimeUnit       = "milliseconds"
 	SecondsUnit            TimeUnit       = "seconds"
 	MinutesUnit            TimeUnit       = "minutes"
@@ -34,9 +40,11 @@ const (
 	PercentUnit            PercentageUnit = "percent"
 	PercentDecimalUnit     PercentageUnit = "percent-decimal"
 	DecimalUnit            string         = "decimal"
-	BytesUnit              string         = "bytes"
+	BinaryBytesUnit        BytesUnit      = "bytes"
+	DecimalBytesUnit       BytesUnit      = "decbytes"
 	BitsPerSecondsUnit     ThroughputUnit = "bits/sec"
 	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
+	BytesDecPerSecondsUnit ThroughputUnit = "decbytes/sec"
 	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
 	EventsPerSecondsUnit   ThroughputUnit = "events/sec"
 	MessagesPerSecondsUnit ThroughputUnit = "messages/sec"
@@ -47,12 +55,27 @@ const (
 	RequestsPerSecondsUnit ThroughputUnit = "requests/sec"
 	RowsPerSecondsUnit     ThroughputUnit = "rows/sec"
 	WritesPerSecondsUnit   ThroughputUnit = "writes/sec"
+	AustralianDollarUnit   CurrencyUnit   = "aud"
+	CanadianDollarUnit     CurrencyUnit   = "cad"
+	SwissFrancUnit         CurrencyUnit   = "chf"
+	RenminbiUnit           CurrencyUnit   = "cny"
+	EuroUnit               CurrencyUnit   = "eur"
+	PoundUnit              CurrencyUnit   = "gbp"
+	HongKongDollarUnit     CurrencyUnit   = "hkd"
+	IndianRupeeUniit       CurrencyUnit   = "inr"
+	YenUnit                CurrencyUnit   = "jpy"
+	SouthKoreanWonUnit     CurrencyUnit   = "krw"
+	NorwegianKroneUnit     CurrencyUnit   = "nok"
+	NewZealandDollarUnit   CurrencyUnit   = "nzd"
+	SwedishKronaDollarUnit CurrencyUnit   = "sek"
+	SingaporeDollarUnit    CurrencyUnit   = "sgd"
+	USDollarUnit           CurrencyUnit   = "usd"
 )
 
 type Format struct {
-	Unit          string `json:"unit" yaml:"unit"`
-	DecimalPlaces int    `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
-	ShortValues   bool   `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
+	Unit          *string `json:"unit,omitempty"          yaml:"unit,omitempty"`
+	DecimalPlaces int     `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
+	ShortValues   bool    `json:"shortValues,omitempty"   yaml:"shortValues,omitempty"`
 }
 
 func (f *Format) UnmarshalJSON(data []byte) error {
@@ -68,7 +91,7 @@ func (f *Format) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (f *Format) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Format
 	type plain Format
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -82,14 +105,20 @@ func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (f *Format) validate() error {
-	switch f.Unit {
-	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
+	if f.Unit == nil {
+		return nil
+	}
+	switch *f.Unit {
+	case string(NanoSecondsUnit), string(MicroSecondsUnit), string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
-		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, BytesUnit,
-		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
+		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBytesUnit), string(DecimalBytesUnit),
+		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
-		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit):
+		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),
+		string(SwissFrancUnit), string(RenminbiUnit), string(EuroUnit), string(PoundUnit),
+		string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit), string(SouthKoreanWonUnit),
+		string(NorwegianKroneUnit), string(NewZealandDollarUnit):
 		return nil
 	default:
 		return fmt.Errorf("unknown format")

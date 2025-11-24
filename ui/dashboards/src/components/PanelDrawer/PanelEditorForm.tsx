@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginKindSelect,
   usePluginEditor,
-  PanelSpecEditor,
   getTitleAction,
   getSubmitText,
   useValidationSchemas,
+  PluginEditorRef,
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
-import { PanelPreview } from './PanelPreview';
+import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEditorProvider';
 import { usePanelEditor } from './usePanelEditor';
+import { PanelQueriesSharedControls } from './PanelQueriesSharedControls';
 
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
@@ -38,6 +39,7 @@ export interface PanelEditorFormProps {
 
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, onSave, onClose } = props;
+  const pluginEditorRef = useRef<PluginEditorRef>(null);
   const panelGroups = useListPanelGroups();
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialValues.panelDefinition);
@@ -75,9 +77,12 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     setLinks(links);
   }, [setLinks, links]);
 
-  const processForm: SubmitHandler<PanelEditorValues> = (data) => {
-    onSave(data);
-  };
+  const processForm: SubmitHandler<PanelEditorValues> = useCallback(
+    (data) => {
+      onSave(data);
+    },
+    [onSave]
+  );
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -108,165 +113,162 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const watchedDescription = useWatch({ control: form.control, name: 'panelDefinition.spec.display.description' });
   const watchedPluginKind = useWatch({ control: form.control, name: 'panelDefinition.spec.plugin.kind' });
 
+  const handleSubmit = useCallback(() => {
+    pluginEditorRef.current?.flushChanges?.();
+    form.handleSubmit(processForm)();
+  }, [form, processForm]);
+
   return (
     <FormProvider {...form}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: (theme) => theme.spacing(1, 2),
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Typography variant="h2">{titleAction} Panel</Typography>
-        <Stack direction="row" spacing={1} marginLeft="auto">
-          <Button
-            aria-label={`${submitText} panel`}
-            variant="contained"
-            disabled={!form.formState.isValid}
-            onClick={form.handleSubmit(processForm)}
-          >
-            {submitText}
-          </Button>
-          <Button color="secondary" variant="outlined" onClick={handleCancel}>
-            Cancel
-          </Button>
-        </Stack>
-      </Box>
-      <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
-        <Grid container spacing={2}>
-          <Grid item xs={8}>
-            <Controller
-              control={form.control}
-              name="panelDefinition.spec.display.name"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  required
-                  fullWidth
-                  label="Name"
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  value={watchedName ?? ''}
-                  onChange={(event) => {
-                    field.onChange(event);
-                    setName(event.target.value);
-                  }}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              control={form.control}
-              name="groupId"
-              render={({ field, fieldState }) => (
-                <TextField
-                  select
-                  {...field}
-                  required
-                  fullWidth
-                  // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
-                  label="Panel group"
-                  // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  onChange={(event) => {
-                    field.onChange(event);
-                  }}
-                >
-                  {panelGroups.map((panelGroup, index) => (
-                    <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                      {panelGroup.title ?? `Group ${index + 1}`}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Grid>
-          <Grid item xs={8}>
-            <Controller
-              control={form.control}
-              name="panelDefinition.spec.display.description"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Description"
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  value={watchedDescription ?? ''}
-                  onChange={(event) => {
-                    field.onChange(event);
-                    setDescription(event.target.value);
-                  }}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              control={form.control}
-              name="panelDefinition.spec.plugin.kind"
-              render={({ field, fieldState }) => (
-                <PluginKindSelect
-                  {...field}
-                  pluginTypes={['Panel']}
-                  required
-                  fullWidth
-                  // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
-                  label="Visualization type"
-                  // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
-                  disabled={pluginEditor.isLoading}
-                  error={!!pluginEditor.error || !!fieldState.error}
-                  helperText={pluginEditor.error?.message ?? fieldState.error?.message}
-                  value={{ type: 'Panel', kind: watchedPluginKind }}
-                  onChange={(event) => {
-                    field.onChange(event.kind);
-                    pluginEditor.onSelectionChange(event);
-                  }}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h4" marginBottom={1}>
-              Preview
-            </Typography>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <PanelPreview panelDefinition={panelDefinition} />
-            </ErrorBoundary>
-          </Grid>
-          <Grid item xs={12}>
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <PanelSpecEditor
+      <PanelEditorProvider>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: (theme) => theme.spacing(1, 2),
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Typography variant="h2">{titleAction} Panel</Typography>
+          <Stack direction="row" spacing={1} marginLeft="auto">
+            <Button
+              aria-label={`${submitText} panel`}
+              variant="contained"
+              disabled={!form.formState.isValid}
+              onClick={handleSubmit}
+            >
+              {submitText}
+            </Button>
+            <Button color="secondary" variant="outlined" onClick={handleCancel}>
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
+        <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+              <Controller
                 control={form.control}
+                name="panelDefinition.spec.display.name"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    label="Name"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    value={watchedName ?? ''}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      setName(event.target.value);
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Controller
+                control={form.control}
+                name="groupId"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    required
+                    fullWidth
+                    // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
+                    label="Panel group"
+                    // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
+                    }}
+                  >
+                    {panelGroups.map((panelGroup, index) => (
+                      <MenuItem key={panelGroup.id} value={panelGroup.id}>
+                        {panelGroup.title ?? `Group ${index + 1}`}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </Grid>
+            <Grid item xs={8}>
+              <Controller
+                control={form.control}
+                name="panelDefinition.spec.display.description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Description"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    value={watchedDescription ?? ''}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      setDescription(event.target.value);
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Controller
+                control={form.control}
+                name="panelDefinition.spec.plugin.kind"
+                render={({ field, fieldState }) => (
+                  <PluginKindSelect
+                    {...field}
+                    pluginTypes={['Panel']}
+                    required
+                    fullWidth
+                    // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
+                    label="Visualization type"
+                    // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
+                    disabled={pluginEditor.isLoading}
+                    error={!!pluginEditor.error || !!fieldState.error}
+                    helperText={pluginEditor.error?.message ?? fieldState.error?.message}
+                    value={{ type: 'Panel', kind: watchedPluginKind }}
+                    onChange={(event) => {
+                      field.onChange(event.kind);
+                      pluginEditor.onSelectionChange(event);
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <PanelQueriesSharedControls
+                control={form.control}
+                plugin={plugin}
                 panelDefinition={panelDefinition}
-                onJSONChange={handlePanelDefinitionChange}
-                onQueriesChange={(queries) => {
-                  setQueries(queries);
-                }}
+                onQueriesChange={(q) => setQueries(q)}
                 onPluginSpecChange={(spec) => {
                   pluginEditor.onSpecChange(spec);
                 }}
+                onJSONChange={handlePanelDefinitionChange}
               />
             </ErrorBoundary>
           </Grid>
-        </Grid>
-      </Box>
-      <DiscardChangesConfirmationDialog
-        // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
-        description="You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone."
-        // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
-        isOpen={isDiscardDialogOpened}
-        onCancel={() => {
-          setDiscardDialogOpened(false);
-        }}
-        onDiscardChanges={() => {
-          setDiscardDialogOpened(false);
-          onClose();
-        }}
-      />
+        </Box>
+        <DiscardChangesConfirmationDialog
+          // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
+          description="You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone."
+          // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
+          isOpen={isDiscardDialogOpened}
+          onCancel={() => {
+            setDiscardDialogOpened(false);
+          }}
+          onDiscardChanges={() => {
+            setDiscardDialogOpened(false);
+            onClose();
+          }}
+        />
+      </PanelEditorProvider>
     </FormProvider>
   );
 }

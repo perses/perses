@@ -11,21 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { forwardRef, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
 export interface MultiQueryEditorProps {
   queryTypes: QueryPluginType[];
+  filteredQueryPlugins?: string[];
   queries?: QueryDefinition[];
+  queryResults?: QueryData[];
   onChange: (queries: QueryDefinition[]) => void;
 }
 
-function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
+function useDefaultQueryDefinition(
+  queryTypes: QueryPluginType[],
+  filteredQueryPlugins?: string[]
+): {
   defaultInitialQueryDefinition: QueryDefinition;
   isLoading: boolean;
 } {
@@ -34,15 +40,21 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
 
   // Firs the default query type
   const defaultQueryType = queryTypes[0]!;
-
   // Then the default plugin kind
   // Use as default the plugin kind explicitly set as default or the first in the list
   const { data: queryPlugins, isLoading } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
-  const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
+
+  let defaultQueryKind: string = '';
+
+  if (filteredQueryPlugins?.length) {
+    defaultQueryKind = queryPlugins?.find((i) => filteredQueryPlugins.includes(i.spec.name))!.spec.name ?? '';
+  } else {
+    defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
+  }
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
-    throwOnError: true,
+    useErrorBoundary: true,
     enabled: true,
   });
 
@@ -66,9 +78,10 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): {
  * @param onChange The callback to call when the queries are modified
  * @constructor
  */
-export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps): ReactElement {
-  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes);
 
+export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
+  const { queryTypes, queries = [], queryResults, filteredQueryPlugins, onChange } = props;
+  const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
@@ -132,10 +145,13 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
       <Stack spacing={1}>
         {queryDefinitions.map((query: QueryDefinition, i: number) => (
           <QueryEditorContainer
+            ref={ref}
             queryTypes={queryTypes}
             key={i}
             index={i}
             query={query}
+            queryResult={queryResults?.[i]}
+            filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
@@ -148,4 +164,6 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
       </Button>
     </>
   );
-}
+});
+
+MultiQueryEditor.displayName = 'MultiQueryEditor';

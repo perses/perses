@@ -40,6 +40,18 @@ func Name(name string) Option {
 	}
 }
 
+func Description(description string) Option {
+	return func(builder *Builder) error {
+		if err := common.ValidateDescription(description); err != nil {
+			if builder.Dashboard.Spec.Display == nil {
+				builder.Dashboard.Spec.Display = &common.Display{}
+			}
+			builder.Dashboard.Spec.Display.Description = description
+		}
+		return nil
+	}
+}
+
 func ProjectName(name string) Option {
 	return func(builder *Builder) error {
 		builder.Dashboard.Metadata.Project = name
@@ -80,7 +92,8 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			Display: &dashboard.GridLayoutDisplay{
 				Title: r.Title,
 			},
-			Items: []dashboard.GridItem{},
+			Items:          []dashboard.GridItem{},
+			RepeatVariable: r.RepeatVariable,
 		}
 
 		if !r.IsCollapsed {

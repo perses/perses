@@ -41,7 +41,7 @@ import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
-import { createViewPanelSlice, ViewPanelSlice } from './view-panel-slice';
+import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -67,19 +67,6 @@ export interface DashboardStoreState
   ttl?: DurationString;
 }
 
-export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
-  isEditMode?: boolean;
-  viewPanelRef?: string;
-  setViewPanelRef?: (viewPanelRef: string | undefined) => void;
-}
-
-export interface DashboardProviderProps {
-  initialState: DashboardStoreProps;
-  dashboardStoreApiRef?: MutableRef<DashboardStoreState>;
-  children?: ReactNode;
-}
-
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
 
 export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T): T {
@@ -90,6 +77,21 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   return useStoreWithEqualityFn(store, selector, shallow);
 }
 
+export interface DashboardStoreProps {
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  isEditMode?: boolean;
+  viewPanelRef?: VirtualPanelRef;
+  setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
+}
+
+export interface DashboardProviderProps {
+  initialState: DashboardStoreProps;
+  // LOGZ.IO CHANGE START:: Add support for dashboardStoreApiRef
+  dashboardStoreApiRef?: MutableRef<DashboardStoreState>;
+  // LOGZ.IO CHANGE END:: Add support for dashboardStoreApiRef
+  children?: ReactNode;
+}
+
 export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardProviderProps): ReactElement {
   const createDashboardStore = useCallback(initStore, [props]);
 
@@ -98,6 +100,7 @@ export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardP
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
 
+  // LOGZ.IO CHANGE START:: Add support for dashboardStoreApiRef
   const [store] = useState(() => {
     const newStore = createDashboardStore(props);
 
@@ -105,6 +108,7 @@ export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardP
 
     return newStore;
   }); // prevent calling createDashboardStore every time it rerenders
+  // LOGZ.IO CHANGE END:: Add support for dashboardStoreApiRef
 
   useEffect(() => {
     if (plugin === undefined) return;
@@ -133,18 +137,10 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
   const {
     kind,
     metadata,
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
   } = dashboardResource;
 
   const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
-
-  let {
-    spec: { layouts, panels },
-  } = dashboardResource;
-
-  // Set fallbacks in case the frontend is used with a non-Perses backend
-  layouts = layouts ?? [];
-  panels = panels ?? {};
 
   const store = createStore<DashboardStoreState>()(
     immer(
@@ -173,7 +169,9 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           datasources,
           ttl,
           isEditMode: !!isEditMode,
-          setEditMode: (isEditMode: boolean): void => set({ isEditMode }),
+          setEditMode: (isEditMode: boolean): void => {
+            set({ isEditMode });
+          },
           setDashboard: ({
             kind,
             metadata,

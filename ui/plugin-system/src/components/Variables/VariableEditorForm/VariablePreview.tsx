@@ -11,26 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import { Alert, Box, Card, Chip, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
 import { InfoTooltip, useSnackbar } from '@perses-dev/components';
-import Refresh from 'mdi-material-ui/Refresh';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { ListVariableDefinition } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../../constants';
 import { useListVariablePluginValues } from '../variable-model';
+import { SORT_METHODS } from './variable-editor-form-model';
 
 const DEFAULT_MAX_PREVIEW_VALUES = 50;
 
 interface VariablePreviewProps {
   values?: string[];
-  onRefresh?: () => void;
   isLoading?: boolean;
   error?: string;
 }
 
 export function VariablePreview(props: VariablePreviewProps): ReactElement {
-  const { values, onRefresh, isLoading, error } = props;
+  const { values, isLoading, error } = props;
   const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
   const { infoSnackbar } = useSnackbar();
   const showAll = (): void => {
@@ -42,17 +41,25 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
     notShown = values.length - maxValues;
   }
 
+  const variablePreviewState = useMemo((): ReactElement | null => {
+    if (isLoading) {
+      return (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      );
+    } else if (error) {
+      return <Alert severity="error">{error}</Alert>;
+    } else if (!values?.length) {
+      return <Alert severity="info">No results</Alert>;
+    }
+    return null;
+  }, [error, isLoading, values]);
+
   return (
     <Box>
       <Stack direction="row" spacing={1} alignItems="center" mb={1}>
         <Typography variant="h4">Preview Values</Typography>
-        {onRefresh && (
-          <InfoTooltip description={TOOLTIP_TEXT.refreshVariableValues}>
-            <IconButton onClick={onRefresh} size="small">
-              <Refresh />
-            </IconButton>
-          </InfoTooltip>
-        )}
         <InfoTooltip description={TOOLTIP_TEXT.copyVariableValues}>
           <IconButton
             onClick={async () => {
@@ -69,14 +76,11 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
       </Stack>
       <Card variant="outlined">
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, m: 2 }}>
-          {error && <Alert severity="error">{error}</Alert>}
-          {values?.length === 0 && <Alert severity="info">No results</Alert>}
-          {isLoading && (
-            <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-              <CircularProgress />
-            </Stack>
-          )}
-          {values?.slice(0, maxValues).map((val, index) => <Chip size="small" key={index} label={val} />)}
+          {variablePreviewState}
+          {values
+            ?.slice(0, maxValues)
+            .filter((val) => val)
+            .map((val, index) => <Chip size="small" key={index} label={val} />)}
           {notShown > 0 && <Chip onClick={showAll} variant="outlined" size="small" label={`+${notShown} more`} />}
         </Box>
       </Card>
@@ -86,20 +90,26 @@ export function VariablePreview(props: VariablePreviewProps): ReactElement {
 
 interface VariableListPreviewProps {
   definition: ListVariableDefinition;
-  onRefresh: () => void;
+  sortMethod?: keyof typeof SORT_METHODS;
 }
 
 export function VariableListPreview(props: VariableListPreviewProps): ReactElement {
-  const { definition, onRefresh } = props;
+  const { definition, sortMethod } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
 
-  return (
-    <VariablePreview
-      values={data?.map((val) => val.value) || []}
-      onRefresh={onRefresh}
-      isLoading={isFetching}
-      error={errorMessage}
-    />
+  const result = !sortMethod || sortMethod === 'none' || !data ? data : SORT_METHODS[sortMethod].sort(data);
+
+  const variablePreview = useMemo(
+    () => (
+      <VariablePreview
+        values={result?.map((val) => val.label || val.value)}
+        isLoading={isFetching}
+        error={errorMessage}
+      />
+    ),
+    [errorMessage, isFetching, result]
   );
+
+  return variablePreview;
 }

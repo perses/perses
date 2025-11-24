@@ -37,7 +37,11 @@ type VariablePluginDependencies = {
  * Plugin for handling custom VariableDefinitions.
  */
 export interface VariablePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getVariableOptions: (definition: Spec, ctx: GetVariableOptionsContext) => Promise<{ data: VariableOption[] }>;
+  getVariableOptions: (
+    definition: Spec,
+    ctx: GetVariableOptionsContext,
+    abortSignal?: AbortSignal
+  ) => Promise<{ data: VariableOption[] }>;
 
   /**
    * Returns a list of variables name this variable depends on. Used to optimize fetching

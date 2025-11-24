@@ -13,7 +13,7 @@
 
 import { Box, Card, CardContent, Typography, Divider, Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { PluginModuleResource } from '@perses-dev/plugin-system';
 import { useSnackbar } from '@perses-dev/components';
 import { usePlugins } from '../../model/plugin-client';
@@ -25,6 +25,10 @@ export function PluginsList(): ReactElement {
   const { exceptionSnackbar } = useSnackbar();
 
   const { data: pluginModules, isLoading, error } = usePlugins();
+
+  const sortedPluginModules = useMemo(() => {
+    return (pluginModules ?? []).toSorted((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+  }, [pluginModules]);
 
   if (isLoading || pluginModules === undefined) {
     return <PersesLoader />;
@@ -45,7 +49,7 @@ export function PluginsList(): ReactElement {
   return (
     <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
-        {pluginModules.map((pluginModule) => (
+        {sortedPluginModules.map((pluginModule) => (
           <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={pluginModule.metadata.name}>
             <Card elevation={2} sx={{ height: '100%' }}>
               <CardContent>

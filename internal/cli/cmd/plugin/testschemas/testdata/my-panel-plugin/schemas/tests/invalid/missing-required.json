@@ -1,0 +1,9 @@
+{
+  "kind": "MyPanel",
+  "spec": {
+    "query": {
+      "datasource": "prometheus",
+      "expression": "some_metric"
+    }
+  }
+}

@@ -14,11 +14,14 @@
 package migrate
 
 import (
+	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"cuelang.org/go/cue/build"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,19 +44,42 @@ var (
 	}
 )
 
-func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
+var grafanaVariablePattern = regexp.MustCompile(`\$\{[a-zA-Z_][a-zA-Z0-9_]*\}`)
+
+func hasGrafanaVariables(url string) bool {
+	return grafanaVariablePattern.MatchString(url)
+}
+
+func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
+	if len(grafanaLinks) == 0 {
+		return nil
+	}
+
+	persesLinks := make([]v1.Link, len(grafanaLinks))
+	for i, grafanaLink := range grafanaLinks {
+		persesLinks[i] = v1.Link{
+			Name:            grafanaLink.Title,
+			URL:             grafanaLink.URL,
+			TargetBlank:     grafanaLink.TargetBlank,
+			RenderVariables: hasGrafanaVariables(grafanaLink.URL),
+		}
+	}
+	return persesLinks
+}
+
+func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
 		if p.Type == grafanaPanelRowType {
 			for j, innerPanel := range p.Panels {
-				panel, err := m.migratePanel(innerPanel)
+				panel, err := m.migratePanel(innerPanel, useDefaultDatasource)
 				if err != nil {
 					return nil, err
 				}
 				panels[fmt.Sprintf("%d_%d", i, j)] = panel
 			}
 		} else {
-			panel, err := m.migratePanel(p)
+			panel, err := m.migratePanel(p, useDefaultDatasource)
 			if err != nil {
 				return nil, err
 			}
@@ -63,9 +89,9 @@ func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*
 	return panels, nil
 }
 
-func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
+func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasource bool) (*v1.Panel, error) {
 	result := &v1.Panel{
-		Kind: "Panel",
+		Kind: string(plugin.KindPanel),
 		Spec: v1.PanelSpec{
 			Display: v1.PanelDisplay{
 				Name:        "empty",
@@ -76,59 +102,90 @@ func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 	if len(grafanaPanel.Title) > 0 {
 		result.Spec.Display.Name = grafanaPanel.Title
 	}
-	migrateScriptInstance, ok := m.panels[grafanaPanel.Type]
+	// first try to load the migration script from the dev migration instance.
+	migrateScriptInstance, ok := m.devMig.panels[grafanaPanel.Type]
 	if !ok {
-		result.Spec.Plugin = defaultPanelPlugin
-		return result, nil
+		// if not found, try to load the migration script from the prod migration instance.
+		migrateScriptInstance, ok = m.mig.panels[grafanaPanel.Type]
+		if !ok {
+			result.Spec.Plugin = defaultPanelPlugin
+			return result, nil
+		}
 	}
-	plugin, panelMigrationIsEmpty, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
+	panelPlugin, panelMigrationIsEmpty, err := ExecutePanelScript(migrateScriptInstance.instance, grafanaPanel.RawMessage)
 	if err != nil {
 		return nil, err
 	}
 	if panelMigrationIsEmpty {
 		result.Spec.Plugin = defaultPanelPlugin
 	} else {
-		result.Spec.Plugin = *plugin
+		result.Spec.Plugin = *panelPlugin
 	}
+	m.migrateQueries(grafanaPanel.Targets, result)
+	result.Spec.Links = convertGrafanaLinksToPerses(grafanaPanel.Links)
 
-	for _, target := range grafanaPanel.Targets {
-		// For the moment, we are only supporting the migration of the TimeSeriesQuery.
-		// That's something we will need to change at some point.
-		// TODO This should be improved
-		i := 0
-		for ; i < len(m.queries); i++ {
-			queryPlugin, queryMigrationIsEmpty, pluginErr := executeQueryMigrationScript(m.queries[i], target)
-			if pluginErr != nil {
-				logrus.WithError(pluginErr).Debug("failed to execute query migration script")
-				continue
+	// Apply datasource cleaning if the flag is set
+	if useDefaultDatasource {
+		// Clean datasource references on all queries in this panel
+		for _, query := range result.Spec.Queries {
+			if pluginSpec, ok := query.Spec.Plugin.Spec.(map[string]any); ok {
+				if datasourceRef, ok := pluginSpec["datasource"].(map[string]any); ok {
+					// Remove explicit datasource references to use default datasource
+					delete(datasourceRef, "name")
+				}
 			}
-			if !queryMigrationIsEmpty {
-				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-					Kind: "TimeSeriesQuery",
-					Spec: v1.QuerySpec{
-						Plugin: *queryPlugin,
-					},
-				})
-				break
-			}
-		}
-		if i == len(m.queries) {
-			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-				Kind: "TimeSeriesQuery",
-				Spec: v1.QuerySpec{
-					Plugin: defaultQueryPlugin,
-				},
-			})
 		}
 	}
 
 	return result, nil
 }
 
-func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaQueryData, "#target", "query")
+func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1.Panel) {
+	// As Grafana does not provide a type of their queries, we can only execute every query migration script hoping there is only one that matches the target.
+	for _, target := range targets {
+		// We try first to execute the migration script from the dev migration instance.
+		isQueryMigrationEmpty := migrateQuery(m.devMig.queries, target, result)
+		if isQueryMigrationEmpty {
+			// If the migration failed, we tried again with the prod migration instance.
+			isQueryMigrationEmpty = migrateQuery(m.mig.queries, target, result)
+			if isQueryMigrationEmpty {
+				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+					Kind: string(plugin.KindTimeSeriesQuery),
+					Spec: v1.QuerySpec{
+						Plugin: defaultQueryPlugin,
+					},
+				})
+			}
+		}
+	}
 }
 
-func executePanelMigrationScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel", "panel")
+func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *v1.Panel) bool {
+	isQueryMigrationEmpty := true
+	for _, query := range queries {
+		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
+		if pluginErr != nil {
+			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
+			continue
+		}
+		if !queryMigrationIsEmpty {
+			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+				Kind: string(query.kind),
+				Spec: v1.QuerySpec{
+					Plugin: *queryPlugin,
+				},
+			})
+			isQueryMigrationEmpty = false
+			break
+		}
+	}
+	return isQueryMigrationEmpty
+}
+
+func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
+	return executeCuelangScript(cueScript, grafanaQueryData, "#target", "query")
+}
+
+func ExecutePanelScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
+	return executeCuelangScript(cueScript, grafanaPanelData, "#panel", "panel")
 }

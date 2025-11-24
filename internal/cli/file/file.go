@@ -39,7 +39,7 @@ func Exists(filePath string) (bool, error) {
 	return true, nil
 }
 
-func Unmarshal(file string, obj interface{}) error {
+func Unmarshal(file string, obj any) error {
 	data, isJSON, err := readAndDetect(file)
 	if err != nil {
 		return err
@@ -159,7 +159,7 @@ func Copy(src, dst string) error {
 type unmarshaller struct {
 	isJSON  bool
 	file    string
-	objects []map[string]interface{}
+	objects []map[string]any
 }
 
 func (u *unmarshaller) unmarshal() ([]modelAPI.Entity, error) {
@@ -177,8 +177,8 @@ func (u *unmarshaller) read() error {
 	}
 	u.isJSON = isJSON
 
-	var objects []map[string]interface{}
-	var object map[string]interface{}
+	var objects []map[string]any
+	var object map[string]any
 
 	if u.isJSON {
 		if jsonErr := json.Unmarshal(data, &objects); jsonErr != nil {

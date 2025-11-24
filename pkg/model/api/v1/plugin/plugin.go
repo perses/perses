@@ -28,9 +28,15 @@ const (
 	KindPanel           Kind = "Panel"
 	KindTimeSeriesQuery Kind = "TimeSeriesQuery"
 	KindTraceQuery      Kind = "TraceQuery"
+	KindProfileQuery    Kind = "ProfileQuery"
+	KindLogQuery        Kind = "LogQuery"
 	KindQuery           Kind = "Query"
 	KindExplore         Kind = "Explore"
 )
+
+func (k Kind) IsQuery() bool {
+	return k == KindTimeSeriesQuery || k == KindTraceQuery || k == KindProfileQuery || k == KindLogQuery
+}
 
 type Spec struct {
 	Display *common.Display `json:"display" yaml:"display"`
@@ -55,7 +61,7 @@ func (p *Plugin) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Plugin) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Plugin
 	type plain Plugin
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -70,7 +76,7 @@ func (p *Plugin) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Plugin) validate() error {
 	if p.Kind != KindVariable && p.Kind != KindDatasource &&
-		p.Kind != KindPanel && p.Kind != KindTimeSeriesQuery && p.Kind != KindTraceQuery && p.Kind != KindExplore {
+		p.Kind != KindPanel && !p.Kind.IsQuery() && p.Kind != KindExplore {
 		return fmt.Errorf("invalid plugin kind %s", p.Kind)
 	}
 	return nil
@@ -84,6 +90,8 @@ type ModuleStatus struct {
 
 type ModuleSpec struct {
 	SchemasPath string   `json:"schemasPath" yaml:"schemasPath"`
+	ModuleName  string   `json:"moduleName,omitempty" yaml:"moduleName,omitempty"`
+	ModuleOrg   string   `json:"moduleOrg,omitempty" yaml:"moduleOrg,omitempty"`
 	Plugins     []Plugin `json:"plugins" yaml:"plugins"`
 }
 
@@ -100,7 +108,7 @@ func (m *ModuleSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *ModuleSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (m *ModuleSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp ModuleSpec
 	type plain ModuleSpec
 	if err := unmarshal((*plain)(&tmp)); err != nil {

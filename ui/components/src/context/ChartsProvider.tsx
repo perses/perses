@@ -18,7 +18,7 @@ import { CursorCoordinates, PointAction } from '../TimeSeriesTooltip';
 export interface ChartsProviderProps {
   chartsTheme: PersesChartsTheme;
   enablePinning?: boolean;
-  enableSyncGrouping?: boolean; // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
+  enableSyncGrouping?: boolean;
   children?: React.ReactNode;
   pointActions?: PointAction[];
 }
@@ -26,7 +26,7 @@ export interface ChartsProviderProps {
 export interface SharedChartsState {
   chartsTheme: PersesChartsTheme;
   enablePinning: boolean;
-  enableSyncGrouping: boolean; // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
+  enableSyncGrouping: boolean;
   lastTooltipPinnedCoords: CursorCoordinates | null;
   setLastTooltipPinnedCoords: (lastTooltipPinnedCoords: CursorCoordinates | null) => void;
   pointActions: PointAction[]; // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
@@ -38,7 +38,7 @@ export function ChartsProvider(props: ChartsProviderProps): ReactElement {
     chartsTheme,
     enablePinning = false,
     pointActions = [], // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
-    enableSyncGrouping = true, // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
+    enableSyncGrouping = true,
   } = props;
 
   const [lastTooltipPinnedCoords, setLastTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
@@ -48,9 +48,9 @@ export function ChartsProvider(props: ChartsProviderProps): ReactElement {
       chartsTheme,
       enablePinning,
       lastTooltipPinnedCoords,
+      enableSyncGrouping,
       setLastTooltipPinnedCoords,
       pointActions, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
-      enableSyncGrouping, // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
     };
   }, [
     chartsTheme,

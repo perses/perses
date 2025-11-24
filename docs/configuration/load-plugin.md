@@ -1,6 +1,5 @@
 How to load a plugin
 ====================
-
 Before being able to use a plugin, it must be recognized and loaded by the Perses backend.
 
 When the Perses backend is starting, it will look at a specific folder that should contain any plugin archive file. This
@@ -11,7 +10,8 @@ plugin:
   archive_path: /path/to/archive/folder
 ```
 
-Note: to know how to build a plugin archive, please refer to the [plugin structure documentation](../plugins/structure.md).
+Note: to know how to build a plugin archive, please refer to
+the [plugin creation documentation](../plugins/creation.md).
 
 By default, the plugin archive folder is set to `plugins-archive` or to `/etc/perses/plugins-archive` if it's running in
 a container.
@@ -35,16 +35,18 @@ plugins to be loaded.
 
 ## Load plugin in development mode
 
-While you are implementing a plugin, you probably would like to see it alive in Perses using the dev server of `rsbuild`.
+While you are implementing a plugin, you probably would like to see it alive in Perses using the dev server of
+`rsbuild`.
 
-Perses is able to load a plugin served by the `rsbuild` dev server. To do so, you need to set the following configuration:
+Perses is able to load a plugin served by the `rsbuild` dev server. To do so, you should use the CLI like this:
 
-```yaml
-plugin:
-  dev_environment:
-    plugins:
-      - name: <plugin_module_name> # Like Prometheus
-        url: http://localhost:3005 # The URL of the rsbuild dev server
-        disable_schema: false # If you want to disable the schema loading
-        absolute_path: "/path/to/plugin/folder" # The absolute path of the plugin folder. Required if disable_schema is false
+```bash
+# Log in to the Perses backend
+percli login http://localhost:8080
+# Start the plugin in development mode
+percli plugin start ./path/to/plugin
 ```
+
+It will start the dev server of `rsbuild` and will also register the plugin in the Perses backend.
+
+Refer to the help of the `percli plugin start` command to see all the options available.

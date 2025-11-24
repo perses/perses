@@ -36,7 +36,7 @@ function getGlobalRole(name: string): Promise<GlobalRoleResource> {
   });
 }
 
-function globalRoleClient(): Promise<GlobalRoleResource[]> {
+function getGlobalRoles(): Promise<GlobalRoleResource[]> {
   const url = buildURL({ resource });
   return fetchJson<GlobalRoleResource[]>(url, {
     method: HTTPMethodGET,
@@ -84,7 +84,7 @@ export function useGlobalRoleList(): UseQueryResult<GlobalRoleResource[], Status
   return useQuery<GlobalRoleResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
-      return globalRoleClient();
+      return getGlobalRoles();
     },
   });
 }

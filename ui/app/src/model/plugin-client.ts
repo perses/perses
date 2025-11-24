@@ -29,6 +29,6 @@ export function usePlugins(
 }
 
 export function fetchPlugins(): Promise<PluginModuleResource[]> {
-  const url = buildURL({ resource, apiPrefix: '/api/v1' });
+  const url = buildURL({ resource });
   return fetchJson<PluginModuleResource[]>(url);
 }

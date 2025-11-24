@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition } from '@perses-dev/core';
-import { PanelGroupDefinition, PanelGroupItemLayout } from '../context';
+import { PanelGroupDefinition, PanelGroupItemLayout, PanelDefinition } from '@perses-dev/core';
 import { GRID_LAYOUT_SMALL_BREAKPOINT, GRID_LAYOUT_COLS } from '../constants';
 
 // Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
@@ -152,10 +151,14 @@ export function insertPanelInLayout(
 }
 
 /**
+ * @deprecated
+ *
  * Get a valid panel key, where a valid key:
  * - does not include invalid characters
  * - is unique
+ * TODO: It is not clear why too much complexity is needed for generating a panel key
  */
+
 export function getValidPanelKey(panelKey: string, panels: Record<string, PanelDefinition>): string {
   const uniquePanelKeys = getUniquePanelKeys(panels);
   let normalizedPanelKey = getPanelKeyParts(removeWhiteSpaces(panelKey)).name;

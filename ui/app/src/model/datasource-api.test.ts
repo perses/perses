@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPDatasourceAPI } from './datasource-api';
+import { buildProxyUrl } from './datasource-api';
 
 interface TestData {
   input: {
@@ -40,6 +40,6 @@ describe('buildProxyUrl', () => {
       expected: '/proxy/projects/projectA/dashboards/dashboardA/datasources/datasourceA',
     },
   ])('$title', (data: TestData) => {
-    expect(new HTTPDatasourceAPI().buildProxyUrl(data.input)).toEqual(data.expected);
+    expect(buildProxyUrl(data.input)).toEqual(data.expected);
   });
 });

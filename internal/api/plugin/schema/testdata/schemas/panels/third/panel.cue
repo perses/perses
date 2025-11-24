@@ -14,7 +14,4 @@
 package model
 
 kind: "ThirdChart"
-spec: {
-	a: string
-	b: string
-}
+spec: {}

@@ -14,8 +14,10 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -37,10 +39,8 @@ type OAuthOverride struct {
 // appendIfMissing will append the value in the slice, only if not already present.
 // Will return a boolean saying if the value has been appended or not.
 func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
-	for _, e := range slice {
-		if e == value {
-			return slice, false
-		}
+	if slices.Contains(slice, value) {
+		return slice, false
 	}
 	return append(slice, value), true
 }
@@ -48,6 +48,28 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 type HTTP struct {
 	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
 	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+}
+
+func (h HTTP) MarshalYAML() (any, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return struct {
+		Timeout   common.Duration         `json:"timeout" yaml:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config" yaml:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	}, nil
+}
+
+func (h HTTP) MarshalJSON() ([]byte, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return json.Marshal(struct {
+		Timeout   common.Duration         `json:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	})
 }
 
 func (h *HTTP) Verify() error {

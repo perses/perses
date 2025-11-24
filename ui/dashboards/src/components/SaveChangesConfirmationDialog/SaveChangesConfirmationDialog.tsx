@@ -13,33 +13,46 @@
 
 import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
+import { DEFAULT_REFRESH_INTERVAL_OPTIONS, useTimeRange } from '@perses-dev/plugin-system';
+import { isRelativeTimeRange } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
+
+const SAVE_DEFAULTS_DIALOG_TEXT =
+  'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
 
 export const SaveChangesConfirmationDialog = (): ReactElement => {
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
   const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
   const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;
+  const isSavedRefreshIntervalModified = dialog?.isSavedRefreshIntervalModified ?? true;
+
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
+  const [saveDefaultRefreshInterval, setDefaultRefreshInterval] = useState(isSavedRefreshIntervalModified);
 
   const { getSavedVariablesStatus } = useVariableDefinitionActions();
   const { modifiedVariableNames } = getSavedVariablesStatus();
 
   const isOpen = dialog !== undefined;
 
-  const { timeRange } = useTimeRange();
+  const { timeRange, refreshInterval } = useTimeRange();
+
   const currentTimeRangeText = isRelativeTimeRange(timeRange)
     ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
-  const saveTimeRangeText = `Save current time range as new default ${currentTimeRangeText}`;
+  const saveTimeRangeMessage = `Save current time range as new default ${currentTimeRangeText}`;
 
-  const saveVariablesText = `Save current variable values as new default (${
+  const saveVariableMessage = `Save current variable values as new default (${
     modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
   })`;
+
+  const refreshIntervalDisplay = DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.display === refreshInterval)
+    ? refreshInterval
+    : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.value.pastDuration === refreshInterval)?.display;
+
+  const saveRefreshIntervalMessage = `Save current refresh interval as new default ${refreshIntervalDisplay ? `(${refreshIntervalDisplay})` : 'refresh interval not modified'}`;
 
   return (
     <Dialog open={isOpen}>
@@ -58,7 +71,17 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
                   />
                 }
-                label={saveTimeRangeText}
+                label={saveTimeRangeMessage}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!isSavedRefreshIntervalModified}
+                    checked={saveDefaultRefreshInterval && isSavedRefreshIntervalModified}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefaultRefreshInterval(e.target.checked)}
+                  />
+                }
+                label={saveRefreshIntervalMessage}
               />
               <FormControlLabel
                 control={
@@ -68,7 +91,7 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
                   />
                 }
-                label={saveVariablesText}
+                label={saveVariableMessage}
               />
             </FormGroup>
           </Dialog.Content>
@@ -76,7 +99,7 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
           <Dialog.Actions>
             <Dialog.PrimaryButton
               onClick={() => {
-                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultVariables);
+                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultRefreshInterval, saveDefaultVariables);
               }}
             >
               Save Changes

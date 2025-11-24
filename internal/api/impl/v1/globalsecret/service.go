@@ -17,12 +17,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api"
-
 	"github.com/brunoga/deep"
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -40,7 +40,7 @@ func NewService(dao globalsecret.DAO, crypto crypto.Crypto) globalsecret.Service
 	}
 }
 
-func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
+func (s *service) Create(_ echo.Context, entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -61,7 +61,7 @@ func (s *service) create(entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error
 	return v1.NewPublicGlobalSecret(entity), nil
 }
 
-func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalSecret, parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
+func (s *service) Update(_ echo.Context, entity *v1.GlobalSecret, parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
@@ -92,11 +92,11 @@ func (s *service) update(entity *v1.GlobalSecret, parameters apiInterface.Parame
 	return v1.NewPublicGlobalSecret(entity), nil
 }
 
-func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
 	scrt, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return v1.NewPublicGlobalSecret(scrt), nil
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([]*v1.PublicGlobalSecret, error) {
+func (s *service) List(q *globalsecret.Query, _ apiInterface.Parameters) ([]*v1.PublicGlobalSecret, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
@@ -116,14 +116,14 @@ func (s *service) List(_ apiInterface.PersesContext, q *globalsecret.Query, _ ap
 	return result, nil
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, _ *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *globalsecret.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

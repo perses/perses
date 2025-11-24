@@ -33,6 +33,11 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
+  // Initialize Proxy mode by default, if neither direct nor proxy mode is selected.
+  if (value.directUrl === undefined && value.proxy === undefined) {
+    Object.assign(value, initialSpecProxy);
+  }
+
   // utilitary function used for headers when renaming a property
   // -> TODO it would be cleaner to manipulate headers as an intermediary list instead, to avoid doing this.
   const buildNewHeaders = (
@@ -55,36 +60,6 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   };
 
   const tabs = [
-    {
-      label: strDirect,
-      content: (
-        <Controller
-          name="URL"
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              fullWidth
-              label="URL"
-              value={value.directUrl || ''}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              InputProps={{
-                readOnly: isReadonly,
-              }}
-              InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-              onChange={(e) => {
-                field.onChange(e);
-                onChange(
-                  produce(value, (draft) => {
-                    draft.directUrl = e.target.value;
-                  })
-                );
-              }}
-            />
-          )}
-        />
-      ),
-    },
     {
       label: strProxy,
       content: (
@@ -420,6 +395,36 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
         </>
       ),
     },
+    {
+      label: strDirect,
+      content: (
+        <Controller
+          name="URL"
+          render={({ field, fieldState }) => (
+            <TextField
+              {...field}
+              fullWidth
+              label="URL"
+              value={value.directUrl || ''}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+              InputProps={{
+                readOnly: isReadonly,
+              }}
+              InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+              onChange={(e) => {
+                field.onChange(e);
+                onChange(
+                  produce(value, (draft) => {
+                    draft.directUrl = e.target.value;
+                  })
+                );
+              }}
+            />
+          )}
+        />
+      ),
+    },
   ];
 
   // Use of findIndex instead of providing hardcoded values to avoid desynchronisatio or
@@ -427,8 +432,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const directModeId = tabs.findIndex((tab) => tab.label === strDirect);
   const proxyModeId = tabs.findIndex((tab) => tab.label === strProxy);
 
-  // In "update datasource" case, set defaultTab to the mode that this datasource is currently relying on.
-  // Otherwise (create datasource), set defaultTab to Direct access.
+  // Set defaultTab to the mode that this datasource is currently relying on.
   const defaultTab = value.proxy ? proxyModeId : directModeId;
 
   // For better user experience, save previous states in mind for both mode.

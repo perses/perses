@@ -523,8 +523,6 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
     };
     const { result } = renderHook(() => useListDatasourceSelectItems(FAKE_PLUGIN_NAME), { wrapper });
 
-    console.log(result.current);
-
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(result.current.data).toEqual(data.expected.result);
   });

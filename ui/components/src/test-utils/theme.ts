@@ -41,8 +41,8 @@ export const testChartsTheme: PersesChartsTheme = generateChartsTheme(createMuiT
 export const mockChartsContext: SharedChartsState = {
   chartsTheme: testChartsTheme,
   enablePinning: false,
+  enableSyncGrouping: true,
   lastTooltipPinnedCoords: null,
   setLastTooltipPinnedCoords: () => null,
   pointActions: [], // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
-  enableSyncGrouping: true, // LOGZ.IO CHANGE:: Shared tooltip in edit panel bug-fix [APPZ-498]
 };

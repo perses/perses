@@ -48,6 +48,14 @@ type dashboardSelector struct {
 }
 type Config struct {
 	// Use it in case you want to prefix the API path.
+	// Warning: This parameter does not work anymore since the version v0.51.0. The functionality has been broken when changing the plugin system and it will be fixed in a future version.
+	// Until then, please avoid using it and avoid using a reverse proxy with a path prefix to serve Perses.
+	// Issues raised about this:
+	// - https://github.com/perses/perses/issues/3166
+	// - https://github.com/perses/perses/issues/2579
+	// - https://github.com/perses/perses/issues/2589
+	// - https://github.com/perses/perses/issues/3384
+	// - https://github.com/perses/perses/issues/3396
 	APIPrefix string `json:"api_prefix,omitempty" yaml:"api_prefix,omitempty"`
 	// Security contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
 	Security Security `json:"security,omitempty" yaml:"security,omitempty"`

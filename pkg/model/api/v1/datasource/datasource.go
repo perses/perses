@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/datasource/sql"
 )
 
 // Prometheus is only used for testing purpose.
@@ -25,5 +26,13 @@ import (
 type Prometheus struct {
 	DirectURL      *url.URL         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
 	Proxy          *http.Proxy      `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval *common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+}
+
+// Postgres is only used for testing purpose.
+// It doesn't reflect the nature of an actual Postgres datasource
+type Postgres struct {
+	DirectURL      string           `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *sql.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	ScrapeInterval *common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }

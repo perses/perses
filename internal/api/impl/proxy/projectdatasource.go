@@ -27,7 +27,7 @@ import (
 
 func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
-	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {

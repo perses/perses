@@ -149,6 +149,7 @@ export function Legend({
           position: 'absolute',
           top: 0,
           right: 0,
+          backgroundColor: (theme) => `${theme.palette.background.default}`,
         }}
       >
         {legendContent}
@@ -166,6 +167,7 @@ export function Legend({
       sx={{
         position: 'absolute',
         bottom: 0,
+        backgroundColor: (theme) => `${theme.palette.background.default}`,
       }}
     >
       {legendContent}

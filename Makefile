@@ -28,6 +28,9 @@ COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
 GORELEASER_PARALLEL   ?= 0
+IMAGE_REGISTRY_DEV    ?= localhost:5000
+IMAGE_REPO_DEV        ?= persesdev
+IMAGE_VERSION_DEV     ?= $(shell git describe --tags)
 
 export LDFLAGS
 export DATE
@@ -111,14 +114,15 @@ validate-data:
 	@echo ">> Validate all data in dev/data"
 	$(GO) run ./scripts/validate-data/validate-data.go
 
+.PHONY: validate-cue
+validate-cue:
+	@echo ">> Validate CUE files against corresponding test files"
+	$(GO) run ./scripts/validate-cue/validate-cue.go
+
 .PHONY: test
 test: generate
 	@echo ">> running all tests"
 	$(GO) test -count=1 -v ./...
-
-.PHONY: cue-test
-cue-test: generate
-	$(GO) test -tags=cue -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: integration-test
 integration-test: generate
@@ -217,3 +221,11 @@ update-helm-readme:
 install-default-plugins:
 	@echo ">> install default plugins"
 	$(GO) run ./scripts/plugin/install_plugin.go
+
+.PHONY: container-dev
+container-dev: generate
+	docker build -f Dockerfile.dev . -t ${IMAGE_REGISTRY_DEV}/${IMAGE_REPO_DEV}:${IMAGE_VERSION_DEV}
+
+.PHONY: push-container-dev
+push-container-dev:
+	docker push ${IMAGE_REGISTRY_DEV}/${IMAGE_REPO_DEV}:${IMAGE_VERSION_DEV}

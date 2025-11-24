@@ -17,40 +17,9 @@ import (
 	"encoding/json"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
-
-var (
-	EmptyCtx = &context{
-		username: "",
-	}
-)
-
-func NewPersesContext(ctx echo.Context) PersesContext {
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
-		// Claim can be empty in anonymous endpoints
-		return &context{}
-	}
-	username, _ := claims.GetSubject()
-	return &context{
-		username: username,
-	}
-}
-
-type PersesContext interface {
-	GetUsername() string
-}
-
-type context struct {
-	username string
-}
-
-func (c context) GetUsername() string {
-	return c.username
-}
 
 type Parameters struct {
 	Project string
@@ -58,12 +27,12 @@ type Parameters struct {
 }
 
 type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
-	Create(ctx PersesContext, entity T) (K, error)
-	Update(ctx PersesContext, entity T, parameters Parameters) (K, error)
-	Delete(ctx PersesContext, parameters Parameters) error
-	Get(ctx PersesContext, parameters Parameters) (K, error)
-	List(ctx PersesContext, query V, parameters Parameters) ([]K, error)
-	RawList(ctx PersesContext, query V, parameters Parameters) ([]json.RawMessage, error)
-	MetadataList(ctx PersesContext, query V, parameters Parameters) ([]api.Entity, error)
-	RawMetadataList(ctx PersesContext, query V, parameters Parameters) ([]json.RawMessage, error)
+	Create(ctx echo.Context, entity T) (K, error)
+	Update(ctx echo.Context, entity T, parameters Parameters) (K, error)
+	Delete(ctx echo.Context, parameters Parameters) error
+	Get(parameters Parameters) (K, error)
+	List(query V, parameters Parameters) ([]K, error)
+	RawList(query V, parameters Parameters) ([]json.RawMessage, error)
+	MetadataList(query V, parameters Parameters) ([]api.Entity, error)
+	RawMetadataList(query V, parameters Parameters) ([]json.RawMessage, error)
 }

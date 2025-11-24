@@ -39,7 +39,7 @@ func (p *Permission) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *Permission) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *Permission) UnmarshalYAML(unmarshal func(any) error) error {
 	var tmp Permission
 	type plain Permission
 	if err := unmarshal((*plain)(&tmp)); err != nil {

@@ -22,9 +22,12 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+// reuse the test data from the API
+var testDataFolder = filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata")
+
 func TestMigrateCMD(t *testing.T) {
-	pathToGrafanaDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_grafana_dashboard.json")
-	pathToPersesDashboard := filepath.Join(test.GetRepositoryPath(), "internal", "api", "plugin", "migrate", "testdata", "barchart_perses_dashboard.json")
+	pathToGrafanaDashboard := filepath.Join(testDataFolder, "dashboards", "basic_grafana_dashboard.json")
+	pathToPersesDashboard := filepath.Join(testDataFolder, "dashboards", "basic_perses_dashboard.json")
 	var dashboard *modelV1.Dashboard
 	test.JSONUnmarshalFromFile(pathToPersesDashboard, &dashboard)
 	testSuite := []cmdTest.Suite{
@@ -41,16 +44,34 @@ func TestMigrateCMD(t *testing.T) {
 			ExpectedMessage: "no args are supported by the command 'migrate'",
 		},
 		{
+			Title:           "offline migration without plugin path",
+			Args:            []string{"-f", pathToGrafanaDashboard},
+			IsErrorExpected: true,
+			ExpectedMessage: "offline migration requires --plugin.path to be specified, or use --online for server-side migration",
+		},
+		{
 			Title:           "migrate with native format",
-			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
 		},
 		{
 			Title:           "migrate with custom resource format",
-			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(test.GetRepositoryPath(), "plugins")},
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "custom-resource", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(createCustomResource(dashboard))) + "\n",
+		},
+		{
+			Title:           "migrate with native format and use default datasource",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--use-default-datasource=true", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
+		},
+		{
+			Title:           "migrate with native format and do not use default datasource",
+			Args:            []string{"-f", pathToGrafanaDashboard, "--format", "native", "--use-default-datasource=false", "--plugin.path", filepath.Join(testDataFolder, "plugins")},
+			IsErrorExpected: false,
+			ExpectedMessage: string(test.YAMLMarshalStrict(dashboard)) + "\n",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

@@ -55,7 +55,7 @@ Helper for defining panel width instead of PanelWidth. The value must be between
 ```golang
 import "github.com/perses/perses/go-sdk/panel-group"
 
-panelgroup.PanelHeight(6)
+panelgroup.PanelHeight(8) 
 ```
 
 Define the panel height. The value must be between 1 and 24.

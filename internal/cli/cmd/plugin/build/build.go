@@ -49,7 +49,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'build'")
+		return fmt.Errorf("no args are supported by the command 'plugin build'")
 	}
 	cfg, err := config.Resolve(o.pluginPath, o.cfgPath)
 	if err != nil {
@@ -185,7 +185,7 @@ func NewCMD() *cobra.Command {
 		Use:   "build",
 		Short: "Build the plugin.",
 		Long: `The command will build the plugin by following these steps:
-- Run npm ci to install the frontend dependencies
+- Run npm ci to install the frontend dependencies. If the node_modules folder already exists, it will skip this step. As a best effort, it will also check if the node_modules folder exists in the root folder of the plugin (if it is a npm workspace / monorepo) and skip the step if it exists.
 - Run npm run build to build the frontend
 - Vendor all cue dependencies if the plugin requires a schema
 - Create the archive with the following files:

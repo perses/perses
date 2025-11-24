@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,8 +15,8 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResul
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
-import { useQueryParam } from 'use-query-params';
 import { useEffect, useState } from 'react';
+import { useQueryParam } from 'use-query-params';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -30,15 +30,8 @@ export interface NativeAuthBody {
   password: string;
 }
 
-export function useIsAccessTokenExist(isAuthEnabled: boolean): boolean {
+export function useIsAccessTokenExist(): boolean {
   const [cookies] = useCookies();
-
-  // Warm the access token request cache back
-  // If the refresh token is not expired, the debounce mechanism will get the refreshed accedd token.
-  // Otherwise, debounce will let pass the empty access token and auth guard will redirect to sign in.
-  if (isAuthEnabled && cookies[jwtPayload] === undefined) {
-    refreshToken();
-  }
 
   // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
   const [debouncedValue, setDebouncedValue] = useState(cookies);
@@ -58,7 +51,7 @@ export function useIsAccessTokenExist(isAuthEnabled: boolean): boolean {
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
 export function useRedirectQueryParam(): string {
-  const [path] = useQueryParam<string>(redirectQueryParam);
+  const [path] = useQueryParam<string | undefined>(redirectQueryParam);
   return path ?? '/';
 }
 
@@ -108,7 +101,7 @@ export function useNativeAuthMutation(): UseMutationResult<void, Error, NativeAu
 }
 
 export function nativeAuth(body: NativeAuthBody): Promise<void> {
-  const url = buildURL({ resource: `${authResource}/providers/native/login`, apiPrefix: '/api' });
+  const url = buildURL({ resource: `${authResource}/providers/native/login`, apiURL: '/api' });
   return fetchJson<void>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
@@ -117,7 +110,7 @@ export function nativeAuth(body: NativeAuthBody): Promise<void> {
 }
 
 export function refreshToken(): Promise<Response> {
-  const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
+  const url = buildURL({ resource: `${authResource}/refresh`, apiURL: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,

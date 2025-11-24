@@ -59,7 +59,7 @@ func (u *URL) IsNilOrEmpty() bool {
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface for URLs.
-func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (u *URL) UnmarshalYAML(unmarshal func(any) error) error {
 	var s string
 	if err := unmarshal(&s); err != nil {
 		return err
@@ -74,7 +74,7 @@ func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // MarshalYAML implements the yaml.Marshaler interface for URLs.
-func (u URL) MarshalYAML() (interface{}, error) {
+func (u URL) MarshalYAML() (any, error) {
 	if u.URL != nil {
 		return u.String(), nil
 	}

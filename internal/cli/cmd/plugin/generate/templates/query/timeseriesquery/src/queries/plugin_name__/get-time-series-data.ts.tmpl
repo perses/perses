@@ -1,0 +1,56 @@
+import { TimeSeriesData, TimeSeries } from '@perses-dev/core';
+import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
+import { {{ .PluginPascalName }}Spec, DatasourceQueryResponse } from './{{ .PluginName }}-types';
+import { DEFAULT_DATASOURCE } from './constants';
+
+function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {
+  if (!response) {
+    return [];
+  }
+
+  return response.data.map((res) => {
+    const { name, values } = res;
+
+    // TODO: map your data to the timeseries format expected for Panel plugins
+    return {
+      name,
+      values,
+    };
+  });
+}
+
+export const getTimeSeriesData: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spec>['getTimeSeriesData'] = async (
+  spec,
+  context
+) => {
+  // return empty data if the query is empty
+  if (spec.query === undefined || spec.query === null || spec.query === '') {
+    return { series: [] };
+  }
+
+  const query = replaceVariables(spec.query, context.variableState);
+
+  const client = await context.datasourceStore.getDatasourceClient(
+    // A default datasource will be selected by matching the kind of datasource if not provided
+    spec.datasource ?? DEFAULT_DATASOURCE
+  );
+
+  const { start, end } = context.timeRange;
+
+  const response = await client.query({ 
+    start: start.getTime().toString(),
+    end: end.getTime().toString(),
+    query,
+  });
+
+  const chartData: TimeSeriesData = {
+    series: buildTimeSeries(response),
+    timeRange: { start, end },
+    stepMs: 30 * 1000,
+    metadata: {
+      executedQueryString: query,
+    },
+  };
+
+  return chartData;
+}

@@ -33,12 +33,19 @@ package migrate
 		// TODO
 		// bytes units
 		bytes:    "bytes"
-		decbytes: "bytes"
+		decbytes: "decbytes"
 		// throughput units
 		bps: "bits/sec"
 		Bps: "bytes/sec"
 		cps: "counts/sec"
-		// TODO add mappings for all throughput units
+		mps: "messages/sec"
+		recps: "records/sec"
+		reqps: "requests/sec"
+		rowsps: "rows/sec"
+		rps: "reads/sec"
+		ops: "ops/sec"
+		pps: "packets/sec"
+		wps: "writes/sec"
 	}
 	// mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
 	calc: {
@@ -104,6 +111,8 @@ package migrate
 		"yellow":             "#fade2a"
 		"light-yellow":       "#ffee52"
 		"super-light-yellow": "#fff899"
+
+		"transparent": "#00000000"
 	}
 }
 #defaultCalc: "last"

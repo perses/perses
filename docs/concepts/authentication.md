@@ -58,7 +58,7 @@ security:
           client_id: "<secret>"
           client_secret: "<secret>"
           issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
-          redirect_uri: "http://localhost:3000/api/auth/providers/oidc-azure/callback"
+          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/azure/callback"
           scopes: [ "openid", "profile", "email", "User.read" ]
       oauth:
         - slug_id: github
@@ -68,7 +68,7 @@ security:
           auth_url: "https://github.com/login/oauth/authorize"
           token_url: "https://github.com/login/oauth/access_token"
           logout_url: "https://github.com/login/oauth/logout"
-          redirect_uri: "http://localhost:3000/api/auth/providers/oauth-github/callback"
+          redirect_uri: "http://localhost:8080/api/auth/providers/oauth/github/callback"
           user_infos_url: "https://api.github.com/user"
 ```
 

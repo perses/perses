@@ -27,9 +27,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const kindPath = "kind"
-
-var cueValidationOptions = []cue.Option{
+// Options to run the final validation (e.g only concrete values allowed)
+var CueValidationOptions = []cue.Option{
 	cue.Concrete(true),
 	cue.Attributes(true),
 	cue.Definitions(true),
@@ -37,7 +36,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	schemaInstance, err := LoadSchemaInstance(schemaPath, "model")
 	if err != nil {
 		return "", nil, err
@@ -47,14 +46,25 @@ func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	if schema.Err() != nil {
 		return "", nil, schema.Err()
 	}
-	kindValue := schema.LookupPath(cue.ParsePath(kindPath))
+	// Check the presence & type of `kind`
+	kindValue := schema.LookupPath(cue.ParsePath("kind"))
 	if kindValue.Err() != nil {
-		return "", nil, fmt.Errorf("unable to retrieve the kind value: %w", kindValue.Err())
+		return "", nil, fmt.Errorf("invalid schema at %s: required `kind` field is missing: %w", schemaPath, kindValue.Err())
 	}
 	kind, err := kindValue.String()
 	if err != nil {
-		return "", nil, fmt.Errorf("unable to retrieve the kind value: %w", err)
+		return "", nil, fmt.Errorf("invalid schema at %s: `kind` is not a string: %w", schemaPath, err)
 	}
+	// Check the presence & type of `spec`
+	specValue := schema.LookupPath(cue.ParsePath("spec"))
+	if specValue.Err() != nil {
+		return "", nil, fmt.Errorf("invalid schema at %s: required `spec` field is missing: %w", schemaPath, specValue.Err())
+	}
+	specKind := specValue.Kind()
+	if specKind != cue.StructKind && specValue.IncompleteKind() != cue.StructKind {
+		return "", nil, fmt.Errorf("invalid schema at %s: `spec` is of wrong type %q", schemaPath, specKind)
+	}
+
 	return kind, schemaInstance, nil
 }
 
@@ -85,10 +95,10 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
 		return err
 	}
-	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	ctx := cuecontext.New()
 	pluginValue := ctx.CompileBytes(pluginData)
 	finalValue := pluginValue.Unify(ctx.BuildInstance(schema))
-	if validateErr := finalValue.Validate(cueValidationOptions...); validateErr != nil {
+	if validateErr := finalValue.Validate(CueValidationOptions...); validateErr != nil {
 		// retrieve the full error detail to provide better insights to the end user:
 		ex, errOs := os.Executable()
 		if errOs != nil {

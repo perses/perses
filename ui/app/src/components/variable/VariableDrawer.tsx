@@ -20,12 +20,12 @@ import {
   ValidationProvider,
   VariableEditorForm,
   useInitialTimeRange,
-  remotePluginLoader,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
+import { ReactElement, useMemo, useState } from 'react';
+import { useDatasourceApi } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -44,12 +44,8 @@ export function VariableDrawer<T extends Variable>({
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    if (projectName) datasourceApi.listDatasources(projectName);
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi, projectName]);
+  const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
 
   const variableDef = useMemo(() => {
     const result = structuredClone(variable.spec);
@@ -76,7 +72,7 @@ export function VariableDrawer<T extends Variable>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={remotePluginLoader()}>
+        <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>

@@ -14,11 +14,12 @@
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
-import { ReactElement } from 'react';
-import { QueryCountProvider, usePlugin } from '../../runtime';
+import { forwardRef, ReactElement } from 'react';
+import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
+import { PluginEditorRef } from '../PluginEditor';
 
 export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
@@ -28,21 +29,22 @@ export interface PanelSpecEditorProps {
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
-export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | null {
+export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
   const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
-  const { data: plugin, isPending, error } = usePlugin('Panel', kind);
+  const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
+
+  const { queryResults } = useDataQueriesContext();
 
   if (error) {
     return <ErrorAlert error={error} />;
   }
 
-  // TODO: Proper loading indicator
-  if (isPending) {
+  if (isLoading) {
     return null;
   }
 
-  if (plugin === undefined) {
+  if (!plugin) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
@@ -58,8 +60,10 @@ export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | nul
           name="panelDefinition.spec.queries"
           render={({ field }) => (
             <MultiQueryEditor
+              ref={ref}
               queryTypes={plugin.supportedQueryTypes ?? []}
               queries={panelDefinition.spec.queries ?? []}
+              queryResults={queryResults}
               onChange={(queries) => {
                 field.onChange(queries);
                 onQueriesChange(queries);
@@ -71,7 +75,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | nul
     });
   }
 
-  if (panelOptionsEditorComponents !== undefined) {
+  if (panelOptionsEditorComponents) {
     tabs = tabs.concat(
       panelOptionsEditorComponents.map(({ label, content: OptionsEditorComponent }) => ({
         label,
@@ -124,4 +128,6 @@ export function PanelSpecEditor(props: PanelSpecEditorProps): ReactElement | nul
       <OptionsEditorTabs key={tabs.length} tabs={tabs} />
     </QueryCountProvider>
   );
-}
+});
+
+PanelSpecEditor.displayName = 'PanelSpecEditor';

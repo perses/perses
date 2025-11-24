@@ -47,20 +47,21 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     dashboardResource,
     datasourceApi,
     externalVariableDefinitions,
-    dashboardTitleComponent,
     emptyDashboardProps,
-    onSave,
-    onDiscard,
-    onDashboardChange, // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
-    initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,
     isDatasourceEnabled,
     isEditing,
     isCreating,
+    isInitialVariableSticky,
+    isLeavingConfirmDialogEnabled,
+    dashboardTitleComponent,
+    onSave,
+    onDiscard,
     sx,
-    dashboardControlsComponent,
     dashboardStoreApiRef,
+    onDashboardChange, // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
+    dashboardControlsComponent, // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -113,8 +114,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProviderWithQueryParams
         initialState={{
-          dashboardResource,
           isEditMode: !!isEditing,
+          dashboardResource,
         }}
         dashboardStoreApiRef={dashboardStoreApiRef}
       >
@@ -143,17 +144,18 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
               <ErrorBoundary FallbackComponent={ErrorAlert}>
                 <DashboardApp
                   dashboardResource={dashboardResource}
-                  dashboardTitleComponent={dashboardTitleComponent}
                   emptyDashboardProps={emptyDashboardProps}
                   onSave={onSave}
                   onDiscard={onDiscard}
                   onDashboardChange={onDashboardChange} // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
-                  initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
                   isVariableEnabled={isVariableEnabled}
                   isDatasourceEnabled={isDatasourceEnabled}
                   isCreating={isCreating}
                   dashboardControlsComponent={dashboardControlsComponent}
+                  isInitialVariableSticky={isInitialVariableSticky}
+                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                  dashboardTitleComponent={dashboardTitleComponent}
                 />
               </ErrorBoundary>
             </Box>

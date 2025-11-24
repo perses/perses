@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec, UnknownSpec } from '@perses-dev/core';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
   // TODO: Do we even need this method?
-  getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
+  getDatasource<PluginSpec = UnknownSpec>(selector: DatasourceSelector): Promise<DatasourceSpec<PluginSpec>>;
 
   /**
    * Given a DatasourceSelector, gets a `Client` object from the corresponding Datasource plugin.
@@ -111,10 +111,12 @@ export function useDatasourceClient<Client>(selector: DatasourceSelector): UseQu
   });
 }
 
-export function useDatasource(selector: DatasourceSelector): UseQueryResult<DatasourceSpec> {
+export function useDatasource<PluginSpec = UnknownSpec>(
+  selector: DatasourceSelector
+): UseQueryResult<DatasourceSpec<PluginSpec>> {
   const store = useDatasourceStore();
-  return useQuery<DatasourceSpec>({
+  return useQuery<DatasourceSpec<PluginSpec>>({
     queryKey: ['getDatasource', selector],
-    queryFn: () => store.getDatasource(selector),
+    queryFn: () => store.getDatasource<PluginSpec>(selector),
   });
 }

@@ -121,7 +121,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'setup'")
+		return fmt.Errorf("no args are supported by the command 'dac setup'")
 	}
 
 	version, err := computeProperVersion(o.version)

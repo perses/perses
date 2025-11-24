@@ -41,10 +41,51 @@ const isPluginModuleResource = (pluginModule: unknown): pluginModule is PluginMo
   );
 };
 
-export const remotePluginLoader = (baseURL?: string): PluginLoader => {
+type RemotePluginLoaderOptions = {
+  /**
+   * The API path for fetching available Perses plugins. Used to construct the full URL to the `/api/v1/plugins` endpoint.
+   * @default ''
+   **/
+  apiPrefix?: string;
+  /**
+   * The base URL for loading plugin assets (e.g., JavaScript files). Used to construct the full URL to the `/plugins` directory
+   * @default ''
+   **/
+  baseURL?: string;
+};
+
+type ParsedPluginOptions = {
+  pluginsApiPath: string;
+  pluginsAssetsPath: string;
+};
+
+const DEFAULT_PLUGINS_API_PATH = '/api/v1/plugins';
+const DEFAULT_PLUGINS_ASSETS_PATH = '/plugins';
+
+const paramToOptions = (options?: RemotePluginLoaderOptions): ParsedPluginOptions => {
+  if (options === undefined) {
+    return {
+      pluginsApiPath: DEFAULT_PLUGINS_API_PATH,
+      pluginsAssetsPath: DEFAULT_PLUGINS_ASSETS_PATH,
+    };
+  }
+
+  return {
+    pluginsApiPath: `${options?.apiPrefix ?? ''}${DEFAULT_PLUGINS_API_PATH}`,
+    pluginsAssetsPath: `${options?.baseURL ?? ''}${DEFAULT_PLUGINS_ASSETS_PATH}`,
+  };
+};
+
+/**
+ * Get a PluginLoader that fetches the list of installed plugins from a remote server and loads them as needed.
+ * @param options - Optional configuration options for the remote plugin loader.
+ */
+export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginLoader {
+  const { pluginsApiPath, pluginsAssetsPath } = paramToOptions(options);
+
   return {
     getInstalledPlugins: async (): Promise<PluginModuleResource[]> => {
-      const pluginsResponse = await fetch(`${baseURL ? baseURL : ''}/api/v1/plugins`);
+      const pluginsResponse = await fetch(pluginsApiPath);
 
       const plugins = await pluginsResponse.json();
 
@@ -68,7 +109,7 @@ export const remotePluginLoader = (baseURL?: string): PluginLoader => {
       const pluginModule: RemotePluginModule = {};
 
       for (const plugin of resource.spec.plugins) {
-        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name);
+        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name, pluginsAssetsPath);
 
         const remotePlugin = remotePluginModule?.[plugin.spec.name];
         if (remotePlugin) {
@@ -81,4 +122,4 @@ export const remotePluginLoader = (baseURL?: string): PluginLoader => {
       return pluginModule;
     },
   };
-};
+}

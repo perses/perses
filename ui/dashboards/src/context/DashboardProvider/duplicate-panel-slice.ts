@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { getValidPanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
+import { PanelGroupItemId } from '@perses-dev/core';
+import { insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
-import { PanelGroupSlice, PanelGroupItemId } from './panel-group-slice';
+import { PanelGroupSlice } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
 
 /**
@@ -68,7 +69,7 @@ export function createDuplicatePanelSlice(): StateCreator<
           throw new Error(`Cannot find layout for Panel with key '${panelKey}'`);
         }
 
-        const dupePanelKey = getValidPanelKey(panelKey, panels);
+        const dupePanelKey = crypto.randomUUID().replaceAll('-', '');
 
         state.panels[dupePanelKey] = panelToDupe;
 

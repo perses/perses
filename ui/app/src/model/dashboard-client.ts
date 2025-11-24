@@ -19,13 +19,12 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { DashboardResource, StatusError } from '@perses-dev/core';
+import { DashboardResource, fetchJson, StatusError } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
 import { useImportantDashboardSelectors } from '../context/Config';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
-import { fetch, fetchJson } from './fetch';
 
 export const resource = 'dashboards';
 
@@ -130,8 +129,12 @@ export function useRecentDashboardList(
  * Used to get important dashboards.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useImportantDashboardList(project?: string): { isLoading: false | true; data: DashboardResource[] } {
-  const { data: dashboards, isLoading } = useDashboardList({ project: project, metadataOnly: true });
+export function useImportantDashboardList(project?: string): {
+  isLoading: false | true;
+  data: DashboardResource[];
+  error: StatusError | null;
+} {
+  const { data: dashboards, isLoading, error } = useDashboardList({ project: project, metadataOnly: true });
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {
@@ -146,8 +149,7 @@ export function useImportantDashboardList(project?: string): { isLoading: false 
     });
     return result;
   }, [dashboards, importantDashboardSelectors]);
-
-  return { data: importantDashboards, isLoading: isLoading };
+  return { data: importantDashboards, isLoading: isLoading, error };
 }
 
 /**

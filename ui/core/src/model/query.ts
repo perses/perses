@@ -14,6 +14,8 @@
 import { Definition, UnknownSpec } from './definitions';
 import { TimeSeriesData } from './time-series-data';
 import { TraceData } from './trace-data';
+import { ProfileData } from './profile-data';
+import { LogData } from './log-data';
 
 interface QuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
@@ -34,6 +36,8 @@ export interface QueryDefinition<Kind = any, PluginSpec = UnknownSpec> {
 export interface QueryType {
   TimeSeriesQuery: TimeSeriesData;
   TraceQuery: TraceData;
+  ProfileQuery: ProfileData;
+  LogQuery: LogData;
   // in the future we can add other query plugin and data types
   // for example: we can add something like `LogsQuery: LogsData;`
 }
@@ -43,7 +47,7 @@ export interface QueryType {
  * @param type
  */
 export function isValidQueryPluginType(type: string): type is QueryPluginType {
-  return ['TimeSeriesQuery', 'TraceQuery'].includes(type as QueryPluginType);
+  return ['TimeSeriesQuery', 'TraceQuery', 'ProfileQuery'].includes(type as QueryPluginType);
 }
 
 /**

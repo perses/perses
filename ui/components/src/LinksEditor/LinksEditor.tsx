@@ -50,9 +50,8 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
         </Typography>
       )}
       <IconButton
-        aria-label="Add link"
         style={{ width: 'fit-content', height: 'fit-content' }}
-        onClick={() => append({ url: '' })}
+        onClick={() => append({ url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false })}
       >
         <PlusIcon />
       </IconButton>
@@ -89,7 +88,6 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               {...field}
               fullWidth
               label="Name"
-              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {
@@ -106,7 +104,6 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               {...field}
               fullWidth
               label="Tooltip"
-              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {

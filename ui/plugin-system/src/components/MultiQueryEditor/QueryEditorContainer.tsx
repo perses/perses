@@ -13,12 +13,15 @@
 
 import { produce } from 'immer';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { Stack, IconButton, Typography, BoxProps, Box } from '@mui/material';
+import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { ReactElement } from 'react';
-import { PluginEditor, PluginEditorProps } from '../PluginEditor';
+import { forwardRef, ReactElement } from 'react';
+import AlertIcon from 'mdi-material-ui/Alert';
+import { InfoTooltip } from '@perses-dev/components';
+import { QueryData } from '../../runtime';
+import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
 
 /**
  * Properties for {@link QueryEditorContainer}
@@ -27,6 +30,8 @@ interface QueryEditorContainerProps {
   queryTypes: QueryPluginType[];
   index: number;
   query: QueryDefinition;
+  queryResult?: QueryData;
+  filteredQueryPlugins?: string[];
   onChange: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
@@ -45,37 +50,94 @@ interface QueryEditorContainerProps {
  * @param onCollapseExpand callback when the query is collapsed or expanded
  * @constructor
  */
-export const QueryEditorContainer = ({
-  queryTypes,
-  index,
-  query,
-  isCollapsed,
-  onDelete,
-  onChange,
-  onCollapseExpand,
-}: QueryEditorContainerProps): ReactElement => {
-  return (
-    <Stack key={index} spacing={1}>
-      <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
-        <IconButton size="small" onClick={() => onCollapseExpand(index)}>
-          {isCollapsed ? <ChevronRight /> : <ChevronDown />}
-        </IconButton>
-        <Typography variant="overline" component="h4">
-          Query #{index + 1}
-        </Typography>
-        <IconButton
-          size="small"
-          // Use `visibility` to ensure that the row has the same height when delete button is visible or not visible
-          sx={{ marginLeft: 'auto', visibility: `${onDelete ? 'visible' : 'hidden'}` }}
-          onClick={() => onDelete && onDelete(index)}
+
+export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorContainerProps>(
+  (props, ref): ReactElement => {
+    const {
+      queryTypes,
+      index,
+      query,
+      queryResult,
+      filteredQueryPlugins,
+      isCollapsed,
+      onDelete,
+      onChange,
+      onCollapseExpand,
+    } = props;
+    return (
+      <Stack key={index} spacing={1}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          borderBottom={1}
+          borderColor={(theme) => theme.palette.divider}
         >
-          <DeleteIcon />
-        </IconButton>
+          <Stack direction="row">
+            <IconButton size="small" onClick={() => onCollapseExpand(index)}>
+              {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+            </IconButton>
+            <Typography variant="overline" component="h4">
+              Query #{index + 1}
+            </Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center">
+            {queryResult?.isFetching && <CircularProgress aria-label="loading" size="1.125rem" />}
+            {queryResult?.error && (
+              <InfoTooltip description={queryResult.error.message}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{
+                    color: (theme) => theme.palette.error.main,
+                  }}
+                >
+                  <IconButton
+                    aria-label="query error"
+                    size="small"
+                    sx={{
+                      color: (theme) => theme.palette.error.main,
+                    }}
+                  >
+                    <AlertIcon />
+                  </IconButton>
+                  <Typography
+                    sx={{
+                      maxWidth: 300,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      '&:hover ::after': { content: '"Click to copy"' },
+                    }}
+                  >
+                    {queryResult.error.message}
+                  </Typography>
+                </Stack>
+              </InfoTooltip>
+            )}
+            {onDelete && (
+              <IconButton aria-label="delete query" size="small" onClick={() => onDelete && onDelete(index)}>
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Stack>
+        </Stack>
+        {!isCollapsed && (
+          <QueryEditor
+            ref={ref}
+            queryTypes={queryTypes}
+            value={query}
+            queryResult={queryResult}
+            filteredQueryPlugins={filteredQueryPlugins}
+            onChange={(next) => onChange(index, next)}
+          />
+        )}
       </Stack>
-      {!isCollapsed && <QueryEditor queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />}
-    </Stack>
-  );
-};
+    );
+  }
+);
+
+QueryEditorContainer.displayName = 'QueryEditorContainer';
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -83,6 +145,8 @@ type OmittedMuiProps = 'children' | 'value' | 'onChange';
 interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryTypes: QueryPluginType[];
   value: QueryDefinition;
+  queryResult?: QueryData;
+  filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
 }
 
@@ -93,9 +157,9 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  * @param props
  * @constructor
  */
-function QueryEditor(props: QueryEditorProps): ReactElement {
-  const { value, onChange, queryTypes, ...others } = props;
 
+const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
+  const { value, onChange, queryTypes, queryResult, filteredQueryPlugins, ...others } = props;
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
@@ -109,6 +173,8 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
   return (
     <Box {...others}>
       <PluginEditor
+        ref={ref}
+        withRunQueryButton={false}
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{
@@ -118,8 +184,12 @@ function QueryEditor(props: QueryEditorProps): ReactElement {
           },
           spec: value.spec.plugin.spec,
         }}
+        filteredQueryPlugins={filteredQueryPlugins}
+        onQueryRefresh={queryResult?.refetch}
         onChange={handlePluginChange}
       />
     </Box>
   );
-}
+});
+
+QueryEditor.displayName = 'QueryEditor';

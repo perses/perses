@@ -19,17 +19,15 @@ import (
 	"fmt"
 	"time"
 
-	modelAPI "github.com/perses/perses/pkg/model/api"
-	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/tidwall/gjson"
-
 	"github.com/go-sql-driver/mysql"
 	databaseFile "github.com/perses/perses/internal/api/database/file"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/database/sql"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
-	promConfig "github.com/prometheus/common/config"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 )
 
 type dao struct {
@@ -56,7 +54,7 @@ func (d *dao) Upsert(entity modelAPI.Entity) error {
 func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	return d.client.Get(kind, metadata, entity)
 }
-func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
+func (d *dao) Query(query databaseModel.Query, slice any) error {
 	return d.client.Query(query, slice)
 }
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
@@ -71,7 +69,7 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 	result := make([]json.RawMessage, 0, len(raws))
 	for _, raw := range raws {
 		metadata := gjson.GetBytes(raw, "metadata").String()
-		result = append(result, []byte(fmt.Sprintf(`{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata)))
+		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
 	return result, nil
 }
@@ -127,7 +125,7 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 
 		// (OPTIONAL) Configure TLS
 		if c.TLSConfig != nil {
-			tlsConfig, parseErr := promConfig.NewTLSConfig(c.TLSConfig)
+			tlsConfig, parseErr := c.TLSConfig.BuildTLSConfig()
 			if parseErr != nil {
 				logrus.WithError(parseErr).Error("Failed to parse TLS from configuration")
 				return nil, parseErr

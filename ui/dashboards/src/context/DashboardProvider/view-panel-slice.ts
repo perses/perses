@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,10 +12,17 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupDefinition, PanelGroupItemId } from '@perses-dev/dashboards';
-import { PanelGroupId } from '@perses-dev/core';
+import { PanelGroupDefinition, PanelGroupItemId, PanelGroupId } from '@perses-dev/core';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
+
+/*
+ * A reference to a Panel that can be repeated in a PanelGroup.
+ */
+export interface VirtualPanelRef {
+  ref: string;
+  repeatVariable?: [string, string];
+}
 
 /**
  * Slice that handles viewing Panels in max size ("full screen").
@@ -29,15 +36,15 @@ export interface ViewPanelSlice {
 export interface ViewPanelState {
   // Do not use directly, use `getViewPanel()` instead for getting the current viewed PanelGroupItemId!
   panelGroupItemId?: PanelGroupItemId;
-  panelRef?: string;
+  panelRef?: VirtualPanelRef;
 }
 
 /**
  * Curried function for viewing panel in max size ("full screen").
  */
 export function createViewPanelSlice(
-  viewPanelRef?: string,
-  setViewPanelRef?: (ref: string | undefined) => void
+  viewPanelRef?: VirtualPanelRef,
+  setViewPanelRef?: (ref: VirtualPanelRef | undefined) => void
 ): StateCreator<ViewPanelSlice & PanelGroupSlice, Middleware, [], ViewPanelSlice> {
   return (set, get) => ({
     viewPanel: {
@@ -67,7 +74,7 @@ export function createViewPanelSlice(
 function getViewPanelGroupId(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
   panelGroupItemId?: PanelGroupItemId,
-  panelRef?: string
+  panelRef?: VirtualPanelRef
 ): PanelGroupItemId | undefined {
   if (panelGroupItemId) {
     return panelGroupItemId;
@@ -83,15 +90,16 @@ function getViewPanelGroupId(
 // Find the PanelGroupItemId of a Panel from a PanelRef
 function findPanelGroupItemIdOfPanelRef(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
-  panelRef?: string
+  panelRef: VirtualPanelRef
 ): PanelGroupItemId | undefined {
   for (const panelGroup of Object.values(panelGroups)) {
-    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef);
+    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef.ref);
     if (itemPanel) {
       const [key] = itemPanel;
       return {
         panelGroupId: panelGroup.id,
         panelGroupItemLayoutId: key,
+        repeatVariable: panelRef.repeatVariable,
       };
     }
   }
@@ -102,13 +110,16 @@ function findPanelGroupItemIdOfPanelRef(
 function findPanelRefOfPanelGroupItemId(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
   panelGroupItemId?: PanelGroupItemId
-): string | undefined {
+): VirtualPanelRef | undefined {
   if (!panelGroupItemId) {
     return undefined;
   }
   const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
   if (panelGroup) {
-    return panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+    const panelRef = panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+    if (panelRef) {
+      return { ref: panelRef, repeatVariable: panelGroupItemId.repeatVariable };
+    }
   }
   return undefined;
 }

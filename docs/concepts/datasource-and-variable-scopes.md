@@ -2,9 +2,9 @@
 
 Datasources & Variables in Perses can be configured at different scopes. The available scopes are:
 
-- **Global**
-- **Project**
-- **Dashboard**
+- **Global** - Available to all dashboards. Global datasources & variables are configured in the Admin view.
+- **Project** - Available to all dashboards in the given project. Project datasources & variables are configured in the Project view.
+- **Dashboard** - Available to the given dashboard only. Dashboard datasources & variables are configured in the Dashboard view.
 
 The idea behind this approach is to:
 

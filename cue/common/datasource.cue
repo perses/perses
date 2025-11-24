@@ -14,7 +14,7 @@
 package common
 
 #datasourceSelector: {
-	datasource?: {
+	datasource?: =~#variableSyntaxRegex | {
 		kind:  string
 		name?: string
 	}
