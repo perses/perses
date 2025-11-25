@@ -284,7 +284,8 @@ func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
 func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// Save the state cookie, will be verified in the codeExchangeHandler
-	state := ctx.Request().URL.Query().Get(redirectQueryParam)
+	redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
+	state := encodeOAuthState(redirectPath)
 	if err := e.saveStateCookie(ctx, state); err != nil {
 		e.logWithError(err).Error("Failed to save state in a cookie.")
 		return err
@@ -326,7 +327,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		e.logWithError(err).Error("An error occurred while verifying the state")
 		return err
 	}
-	redirectURI := state
+	redirectURI := decodeOAuthState(state)
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)

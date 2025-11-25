@@ -14,10 +14,13 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -45,6 +48,9 @@ const (
 	// callback URL that will serve to retrieve the token.
 	// It is used only in external authentication flows.
 	redirectURIQueryParam = "redirect_uri"
+	// stateSeparator is the separator used to separate the state and the redirect path in the oauth2 flow's state.
+	// It is used only in external authentication flows (oauth2 and oidc)
+	stateSeparator = "##"
 )
 
 func getRedirectURI(r *http.Request, authKind string, slugID string) string {
@@ -212,4 +218,22 @@ func withOAuthErrorMdw(handler echo.HandlerFunc) echo.HandlerFunc {
 
 		return err
 	}
+}
+
+// encodeOAuthState generates a random state to be used in the OAuth flow.
+// It should contain a redirect path to be able to redirect the user back to the right page after authentication.
+// Note that we don't reuse only the redirectPath because we want a secure enough state to prevent CSRF attacks.
+func encodeOAuthState(redirectPath string) string {
+	b := make([]byte, 8) // 8 bytes = 16 hexadecimals
+	_, _ = rand.Read(b)
+	randomPart := hex.EncodeToString(b)
+	return fmt.Sprintf("%s%s%s", randomPart, stateSeparator, redirectPath)
+}
+
+func decodeOAuthState(state string) string {
+	parts := strings.SplitN(state, stateSeparator, 2)
+	if len(parts) == 2 {
+		return parts[1]
+	}
+	return ""
 }
