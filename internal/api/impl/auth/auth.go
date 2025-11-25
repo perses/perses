@@ -227,7 +227,7 @@ func encodeOAuthState(redirectPath string) string {
 	b := make([]byte, 8) // 8 bytes = 16 hexadecimals
 	_, _ = rand.Read(b)
 	randomPart := hex.EncodeToString(b)
-	return strings.Join([]string{randomPart, redirectPath}, stateSeparator)
+	return fmt.Sprintf("%s%s%s", randomPart, stateSeparator, redirectPath)
 }
 
 func decodeOAuthState(state string) string {
