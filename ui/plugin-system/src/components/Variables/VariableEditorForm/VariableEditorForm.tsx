@@ -13,7 +13,7 @@
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
-import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
+import { VariableDefinition, ListVariableDefinition, Action, pluginSchema } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,6 +24,15 @@ import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { SORT_METHODS, SortMethodName } from './variable-editor-form-model';
+
+// LOGZ.IO CHANGE START:: Upgrade perses to latest [APPZ-1597]
+const DEFAULT_LIST_VARIABLE_PLUGIN = pluginSchema.parse({
+  kind: 'StaticListVariable' as const,
+  spec: {
+    values: [],
+  },
+});
+// LOGZ.IO CHANGE END:: Upgrade perses to latest [APPZ-1597]
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;
@@ -131,7 +140,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
   }
 
   if (!values.spec.plugin) {
-    form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
+    form.setValue('spec.plugin', DEFAULT_LIST_VARIABLE_PLUGIN); // LOGZ.IO CHANGE:: Upgrade perses to latest [APPZ-1597]
   }
 
   if (!values.spec.sort) {
@@ -164,9 +173,9 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                     value={{
                       selection: {
                         type: 'Variable',
-                        kind: kind ?? 'StaticListVariable',
+                        kind: kind ?? DEFAULT_LIST_VARIABLE_PLUGIN.kind, // LOGZ.IO CHANGE:: Upgrade perses to latest [APPZ-1597]
                       },
-                      spec: pluginSpec ?? {},
+                      spec: pluginSpec ?? DEFAULT_LIST_VARIABLE_PLUGIN.spec, // LOGZ.IO CHANGE:: Upgrade perses to latest [APPZ-1597]
                     }}
                     isReadonly={action === 'read'}
                     onChange={(v) => {
