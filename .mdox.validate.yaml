@@ -53,3 +53,5 @@ validators:
   # code 403: forbidden
   - regex: 'webpack\.js\.org'
     type: 'ignore'
+  - regex: 'medium\.com'
+    type: 'ignore'
