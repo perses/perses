@@ -13,7 +13,7 @@
 
 import { StateCreator } from 'zustand';
 import { PanelGroupItemId } from '@perses-dev/core';
-import { insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
+import { insertPanelInLayout, randomUUID, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -69,7 +69,7 @@ export function createDuplicatePanelSlice(): StateCreator<
           throw new Error(`Cannot find layout for Panel with key '${panelKey}'`);
         }
 
-        const dupePanelKey = crypto.randomUUID().replaceAll('-', '');
+        const dupePanelKey = randomUUID().replaceAll('-', '');
 
         state.panels[dupePanelKey] = panelToDupe;
 

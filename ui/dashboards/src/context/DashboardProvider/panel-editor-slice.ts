@@ -20,7 +20,7 @@ import {
   PanelGroupItemLayout,
 } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { getYForNewRow } from '../../utils';
+import { getYForNewRow, randomUUID } from '../../utils';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import { PanelGroupSlice, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -186,7 +186,7 @@ export function createPanelEditorSlice(): StateCreator<
           panelDefinition: panelDefinition ?? get().initialValues?.panelDefinition ?? createPanelDefinition(),
         },
         applyChanges: (next) => {
-          const panelKey = crypto.randomUUID().replaceAll('-', '');
+          const panelKey = randomUUID().replaceAll('-', '');
           set((state) => {
             // Add a panel
             state.panels[panelKey] = next.panelDefinition;
