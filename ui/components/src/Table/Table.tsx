@@ -144,7 +144,19 @@ export function Table<TableData>({
   }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
-    const initTableColumns = persesColumnsToTanstackColumns(columns);
+    const initTableColumns = 78
+      (columns);
+        // Fix for issue #3639: Deduplicate columns to prevent column duplication when multiple
+    // column settings are defined for the same column
+    const columnIds = new Set<string>();
+    initTableColumns = initTableColumns.filter((col) => {
+      if (col.id && columnIds.has(col.id)) {
+        return false; // Skip duplicate columns
+      }
+      if (col.id) columnIds.add(col.id);
+      return true;
+    });
+
 
     if (checkboxSelection) {
       initTableColumns.unshift(checkboxColumn);
