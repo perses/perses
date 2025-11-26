@@ -38,14 +38,14 @@ interface ResourceListProps {
   onClick: () => void;
 }
 
-function SearchProjectList(props: ResourceListProps): ReactElement {
+function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
   return (
     <SearchList list={projectsQueryResult.data ?? []} query={props.query} onClick={props.onClick} icon={Archive} />
   );
 }
 
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
+function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
   return (
     <SearchList

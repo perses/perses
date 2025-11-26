@@ -48,7 +48,7 @@ import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
 import { useConfigContext } from '../../context/Config';
-import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth-client';
+import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.

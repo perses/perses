@@ -24,21 +24,28 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type Authorization interface {
 	// IsEnabled returns true if the authorization is enabled, false otherwise.
 	IsEnabled() bool
+	// IsNative returns if the authentication is being handled internally or externally, ie. if the User
+	// information is saved in the perses backend. Currently only the k8s authentication provider is an
+	// external, or non-native, provider
+	IsNative() bool
 	// GetUser returns the user information from the context. The user information will depend on the implementation.
 	// While implementing this method, consider that the user information is not guaranteed to be set in the context.
 	// You should consider the case where the context can be empty and that the function can be called from an anonymous endpoint.
 	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
 	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
-	// If it is not the case, you should return an error.
+	// If it is not the case, you should return an error. All further functions are dependant on the results of theses decisions.
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)
+	// GetPublicUser returns the PublicUser of the user from the context.
+	GetPublicUser(ctx echo.Context) (*v1.PublicUser, error)
 	// Middleware returns the middleware function to be used in the echo server.
 	// This middleware is responsible for finding the token in the request, validating it and extracting it in the context.
 	// In case the token is not valid, it will prevent the request from being processed and return an error.
