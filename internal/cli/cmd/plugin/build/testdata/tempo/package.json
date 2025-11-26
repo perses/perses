@@ -12,7 +12,7 @@
   "dependencies": {
     "@module-federation/enhanced": "^0.16.0",
     "@codemirror/autocomplete": "^6.18.4",
-    "@lezer/highlight": "^1.2.1x",
+    "@lezer/highlight": "^1.2.3",
     "@grafana/lezer-traceql": "^0.0.22"
   },
   "peerDependencies": {
