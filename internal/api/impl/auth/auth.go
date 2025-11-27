@@ -54,7 +54,7 @@ const (
 	stateSeparator = "##"
 )
 
-func getRootURL(r *http.Request) url.URL {
+func getRootURL(r *http.Request, apiPrefix string) url.URL {
 	u := url.URL{}
 
 	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
@@ -71,12 +71,13 @@ func getRootURL(r *http.Request) url.URL {
 			u.Scheme = "https"
 		}
 	}
+	u.Path = apiPrefix
 	return u
 }
 
-func getRedirectURI(r *http.Request, authKind string, slugID string) string {
-	rd := getRootURL(r)
-	rd.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
+func getRedirectURI(r *http.Request, authKind, slugID, apiPrefix string) string {
+	rd := getRootURL(r, apiPrefix)
+	rd.Path += fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
 	return rd.String()
 }
 
@@ -107,7 +108,7 @@ type endpoint struct {
 	isAuthEnable    bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthProviders, isAuthEnable bool, apiPrefix string) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
@@ -122,7 +123,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz)
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -131,7 +132,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz)
+		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -258,6 +259,8 @@ func encodeOAuthState(redirectPath string) string {
 	return fmt.Sprintf("%s%s%s", randomPart, stateSeparator, redirectPath)
 }
 
+// decodeOAuthState extracts the redirect path from the state string.
+// If the format is invalid or the redirect path is missing, returns an empty string.
 func decodeOAuthState(state string) string {
 	parts := strings.SplitN(state, stateSeparator, 2)
 	if len(parts) == 2 {

@@ -138,6 +138,7 @@ type oAuthEndpoint struct {
 	authURL         url.URL
 	svc             service
 	loginProps      []string
+	apiPrefix       string
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -152,7 +153,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -191,6 +192,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
+		apiPrefix:       apiPrefix,
 	}, nil
 }
 
@@ -313,7 +315,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -353,7 +355,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	providerCtx := e.newQueryContext(ctx)
