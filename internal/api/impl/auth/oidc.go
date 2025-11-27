@@ -153,9 +153,10 @@ type oIDCEndpoint struct {
 	issuer                 string
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
+	apiPrefix              string
 }
 
-func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint) (echo.HandlerFunc, error) {
+func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
 	if !provider.Logout.Enabled {
 		return nil, nil
 	}
@@ -167,14 +168,14 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	return func(ctx echo.Context) error {
 		endSessionURL := *pEndSessionURL
 		queryParams := endSessionURL.Query()
-		rd := getRootURL(ctx.Request())
+		rd := getRootURL(ctx.Request(), apiPrefix)
 		queryParams.Add("post_logout_redirect_uri", rd.String())
 		endSessionURL.RawQuery = queryParams.Encode()
 		return ctx.Redirect(302, endSessionURL.String())
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -194,7 +195,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		}
 	}
 
-	extraLogoutHandler, err := newOIDCExtraLogoutHandler(provider, relyingParty)
+	extraLogoutHandler, err := newOIDCExtraLogoutHandler(provider, relyingParty, apiPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -210,6 +211,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
+		apiPrefix:              apiPrefix,
 	}, nil
 }
 
@@ -247,7 +249,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 	}
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.AuthURLHandler(func() string {
 		redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
@@ -287,7 +289,7 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)
