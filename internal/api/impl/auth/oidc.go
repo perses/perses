@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gorilla/securecookie"
@@ -151,9 +152,29 @@ type oIDCEndpoint struct {
 	urlParams              map[string]string
 	issuer                 string
 	svc                    service
+	extraLogoutHandler     echo.HandlerFunc
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
+func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint) (echo.HandlerFunc, error) {
+	if !provider.Logout.Enabled {
+		return nil, nil
+	}
+	pEndSessionURL, err := url.Parse(rp.GetEndSessionEndpoint())
+	if err != nil {
+		logrus.WithError(err).Error("Failed to parse end session endpoint")
+		return nil, err
+	}
+	return func(ctx echo.Context) error {
+		endSessionURL := *pEndSessionURL
+		queryParams := endSessionURL.Query()
+		rd := getRootURL(ctx.Request())
+		queryParams.Add("post_logout_redirect_uri", rd.String())
+		endSessionURL.RawQuery = queryParams.Encode()
+		return ctx.Redirect(302, endSessionURL.String())
+	}, nil
+}
+
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -173,6 +194,11 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		}
 	}
 
+	extraLogoutHandler, err := newOIDCExtraLogoutHandler(provider, relyingParty)
+	if err != nil {
+		return nil, err
+	}
+
 	return &oIDCEndpoint{
 		relyingParty:           relyingParty,
 		deviceCodeRelyingParty: deviceCodeRelyingParty,
@@ -183,6 +209,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
+		extraLogoutHandler:     extraLogoutHandler,
 	}, nil
 }
 
@@ -196,6 +223,18 @@ func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
 	// Add routes for device code flow and token exchange
 	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathDeviceCode), e.deviceCode, true)
 	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathToken), e.token, true)
+}
+
+func (e *oIDCEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
+	return e.extraLogoutHandler
+}
+
+func (e *oIDCEndpoint) GetAuthKind() string {
+	return utils.AuthKindOIDC
+}
+
+func (e *oIDCEndpoint) GetSlugID() string {
+	return e.slugID
 }
 
 // auth is the http handler on Perses side that triggers the "Authorization Code"
@@ -347,12 +386,16 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
-	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	providerInfo := crypto.ProviderInfo{
+		ProviderKind: utils.AuthKindOIDC,
+		ProviderID:   e.slugID,
+	}
+	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err
