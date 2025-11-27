@@ -319,6 +319,16 @@ export interface TableColumnConfig<TableData>
    * @default 'auto'
    */
   width?: number | 'auto';
+
+  /**
+   * Dynamic link setting. If available the the cell content should turn into
+   * a link with the value of the cell as the dynamic section
+   */
+  dataLink?: {
+    url: string;
+    title?: string;
+    openNewTab: boolean;
+  };
 }
 
 /**
