@@ -51,7 +51,7 @@ const (
 	redirectURIQueryParam = "redirect_uri"
 	// stateSeparator is the separator used to separate the state and the redirect path in the oauth2 flow's state.
 	// It is used only in external authentication flows (oauth2 and oidc)
-	stateSeparator = "##"
+	stateSeparator = "--"
 )
 
 func getRootURL(r *http.Request, apiPrefix string) url.URL {
