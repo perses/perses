@@ -23,13 +23,15 @@ export interface SaveChangesConfirmationDialogSlice {
 export interface SaveChangesConfirmationDialogState {
   onSaveChanges: (
     saveDefaultTimeRange: boolean,
+    saveDefaultVariables: boolean,
     saveDefaultRefreshInterval: boolean,
-    saveDefaultVariables: boolean
+    saveTimeZone: boolean
   ) => void;
   onCancel: () => void;
   isSavedDurationModified: boolean;
-  isSavedRefreshIntervalModified: boolean;
   isSavedVariableModified: boolean;
+  isSavedRefreshIntervalModified: boolean;
+  isSavedTimeZoneModified: boolean;
   description?: string;
 }
 

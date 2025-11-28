@@ -101,6 +101,8 @@ type DashboardSpec struct {
 	Duration common.Duration `json:"duration" yaml:"duration"`
 	// RefreshInterval is the default refresh interval to use when landing on the dashboard
 	RefreshInterval common.Duration `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	// TimeZone will be set to local time zone if not specified
+	TimeZone string `json:"timeZone,omitempty" yaml:"timeZone,omitempty"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {

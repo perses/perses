@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
-import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
+import {
+  BuiltinVariableDefinition,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
+  TimeRangeValue,
+  DurationString,
+} from '@perses-dev/core';
+import { ErrorBoundary, ErrorAlert, combineSx, TimeZoneProvider } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
@@ -26,6 +32,7 @@ import {
   DatasourceStoreProvider,
   VariableProviderProps,
   VariableProviderWithQueryParams,
+  useDashboardStore,
 } from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
@@ -109,47 +116,117 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
           dashboardResource,
         }}
       >
-        <TimeRangeProviderWithQueryParams
+        <ViewDashboardContent
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
-        >
-          <VariableProviderWithQueryParams
-            initialVariableDefinitions={spec.variables}
-            externalVariableDefinitions={externalVariableDefinitions}
-            builtinVariableDefinitions={builtinVariables}
-          >
-            <Box
-              sx={combineSx(
-                {
-                  display: 'flex',
-                  width: '100%',
-                  height: '100%',
-                  position: 'relative',
-                  overflow: 'hidden',
-                },
-                sx
-              )}
-              {...others}
-            >
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp
-                  dashboardResource={dashboardResource}
-                  emptyDashboardProps={emptyDashboardProps}
-                  isReadonly={isReadonly}
-                  isVariableEnabled={isVariableEnabled}
-                  isDatasourceEnabled={isDatasourceEnabled}
-                  isCreating={isCreating}
-                  isInitialVariableSticky={isInitialVariableSticky}
-                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
-                  dashboardTitleComponent={dashboardTitleComponent}
-                  onSave={onSave}
-                  onDiscard={onDiscard}
-                />
-              </ErrorBoundary>
-            </Box>
-          </VariableProviderWithQueryParams>
-        </TimeRangeProviderWithQueryParams>
+          spec={spec}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariables={builtinVariables}
+          dashboardResource={dashboardResource}
+          emptyDashboardProps={emptyDashboardProps}
+          isReadonly={isReadonly}
+          isVariableEnabled={isVariableEnabled}
+          isDatasourceEnabled={isDatasourceEnabled}
+          isCreating={isCreating}
+          isInitialVariableSticky={isInitialVariableSticky}
+          isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+          dashboardTitleComponent={dashboardTitleComponent}
+          onSave={onSave}
+          onDiscard={onDiscard}
+          sx={sx}
+          {...others}
+        />
       </DashboardProviderWithQueryParams>
     </DatasourceStoreProvider>
+  );
+}
+
+interface ViewDashboardContentProps extends Omit<BoxProps, 'children'> {
+  initialTimeRange: TimeRangeValue;
+  initialRefreshInterval: DurationString;
+  spec: DashboardAppProps['dashboardResource']['spec'];
+  externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
+  builtinVariables: BuiltinVariableDefinition[];
+  dashboardResource: DashboardAppProps['dashboardResource'];
+  emptyDashboardProps?: DashboardAppProps['emptyDashboardProps'];
+  isReadonly: boolean;
+  isVariableEnabled: boolean;
+  isDatasourceEnabled: boolean;
+  isCreating?: boolean;
+  isInitialVariableSticky?: boolean;
+  isLeavingConfirmDialogEnabled?: boolean;
+  dashboardTitleComponent?: DashboardAppProps['dashboardTitleComponent'];
+  onSave?: DashboardAppProps['onSave'];
+  onDiscard?: DashboardAppProps['onDiscard'];
+}
+
+function ViewDashboardContent(props: ViewDashboardContentProps): ReactElement {
+  const {
+    initialTimeRange,
+    initialRefreshInterval,
+    spec,
+    externalVariableDefinitions,
+    builtinVariables,
+    dashboardResource,
+    emptyDashboardProps,
+    isReadonly,
+    isVariableEnabled,
+    isDatasourceEnabled,
+    isCreating,
+    isInitialVariableSticky,
+    isLeavingConfirmDialogEnabled,
+    dashboardTitleComponent,
+    onSave,
+    onDiscard,
+    sx,
+    ...others
+  } = props;
+
+  // Get the current timezone from the dashboard store (reactive)
+  const currentTimeZone = useDashboardStore((state) => state.timeZone);
+
+  return (
+    <TimeZoneProvider timeZone={currentTimeZone}>
+      <TimeRangeProviderWithQueryParams
+        initialTimeRange={initialTimeRange}
+        initialRefreshInterval={initialRefreshInterval}
+      >
+        <VariableProviderWithQueryParams
+          initialVariableDefinitions={spec.variables}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariables}
+        >
+          <Box
+            sx={combineSx(
+              {
+                display: 'flex',
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden',
+              },
+              sx
+            )}
+            {...others}
+          >
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <DashboardApp
+                dashboardResource={dashboardResource}
+                emptyDashboardProps={emptyDashboardProps}
+                isReadonly={isReadonly}
+                isVariableEnabled={isVariableEnabled}
+                isDatasourceEnabled={isDatasourceEnabled}
+                isCreating={isCreating}
+                isInitialVariableSticky={isInitialVariableSticky}
+                isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                dashboardTitleComponent={dashboardTitleComponent}
+                onSave={onSave}
+                onDiscard={onDiscard}
+              />
+            </ErrorBoundary>
+          </Box>
+        </VariableProviderWithQueryParams>
+      </TimeRangeProviderWithQueryParams>
+    </TimeZoneProvider>
   );
 }

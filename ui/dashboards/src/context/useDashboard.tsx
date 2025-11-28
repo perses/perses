@@ -36,6 +36,7 @@ export function useDashboard(): {
     display,
     duration,
     refreshInterval,
+    timeZone,
     datasources,
     ttl,
   } = useDashboardStore(
@@ -49,6 +50,7 @@ export function useDashboard(): {
       display,
       duration,
       refreshInterval,
+      timeZone,
       datasources,
       ttl,
     }) => ({
@@ -61,6 +63,7 @@ export function useDashboard(): {
       display,
       duration,
       refreshInterval,
+      timeZone,
       datasources,
       ttl,
     })
@@ -81,6 +84,7 @@ export function useDashboard(): {
             variables,
             duration,
             refreshInterval,
+            timeZone,
             datasources,
           },
         } as DashboardResource)
@@ -94,6 +98,7 @@ export function useDashboard(): {
             variables,
             duration,
             refreshInterval,
+            timeZone,
             datasources,
             ttl,
           },

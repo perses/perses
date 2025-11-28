@@ -30,6 +30,7 @@ export interface DashboardSpec {
   datasources?: Record<string, DatasourceSpec>;
   duration: DurationString;
   refreshInterval?: DurationString;
+  timeZone?: string;
   variables: VariableDefinition[];
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
