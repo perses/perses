@@ -165,11 +165,20 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 		logrus.WithError(err).Error("Failed to parse end session endpoint")
 		return nil, err
 	}
+
+	// Determine which parameter name to use for the logout redirect URI
+	// Default to standard OIDC "post_logout_redirect_uri" if not specified
+	logoutRedirectParam := "post_logout_redirect_uri"
+	if provider.Logout.LogoutRedirectParamName != "" {
+		logoutRedirectParam = provider.Logout.LogoutRedirectParamName
+	}
+
 	return func(ctx echo.Context) error {
 		endSessionURL := *pEndSessionURL
 		queryParams := endSessionURL.Query()
 		rd := getRootURL(ctx.Request(), apiPrefix)
-		queryParams.Add("post_logout_redirect_uri", rd.String())
+		queryParams.Add(logoutRedirectParam, rd.String())
+		queryParams.Add("client_id", rp.OAuthConfig().ClientID)
 		endSessionURL.RawQuery = queryParams.Encode()
 		return ctx.Redirect(302, endSessionURL.String())
 	}, nil

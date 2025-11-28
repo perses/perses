@@ -271,6 +271,8 @@ logout:
   # Setting this to true will redirect the user to the provider's logout endpoint after the logout process.
   # If false, the user will be logged out from Perses only.
   enabled: <boolean> | default = false # Optional
+  # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
+  logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
 ```
 
 ##### OAuth provider
