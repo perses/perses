@@ -22,11 +22,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetRedirectURI(t *testing.T) {
-	assert.Equal(t, "http://localhost:8080/api/auth/providers/oidc/azure/callback", getRedirectURI(&http.Request{
-		URL: &url.URL{
-			Scheme: "http",
-		},
-		Host: "localhost:8080",
-	}, utils.AuthKindOIDC, "azure"))
+func TestGetRedirectURI_WithAPIPrefix(t *testing.T) {
+	cases := []struct {
+		title     string
+		apiPrefix string
+		want      string
+	}{
+		{"empty prefix", "", "http://localhost:8080/api/auth/providers/oidc/azure/callback"},
+		{"perses", "perses", "http://localhost:8080/perses/api/auth/providers/oidc/azure/callback"},
+		{"/perses", "/perses", "http://localhost:8080/perses/api/auth/providers/oidc/azure/callback"},
+		// Double slashes are not removed, but it's ok as the apiPrefix supposed to be used as is.
+		{"perses/", "perses/", "http://localhost:8080/perses//api/auth/providers/oidc/azure/callback"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.title, func(t *testing.T) {
+			got := getRedirectURI(&http.Request{
+				URL: &url.URL{
+					Scheme: "http",
+				},
+				Host: "localhost:8080",
+			}, utils.AuthKindOIDC, "azure", tc.apiPrefix)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+// Test for encodeOAuthState: ensures the state is correctly formatted and contains the redirect path.
+func TestEncodeOAuthState(t *testing.T) {
+	redirect := "/dashboard"
+	state := encodeOAuthState(redirect)
+	assert.Contains(t, state, "##/dashboard")
+	assert.Len(t, state, 16+2+10)
+}
+
+// Test for decodeOAuthState: ensures correct extraction and empty string for invalid formats.
+func TestDecodeOAuthState(t *testing.T) {
+	redirect := "/dashboard"
+	state := "1234567890abcdef##" + redirect
+	assert.Equal(t, redirect, decodeOAuthState(state))
+
+	state = "invalidformat"
+	assert.Equal(t, "", decodeOAuthState(state))
+
+	state = "short##"
+	assert.Equal(t, "", decodeOAuthState(state))
 }

@@ -44,27 +44,29 @@ interface ResourceListProps {
 
 function SearchProjectList(props: ResourceListProps): ReactElement {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  const { query, onClick, isResources } = props;
   return (
     <SearchList
       list={projectsQueryResult.data ?? []}
-      query={props.query}
-      onClick={props.onClick}
+      query={query}
+      onClick={onClick}
       icon={Archive}
-      isResource={(isAvailable) => props.isResources?.('projects', isAvailable)}
+      isResource={(isAvailable) => isResources?.('projects', isAvailable)}
     />
   );
 }
 
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
+  const { query, onClick, isResources } = props;
   return (
     <SearchList
       list={globalDatasourceQueryResult.data ?? []}
-      query={props.query}
-      onClick={props.onClick}
+      query={query}
+      onClick={onClick}
       icon={DatabaseIcon}
       buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={(isAvailable) => props.isResources?.('globalDatasources', isAvailable)}
+      isResource={(isAvailable) => isResources?.('globalDatasources', isAvailable)}
     />
   );
 }
@@ -84,8 +86,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
     error: importantDashboardsError,
   } = useImportantDashboardList();
 
+  const { query, isResources, onClick } = props;
+
   const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    if (props.query.length && dashboardList) {
+    if (query.length && dashboardList) {
       return dashboardList.map((d) => {
         const highlight = !!importantDashboards.some(
           (importantDashboard) =>
@@ -97,7 +101,7 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
     } else {
       return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
     }
-  }, [importantDashboards, dashboardList, props.query]);
+  }, [importantDashboards, dashboardList, query]);
 
   if (dashboardListError || importantDashboardsError)
     return (
@@ -113,28 +117,29 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   return dashboardListLoading || importantDashboardsLoading ? null : (
     <SearchList
       list={list}
-      query={props.query}
-      onClick={props.onClick}
+      query={query}
+      onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
-      isResource={(isAvailable) => props.isResources?.('dashboards', isAvailable)}
+      isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
     />
   );
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
+  const { isResources, onClick, query } = props;
   return (
     <SearchList
       list={datasourceQueryResult.data ?? []}
-      query={props.query}
-      onClick={props.onClick}
+      query={query}
+      onClick={onClick}
       icon={DatabaseIcon}
       chip={true}
       buildRouting={(resource) =>
         `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
       }
-      isResource={(isAvailable) => props.isResources?.('datasources', isAvailable)}
+      isResource={(isAvailable) => isResources?.('datasources', isAvailable)}
     />
   );
 }
@@ -173,9 +178,11 @@ export function SearchBar(): ReactElement {
     globalDatasources: false,
     datasources: false,
   });
+
   function handleIsResourceAvailable(type: ResourceType, available: boolean): void {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }
+
   const handleOpen = (): void => setOpen(true);
   const handleClose = (): void => setOpen(false);
   useHandleShortCut(handleOpen);
@@ -238,19 +245,16 @@ export function SearchBar(): ReactElement {
               ),
             }}
           />
-          {query.length && !Object.values(hasResource).some((v) => v) ? (
+          {!!query.length && !Object.values(hasResource).some((v) => v) && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
             </Box>
-          ) : (
-            <>
-              <SearchDashboardList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-              <SearchProjectList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-              <SearchGlobalDatasource query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-              <SearchDatasourceList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-            </>
           )}
+          <SearchDashboardList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          <SearchProjectList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          <SearchGlobalDatasource query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          <SearchDatasourceList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
         </Paper>
       </Modal>
     </Paper>
