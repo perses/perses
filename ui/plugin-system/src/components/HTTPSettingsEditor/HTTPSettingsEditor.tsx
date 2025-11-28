@@ -13,7 +13,7 @@
 
 import { RequestHeaders, HTTPDatasourceSpec } from '@perses-dev/core';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, ReactElement, useState } from 'react';
+import React, { Fragment, ReactElement, useState, useRef } from 'react';
 import { produce } from 'immer';
 import { Controller } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -38,13 +38,25 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     Object.assign(value, initialSpecProxy);
   }
 
-  type HeaderEntry = { name: string; value: string };
+  type HeaderEntry = {
+    // Unique identifier for the entry, added to avoid using array index as key
+    id: string;
+    name: string;
+    value: string;
+  };
+
+  // Counter for generating unique IDs
+  const nextIdRef = useRef(0);
 
   // Use local state to maintain an array of header entries during editing, instead of
   // manipulating a map directly which causes weird UX.
   const [headerEntries, setHeaderEntries] = useState<HeaderEntry[]>(() => {
     const headers = value.proxy?.spec.headers ?? {};
-    return Object.entries(headers).map(([name, headerValue]) => ({ name, value: headerValue as string }));
+    return Object.entries(headers).map(([name, headerValue]) => ({
+      id: String(nextIdRef.current++),
+      name,
+      value: headerValue as string,
+    }));
   });
 
   // Check for duplicate header names
@@ -61,11 +73,10 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   });
   const hasDuplicates = duplicateNames.size > 0;
 
-  const syncHeadersToParent = (entries: Array<{ name: string; value: string }>): void => {
+  const syncHeadersToParent = (entries: HeaderEntry[]): void => {
     const headersObject: RequestHeaders = {};
     entries.forEach(({ name, value: headerValue }) => {
-      // Only sync non-empty entries to parent
-      if (name !== '' || headerValue !== '') {
+      if (name !== '') {
         headersObject[name] = headerValue;
       }
     });
@@ -79,29 +90,23 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     );
   };
 
-  const handleHeaderChange = (index: number, field: 'name' | 'value', newValue: string): void => {
-    const newEntries = headerEntries.slice();
-    const entry = newEntries[index];
-    if (!entry) return;
-
-    if (field === 'name') {
-      newEntries[index] = { name: newValue, value: entry.value };
-    } else {
-      newEntries[index] = { name: entry.name, value: newValue };
-    }
+  const handleHeaderChange = (id: string, field: 'name' | 'value', newValue: string): void => {
+    const newEntries = headerEntries.map((entry) => {
+      if (entry.id !== id) return entry;
+      return field === 'name' ? { ...entry, name: newValue } : { ...entry, value: newValue };
+    });
     setHeaderEntries(newEntries);
     syncHeadersToParent(newEntries);
   };
 
   const addHeader = (): void => {
-    const newEntries = [...headerEntries, { name: '', value: '' }];
+    const newEntries = [...headerEntries, { id: String(nextIdRef.current++), name: '', value: '' }];
     setHeaderEntries(newEntries);
     syncHeadersToParent(newEntries);
   };
 
-  const removeHeader = (index: number): void => {
-    const newEntries = headerEntries.slice();
-    newEntries.splice(index, 1);
+  const removeHeader = (id: string): void => {
+    const newEntries = headerEntries.filter((entry) => entry.id !== id);
     setHeaderEntries(newEntries);
     syncHeadersToParent(newEntries);
   };
@@ -296,18 +301,18 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
           </Typography>
           <Grid container spacing={2} mb={2}>
             {headerEntries.length > 0 ? (
-              headerEntries.map((header, i) => (
-                <Fragment key={i}>
+              headerEntries.map((header) => (
+                <Fragment key={header.id}>
                   <Grid item xs={4}>
                     <Controller
-                      name={`Header name ${i}`}
+                      name={`Header name ${header.id}`}
                       render={({ field, fieldState }) => (
                         <TextField
                           {...field}
                           fullWidth
                           label="Header name"
                           value={header.name}
-                          error={!!fieldState.error || (header.name !== '' && duplicateNames.has(header.name))}
+                          error={!!fieldState.error || duplicateNames.has(header.name)}
                           helperText={fieldState.error?.message}
                           InputProps={{
                             readOnly: isReadonly,
@@ -315,7 +320,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                           onChange={(e) => {
                             field.onChange(e);
-                            handleHeaderChange(i, 'name', e.target.value);
+                            handleHeaderChange(header.id, 'name', e.target.value);
                           }}
                         />
                       )}
@@ -323,7 +328,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                   </Grid>
                   <Grid item xs={7}>
                     <Controller
-                      name={`Header value ${i}`}
+                      name={`Header value ${header.id}`}
                       render={({ field, fieldState }) => (
                         <TextField
                           {...field}
@@ -338,7 +343,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                           onChange={(e) => {
                             field.onChange(e);
-                            handleHeaderChange(i, 'value', e.target.value);
+                            handleHeaderChange(header.id, 'value', e.target.value);
                           }}
                         />
                       )}
@@ -346,15 +351,15 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                   </Grid>
                   <Grid item xs={1}>
                     <Controller
-                      name={`Remove Header ${i}`}
+                      name={`Remove Header ${header.id}`}
                       render={({ field }) => (
                         <IconButton
                           {...field}
                           disabled={isReadonly}
-                          aria-label={`Remove header ${header.name || i}`}
+                          aria-label={`Remove header ${header.name || header.id}`}
                           onClick={(e) => {
                             field.onChange(e);
-                            removeHeader(i);
+                            removeHeader(header.id);
                           }}
                         >
                           <MinusIcon />
