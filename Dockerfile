@@ -7,14 +7,14 @@ FROM gcr.io/distroless/static-debian12:nonroot
 
 LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 
-COPY --chown=nonroot:nonroot perses                            /bin/perses
-COPY --chown=nonroot:nonroot percli                            /bin/percli
-COPY --chown=nonroot:nonroot LICENSE                           /LICENSE
-COPY --chown=nonroot:nonroot plugins-archive/                  /etc/perses/plugins-archive/
-COPY --chown=nonroot:nonroot docs/examples/config.docker.yaml  /etc/perses/config.yaml
-COPY --from=build-env --chown=nonroot:nonroot                  /perses         /perses
-COPY --from=build-env --chown=nonroot:nonroot                  /plugins        /etc/perses/plugins
-COPY --from=build-env --chown=nonroot:nonroot                  /etc/mime.types /etc/mime.types
+COPY perses                                   /bin/perses
+COPY percli                                   /bin/percli
+COPY LICENSE                                  /LICENSE
+COPY plugins-archive/                         /etc/perses/plugins-archive/
+COPY docs/examples/config.docker.yaml         /etc/perses/config.yaml
+COPY --from=build-env --chown=nonroot:nonroot /perses         /perses
+COPY --from=build-env --chown=nonroot:nonroot /plugins        /etc/perses/plugins
+COPY --from=build-env                         /etc/mime.types /etc/mime.types
 
 WORKDIR /perses
 
