@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
+    "start:shared": "cross-env NODE_ENV=development SHARED_DEV=true rspack serve",
     "start": "cross-env NODE_ENV=development rspack serve",
     "build": "rspack build",
     "type-check": "tsc --noEmit",
