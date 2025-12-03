@@ -35,3 +35,7 @@ coverage
 LICENSE
 CHANGELOG.md
 /embed.go
+
+# ignore shared package links
+.perses-shared-link-bk.json
+.perses-shared-link-lock-bk.json

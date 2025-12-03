@@ -5,9 +5,6 @@
     "sourceMap": true,
     "paths": {
       "@perses-dev/core": ["../core/src"],
-      "@perses-dev/components": ["../components/src"],
-      "@perses-dev/dashboards": ["../dashboards/src"],
-      "@perses-dev/explore": ["../explore/src"],
       "@perses-dev/plugin-system": ["../plugin-system/src"]
     }
   }
