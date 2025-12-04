@@ -16,15 +16,16 @@ import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { AbsoluteTimeRange } from '@perses-dev/core';
-import { useTimeZone } from '../context';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ErrorAlert } from '../ErrorAlert';
+import { formatWithTimeZone } from '../utils/format';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
 interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
   onChange: (timeRange: AbsoluteTimeRange) => void;
   onCancel: () => void;
+  timeZone: string;
 }
 
 type AbsoluteTimeRangeInputValue = {
@@ -40,24 +41,27 @@ type AbsoluteTimeRangeInputValue = {
  * @param onCancel event received when user click on cancel
  * @constructor
  */
-export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps): ReactElement => {
-  const { formatWithUserTimeZone } = useTimeZone();
-
+export const DateTimeRangePicker = ({
+  initialTimeRange,
+  onChange,
+  onCancel,
+  timeZone,
+}: AbsoluteTimeFormProps): ReactElement => {
   // Time range values as dates that can be used as a time range.
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
 
   // Time range values as strings used to populate the text inputs. May not
   // be valid as dates when the user is typing.
   const [timeRangeInputs, setTimeRangeInputs] = useState<AbsoluteTimeRangeInputValue>({
-    start: formatWithUserTimeZone(initialTimeRange.start, DATE_TIME_FORMAT),
-    end: formatWithUserTimeZone(initialTimeRange.end, DATE_TIME_FORMAT),
+    start: formatWithTimeZone(initialTimeRange.start, DATE_TIME_FORMAT, timeZone),
+    end: formatWithTimeZone(initialTimeRange.end, DATE_TIME_FORMAT, timeZone),
   });
 
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
   const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange): void => {
     const isInputChange = typeof newTime === 'string';
-    const newInputTime = isInputChange ? newTime : formatWithUserTimeZone(newTime, DATE_TIME_FORMAT);
+    const newInputTime = isInputChange ? newTime : formatWithTimeZone(newTime, DATE_TIME_FORMAT, timeZone);
 
     setTimeRangeInputs((prevTimeRangeInputs) => {
       return {

@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select } from '@mui/material';
-import Calendar from 'mdi-material-ui/Calendar';
-import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import { Box, MenuItem, Popover, Select, useMediaQuery, useTheme } from '@mui/material';
+import ClockTimeFiveOutline from 'mdi-material-ui/ClockTimeFiveOutline';
+import {
+  TimeRangeValue,
+  isRelativeTimeRange,
+  AbsoluteTimeRange,
+  toAbsoluteTimeRange,
+  DEFAULT_DASHBOARD_TIMEZONE,
+} from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
-import { useTimeZone } from '../context';
 import { TimeOption } from '../model';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
@@ -43,6 +48,10 @@ interface TimeRangeSelectorProps {
    * Defaults to true.
    */
   showCustomTimeRange?: boolean;
+  /**
+   * The time zone to use for the time range selector.
+   */
+  timeZone?: string;
 }
 
 /**
@@ -57,8 +66,9 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
+  timeZone = DEFAULT_DASHBOARD_TIMEZONE,
 }: TimeRangeSelectorProps): ReactElement {
-  const { timeZone } = useTimeZone();
+  const isMobile = useMediaQuery(useTheme().breakpoints.down('md'));
 
   const anchorEl = useRef(); // Used to position the absolute time range picker
 
@@ -108,6 +118,7 @@ export function TimeRangeSelector({
             setOpen(false);
           }}
           onCancel={() => setShowCustomDateSelector(false)}
+          timeZone={timeZone}
         />
       </Popover>
       <Box ref={anchorEl}>
@@ -115,20 +126,26 @@ export function TimeRangeSelector({
           open={open}
           value={formatTimeRange(value, timeZone)}
           onClick={() => setOpen(!open)}
-          IconComponent={Calendar}
+          IconComponent={ClockTimeFiveOutline}
           inputProps={{
             'aria-label': `Select time range. Currently set to ${value}`,
           }}
           sx={{
             // `transform: none` prevents calendar icon from flipping over when menu is open
             '.MuiSelect-icon': {
-              marginTop: '1px',
               transform: 'none',
             },
             // paddingRight creates more space for the calendar icon (it's a bigger icon)
-            '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': {
-              paddingRight: '36px',
-            },
+            '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': isMobile
+              ? {
+                  paddingRight: '25px',
+                  textIndent: '-9999px', // Hide text by moving it far off screen
+                  whiteSpace: 'nowrap', // Prevent text from wrapping
+                  overflow: 'hidden', // Hide any overflow
+                }
+              : {
+                  paddingRight: '36px',
+                },
             '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
           }}
         >
