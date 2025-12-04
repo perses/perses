@@ -13,7 +13,6 @@
 
 import { Theme } from '@mui/material';
 import {
-  AccessorKeyColumnDef,
   CellContext,
   ColumnDef,
   CoreOptions,
@@ -21,6 +20,8 @@ import {
   RowData,
   RowSelectionState,
   SortingState,
+  ColumnDefBase,
+  AccessorFn,
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
@@ -292,12 +293,27 @@ export interface TableColumnConfig<TableData>
   // https://github.com/TanStack/table/issues/4241
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
+  // LOGZ.IO CHANGE START:: group by array field [APPZ-994]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn'> {
+  extends Pick<ColumnDefBase<TableData, any>, 'cell' | 'sortingFn'> {
   /**
    * Text to display in the header for the column.
    */
   header: string;
+
+  /**
+   * Key to access the data for this column. Used when the column accesses a property directly.
+   * Cannot be used together with accessorFn.
+   */
+  accessorKey?: (string & {}) | keyof TableData;
+
+  /**
+   * Function to access the data for this column. Used when custom logic is needed to retrieve the value.
+   * Cannot be used together with accessorKey.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessorFn?: AccessorFn<TableData, any>;
+  // LOGZ.IO CHANGE END:: group by array field [APPZ-994]
 
   /**
    * Alignment of the content in the cell.
