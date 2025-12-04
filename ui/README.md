@@ -48,11 +48,11 @@ The following packages include components, plugins, utilities, and other code th
 
 These packages are published to npm with the `@perses-dev` namespace.
 
-- [`components`](./components): common components available to the app, plugins, or users who want to embed common Perses UI elements into their own applications.
+- [`components`](https://github.com/perses/shared/tree/main/components): common components available to the app, plugins, or users who want to embed common Perses UI elements into their own applications.
 - [`core`](./core): Core functionality that's exposed to plugins and also
   consumed by the app.
-- [`dashboards`](./dashboards): Dashboard components and related utilities.
-- [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the
+- [`dashboards`](https://github.com/perses/shared/tree/main/dashboards): Dashboard components and related utilities.
+- [`plugin-system`](https://github.com/perses/shared/tree/main/plugin-system): All the type definitions and components that power our plugins, also includes the
   definitions for the runtime available to plugins (e.g. the current time range state, the current variable
   state).
 

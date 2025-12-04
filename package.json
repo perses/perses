@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@perses-dev/components": "file:../shared/components"
+  }
+}
