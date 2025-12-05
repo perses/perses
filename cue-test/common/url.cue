@@ -13,5 +13,5 @@
 
 package common
 
-test1: #url && "http://localhost:9090"
-test2: #url && "https://localhost:9090"
+test1: #url & "http://localhost:9090"
+test2: #url & "https://localhost:9090"

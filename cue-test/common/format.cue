@@ -13,16 +13,7 @@
 
 package common
 
-myJoinByColumnValueTransform: #joinByColumnValueTransform & { spec: columns: ["job", "instance"] }
-
-myMergeColumnsTransform: #mergeColumnsTransform & {
-	spec: {
-		columns: ["job", "instance"]
-		name:     "job-instance"
-		disabled: true
-	}
+myFormat: #format & {
+    decimalPlaces: 0
+    shortValues:   false
 }
-
-myMergeIndexedColumnsTransform: #mergeIndexedColumnsTransform & { spec: column: "instance" }
-
-mergeSeries: #mergeSeries & { spec: disabled: false }
