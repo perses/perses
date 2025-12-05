@@ -2,7 +2,7 @@ import { Box, CircularProgress, Link, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import Github from 'mdi-material-ui/Github';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { useHealth } from '../model/health-client';
 
 const style: SxProps<Theme> = {
@@ -32,6 +32,23 @@ export default function Footer(): ReactElement {
     exceptionSnackbar(error);
   }
 
+  let versionContent: ReactNode;
+
+  if (isLoading) {
+    versionContent = <CircularProgress size="1rem" />;
+  } else if (data !== undefined && data.version !== '') {
+    const releaseHref = data.version.startsWith('main')
+      ? `https://github.com/perses/perses/tree/${data.commit}`
+      : `https://github.com/perses/perses/releases/tag/v${data.version}`;
+    versionContent = (
+      <Link color="inherit" underline="hover" target="_blank" rel="noreferrer" href={releaseHref}>
+        {data.version}
+      </Link>
+    );
+  } else {
+    versionContent = 'development version';
+  }
+
   return (
     <Box component="footer" sx={style}>
       <ul
@@ -45,27 +62,7 @@ export default function Footer(): ReactElement {
             <Github sx={{ verticalAlign: 'bottom' }} />
           </a>
         </li>
-        <li>
-          {isLoading ? (
-            <CircularProgress size="1rem" />
-          ) : data !== undefined && data.version !== '' ? (
-            <Link
-              color="inherit"
-              underline="hover"
-              target="_blank"
-              rel="noreferrer"
-              href={
-                data.version.startsWith('main')
-                  ? `https://github.com/perses/perses/tree/${data.commit}`
-                  : `https://github.com/perses/perses/releases/tag/v${data.version}`
-              }
-            >
-              {data.version}
-            </Link>
-          ) : (
-            'development version'
-          )}
-        </li>
+        <li>{versionContent}</li>
       </ul>
     </Box>
   );
