@@ -54,15 +54,13 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			},
 			Module: pluginModule,
 		}
-		if !IsSchemaRequired(pluginModule.Spec) || plg.DisableSchema {
-			logrus.Debugf("schema is disabled or not required for plugin %q", pluginModule.Metadata.Name)
-			return nil
-		}
-		if pluginSchemaLoadErr := p.sch.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
-			return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
-		}
-		if pluginMigrateLoadErr := p.mig.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
-			return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin migration: %s", pluginMigrateLoadErr))
+		if IsSchemaRequired(pluginModule.Spec) && !plg.DisableSchema {
+			if pluginSchemaLoadErr := p.sch.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginSchemaLoadErr != nil {
+				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin schema: %s", pluginSchemaLoadErr))
+			}
+			if pluginMigrateLoadErr := p.mig.LoadDevPlugin(plg.AbsolutePath, pluginModule); pluginMigrateLoadErr != nil {
+				return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin migration: %s", pluginMigrateLoadErr))
+			}
 		}
 		p.mutex.Lock()
 		p.devLoaded[manifest.Name] = pluginLoaded
