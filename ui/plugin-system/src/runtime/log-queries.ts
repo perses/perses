@@ -41,6 +41,10 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
       const logQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<LogQueryResult> => {
           const plugin = await getPlugin(LOG_QUERY_KEY, logQueryKind);
           const data = await plugin.getLogData(definition.spec.plugin.spec, context, signal);
