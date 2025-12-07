@@ -121,7 +121,7 @@ function HomeView(): ReactElement {
                 action="create"
                 scope="Project"
                 variant="contained"
-                size="large"
+                size="medium"
                 startIcon={<PlusIcon />}
                 onClick={handleAddProjectDialogOpen}
                 sx={{ px: 3 }}
@@ -130,7 +130,7 @@ function HomeView(): ReactElement {
               </CRUDButton>
               <Button
                 variant="outlined"
-                size="large"
+                size="medium"
                 startIcon={<ViewDashboardOutlineIcon />}
                 onClick={handleAddDashboardDialogOpen}
                 disabled={userProjects.length === 0}
@@ -140,7 +140,7 @@ function HomeView(): ReactElement {
               </Button>
               <Button
                 variant="outlined"
-                size="large"
+                size="medium"
                 startIcon={<UploadIcon />}
                 component={RouterLink}
                 to={ImportRoute}
