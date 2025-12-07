@@ -16,21 +16,19 @@ import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import { intlFormatDistance } from 'date-fns';
 import { ReactElement, useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { useConfig } from '../../model/config-client';
-import { Link as RouterLink } from 'react-router-dom';
 
 const MAX_IMPORTANT_DASHBOARDS = 3;
 
 export function ImportantDashboards(): ReactElement {
   const { data: config } = useConfig();
   const { data: dashboards, isLoading } = useImportantDashboardList();
-  const dashboardList = dashboards ?? [];
 
-  const previewDashboards = useMemo(
-    () => dashboardList.slice(0, MAX_IMPORTANT_DASHBOARDS),
-    [dashboardList]
-  );
+  const dashboardList = useMemo(() => dashboards ?? [], [dashboards]);
+
+  const previewDashboards = useMemo(() => dashboardList.slice(0, MAX_IMPORTANT_DASHBOARDS), [dashboardList]);
 
   const hasImportantDashboards = Boolean(config?.frontend.important_dashboards?.length && dashboardList.length > 0);
 
