@@ -11,149 +11,161 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  CircularProgress,
-  IconButton,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { ChangeEvent, MouseEvent, ReactElement, useCallback, useMemo, useState } from 'react';
-import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
-import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
-import ChevronDown from 'mdi-material-ui/ChevronDown';
+import { Box, Button, CircularProgress, InputAdornment, Paper, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
+import { getResourceDisplayName } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
-import DeleteOutline from 'mdi-material-ui/DeleteOutline';
+import Magnify from 'mdi-material-ui/Magnify';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
-import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
-import { useTranslation } from 'react-i18next';
-import { DashboardList } from '../../components/DashboardList/DashboardList';
-import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
-import { useHasPermission } from '../../context/Authorization';
-import { DeleteResourceDialog } from '../../components/dialogs';
-import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
+import ChevronRight from 'mdi-material-ui/ChevronRight';
+import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
 
-interface ProjectAccordionProps {
+/**
+ * Generate a color for a project based on its name.
+ * Uses a deterministic hash function to consistently assign colors to projects.
+ * Note: Hardcoded colors are used here for decorative project avatars to ensure
+ * distinct, visually appealing colors that work well for icons. This is an exception
+ * to the general rule of using theme colors.
+ */
+function getProjectColor(projectName: string): string {
+  const colors: string[] = [
+    '#3B82F6',
+    '#8B5CF6',
+    '#10B981',
+    '#F97316',
+    '#EC4899',
+    '#06B6D4',
+    '#6366F1',
+    '#F43F5E',
+    '#14B8A6',
+    '#F59E0B',
+  ];
+  let hash = 0;
+  for (let i = 0; i < projectName.length; i++) {
+    hash = projectName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  // Index is guaranteed to be within bounds due to modulo operation
+  const color = colors[index];
+  if (color) {
+    return color;
+  }
+  // Fallback to first color (should never happen, but satisfies TypeScript)
+  return colors[0]!;
+}
+
+interface ProjectCardProps {
   row: ProjectWithDashboards;
 }
 
-function ProjectAccordion({ row }: ProjectAccordionProps): ReactElement {
-  const isReadonly = useIsReadonly();
-  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-
-  const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
-
-  const hasPermission = useHasPermission('delete', row.project.metadata.name, 'Project');
-  const deleteProjectMutation = useDeleteProjectMutation();
-
-  function openDeleteProjectConfirmDialog($event: MouseEvent): void {
-    $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
-    setIsDeleteProjectDialogOpen(true);
-  }
-
-  function closeDeleteProjectConfirmDialog(): void {
-    setIsDeleteProjectDialogOpen(false);
-  }
-
-  function handleProjectDelete(project: ProjectResource): void {
-    deleteProjectMutation.mutate(project, {
-      onSuccess: (deletedProject: ProjectResource): void => {
-        successSnackbar(`Project ${deletedProject.metadata.name} has been successfully deleted`);
-        closeDeleteProjectConfirmDialog();
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-        throw err;
-      },
-    });
-  }
+function ProjectCard({ row }: ProjectCardProps): ReactElement {
+  const theme = useTheme();
+  const dashboardsCount = row.dashboards.length;
+  const projectName = getResourceDisplayName(row.project);
+  const projectColor = getProjectColor(row.project.metadata.name ?? 'default');
 
   return (
-    <>
-      <Accordion TransitionProps={{ unmountOnExit: true }} key={row.project.metadata.name}>
-        <AccordionSummary expandIcon={<ChevronDown />}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
-            <Stack direction="row" alignItems="center" gap={1}>
-              <Archive sx={{ margin: 1 }} />
-              <Link component={RouterLink} to={`/projects/${row.project.metadata.name}`} variant="h3" underline="hover">
-                {getResourceDisplayName(row.project)}
-              </Link>
-            </Stack>
-            {hasPermission && (
-              <IconButton
-                component="div"
-                onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event)}
-                disabled={isReadonly}
-              >
-                <DeleteOutline />
-              </IconButton>
-            )}
-          </Stack>
-        </AccordionSummary>
-        <AccordionDetails id={`${row.project.metadata.name}-dashboard-list`} sx={{ padding: 0 }}>
-          <DashboardList
-            dashboardList={row.dashboards}
-            hideToolbar={true}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 25, page: 0 },
-              },
-              columns: {
-                columnVisibilityModel: {
-                  id: false,
-                  project: false,
-                  version: false,
-                },
-              },
-            }}
-            isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-          />
-        </AccordionDetails>
-      </Accordion>
-      <DeleteResourceDialog
-        resource={row.project}
-        open={isDeleteProjectDialogOpen}
-        onSubmit={() => handleProjectDelete(row.project)}
-        onClose={closeDeleteProjectConfirmDialog}
-      />
-    </>
+    <Paper
+      elevation={1}
+      component={RouterLink}
+      to={`/projects/${row.project.metadata.name}`}
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        cursor: 'pointer',
+        textDecoration: 'none',
+        color: 'inherit',
+        transition: 'all 0.2s',
+        '&:hover': {
+          boxShadow: (theme) => theme.shadows[2],
+          bgcolor: 'action.hover',
+        },
+      }}
+    >
+      <Box sx={{ mb: 1.5 }}>
+        <Box
+          sx={{
+            width: 36,
+            height: 36,
+            borderRadius: 1.5,
+            bgcolor: projectColor,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Archive sx={{ color: theme.palette.common.white, fontSize: 20 }} />
+        </Box>
+      </Box>
+
+      <Typography variant="subtitle1" sx={{ mb: 0.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {projectName}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+        {dashboardsCount} dashboard{dashboardsCount !== 1 ? 's' : ''}
+      </Typography>
+
+      <Button
+        fullWidth
+        size="small"
+        variant="text"
+        endIcon={<ChevronRight fontSize="small" />}
+        sx={{
+          justifyContent: 'space-between',
+          transition: 'all 0.2s',
+          fontSize: '0.75rem',
+          py: 0.5,
+          '&:hover': {
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+          },
+        }}
+      >
+        Open Project
+      </Button>
+    </Paper>
   );
 }
 
-interface RenderDashboardListProps {
+interface RenderProjectGridProps {
   projectRows: ProjectWithDashboards[];
 }
 
-function RenderDashboardList(props: RenderDashboardListProps): ReactElement {
+function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
   const { projectRows } = props;
 
   if (projectRows.length === 0) {
     return (
-      <Typography sx={{ fontStyle: 'italic', color: 'warning.main' }}>No projects with dashboards found!</Typography>
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <Typography color="text.secondary">No projects found</Typography>
+      </Box>
     );
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+          lg: 'repeat(4, 1fr)',
+          xl: 'repeat(5, 1fr)',
+        },
+        gap: 1.5,
+      }}
+    >
       {projectRows.map((row) => (
-        <ProjectAccordion key={row.project.metadata.name} row={row} />
+        <ProjectCard key={row.project.metadata.name} row={row} />
       ))}
     </Box>
   );
 }
 
-interface SearchableDashboardsProps {
-  id?: string;
-}
-
-export function SearchableDashboards(props: SearchableDashboardsProps): ReactElement {
+export function ProjectsAndDashboards(): ReactElement {
   const kvSearch = useMemo(
     () =>
       new KVSearch<ProjectWithDashboards>({
@@ -170,58 +182,63 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
 
   const { data: projectRows, isLoading } = useProjectsWithDashboards();
 
-  const [search, setSearch] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const filteredProjectRows: ProjectWithDashboards[] = useMemo(() => {
-    if (search) {
-      return kvSearch.filter(search, projectRows ?? []).map((res) => res.original);
+    if (searchQuery) {
+      return kvSearch.filter(searchQuery, projectRows ?? []).map((res) => res.original);
     } else {
       return projectRows ?? [];
     }
-  }, [kvSearch, projectRows, search]);
+  }, [kvSearch, projectRows, searchQuery]);
 
   const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value) {
-      setSearch(e.target.value);
-    } else {
-      setSearch('');
-    }
+    setSearchQuery(e.target.value);
   }, []);
 
-  if (isLoading) {
-    return (
-      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Stack>
-    );
-  }
-
   return (
-    <Stack gap={2} id={props.id} marginBottom={4}>
-      <TextField
-        id="search"
-        label="Search a Project or a Dashboard"
-        variant="outlined"
-        onChange={handleSearch}
-        fullWidth
-      />
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <RenderDashboardList projectRows={filteredProjectRows} />
-      </ErrorBoundary>
-    </Stack>
-  );
-}
+    <Box component="section">
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Archive sx={{ color: 'primary.main' }} />
+          <Typography variant="h2">Projects & Dashboards</Typography>
+        </Box>
 
-export function ProjectsAndDashboards(): ReactElement {
-  const { t: translate } = useTranslation('dashboard');
+        <TextField
+          placeholder="Search projects..."
+          value={searchQuery}
+          onChange={handleSearch}
+          size="small"
+          sx={{
+            width: 280,
+            '& .MuiOutlinedInput-root': {
+              bgcolor: 'action.hover',
+              height: 36,
+              '& fieldset': { border: 'none' },
+              '& input': {
+                padding: '8px 0',
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Magnify fontSize="small" />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
 
-  return (
-    <Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
-        <FormatListBulletedIcon />
-        <h2>{translate('projects_and_dashboards')}</h2>
-      </Stack>
-      <SearchableDashboards id="project-dashboard-list" />
-    </Stack>
+      {isLoading ? (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      ) : (
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          <RenderProjectGrid projectRows={filteredProjectRows} />
+        </ErrorBoundary>
+      )}
+    </Box>
   );
 }

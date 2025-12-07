@@ -11,27 +11,103 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Card, Stack } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
-import { ReactElement } from 'react';
+import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
+import Archive from 'mdi-material-ui/Archive';
+import { ReactElement, useMemo } from 'react';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
+import { intlFormatDistance } from 'date-fns';
 import { useRecentDashboardList } from '../../model/dashboard-client';
+import { Link as RouterLink } from 'react-router-dom';
+
+const MAX_RECENT_DASHBOARDS = 5;
 
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
 
+  const dashboards = useMemo(() => data?.slice(0, MAX_RECENT_DASHBOARDS) ?? [], [data]);
+
   return (
-    <Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
-        <HistoryIcon />
-        <h2>Recently Viewed Dashboards</h2>
-      </Stack>
-      <Card id="recent-dashboard-list">
+    <Card elevation={1} sx={{ border: '1px solid', borderColor: 'divider', height: '100%' }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <HistoryIcon sx={{ color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
+            Recently Viewed Dashboards
+          </Typography>
+        </Box>
+
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <RecentDashboardList dashboardList={data} isLoading={isLoading} />
+          {isLoading ? (
+            <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+              <CircularProgress size={24} />
+            </Stack>
+          ) : dashboards.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              No dashboards viewed yet.
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              {dashboards.map((item, index) => {
+                const updatedAt = item.date ?? item.dashboard.metadata.updatedAt;
+                const relativeTime = updatedAt ? intlFormatDistance(new Date(updatedAt), new Date()) : 'moments ago';
+                const displayName = item.dashboard.spec.display?.name ?? item.dashboard.metadata.name;
+                const dashboardKey = `${item.dashboard.metadata.project}-${item.dashboard.metadata.name}-${index}`;
+
+                return (
+                  <Box key={dashboardKey}>
+                    <Box
+                      component={RouterLink}
+                      to={`/projects/${item.dashboard.metadata.project}/dashboards/${item.dashboard.metadata.name}`}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        py: 2,
+                        pl: 1,
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s ease',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 1.5,
+                          bgcolor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />
+                      </Box>
+
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {displayName}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                          <Archive sx={{ fontSize: 12, color: 'text.secondary' }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {item.dashboard.metadata.project} • {relativeTime}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                    {index < dashboards.length - 1 && <Divider />}
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
         </ErrorBoundary>
-      </Card>
-    </Stack>
+      </CardContent>
+    </Card>
   );
 }
