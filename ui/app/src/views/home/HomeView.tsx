@@ -113,7 +113,8 @@ function HomeView(): ReactElement {
               Welcome to Perses
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-            Build, monitor, and analyze dashboards with enterprise-grade performance. Access your most important metrics in real-time.
+              Build, monitor, and analyze dashboards with enterprise-grade performance. Access your most important
+              telemetry in real-time.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               <CRUDButton
