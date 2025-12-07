@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, CircularProgress, InputAdornment, Paper, Stack, TextField, Typography, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
 import { getResourceDisplayName } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';

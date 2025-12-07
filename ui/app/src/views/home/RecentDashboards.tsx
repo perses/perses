@@ -16,10 +16,10 @@ import HistoryIcon from 'mdi-material-ui/History';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import Archive from 'mdi-material-ui/Archive';
 import { ReactElement, useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
 import { useRecentDashboardList } from '../../model/dashboard-client';
-import { Link as RouterLink } from 'react-router-dom';
 
 const MAX_RECENT_DASHBOARDS = 5;
 
@@ -89,7 +89,10 @@ export function RecentDashboards(): ReactElement {
                       </Box>
 
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
                           {displayName}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
