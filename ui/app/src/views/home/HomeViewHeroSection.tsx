@@ -85,13 +85,22 @@ export function HomeViewHeroSection({
         }}
       />
 
-      <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+      <Box
+        sx={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 2,
+        }}
+      >
         <Box sx={{ maxWidth: 800, flex: 1 }}>
           {information ? (
             <Box
-              sx={{ 
-                lineHeight: 1.5, 
-                '& *': { marginTop: 0 }
+              sx={{
+                lineHeight: 1.5,
+                '& *': { marginTop: 0 },
               }}
               dangerouslySetInnerHTML={{ __html: information }}
             />
@@ -153,4 +162,3 @@ export function HomeViewHeroSection({
     </Box>
   );
 }
-
