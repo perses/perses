@@ -203,9 +203,10 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 			}
 		}
 		return &httpProxy{
-			config: httpConfig,
-			path:   path,
-			secret: scrt,
+			config:         httpConfig,
+			datasourceName: datasourceName,
+			path:           path,
+			secret:         scrt,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -232,9 +233,10 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 }
 
 type httpProxy struct {
-	config *datasourceHTTP.Config
-	secret *v1.SecretSpec
-	path   string
+	config         *datasourceHTTP.Config
+	secret         *v1.SecretSpec
+	datasourceName string
+	path           string
 }
 
 func (h *httpProxy) serve(c echo.Context) error {
@@ -308,8 +310,18 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 	}
 	// set header according to the configuration
 	if len(h.config.Headers) > 0 {
-		// TODO list the headers that cannot be overridden.
 		for k, v := range h.config.Headers {
+			if k == echo.HeaderAuthorization {
+				// Authorization header cannot be overwritten by the public configuration.
+				// It must be set using the Secret configuration.
+				// It will avoid leaking credentials and user to be able to set them directly in the datasource configuration.
+				//
+				// The verification is not done during the validation of the datasource configuration because this is up to the Observability vendor to decide how it wants to manage its datasource configuration.
+				// For Perses, we don't want to allow users to set the Authorization header directly in the datasource configuration because we have created a dedicated object to handle sensitive information: the Secret.
+				// But other vendors might have different policies about it and might want to allow it.
+				logrus.Infof("Datasource %s has Authorization header in its configuration. This is not allowed and will be ignored. Use Secret object to set Authorization header.", h.datasourceName)
+				continue
+			}
 			req.Header.Set(k, v)
 		}
 	}
@@ -334,7 +346,7 @@ func (h *httpProxy) setupAuthentication(req *http.Request) error {
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("%s %s", auth.Type, credential))
 	}
 	oauth := h.secret.OAuth
 	if oauth != nil {
@@ -342,7 +354,7 @@ func (h *httpProxy) setupAuthentication(req *http.Request) error {
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token.AccessToken))
 	}
 
 	return nil
