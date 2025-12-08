@@ -8,10 +8,10 @@ FROM golang:1.25 AS go-builder
 WORKDIR /go/src/github.com/perses/perses
 COPY . .
 COPY --from=node-builder /app/ui/app/dist ui/app/dist
-RUN mkdir /perses
-RUN mkdir /plugins
-RUN make build-api
-RUN make build-cli
+RUN mkdir /perses \
+  && mkdir /plugins \
+  && make build-api \
+  && make build-cli
 
 FROM gcr.io/distroless/static-debian12
 
@@ -22,7 +22,7 @@ USER nobody
 COPY --from=go-builder --chown=nobody:nobody  /go/src/github.com/perses/perses/bin/perses        /bin/perses
 COPY --from=go-builder --chown=nobody:nobody  /go/src/github.com/perses/perses/bin/percli        /bin/percli
 COPY --chown=nobody:nobody                    LICENSE            /LICENSE
-COPY --chown=nobody:nobody                    plugins-archive/   /etc/perses/plugins-archive/
+COPY --from=go-builder --chown=nobody:nobody  /go/src/github.com/perses/perses/plugins-archive/   /etc/perses/plugins-archive/
 COPY --chown=nobody:nobody                    docs/examples/config.docker.yaml     /etc/perses/config.yaml
 COPY --from=go-builder --chown=nobody:nobody  /perses            /perses
 COPY --from=go-builder --chown=nobody:nobody  /plugins           /etc/perses/plugins
