@@ -20,15 +20,11 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { useConfig } from '../../model/config-client';
 
-const MAX_IMPORTANT_DASHBOARDS = 3;
-
 export function ImportantDashboards(): ReactElement {
   const { data: config } = useConfig();
   const { data: dashboards, isLoading } = useImportantDashboardList();
 
   const dashboardList = useMemo(() => dashboards ?? [], [dashboards]);
-
-  const previewDashboards = useMemo(() => dashboardList.slice(0, MAX_IMPORTANT_DASHBOARDS), [dashboardList]);
 
   const hasImportantDashboards = Boolean(config?.frontend.important_dashboards?.length && dashboardList.length > 0);
 
@@ -43,6 +39,7 @@ export function ImportantDashboards(): ReactElement {
         border: '1px solid',
         borderColor: 'divider',
         height: '100%',
+        maxHeight: 600,
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -56,14 +53,14 @@ export function ImportantDashboards(): ReactElement {
           </Typography>
         </Box>
       </CardContent>
-      <CardContent sx={{ flex: '1 1 auto', overflowY: 'auto', pt: 0 }}>
+      <CardContent sx={{ flex: '1 1 auto', overflowY: 'auto', pt: 0, minHeight: 0 }}>
         {isLoading ? (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Stack>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {previewDashboards.map((dashboard) => {
+            {dashboardList.map((dashboard) => {
               const metricsCount = Object.keys(dashboard.spec.panels ?? {}).length;
               const updatedAt = dashboard.metadata.updatedAt ?? dashboard.metadata.createdAt;
               const relativeTime = updatedAt ? intlFormatDistance(new Date(updatedAt), new Date()) : 'Recently updated';

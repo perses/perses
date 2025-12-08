@@ -21,23 +21,32 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 
-const MAX_RECENT_DASHBOARDS = 5;
-
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
 
-  const dashboards = useMemo(() => data?.slice(0, MAX_RECENT_DASHBOARDS) ?? [], [data]);
+  const dashboards = useMemo(() => data ?? [], [data]);
 
   return (
-    <Card elevation={1} sx={{ border: '1px solid', borderColor: 'divider', height: '100%' }}>
-      <CardContent>
+    <Card
+      elevation={1}
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        height: '100%',
+        maxHeight: 600,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <CardContent sx={{ flex: '0 0 auto' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
           <HistoryIcon sx={{ color: 'primary.main' }} />
           <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
             Recently Viewed Dashboards
           </Typography>
         </Box>
-
+      </CardContent>
+      <CardContent sx={{ flex: '1 1 auto', overflowY: 'auto', pt: 0, minHeight: 0 }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           {isLoading ? (
             <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>

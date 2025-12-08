@@ -13,8 +13,8 @@
 
 import {
   Box,
-  Button,
   CircularProgress,
+  IconButton,
   InputAdornment,
   Paper,
   Stack,
@@ -90,66 +90,72 @@ function ProjectCard({ row }: ProjectCardProps): ReactElement {
         transition: 'all 0.2s',
         '&:hover': {
           boxShadow: (theme) => theme.shadows[2],
-          bgcolor: 'action.hover',
+          transform: 'translateY(-4px)',
         },
       }}
     >
-      <Box sx={{ mb: 1.5 }}>
-        <Box
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: 1,
+              bgcolor: projectColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Archive sx={{ color: theme.palette.common.white, fontSize: 18 }} />
+          </Box>
+
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {projectName}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {dashboardsCount} dashboard{dashboardsCount !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+        </Box>
+
+        <IconButton
+          size="small"
           sx={{
-            width: 36,
-            height: 36,
-            borderRadius: 1.5,
-            bgcolor: projectColor,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'all 0.2s',
+            '&:hover': {
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+            },
           }}
         >
-          <Archive sx={{ color: theme.palette.common.white, fontSize: 20 }} />
-        </Box>
+          <ChevronRight fontSize="small" />
+        </IconButton>
       </Box>
-
-      <Typography variant="subtitle1" sx={{ mb: 0.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {projectName}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
-        {dashboardsCount} dashboard{dashboardsCount !== 1 ? 's' : ''}
-      </Typography>
-
-      <Button
-        fullWidth
-        size="small"
-        variant="text"
-        endIcon={<ChevronRight fontSize="small" />}
-        sx={{
-          justifyContent: 'space-between',
-          transition: 'all 0.2s',
-          fontSize: '0.75rem',
-          py: 0.5,
-          '&:hover': {
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-          },
-        }}
-      >
-        Open Project
-      </Button>
     </Paper>
   );
 }
 
 interface RenderProjectGridProps {
   projectRows: ProjectWithDashboards[];
+  searchQuery: string;
 }
 
 function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
-  const { projectRows } = props;
+  const { projectRows, searchQuery } = props;
 
   if (projectRows.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography color="text.secondary">No projects found</Typography>
+        <Typography color="text.secondary">
+          {searchQuery ? `No projects found matching "${searchQuery}"` : 'No projects found'}
+        </Typography>
       </Box>
     );
   }
@@ -211,7 +217,7 @@ export function ProjectsAndDashboards(): ReactElement {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Archive sx={{ color: 'primary.main' }} />
-          <Typography variant="h2">Projects & Dashboards</Typography>
+          <Typography variant="h2">Projects</Typography>
         </Box>
 
         <Box
@@ -254,7 +260,7 @@ export function ProjectsAndDashboards(): ReactElement {
         </Stack>
       ) : (
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <RenderProjectGrid projectRows={filteredProjectRows} />
+          <RenderProjectGrid projectRows={filteredProjectRows} searchQuery={searchQuery} />
         </ErrorBoundary>
       )}
     </Box>
