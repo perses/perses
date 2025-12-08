@@ -2120,11 +2120,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"avalanche\",instance=\"avalanche:9001\"}"
                     }
                   }
                 }
@@ -2154,11 +2150,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"avalanche\",instance=\"avalanche:9001\"}"
                     }
                   }
                 }
@@ -2188,11 +2180,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"avalanche\",instance=\"avalanche:9001\"}"
                     }
                   }
                 }
@@ -2222,11 +2210,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
+                      "query": "up{job=\"avalanche\",instance=\"avalanche:9001\"}",
                       "seriesNameFormat": "formatted series name example - {{job}} job - instance {{instance}}"
                     }
                   }
@@ -2260,11 +2244,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
-                      "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}"
+                      "query": "up{job=\"avalanche\",instance=\"avalanche:9001\"}"
                     }
                   }
                 }
@@ -2295,10 +2275,6 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "datasource": {
-                        "kind": "PrometheusDatasource",
-                        "name": "PrometheusDemo"
-                      },
                       "query": "fake_graphite_query_with_nulls"
                     }
                   }

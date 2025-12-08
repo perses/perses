@@ -38,7 +38,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
       await dashboardPage.mockQueryRangeRequests({
         queries: [
           {
-            query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+            query: 'up{job="avalanche",instance="avalanche:9001"}',
             response: {
               status: 200,
               body: JSON.stringify(
@@ -47,8 +47,8 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                     {
                       metric: {
                         __name__: 'up',
-                        instance: 'demo.do.prometheus.io:3000',
-                        job: 'grafana',
+                        instance: 'avalanche:9001',
+                        job: 'avalanche',
                       },
                       value: '1',
                     },
@@ -87,7 +87,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await dashboardPage.mockQueryRangeRequests({
       queries: [
         {
-          query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+          query: 'up{job="avalanche",instance="avalanche:9001"}',
           response: {
             status: 200,
             body: JSON.stringify(
@@ -96,8 +96,8 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                   {
                     metric: {
                       __name__: 'up',
-                      instance: 'demo.do.prometheus.io:3000',
-                      job: 'grafana',
+                      instance: 'avalanche:9001',
+                      job: 'avalanche',
                     },
                     value: '1',
                   },

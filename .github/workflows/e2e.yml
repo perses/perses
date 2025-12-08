@@ -28,6 +28,10 @@ jobs:
           enable_npm: true
           enable_go: true
           nvmrc_path: "./ui/.nvmrc"
+      - name: start dev environment
+        uses: hoverkraft-tech/compose-action@v2.4.2
+        with:
+            compose-file: ./dev/docker-compose.e2e.yaml
       - name: Install UI deps
         working-directory: ./ui
         run: npm ci
