@@ -19,6 +19,7 @@ import { ReactElement, useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { useConfig } from '../../model/config-client';
+import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 export function ImportantDashboards(): ReactElement {
   const { data: config } = useConfig();
@@ -26,9 +27,9 @@ export function ImportantDashboards(): ReactElement {
 
   const dashboardList = useMemo(() => dashboards ?? [], [dashboards]);
 
-  const hasImportantDashboards = Boolean(config?.frontend.important_dashboards?.length && dashboardList.length > 0);
+  const hasImportantDashboardsConfig = Boolean(config?.frontend.important_dashboards?.length);
 
-  if (!hasImportantDashboards) {
+  if (!hasImportantDashboardsConfig) {
     return <></>;
   }
 
@@ -53,11 +54,31 @@ export function ImportantDashboards(): ReactElement {
           </Typography>
         </Box>
       </CardContent>
-      <CardContent sx={{ flex: '1 1 auto', overflowY: 'auto', pt: 0, minHeight: 0 }}>
+      <CardContent
+        sx={{
+          flex: '1 1 auto',
+          overflowY: 'auto',
+          pt: 0,
+          minHeight: 0,
+          ...(dashboardList.length === 0 && !isLoading
+            ? {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }
+            : {}),
+        }}
+      >
         {isLoading ? (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Stack>
+        ) : dashboardList.length === 0 ? (
+          <EmptyState
+            icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
+            message="No important dashboards found."
+            hint="Configure important dashboards in your config file."
+          />
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {dashboardList.map((dashboard) => {
@@ -94,6 +115,7 @@ export function ImportantDashboards(): ReactElement {
                         bgcolor: 'action.hover',
                         height: 'fit-content',
                         transition: 'all 0.2s',
+                        display: 'flex',
                       }}
                     >
                       <ViewDashboardOutline sx={{ fontSize: 20, color: 'primary.main' }} />
