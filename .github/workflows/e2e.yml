@@ -30,11 +30,6 @@ jobs:
           nvmrc_path: "./ui/.nvmrc"
       - name: Run e2e-docker-compose
         run: docker compose -f ./.github/workflows/e2e-docker-compose.yaml up -d
-      - name: Verify connection to Prometheus (simple check)
-        run: |
-          echo "Attempting to connect to local Prometheus..."
-          curl http://localhost:9090/metrics
-          echo "If the above command didn't fail, Prometheus is likely running."
       - name: Install UI deps
         working-directory: ./ui
         run: npm ci
