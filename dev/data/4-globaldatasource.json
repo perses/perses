@@ -2,6 +2,26 @@
   {
     "kind": "GlobalDatasource",
     "metadata": {
+      "name": "PrometheusDemo"
+    },
+    "spec": {
+      "default": false,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "https://prometheus.demo.prometheus.io"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
       "name": "PrometheusLocal"
     },
     "spec": {
