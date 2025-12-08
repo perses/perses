@@ -129,31 +129,31 @@ export function HomeViewHeroSection({
             action="create"
             scope="Project"
             variant="contained"
-            size="medium"
+            size="small"
             startIcon={<PlusIcon />}
             onClick={onAddProjectClick}
-            sx={{ px: 3 }}
+            sx={{ px: 2 }}
           >
             Create Project
           </CRUDButton>
           <Button
             variant="outlined"
-            size="medium"
+            size="small"
             startIcon={<ViewDashboardOutlineIcon />}
             onClick={onAddDashboardClick}
             disabled={userProjects.length === 0}
-            sx={{ px: 3 }}
+            sx={{ px: 2 }}
           >
-            New Dashboard
+            Create Dashboard
           </Button>
           <Button
             variant="outlined"
-            size="medium"
+            size="small"
             startIcon={<UploadIcon />}
             component={RouterLink}
             to={ImportRoute}
             disabled={userProjects.length === 0}
-            sx={{ px: 3 }}
+            sx={{ px: 2 }}
           >
             Import Dashboard
           </Button>
