@@ -31,6 +31,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
+import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 /**
  * Generate a color for a project based on its name.
@@ -152,11 +153,12 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
 
   if (projectRows.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography color="text.secondary">
-          {searchQuery ? `No projects found matching "${searchQuery}"` : 'No projects found'}
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<Archive sx={{ fontSize: 32, color: 'text.secondary' }} />}
+        message={searchQuery ? `No projects found matching "${searchQuery}"` : 'No projects found'}
+        hint={searchQuery ? 'Try adjusting your search query.' : 'Create a new project to get started.'}
+        sx={{ py: 8 }}
+      />
     );
   }
 
@@ -181,7 +183,7 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
   );
 }
 
-export function ProjectsAndDashboards(): ReactElement {
+export function Projects(): ReactElement {
   const kvSearch = useMemo(
     () =>
       new KVSearch<ProjectWithDashboards>({

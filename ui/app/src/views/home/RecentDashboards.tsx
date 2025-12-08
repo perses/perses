@@ -20,6 +20,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
 import { useRecentDashboardList } from '../../model/dashboard-client';
+import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
@@ -46,16 +47,32 @@ export function RecentDashboards(): ReactElement {
           </Typography>
         </Box>
       </CardContent>
-      <CardContent sx={{ flex: '1 1 auto', overflowY: 'auto', pt: 0, minHeight: 0 }}>
+      <CardContent
+        sx={{
+          flex: '1 1 auto',
+          overflowY: 'auto',
+          pt: 0,
+          minHeight: 0,
+          ...(dashboards.length === 0 && !isLoading
+            ? {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }
+            : {}),
+        }}
+      >
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           {isLoading ? (
             <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
               <CircularProgress size={24} />
             </Stack>
           ) : dashboards.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No dashboards viewed yet.
-            </Typography>
+            <EmptyState
+              icon={<HistoryIcon sx={{ fontSize: 32, color: 'text.secondary' }} />}
+              message="No dashboards viewed yet."
+              hint="Your recently viewed dashboards will appear here."
+            />
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {dashboards.map((item, index) => {

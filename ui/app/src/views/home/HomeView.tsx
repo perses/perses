@@ -20,7 +20,7 @@ import { useIsMobileSize } from '../../utils/browser-size';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
 import { useIsEphemeralDashboardEnabled } from '../../context/Config';
 import { RecentDashboards } from './RecentDashboards';
-import { ProjectsAndDashboards } from './ProjectsAndDashboards';
+import { Projects } from './Projects';
 import { ImportantDashboards } from './ImportantDashboards';
 import { HomeViewHeroSection } from './HomeViewHeroSection';
 
@@ -91,7 +91,7 @@ function HomeView(): ReactElement {
         </Box>
       </Box>
       <Box mt={3} mb={3}>
-        <ProjectsAndDashboards />
+        <Projects />
       </Box>
     </Stack>
   );
