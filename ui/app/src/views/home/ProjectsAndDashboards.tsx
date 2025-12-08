@@ -214,30 +214,38 @@ export function ProjectsAndDashboards(): ReactElement {
           <Typography variant="h2">Projects & Dashboards</Typography>
         </Box>
 
-        <TextField
-          placeholder="Search projects..."
-          value={searchQuery}
-          onChange={handleSearch}
-          size="small"
+        <Box
           sx={{
-            width: 280,
-            '& .MuiOutlinedInput-root': {
-              bgcolor: 'action.hover',
-              height: 36,
-              '& fieldset': { border: 'none' },
-              '& input': {
-                padding: '8px 0',
+            width: { xs: '100%', lg: 'calc((100% - 48px) / 3)' },
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <TextField
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={handleSearch}
+            size="small"
+            fullWidth
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'action.hover',
+                height: 36,
+                '& fieldset': { border: 'none' },
+                '& input': {
+                  padding: '8px 0',
+                },
               },
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Magnify fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-        />
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Magnify fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
       </Box>
 
       {isLoading ? (
