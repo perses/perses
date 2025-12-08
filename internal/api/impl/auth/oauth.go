@@ -27,13 +27,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/impl/auth/userinfo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
@@ -43,7 +43,7 @@ import (
 const stateParam = "state"
 const codeVerifierParam = "code_verifier"
 
-var defaultLoginProps = []string{"login", "username"}
+var defaultOAuthLoginProps = []string{"login", "username"}
 
 func newOAuthConfig(provider config.OAuthProvider, override *config.OAuthOverride) oauth2.Config {
 	// Mandatory URLS. They are validated as non nil from the config (see config.OauthProvider.Verify)
@@ -83,46 +83,6 @@ func newOAuthConfig(provider config.OAuthProvider, override *config.OAuthOverrid
 		}
 	}
 	return conf
-}
-
-type oauthUserInfo struct {
-	externalUserInfoProfile
-	RawProperties map[string]any
-	loginKeys     []string
-	authURL       url.URL
-}
-
-func (u *oauthUserInfo) getProperty(keys []string) string {
-	for _, key := range keys {
-		if value, ok := u.RawProperties[key]; ok {
-			// Ensure it is a string. This makes sure for example that an int is well transformed into a string
-			return fmt.Sprint(value)
-		}
-	}
-	return ""
-}
-
-// GetLogin implements [externalUserInfo]
-func (u *oauthUserInfo) GetLogin() string {
-	if login := u.getProperty(u.loginKeys); login != "" {
-		return login
-	}
-	return buildLoginFromEmail(u.Email)
-}
-
-// GetProfile implements [externalUserInfo]
-func (u *oauthUserInfo) GetProfile() externalUserInfoProfile {
-	return u.externalUserInfoProfile
-}
-
-// GetProviderContext implements [externalUserInfo]
-func (u *oauthUserInfo) GetProviderContext() v1.OAuthProvider {
-	return v1.OAuthProvider{
-		// As there's no particular issuer in oauth2 generic, we recreate a fake issuer from authURL
-		Issuer:  u.authURL.Hostname(),
-		Email:   u.Email,
-		Subject: u.GetLogin(),
-	}
 }
 
 type oAuthEndpoint struct {
@@ -169,7 +129,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		clientCredConf = newOAuthConfig(provider, provider.ClientCredentials)
 	}
 
-	loginProps := defaultLoginProps
+	loginProps := defaultOAuthLoginProps
 	if customProp := provider.CustomLoginProperty; customProp != "" {
 		loginProps = []string{customProp}
 	}
@@ -451,7 +411,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
+func (e *oAuthEndpoint) performUserSync(userInfo userinfo.ExternalUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
@@ -570,7 +530,7 @@ func (e *oAuthEndpoint) retrieveClientCredentialsToken(ctx context.Context, clie
 }
 
 // requestUserInfo execute an HTTP request on the user infos url if provided.
-func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token) (externalUserInfo, error) {
+func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token) (userinfo.ExternalUserInfo, error) {
 	resp, err := e.conf.Client(ctx, token).Get(e.userInfoURL)
 	if err != nil {
 		return nil, err
@@ -582,22 +542,13 @@ func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token
 		return nil, err
 	}
 
-	userInfos := oauthUserInfo{
-		authURL:   e.authURL,
-		loginKeys: e.loginProps,
-	}
+	userInfo := userinfo.NewOAuthUserInfo(e.authURL, e.loginProps)
 
-	if err = json.Unmarshal(body, &userInfos); err != nil {
+	if err = json.Unmarshal(body, userInfo); err != nil {
 		return nil, err
 	}
 
-	// Parse a second time into a more generic structure in order to possibly make some extra retrievals.
-	// Indeed, oauth providers are not constraint to respect any guidance and login/subject can come from any field.
-	if err = json.Unmarshal(body, &userInfos.RawProperties); err != nil {
-		return nil, err
-	}
-
-	return &userInfos, nil
+	return userInfo, nil
 }
 
 // logWithError is a little logrus helper to log with given error and the provider slugID.
