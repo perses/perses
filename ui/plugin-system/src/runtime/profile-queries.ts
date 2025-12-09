@@ -41,6 +41,10 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
       const profileQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ProfileData> => {
           const plugin = await getPlugin(PROFILE_QUERY_KEY, profileQueryKind);
           const data = await plugin.getProfileData(definition.spec.plugin.spec, context, signal);
