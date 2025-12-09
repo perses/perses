@@ -13,12 +13,21 @@
 
 import { RequestHeaders, HTTPDatasourceSpec } from '@perses-dev/core';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, ReactElement, useState, useRef } from 'react';
+import React, { Fragment, ReactElement, useState, useEffect, useRef } from 'react';
 import { produce } from 'immer';
-import { Controller } from 'react-hook-form';
+import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
+
+type HeaderEntry = {
+  name: string;
+  value: string;
+};
+
+type HeaderFormValues = {
+  headers: HeaderEntry[];
+};
 
 export interface HTTPSettingsEditor {
   value: HTTPDatasourceSpec;
@@ -38,31 +47,33 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     Object.assign(value, initialSpecProxy);
   }
 
-  type HeaderEntry = {
-    // Unique identifier for the entry, added to avoid using array index as key
-    id: string;
-    name: string;
-    value: string;
-  };
-
-  // Counter for generating unique IDs
-  const nextIdRef = useRef(0);
-
   // Use local state to maintain an array of header entries during editing, instead of
   // manipulating a map directly which causes weird UX.
-  const [headerEntries, setHeaderEntries] = useState<HeaderEntry[]>(() => {
-    const headers = value.proxy?.spec.headers ?? {};
-    return Object.entries(headers).map(([name, headerValue]) => ({
-      id: String(nextIdRef.current++),
-      name,
-      value: headerValue as string,
-    }));
+  const headersForm = useForm<HeaderFormValues>({
+    defaultValues: {
+      headers: Object.entries(value.proxy?.spec.headers ?? {}).map(([name, headerValue]) => ({
+        name,
+        value: headerValue as string,
+      })),
+    },
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control: headersForm.control,
+    name: 'headers',
+  });
+
+  // Watch the headers array for changes to detect duplicates
+  const watchedHeaders = headersForm.watch('headers');
+
+  // Use a ref to always have access to the latest value
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   // Check for duplicate header names
   const nameMap = new Map<string, number>();
   const duplicateNames = new Set<string>();
-  headerEntries.forEach(({ name }) => {
+  watchedHeaders.forEach(({ name }) => {
     if (name !== '') {
       const count = (nameMap.get(name) || 0) + 1;
       nameMap.set(name, count);
@@ -73,43 +84,24 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   });
   const hasDuplicates = duplicateNames.size > 0;
 
-  const syncHeadersToParent = (entries: HeaderEntry[]): void => {
+  // Sync headers to parent when they change
+  useEffect(() => {
     const headersObject: RequestHeaders = {};
-    entries.forEach(({ name, value: headerValue }) => {
+    watchedHeaders.forEach(({ name, value: headerValue }) => {
       if (name !== '') {
         headersObject[name] = headerValue;
       }
     });
 
     onChange(
-      produce(value, (draft) => {
+      produce(valueRef.current, (draft) => {
         if (draft.proxy !== undefined) {
           draft.proxy.spec.headers = Object.keys(headersObject).length > 0 ? headersObject : undefined;
         }
       })
     );
-  };
-
-  const handleHeaderChange = (id: string, field: 'name' | 'value', newValue: string): void => {
-    const newEntries = headerEntries.map((entry) => {
-      if (entry.id !== id) return entry;
-      return field === 'name' ? { ...entry, name: newValue } : { ...entry, value: newValue };
-    });
-    setHeaderEntries(newEntries);
-    syncHeadersToParent(newEntries);
-  };
-
-  const addHeader = (): void => {
-    const newEntries = [...headerEntries, { id: String(nextIdRef.current++), name: '', value: '' }];
-    setHeaderEntries(newEntries);
-    syncHeadersToParent(newEntries);
-  };
-
-  const removeHeader = (id: string): void => {
-    const newEntries = headerEntries.filter((entry) => entry.id !== id);
-    setHeaderEntries(newEntries);
-    syncHeadersToParent(newEntries);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(watchedHeaders)]);
 
   const tabs = [
     {
@@ -300,72 +292,55 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
             Request Headers
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {headerEntries.length > 0 ? (
-              headerEntries.map((header) => (
-                <Fragment key={header.id}>
+            {fields.length > 0 ? (
+              fields.map((field, index) => (
+                <Fragment key={field.id}>
                   <Grid item xs={4}>
                     <Controller
-                      name={`Header name ${header.id}`}
-                      render={({ field, fieldState }) => (
+                      control={headersForm.control}
+                      name={`headers.${index}.name`}
+                      render={({ field: controllerField, fieldState }) => (
                         <TextField
-                          {...field}
+                          {...controllerField}
                           fullWidth
                           label="Header name"
-                          value={header.name}
-                          error={!!fieldState.error || duplicateNames.has(header.name)}
+                          error={!!fieldState.error || duplicateNames.has(controllerField.value)}
                           helperText={fieldState.error?.message}
                           InputProps={{
                             readOnly: isReadonly,
                           }}
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleHeaderChange(header.id, 'name', e.target.value);
-                          }}
                         />
                       )}
                     />
                   </Grid>
                   <Grid item xs={7}>
                     <Controller
-                      name={`Header value ${header.id}`}
-                      render={({ field, fieldState }) => (
+                      control={headersForm.control}
+                      name={`headers.${index}.value`}
+                      render={({ field: controllerField, fieldState }) => (
                         <TextField
-                          {...field}
+                          {...controllerField}
                           fullWidth
                           label="Header value"
-                          value={header.value}
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                           InputProps={{
                             readOnly: isReadonly,
                           }}
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleHeaderChange(header.id, 'value', e.target.value);
-                          }}
                         />
                       )}
                     />
                   </Grid>
                   <Grid item xs={1}>
-                    <Controller
-                      name={`Remove Header ${header.id}`}
-                      render={({ field }) => (
-                        <IconButton
-                          {...field}
-                          disabled={isReadonly}
-                          aria-label={`Remove header ${header.name || header.id}`}
-                          onClick={(e) => {
-                            field.onChange(e);
-                            removeHeader(header.id);
-                          }}
-                        >
-                          <MinusIcon />
-                        </IconButton>
-                      )}
-                    />
+                    <IconButton
+                      disabled={isReadonly}
+                      aria-label={`Remove header ${watchedHeaders[index]?.name || index}`}
+                      onClick={() => remove(index)}
+                    >
+                      <MinusIcon />
+                    </IconButton>
                   </Grid>
                 </Fragment>
               ))
@@ -382,7 +357,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
               </Grid>
             )}
             <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
-              <IconButton disabled={isReadonly} onClick={addHeader}>
+              <IconButton disabled={isReadonly} onClick={() => append({ name: '', value: '' })}>
                 <PlusIcon />
               </IconButton>
             </Grid>
