@@ -1,0 +1,31 @@
+name: "perses e2e setup"
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    depends_on:
+      - avalanche
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
+    volumes:
+      - ./extra/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+
+  # Generate fake metrics
+  avalanche:
+    image: quay.io/prometheuscommunity/avalanche:latest
+    command:
+      - "--gauge-metric-count=5"
+      - "--counter-metric-count=5"
+      - "--histogram-metric-count=5"
+      - "--histogram-metric-bucket-count=5"
+      - "--native-histogram-metric-count=5"
+      - "--summary-metric-count=5"
+      - "--summary-metric-objective-count=5"
+      - "--label-count=5"
+      - "--series-count=100"
+    ports:
+      - "9001:9001"
