@@ -30,7 +30,7 @@ type TraceQueryQueryPluginDependencies = {
  * A plugin for running trace queries.
  */
 export interface TraceQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getTraceData: (spec: Spec, ctx: TraceQueryContext) => Promise<TraceData>;
+  getTraceData: (spec: Spec, ctx: TraceQueryContext, abortSignal?: AbortSignal) => Promise<TraceData>;
   dependsOn?: (spec: Spec, ctx: TraceQueryContext) => TraceQueryQueryPluginDependencies;
 }
 

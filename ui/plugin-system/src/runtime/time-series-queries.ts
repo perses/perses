@@ -126,7 +126,6 @@ export function useTimeSeriesQueries(
     TIME_SERIES_QUERY_KEY,
     definitions.map((d) => ({ kind: d.spec.plugin.kind }))
   );
-
   return useQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
@@ -134,6 +133,10 @@ export function useTimeSeriesQueries(
       return {
         ...queryOptions,
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
         queryKey: queryKey,
         queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);

@@ -46,9 +46,13 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
-        queryFn: async (): Promise<TraceData> => {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
           const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
-          const data = await plugin.getTraceData(definition.spec.plugin.spec, context);
+          const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
           return data;
         },
       };
