@@ -22,6 +22,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -137,6 +138,13 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 		return "", err
 	}
 	return k8sUser.GetName(), nil
+}
+
+// GetProviderInfo implements [Authorization]
+func (k *k8sImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+	// Provider Info is essentially used to know the original type of authentication provider used when using native authorization model.
+	// For k8s authorization, the authentication is not using provider but k8s, so there won't be any provider info to retrieve.
+	return crypto.ProviderInfo{}, nil
 }
 
 // Middleware implements [Authorization]
