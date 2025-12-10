@@ -13,6 +13,7 @@ import (
 )
 
 const dockerOrg = "docker.io/persesdev"
+const quayOrg = "quay.io/persesdev"
 
 var date = time.Now().Format("2006-01-02")
 
@@ -71,15 +72,23 @@ type goreleaserGenerator struct {
 	currentBranch                    string
 	currentCommit                    string
 	dockerBaseImageName              string
+	quayBaseImageName                string
 	repo                             string
 	extraFiles                       []string
 }
 
-func (g *goreleaserGenerator) generateDockerImageName(arch string, templateLongName string) string {
+func (g *goreleaserGenerator) generateDockerhubImageName(arch string, templateLongName string) string {
 	if g.currentBranch == "main" {
 		return fmt.Sprintf("%s:main-%s-%s-%s-%s", g.dockerBaseImageName, date, g.currentCommit, templateLongName, arch)
 	}
 	return fmt.Sprintf("%s:{{ .Tag }}-%s-%s", g.dockerBaseImageName, templateLongName, arch)
+}
+
+func (g *goreleaserGenerator) generateQuayImageName(arch string, templateLongName string) string {
+	if g.currentBranch == "main" {
+		return fmt.Sprintf("%s:main-%s-%s-%s-%s", g.quayBaseImageName, date, g.currentCommit, templateLongName, arch)
+	}
+	return fmt.Sprintf("%s:{{ .Tag }}-%s-%s", g.quayBaseImageName, templateLongName, arch)
 }
 
 func (g *goreleaserGenerator) generateDockerConfig() {
@@ -96,7 +105,8 @@ func (g *goreleaserGenerator) generateDockerConfig() {
 				Dockerfile: dockerfileName,
 				Use:        "buildx",
 				ImageTemplates: []string{
-					g.generateDockerImageName(arch, templateNames.longName),
+					g.generateDockerhubImageName(arch, templateNames.longName),
+					g.generateQuayImageName(arch, templateNames.longName),
 				},
 				BuildFlagTemplates: []string{
 					"--pull",
@@ -129,7 +139,8 @@ func (g *goreleaserGenerator) generateDockerManifestForMainBranch() {
 	for _, templateNames := range g.mapDockerfileNameAndTemplateName {
 		var imageTemplate []string
 		for _, arch := range g.dockerSupportedArches {
-			imageTemplate = append(imageTemplate, g.generateDockerImageName(arch, templateNames.longName))
+			imageTemplate = append(imageTemplate, g.generateDockerhubImageName(arch, templateNames.longName))
+			imageTemplate = append(imageTemplate, g.generateQuayImageName(arch, templateNames.longName))
 		}
 		g.goreleaserConfig.DockerManifests = append(g.goreleaserConfig.DockerManifests,
 			config.DockerManifest{
@@ -143,7 +154,8 @@ func (g *goreleaserGenerator) generateDockerManifestForReleaseOrSnapshot() {
 	for _, templateNames := range g.mapDockerfileNameAndTemplateName {
 		var imageTemplate []string
 		for _, arch := range g.dockerSupportedArches {
-			imageTemplate = append(imageTemplate, g.generateDockerImageName(arch, templateNames.longName))
+			imageTemplate = append(imageTemplate, g.generateDockerhubImageName(arch, templateNames.longName))
+			imageTemplate = append(imageTemplate, g.generateQuayImageName(arch, templateNames.longName))
 		}
 		g.goreleaserConfig.DockerManifests = append(g.goreleaserConfig.DockerManifests,
 			config.DockerManifest{
@@ -171,6 +183,7 @@ func GenerateGoreleaserConfig(baseGoreleaserConfig []byte, repo string, extraFil
 		goreleaserConfig:      c,
 		repo:                  repo,
 		dockerBaseImageName:   fmt.Sprintf("%s/%s", dockerOrg, repo),
+		quayBaseImageName:     fmt.Sprintf("%s/%s", quayOrg, repo),
 		extraFiles:            extraFiles,
 		dockerSupportedArches: []string{"amd64", "arm64"},
 		mapDockerfileNameAndTemplateName: map[string]dockerTemplateName{
