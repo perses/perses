@@ -70,3 +70,19 @@ func MustGetWorkspaces(dirPath string) []string {
 	}
 	return workspaces
 }
+
+func GetVersion(dirPath string) (string, error) {
+	pkg, err := GetPackage(dirPath)
+	if err != nil {
+		return "", err
+	}
+	return pkg.Version, nil
+}
+
+func MustGetVersion(dirPath string) string {
+	version, err := GetVersion(dirPath)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to read version from package.json")
+	}
+	return version
+}

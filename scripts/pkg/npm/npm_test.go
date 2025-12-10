@@ -40,3 +40,9 @@ func TestGetWorkspaces(t *testing.T) {
 	expectedWorkspaces := []string{"foo", "bar", "octopus"}
 	assert.Equal(t, expectedWorkspaces, workspaces)
 }
+
+func TestGetVersion(t *testing.T) {
+	version, err := GetVersion(".")
+	assert.NoError(t, err)
+	assert.Equal(t, "0.1.0", version)
+}
