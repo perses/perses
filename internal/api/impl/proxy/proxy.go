@@ -328,13 +328,13 @@ func (h *httpProxy) setupAuthentication(req *http.Request) error {
 		}
 		req.SetBasicAuth(basicAuth.Username, password)
 	}
-	auth := h.secret.Authorization
-	if auth != nil {
-		credential, err := auth.GetCredentials()
+	authz := h.secret.Authorization
+	if authz != nil {
+		credential, err := authz.GetCredentials()
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
+		req.Header.Set("Authorization", fmt.Sprintf("%s %s", authz.Type, credential))
 	}
 	oauth := h.secret.OAuth
 	if oauth != nil {

@@ -39,7 +39,7 @@ const (
 	xForwardedHost  = "X-Forwarded-Host"
 	// redirectQueryParam is a query param key used to retrieve the original path that
 	// a user desired before being redirected to the login page.
-	// It is used in native and external authentication flows.
+	// It is used in native, external and delegated authentication flows.
 	redirectQueryParam = "rd"
 	// redirectURLQueryParam is a query param key used to send to external provider the
 	// callback URL that will serve to retrieve the token.
@@ -82,17 +82,20 @@ func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
 }
 
 type endpoint struct {
-	endpoints       []route.Endpoint
-	jwt             crypto.JWT
-	tokenManagement tokenManagement
-	isAuthEnable    bool
+	endpoints        []route.Endpoint
+	jwt              crypto.JWT
+	tokenManagement  tokenManagement
+	isAuthnEnable    bool
+	isDelegatedAuthn bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
-		isAuthEnable:    isAuthEnable,
+		isAuthnEnable:   isAuthnEnable,
+		// Currently the only delegated authentication provider is kubernetes
+		isDelegatedAuthn: providers.KubernetesProvider.Enable,
 	}
 
 	// Register the native provider if enabled
@@ -121,15 +124,17 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
-	if !e.isAuthEnable {
+	if !e.isAuthnEnable {
 		return
 	}
 	providersGroup := g.Group(fmt.Sprintf("/%s", utils.PathAuthProviders))
 	for _, ep := range e.endpoints {
 		ep.CollectRoutes(providersGroup)
 	}
-	g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
-	g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, true)
+	if !e.isDelegatedAuthn {
+		g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
+		g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, true)
+	}
 }
 
 func (e *endpoint) refresh(ctx echo.Context) error {

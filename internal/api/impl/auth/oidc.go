@@ -187,7 +187,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 }
 
 func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
-	oidcGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOIDC, e.slugID), withOAuthErrorMdw)
+	oidcGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthnKindOIDC, e.slugID), withOAuthErrorMdw)
 
 	// Add routes for the "Authorization Code" flow
 	oidcGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.auth, true)
@@ -208,7 +208,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 	}
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID)))
 	}
 	codeExchangeHandler := rp.AuthURLHandler(func() string {
 		return ctx.Request().URL.Query().Get(redirectQueryParam)
@@ -247,7 +247,7 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID)))
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)

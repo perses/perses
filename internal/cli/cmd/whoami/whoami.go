@@ -17,10 +17,12 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/perses/perses/internal/api/utils"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/pkg/client/api"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 )
@@ -32,10 +34,18 @@ type option struct {
 	showToken     bool
 	showURL       bool
 	authorization *secret.Authorization
+	apiClient     api.ClientInterface
 }
 
 func (o *option) Complete(_ []string) error {
 	o.authorization = config.Global.RestClientConfig.Authorization
+
+	apiClient, err := config.Global.GetAPIClient()
+	if err != nil {
+		return err
+	}
+	o.apiClient = apiClient
+
 	return nil
 }
 
@@ -48,7 +58,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	if o.showToken {
-		if err := output.HandleString(o.writer, fmt.Sprintf("Token used: %s", o.authorization.Credentials)); err != nil {
+		if err := output.HandleString(o.writer, o.tokenMessage()); err != nil {
 			return err
 		}
 	}
@@ -57,20 +67,30 @@ func (o *option) Execute() error {
 			return err
 		}
 	}
-	login, err := o.extractLogin()
+	username, err := o.Whoami()
 	if err != nil {
 		return err
 	}
-	return output.HandleString(o.writer, fmt.Sprintf("User used: %s", login))
+	return output.HandleString(o.writer, fmt.Sprintf("User used: %s", username))
 }
 
-func (o *option) extractLogin() (string, error) {
-	claims := &jwt.RegisteredClaims{}
-	token, _, err := jwt.NewParser().ParseUnverified(o.authorization.Credentials, claims)
+func (o *option) Whoami() (string, error) {
+	res := o.apiClient.RESTClient().Get().
+		APIVersion("v1").
+		Resource(fmt.Sprintf("/%s/%s", utils.PathUser, utils.PathMe)).
+		Do()
+
+	if err := res.Error(); err != nil {
+		return "", err
+	}
+
+	result := &v1.PublicUser{}
+	err := res.Object(result)
 	if err != nil {
 		return "", err
 	}
-	return token.Claims.(*jwt.RegisteredClaims).Subject, nil
+
+	return result.Metadata.GetName(), nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -79,6 +99,13 @@ func (o *option) SetWriter(writer io.Writer) {
 
 func (o *option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
+}
+
+func (o *option) tokenMessage() string {
+	if config.Global.RestClientConfig.K8sAuth != nil {
+		return fmt.Sprintf("Kubeconfig file used: %s", config.Global.RestClientConfig.K8sAuth.KubeconfigFile)
+	}
+	return fmt.Sprintf("Token used: %s", o.authorization.Credentials)
 }
 
 func NewCMD() *cobra.Command {

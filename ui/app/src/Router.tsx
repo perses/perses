@@ -15,32 +15,29 @@ import { SnackbarProvider } from '@perses-dev/components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, ReactElement, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { PersesLoader } from './components/PersesLoader';
 import { AuthorizationProvider } from './context/Authorization';
-import {
-  ConfigContextProvider,
-  useIsAuthEnabled,
-  useIsEphemeralDashboardEnabled,
-  useIsExplorerEnabled,
-} from './context/Config';
+import { ConfigContextProvider, useIsEphemeralDashboardEnabled, useIsExplorerEnabled } from './context/Config';
 import { DarkModeContextProvider } from './context/DarkMode';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
-import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 import {
   AdminRoute,
   ConfigRoute,
   ExploreRoute,
+  DelegatedAuthnErrorRoute,
   ImportRoute,
   ProfileRoute,
   ProjectRoute,
   SignInRoute,
   SignUpRoute,
 } from './model/route';
+import { RequireAuth, RequireAuthEnabled } from './views/auth/RequireAuth';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
+import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
 import HomeView from './views/home/HomeView';
 // Default route is eagerly loaded
 import App from './App';
@@ -160,6 +157,11 @@ function Router(): ReactElement {
             element: <RequireAuthEnabled />,
             children: [{ index: true, Component: SignUpView }],
           },
+          {
+            path: DelegatedAuthnErrorRoute,
+            element: <RequireAuthEnabled />,
+            children: [{ index: true, Component: DelegatedAuthnErrorView }],
+          },
         ],
       },
       { path: '*', element: <Navigate to="/" replace /> },
@@ -172,37 +174,6 @@ function Router(): ReactElement {
       <RouterProvider router={router} />
     </Suspense>
   );
-}
-
-/**
- * This component aims to redirect the user to the SignIn page if not logged in.
- * Otherwise, it just loads the underlying component(s) defined as children.
- * This is leveraging the following mechanism:
- * https://reactrouter.com/en/main/upgrading/v5#refactor-custom-routes
- * https://gist.github.com/mjackson/d54b40a094277b7afdd6b81f51a0393f
- * @param children
- * @constructor
- */
-function RequireAuth(): ReactElement | null {
-  const isAuthEnabled = useIsAuthEnabled();
-  const isAccessTokenExist = useIsAccessTokenExist();
-  const location = useLocation();
-  if (!isAuthEnabled || isAccessTokenExist) {
-    return <Outlet />;
-  }
-  let to = SignInRoute;
-  if (location.pathname !== '' && location.pathname !== '/') {
-    to += `?${buildRedirectQueryString(location.pathname + location.search)}`;
-  }
-  return <Navigate to={to} />;
-}
-
-function RequireAuthEnabled(): ReactElement {
-  const isAuthEnabled = useIsAuthEnabled();
-  if (!isAuthEnabled) {
-    return <Navigate to="/" replace />;
-  }
-  return <Outlet />;
 }
 
 function RequireExplorerEnabled(): ReactElement {

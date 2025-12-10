@@ -47,8 +47,8 @@ import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
-import { useConfigContext } from '../../context/Config';
-import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth-client';
+import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.
@@ -125,6 +125,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const isLaptopSize = useIsLaptopSize();
   const config = useConfigContext();
   const theme = useTheme();
+  const isNativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
   const oauthProviders = (config.config?.security?.authentication?.providers?.oauth || []).map((provider) => ({
     path: `oauth/${provider.slug_id}`,
     name: provider.name,
@@ -136,7 +137,6 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
     button: computeSocialButtonFromURL(theme, provider.issuer),
   }));
   const socialProviders = [...oidcProviders, ...oauthProviders];
-  const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
   const path = useRedirectQueryParam();
 
   return (
@@ -155,8 +155,8 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
         sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
       />
       <Stack gap={1} sx={{ maxWidth: '85%', minWidth: '200px' }}>
-        {nativeProviderIsEnabled && props.children}
-        {nativeProviderIsEnabled && socialProviders.length > 0 && (
+        {isNativeAuthnProviderEnabled && props.children}
+        {isNativeAuthnProviderEnabled && socialProviders.length > 0 && (
           <div>
             <Divider sx={{ marginTop: '16px' }}>or</Divider>
           </div>

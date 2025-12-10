@@ -267,7 +267,7 @@ func (e *oAuthEndpoint) newQueryContext(ctx echo.Context) context.Context {
 }
 
 func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
-	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOAuth, e.slugID), withOAuthErrorMdw)
+	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthnKindOAuth, e.slugID), withOAuthErrorMdw)
 
 	// Add routes for the "Authorization Code" flow
 	oauthGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.authHandler, true)
@@ -300,7 +300,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID)))
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -340,7 +340,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID)))
 	}
 
 	providerCtx := e.newQueryContext(ctx)

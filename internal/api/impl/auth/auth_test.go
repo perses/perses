@@ -28,5 +28,5 @@ func TestGetRedirectURI(t *testing.T) {
 			Scheme: "http",
 		},
 		Host: "localhost:8080",
-	}, utils.AuthKindOIDC, "azure"))
+	}, utils.AuthnKindOIDC, "azure"))
 }

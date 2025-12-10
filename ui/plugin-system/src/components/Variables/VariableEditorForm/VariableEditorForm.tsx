@@ -134,7 +134,9 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
   }
 
-  const { refresh } = useTimeRange();
+  if (!values.spec.sort) {
+    form.setValue('spec.sort', 'none');
+  }
 
   return (
     <>

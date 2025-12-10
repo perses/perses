@@ -23,14 +23,14 @@ import (
 )
 
 type deviceCodeLogin struct {
-	writer               io.Writer
-	externalAuthKind     externalAuthKind
-	externalAuthProvider string
-	apiClient            api.ClientInterface
+	writer                io.Writer
+	externalAuthnKind     externalAuthnKind
+	externalAuthnProvider string
+	apiClient             api.ClientInterface
 }
 
 func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
-	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
+	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthnKind), l.externalAuthnProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 		return nil, outErr
 	}
 
-	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse)
+	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthnKind), l.externalAuthnProvider, deviceCodeResponse)
 }
 
 func (l *deviceCodeLogin) SetMissingInput() error {
