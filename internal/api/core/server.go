@@ -95,6 +95,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		serviceManager.GetAuthorization(),
 		cfg.Security.Authentication.Providers,
 		cfg.Security.EnableAuth,
+		cfg.APIPrefix,
 	)
 	if err != nil {
 		logrus.WithError(err).Fatal("error initializing authentication endpoints")

@@ -26,6 +26,7 @@ export interface MultiQueryEditorProps {
   queries?: QueryDefinition[];
   queryResults?: QueryData[];
   onChange: (queries: QueryDefinition[]) => void;
+  onQueryRun: (index: number, query: QueryDefinition) => void;
 }
 
 function useDefaultQueryDefinition(
@@ -80,7 +81,7 @@ function useDefaultQueryDefinition(
  */
 
 export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, queries = [], queryResults, filteredQueryPlugins, onChange } = props;
+  const { queryTypes, queries = [], queryResults, filteredQueryPlugins, onChange, onQueryRun } = props;
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
@@ -96,6 +97,10 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
         }
       })
     );
+  };
+
+  const handleQueryRun = (index: number, queryDef: QueryDefinition): void => {
+    onQueryRun(index, queryDef);
   };
 
   const handleQueryAdd = (): void => {
@@ -154,6 +159,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
             onChange={handleQueryChange}
+            onQueryRun={handleQueryRun}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
           />

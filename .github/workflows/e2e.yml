@@ -21,13 +21,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           enable_go: true
           nvmrc_path: "./ui/.nvmrc"
+      - name: start dev environment
+        uses: hoverkraft-tech/compose-action@v2.4.2
+        with:
+            compose-file: ./dev/docker-compose.e2e.yaml
       - name: Install UI deps
         working-directory: ./ui
         run: npm ci

@@ -91,7 +91,7 @@ func getServerPortAndExactPluginName(pluginPath string) (int, string, error) {
 // It will wrap the devserver in a taskhelper.Helper and create a signal listener.
 func buildDevServerTasks(servers []*devserver) []taskhelper.Helper {
 	var tasks []taskhelper.Helper
-	signalsListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM))
+	signalsListener, _ := taskhelper.New(async.NewSignalListener(syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL))
 	tasks = append(tasks, signalsListener)
 	for _, server := range servers {
 		task, _ := taskhelper.New(server)
@@ -176,7 +176,7 @@ func (o *option) Execute() error {
 	defer cancel()
 
 	// Start all dev servers
-	o.startDevServers(ctx, cancel, servers)
+	devServersTasks := o.startDevServers(ctx, cancel, servers)
 
 	// Discover and update ports from dev server output
 	o.discoverAndUpdatePorts(ctx, servers, pluginInDev)
@@ -187,7 +187,7 @@ func (o *option) Execute() error {
 	}
 
 	// Wait for graceful shutdown and cleanup
-	o.waitForShutdownAndCleanup(ctx, buildDevServerTasks(servers), pluginInDev)
+	o.waitForShutdownAndCleanup(ctx, devServersTasks, pluginInDev)
 	return nil
 }
 
@@ -215,11 +215,12 @@ func (o *option) prepareAllPlugins() ([]*devserver, []*v1.PluginInDevelopment, e
 }
 
 // startDevServers starts all dev server tasks
-func (o *option) startDevServers(ctx context.Context, cancel context.CancelFunc, servers []*devserver) {
+func (o *option) startDevServers(ctx context.Context, cancel context.CancelFunc, servers []*devserver) []taskhelper.Helper {
 	devServerTasks := buildDevServerTasks(servers)
 	for _, task := range devServerTasks {
 		taskhelper.Run(ctx, cancel, task)
 	}
+	return devServerTasks
 }
 
 // discoverAndUpdatePorts captures ports from dev server output and updates plugin URLs

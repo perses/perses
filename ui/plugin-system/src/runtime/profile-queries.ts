@@ -37,13 +37,17 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
   return useQueries({
     queries: definitions.map((definition) => {
-      const queryKey = [definition, datasourceStore, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
+      const queryKey = ['query', PROFILE_QUERY_KEY, definition, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
       const profileQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,
-        queryFn: async (): Promise<ProfileData> => {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        staleTime: Infinity,
+        queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ProfileData> => {
           const plugin = await getPlugin(PROFILE_QUERY_KEY, profileQueryKind);
-          const data = await plugin.getProfileData(definition.spec.plugin.spec, context);
+          const data = await plugin.getProfileData(definition.spec.plugin.spec, context, signal);
           return data;
         },
 

@@ -35,7 +35,19 @@ type nativeEndpoint struct {
 	tokenManagement tokenManagement
 }
 
-func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) route.Endpoint {
+func (e *nativeEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
+	return nil // No specific logout handler for native auth
+}
+
+func (e *nativeEndpoint) GetAuthKind() string {
+	return utils.AuthKindNative
+}
+
+func (e *nativeEndpoint) GetSlugID() string {
+	return "" // no slug ID needed for native auth
+}
+
+func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) authEndpoint {
 	return &nativeEndpoint{
 		dao:             dao,
 		jwt:             jwt,
@@ -64,11 +76,15 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		return apiinterface.HandleBadRequestError("wrong login or password ")
 	}
 	login := body.Login
-	accessToken, err := e.tokenManagement.accessToken(login, ctx.SetCookie)
+	providerInfo := crypto.ProviderInfo{
+		ProviderKind: utils.AuthKindNative,
+		ProviderID:   "", // no provider ID needed for native auth
+	}
+	accessToken, err := e.tokenManagement.accessToken(login, providerInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(login, ctx.SetCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(login, providerInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}

@@ -30,11 +30,24 @@ const (
 	cookiePath            = "/"
 )
 
-func signedToken(login string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &jwt.RegisteredClaims{
-		Subject:   login,
-		ExpiresAt: jwt.NewNumericDate(expireAt),
-		NotBefore: jwt.NewNumericDate(notBefore),
+type ProviderInfo struct {
+	ProviderKind string `json:"pkd"`
+	ProviderID   string `json:"pid"`
+}
+
+type JWTClaims struct {
+	jwt.RegisteredClaims
+	ProviderInfo
+}
+
+func signedToken(login string, providerInfo ProviderInfo, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTClaims{
+		ProviderInfo: providerInfo,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   login,
+			ExpiresAt: jwt.NewNumericDate(expireAt),
+			NotBefore: jwt.NewNumericDate(notBefore),
+		},
 	})
 	// The type of the key depends on the signature method.
 	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
@@ -42,8 +55,8 @@ func signedToken(login string, notBefore time.Time, expireAt time.Time, key []by
 }
 
 type JWT interface {
-	SignedAccessToken(login string) (string, error)
-	SignedRefreshToken(login string) (string, error)
+	SignedAccessToken(login string, providerInfo ProviderInfo) (string, error)
+	SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error)
 	// CreateAccessTokenCookie will create two different cookies that contain a piece of the token.
 	// As a reminder, a JWT token has the following structure: header.payload.signature
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
@@ -52,7 +65,7 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
-	ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error)
+	ValidateRefreshToken(token string) (*JWTClaims, error)
 }
 
 type jwtImpl struct {
@@ -63,14 +76,14 @@ type jwtImpl struct {
 	cookieConfig    config.Cookie
 }
 
-func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
+func (j *jwtImpl) SignedAccessToken(login string, providerInfo ProviderInfo) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(j.accessTokenTTL), j.accessKey)
+	return signedToken(login, providerInfo, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
-func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
+func (j *jwtImpl) SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(j.refreshTokenTTL), j.refreshKey)
+	return signedToken(login, providerInfo, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
@@ -144,12 +157,12 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) ValidateRefreshToken(token string) (*jwt.RegisteredClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(_ *jwt.Token) (any, error) {
+func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTClaims, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &JWTClaims{}, func(_ *jwt.Token) (any, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {
 		return nil, err
 	}
-	return parsedToken.Claims.(*jwt.RegisteredClaims), nil
+	return parsedToken.Claims.(*JWTClaims), nil
 }

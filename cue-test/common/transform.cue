@@ -13,14 +13,16 @@
 
 package common
 
-#joinByColumnValueTransform: spec: columns: ["job", "instance"]
+myJoinByColumnValueTransform: #joinByColumnValueTransform & { spec: columns: ["job", "instance"] }
 
-#mergeColumnsTransform: spec: {
-	columns: ["job", "instance"]
-	name:     "job-instance"
-	disabled: true
+myMergeColumnsTransform: #mergeColumnsTransform & {
+	spec: {
+		columns: ["job", "instance"]
+		name:     "job-instance"
+		disabled: true
+	}
 }
 
-#mergeIndexedColumnsTransform: spec: column: "instance"
+myMergeIndexedColumnsTransform: #mergeIndexedColumnsTransform & { spec: column: "instance" }
 
-#mergeSeries: spec: disabled: false
+mergeSeries: #mergeSeries & { spec: disabled: false }

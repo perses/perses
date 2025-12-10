@@ -52,14 +52,16 @@ security:
   authentication:
     providers:
       oidc:
-        # Example with an Azure AD OIDC configuration
-        - slug_id: azure
-          name: "Azure AD"
+        # Example with a Microsoft Entra ID OIDC configuration
+        - slug_id: msft
+          name: "Microsoft"
           client_id: "<secret>"
           client_secret: "<secret>"
           issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
           redirect_uri: "http://localhost:8080/api/auth/providers/oidc/azure/callback"
           scopes: [ "openid", "profile", "email", "User.read" ]
+          logout:
+            enabled: true
       oauth:
         - slug_id: github
           name: "Github"
@@ -82,7 +84,7 @@ sequenceDiagram
     participant rp as Perses Backend
     participant op as External Identity Provider
     
-    hu->>br: Login with OIDC provider (e.g Azure AD)
+    hu->>br: Login with OIDC provider (e.g Microsoft Entra ID)
     activate br
     br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
     activate rp
