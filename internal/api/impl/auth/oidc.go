@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gorilla/securecookie"
@@ -151,9 +152,30 @@ type oIDCEndpoint struct {
 	urlParams              map[string]string
 	issuer                 string
 	svc                    service
+	extraLogoutHandler     echo.HandlerFunc
+	apiPrefix              string
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
+func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
+	if !provider.Logout.Enabled {
+		return nil, nil
+	}
+	pEndSessionURL, err := url.Parse(rp.GetEndSessionEndpoint())
+	if err != nil {
+		logrus.WithError(err).Error("Failed to parse end session endpoint")
+		return nil, err
+	}
+	return func(ctx echo.Context) error {
+		endSessionURL := *pEndSessionURL
+		queryParams := endSessionURL.Query()
+		rd := getRootURL(ctx.Request(), apiPrefix)
+		queryParams.Add("post_logout_redirect_uri", rd.String())
+		endSessionURL.RawQuery = queryParams.Encode()
+		return ctx.Redirect(302, endSessionURL.String())
+	}, nil
+}
+
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -173,6 +195,11 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		}
 	}
 
+	extraLogoutHandler, err := newOIDCExtraLogoutHandler(provider, relyingParty, apiPrefix)
+	if err != nil {
+		return nil, err
+	}
+
 	return &oIDCEndpoint{
 		relyingParty:           relyingParty,
 		deviceCodeRelyingParty: deviceCodeRelyingParty,
@@ -183,6 +210,8 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
+		extraLogoutHandler:     extraLogoutHandler,
+		apiPrefix:              apiPrefix,
 	}, nil
 }
 
@@ -198,6 +227,18 @@ func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
 	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathToken), e.token, true)
 }
 
+func (e *oIDCEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
+	return e.extraLogoutHandler
+}
+
+func (e *oIDCEndpoint) GetAuthKind() string {
+	return utils.AuthnKindOIDC
+}
+
+func (e *oIDCEndpoint) GetSlugID() string {
+	return e.slugID
+}
+
 // auth is the http handler on Perses side that triggers the "Authorization Code"
 // flow to the oauth 2.0 provider.
 // It will redirect the user to the provider's "auth" url.
@@ -208,10 +249,11 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 	}
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.AuthURLHandler(func() string {
-		return ctx.Request().URL.Query().Get(redirectQueryParam)
+		redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
+		return encodeOAuthState(redirectPath)
 	}, e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)
 	return handler(ctx)
@@ -228,7 +270,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 //   - ultimately, generate a Perses user session with an access and refresh token
 func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
-		redirectURI := state
+		redirectURI := decodeOAuthState(state)
 
 		setCookie := func(cookie *http.Cookie) {
 			http.SetCookie(w, cookie)
@@ -247,7 +289,7 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)
@@ -346,12 +388,16 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
-	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	providerInfo := crypto.ProviderInfo{
+		ProviderKind: utils.AuthnKindOIDC,
+		ProviderID:   e.slugID,
+	}
+	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err

@@ -18,6 +18,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/authorization/k8s"
 	"github.com/perses/perses/internal/api/authorization/native"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -45,6 +46,8 @@ type Authorization interface {
 	GetUsername(ctx echo.Context) (string, error)
 	// GetPublicUser returns the PublicUser of the user from the context.
 	GetPublicUser(ctx echo.Context) (*v1.PublicUser, error)
+	// GetProviderInfo return some information about the provider used to authenticate the user.
+	GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error)
 	// Middleware returns the middleware function to be used in the echo server.
 	// This middleware is responsible for finding the token in the request, validating it and extracting it in the context.
 	// In case the token is not valid, it will prevent the request from being processed and return an error.

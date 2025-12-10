@@ -16,7 +16,7 @@ import { createContext, ReactElement, ReactNode, useMemo, useState } from 'react
 export interface PanelEditor {
   preview: {
     previewPanelWidth?: number;
-    setPreviewPanelWidth?: (width: number) => void;
+    setPreviewPanelWidth: (width: number) => void;
   };
 }
 
@@ -36,7 +36,7 @@ export const PanelEditorProvider = ({ children }: PanelEditorProviderProps): Rea
         setPreviewPanelWidth,
       },
     }),
-    [previewPanelWidth, setPreviewPanelWidth]
+    [previewPanelWidth]
   );
 
   return <PanelEditorContext.Provider value={ctx}>{children}</PanelEditorContext.Provider>;

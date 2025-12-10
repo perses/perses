@@ -20,7 +20,7 @@ import { Plugin } from './plugin-base';
  * A plugin for running profile queries.
  */
 export interface ProfileQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getProfileData: (spec: Spec, ctx: ProfileQueryContext) => Promise<ProfileData>;
+  getProfileData: (spec: Spec, ctx: ProfileQueryContext, abortSignal?: AbortSignal) => Promise<ProfileData>;
 }
 
 /**

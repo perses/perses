@@ -138,9 +138,22 @@ type oAuthEndpoint struct {
 	authURL         url.URL
 	svc             service
 	loginProps      []string
+	apiPrefix       string
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization) (route.Endpoint, error) {
+func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
+	return nil // No specific logout handler for oauth auth
+}
+
+func (e *oAuthEndpoint) GetAuthKind() string {
+	return utils.AuthnKindOAuth
+}
+
+func (e *oAuthEndpoint) GetSlugID() string {
+	return e.slugID
+}
+
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -179,6 +192,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
+		apiPrefix:       apiPrefix,
 	}, nil
 }
 
@@ -284,7 +298,8 @@ func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
 func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// Save the state cookie, will be verified in the codeExchangeHandler
-	state := ctx.Request().URL.Query().Get(redirectQueryParam)
+	redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
+	state := encodeOAuthState(redirectPath)
 	if err := e.saveStateCookie(ctx, state); err != nil {
 		e.logWithError(err).Error("Failed to save state in a cookie.")
 		return err
@@ -300,7 +315,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -326,7 +341,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		e.logWithError(err).Error("An error occurred while verifying the state")
 		return err
 	}
-	redirectURI := state
+	redirectURI := decodeOAuthState(state)
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)
@@ -340,7 +355,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	providerCtx := e.newQueryContext(ctx)
@@ -445,12 +460,16 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
-	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	providerInfo := crypto.ProviderInfo{
+		ProviderKind: utils.AuthnKindOAuth,
+		ProviderID:   e.slugID,
+	}
+	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err

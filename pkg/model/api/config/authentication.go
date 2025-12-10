@@ -108,12 +108,17 @@ type K8sAuthnProvider struct {
 	Enable bool `json:"enable" yaml:"enable"`
 }
 
+type OIDCLogout struct {
+	Enabled bool `json:"enabled" yaml:"enabled"`
+}
+
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
 	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
+	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
 }
 
 func (p *OIDCProvider) Verify() error {

@@ -23,6 +23,7 @@ import (
 
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -53,6 +54,10 @@ func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
 
 func (t *testRBAC) GetPublicUser(_ echo.Context) (*v1.PublicUser, error) {
 	return nil, nil
+}
+
+func (t *testRBAC) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+	return crypto.ProviderInfo{}, nil
 }
 
 func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
