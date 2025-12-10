@@ -34,6 +34,6 @@ type LogQueryPluginDependencies = {
 };
 
 export interface LogQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getLogData: (spec: Spec, ctx: LogQueryContext) => Promise<LogQueryResult>;
+  getLogData: (spec: Spec, ctx: LogQueryContext, abortSignal?: AbortSignal) => Promise<LogQueryResult>;
   dependsOn?: (spec: Spec, ctx: LogQueryContext) => LogQueryPluginDependencies;
 }

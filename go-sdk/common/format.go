@@ -40,9 +40,12 @@ const (
 	PercentUnit            PercentageUnit = "percent"
 	PercentDecimalUnit     PercentageUnit = "percent-decimal"
 	DecimalUnit            string         = "decimal"
+	BinaryBitsUnit         BytesUnit      = "bits"
+	DecimalBitsUnit        BytesUnit      = "decbits"
 	BinaryBytesUnit        BytesUnit      = "bytes"
 	DecimalBytesUnit       BytesUnit      = "decbytes"
 	BitsPerSecondsUnit     ThroughputUnit = "bits/sec"
+	BitsDecPerSecondsUnit  ThroughputUnit = "decbits/sec"
 	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
 	BytesDecPerSecondsUnit ThroughputUnit = "decbytes/sec"
 	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
@@ -112,7 +115,7 @@ func (f *Format) validate() error {
 	case string(NanoSecondsUnit), string(MicroSecondsUnit), string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
 		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBytesUnit), string(DecimalBytesUnit),
-		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
+		string(BitsPerSecondsUnit), string(BitsDecPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
 		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),

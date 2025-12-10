@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Fragment, HTMLAttributes, ReactElement } from 'react';
-import { Checkbox, Divider, FormControlLabel, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { Controller, useFieldArray, Control } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 import { PanelEditorValues } from '@perses-dev/core';
+import { LinkEditorForm } from './LinkEditorForm';
 
 export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {
   control: Control<PanelEditorValues>;
@@ -59,80 +60,50 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
 
 function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
   return (
-    <Stack gap={2} flexGrow={1}>
-      <Stack direction="row" gap={2}>
-        <Controller
-          control={control}
-          name={`panelDefinition.spec.links.${index}.url`}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              required
-              fullWidth
-              label="URL"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              onChange={(event) => {
-                field.onChange(event);
-              }}
-            />
-          )}
+    <Controller
+      control={control}
+      name={`panelDefinition.spec.links.${index}`}
+      render={({ field, field: { value: link }, fieldState }) => (
+        <LinkEditorForm
+          mode="inline"
+          url={{
+            value: link.url,
+            label: 'URL',
+            error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
+            onChange: (url) => {
+              field.onChange({ ...link, url });
+            },
+          }}
+          newTabOpen={{
+            value: !!link.targetBlank,
+            onChange: (targetBlank) => {
+              field.onChange({ ...link, targetBlank });
+            },
+            label: 'Open in new tab',
+          }}
+          name={{
+            value: link.name ?? '',
+            label: 'Name',
+            onChange: (name) => {
+              field.onChange({ ...link, name });
+            },
+          }}
+          renderVariables={{
+            value: !!link.renderVariables,
+            label: 'Render variables',
+            onChange: (renderVariables) => {
+              field.onChange({ ...link, renderVariables });
+            },
+          }}
+          tooltip={{
+            value: link.tooltip ?? '',
+            label: 'Tooltip',
+            onChange: (tooltip) => {
+              field.onChange({ ...link, tooltip });
+            },
+          }}
         />
-        <Controller
-          control={control}
-          name={`panelDefinition.spec.links.${index}.name`}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              fullWidth
-              label="Name"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              onChange={(event) => {
-                field.onChange(event);
-              }}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name={`panelDefinition.spec.links.${index}.tooltip`}
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              fullWidth
-              label="Tooltip"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              onChange={(event) => {
-                field.onChange(event);
-              }}
-            />
-          )}
-        />
-      </Stack>
-      <Stack gap={2} direction="row" alignItems="center">
-        <Controller
-          control={control}
-          name={`panelDefinition.spec.links.${index}.renderVariables`}
-          render={({ field }) => (
-            <FormControlLabel
-              label="Render Variables"
-              control={<Checkbox {...field} checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name={`panelDefinition.spec.links.${index}.targetBlank`}
-          render={({ field }) => (
-            <FormControlLabel
-              label="Open in new tab"
-              control={<Checkbox {...field} checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-            />
-          )}
-        />
-      </Stack>
-    </Stack>
+      )}
+    />
   );
 }

@@ -57,7 +57,7 @@ func (b *Banner) Verify() error {
 }
 
 type TimeRange struct {
-	DisableCustomTimeRange bool              `json:"disable_custom" yaml:"disable_custom"`
+	DisableCustomTimeRange bool              `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
 	DisableZoomTimeRange   bool              `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
 	Options                []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }

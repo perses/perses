@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { formatBytes, BytesFormatOptions as BytesFormatOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
+import { formatBits, BitsFormatOptions as BitsFormatOptions, BITS_GROUP_CONFIG, BITS_UNIT_CONFIG } from './bits';
 import {
   formatDecimal,
   DecimalFormatOptions as DecimalFormatOptions,
@@ -54,6 +55,7 @@ export const UNIT_GROUP_CONFIG: Readonly<Record<UnitGroup, UnitGroupConfig>> = {
   Percent: PERCENT_GROUP_CONFIG,
   Decimal: DECIMAL_GROUP_CONFIG,
   Bytes: BYTES_GROUP_CONFIG,
+  Bits: BITS_GROUP_CONFIG,
   Throughput: THROUGHPUT_GROUP_CONFIG,
   Currency: CURRENCY_GROUP_CONFIG,
   Temperature: TEMPERATURE_GROUP_CONFIG,
@@ -64,6 +66,7 @@ export const UNIT_CONFIG = {
   ...PERCENT_UNIT_CONFIG,
   ...DECIMAL_UNIT_CONFIG,
   ...BYTES_UNIT_CONFIG,
+  ...BITS_UNIT_CONFIG,
   ...THROUGHPUT_UNIT_CONFIG,
   ...CURRENCY_UNIT_CONFIG,
   ...TEMPERATURE_UNIT_CONFIG,
@@ -75,6 +78,7 @@ export type FormatOptions =
   | PercentFormatOptions
   | DecimalFormatOptions
   | BytesFormatOptions
+  | BitsFormatOptions
   | ThroughputFormatOptions
   | CurrencyFormatOptions
   | TemperatureFormatOptions
@@ -90,6 +94,10 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 
   if (isBytesUnit(formatOptions)) {
     return formatBytes(value, formatOptions);
+  }
+
+  if (isBitsUnit(formatOptions)) {
+    return formatBits(value, formatOptions);
   }
 
   if (isDecimalUnit(formatOptions)) {
@@ -153,6 +161,10 @@ export function isDecimalUnit(formatOptions: FormatOptions): formatOptions is De
 
 export function isBytesUnit(formatOptions: FormatOptions): formatOptions is BytesFormatOptions {
   return getUnitGroup(formatOptions) === 'Bytes';
+}
+
+export function isBitsUnit(formatOptions: FormatOptions): formatOptions is BitsFormatOptions {
+  return getUnitGroup(formatOptions) === 'Bits';
 }
 
 export function isUnitWithDecimalPlaces(

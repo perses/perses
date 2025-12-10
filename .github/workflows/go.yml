@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: check license headers
         run: make checklicense
   docs-fmt:
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -42,13 +42,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -71,13 +71,13 @@ jobs:
           POSTGRES_PASSWORD: password
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: test
         run: make integration-test
   test-windows:
@@ -85,13 +85,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - uses: ikalnytskyi/action-setup-postgres@v8
         with:
           username: user
@@ -131,13 +131,13 @@ jobs:
           POSTGRES_PASSWORD: password
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -145,7 +145,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -155,7 +155,7 @@ jobs:
       - name: generate files
         run: make assets-compress
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8.0.0
+        uses: golangci/golangci-lint-action@v9.2.0
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
           version: v2.4.0
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -180,13 +180,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: validate CUE files against corresponding test files
         run: make validate-cue
   check-cue-gen:
@@ -194,13 +194,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.14.0"
+          cue_version: "v0.15.0"
       - name: generate .cue model files
         run: make cue-gen
       - name: check for changes

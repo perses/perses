@@ -65,7 +65,7 @@ func fileExists(path string) bool {
 func runCueVet(schemaFile, testFile string) error {
 	logrus.Debugf("Validating %s against %s", schemaFile, testFile)
 
-	cmd := exec.Command("cue", "vet", "-c=false", schemaFile, testFile)
+	cmd := exec.Command("cue", "vet", "-c", schemaFile, testFile)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -86,6 +86,7 @@ func validateCueFiles() error {
 
 	validatedCount := 0
 	skippedCount := 0
+	errCount := 0
 
 	for _, subDir := range dirsInScope {
 		logrus.Debugf("Processing directory: %s", subDir)
@@ -106,11 +107,15 @@ func validateCueFiles() error {
 			}
 
 			if err := runCueVet(schemaFile, testFile); err != nil {
-				return err
+				logrus.Errorf("Validation failed for %s: %v", schemaFile, err)
+				errCount++
 			}
 
 			validatedCount++
 		}
+	}
+	if errCount > 0 {
+		return fmt.Errorf("validation failed for %d file(s)", errCount)
 	}
 
 	logrus.Infof("CUE files validation completed: %d validated, %d skipped", validatedCount, skippedCount)
