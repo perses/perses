@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,15 +15,15 @@ package main
 
 import (
 	"flag"
-	"os/exec"
 	"strings"
 
-	"github.com/perses/perses/scripts/changelog"
+	"github.com/perses/perses/scripts/pkg/changelog"
+	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/sirupsen/logrus"
 )
 
 func getPreviousTag() string {
-	previousVersion, err := exec.Command("git", "describe", "--abbrev=0").Output()
+	previousVersion, err := command.Create("git", "describe", "--abbrev=0").Output()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the latest tag")
 	}
