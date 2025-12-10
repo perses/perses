@@ -17,6 +17,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Package struct {
@@ -41,6 +43,14 @@ func GetPackage(dirPath string) (Package, error) {
 	return pkg, nil
 }
 
+func MustGetPackage(dirPath string) Package {
+	pkg, err := GetPackage(dirPath)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to load package.json")
+	}
+	return pkg
+}
+
 func GetWorkspaces(dirPath string) ([]string, error) {
 	data, err := readPackageFile(dirPath)
 	if err != nil {
@@ -51,4 +61,12 @@ func GetWorkspaces(dirPath string) ([]string, error) {
 		return nil, unmarshalErr
 	}
 	return pkg.Workspaces, nil
+}
+
+func MustGetWorkspaces(dirPath string) []string {
+	workspaces, err := GetWorkspaces(dirPath)
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to read workspaces from package.json")
+	}
+	return workspaces
 }
