@@ -25,7 +25,7 @@ import (
 )
 
 type refreshOption interface {
-	Refresh() error
+	refresh() error
 }
 
 type option struct {
@@ -72,7 +72,7 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	err = refreshOption.Refresh()
+	err = refreshOption.refresh()
 	if err != nil {
 		return err
 	}
@@ -97,9 +97,24 @@ func (o *option) newRefreshOption() (refreshOption, error) {
 			apiClient: apiClient,
 		}, nil
 	}
-	return &nativeAndExternalAuthnRefresh{
+	return &refresh{
 		apiClient: apiClient,
 	}, nil
+}
+
+type refresh struct {
+	apiClient api.ClientInterface
+}
+
+func (n *refresh) refresh() error {
+	response, err := n.apiClient.Auth().Refresh(config.Global.RefreshToken)
+	if err != nil {
+		return err
+	}
+	if writeErr := config.SetAccessToken(response.AccessToken); writeErr != nil {
+		return writeErr
+	}
+	return nil
 }
 
 func NewCMD() *cobra.Command {
