@@ -170,6 +170,19 @@ export function getValidPanelKey(panelKey: string, panels: Record<string, PanelD
   return normalizedPanelKey;
 }
 
+/**
+ * This function generates a unique panel key based on UUID or timestamp and random suffix.
+ */
+export const generatePanelKey = (): string => {
+  /* crypto.randomUUID() is only available in secure contexts (HTTPS), */
+  if (window.isSecureContext) {
+    return crypto.randomUUID().replaceAll('-', '');
+  }
+  const timestamp = String(Date.now());
+  const randomSuffix = Math.random().toString(36).substring(2);
+  return `${timestamp}${randomSuffix}`;
+};
+
 type PanelKeyParts = {
   name: string;
   number?: number;
