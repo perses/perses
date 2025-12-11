@@ -207,7 +207,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 	}
 
 	k8sNamespaces := k.getNamespaceList()
-	var authorizedNamespaces []string
+	authorizedNamespaces := []string{}
 	for _, k8sNamespace := range k8sNamespaces {
 		if k.checkNamespacePermission(ctx, k8sNamespace, kubernetesUser) {
 			authorizedNamespaces = append(authorizedNamespaces, k8sNamespace)
@@ -299,7 +299,6 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 
 	namespaces := k.getNamespaceList()
 
-scope:
 	for _, k8sScope := range k8sScopesToCheck {
 		// Contains the actions which need to be checked every loop.
 		// If action is permitted at the global scope, then we don't need to check within the namespace scope.
@@ -369,7 +368,7 @@ scope:
 
 				if k8sActionToCheck == k8sReadAction && authorized == authorizer.DecisionDeny {
 					// User can't even read the resource, no need to check the rest
-					break scope
+					continue project
 				}
 
 				if authorized == authorizer.DecisionAllow && slices.Contains([]k8sAction{
