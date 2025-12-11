@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelGroupDefinition, PanelGroupItemLayout, PanelDefinition } from '@perses-dev/core';
+import { PanelGroupDefinition, PanelGroupItemLayout } from '@perses-dev/core';
 import { GRID_LAYOUT_SMALL_BREAKPOINT, GRID_LAYOUT_COLS } from '../constants';
 
 // Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
@@ -151,67 +151,14 @@ export function insertPanelInLayout(
 }
 
 /**
- * @deprecated
- *
- * Get a valid panel key, where a valid key:
- * - does not include invalid characters
- * - is unique
- * TODO: It is not clear why too much complexity is needed for generating a panel key
+ * This function generates a unique panel key based on UUID or timestamp and random suffix.
  */
-
-export function getValidPanelKey(panelKey: string, panels: Record<string, PanelDefinition>): string {
-  const uniquePanelKeys = getUniquePanelKeys(panels);
-  let normalizedPanelKey = getPanelKeyParts(removeWhiteSpaces(panelKey)).name;
-
-  const matchingKey = uniquePanelKeys[normalizedPanelKey];
-  if (typeof matchingKey === 'number') {
-    normalizedPanelKey += `-${matchingKey + 1}`;
+export const generatePanelKey = (): string => {
+  /* crypto.randomUUID() is only available in secure contexts (HTTPS), */
+  if (window.isSecureContext) {
+    return crypto.randomUUID().replaceAll('-', '');
   }
-  return normalizedPanelKey;
-}
-
-type PanelKeyParts = {
-  name: string;
-  number?: number;
+  const timestamp = String(Date.now());
+  const randomSuffix = Math.random().toString(36).substring(2);
+  return `${timestamp}${randomSuffix}`;
 };
-
-const removeWhiteSpaces = (str: string): string => {
-  return str.replace(/\s+/g, '');
-};
-
-/**
- * Breaks the specified panel key into the name and the optional `-number` used
- * for deduping panels with the same name.
- */
-function getPanelKeyParts(panelKey: string): PanelKeyParts {
-  const parts = panelKey.match(/(.+)-([0-9]+)/);
-  if (parts && parts[1] && parts[2]) {
-    return {
-      name: parts[1],
-      number: parseInt(parts[2], 10),
-    };
-  }
-
-  return {
-    name: panelKey,
-  };
-}
-
-// Find all the unique panel keys and the largest number used for each.
-// ex: cpu, cpu-1, cpu-2 count as the same panel key since these panels have the same name
-function getUniquePanelKeys(panels: Record<string, PanelDefinition>): Record<string, number> {
-  const uniquePanelKeys: Record<string, number> = {};
-  Object.keys(panels).forEach((panelKey) => {
-    const { name, number } = getPanelKeyParts(panelKey);
-    if (uniquePanelKeys[name] === undefined) {
-      uniquePanelKeys[name] = 0;
-    }
-    const currentValue = uniquePanelKeys[name];
-    if (typeof currentValue === 'number' && number) {
-      // Check for the maximum value because we cannot rely on a sequential
-      // set of numbers when panels are modified.
-      uniquePanelKeys[name] = Math.max(currentValue, number);
-    }
-  });
-  return uniquePanelKeys;
-}
