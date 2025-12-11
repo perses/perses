@@ -41,7 +41,7 @@ func TestGetRedirectURI_WithAPIPrefix(t *testing.T) {
 					Scheme: "http",
 				},
 				Host: "localhost:8080",
-			}, utils.AuthKindOIDC, "azure", tc.apiPrefix)
+			}, utils.AuthnKindOIDC, "azure", tc.apiPrefix)
 			assert.Equal(t, tc.want, got)
 		})
 	}

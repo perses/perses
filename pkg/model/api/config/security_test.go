@@ -64,13 +64,98 @@ cors:
 			errMessage: "authorization provider cannot be setup without auth enabled",
 		},
 		{
-			title: "valid k8s authz configuration",
+			title: "valid k8s auth configuration",
 			yaml: `
 readonly: false
 encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
 enable_auth: true
 authentication:
   disable_sign_up: true
+  providers:
+    kubernetes:
+      enable: true
+authorization:
+  provider:
+    kubernetes:
+      enable: true
+cors:
+  enable: true
+  allow_origins:
+    - https://github.com
+  allow_methods:
+    - GET
+    - POST
+  allow_headers:
+    - X-Custom-Header
+  allow_credentials: true
+  expose_headers:
+    - Content-Encoding
+  max_age: 60
+`,
+			errMessage: "",
+		},
+		{
+			title: "cannot enable auth without authentication provider",
+			yaml: `
+readonly: false
+encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+enable_auth: true
+authentication:
+  disable_sign_up: true
+authorization:
+  provider:
+    kubernetes:
+      enable: true
+cors:
+  enable: true
+  allow_origins:
+    - https://github.com
+  allow_methods:
+    - GET
+    - POST
+  allow_headers:
+    - X-Custom-Header
+  allow_credentials: true
+  expose_headers:
+    - Content-Encoding
+  max_age: 60
+`,
+			errMessage: "impossible to enable auth if no authentication provider is setup",
+		},
+		{
+			title: "cannot enable k8s authentication with no authorization set",
+			yaml: `
+readonly: false
+encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+enable_auth: true
+authentication:
+  disable_sign_up: true
+  providers:
+    kubernetes:
+      enable: true
+cors:
+  enable: true
+  allow_origins:
+    - https://github.com
+  allow_methods:
+    - GET
+    - POST
+  allow_headers:
+    - X-Custom-Header
+  allow_credentials: true
+  expose_headers:
+    - Content-Encoding
+  max_age: 60
+`,
+			errMessage: "kubernetes authorization and authentication providers must be enabled at the same time",
+		},
+		{
+			title: "cannot enable k8s authorization with non-k8s authentication set",
+			yaml: `
+readonly: false
+encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+enable_auth: true
+authentication:
   providers:
     enable_native: true
 authorization:
@@ -91,7 +176,38 @@ cors:
     - Content-Encoding
   max_age: 60
 `,
-			errMessage: "",
+			errMessage: "kubernetes authorization and authentication providers must be enabled at the same time",
+		},
+		{
+			title: "cannot enable k8s authentication with native authorization",
+			yaml: `
+readonly: false
+encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+enable_auth: true
+authentication:
+  disable_sign_up: true
+  providers:
+    kubernetes:
+      enable: true
+authorization:
+  provider:
+    native:
+      enable: true
+cors:
+  enable: true
+  allow_origins:
+    - https://github.com
+  allow_methods:
+    - GET
+    - POST
+  allow_headers:
+    - X-Custom-Header
+  allow_credentials: true
+  expose_headers:
+    - Content-Encoding
+  max_age: 60
+`,
+			errMessage: "kubernetes authorization and authentication providers must be enabled at the same time",
 		},
 		{
 			title: "valid native authz configuration (ensure backwards compatibility)",
@@ -218,7 +334,7 @@ security:
 						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
 						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
-						Providers: AuthProviders{
+						Providers: AuthenticationProviders{
 							EnableNative: true,
 						},
 					},

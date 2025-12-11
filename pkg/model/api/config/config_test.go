@@ -273,7 +273,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
 					EnableAuth:    true,
 					Authentication: AuthenticationConfig{
-						Providers: AuthProviders{
+						Providers: AuthenticationProviders{
 							EnableNative: true,
 						},
 					},
@@ -472,7 +472,7 @@ plugin:
 						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
 						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
-						Providers: AuthProviders{
+						Providers: AuthenticationProviders{
 							EnableNative: true,
 						},
 					},

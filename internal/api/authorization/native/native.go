@@ -76,6 +76,10 @@ func (n *native) IsEnabled() bool {
 	return true
 }
 
+func (n *native) IsNativeAuthz() bool {
+	return true
+}
+
 func (n *native) GetUser(ctx echo.Context) (any, error) {
 	// Context can be nil when the function is called outside the request context.
 	// For example, the provisioning service is calling every service without any context.
@@ -115,6 +119,20 @@ func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) 
 		return crypto.ProviderInfo{}, nil // No user found in the context, this is an anonymous endpoint
 	}
 	return usr.(*crypto.JWTClaims).ProviderInfo, nil
+}
+
+func (n *native) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := n.userDAO.Get(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return v1.NewPublicUser(user), nil
 }
 
 func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {

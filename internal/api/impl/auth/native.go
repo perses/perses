@@ -20,7 +20,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
@@ -40,7 +40,7 @@ func (e *nativeEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
 }
 
 func (e *nativeEndpoint) GetAuthKind() string {
-	return utils.AuthKindNative
+	return utils.AuthnKindNative
 }
 
 func (e *nativeEndpoint) GetSlugID() string {
@@ -56,7 +56,7 @@ func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) authEndpoint {
 }
 
 func (e *nativeEndpoint) CollectRoutes(g *route.Group) {
-	g.POST(fmt.Sprintf("/%s/%s", utils.AuthKindNative, utils.PathLogin), e.auth, true)
+	g.POST(fmt.Sprintf("/%s/%s", utils.AuthnKindNative, utils.PathLogin), e.auth, true)
 }
 
 func (e *nativeEndpoint) auth(ctx echo.Context) error {
@@ -77,7 +77,7 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 	}
 	login := body.Login
 	providerInfo := crypto.ProviderInfo{
-		ProviderKind: utils.AuthKindNative,
+		ProviderKind: utils.AuthnKindNative,
 		ProviderID:   "", // no provider ID needed for native auth
 	}
 	accessToken, err := e.tokenManagement.accessToken(login, providerInfo, ctx.SetCookie)

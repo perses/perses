@@ -30,14 +30,16 @@ const (
 type k8sScope string
 
 const (
-	k8sWildcardScope   k8sScope = "*"
-	k8sDashboardScope  k8sScope = "persesdashboards"
-	k8sDatasourceScope k8sScope = "persesdatasources"
-	k8sProjectScope    k8sScope = "namespaces"
+	k8sWildcardScope         k8sScope = "*"
+	k8sDashboardScope        k8sScope = "persesdashboards"
+	k8sGlobalDatasourceScope k8sScope = "persesglobaldatasources"
+	k8sDatasourceScope       k8sScope = "persesdatasources"
+	k8sProjectScope          k8sScope = "namespaces"
 )
 
-var k8sScopesToCheck = [2]k8sScope{
+var k8sScopesToCheck = [3]k8sScope{
 	k8sDashboardScope,
+	k8sGlobalDatasourceScope,
 	k8sDatasourceScope,
 }
 
@@ -80,6 +82,8 @@ func getK8sScope(scope v1Role.Scope) k8sScope {
 	switch scope {
 	case v1Role.DashboardScope:
 		return k8sDashboardScope
+	case v1Role.GlobalDatasourceScope:
+		return k8sGlobalDatasourceScope
 	case v1Role.DatasourceScope:
 		return k8sDatasourceScope
 	case v1Role.ProjectScope:
@@ -96,6 +100,8 @@ func getPersesScope(scope k8sScope) v1Role.Scope {
 	switch scope {
 	case k8sDashboardScope:
 		return v1Role.DashboardScope
+	case k8sGlobalDatasourceScope:
+		return v1Role.GlobalDatasourceScope
 	case k8sDatasourceScope:
 		return v1Role.DatasourceScope
 	case k8sProjectScope:

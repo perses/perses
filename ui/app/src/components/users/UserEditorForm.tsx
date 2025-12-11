@@ -21,7 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { useIsExternalProviderEnabled, useIsNativeProviderEnabled } from '../../context/Config';
+import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import { FormEditorProps } from '../form-drawers';
 
 type UserEditorFormProps = FormEditorProps<UserResource>;
@@ -36,8 +36,8 @@ export function UserEditorForm({
   onClose,
   onDelete,
 }: UserEditorFormProps): ReactElement {
-  const externalProvidersEnabled = useIsExternalProviderEnabled();
-  const nativeProviderEnabled = useIsNativeProviderEnabled();
+  const externalAuthnProvidersEnabled = useIsExternalAuthnProviderEnabled();
+  const nativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
@@ -194,8 +194,8 @@ export function UserEditorForm({
             </IconButton>
           ) : (
             <Stack gap={2}>
-              {!nativeProviderEnabled && (
-                <Alert severity="warning">Native provider is currently disabled in the config!</Alert>
+              {!nativeAuthnProviderEnabled && (
+                <Alert severity="warning">Native authentication provider is currently disabled in the config!</Alert>
               )}
               <Stack direction="row" gap={1} alignItems="end">
                 <Controller
@@ -235,8 +235,10 @@ export function UserEditorForm({
           <Typography variant="h1" mb={2}>
             OAuth & OIDC Providers
           </Typography>
-          {!externalProvidersEnabled && (
-            <Alert severity="warning">No OAuth or OIDC providers are currently enabled in the config!</Alert>
+          {!externalAuthnProvidersEnabled && (
+            <Alert severity="warning">
+              No OAuth or OIDC authentication providers are currently enabled in the config!
+            </Alert>
           )}
           <Stack gap={2}>
             {fields && fields.length > 0 ? (
@@ -248,7 +250,7 @@ export function UserEditorForm({
                       disabled={isReadonly || action === 'read'}
                       style={{ width: 'fit-content', height: 'fit-content' }}
                       onClick={() => remove(index)}
-                      title="Remove provider"
+                      title="Remove authentication provider"
                     >
                       <MinusIcon />
                     </IconButton>
@@ -257,14 +259,14 @@ export function UserEditorForm({
               ))
             ) : (
               <Typography variant="subtitle1" mb={2} fontStyle="italic">
-                No OAuth or OIDC provider defined
+                No OAuth or OIDC authentication provider defined
               </Typography>
             )}
             <IconButton
               disabled={isReadonly || action === 'read'}
               style={{ width: 'fit-content', height: 'fit-content' }}
               onClick={() => append({ issuer: '', email: '', subject: '' })}
-              title="Add OIDC or OAuth provider"
+              title="Add OIDC or OAuth authentication provider"
             >
               <PlusIcon />
             </IconButton>
