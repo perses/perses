@@ -13,7 +13,7 @@
 
 import { RequestHeaders, HTTPDatasourceSpec } from '@perses-dev/core';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, ReactElement, useState, useEffect, useRef } from 'react';
+import React, { Fragment, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -66,10 +66,6 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   // Watch the headers array for changes to detect duplicates
   const watchedHeaders = headersForm.watch('headers');
 
-  // Use a ref to always have access to the latest value
-  const valueRef = useRef(value);
-  valueRef.current = value;
-
   // Check for duplicate header names
   const nameMap = new Map<string, number>();
   const duplicateNames = new Set<string>();
@@ -84,24 +80,23 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   });
   const hasDuplicates = duplicateNames.size > 0;
 
-  // Sync headers to parent when they change
-  useEffect(() => {
+  // Sync headers to parent
+  const syncHeadersToParent = (headers: HeaderEntry[]): void => {
     const headersObject: RequestHeaders = {};
-    watchedHeaders.forEach(({ name, value: headerValue }) => {
+    headers.forEach(({ name, value: headerValue }) => {
       if (name !== '') {
         headersObject[name] = headerValue;
       }
     });
 
     onChange(
-      produce(valueRef.current, (draft) => {
+      produce(value, (draft) => {
         if (draft.proxy !== undefined) {
           draft.proxy.spec.headers = Object.keys(headersObject).length > 0 ? headersObject : undefined;
         }
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(watchedHeaders)]);
+  };
 
   const tabs = [
     {
@@ -310,6 +305,12 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                             readOnly: isReadonly,
                           }}
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            const updatedHeaders = [...watchedHeaders];
+                            updatedHeaders[index] = { name: e.target.value, value: updatedHeaders[index]?.value ?? '' };
+                            syncHeadersToParent(updatedHeaders);
+                          }}
                         />
                       )}
                     />
@@ -329,6 +330,12 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                             readOnly: isReadonly,
                           }}
                           InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            const updatedHeaders = [...watchedHeaders];
+                            updatedHeaders[index] = { name: updatedHeaders[index]?.name ?? '', value: e.target.value };
+                            syncHeadersToParent(updatedHeaders);
+                          }}
                         />
                       )}
                     />
@@ -337,7 +344,11 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                     <IconButton
                       disabled={isReadonly}
                       aria-label={`Remove header ${watchedHeaders[index]?.name || index}`}
-                      onClick={() => remove(index)}
+                      onClick={() => {
+                        remove(index);
+                        const updatedHeaders = watchedHeaders.filter((_, i) => i !== index);
+                        syncHeadersToParent(updatedHeaders);
+                      }}
                     >
                       <MinusIcon />
                     </IconButton>

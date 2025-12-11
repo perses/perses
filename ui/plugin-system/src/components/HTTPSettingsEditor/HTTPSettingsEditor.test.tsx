@@ -220,6 +220,39 @@ describe('HTTPSettingsEditor - Request Headers', () => {
       const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
       expect(lastCall.proxy?.spec.headers).toBeUndefined();
     });
+
+    it('should sync removed headers to parent immediately', async () => {
+      const onChange = jest.fn();
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+            headers: {
+              Authorization: 'Bearer token',
+              'X-Custom': 'value1',
+            },
+          },
+        },
+      };
+
+      renderComponent(value, onChange);
+
+      // Find and click the remove button for X-Custom header
+      const removeButton = await screen.findByLabelText('Remove header X-Custom');
+      await userEvent.click(removeButton);
+
+      // onChange should be called with only Authorization header remaining
+      await waitFor(
+        () => {
+          expect(onChange).toHaveBeenCalled();
+          const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+          expect(lastCall.proxy?.spec.headers).toEqual({ Authorization: 'Bearer token' });
+          expect(lastCall.proxy?.spec.headers).not.toHaveProperty('X-Custom');
+        },
+        { timeout: 2000 }
+      );
+    });
   });
 
   describe('Duplicate header detection', () => {
@@ -370,10 +403,12 @@ describe('HTTPSettingsEditor - Request Headers', () => {
       expect(addButton).toBeDefined();
       await userEvent.click(addButton!);
 
-      // Empty headers should not be synced
+      // Adding empty header should not trigger onChange
+      expect(onChange).not.toHaveBeenCalled();
+
+      // Verify the header inputs are present
       await waitFor(() => {
-        const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-        expect(lastCall.proxy?.spec.headers).toBeUndefined();
+        expect(screen.getByLabelText(/Header name/i)).toBeInTheDocument();
       });
     });
   });
