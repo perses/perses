@@ -67,6 +67,8 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const watchedHeaders = headersForm.watch('headers');
 
   // Check for duplicate header names
+  // TODO: duplication detection logic to be replaced by proper zod schema validation in the future
+  // ref https://github.com/perses/perses/issues/3014
   const nameMap = new Map<string, number>();
   const duplicateNames = new Set<string>();
   watchedHeaders.forEach(({ name }) => {
