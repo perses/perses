@@ -101,11 +101,12 @@ type authEndpoint interface {
 }
 
 type endpoint struct {
-	endpoints       []authEndpoint
-	jwt             crypto.JWT
-	tokenManagement tokenManagement
-	authz           authorization.Authorization
-	isAuthnEnable   bool
+	endpoints        []authEndpoint
+	jwt              crypto.JWT
+	tokenManagement  tokenManagement
+	authz            authorization.Authorization
+	isAuthnEnable    bool
+	isDelegatedAuthn bool
 }
 
 func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
@@ -114,6 +115,8 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 		tokenManagement: tokenManagement{jwt: jwt},
 		authz:           authz,
 		isAuthnEnable:   isAuthnEnable,
+		// Currently only k8s is a delegated authentication provider
+		isDelegatedAuthn: providers.KubernetesProvider.Enable,
 	}
 
 	// Register the native provider if enabled
@@ -149,7 +152,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	for _, ep := range e.endpoints {
 		ep.CollectRoutes(providersGroup)
 	}
-	if e.authz.IsNativeAuthz() {
+	if !e.isDelegatedAuthn {
 		g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
 		g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, false)
 	}
