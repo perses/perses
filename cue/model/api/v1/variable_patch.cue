@@ -23,7 +23,14 @@ package v1
 
 import "github.com/perses/perses/cue/model/api/v1/variable"
 
+#Variable: kind: #KindVariable @go(Kind)
+
+#GlobalVariable: kind: #KindGlobalVariable @go(Kind)
+
 #VariableSpec: {
-	kind: variable.#Kind @go(Kind)
-	spec: _              @go(Spec)
+	kind: variable.#KindText @go(Kind)
+	spec: variable.#TextSpec  @go(Spec)
+} | {
+	kind: variable.#KindList @go(Kind)
+	spec: variable.#ListSpec  @go(Spec)
 }

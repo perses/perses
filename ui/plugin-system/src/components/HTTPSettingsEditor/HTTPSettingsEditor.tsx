@@ -15,10 +15,19 @@ import { RequestHeaders, HTTPDatasourceSpec } from '@perses-dev/core';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import React, { Fragment, ReactElement, useState } from 'react';
 import { produce } from 'immer';
-import { Controller } from 'react-hook-form';
+import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
+
+type HeaderEntry = {
+  name: string;
+  value: string;
+};
+
+type HeaderFormValues = {
+  headers: HeaderEntry[];
+};
 
 export interface HTTPSettingsEditor {
   value: HTTPDatasourceSpec;
@@ -38,25 +47,57 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     Object.assign(value, initialSpecProxy);
   }
 
-  // utilitary function used for headers when renaming a property
-  // -> TODO it would be cleaner to manipulate headers as an intermediary list instead, to avoid doing this.
-  const buildNewHeaders = (
-    oldHeaders: RequestHeaders | undefined,
-    oldName: string,
-    newName: string
-  ): RequestHeaders | undefined => {
-    if (oldHeaders === undefined) return oldHeaders;
-    const keys = Object.keys(oldHeaders);
-    const newHeaders = keys.reduce<Record<string, string>>((acc, val) => {
-      if (val === oldName) {
-        acc[newName] = oldHeaders[oldName] || '';
-      } else {
-        acc[val] = oldHeaders[val] || '';
-      }
-      return acc;
-    }, {});
+  // Use local state to maintain an array of header entries during editing, instead of
+  // manipulating a map directly which causes weird UX.
+  const headersForm = useForm<HeaderFormValues>({
+    defaultValues: {
+      headers: Object.entries(value.proxy?.spec.headers ?? {}).map(([name, headerValue]) => ({
+        name,
+        value: headerValue as string,
+      })),
+    },
+  });
 
-    return { ...newHeaders };
+  const { fields, append, remove } = useFieldArray({
+    control: headersForm.control,
+    name: 'headers',
+  });
+
+  // Watch the headers array for changes to detect duplicates
+  const watchedHeaders = headersForm.watch('headers');
+
+  // Check for duplicate header names
+  // TODO: duplication detection logic to be replaced by proper zod schema validation in the future
+  // ref https://github.com/perses/perses/issues/3014
+  const nameMap = new Map<string, number>();
+  const duplicateNames = new Set<string>();
+  watchedHeaders.forEach(({ name }) => {
+    if (name !== '') {
+      const count = (nameMap.get(name) || 0) + 1;
+      nameMap.set(name, count);
+      if (count > 1) {
+        duplicateNames.add(name);
+      }
+    }
+  });
+  const hasDuplicates = duplicateNames.size > 0;
+
+  // Sync headers to parent
+  const syncHeadersToParent = (headers: HeaderEntry[]): void => {
+    const headersObject: RequestHeaders = {};
+    headers.forEach(({ name, value: headerValue }) => {
+      if (name !== '') {
+        headersObject[name] = headerValue;
+      }
+    });
+
+    onChange(
+      produce(value, (draft) => {
+        if (draft.proxy !== undefined) {
+          draft.proxy.spec.headers = Object.keys(headersObject).length > 0 ? headersObject : undefined;
+        }
+      })
+    );
   };
 
   const tabs = [
@@ -248,118 +289,88 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
             Request Headers
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.headers &&
-              Object.keys(value.proxy.spec.headers).map((headerName, i) => {
-                return (
-                  <Fragment key={i}>
-                    <Grid item xs={4}>
-                      <Controller
-                        name={`Header name ${i}`}
-                        render={({ field, fieldState }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label="Header name"
-                            value={headerName}
-                            error={!!fieldState.error}
-                            helperText={fieldState.error?.message}
-                            InputProps={{
-                              readOnly: isReadonly,
-                            }}
-                            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              onChange(
-                                produce(value, (draft) => {
-                                  if (draft.proxy !== undefined) {
-                                    draft.proxy.spec.headers = buildNewHeaders(
-                                      draft.proxy.spec.headers,
-                                      headerName,
-                                      e.target.value
-                                    );
-                                  }
-                                })
-                              );
-                            }}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={7}>
-                      <Controller
-                        name={`Header value ${i}`}
-                        render={({ field, fieldState }) => (
-                          <TextField
-                            {...field}
-                            fullWidth
-                            label="Header value"
-                            value={value.proxy?.spec.headers?.[headerName]}
-                            error={!!fieldState.error}
-                            helperText={fieldState.error?.message}
-                            InputProps={{
-                              readOnly: isReadonly,
-                            }}
-                            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                            onChange={(e) => {
-                              field.onChange(e);
-                              onChange(
-                                produce(value, (draft) => {
-                                  if (draft.proxy !== undefined) {
-                                    draft.proxy.spec.headers = {
-                                      ...draft.proxy.spec.headers,
-                                      [headerName]: e.target.value,
-                                    };
-                                  }
-                                })
-                              );
-                            }}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={1}>
-                      <Controller
-                        name={`Remove Header ${i}`}
-                        render={({ field }) => (
-                          <IconButton
-                            {...field}
-                            disabled={isReadonly}
-                            // Remove the given header from the list
-                            onClick={(e) => {
-                              field.onChange(e);
-                              const newHeaders = { ...value.proxy?.spec.headers };
-                              delete newHeaders[headerName];
-                              onChange(
-                                produce(value, (draft) => {
-                                  if (draft.proxy !== undefined) {
-                                    draft.proxy.spec.headers = newHeaders;
-                                  }
-                                })
-                              );
-                            }}
-                          >
-                            <MinusIcon />
-                          </IconButton>
-                        )}
-                      />
-                    </Grid>
-                  </Fragment>
-                );
-              })}
+            {fields.length > 0 ? (
+              fields.map((field, index) => (
+                <Fragment key={field.id}>
+                  <Grid item xs={4}>
+                    <Controller
+                      control={headersForm.control}
+                      name={`headers.${index}.name`}
+                      render={({ field: controllerField, fieldState }) => (
+                        <TextField
+                          {...controllerField}
+                          fullWidth
+                          label="Header name"
+                          error={!!fieldState.error || duplicateNames.has(controllerField.value)}
+                          helperText={fieldState.error?.message}
+                          InputProps={{
+                            readOnly: isReadonly,
+                          }}
+                          InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            const updatedHeaders = [...watchedHeaders];
+                            updatedHeaders[index] = { name: e.target.value, value: updatedHeaders[index]?.value ?? '' };
+                            syncHeadersToParent(updatedHeaders);
+                          }}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={7}>
+                    <Controller
+                      control={headersForm.control}
+                      name={`headers.${index}.value`}
+                      render={({ field: controllerField, fieldState }) => (
+                        <TextField
+                          {...controllerField}
+                          fullWidth
+                          label="Header value"
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                          InputProps={{
+                            readOnly: isReadonly,
+                          }}
+                          InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            const updatedHeaders = [...watchedHeaders];
+                            updatedHeaders[index] = { name: updatedHeaders[index]?.name ?? '', value: e.target.value };
+                            syncHeadersToParent(updatedHeaders);
+                          }}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={1}>
+                    <IconButton
+                      disabled={isReadonly}
+                      aria-label={`Remove header ${watchedHeaders[index]?.name || index}`}
+                      onClick={() => {
+                        remove(index);
+                        const updatedHeaders = watchedHeaders.filter((_, i) => i !== index);
+                        syncHeadersToParent(updatedHeaders);
+                      }}
+                    >
+                      <MinusIcon />
+                    </IconButton>
+                  </Grid>
+                </Fragment>
+              ))
+            ) : (
+              <Grid item xs={4}>
+                <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
+              </Grid>
+            )}
+            {hasDuplicates && (
+              <Grid item xs={12}>
+                <Typography variant="body2" color="error">
+                  Duplicate header names detected. Each header name must be unique.
+                </Typography>
+              </Grid>
+            )}
             <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
-              <IconButton
-                disabled={isReadonly}
-                // Add a new (empty) header to the list
-                onClick={() =>
-                  onChange(
-                    produce(value, (draft) => {
-                      if (draft.proxy !== undefined) {
-                        draft.proxy.spec.headers = { ...draft.proxy.spec.headers, '': '' };
-                      }
-                    })
-                  )
-                }
-              >
+              <IconButton disabled={isReadonly} onClick={() => append({ name: '', value: '' })}>
                 <PlusIcon />
               </IconButton>
             </Grid>
