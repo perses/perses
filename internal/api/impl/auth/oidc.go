@@ -25,13 +25,13 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/impl/auth/userinfo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/zitadel/oidc/v3/pkg/client"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
@@ -40,42 +40,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// oidcUserInfo implements externalUserInfo for the OIDC providers
-type oidcUserInfo struct {
-	externalUserInfoProfile
-	Subject string `json:"sub,omitempty"`
-	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
-	issuer string
-}
-
-// GetSubject implements [rp.SubjectGetter]
-func (u *oidcUserInfo) GetSubject() string {
-	return u.Subject
-}
-
-// GetLogin implements [externalUserInfo]
-// It uses the first part of the email to create the username.
-func (u *oidcUserInfo) GetLogin() string {
-	login := buildLoginFromEmail(u.Email)
-	if len(login) > 0 {
-		return login
-	}
-	return u.Subject
-}
-
-// GetProfile implements [externalUserInfo]
-func (u *oidcUserInfo) GetProfile() externalUserInfoProfile {
-	return u.externalUserInfoProfile
-}
-
-// GetProviderContext implements [externalUserInfo]
-func (u *oidcUserInfo) GetProviderContext() v1.OAuthProvider {
-	return v1.OAuthProvider{
-		Issuer:  u.issuer,
-		Email:   u.Email,
-		Subject: u.Subject,
-	}
-}
+// defaultOIDCLoginProps is empty instead of ["sub"] because sub is already considered default AFTER email first part
+var defaultOIDCLoginProps []string
 
 type RelyingPartyWithTokenEndpoint struct {
 	rp.RelyingParty
@@ -154,6 +120,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
+	loginProps             []string
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -195,6 +162,11 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		}
 	}
 
+	loginProps := defaultOIDCLoginProps
+	if customProp := provider.CustomLoginProperty; customProp != "" {
+		loginProps = []string{customProp}
+	}
+
 	extraLogoutHandler, err := newOIDCExtraLogoutHandler(provider, relyingParty, apiPrefix)
 	if err != nil {
 		return nil, err
@@ -211,6 +183,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
+		loginProps:             loginProps,
 		apiPrefix:              apiPrefix,
 	}, nil
 }
@@ -269,7 +242,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 //   - save the user in database if it's a new user, or update it with the collected information
 //   - ultimately, generate a Perses user session with an access and refresh token
 func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *userinfo.OIDCUserInfo) {
 		redirectURI := decodeOAuthState(state)
 
 		setCookie := func(cookie *http.Cookie) {
@@ -329,7 +302,7 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	grantType := ctx.FormValue("grant_type")
 
-	var uInfo *oidcUserInfo
+	var uInfo *userinfo.OIDCUserInfo
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
@@ -344,7 +317,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Failed to verify token")
 			return err
 		}
-		uInfo, err = rp.Userinfo[*oidcUserInfo](ctx.Request().Context(), resp.AccessToken, resp.TokenType, idClaims.GetSubject(), e.deviceCodeRelyingParty)
+		uInfo, err = rp.Userinfo[*userinfo.OIDCUserInfo](ctx.Request().Context(), resp.AccessToken, resp.TokenType, idClaims.GetSubject(), e.deviceCodeRelyingParty)
 		if err != nil {
 			e.logWithError(err).Error("Failed to request user info")
 			return err
@@ -363,7 +336,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			return err
 		}
 		//TODO: Probably not a good idea to use the client id as the subject, but what can we do with client credentials?
-		uInfo = &oidcUserInfo{Subject: clientID}
+		uInfo = &userinfo.OIDCUserInfo{Subject: clientID}
 	default:
 		return oidc.ErrUnsupportedGrantType()
 	}
@@ -376,9 +349,11 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
-	// We don´t forget to set the issuer before making any sync in the database.
-	userInfo.issuer = e.issuer
+func (e *oIDCEndpoint) performUserSync(userInfo *userinfo.OIDCUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
+	// We don´t forget to set login keys and issuer before making any sync in the database.
+	// They will be used by the user info getters.
+	userInfo.SetLoginProps(e.loginProps)
+	userInfo.SetIssuer(e.issuer)
 
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {

@@ -80,15 +80,16 @@ func (h *HTTP) Verify() error {
 }
 
 type Provider struct {
-	SlugID            string         `json:"slug_id" yaml:"slug_id"`
-	Name              string         `json:"name" yaml:"name"`
-	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
-	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
-	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
-	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
-	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
-	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
-	HTTP              HTTP           `json:"http" yaml:"http"`
+	SlugID              string         `json:"slug_id" yaml:"slug_id"`
+	Name                string         `json:"name" yaml:"name"`
+	ClientID            secret.Hidden  `json:"client_id" yaml:"client_id"`
+	ClientSecret        secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	DeviceCode          *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
+	ClientCredentials   *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
+	RedirectURI         common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
+	Scopes              []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	HTTP                HTTP           `json:"http" yaml:"http"`
+	CustomLoginProperty string         `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *Provider) Verify() error {
@@ -125,12 +126,11 @@ func (p *OIDCProvider) Verify() error {
 }
 
 type OAuthProvider struct {
-	Provider            `json:",inline" yaml:",inline"`
-	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
-	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
-	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
-	DeviceAuthURL       common.URL `json:"device_auth_url" yaml:"device_auth_url"`
-	CustomLoginProperty string     `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
+	Provider      `json:",inline" yaml:",inline"`
+	AuthURL       common.URL `json:"auth_url" yaml:"auth_url"`
+	TokenURL      common.URL `json:"token_url" yaml:"token_url"`
+	UserInfosURL  common.URL `json:"user_infos_url" yaml:"user_infos_url"`
+	DeviceAuthURL common.URL `json:"device_auth_url" yaml:"device_auth_url"`
 }
 
 func (p *OAuthProvider) Verify() error {

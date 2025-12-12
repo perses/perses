@@ -271,6 +271,11 @@ logout:
   # Setting this to true will redirect the user to the provider's logout endpoint after the logout process.
   # If false, the user will be logged out from Perses only.
   enabled: <boolean> | default = false # Optional
+
+# Name of the property to get "login" from user infos API and id token.
+# If not provided, it will use the first part of the address mail before the @ symbol.
+# If no email is found, it will use the "sub" value, that may not be very readable.
+custom_login_property: <string> # Optional
 ```
 
 ##### OAuth provider

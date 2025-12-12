@@ -19,6 +19,7 @@ import (
 
 	"github.com/perses/perses/internal/api/authorization"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/impl/auth/userinfo"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -35,7 +36,7 @@ func useNewIfPresent(old, new string) (string, bool) { // nolint: revive
 
 // saveProfileInfo build a user spec merging the old spec with a given user profile
 // Return a boolean saying if the result is different from old value.
-func saveProfileInfo(old v1.UserSpec, uInfoProfile externalUserInfoProfile) (v1.UserSpec, bool) {
+func saveProfileInfo(old v1.UserSpec, uInfoProfile userinfo.ExternalUserInfoProfile) (v1.UserSpec, bool) {
 	firstChanged := false
 	lastChanged := false
 	old.FirstName, firstChanged = useNewIfPresent(old.FirstName, uInfoProfile.GivenName)
@@ -68,7 +69,7 @@ func saveProviderInfo(old v1.UserSpec, uInfoProvider v1.OAuthProvider) (v1.UserS
 	return old, !foundPerfectMatch, nil
 }
 
-func newSpecIfChanged(old v1.UserSpec, uInfo externalUserInfo) (v1.UserSpec, bool, error) {
+func newSpecIfChanged(old v1.UserSpec, uInfo userinfo.ExternalUserInfo) (v1.UserSpec, bool, error) {
 	specWithProfile, profileChanged := saveProfileInfo(old, uInfo.GetProfile())
 	newSpec, providerChanged, err := saveProviderInfo(specWithProfile, uInfo.GetProviderContext())
 	return newSpec, profileChanged || providerChanged, err
@@ -91,7 +92,7 @@ func (s *service) getOrPrepareUserEntity(login string) (*v1.User, bool, error) {
 	return result, false, nil
 }
 
-func (s *service) syncUser(uInfo externalUserInfo) (*v1.User, error) {
+func (s *service) syncUser(uInfo userinfo.ExternalUserInfo) (*v1.User, error) {
 	login := uInfo.GetLogin()
 	if len(login) == 0 {
 		return nil, errors.New("the user login cannot be empty")
