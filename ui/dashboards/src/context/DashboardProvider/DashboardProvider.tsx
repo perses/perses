@@ -26,6 +26,7 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
   EphemeralDashboardResource,
+  DEFAULT_DASHBOARD_TIMEZONE,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -56,10 +57,12 @@ export interface DashboardStoreState
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+  setTimeZone: (timeZone: string) => void;
   kind: DashboardResource['kind'] | EphemeralDashboardResource['kind'];
   metadata: ProjectMetadata;
   duration: DurationString;
   refreshInterval: DurationString;
+  timeZone: string;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   ttl?: DurationString;
@@ -123,7 +126,15 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
   const {
     kind,
     metadata,
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
+    spec: {
+      display,
+      panels = {},
+      layouts = [],
+      duration,
+      timeZone = DEFAULT_DASHBOARD_TIMEZONE,
+      refreshInterval = DEFAULT_REFRESH_INTERVAL,
+      datasources,
+    },
   } = dashboardResource;
 
   const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
@@ -152,16 +163,20 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           display,
           duration,
           refreshInterval,
+          timeZone,
           datasources,
           ttl,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean): void => {
             set({ isEditMode });
           },
+          setTimeZone: (timeZone: string): void => {
+            set({ timeZone });
+          },
           setDashboard: ({
             kind,
             metadata,
-            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
+            spec: { display, panels = {}, layouts = [], duration, refreshInterval, timeZone, datasources = {} },
           }): void => {
             set((state) => {
               state.kind = kind;
@@ -173,6 +188,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+              state.timeZone = timeZone ?? DEFAULT_DASHBOARD_TIMEZONE;
               state.datasources = datasources;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
