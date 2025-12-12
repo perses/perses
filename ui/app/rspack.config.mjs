@@ -108,6 +108,15 @@ export default defineConfig({
       favicon: './favicon.ico',
       publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
+    new rspack.CopyRspackPlugin({
+      patterns: [
+        {
+          from: 'src/locales',
+          to: 'locales',
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),
 });
