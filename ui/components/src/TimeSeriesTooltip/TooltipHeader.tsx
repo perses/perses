@@ -16,7 +16,7 @@ import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import { memo, ReactElement } from 'react';
 import { getDateAndTime } from '../utils';
-import { NearbySeriesArray } from './nearby-series';
+import { NearbySeriesArray } from './types';
 import {
   TOOLTIP_BG_COLOR_FALLBACK,
   TOOLTIP_MAX_WIDTH,
