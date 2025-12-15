@@ -5,8 +5,11 @@
 package common
 
 #PluginMetadata: {
-	version:  string @go(Version)
-	registry: string @go(Registry)
+	// Version is optional. If not provided, it means the latest version available in the Perses instance.
+	version?: string @go(Version)
+
+	// Registry is optional. If not provided, it means the default registry: "perses.dev".
+	registry?: string @go(Registry)
 }
 
 #Plugin: _
