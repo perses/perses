@@ -4,4 +4,9 @@
 
 package common
 
+#PluginMetadata: {
+	version:  string @go(Version)
+	registry: string @go(Registry)
+}
+
 #Plugin: _

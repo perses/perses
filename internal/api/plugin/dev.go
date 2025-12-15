@@ -38,6 +38,8 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			Metadata: plugin.ModuleMetadata{
 				Name:    manifest.Name,
 				Version: manifest.Metadata.BuildInfo.Version,
+				// TODO probably moduleOrg is not the same thing than registry
+				Registry: npmPackageData.Perses.ModuleOrg,
 			},
 			Spec: npmPackageData.Perses,
 			Status: &plugin.ModuleStatus{
@@ -63,22 +65,22 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			}
 		}
 		p.mutex.Lock()
-		p.devLoaded[manifest.Name] = pluginLoaded
+		p.devLoaded.Add(manifest.Name, pluginModule.Metadata, pluginLoaded)
 		p.mutex.Unlock()
 		logrus.Debugf("plugin %q has been loaded in development mode", manifest.Name)
 	}
 	return p.storeLoadedList()
 }
 
-func (p *pluginFile) RefreshDevPlugin(name string) error {
+func (p *pluginFile) RefreshDevPlugin(metadata plugin.ModuleMetadata) error {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
-	plg, ok := p.devLoaded[name]
+	plg, ok := p.devLoaded.Get(metadata.Name, metadata)
 	if !ok {
-		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", name))
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", metadata.Name))
 	}
 	if !IsSchemaRequired(plg.Module.Spec) || plg.DevEnvironment.DisableSchema {
-		logrus.Debugf("schema is disabled or not required for plugin %q", name)
+		logrus.Debugf("schema is disabled or not required for plugin %q", metadata.Name)
 		return nil
 	}
 	if err := p.sch.LoadDevPlugin(plg.DevEnvironment.AbsolutePath, plg.Module); err != nil {
@@ -87,21 +89,21 @@ func (p *pluginFile) RefreshDevPlugin(name string) error {
 	if err := p.mig.LoadDevPlugin(plg.DevEnvironment.AbsolutePath, plg.Module); err != nil {
 		return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to refresh plugin migration schema: %s", err))
 	}
-	logrus.Infof("plugin %q has been refreshed in development mode", name)
+	logrus.Infof("plugin %q has been refreshed in development mode", metadata.Name)
 	return nil
 }
 
-func (p *pluginFile) UnLoadDevPlugin(name string) error {
+func (p *pluginFile) UnLoadDevPlugin(metadata plugin.ModuleMetadata) error {
 	p.mutex.Lock()
-	plg, ok := p.devLoaded[name]
+	plg, ok := p.devLoaded.Get(metadata.Name, metadata)
 	if !ok {
 		p.mutex.Unlock()
-		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", name))
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found in development mode", metadata.Name))
 	}
 	p.sch.UnloadDevPlugin(plg.Module)
 	p.mig.UnLoadDevPlugin(plg.Module)
-	delete(p.devLoaded, name)
+	p.devLoaded.Remove(metadata.Name, metadata)
 	p.mutex.Unlock()
-	logrus.Debugf("plugin %q has been unloaded from development mode", name)
+	logrus.Debugf("plugin %q has been unloaded from development mode", metadata.Name)
 	return p.storeLoadedList()
 }

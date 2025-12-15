@@ -18,8 +18,14 @@ import (
 	"fmt"
 )
 
+type PluginMetadata struct {
+	Version  string `json:"version" yaml:"version"`
+	Registry string `json:"registry" yaml:"registry"`
+}
+
 type Plugin struct {
-	Kind string `json:"kind" yaml:"kind"`
+	Kind     string         `json:"kind" yaml:"kind"`
+	Metadata PluginMetadata `json:"metadata" yaml:"metadata"`
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	Spec any `json:"spec" yaml:"spec"`
