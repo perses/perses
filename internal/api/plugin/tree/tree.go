@@ -114,7 +114,10 @@ func (t Tree[T]) Get(name string, moduleMetadata plugin.ModuleMetadata) (T, bool
 	return emptyValue, false
 }
 
-func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata common.PluginMetadata) (T, bool) {
+func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *common.PluginMetadata) (T, bool) {
+	if pluginMetadata == nil {
+		return t.Get(name, plugin.ModuleMetadata{Version: plugin.LatestVersion, Registry: plugin.DefaultRegistry})
+	}
 	return t.Get(name, plugin.ModuleMetadata{Version: pluginMetadata.Version, Registry: pluginMetadata.Registry})
 }
 

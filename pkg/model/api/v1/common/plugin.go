@@ -29,7 +29,7 @@ type Plugin struct {
 	// Kind is the type of the plugin (e.g., Panel, Variable, Datasource, etc.).
 	Kind string `json:"kind" yaml:"kind"`
 	// Metadata is an optional field that contains additional information such as version and registry of the plugin.
-	Metadata PluginMetadata `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+	Metadata *PluginMetadata `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	Spec any `json:"spec" yaml:"spec"`
