@@ -1,3 +1,334 @@
 {
-  "this has no use for this test right?": true
+  "id": "FooChart",
+  "name": "FooChart",
+  "metaData": {
+    "name": "FooChart",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/foo-chart-plugin"
+    },
+    "remoteEntry": {
+      "name": "__mf/js/FooChart.cd401d85.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "FooChart",
+    "pluginVersion": "0.19.1",
+    "prefetchInterface": false,
+    "getPublicPath": "function() { const prefix = window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || \"\"; return prefix + \"/plugins/FooChart/\"; }"
+  },
+  "shared": [
+    {
+      "id": "FooChart:@emotion/react",
+      "name": "@emotion/react",
+      "version": "11.14.0",
+      "singleton": true,
+      "requiredVersion": "^11.11.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/960.33cdf4ef.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:@emotion/styled",
+      "name": "@emotion/styled",
+      "version": "11.14.0",
+      "singleton": true,
+      "requiredVersion": "^11.14.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/694.beb18780.js",
+            "__mf/js/async/770.ece8043c.js",
+            "__mf/js/async/790.219148ac.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:@hookform/resolvers",
+      "name": "@hookform/resolvers",
+      "version": "3.10.0",
+      "singleton": true,
+      "requiredVersion": "^3.10.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/214.c9488f88.js",
+            "__mf/js/async/738.7c9852d4.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:@perses-dev/components",
+      "name": "@perses-dev/components",
+      "version": "0.52.0",
+      "singleton": true,
+      "requiredVersion": "^0.52.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/288.70b237a6.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:@perses-dev/plugin-system",
+      "name": "@perses-dev/plugin-system",
+      "version": "0.52.0",
+      "singleton": true,
+      "requiredVersion": "^0.52.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/109.b86d041e.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:date-fns",
+      "name": "date-fns",
+      "version": "4.1.0",
+      "singleton": true,
+      "requiredVersion": "^4.1.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/75.c086bb12.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:echarts",
+      "name": "echarts",
+      "version": "5.5.0",
+      "singleton": true,
+      "requiredVersion": "^undefined",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/409.fdf96221.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:immer",
+      "name": "immer",
+      "version": "10.1.1",
+      "singleton": true,
+      "requiredVersion": "^10.1.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/774.aec5dd0e.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:lodash",
+      "name": "lodash",
+      "version": "4.17.21",
+      "singleton": true,
+      "requiredVersion": "^4.17.21",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/981.5c1d40ce.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:mdi-material-ui",
+      "name": "mdi-material-ui",
+      "version": "7.9.3",
+      "singleton": true,
+      "requiredVersion": "^7.4.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/296.78a77608.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:react-dom",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "^18.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/173.3531997c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:react",
+      "name": "react",
+      "version": "18.3.1",
+      "singleton": true,
+      "requiredVersion": "^18.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/964.1b58e06a.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:use-resize-observer",
+      "name": "use-resize-observer",
+      "version": "9.1.0",
+      "singleton": true,
+      "requiredVersion": "^9.1.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/553.846194ff.js",
+            "__mf/js/async/623.e68b6216.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    },
+    {
+      "id": "FooChart:date-fns-tz",
+      "name": "date-fns-tz",
+      "version": "3.2.0",
+      "singleton": true,
+      "requiredVersion": "^3.2.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "__mf/js/async/740.6d6370ec.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      }
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "FooChart:FooChart",
+      "name": "FooChart",
+      "assets": {
+        "js": {
+          "sync": [
+            "__mf/js/async/679.6fb75801.js",
+            "__mf/js/async/69.3c81e152.js",
+            "__mf/js/async/838.bc0c4131.js",
+            "__mf/js/async/298.e67cf440.js",
+            "__mf/js/async/__federation_expose_FooChart.ea2eb1bc.js"
+          ],
+          "async": [
+            "__mf/js/async/238.45a5ec9c.js",
+            "__mf/js/async/224.5f9af696.js",
+            "__mf/js/async/292.faabc281.js",
+            "__mf/js/async/45.7ccf6b51.js",
+            "__mf/js/async/922.2ce525ff.js",
+            "__mf/js/async/lib-router.10c5a0f9.js",
+            "__mf/js/async/488.b4de54ee.js"
+          ]
+        },
+        "css": {
+          "sync": [],
+          "async": [
+            "__mf/css/async/341.1f61a808.css",
+            "__mf/css/async/263.1f61a808.css"
+          ]
+        }
+      },
+      "path": "./FooChart"
+    }
+  ]
 }
