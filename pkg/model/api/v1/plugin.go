@@ -33,6 +33,10 @@ type PluginModule struct {
 type PluginInDevelopment struct {
 	// The name of the plugin in development
 	Name string `json:"name" yaml:"name"`
+	// The version of the plugin in development
+	Version string `json:"version" yaml:"version"`
+	// The registry of the plugin in development. It can be empty.
+	Registry string `json:"registry,omitempty" yaml:"registry,omitempty"`
 	// DisableSchema is used to disable the schema validation of the plugin.
 	// It is useful when the plugin is in development and the schema is not yet defined.
 	DisableSchema bool `json:"disable_schema,omitempty" yaml:"disable_schema,omitempty"`

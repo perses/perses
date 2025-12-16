@@ -25,7 +25,9 @@ import (
 func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 	for _, plg := range plugins {
 		devURL := plg.URL
-		manifest, err := ReadManifestFromNetwork(devURL, plg.Name)
+		// We are reading the manifest from the dev server, just to ensure it is present and reachable.
+		// We don't use the manifest data as all info is already in the PluginInDevelopment struct.
+		_, err := ReadManifestFromNetwork(devURL, plg.Name)
 		if err != nil {
 			return apiinterface.HandleBadRequestError(fmt.Sprintf("error reading manifest: %s", err))
 		}
@@ -36,10 +38,9 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 		pluginModule := v1.PluginModule{
 			Kind: v1.PluginModuleKind,
 			Metadata: plugin.ModuleMetadata{
-				Name:    manifest.Name,
-				Version: manifest.Metadata.BuildInfo.Version,
-				// TODO probably moduleOrg is not the same thing than registry
-				Registry: npmPackageData.Perses.ModuleOrg,
+				Name:     plg.Name,
+				Version:  plg.Version,
+				Registry: plg.Registry,
 			},
 			Spec: npmPackageData.Perses,
 			Status: &plugin.ModuleStatus{
@@ -65,9 +66,9 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 			}
 		}
 		p.mutex.Lock()
-		p.devLoaded.Add(manifest.Name, pluginModule.Metadata, pluginLoaded)
+		p.devLoaded.Add(plg.Name, pluginModule.Metadata, pluginLoaded)
 		p.mutex.Unlock()
-		logrus.Debugf("plugin %q has been loaded in development mode", manifest.Name)
+		logrus.Debugf("plugin %q has been loaded in development mode", plg.Name)
 	}
 	return p.storeLoadedList()
 }
