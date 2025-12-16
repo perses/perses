@@ -99,7 +99,7 @@ jobs:
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.15.0"
       - name: Download plugin archive
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: plugins
           path: plugins-archive
@@ -119,7 +119,7 @@ jobs:
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.15.0"
       - name: Download plugin archive
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: plugins
           path: plugins-archive
@@ -171,7 +171,7 @@ jobs:
           enable_cue: true # needed for DaC CLI commands unit tests
           cue_version: "v0.15.0"
       - name: Download plugin archive
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: plugins
           path: plugins-archive
@@ -210,7 +210,7 @@ jobs:
           enable_go: true
           enable_cue: false
       - name: Download plugin archive
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: plugins
           path: plugins-archive
