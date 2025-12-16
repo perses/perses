@@ -61,7 +61,7 @@ func (c *plugin) RefreshDevPlugin(metadata pluginModel.ModuleMetadata) error {
 
 func (c *plugin) UnLoadDevPlugin(metadata pluginModel.ModuleMetadata) error {
 	return c.client.Delete().
-		Resource(pluginResource).
+		Resource(devPluginResource).
 		Body(metadata).
 		Do().
 		Error()
