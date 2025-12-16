@@ -246,12 +246,11 @@ func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance
 	// For the moment, we are only supporting the plugin datasource from the perses registry for the datasource discovery.
 	// The discovery is not really well used and having multiple registries for datasources is not a common use case currently.
 	// This hack should be fine for a while.
-	// Todo make it more generic if needed in the future.
-	pluginMetadata := common.PluginMetadata{}
-	if _, ok := s.devSch.datasources.GetWithPluginMetadata(pluginName, pluginMetadata); ok {
-		return s.devSch.getDatasourceSchema(pluginName, pluginMetadata)
+
+	if _, ok := s.devSch.datasources.GetWithPluginMetadata(pluginName, nil); ok {
+		return s.devSch.getDatasourceSchema(pluginName, nil)
 	}
-	return s.sch.getDatasourceSchema(pluginName, pluginMetadata)
+	return s.sch.getDatasourceSchema(pluginName, nil)
 }
 
 func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
@@ -350,7 +349,7 @@ func (s *sch) validateVariable(plugin common.Plugin, variableName string) error 
 	return validatePlugin(plugin, instance, "variable", variableName)
 }
 
-func (s *sch) getDatasourceSchema(datasourceName string, metadata common.PluginMetadata) (*build.Instance, error) {
+func (s *sch) getDatasourceSchema(datasourceName string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
 		return nil, fmt.Errorf("datasource schemas are not loaded")
 	}
