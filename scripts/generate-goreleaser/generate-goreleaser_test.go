@@ -14,23 +14,19 @@
 package main
 
 import (
-	_ "embed"
+	"testing"
 
-	"github.com/perses/perses/scripts/pkg/goreleaser"
+	"github.com/goreleaser/goreleaser/v2/pkg/config"
+	"github.com/perses/perses/internal/cli/file"
+	"github.com/stretchr/testify/assert"
 )
 
-//go:embed .goreleaser.base.yaml
-var baseConfig []byte
-
-func generate() {
-	goreleaser.Generate(baseConfig, &goreleaser.DockerConfig{
-		ImageName:  "perses",
-		DebugImage: true,
-		BinaryIDs:  []string{"perses", "percli"},
-		ExtraFiles: []string{"LICENSE", "docs/examples/config.docker.yaml", "plugins-archive"},
-	})
-}
-
-func main() {
+func TestGenerate(t *testing.T) {
 	generate()
+	assert.FileExists(t, ".goreleaser.yaml")
+	var cfg config.Project
+	var expectedCfg config.Project
+	assert.NoError(t, file.Unmarshal(".goreleaser.yaml", &cfg))
+	assert.NoError(t, file.Unmarshal("testdata/expected-config.goreleaser.yaml", &expectedCfg))
+	assert.Equal(t, expectedCfg, cfg)
 }

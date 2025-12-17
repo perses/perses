@@ -288,8 +288,8 @@ github.com/goreleaser/chglog v0.7.3 h1:eCKJrvsDgG+F1F2fhwM6qX+S5yMiZgsQ4VNTPFl9q
 github.com/goreleaser/chglog v0.7.3/go.mod h1:HXPf4avc1kTD00a46LuTEH0i1dZctLq8Xs2BxUfROnY=
 github.com/goreleaser/fileglob v1.4.0 h1:Y7zcUnzQjT1gbntacGAkIIfLv+OwojxTXBFxjSFoBBs=
 github.com/goreleaser/fileglob v1.4.0/go.mod h1:1pbHx7hhmJIxNZvm6fi6WVrnP0tndq6p3ayWdLn1Yf8=
-github.com/goreleaser/goreleaser/v2 v2.12.7 h1:C2EgMDSQQvFpaZwA4L7JuopZzrvvNuVvdHA52AyCT0M=
-github.com/goreleaser/goreleaser/v2 v2.12.7/go.mod h1:T1KgP62trtw9PeXcVHD2FxOvquzVABSpmViioSD4SQA=
+github.com/goreleaser/goreleaser/v2 v2.13.1 h1:/CqB16sE5mQX+HKEHXyPMJZAsK/6n/WRa4t5+7msMh8=
+github.com/goreleaser/goreleaser/v2 v2.13.1/go.mod h1:FpFenJb/Sa4eWNecTPy82aN02E7Rd4nzKHoZ65RCHSQ=
 github.com/goreleaser/nfpm/v2 v2.44.0 h1:TlfLFJX/soK/I9GFbXMtP4SRM74s8sAfdBYNDYjCL8U=
 github.com/goreleaser/nfpm/v2 v2.44.0/go.mod h1:sLNhEIplQWuRK5QLxUsMCpkttUiM8lI1cH7rkjmziZU=
 github.com/gorilla/securecookie v1.1.2 h1:YCIWL56dvtr73r6715mJs5ZvhtnY73hBvEF8kXD8ePA=
