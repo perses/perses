@@ -34,6 +34,7 @@ func TestGenerate(t *testing.T) {
 				ImageName:  "perses",
 				BinaryIDs:  []string{"perses", "percli"},
 				ExtraFiles: []string{"LICENSE", "docs/examples/config.docker.yaml", "plugins-archive"},
+				Branch:     "foo",
 			},
 			expectedFile: "perses.goreleaser.yaml",
 		},
@@ -44,6 +45,7 @@ func TestGenerate(t *testing.T) {
 				DebugImage: true,
 				BinaryIDs:  []string{"perses", "percli"},
 				ExtraFiles: []string{"LICENSE", "docs/examples/config.docker.yaml", "plugins-archive"},
+				Branch:     "foo",
 			},
 			expectedFile: "debug-perses.goreleaser.yaml",
 		},
@@ -52,8 +54,19 @@ func TestGenerate(t *testing.T) {
 			cfg: DockerConfig{
 				ImageName: "perses",
 				Registry:  []string{DefaultDockerRegistry, "ghcr.io/perses", "quay.io/perses"},
+				Branch:    "foo",
 			},
 			expectedFile: "perses-multiple-registry.goreleaser.yaml",
+		},
+		{
+			name: "config for main branch",
+			cfg: DockerConfig{
+				ImageName: "perses",
+				Branch:    "main",
+				Commit:    "abc1234",
+				Date:      "2006-01-02",
+			},
+			expectedFile: "perses-main-branch.goreleaser.yaml",
 		},
 	}
 	for _, test := range testSuite {

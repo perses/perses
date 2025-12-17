@@ -16,6 +16,9 @@ package goreleaser
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/goreleaser/goreleaser/v2/pkg/config"
 	"github.com/sirupsen/logrus"
@@ -27,7 +30,32 @@ const (
 	DefaultDebugDockerfile = "distroless-debug.Dockerfile"
 )
 
-var DefaultPlatform = []string{"linux/amd64", "linux/arm64"}
+var (
+	DefaultPlatform = []string{"linux/amd64", "linux/arm64"}
+	DefaultTags     = []string{
+		"latest",
+		"{{ .Tag }}",
+		"v{{ .Major }}.{{ .Minor }}",
+		"{{ .Tag }}-distroless",
+		"v{{ .Major }}.{{ .Minor }}-distroless",
+	}
+)
+
+func getCurrentBranch() string {
+	branch, err := exec.Command("git", "branch", "--show-current").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current branch")
+	}
+	return strings.TrimSpace(string(branch))
+}
+
+func getCurrentCommit() string {
+	commit, err := exec.Command("git", "log", "-n1", "--format=\"%h\"").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current commit")
+	}
+	return strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(commit)), "\""), "\"")
+}
 
 // DockerConfig represents the configuration needed to generate the Goreleaser docker config.
 type DockerConfig struct {
@@ -50,6 +78,15 @@ type DockerConfig struct {
 	// List of extra files to include in the docker image.
 	// Leave it empty if no extra files are needed.
 	ExtraFiles []string
+	// The current git branch
+	// This is an internal field populated automatically, but can be overridden for testing.
+	Branch string
+	// The current git commit
+	// This is an internal field populated automatically, but can be overridden for testing.
+	Commit string
+	// The current date string
+	// This is an internal field populated automatically, but can be overridden for testing.
+	Date string
 }
 
 func (c *DockerConfig) validate() error {
@@ -69,6 +106,17 @@ func (c *DockerConfig) completeDefaults() {
 	if len(c.DebugDockerfile) == 0 {
 		c.DebugDockerfile = DefaultDebugDockerfile
 	}
+
+	// We are populating internal fields if not already set to allow test to override them.
+	if len(c.Commit) == 0 {
+		c.Commit = getCurrentCommit()
+	}
+	if len(c.Branch) == 0 {
+		c.Branch = getCurrentBranch()
+	}
+	if len(c.Date) == 0 {
+		c.Date = time.Now().Format("2006-01-02")
+	}
 }
 
 func (c *DockerConfig) generateImageNames() []string {
@@ -77,6 +125,21 @@ func (c *DockerConfig) generateImageNames() []string {
 		imageNames = append(imageNames, fmt.Sprintf("%s/%s", registry, c.ImageName))
 	}
 	return imageNames
+}
+
+func (c *DockerConfig) generateTags(debug bool) []string {
+	var suffix string
+	if debug {
+		suffix = "-debug"
+	}
+	if c.Branch == "main" {
+		return []string{fmt.Sprintf("main-%s-%s-distroless%s", c.Date, c.Commit, suffix)}
+	}
+	var tags []string
+	for _, tag := range DefaultTags {
+		tags = append(tags, fmt.Sprintf("%s%s", tag, suffix))
+	}
+	return tags
 }
 
 func (c *DockerConfig) generate() []config.DockerV2 {
@@ -100,13 +163,7 @@ func (c *DockerConfig) generate() []config.DockerV2 {
 			IDs:        c.BinaryIDs,
 			Dockerfile: "Dockerfile",
 			Images:     images,
-			Tags: []string{
-				"latest",
-				"{{ .Tag }}",
-				"v{{ .Major }}.{{ .Minor }}",
-				"{{ .Tag }}-distroless",
-				"v{{ .Major }}.{{ .Minor }}-distroless",
-			},
+			Tags:       c.generateTags(false),
 			Labels:     labels,
 			ExtraFiles: c.ExtraFiles,
 			Platforms:  c.Platform,
@@ -119,13 +176,7 @@ func (c *DockerConfig) generate() []config.DockerV2 {
 			IDs:        c.BinaryIDs,
 			Dockerfile: c.DebugDockerfile,
 			Images:     images,
-			Tags: []string{
-				"latest-debug",
-				"{{ .Tag }}-debug",
-				"v{{ .Major }}.{{ .Minor }}-debug",
-				"{{ .Tag }}-distroless-debug",
-				"v{{ .Major }}.{{ .Minor }}-distroless-debug",
-			},
+			Tags:       c.generateTags(true),
 			Labels:     labels,
 			ExtraFiles: c.ExtraFiles,
 			Platforms:  c.Platform,

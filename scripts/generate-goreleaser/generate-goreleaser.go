@@ -22,15 +22,24 @@ import (
 //go:embed .goreleaser.base.yaml
 var baseConfig []byte
 
-func generate() {
+type testConfig struct {
+	branch string
+	commit string
+	date   string
+}
+
+func generate(cfg testConfig) {
 	goreleaser.Generate(baseConfig, &goreleaser.DockerConfig{
 		ImageName:  "perses",
 		DebugImage: true,
 		BinaryIDs:  []string{"perses", "percli"},
 		ExtraFiles: []string{"LICENSE", "docs/examples/config.docker.yaml", "plugins-archive"},
+		Branch:     cfg.branch,
+		Commit:     cfg.commit,
+		Date:       cfg.date,
 	})
 }
 
 func main() {
-	generate()
+	generate(testConfig{})
 }
