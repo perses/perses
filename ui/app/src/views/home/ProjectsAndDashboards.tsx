@@ -37,6 +37,8 @@ import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Con
 import { useHasPermission } from '../../context/Authorization';
 import { DeleteResourceDialog } from '../../components/dialogs';
 import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface ProjectAccordionProps {
   row: ProjectWithDashboards;
@@ -212,11 +214,13 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
 }
 
 export function ProjectsAndDashboards(): ReactElement {
+  const { t } = useTranslation("dashboard");
+
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2>Projects & Dashboards</h2>
+        <h2>{t("projects_and_dashboards")}</h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>
