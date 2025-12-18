@@ -14,48 +14,10 @@
 package main
 
 import (
-	"os/exec"
-	"strings"
-
-	"github.com/goreleaser/goreleaser/v2/pkg/config"
-	"github.com/perses/perses/internal/cli/file"
-	"github.com/sirupsen/logrus"
+	"github.com/perses/perses/scripts/generate-goreleaser/dockerconfig"
+	"github.com/perses/perses/scripts/pkg/goreleaser"
 )
 
-const goreleaserFile = ".goreleaser.yaml"
-
-func getCurrentBranch() string {
-	branch, err := exec.Command("git", "branch", "--show-current").Output()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the current branch")
-	}
-	return strings.TrimSpace(string(branch))
-}
-
 func main() {
-	if getCurrentBranch() != "main" {
-		logrus.Warning("script has been executed on a branch different than the main branch")
-		return
-	}
-	goreleaserConfig := &config.Project{}
-	if err := file.Unmarshal(goreleaserFile, goreleaserConfig); err != nil {
-		logrus.WithError(err).Fatal("unable to load the goreleaser config")
-	}
-	for _, dockerConfig := range goreleaserConfig.Dockers {
-		for _, image := range dockerConfig.ImageTemplates {
-			if output, err := exec.Command("docker", "push", image).Output(); err != nil { //nolint: gosec
-				logrus.WithError(err).Fatalf("unable to push the docker image %q. Output: %q", image, output)
-			}
-		}
-	}
-	for _, manifestConfig := range goreleaserConfig.DockerManifests {
-		args := []string{"manifest", "create", manifestConfig.NameTemplate}
-		args = append(args, manifestConfig.ImageTemplates...)
-		if output, err := exec.Command("docker", args...).Output(); err != nil { //nolint: gosec
-			logrus.WithError(err).Fatalf("unable to create the docker manifest %q. Output: %q", manifestConfig.NameTemplate, output)
-		}
-		if output, err := exec.Command("docker", "manifest", "push", manifestConfig.NameTemplate).Output(); err != nil { //nolint:gosec
-			logrus.WithError(err).Fatalf("unable to push the docker manifest %q. Output: %q", manifestConfig.NameTemplate, output)
-		}
-	}
+	goreleaser.BuildManifestsAndPushIt(dockerconfig.PersesDockerConfig(dockerconfig.TestConfig{}))
 }
