@@ -193,12 +193,12 @@ func (c *DockerConfig) Build() []config.DockerV2 {
 // This function should not be used for other branches as we are not pushing images for other branches.
 // The exceptiong is during the release process where goreleaser will handle everything automatically (tags, manifests, etc).
 func (c *DockerConfig) BuildDockerImagesAndManifests() ([]DockerManifest, []string) {
-	if c.Branch != DefaultMainBranch {
-		logrus.Fatal("BuildDockerImages only works with main branch")
-	}
 	configs := c.Build()
 	var images []string
 	var manifests []DockerManifest
+	if c.Branch != DefaultMainBranch {
+		logrus.Fatal("BuildDockerImages only works with main branch")
+	}
 	for _, cfg := range configs {
 		for _, image := range cfg.Images {
 			for _, tag := range cfg.Tags {
