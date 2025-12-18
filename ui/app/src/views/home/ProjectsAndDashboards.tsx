@@ -32,13 +32,12 @@ import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
 import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
+import { useTranslation } from 'react-i18next';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
 import { useHasPermission } from '../../context/Authorization';
 import { DeleteResourceDialog } from '../../components/dialogs';
 import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
-import { useTranslation } from 'react-i18next';
-import { t } from 'i18next';
 
 interface ProjectAccordionProps {
   row: ProjectWithDashboards;
@@ -214,13 +213,13 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
 }
 
 export function ProjectsAndDashboards(): ReactElement {
-  const { t } = useTranslation("dashboard");
+  const { t } = useTranslation('dashboard');
 
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2>{t("projects_and_dashboards")}</h2>
+        <h2>{t('projects_and_dashboards')}</h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>

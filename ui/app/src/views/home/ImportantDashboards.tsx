@@ -48,7 +48,7 @@ function DashboardMosaic({ dashboards }: DashboardMosaicProps): ReactElement {
 }
 
 export function ImportantDashboards(): ReactElement {
-  const { t } = useTranslation("dashboard");
+  const { t } = useTranslation('dashboard');
   const { data: config } = useConfig();
   const { data: dashboards, isLoading } = useImportantDashboardList();
 
@@ -61,7 +61,7 @@ export function ImportantDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <StarFourPointsOutline />
-        <h2>{t("important_dashboards")}</h2>        
+        <h2>{t('important_dashboards')}</h2>
       </Stack>
       {isLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
