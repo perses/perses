@@ -115,9 +115,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   dashboardTitleComponent={
                     <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
                   }
-                  emptyDashboardProps={{
-                    additionalText: 'In order to save this dashboard, you need to add at least one panel!',
-                  }}
                   onSave={onSave}
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}
