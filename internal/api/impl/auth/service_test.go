@@ -16,26 +16,27 @@ package auth
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/api/impl/auth/userinfo"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSaveProviderInfo(t *testing.T) {
-	uInfoA := oidcUserInfo{
-		externalUserInfoProfile: externalUserInfoProfile{
+	uInfoA := userinfo.OIDCUserInfo{
+		ExternalUserInfoProfile: userinfo.ExternalUserInfoProfile{
 			Email: "email",
 		},
 		Subject: "subject",
-		issuer:  "issuer",
 	}
+	uInfoA.SetIssuer("issuer")
 
-	uInfoB := oidcUserInfo{
-		externalUserInfoProfile: externalUserInfoProfile{
+	uInfoB := userinfo.OIDCUserInfo{
+		ExternalUserInfoProfile: userinfo.ExternalUserInfoProfile{
 			Email: "differentEmail",
 		},
 		Subject: "subject",
-		issuer:  "issuer",
 	}
+	uInfoB.SetIssuer("issuer")
 
 	initialSpec := v1.UserSpec{
 		FirstName:      "",
