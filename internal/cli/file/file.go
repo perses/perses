@@ -108,8 +108,9 @@ func visit(dir string) ([]string, error) {
 			return nil
 		}
 		fileName := info.Name()
-		if filepath.Ext(fileName) != ".json" && filepath.Ext(fileName) != ".yaml" {
+		if filepath.Ext(fileName) != ".json" && filepath.Ext(fileName) != ".yaml" && filepath.Ext(fileName) != ".yml" {
 			// skip every file that doesn't have the correct extension
+			logrus.Tracef("Skipping %s", fileName)
 			return nil
 		}
 		files = append(files, path)
