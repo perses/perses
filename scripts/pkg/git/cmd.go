@@ -11,22 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package git
 
 import (
-	_ "embed"
+	"os/exec"
+	"strings"
 
-	"github.com/perses/perses/scripts/generate-goreleaser/dockerconfig"
-	"github.com/perses/perses/scripts/pkg/goreleaser"
+	"github.com/sirupsen/logrus"
 )
 
-//go:embed .goreleaser.base.yaml
-var baseConfig []byte
-
-func generate(cfg dockerconfig.TestConfig) {
-	goreleaser.Generate(baseConfig, dockerconfig.PersesDockerConfig(cfg))
+func CurrentBranch() string {
+	branch, err := exec.Command("git", "branch", "--show-current").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current branch")
+	}
+	return strings.TrimSpace(string(branch))
 }
 
-func main() {
-	generate(dockerconfig.TestConfig{})
+func CurrentCommit() string {
+	commit, err := exec.Command("git", "log", "-n1", "--format=\"%h\"").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current commit")
+	}
+	return strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(commit)), "\""), "\"")
 }

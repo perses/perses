@@ -19,28 +19,31 @@ import (
 
 	"github.com/goreleaser/goreleaser/v2/pkg/config"
 	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/scripts/generate-goreleaser/dockerconfig"
 	"github.com/stretchr/testify/assert"
 )
 
+// TestGenerate tests the generation of the finale goreleaser config file.
+// It will help us to know what configuration are generated in the CI and prevent regression when modifying the generation logic.
 func TestGenerate(t *testing.T) {
 	testSuite := []struct {
 		name         string
-		cfg          testConfig
+		cfg          dockerconfig.TestConfig
 		expectedFile string
 	}{
 		{
 			name: "config generation on different branch than main",
-			cfg: testConfig{
-				branch: "foo-branch",
+			cfg: dockerconfig.TestConfig{
+				Branch: "foo-branch",
 			},
 			expectedFile: "expected-config.goreleaser.yaml",
 		},
 		{
 			name: "config generation on main branch",
-			cfg: testConfig{
-				branch: "main",
-				commit: "abc1234",
-				date:   "2024-01-01",
+			cfg: dockerconfig.TestConfig{
+				Branch: "main",
+				Commit: "abc1234",
+				Date:   "2024-01-01",
 			},
 			expectedFile: "expected-config-main.goreleaser.yaml",
 		},

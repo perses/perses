@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerate(t *testing.T) {
+func TestDockerConfig_Build(t *testing.T) {
 	testSuite := []struct {
 		name         string
 		cfg          DockerConfig
@@ -71,12 +71,124 @@ func TestGenerate(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
-			generated := test.cfg.generate()
+			generated := test.cfg.Build()
 			var expectedCFG config.Project
 			if err := file.Unmarshal(filepath.Join("testdata", test.expectedFile), &expectedCFG); err != nil {
 				t.Fatalf("unable to read expected file %s: %v", test.expectedFile, err)
 			}
 			assert.Equal(t, expectedCFG.DockersV2, generated)
+		})
+	}
+}
+
+func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
+	testSuite := []struct {
+		name                 string
+		cfg                  DockerConfig
+		expectedManifests    []DockerManifest
+		expectedDockerImages []string
+	}{
+		{
+			name: "single image, basic config",
+			cfg: DockerConfig{
+				ImageName: "bar",
+				Branch:    DefaultMainBranch,
+				Date:      "2006-01-02",
+				Commit:    "abc1234",
+			},
+			expectedManifests: []DockerManifest{
+				{
+					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
+					Images: []string{
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+			},
+			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+			},
+		},
+		{
+			name: "multiple registries",
+			cfg: DockerConfig{
+				ImageName: "bar",
+				Registry:  []string{"docker.io/persesdev", "ghcr.io/perses", "quay.io/perses"},
+				Branch:    "main",
+				Date:      "2006-01-02",
+				Commit:    "abc1234",
+			},
+			expectedManifests: []DockerManifest{
+				{
+					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
+					Images: []string{
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+				{
+					Name: "ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless",
+					Images: []string{
+						"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
+						"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+				{
+					Name: "quay.io/perses/bar:main-2006-01-02-abc1234-distroless",
+					Images: []string{
+						"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
+						"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+			},
+			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
+				"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
+				"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+			},
+		},
+		{
+			name: "debug image enabled",
+			cfg: DockerConfig{
+				ImageName:  "bar",
+				DebugImage: true,
+				Branch:     "main",
+				Date:       "2006-01-02",
+				Commit:     "abc1234",
+			},
+			expectedManifests: []DockerManifest{
+				{
+					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
+					Images: []string{
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+				{
+					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug",
+					Images: []string{
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-amd64",
+						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-arm64",
+					},
+				},
+			},
+			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-amd64",
+				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-arm64",
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			manifests, images := test.cfg.BuildDockerImagesAndManifests()
+			assert.Equal(t, test.expectedDockerImages, images)
+			assert.Equal(t, test.expectedManifests, manifests)
 		})
 	}
 }
