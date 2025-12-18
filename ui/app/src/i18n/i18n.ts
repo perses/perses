@@ -22,8 +22,8 @@ i18n
     lng: 'en',
     fallbackLng: 'en',
     supportedLngs: ['en', 'fr', 'am'],
-    ns: ['common', 'dashboard'],
-    defaultNS: 'common',
+    ns: ['dashboard'],
+    defaultNS: 'dashboard',
     backend: {
       loadPath: '/locales/{{lng}}.{{ns}}.json',
     },

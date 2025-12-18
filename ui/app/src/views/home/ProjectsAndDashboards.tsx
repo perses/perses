@@ -213,13 +213,13 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
 }
 
 export function ProjectsAndDashboards(): ReactElement {
-  const { t } = useTranslation('dashboard');
+  const { t: translate } = useTranslation('dashboard');
 
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2>{t('projects_and_dashboards')}</h2>
+        <h2>{translate('projects_and_dashboards')}</h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>
