@@ -114,11 +114,6 @@ validate-data:
 	@echo ">> Validate all data in dev/data"
 	$(GO) run ./scripts/validate-data/validate-data.go
 
-.PHONY: validate-cue
-validate-cue:
-	@echo ">> Validate CUE files against corresponding test files"
-	$(GO) run ./scripts/validate-cue/validate-cue.go
-
 .PHONY: test
 test: generate
 	@echo ">> running all tests"
