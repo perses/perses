@@ -13,16 +13,13 @@
 
 package common
 
-myJoinByColumnValueTransform: #joinByColumnValueTransform & { spec: columns: ["job", "instance"] }
+import (
+	sharedCommon "github.com/perses/shared/cue/common"
+)
 
-myMergeColumnsTransform: #mergeColumnsTransform & {
-	spec: {
-		columns: ["job", "instance"]
-		name:     "job-instance"
-		disabled: true
-	}
-}
+// This file is here to ensure retrocompatibility for eventual CUE schemas
+// outside of the Perses organization that relied on this package before the
+// migration of common CUE schemas to the shared repository - that happened
+// with https://github.com/perses/shared/pull/13.
 
-myMergeIndexedColumnsTransform: #mergeIndexedColumnsTransform & { spec: column: "instance" }
-
-mergeSeries: #mergeSeries & { spec: disabled: false }
+sharedCommon

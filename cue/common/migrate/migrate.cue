@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,16 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package migrate
 
-#stepOption: {
-	value:  number
-	color?: string
-	name?:  string
-}
+import (
+	sharedMigrate "github.com/perses/shared/cue/common/migrate"
+)
 
-#thresholds: {
-	mode?:         "percent" | "absolute"
-	defaultColor?: string
-	steps?: [...#stepOption]
-}
+// This file is here to ensure retrocompatibility for eventual CUE schemas
+// outside of the Perses organization that relied on this package before the
+// migration of common CUE schemas to the shared repository - that happened
+// with https://github.com/perses/shared/pull/13.
+
+sharedMigrate
