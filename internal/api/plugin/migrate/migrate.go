@@ -144,6 +144,11 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		ctx.CompileBytes(grafanaData),
 	)
 
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Grafana %s to migrate:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%# v\n", grafanaValue)
+	}
+
 	// Probably it is unnecessary to do that as JSON should be valid.
 	// Otherwise, we won't be able to unmarshal the grafana dashboard.
 	if err := grafanaValue.Validate(cue.Final()); err != nil {
@@ -157,6 +162,12 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
 		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
+
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Final Perses %s:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%v\n", finalVal)
+	}
+
 	return convertToPlugin(finalVal)
 }
 

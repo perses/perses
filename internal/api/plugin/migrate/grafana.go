@@ -82,7 +82,6 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(targets, &panel.Targets); err != nil {
 			return err
 		}
-		delete(tmp, "targets")
 	}
 	if links, ok := tmp["links"]; ok {
 		if err := json.Unmarshal(links, &panel.Links); err != nil {
