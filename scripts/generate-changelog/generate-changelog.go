@@ -15,15 +15,17 @@ package main
 
 import (
 	"flag"
+	"os/exec"
 	"strings"
 
 	"github.com/perses/perses/scripts/pkg/changelog"
-	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/sirupsen/logrus"
 )
 
 func getPreviousTag() string {
-	previousVersion, err := command.Create("git", "describe", "--abbrev=0").Output()
+	// We cannot use the package command from scripts/pkg/command/command.go because it sets the output to os.Stdout while the function Output() needs to capture it.
+	// And somehow, you cannot set twice the output of a command.
+	previousVersion, err := exec.Command("git", "describe", "--abbrev=0").Output()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the latest tag")
 	}
