@@ -19,7 +19,7 @@ import (
 
 // This file is here to ensure retrocompatibility for eventual CUE schemas
 // outside of the Perses organization that relied on this package before the
-// migration of common CUE schemas to the shared repository happened with
-// https://github.com/perses/shared/pull/13.
+// migration of common CUE schemas to the shared repository - that happened
+// with https://github.com/perses/shared/pull/13.
 
 sharedMigrate
