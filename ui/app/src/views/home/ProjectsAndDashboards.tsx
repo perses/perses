@@ -32,6 +32,7 @@ import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
 import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
+import { useTranslation } from 'react-i18next';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
 import { useHasPermission } from '../../context/Authorization';
@@ -212,11 +213,13 @@ export function SearchableDashboards(props: SearchableDashboardsProps): ReactEle
 }
 
 export function ProjectsAndDashboards(): ReactElement {
+  const { t: translate } = useTranslation('dashboard');
+
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
-        <h2>Projects & Dashboards</h2>
+        <h2>{translate('projects_and_dashboards')}</h2>
       </Stack>
       <SearchableDashboards id="project-dashboard-list" />
     </Stack>
