@@ -68,6 +68,7 @@ func TestPreparePlugin(t *testing.T) {
 			pluginPath: filepath.Join("..", "build", "testdata", "barchart"),
 			expectedPluginInDevelopment: &v1.PluginInDevelopment{
 				Name:         "BarChart",
+				Version:      "0.4.1",
 				URL:          common.MustParseURL("http://localhost:3005"),
 				AbsolutePath: filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "barchart"),
 			},
@@ -77,6 +78,7 @@ func TestPreparePlugin(t *testing.T) {
 			pluginPath: filepath.Join("..", "build", "testdata", "tempo"),
 			expectedPluginInDevelopment: &v1.PluginInDevelopment{
 				Name:         "Tempo",
+				Version:      "0.2.0",
 				URL:          common.MustParseURL("http://localhost:3005"),
 				AbsolutePath: filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "tempo"),
 			},
