@@ -46,9 +46,8 @@ export default function Footer(): ReactElement {
           </a>
         </li>
         <li>
-          {isLoading ? (
-            <CircularProgress size="1rem" />
-          ) : data !== undefined && data.version !== '' ? (
+          {isLoading && <CircularProgress size="1rem" />}
+          {!isLoading && data?.version && (
             <Link
               color="inherit"
               underline="hover"
@@ -62,9 +61,8 @@ export default function Footer(): ReactElement {
             >
               {data.version}
             </Link>
-          ) : (
-            'development version'
           )}
+          {!isLoading && !data?.version && 'development version'}
         </li>
       </ul>
     </Box>

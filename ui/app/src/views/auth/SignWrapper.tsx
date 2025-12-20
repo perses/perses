@@ -147,7 +147,9 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
       justifyContent="center"
       gap={2}
     >
-      {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
+      {!isLaptopSize && <PersesLogoCropped />}
+      {isLaptopSize && isDarkModeEnabled && <DarkThemePersesLogo />}
+      {isLaptopSize && !isDarkModeEnabled && <LightThemePersesLogo />}
       <Divider
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"
