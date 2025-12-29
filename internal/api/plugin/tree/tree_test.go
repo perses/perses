@@ -29,13 +29,13 @@ type treeParameter struct {
 func TestTree_Add(t *testing.T) {
 	testSuite := []struct {
 		name          string
-		basedTree     Tree[any]
+		baseTree      Tree[any]
 		treeParameter []treeParameter
 		expectedTree  Tree[any]
 	}{
 		{
-			name:      "single version becomes latest",
-			basedTree: nil,
+			name:     "single version becomes latest",
+			baseTree: nil,
 			treeParameter: []treeParameter{
 				{
 					name:     "schema",
@@ -52,7 +52,7 @@ func TestTree_Add(t *testing.T) {
 		},
 		{
 			name: "adding higher version updates latest",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"latest": "old-inst",
@@ -74,8 +74,8 @@ func TestTree_Add(t *testing.T) {
 			},
 		},
 		{
-			name:      "different registries are distinct keys",
-			basedTree: nil,
+			name:     "different registries are distinct keys",
+			baseTree: nil,
 			treeParameter: []treeParameter{
 				{"schema", plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regA"}, "a-inst"},
 				{"schema", plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regB"}, "b-inst"},
@@ -92,8 +92,8 @@ func TestTree_Add(t *testing.T) {
 			},
 		},
 		{
-			name:      "duplicate version overwrites instance",
-			basedTree: nil,
+			name:     "duplicate version overwrites instance",
+			baseTree: nil,
 			treeParameter: []treeParameter{
 				{"dup", plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}, "first"},
 				{"dup", plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}, "second"},
@@ -108,27 +108,27 @@ func TestTree_Add(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
-			if test.basedTree == nil {
-				test.basedTree = make(Tree[any])
+			if test.baseTree == nil {
+				test.baseTree = make(Tree[any])
 			}
 			for _, thing := range test.treeParameter {
-				test.basedTree.Add(thing.name, thing.metadata, thing.instance)
+				test.baseTree.Add(thing.name, thing.metadata, thing.instance)
 			}
 		})
-		assert.Equal(t, test.expectedTree, test.basedTree)
+		assert.Equal(t, test.expectedTree, test.baseTree)
 	}
 }
 
 func TestTree_Remove(t *testing.T) {
 	testSuite := []struct {
 		name         string
-		basedTree    Tree[any]
+		baseTree     Tree[any]
 		removes      []treeParameter
 		expectedTree Tree[any]
 	}{
 		{
 			name: "remove non-existent version is no-op",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
@@ -144,7 +144,7 @@ func TestTree_Remove(t *testing.T) {
 		},
 		{
 			name: "remove non-latest version",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"v1.1.0": "new-inst",
@@ -161,7 +161,7 @@ func TestTree_Remove(t *testing.T) {
 		},
 		{
 			name: "remove latest updates latest to highest remaining",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "a-inst",
 					"v1.2.0": "c-inst",
@@ -178,7 +178,7 @@ func TestTree_Remove(t *testing.T) {
 		},
 		{
 			name: "remove last version deletes key",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "dup", registry: plugin.DefaultRegistry}: {
 					"v2.0.0": "second",
 					"latest": "second",
@@ -189,7 +189,7 @@ func TestTree_Remove(t *testing.T) {
 		},
 		{
 			name: "remove version in one registry does not affect other",
-			basedTree: Tree[any]{
+			baseTree: Tree[any]{
 				node{name: "schema", registry: "regA"}: {
 					"v0.1.0": "a-inst",
 					"latest": "a-inst",
@@ -211,7 +211,7 @@ func TestTree_Remove(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
-			based := test.basedTree
+			based := test.baseTree
 			if based == nil {
 				based = make(Tree[any])
 			}
@@ -225,16 +225,16 @@ func TestTree_Remove(t *testing.T) {
 
 func TestTree_Get(t *testing.T) {
 	testSuite := []struct {
-		name      string
-		basedTree Tree[string]
-		nameArg   string
-		meta      plugin.ModuleMetadata
-		expected  string
-		exists    bool
+		name     string
+		baseTree Tree[string]
+		nameArg  string
+		meta     plugin.ModuleMetadata
+		expected string
+		exists   bool
 	}{
 		{
 			name: "get latest when version empty",
-			basedTree: Tree[string]{
+			baseTree: Tree[string]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"v1.1.0": "inst-2",
@@ -248,7 +248,7 @@ func TestTree_Get(t *testing.T) {
 		},
 		{
 			name: "get specific existing version",
-			basedTree: Tree[string]{
+			baseTree: Tree[string]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"v1.1.0": "new-inst",
@@ -262,7 +262,7 @@ func TestTree_Get(t *testing.T) {
 		},
 		{
 			name: "get non-existent version returns false",
-			basedTree: Tree[string]{
+			baseTree: Tree[string]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
@@ -274,7 +274,7 @@ func TestTree_Get(t *testing.T) {
 		},
 		{
 			name: "registry isolation",
-			basedTree: Tree[string]{
+			baseTree: Tree[string]{
 				node{name: "schema", registry: "regA"}: {
 					"v0.1.0": "a-inst",
 					"latest": "a-inst",
@@ -294,7 +294,7 @@ func TestTree_Get(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
 			// prepare the tree
-			tree := test.basedTree
+			tree := test.baseTree
 			val, ok := tree.Get(test.nameArg, test.meta)
 			if test.exists {
 				assert.True(t, ok)

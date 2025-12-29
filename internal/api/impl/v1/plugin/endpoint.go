@@ -78,7 +78,6 @@ func (e *endpoint) RefreshDevPlugin(ctx echo.Context) error {
 }
 
 func (e *endpoint) DeleteDevPlugin(ctx echo.Context) error {
-	// TODO update CLI too as this is a breaking change
 	var pluginMetadata pluginModel.ModuleMetadata
 	if err := ctx.Bind(&pluginMetadata); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
