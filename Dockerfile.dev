@@ -1,4 +1,4 @@
-FROM node:20 AS node-builder
+FROM node:25 AS node-builder
 WORKDIR /app
 COPY ui ui
 COPY Makefile Makefile
