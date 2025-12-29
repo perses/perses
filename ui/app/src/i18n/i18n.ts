@@ -11,9 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import HttpBackend, { HttpBackendOptions } from 'i18next-http-backend';
 
-myFormat: #format & {
-    decimalPlaces: 0
-    shortValues:   false
-}
+i18n
+  .use(HttpBackend)
+  .use(initReactI18next)
+  .init<HttpBackendOptions>({
+    lng: 'en',
+    fallbackLng: 'en',
+    supportedLngs: ['en', 'fr', 'am'],
+    ns: ['dashboard'],
+    defaultNS: 'dashboard',
+    backend: {
+      loadPath: '/locales/{{lng}}.{{ns}}.json',
+    },
+
+    interpolation: {
+      escapeValue: false,
+    },
+
+    react: {
+      useSuspense: true,
+    },
+  });
+
+export default i18n;

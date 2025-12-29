@@ -26,7 +26,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.15.0"
+          cue_version: "v0.15.1"
       - name: check cue schema
         run: make cue-eval
 
@@ -43,7 +43,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.15.0"
+          cue_version: "v0.15.1"
       - name: Login to Central Registry # to allow publishing the module
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Publish the module

@@ -50,7 +50,7 @@ jobs:
         working-directory: ./ui
         run: npm run build
       - name: store react production build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ui-libs
           path: |
@@ -73,7 +73,7 @@ jobs:
       - name: Build the typedoc docs
         run: cd ./ui && npm run build && npm run typedoc
       - name: store typedoc build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: typedoc
           path: ui/typedoc
@@ -91,7 +91,7 @@ jobs:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: Download react build
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ui-libs
           path: ui
@@ -143,7 +143,7 @@ jobs:
         with:
           enable_go: true
       - name: Download react build
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ui-libs
           path: ui
