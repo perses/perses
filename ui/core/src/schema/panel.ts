@@ -16,7 +16,7 @@ import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, Quer
 import { PluginSchema, pluginSchema } from './plugin';
 
 export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
-  name: z.string().min(1, { message: 'Required' }),
+  name: z.string().optional(),
   description: z.string().optional(),
 });
 
@@ -36,7 +36,7 @@ export const linkSchema: z.ZodSchema<Link> = z.object({
 });
 
 export const panelSpecSchema: z.ZodSchema<PanelSpec> = z.object({
-  display: panelDisplaySpec,
+  display: panelDisplaySpec.optional(),
   plugin: pluginSchema,
   queries: z.array(querySpecSchema).optional(),
   links: z.array(linkSchema).optional(),
@@ -44,7 +44,7 @@ export const panelSpecSchema: z.ZodSchema<PanelSpec> = z.object({
 
 export function buildPanelSpecSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelSpec> {
   return z.object({
-    display: panelDisplaySpec,
+    display: panelDisplaySpec.optional(),
     plugin: pluginSchema,
     queries: z.array(querySpecSchema).optional(),
     links: z.array(linkSchema).optional(),
