@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
+          token: '${{ secrets.BOT_TOKEN }}'
       - uses: perses/github-actions@v0.11.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -36,3 +37,6 @@ jobs:
         with:
           commit_message: '[dependabot skip] apply go mod tidy'
           commit_options: '--no-verify --signoff'
+          commit_user_name: 'perses-bot'
+          commit_user_email: 'perses-team+bot@googlegroups.com'
+          commit_author: 'persesbot <perses-team+bot@googlegroups.com>'
