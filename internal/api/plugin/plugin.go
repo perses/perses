@@ -15,18 +15,22 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/plugin/tree"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/mod/semver"
 )
 
 const pluginFileName = "plugin-modules.json"
@@ -43,11 +47,11 @@ type Loaded struct {
 type Plugin interface {
 	Load() error
 	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
-	RefreshDevPlugin(name string) error
-	UnLoadDevPlugin(name string) error
+	RefreshDevPlugin(metadata plugin.ModuleMetadata) error
+	UnLoadDevPlugin(metadata plugin.ModuleMetadata) error
 	List() ([]byte, error)
 	UnzipArchives() error
-	GetLoadedPlugin(name string) (*Loaded, bool)
+	GetLoadedPlugin(name, version, registry string) (*Loaded, bool)
 	Schema() schema.Schema
 	Migration() migrate.Migration
 }
@@ -81,8 +85,8 @@ func New(cfg config.Plugin) Plugin {
 		},
 		sch:       schema.New(),
 		mig:       migrate.New(),
-		loaded:    make(map[string]*Loaded),
-		devLoaded: make(map[string]*Loaded),
+		loaded:    make(tree.Tree[*Loaded]),
+		devLoaded: make(tree.Tree[*Loaded]),
 	}
 }
 
@@ -90,10 +94,9 @@ type pluginFile struct {
 	// path is the local path where the plugins are stored.
 	path string
 	// loaded is a map that contains all the loaded plugin modules.
-	// The key is the name of the plugin used by the frontend to get access to the plugin files.
-	loaded map[string]*Loaded
+	loaded tree.Tree[*Loaded]
 	// devLoaded is a map that contains all the loaded plugin modules in development mode.
-	devLoaded map[string]*Loaded
+	devLoaded tree.Tree[*Loaded]
 	// archibal is the archive service used only to extract the plugin files from the archive.
 	archibal *arch
 	// sch is the service used to load and provide the schema of the plugin.
@@ -120,15 +123,15 @@ func (p *pluginFile) List() ([]byte, error) {
 	return os.ReadFile(pluginFilePath) //nolint: gosec
 }
 
-func (p *pluginFile) GetLoadedPlugin(name string) (*Loaded, bool) {
+func (p *pluginFile) GetLoadedPlugin(name, version, registry string) (*Loaded, bool) {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	// Check in the dev plugin first
-	if devLoaded, ok := p.devLoaded[name]; ok {
+	moduleMetadata := plugin.ModuleMetadata{Version: version, Registry: registry}
+	if devLoaded, ok := p.devLoaded.Get(name, moduleMetadata); ok {
 		return devLoaded, true
 	}
-	loaded, ok := p.loaded[name]
-	return loaded, ok
+	return p.loaded.Get(name, moduleMetadata)
 }
 
 func (p *pluginFile) Schema() schema.Schema {
@@ -165,7 +168,7 @@ func (p *pluginFile) Load() error {
 			LocalPath:      pluginPath,
 		}
 		p.mutex.Lock()
-		p.loaded[pluginModule.Metadata.Name] = pluginLoaded
+		p.loaded.Add(pluginModule.Metadata.Name, pluginModule.Metadata, pluginLoaded)
 		p.mutex.Unlock()
 	}
 	return p.storeLoadedList()
@@ -188,6 +191,10 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 		InDev:    false,
 	}
 
+	version := manifest.Metadata.BuildInfo.Version
+	if !strings.HasPrefix(version, "v") {
+		version = fmt.Sprintf("v%s", version)
+	}
 	pluginModule := &v1.PluginModule{
 		Kind: v1.PluginModuleKind,
 		Metadata: plugin.ModuleMetadata{
@@ -195,6 +202,13 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 			Version: manifest.Metadata.BuildInfo.Version,
 		},
 		Status: pluginStatus,
+	}
+
+	if !semver.IsValid(version) {
+		logrus.Errorf("plugin %q does not follow the semver convention for its version %q", manifest.Name, version)
+		pluginStatus.IsLoaded = false
+		pluginStatus.Error = "invalid plugin version, must follow semver convention"
+		return pluginModule
 	}
 
 	npmPackageData, readErr := ReadPackage(pluginPath)
@@ -227,18 +241,18 @@ func (p *pluginFile) storeLoadedList() error {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	var pluginModuleList []v1.PluginModule
-	mergeMap := make(map[string]*Loaded)
-	for _, l := range p.loaded {
-		mergeMap[l.Module.Metadata.Name] = l
-	}
-	for _, l := range p.devLoaded {
-		mergeMap[l.Module.Metadata.Name] = l
-	}
-	for _, l := range mergeMap {
-		pluginModuleList = append(pluginModuleList, l.Module)
-	}
+	mergeTree := tree.Merge(p.loaded, p.devLoaded)
 	if len(pluginModuleList) == 0 {
 		pluginModuleList = make([]v1.PluginModule, 0)
+	}
+	for _, versions := range mergeTree {
+		for version, loaded := range versions {
+			if version == plugin.LatestVersion {
+				// we skip the latest version pointer as it's not a real version
+				continue
+			}
+			pluginModuleList = append(pluginModuleList, loaded.Module)
+		}
 	}
 	marshalData, marshalErr := json.Marshal(pluginModuleList)
 	if marshalErr != nil {

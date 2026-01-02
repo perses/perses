@@ -22,6 +22,7 @@
 package common
 
 #Plugin: {
-	kind: string @go(Kind)
-	spec: _      @go(Spec)
+	kind:      string          @go(Kind)
+	metadata?: #PluginMetadata @go(PluginMetadata)
+	spec:      _               @go(Spec)
 }
