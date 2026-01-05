@@ -38,6 +38,36 @@ type VariableProps = {
   source?: string;
 };
 
+//LOGZ.IO CHANGE START:: Variable input width calculation [APPZ-1764]
+let measurementCanvas: HTMLCanvasElement | null = null;
+let measurementContext: CanvasRenderingContext2D | null = null;
+
+function getMeasurementContext(): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  if (!measurementCanvas) {
+    measurementCanvas = document.createElement('canvas');
+    measurementContext = measurementCanvas.getContext('2d');
+  }
+
+  return measurementContext;
+}
+
+function getTextWidth(text: string, font: string): number {
+  const context = getMeasurementContext();
+
+  if (!context) {
+    return text.length * 8;
+  }
+
+  context.font = font;
+  const metrics = context.measureText(text);
+  return Math.ceil(metrics.width);
+}
+//LOGZ.IO CHANGE END:: Variable input width calculation [APPZ-1764]
+
 function variableOptionToVariableValue(options: VariableOption | VariableOption[] | null): VariableValue {
   if (options === null) {
     return null;
@@ -186,19 +216,25 @@ const StyledPopper = (props: PopperProps): ReactElement => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
-const LETTER_HSIZE = 8; // approximation
-const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
+//LOGZ.IO CHANGE START:: Variable input width calculation [APPZ-1764]
+const VARIABLE_INPUT_FONT = '400 14px Roboto, sans-serif';
+
+const ARROW_DROPDOWN_WIDTH = 40;
+const PADDING_BUFFER = 20;
 const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
-  const width = (inputValue.length + 1) * LETTER_HSIZE + (kind === 'list' ? ARROW_OFFSET : 0);
-  if (width < MIN_VARIABLE_WIDTH) {
+  const textWidth = getTextWidth(inputValue, VARIABLE_INPUT_FONT);
+
+  const totalWidth = textWidth + (kind === 'list' ? ARROW_DROPDOWN_WIDTH : 0) + PADDING_BUFFER;
+
+  if (totalWidth < MIN_VARIABLE_WIDTH) {
     return MIN_VARIABLE_WIDTH;
-  } else if (width > MAX_VARIABLE_WIDTH) {
+  } else if (totalWidth > MAX_VARIABLE_WIDTH) {
     return MAX_VARIABLE_WIDTH;
   } else {
-    return width;
+    return totalWidth;
   }
 };
-
+//LOGZ.IO CHANGE END:: Variable input width calculation [APPZ-1764]
 function ListVariable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
   const definition = ctx.definition as ListVariableDefinition;
@@ -315,7 +351,8 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
           const { key, ...optionProps } = props;
           return (
             <li key={key} {...optionProps} style={{ padding: 0 }}>
-              <Checkbox style={{ marginRight: 8 }} checked={selected} />
+              {/* LOGZ.IO CHANGE:: Variable input width calculation [APPZ-1764] */}
+              <Checkbox checked={selected} />
               {option.label}
             </li>
           );
