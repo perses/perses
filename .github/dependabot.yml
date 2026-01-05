@@ -12,6 +12,12 @@ updates:
       gomod:
         patterns:
           - "*"
+    ignore:
+      # Ignore updates for goreleaser because since v2.13.2, goreleaser is using beta dependencies of githug.com/charmbracelet while they are changing their modules.
+      # These changes are breaking our build. There is a conflict with the package github.com/charmbracelet/x/cellbuf which depends on the package github.com/charmbracelet/x/ansi.
+      # Upgrading goreleaser to the latest version is updating the package github.com/charmbracelet/x/ansi to a version which is not compatible with the version required by github.com/charmbracelet/x/cellbuf.
+      # So until these dependencies are stabilized, we ignore updates for goreleaser.
+      - dependency-name: "github.com/goreleaser/goreleaser/v2"
     # Raise all gomod pull requests with custom labels
     labels:
       - "dependencies"
