@@ -110,10 +110,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
             display: 'flex',
             width: '100%',
             alignItems: 'start',
-            padding: (theme) => theme.spacing(1, 2, 0, 2),
+            padding: (theme) => theme.spacing(1, 2, 1, 2),
             flexDirection: isBiggerThanMd ? 'row' : 'column',
             flexWrap: 'nowrap',
             gap: 1,
+            borderBottom: '1px solid',
+            borderColor: (theme) => theme.palette.divider,
           }}
         >
           <Box width="100%">
@@ -127,7 +129,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
             </ErrorBoundary>
           </Box>
           <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
-            <Stack direction="row" spacing={1} mt={1} ml={1}>
+            <Stack direction="row" spacing={1} my={0.5} ml={1}>
               <TimeRangeControls />
               <DownloadButton />
               <EditJsonButton isReadonly={!isEditMode} />

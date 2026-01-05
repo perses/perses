@@ -72,7 +72,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
             display="flex"
             flexWrap={!isSticky && isBiggerThanMd ? 'wrap' : 'nowrap'}
             maxWidth={isSticky || !isBiggerThanMd ? '100vw' : '100%'}
-            pt={1}
+            pt="6px"
             pl={isSticky ? 1 : 0}
             mt={isSticky && isBiggerThanMd ? 0.5 : 0}
             ml={isSticky && isBiggerThanMd ? 0.5 : 0}

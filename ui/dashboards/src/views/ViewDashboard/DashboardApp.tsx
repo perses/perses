@@ -122,10 +122,9 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     <Box
       sx={{
         flexGrow: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
+        height: '100%',
       }}
     >
       <DashboardToolbar
@@ -140,7 +139,15 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         onCancelButtonClick={onCancelButtonClick}
         dashboardControlsComponent={dashboardControlsComponent}
       />
-      <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          paddingTop: 1,
+          paddingX: 2,
+        }}
+      >
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
             emptyDashboardProps={{
