@@ -347,6 +347,29 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 
 		logrus.Debugf("Run migration test for plugin %s of type %s", expectedPlugin.Kind, pluginKind)
 
+		// Load the model schema for validating the expected output
+		// testDir is migrate/tests, so we need to go up two levels to reach the model directory
+		parentDir := filepath.Dir(filepath.Dir(testDir))
+		_, modelBuildInstance, err := schema.LoadModelSchema(parentDir)
+		if err != nil {
+			result.Error = fmt.Sprintf("Failed to load model schema for validation: %v", err)
+			results = append(results, result)
+			return filepath.SkipDir
+		}
+
+		// Validate expected.json against the model schema (e.g to check for eventual typos)
+		logrus.Debugf("Validating expected.json for migration test %s", testName)
+		ctx := cuecontext.New()
+		expectedValue := ctx.CompileBytes(expectedData)
+		expectedFinalValue := expectedValue.Unify(ctx.BuildInstance(modelBuildInstance))
+
+		expectedValidationErr := expectedFinalValue.Validate(schema.CueValidationOptions...)
+		if expectedValidationErr != nil {
+			result.Error = fmt.Sprintf("Expected output failed model validation: %v", expectedValidationErr)
+			results = append(results, result)
+			return filepath.SkipDir
+		}
+
 		var resultPlugin *common.Plugin
 		var resultIsEmpty bool
 		// Set default definition ID and type based on the plugin kind from the loaded schema
