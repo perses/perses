@@ -39,11 +39,7 @@ function getUser(name: string): Promise<UserResource> {
 }
 
 function getCurrentUser(): Promise<UserResource> {
-  const url = buildURL({ resource: userResource, pathSuffix: ['me'] });
-  return fetchJson<UserResource>(url, {
-    method: HTTPMethodGET,
-    headers: HTTPHeader,
-  });
+  return getUser('me');
 }
 
 function getUsers(): Promise<UserResource[]> {
