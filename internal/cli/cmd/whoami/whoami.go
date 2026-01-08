@@ -37,6 +37,12 @@ type option struct {
 	apiClient     api.ClientInterface
 }
 
+type k8sUser struct {
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+}
+
 func (o *option) Complete(_ []string) error {
 	o.authorization = config.Global.RestClientConfig.Authorization
 
@@ -82,6 +88,18 @@ func (o *option) Whoami() (string, error) {
 
 	if err := res.Error(); err != nil {
 		return "", err
+	}
+
+	// Because kubernetes usernames have less restrictions than perses ones they can contain characters which
+	// are considered invalid. Due to this, we unmarshall without performing validation on the username
+	if config.Global.RestClientConfig.K8sAuth != nil {
+		result := &k8sUser{}
+		err := res.Object(result)
+		if err != nil {
+			return "", err
+		}
+
+		return result.Metadata.Name, nil
 	}
 
 	result := &v1.PublicUser{}
