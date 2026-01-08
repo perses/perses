@@ -1,0 +1,22 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "my-dashboard",
+    "project": "default"
+  },
+  "spec": {
+    "display": {
+      "name": "My Dashboard",
+      "description": "A test dashboard"
+    },
+    "datasources": {
+      "prom": {}
+    },
+    "variables": [],
+    "panels": {},
+    "layouts": [],
+    "duration": null,
+    "refreshInterval": null
+  }
+}
+
