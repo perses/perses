@@ -347,7 +347,7 @@ func (k *k8sImpl) getPermittedActions(ctx echo.Context, namespace string, user u
 		}
 
 		if authorized == authorizer.DecisionAllow {
-			newlyValidActions = append(newlyValidActions, v1Role.Action(action))
+			newlyValidActions = append(newlyValidActions, action)
 		}
 	}
 	return newlyValidActions
