@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.53.0-rc.0 / 2026-01-07
+
+## Core & UI
+
+- [ENHANCEMENT] `plugin test-schemas`: match migration output against model (#3762)
+- [ENHANCEMENT] Make panel `display` attribute optional (#3751)
+
+## Plugins improvements
+
+- [FEATURE] Table: Add data link column setting to generate column config (perses/plugins#516)
+- [FEATURE] TimeSeriesChart: Adds support for log type y-axis (as well as linear) (perses/plugins#500)
+- [FEATURE] Logstable: Add back in color coded log rows (perses/plugins#512)
+- [FEATURE] Table: Add link editor to the table column setting (perses/plugins#506)
+- [ENHANCEMENT] Table: improve migration of column settings (perses/plugins#514)
+
 ## 0.53.0-beta.4 / 2025-12-19
 
 ### Core & UI
