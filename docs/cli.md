@@ -65,6 +65,7 @@ If the server requires an authentication, you will have to provide either:
 - a user + password: `--username` and `--password` can be used to set a username & password. The command will contact the Perses server
   with the credential(s). It will return a Bearer JWT token which expires after 1h.
 - external auth information: if the server relies on an external OIDC/OAuth provider for authentication, use `--client-id` and `--client-secret` to pass the client credentials, plus `--provider` to pass the identifier of the external provider (e.g `google`, `azure`..).
+- kubeconfig file location: if the server relies on the delegated kubernetes provider for authentication, use `--kube` to login using a kubeconfig file. The `KUBECONFIG` env variable and fallback of `~/.kube/config` will be used unless `--kubeconfig-file` is used to set the path.
 
 The URL and the token will be stored in JSON file that is by default `<UserHome>/.perses/config.json`.
 
