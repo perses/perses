@@ -6,24 +6,23 @@
 
 ## Running Locally
 1. `./scripts/run-kubernetes.sh` - Starts a kind cluster and adds all relevant data (CRD's, users, permissions)
-2. `./scripts/k8s-dev.sh` - Start a tmux session with a reverse-proxy to add in the Authorization proxy and the perses backend
 
-Perses should then be running on localhost:8080 logged in as "user" 
-
-### Manually running servers
 After the kind cluster has been started the backend can be stated using:
 
 ```
-make build-api && ./bin/perses --config="./dev/config-kubernetes.yaml" --log.level="debug" --web.listen-address=":8081"`
+make build-api && ./bin/perses --config="./dev/config-kubernetes.yaml" --log.level="debug" --web.listen-address=":8081"
 ```
 
-The reverse-proxy can then be started using the following commands
+The reverse-proxy can then be started using the following commands. The reverse-proxy is located at port 8080 so the frontend
+development server can be run in its default state as described in the [UI Readme](../../ui/README.md).
+
 ```
 export USER_TOKEN="$(kubectl --kubeconfig=./dev/kubernetes/local/kind-admin create token user --namespace perses --duration 8760h)"
 caddy run --config ./dev/kubernetes/Caddyfile --adapter caddyfile
 ```
 
-The reverse-proxy is located at port 8080 so the frontend development server can be run in its default state as described in the [UI Readme](../../ui/README.md).
+Perses should then be running on localhost:8080 logged in as "user".
 
 ## Debugging
+
 If your backend fails to start due to being unable to there being `no such file or directory` for your kubeconfig you may need to provide full file paths for all file locations in the `config-kubernetes.yaml` file.
