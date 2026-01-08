@@ -6,7 +6,7 @@ security:
     provider:
       kubernetes:
         enable: true
-        kubeconfig: "dev/kubernests/local/perses-backend"
+        kubeconfig: "dev/kubernetes/local/perses-backend"
   authentication:
     providers:
       kubernetes:
