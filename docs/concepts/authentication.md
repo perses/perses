@@ -58,8 +58,18 @@ security:
           client_id: "<secret>"
           client_secret: "<secret>"
           issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
-          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/azure/callback"
+          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/msft/callback"
           scopes: [ "openid", "profile", "email", "User.read" ]
+          logout:
+            enabled: true
+        # Example with a Keycloak OIDC configuration
+        - slug_id: keycloak
+          name: "Keycloak"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          issuer: "https://<keycloak host>/realms/<realm>" // For Keycloak versions <17: https://<keycloak host>/auth/realms/<realm>
+          redirect_uri: "http://localhost:8080/api/auth/providers/oidc/keycloak/callback"
+          scopes: [ "openid", "profile", "email", "roles" ]
           logout:
             enabled: true
       oauth:

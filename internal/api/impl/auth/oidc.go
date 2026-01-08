@@ -170,6 +170,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 		queryParams := endSessionURL.Query()
 		rd := getRootURL(ctx.Request(), apiPrefix)
 		queryParams.Add("post_logout_redirect_uri", rd.String())
+		queryParams.Add("client_id", rp.OAuthConfig().ClientID)
 		endSessionURL.RawQuery = queryParams.Encode()
 		return ctx.Redirect(302, endSessionURL.String())
 	}, nil
