@@ -209,7 +209,7 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 	k8sNamespaces := k.getNamespaceList()
 	authorizedNamespaces := []string{}
 	for _, k8sNamespace := range k8sNamespaces {
-		if k.checkNamespacePermission(ctx, k8sNamespace, kubernetesUser) {
+		if k.hasPermissionForNamespace(ctx, k8sNamespace, kubernetesUser) {
 			authorizedNamespaces = append(authorizedNamespaces, k8sNamespace)
 		}
 	}
@@ -245,25 +245,7 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 		return false
 	}
 
-	action := getK8sAction(requestAction)
-	apiGroup := getK8sAPIGroup(scope)
-	apiVersion := getK8sAPIVersion(scope)
-
-	// Try checking the specific project for access
-	// If the namespace doesn't exist in k8s, the authorizer will return the "*" permissions
-	attributes := authorizer.AttributesRecord{
-		User:            kubernetesUser,
-		Verb:            string(action),
-		Namespace:       requestProject,
-		APIGroup:        apiGroup,
-		APIVersion:      apiVersion,
-		Resource:        string(scope),
-		Subresource:     "",
-		Name:            "",
-		ResourceRequest: true,
-	}
-
-	authorized, _, _ := k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	authorized, _ := k.checkSpecificPermision(ctx, requestProject, kubernetesUser, requestScope, requestAction)
 
 	return authorized == authorizer.DecisionAllow
 }
@@ -299,107 +281,112 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 
 	namespaces := k.getNamespaceList()
 
-	for _, k8sScope := range k8sScopesToCheck {
-		// Contains the actions which need to be checked every loop.
-		// If action is permitted at the global scope, then we don't need to check within the namespace scope.
-		// Since each permission check is a network round trip, it is best to optimize
-		// the logic to reduce the number of permission checks we make
-		actionsToCheck := []k8sAction{
-			k8sWildcardAction,
-			k8sReadAction,
-			k8sCreateAction,
-			k8sUpdateAction,
-			k8sDeleteAction,
+	// Do an initial pass over the all namespace project so that we don't have to check the permissions available there
+	// against any of the projects we check after this point
+	allNamespacePermittedActions := map[v1Role.Scope][]v1Role.Action{}
+	allNamespacePermissions := []*v1Role.Permission{}
+	for _, scope := range scopesToCheck {
+		permittedActions := k.getPermittedActions(ctx, v1.WildcardProject, kubernetesUser, scope, []v1Role.Action{})
+		if len(permittedActions) > 0 {
+			allNamespacePermittedActions[scope] = permittedActions
+			allNamespacePermissions = append(allNamespacePermissions, &v1Role.Permission{
+				Scopes:  []v1Role.Scope{scope},
+				Actions: permittedActions,
+			})
 		}
-		apiGroup := getK8sAPIGroup(k8sScope)
-		apiVersion := getK8sAPIVersion(k8sScope)
-	project:
-		for _, k8sProject := range namespaces {
-			scopeActions, ok := userPermissions[k8sProject]
-			if ok {
-				scopeActions = append(scopeActions, &v1Role.Permission{
-					Scopes:  []v1Role.Scope{getPersesScope(k8sScope)},
-					Actions: []v1Role.Action{},
-				})
-			} else {
-				scopeActions = []*v1Role.Permission{{
-					Scopes:  []v1Role.Scope{getPersesScope(k8sScope)},
-					Actions: []v1Role.Action{},
-				}}
+	}
+	if len(allNamespacePermissions) > 0 {
+		userPermissions[v1.WildcardProject] = allNamespacePermissions
+	}
 
-			}
-			permissionIndex := len(scopeActions) - 1
-
-		action:
-			for _, k8sActionToCheck := range actionsToCheck {
-				attributes := authorizer.AttributesRecord{
-					User:            kubernetesUser,
-					Verb:            string(k8sActionToCheck),
-					Namespace:       k8sProject,
-					APIGroup:        apiGroup,
-					APIVersion:      apiVersion,
-					Resource:        string(k8sScope),
-					Subresource:     "",
-					Name:            "",
-					ResourceRequest: true,
-				}
-
-				authorized, _, err := k.authorizer.Authorize(ctx.Request().Context(), attributes)
-				if err != nil {
-					// If the request errors, then assume the rest of the requests will also error and break
-					// out early
-					break project
-				}
-
-				if k8sActionToCheck == k8sWildcardAction {
-					if authorized == authorizer.DecisionAllow {
-						scopeActions[permissionIndex].Actions = append(scopeActions[permissionIndex].Actions, getPersesAction(k8sWildcardAction))
-						if k8sProject == v1.WildcardProject {
-							userPermissions[k8sProject] = scopeActions
-							break project
-							// User has all permissions for this scope, no need
-							// to check other namespaces or permissions
-						}
-						// User has all permissions for this namespace, no need
-						// to check other permissions
-						break action
-					}
-				}
-
-				if k8sActionToCheck == k8sReadAction && authorized == authorizer.DecisionDeny {
-					// User can't even read the resource, no need to check the rest
-					continue project
-				}
-
-				if authorized == authorizer.DecisionAllow && slices.Contains([]k8sAction{
-					k8sReadAction,
-					k8sCreateAction,
-					k8sUpdateAction,
-					k8sDeleteAction,
-				}, k8sActionToCheck) {
-					scopeActions[permissionIndex].Actions = append(scopeActions[permissionIndex].Actions, getPersesAction(k8sActionToCheck))
-					if k8sProject == v1.WildcardProject {
-						actionsToCheck = slices.DeleteFunc(actionsToCheck, func(actionToCheck k8sAction) bool {
-							return actionToCheck == k8sActionToCheck
-						})
-						if len(actionsToCheck) == 1 {
-							// User has all permissions except for wildcard for this scope, no need
-							// to check the other namespaces or permissions
-							userPermissions[k8sProject] = scopeActions
-							break project
-						}
-					}
-				}
-			}
-			// Check if any actions are permitted for the user for the
-			// given project
-			if len(scopeActions[permissionIndex].Actions) > 0 {
-				userPermissions[k8sProject] = scopeActions
-			}
+	for _, namespace := range namespaces {
+		namespacePermissions := k.getNamespacePermissions(ctx, namespace, kubernetesUser, scopesToCheck, allNamespacePermittedActions)
+		if len(namespacePermissions) > 0 {
+			userPermissions[namespace] = namespacePermissions
 		}
 	}
 
 	return userPermissions, nil
+}
+
+func (k *k8sImpl) getNamespacePermissions(ctx echo.Context, namespace string, user user.Info, scopes []v1Role.Scope, knownPermissions map[v1Role.Scope][]v1Role.Action) []*v1Role.Permission {
+	namespacePermissions := []*v1Role.Permission{}
+	for _, scope := range scopes {
+		permittedActions := k.getPermittedActions(ctx, namespace, user, scope, knownPermissions[scope])
+		if len(permittedActions) > 0 {
+			namespacePermissions = append(namespacePermissions, &v1Role.Permission{
+				Scopes:  []v1Role.Scope{scope},
+				Actions: permittedActions,
+			})
+		}
+	}
+	return namespacePermissions
+}
+
+func (k *k8sImpl) getPermittedActions(ctx echo.Context, namespace string, user user.Info, scope v1Role.Scope, knownActions []v1Role.Action) []v1Role.Action {
+	// We only need to check actions which aren't already permitted
+	actionsToCheck := getUnknownActions(knownActions)
+	newlyValidActions := []v1Role.Action{}
+	for _, action := range actionsToCheck {
+		authorized, err := k.checkSpecificPermision(ctx, namespace, user, scope, action)
+
+		if err != nil {
+			// If the request errors, then assume the rest of the requests will also error and break
+			// out early
+			return newlyValidActions
+		}
+
+		if action == v1Role.WildcardAction && authorized == authorizer.DecisionAllow {
+			newlyValidActions = append(newlyValidActions, v1Role.WildcardAction)
+			return newlyValidActions
+		}
+
+		if action == v1Role.ReadAction && authorized == authorizer.DecisionDeny {
+			// If the user cannot even read the scope then assume they won't have other access
+			return newlyValidActions
+		}
+
+		if authorized == authorizer.DecisionAllow {
+			newlyValidActions = append(newlyValidActions, v1Role.Action(action))
+		}
+	}
+	return newlyValidActions
+}
+
+func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
+	// If all actions are permitted in then nothing is unknown
+	if len(knownActions) == 1 && knownActions[0] == v1Role.WildcardAction {
+		return []v1Role.Action{}
+	}
+	allActions := []v1Role.Action{
+		v1Role.WildcardAction,
+		v1Role.ReadAction,
+		v1Role.CreateAction,
+		v1Role.UpdateAction,
+		v1Role.DeleteAction,
+	}
+	return slices.DeleteFunc(allActions, func(actionToCheck v1Role.Action) bool {
+		return slices.Contains(knownActions, actionToCheck)
+	})
+}
+
+func (k *k8sImpl) checkSpecificPermision(ctx echo.Context, namespace string, user user.Info, scope v1Role.Scope, action v1Role.Action) (authorized authorizer.Decision, err error) {
+	k8sScope := getK8sScope(scope)
+	apiGroup := getK8sAPIGroup(k8sScope)
+	apiVersion := getK8sAPIVersion(k8sScope)
+	attributes := authorizer.AttributesRecord{
+		User:            user,
+		Verb:            string(getK8sAction(action)),
+		Namespace:       namespace,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        string(k8sScope),
+		Subresource:     "",
+		Name:            "",
+		ResourceRequest: true,
+	}
+	authorized, _, err = k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	return authorized, err
 }
 
 // RefreshPermissions implements [Authorization]
@@ -407,27 +394,14 @@ func (k *k8sImpl) RefreshPermissions() error {
 	return nil
 }
 
-func (k *k8sImpl) checkNamespacePermission(ctx echo.Context, namespace string, user user.Info) bool {
+func (k *k8sImpl) hasPermissionForNamespace(ctx echo.Context, namespace string, user user.Info) bool {
 	// Rather than checking if the user has access to the namespace, we check if the user has access
-	// to any of the perses scopes within the namespace, since namespaces which the user has access to
+	// to read any of the perses scopes within the namespace, since namespaces which the user has access to
 	// but cannot view perses scopes are irrelevant
-	for _, k8sScope := range k8sScopesToCheck {
-		attributes := authorizer.AttributesRecord{
-			User:            user,
-			Verb:            string(k8sReadAction),
-			Namespace:       namespace,
-			APIGroup:        "perses.dev",
-			APIVersion:      "v1alpha1",
-			Resource:        string(k8sScope),
-			Subresource:     "",
-			Name:            "",
-			ResourceRequest: true,
-		}
-
-		// don't need to check bool or error since if the authorized isn't allow then all other instances
-		// mean failure
-		authorized, _, _ := k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	for _, scope := range scopesToCheck {
+		authorized, _ := k.checkSpecificPermision(ctx, namespace, user, scope, v1Role.ReadAction)
 		if authorized == authorizer.DecisionAllow {
+			// We can return early if the user can access any of the scopes
 			return true
 		}
 	}

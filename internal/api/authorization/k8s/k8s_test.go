@@ -175,6 +175,12 @@ func mockAuthentication(clientset *fake.Clientset) {
 					Username: "user1",
 					Groups:   []string{"system:authenticated"},
 				}
+			case "user2-token":
+				tr.Status.Authenticated = true
+				tr.Status.User = authnv1.UserInfo{
+					Username: "user2",
+					Groups:   []string{"system:authenticated"},
+				}
 			default:
 				tr.Status.Authenticated = false
 				tr.Status.Error = "unknown token"
@@ -204,6 +210,10 @@ func mockAuthorization(clientset *fake.Clientset) {
 			} else if spec.User == "user1" {
 				sar.Status.Allowed = false
 				sar.Status.Reason = fmt.Sprintf("Mock RBAC: user1 cannot '%s'", createAction.GetVerb())
+			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "get" {
+				sar.Status.Allowed = true
+			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "create" && spec.ResourceAttributes.Namespace == "project0" {
+				sar.Status.Allowed = true
 			} else {
 				sar.Status.Allowed = false
 				sar.Status.Reason = "Mock RBAC: User does not exist"
@@ -285,6 +295,38 @@ func TestHasPermission(t *testing.T) {
 			reqScope:       "Dashboard",
 			expectedResult: false,
 		},
+		{
+			title:          "user2 has read dashboard perm in project0",
+			user:           "user2",
+			reqAction:      "read",
+			reqProject:     "project0",
+			reqScope:       "Dashboard",
+			expectedResult: true,
+		},
+		{
+			title:          "user2 has read dashboard perm in project1",
+			user:           "user2",
+			reqAction:      "read",
+			reqProject:     "project1",
+			reqScope:       "Dashboard",
+			expectedResult: true,
+		},
+		{
+			title:          "user2 has create dashboard perm in project0",
+			user:           "user2",
+			reqAction:      "create",
+			reqProject:     "project0",
+			reqScope:       "Dashboard",
+			expectedResult: true,
+		},
+		{
+			title:          "user2 doesn't have create dashboard perm in project1",
+			user:           "user2",
+			reqAction:      "create",
+			reqProject:     "project1",
+			reqScope:       "Dashboard",
+			expectedResult: false,
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
@@ -321,6 +363,11 @@ func TestGetUserProjects(t *testing.T) {
 			title:          "user0 has access to project0",
 			user:           "user0",
 			expectedResult: []string{"project0"},
+		},
+		{
+			title:          "user2 has access to all projects",
+			user:           "user2",
+			expectedResult: []string{"*", "perses", "project0", "project1"},
 		},
 	}
 	for i := range testSuites {
@@ -367,6 +414,19 @@ func TestGetPermissions(t *testing.T) {
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
+			}},
+		},
+		{
+			title: "user2 has read permissions in all namespaces and create permissions in project0",
+			user:  "user2",
+			expectedResult: map[string][]*v1Role.Permission{"*": {
+				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
+				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
+			}, "project0": {
+				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Dashboard"}},
+				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},
 	}

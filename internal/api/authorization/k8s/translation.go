@@ -37,10 +37,10 @@ const (
 	k8sProjectScope          k8sScope = "namespaces"
 )
 
-var k8sScopesToCheck = [3]k8sScope{
-	k8sDashboardScope,
-	k8sGlobalDatasourceScope,
-	k8sDatasourceScope,
+var scopesToCheck = []v1Role.Scope{
+	v1Role.DashboardScope,
+	v1Role.GlobalDatasourceScope,
+	v1Role.DatasourceScope,
 }
 
 func getK8sAction(action v1Role.Action) k8sAction {
