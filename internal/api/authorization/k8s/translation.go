@@ -74,6 +74,6 @@ func getK8sScope(scope v1Role.Scope) k8sScope {
 	case v1Role.WildcardScope:
 		return k8sWildcardScope
 	default:
-		return "" // Non-K8s Scope, use guest permissions
+		return "" // Scope doesn't have a k8s equivalent. For now default to rejecting
 	}
 }
