@@ -52,6 +52,10 @@ func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
 	return "", nil
 }
 
+func (t *testRBAC) GetPublicUser(_ echo.Context) (*v1.PublicUser, error) {
+	return nil, nil
+}
+
 func (t *testRBAC) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
 	return crypto.ProviderInfo{}, nil
 }
@@ -73,6 +77,10 @@ func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role
 }
 
 func (t *testRBAC) IsEnabled() bool {
+	return true
+}
+
+func (t *testRBAC) IsNativeAuthz() bool {
 	return true
 }
 

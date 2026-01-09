@@ -135,21 +135,27 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiIn
 		result := make([]K, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	case []api.Entity:
 		result := make([]api.Entity, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	case []json.RawMessage:
 		result := make([]json.RawMessage, 0, len(typedList))
 		buildMap := buildRawMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	}

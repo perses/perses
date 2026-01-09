@@ -59,7 +59,7 @@ func DefaultConfig() apiConfig.Config {
 			Authentication: apiConfig.AuthenticationConfig{
 				AccessTokenTTL:  common.Duration(apiConfig.DefaultAccessTokenTTL),
 				RefreshTokenTTL: common.Duration(apiConfig.DefaultRefreshTokenTTL),
-				Providers:       apiConfig.AuthProviders{EnableNative: true},
+				Providers:       apiConfig.AuthenticationProviders{EnableNative: true},
 			},
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
@@ -128,7 +128,7 @@ func createAliceUserAndLogin(expect *httpexpect.Expect) (string, modelAPI.Entity
 		Login:    usrEntity.GetMetadata().GetName(),
 		Password: usrEntity.Spec.NativeProvider.Password,
 	}
-	authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+	authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
 		WithJSON(authEntity).
 		Expect().
 		Status(http.StatusOK)

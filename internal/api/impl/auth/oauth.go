@@ -146,7 +146,7 @@ func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
 }
 
 func (e *oAuthEndpoint) GetAuthKind() string {
-	return utils.AuthKindOAuth
+	return utils.AuthnKindOAuth
 }
 
 func (e *oAuthEndpoint) GetSlugID() string {
@@ -281,7 +281,7 @@ func (e *oAuthEndpoint) newQueryContext(ctx echo.Context) context.Context {
 }
 
 func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
-	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOAuth, e.slugID), withOAuthErrorMdw)
+	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthnKindOAuth, e.slugID), withOAuthErrorMdw)
 
 	// Add routes for the "Authorization Code" flow
 	oauthGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.authHandler, true)
@@ -315,7 +315,7 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID, e.apiPrefix)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -355,7 +355,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.conf.RedirectURL == "" {
-		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID, e.apiPrefix)))
+		opts = append(opts, oauth2.SetAuthURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOAuth, e.slugID, e.apiPrefix)))
 	}
 
 	providerCtx := e.newQueryContext(ctx)
@@ -461,7 +461,7 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
 	providerInfo := crypto.ProviderInfo{
-		ProviderKind: utils.AuthKindOAuth,
+		ProviderKind: utils.AuthnKindOAuth,
 		ProviderID:   e.slugID,
 	}
 	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)

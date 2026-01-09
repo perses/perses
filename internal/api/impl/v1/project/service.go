@@ -37,16 +37,15 @@ import (
 
 type service struct {
 	project.Service
-	dao                   project.DAO
-	folderDAO             folder.DAO
-	datasourceDAO         datasource.DAO
-	dashboardDAO          dashboard.DAO
-	roleDAO               role.DAO
-	roleBindingDAO        rolebinding.DAO
-	secretDAO             secret.DAO
-	variableDAO           variable.DAO
-	authz                 authorization.Authorization
-	isAuthorizationNative bool
+	dao            project.DAO
+	folderDAO      folder.DAO
+	datasourceDAO  datasource.DAO
+	dashboardDAO   dashboard.DAO
+	roleDAO        role.DAO
+	roleBindingDAO rolebinding.DAO
+	secretDAO      secret.DAO
+	variableDAO    variable.DAO
+	authz          authorization.Authorization
 }
 
 func NewService(dao project.DAO,
@@ -57,19 +56,17 @@ func NewService(dao project.DAO,
 	roleBindingDAO rolebinding.DAO,
 	secretDAO secret.DAO,
 	variableDAO variable.DAO,
-	authz authorization.Authorization,
-	isAuthorizationNative bool) project.Service {
+	authz authorization.Authorization) project.Service {
 	return &service{
-		dao:                   dao,
-		folderDAO:             folderDAO,
-		datasourceDAO:         datasourceDAO,
-		dashboardDAO:          dashboardDAO,
-		roleDAO:               roleDAO,
-		roleBindingDAO:        roleBindingDAO,
-		secretDAO:             secretDAO,
-		variableDAO:           variableDAO,
-		authz:                 authz,
-		isAuthorizationNative: isAuthorizationNative,
+		dao:            dao,
+		folderDAO:      folderDAO,
+		datasourceDAO:  datasourceDAO,
+		dashboardDAO:   dashboardDAO,
+		roleDAO:        roleDAO,
+		roleBindingDAO: roleBindingDAO,
+		secretDAO:      secretDAO,
+		variableDAO:    variableDAO,
+		authz:          authz,
 	}
 }
 
@@ -89,7 +86,7 @@ func (s *service) create(ctx echo.Context, entity *v1.Project) (*v1.Project, err
 	}
 
 	// If authorization is enabled, permissions to the creator need to be given
-	if s.authz.IsEnabled() && s.isAuthorizationNative {
+	if s.authz.IsEnabled() && s.authz.IsNativeAuthz() {
 		if err := s.createProjectRoleAndRoleBinding(ctx, entity.Metadata.Name); err != nil {
 			return nil, err
 		}

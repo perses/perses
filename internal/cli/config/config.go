@@ -197,6 +197,9 @@ func Write(cfg *Config) error {
 				if restConfig.NativeAuth != nil {
 					previousConf.RestClientConfig.NativeAuth = restConfig.NativeAuth
 				}
+				if restConfig.K8sAuth != nil {
+					previousConf.RestClientConfig.K8sAuth = restConfig.K8sAuth
+				}
 				if len(restConfig.Headers) > 0 {
 					previousConf.RestClientConfig.Headers = restConfig.Headers
 				}
