@@ -53,14 +53,13 @@ func TestCollectFilesNotContainingLicense(t *testing.T) {
 		}
 	}
 
-	l := &License{
-		Patterns:         []string{"*.go"},
-		ExcludedFiles:    []string{"excluded.go"},
-		ExcludedDirs:     []string{"excludeDir"},
-		ExcludedPatterns: []string{"excluded_*"},
-	}
+	l := New().
+		AddPattern("*.go").
+		AddExcludedPattern("excluded_*").
+		AddExcludedDir("excludeDir").
+		AddExcludedFile("excluded.go")
 
-	res := l.collectFilesNotContainingLicense(".")
+	res := l.(*license).collectFilesNotContainingLicense(".")
 
 	// Expect these files to be reported as missing the license
 	want := []string{filepath.Join("dir1", "nested_without.go"), "file_without_license.go"}

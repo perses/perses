@@ -20,28 +20,9 @@ import (
 )
 
 func main() {
-	l := &license.License{
-		ExcludedPatterns: []string{"*_go_gen.cue"},
-		ExcludedDirs: []string{
-			"node_modules",
-			".git",
-			".github",
-			".idea",
-			"dist",
-			"storybook-static",
-			"plugins",
-			"plugins-archive",
-			"cue.mod",
-		},
-		Patterns: []string{
-			"*.go",
-			"*.cue",
-			"*.js",
-			"*.ts",
-			"*.jsx",
-			"*.tsx",
-		},
-	}
+	l := license.DefaultLicense().
+		AddExcludedPattern("*_go_gen.cue").
+		AddExcludedDir("storybook-static", "plugins", "plugins-archive")
 
 	l.RegisterFlags()
 	flag.Parse()
