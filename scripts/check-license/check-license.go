@@ -11,13 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package migrate
+package main
 
-#target: _
+import (
+	"flag"
 
-if (*#target.datasource.type | null) == "mydatasource" {
-	kind: "MyQuery"
-	spec: {
-		query: #target.expr
+	"github.com/perses/perses/scripts/pkg/license"
+)
+
+func main() {
+	l := &license.License{
+		ExcludedPatterns: []string{"*_go_gen.cue"},
+		ExcludedDirs: []string{
+			"node_modules",
+			".git",
+			".github",
+			".idea",
+			"dist",
+			"storybook-static",
+			"plugins",
+			"plugins-archive",
+			"cue.mod",
+		},
+		Patterns: []string{
+			"*.go",
+			"*.cue",
+			"*.js",
+			"*.ts",
+			"*.jsx",
+			"*.tsx",
+		},
 	}
-},
+
+	l.RegisterFlags()
+	flag.Parse()
+	l.Execute()
+}
