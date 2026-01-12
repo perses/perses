@@ -26,11 +26,6 @@ import (
 	"github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
-#PanelDisplay: {
-	name:         string @go(Name)
-	description?: string @go(Description)
-}
-
 #Panel: {
 	kind: "Panel"
 }

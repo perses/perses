@@ -6,6 +6,9 @@ package plugin
 
 import "github.com/perses/perses/cue/model/api/v1/common"
 
+#LatestVersion:   "latest"
+#DefaultRegistry: "perses.dev"
+
 #Kind: string // #enumKind
 
 #enumKind:
@@ -45,6 +48,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 #ModuleSpec: _
 
 #ModuleMetadata: {
-	name:    string @go(Name)
-	version: string @go(Version)
+	name:     string @go(Name)
+	version:  string @go(Version)
+	registry: string @go(Registry)
 }

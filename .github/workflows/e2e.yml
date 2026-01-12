@@ -29,7 +29,7 @@ jobs:
           enable_go: true
           nvmrc_path: "./ui/.nvmrc"
       - name: start dev environment
-        uses: hoverkraft-tech/compose-action@v2.4.2
+        uses: hoverkraft-tech/compose-action@v2.4.3
         with:
             compose-file: ./dev/docker-compose.e2e.yaml
       - name: Install UI deps
@@ -43,13 +43,14 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run Playwright tests
         working-directory: ./ui
+        timeout-minutes: 10
         run: npm run e2e:ci
         env:
           # Outputs information from webservers started in the background by
           # Playwright. Useful for understanding if something failing there
           # breaks the tests.
           DEBUG: pw:webserver
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report

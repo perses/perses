@@ -19,6 +19,7 @@ import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import { SignInRoute, SignUpRoute } from './model/route';
 import { PersesLoader } from './components/PersesLoader';
+import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);

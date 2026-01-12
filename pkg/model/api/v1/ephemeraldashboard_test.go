@@ -53,7 +53,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 							"MyPanel": {
 								Kind: "Panel",
 								Spec: PanelSpec{
-									Display: PanelDisplay{
+									Display: &PanelDisplay{
 										Name: "simple line chart",
 									},
 									Plugin: common.Plugin{
@@ -199,7 +199,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 							"MyPanel": {
 								Kind: "Panel",
 								Spec: PanelSpec{
-									Display: PanelDisplay{
+									Display: &PanelDisplay{
 										Name: "simple line chart",
 									},
 									Plugin: common.Plugin{
@@ -420,7 +420,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 	panel := &Panel{
 		Kind: "Panel",
 		Spec: PanelSpec{
-			Display: PanelDisplay{
+			Display: &PanelDisplay{
 				Name: "simple line chart",
 			},
 			Plugin: common.Plugin{
