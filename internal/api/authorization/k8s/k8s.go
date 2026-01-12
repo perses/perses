@@ -285,7 +285,7 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 	// against any of the projects we check after this point
 	allNamespacePermittedActions := map[v1Role.Scope][]v1Role.Action{}
 	allNamespacePermissions := []*v1Role.Permission{}
-	for _, scope := range scopesToCheck {
+	for _, scope := range globalScopesToCheck {
 		permittedActions := k.getPermittedActions(ctx, v1.WildcardProject, kubernetesUser, scope, []v1Role.Action{})
 		if len(permittedActions) > 0 {
 			allNamespacePermittedActions[scope] = permittedActions
@@ -300,7 +300,7 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 	}
 
 	for _, namespace := range namespaces {
-		namespacePermissions := k.getNamespacePermissions(ctx, namespace, kubernetesUser, scopesToCheck, allNamespacePermittedActions)
+		namespacePermissions := k.getNamespacePermissions(ctx, namespace, kubernetesUser, projectScopesToCheck, allNamespacePermittedActions)
 		if len(namespacePermissions) > 0 {
 			userPermissions[namespace] = namespacePermissions
 		}
@@ -374,6 +374,12 @@ func (k *k8sImpl) checkSpecificPermision(ctx echo.Context, namespace string, use
 	k8sScope := getK8sScope(scope)
 	apiGroup := getK8sAPIGroup(k8sScope)
 	apiVersion := getK8sAPIVersion(k8sScope)
+
+	// To align with Perses RBAC any Global resource is not namespaced
+	if slices.Contains(globalScopes, scope) {
+		namespace = v1.WildcardProject
+	}
+
 	attributes := authorizer.AttributesRecord{
 		User:            user,
 		Verb:            string(getK8sAction(action)),
@@ -398,7 +404,7 @@ func (k *k8sImpl) hasPermissionForNamespace(ctx echo.Context, namespace string, 
 	// Rather than checking if the user has access to the namespace, we check if the user has access
 	// to read any of the perses scopes within the namespace, since namespaces which the user has access to
 	// but cannot view perses scopes are irrelevant
-	for _, scope := range scopesToCheck {
+	for _, scope := range projectScopesToCheck {
 		authorized, _ := k.checkSpecificPermision(ctx, namespace, user, scope, v1Role.ReadAction)
 		if authorized == authorizer.DecisionAllow {
 			// We can return early if the user can access any of the scopes

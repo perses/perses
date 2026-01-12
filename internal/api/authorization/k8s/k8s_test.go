@@ -201,8 +201,10 @@ func mockAuthorization(clientset *fake.Clientset) {
 			spec := sar.Spec
 			if spec.User == "admin" {
 				sar.Status.Allowed = true
-				// User0 has access to read in project0 only
-			} else if spec.User == "user0" && spec.ResourceAttributes.Verb == "get" && spec.ResourceAttributes.Namespace == "project0" {
+				// User0 has access to read in project0 only and GlobalDatasource in in all projects
+			} else if spec.User == "user0" && spec.ResourceAttributes.Verb == "get" && spec.ResourceAttributes.Namespace == "project0" && spec.ResourceAttributes.Resource != string(k8sGlobalDatasourceScope) {
+				sar.Status.Allowed = true
+			} else if spec.User == "user0" && spec.ResourceAttributes.Verb == "get" && spec.ResourceAttributes.Resource == string(k8sGlobalDatasourceScope) {
 				sar.Status.Allowed = true
 			} else if spec.User == "user0" {
 				sar.Status.Allowed = false
@@ -210,9 +212,13 @@ func mockAuthorization(clientset *fake.Clientset) {
 			} else if spec.User == "user1" {
 				sar.Status.Allowed = false
 				sar.Status.Reason = fmt.Sprintf("Mock RBAC: user1 cannot '%s'", createAction.GetVerb())
-			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "get" {
+			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "get" && spec.ResourceAttributes.Resource != string(k8sGlobalDatasourceScope) {
 				sar.Status.Allowed = true
 			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "create" && spec.ResourceAttributes.Namespace == "project0" {
+				sar.Status.Allowed = true
+				// user2 has incorrectly set up GlobalDatasource access to a single namespace. This should not be reflected
+				// in any perses permissions
+			} else if spec.User == "user2" && spec.ResourceAttributes.Verb == "read" && spec.ResourceAttributes.Namespace == "project0" && spec.ResourceAttributes.Resource == string(k8sGlobalDatasourceScope) {
 				sar.Status.Allowed = true
 			} else {
 				sar.Status.Allowed = false
@@ -261,6 +267,30 @@ func TestHasPermission(t *testing.T) {
 			reqAction:      "read",
 			reqProject:     "project0",
 			reqScope:       "Dashboard",
+			expectedResult: true,
+		},
+		{
+			title:          "user0 has read globaldatasource perm in project0",
+			user:           "user0",
+			reqAction:      "read",
+			reqProject:     "project0",
+			reqScope:       "GlobalDatasource",
+			expectedResult: true,
+		},
+		{
+			title:          "user0 has read globaldatasource perm in project1",
+			user:           "user0",
+			reqAction:      "read",
+			reqProject:     "project2",
+			reqScope:       "GlobalDatasource",
+			expectedResult: true,
+		},
+		{
+			title:          "user0 has read globaldatasource perm in wildcard project",
+			user:           "user0",
+			reqAction:      "read",
+			reqProject:     "*",
+			reqScope:       "GlobalDatasource",
 			expectedResult: true,
 		},
 		{
@@ -325,6 +355,14 @@ func TestHasPermission(t *testing.T) {
 			reqAction:      "create",
 			reqProject:     "project1",
 			reqScope:       "Dashboard",
+			expectedResult: false,
+		},
+		{
+			title:          "user2 doesn't have read globaldatasource perm in project0 due to invalid configuration",
+			user:           "user2",
+			reqAction:      "read",
+			reqProject:     "project0",
+			reqScope:       "GlobalDatasource",
 			expectedResult: false,
 		},
 	}
@@ -402,17 +440,18 @@ func TestGetPermissions(t *testing.T) {
 			title: "admin has full permissions to all projects",
 			user:  "admin",
 			expectedResult: map[string][]*v1Role.Permission{"*": {
-				&v1Role.Permission{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+				&v1Role.Permission{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},
 		{
-			title: "user0 has readonly permissions in project0",
+			title: "user0 has readonly permissions in project0 and GlobalDatasource in all namespaces",
 			user:  "user0",
-			expectedResult: map[string][]*v1Role.Permission{"project0": {
-				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
+			expectedResult: map[string][]*v1Role.Permission{"*": {
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+			}, "project0": {
+				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},
@@ -421,11 +460,9 @@ func TestGetPermissions(t *testing.T) {
 			user:  "user2",
 			expectedResult: map[string][]*v1Role.Permission{"*": {
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
-				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}, "project0": {
 				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Dashboard"}},
-				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},

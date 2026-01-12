@@ -37,10 +37,20 @@ const (
 	k8sProjectScope          k8sScope = "namespaces"
 )
 
-var scopesToCheck = []v1Role.Scope{
-	v1Role.DashboardScope,
+var globalScopesToCheck = []v1Role.Scope{
 	v1Role.GlobalDatasourceScope,
+	v1Role.DashboardScope,
 	v1Role.DatasourceScope,
+}
+
+var projectScopesToCheck = []v1Role.Scope{
+	v1Role.DashboardScope,
+	v1Role.DatasourceScope,
+}
+
+// All resources which are global scoped
+var globalScopes = []v1Role.Scope{
+	v1Role.GlobalDatasourceScope,
 }
 
 func getK8sAction(action v1Role.Action) k8sAction {
