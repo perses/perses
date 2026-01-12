@@ -37,6 +37,7 @@ import (
 	"github.com/perses/perses/pkg/client/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -302,7 +303,11 @@ func (o *option) waitForShutdownAndCleanup(ctx context.Context, devServerTasks [
 
 	// Unregister plugins from the remote server
 	for _, plg := range pluginInDev {
-		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(plg.Name); err != nil {
+		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(pluginModel.ModuleMetadata{
+			Name:     plg.Name,
+			Version:  plg.Version,
+			Registry: plg.Registry,
+		}); err != nil {
 			logrus.WithError(err).Errorf("failed to unregister the plugin %q from the remote server", plg.Name)
 		} else {
 			logrus.Infof("plugin %q has been unregistered from the remote server", plg.Name)
@@ -337,6 +342,8 @@ func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *
 	server := newDevServer(pluginName, pluginPath, rsbuildCMD, o.writer, o.errWriter, c)
 	pluginInDevelopment := &v1.PluginInDevelopment{
 		Name:         pluginName,
+		Version:      npmPackageData.Version,
+		Registry:     npmPackageData.Perses.ModuleOrg,
 		URL:          common.MustParseURL(fmt.Sprintf("http://localhost:%d", port)),
 		AbsolutePath: abs,
 	}
@@ -377,7 +384,11 @@ func (o *option) watchPluginSchema(ctx context.Context, pluginInDev *v1.PluginIn
 					continue
 				}
 
-				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(pluginInDev.Name); apiErr != nil {
+				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(pluginModel.ModuleMetadata{
+					Name:     pluginInDev.Name,
+					Version:  pluginInDev.Version,
+					Registry: pluginInDev.Registry,
+				}); apiErr != nil {
 					logrus.WithError(apiErr).Errorf("failed to refresh the plugin schema for the plugin %q: %s", pluginInDev.Name, apiErr)
 				} else {
 					logrus.Infof("plugin schema for %q has been refreshed", pluginInDev.Name)

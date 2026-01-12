@@ -20,6 +20,11 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+const (
+	LatestVersion   = "latest"
+	DefaultRegistry = "perses.dev"
+)
+
 type Kind string
 
 const (
@@ -132,6 +137,7 @@ func (m *ModuleSpec) validate() error {
 }
 
 type ModuleMetadata struct {
-	Name    string `json:"name" yaml:"name"`
-	Version string `json:"version" yaml:"version"`
+	Name     string `json:"name" yaml:"name"`
+	Version  string `json:"version" yaml:"version"`
+	Registry string `json:"registry" yaml:"registry"`
 }

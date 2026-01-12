@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue/build"
+	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -113,18 +114,8 @@ type Schema interface {
 
 func New() Schema {
 	return &completeSchema{
-		sch: &sch{
-			datasources: make(map[string]*build.Instance),
-			queries:     make(map[string]*build.Instance),
-			variables:   make(map[string]*build.Instance),
-			panels:      make(map[string]*build.Instance),
-		},
-		devSch: &sch{
-			datasources: make(map[string]*build.Instance),
-			queries:     make(map[string]*build.Instance),
-			variables:   make(map[string]*build.Instance),
-			panels:      make(map[string]*build.Instance),
-		},
+		sch:    newSch(),
+		devSch: newSch(),
 	}
 }
 
@@ -151,14 +142,14 @@ func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	for _, p := range module.Spec.Plugins {
-		s.devSch.remove(p.Kind, p.Spec.Name)
+		s.devSch.remove(p.Kind, p.Spec.Name, module.Metadata)
 	}
 }
 
 func (s *completeSchema) ValidateDatasource(plugin common.Plugin, dtsName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.datasources[plugin.Kind]; ok {
+	if _, ok := s.devSch.datasources.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateDatasource(plugin, dtsName)
 	}
 	return s.sch.validateDatasource(plugin, dtsName)
@@ -191,7 +182,7 @@ func (s *completeSchema) ValidatePanels(panels map[string]*v1.Panel) error {
 func (s *completeSchema) ValidatePanel(plugin common.Plugin, panelName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.panels[plugin.Kind]; ok {
+	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validatePanel(plugin, panelName)
 	}
 	return s.sch.validatePanel(plugin, panelName)
@@ -242,7 +233,7 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.panels[plugin.Kind]; ok {
+	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateVariable(plugin, varName)
 	}
 	return s.sch.validateVariable(plugin, varName)
@@ -251,26 +242,40 @@ func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) 
 func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.datasources[pluginName]; ok {
-		return s.devSch.getDatasourceSchema(pluginName)
+
+	// For the moment, we are only supporting the plugin datasource from the perses registry for the datasource discovery.
+	// The discovery is not really well used and having multiple registries for datasources is not a common use case currently.
+	// This hack should be fine for a while.
+
+	if _, ok := s.devSch.datasources.GetWithPluginMetadata(pluginName, nil); ok {
+		return s.devSch.getDatasourceSchema(pluginName, nil)
 	}
-	return s.sch.getDatasourceSchema(pluginName)
+	return s.sch.getDatasourceSchema(pluginName, nil)
 }
 
 func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.queries[plugin.Kind]; ok {
+	if _, ok := s.devSch.queries.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateQuery(plugin, queryName)
 	}
 	return s.sch.validateQuery(plugin, queryName)
 }
 
 type sch struct {
-	datasources map[string]*build.Instance
-	queries     map[string]*build.Instance
-	variables   map[string]*build.Instance
-	panels      map[string]*build.Instance
+	datasources tree.Tree[*build.Instance]
+	queries     tree.Tree[*build.Instance]
+	variables   tree.Tree[*build.Instance]
+	panels      tree.Tree[*build.Instance]
+}
+
+func newSch() *sch {
+	return &sch{
+		datasources: make(tree.Tree[*build.Instance]),
+		queries:     make(tree.Tree[*build.Instance]),
+		variables:   make(tree.Tree[*build.Instance]),
+		panels:      make(tree.Tree[*build.Instance]),
+	}
 }
 
 func (s *sch) load(pluginPath string, module v1.PluginModule) error {
@@ -280,15 +285,15 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	}
 	for _, schema := range schemas {
 		if schema.Kind.IsQuery() {
-			s.queries[schema.Name] = schema.Instance
+			s.queries.Add(schema.Name, module.Metadata, schema.Instance)
 		} else {
 			switch schema.Kind {
 			case plugin.KindDatasource:
-				s.datasources[schema.Name] = schema.Instance
+				s.datasources.Add(schema.Name, module.Metadata, schema.Instance)
 			case plugin.KindVariable:
-				s.variables[schema.Name] = schema.Instance
+				s.variables.Add(schema.Name, module.Metadata, schema.Instance)
 			case plugin.KindPanel:
-				s.panels[schema.Name] = schema.Instance
+				s.panels.Add(schema.Name, module.Metadata, schema.Instance)
 			default:
 				return fmt.Errorf("unknown kind %s", schema.Kind)
 			}
@@ -297,17 +302,17 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	return nil
 }
 
-func (s *sch) remove(kind plugin.Kind, name string) {
+func (s *sch) remove(kind plugin.Kind, name string, moduleMetadata plugin.ModuleMetadata) {
 	if kind.IsQuery() {
-		delete(s.queries, name)
+		s.queries.Remove(name, moduleMetadata)
 	} else {
 		switch kind {
 		case plugin.KindDatasource:
-			delete(s.datasources, name)
+			s.datasources.Remove(name, moduleMetadata)
 		case plugin.KindVariable:
-			delete(s.variables, name)
+			s.variables.Remove(name, moduleMetadata)
 		case plugin.KindPanel:
-			delete(s.panels, name)
+			s.panels.Remove(name, moduleMetadata)
 		}
 	}
 }
@@ -316,37 +321,41 @@ func (s *sch) validateDatasource(plugin common.Plugin, dtsName string) error {
 	if len(s.datasources) == 0 {
 		return fmt.Errorf("datasource schemas are not loaded")
 	}
-	return validatePlugin(plugin, s.datasources[plugin.Kind], "datasource", dtsName)
+	instance, _ := s.datasources.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	return validatePlugin(plugin, instance, "datasource", dtsName)
 }
 
 func (s *sch) validatePanel(plugin common.Plugin, panelName string) error {
 	if s.panels == nil {
 		return fmt.Errorf("panel schemas are not loaded")
 	}
-	return validatePlugin(plugin, s.panels[plugin.Kind], "panel", panelName)
+	instance, _ := s.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	return validatePlugin(plugin, instance, "panel", panelName)
 }
 
 func (s *sch) validateQuery(plugin common.Plugin, queryName string) error {
 	if s.queries == nil {
 		return fmt.Errorf("query schemas are not loaded")
 	}
-	return validatePlugin(plugin, s.queries[plugin.Kind], "query", queryName)
+	instance, _ := s.queries.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	return validatePlugin(plugin, instance, "query", queryName)
 }
 
 func (s *sch) validateVariable(plugin common.Plugin, variableName string) error {
 	if len(s.variables) == 0 {
 		return fmt.Errorf("variable schemas are not loaded")
 	}
-	return validatePlugin(plugin, s.variables[plugin.Kind], "variable", variableName)
+	instance, _ := s.variables.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	return validatePlugin(plugin, instance, "variable", variableName)
 }
 
-func (s *sch) getDatasourceSchema(pluginName string) (*build.Instance, error) {
+func (s *sch) getDatasourceSchema(datasourceName string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
 		return nil, fmt.Errorf("datasource schemas are not loaded")
 	}
-	instance, ok := s.datasources[pluginName]
+	instance, ok := s.datasources.GetWithPluginMetadata(datasourceName, metadata)
 	if !ok {
-		return nil, fmt.Errorf("datasource schema not found for plugin %s", pluginName)
+		return nil, fmt.Errorf("datasource schema not found for plugin %s", datasourceName)
 	}
 	return instance, nil
 }
