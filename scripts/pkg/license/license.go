@@ -20,9 +20,9 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
+	"github.com/perses/common/set"
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,28 +44,32 @@ const (
 
 // DefaultLicense returns a License struct with default excluded directories and file patterns that matches most common use cases in the Perses project.
 func DefaultLicense() License {
-	return &license{
-		excludedDirs: []string{
+	return New().
+		AddExcludedDir(
 			"node_modules",
 			".git",
 			".github",
 			".idea",
 			"dist",
 			"cue.mod",
-		},
-		patterns: []string{
+		).
+		AddPattern(
 			"*.go",
 			"*.cue",
 			"*.js",
 			"*.ts",
 			"*.jsx",
 			"*.tsx",
-		},
-	}
+		)
 }
 
 func New() License {
-	return &license{}
+	return &license{
+		excludedFiles:    set.New[string](),
+		excludedPatterns: set.New[string](),
+		excludedDirs:     set.New[string](),
+		patterns:         set.New[string](),
+	}
 }
 
 type License interface {
@@ -89,10 +93,10 @@ type License interface {
 }
 
 type license struct {
-	excludedFiles    []string
-	excludedPatterns []string
-	excludedDirs     []string
-	patterns         []string
+	excludedFiles    set.Set[string]
+	excludedPatterns set.Set[string]
+	excludedDirs     set.Set[string]
+	patterns         set.Set[string]
 	checkLicenseFlag bool
 	fixLicenseFlag   bool
 }
@@ -113,19 +117,19 @@ func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
 			return err
 		}
 		if info.IsDir() {
-			for _, excludedDir := range l.excludedDirs {
+			for excludedDir := range l.excludedDirs {
 				if info.Name() == excludedDir {
 					return filepath.SkipDir
 				}
 			}
 			return nil
 		}
-		for _, excludedFile := range l.excludedFiles {
+		for excludedFile := range l.excludedFiles {
 			if info.Name() == excludedFile {
 				return nil
 			}
 		}
-		for _, excludedPattern := range l.excludedPatterns {
+		for excludedPattern := range l.excludedPatterns {
 			matched, matchErr := filepath.Match(excludedPattern, info.Name())
 			if matchErr != nil {
 				logrus.Fatalf("Failed to match excluded pattern %q: %s", excludedPattern, matchErr)
@@ -134,7 +138,7 @@ func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
 				return nil
 			}
 		}
-		for _, pattern := range l.patterns {
+		for pattern := range l.patterns {
 			matched, matchErr := filepath.Match(pattern, info.Name())
 			if matchErr != nil {
 				logrus.Fatalf("Failed to match pattern %q: %s", pattern, matchErr)
@@ -227,37 +231,21 @@ func (l *license) Execute() {
 }
 
 func (l *license) AddExcludedFile(files ...string) License {
-	for _, file := range files {
-		if !slices.Contains(l.excludedFiles, file) {
-			l.excludedFiles = append(l.excludedFiles, file)
-		}
-	}
+	l.excludedFiles.Add(files...)
 	return l
 }
 
 func (l *license) AddExcludedDir(dirs ...string) License {
-	for _, dir := range dirs {
-		if !slices.Contains(l.excludedDirs, dir) {
-			l.excludedDirs = append(l.excludedDirs, dir)
-		}
-	}
+	l.excludedDirs.Add(dirs...)
 	return l
 }
 
 func (l *license) AddExcludedPattern(patterns ...string) License {
-	for _, pattern := range patterns {
-		if !slices.Contains(l.excludedPatterns, pattern) {
-			l.excludedPatterns = append(l.excludedPatterns, pattern)
-		}
-	}
+	l.excludedPatterns.Add(patterns...)
 	return l
 }
 
 func (l *license) AddPattern(patterns ...string) License {
-	for _, pattern := range patterns {
-		if !slices.Contains(l.patterns, pattern) {
-			l.patterns = append(l.patterns, pattern)
-		}
-	}
+	l.patterns.Add(patterns...)
 	return l
 }
