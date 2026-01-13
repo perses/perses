@@ -29,6 +29,8 @@ export interface HTTPProxySpec {
   // secret is the name of the secret that should be used for the proxy or discovery configuration
   // It will contain any sensitive information such as password, token, certificate.
   secret?: string;
+  // removeOriginAndReferer is removing Origin and Referer headers when proxying requests, to avoid CORS issues with some datasources
+  removeOriginAndReferer?: boolean;
 }
 
 export interface HTTPAllowedEndpoint {

@@ -81,6 +81,8 @@ type Config struct {
 	// Secret is the name of the secret that should be used for the proxy or discovery configuration
 	// It will contain any sensitive information such as password, token, certificate.
 	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
+	// RemoveOriginAndReferer is removing Origin and Referer headers when proxying requests, to avoid CORS issues with some datasources
+	RemoveOriginAndReferer bool `json:"removeOriginAndReferer,omitempty" yaml:"removeOriginAndReferer,omitempty"`
 }
 
 func (h *Config) UnmarshalJSON(data []byte) error {
