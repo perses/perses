@@ -23,8 +23,20 @@ export type AnyValue =
   | { intValue: string }
   | { doubleValue: number }
   | { boolValue: boolean }
-  | { arrayValue: { values?: AnyValue[] } };
+  | { arrayValue: ArrayValue }
+  | { kvlistValue: KeyValueList }
+  | { bytesValue: string };
+
+export interface ArrayValue {
+  values?: AnyValue[];
+}
+
+export interface KeyValueList {
+  values?: KeyValue[];
+}
 
 export interface InstrumentationScope {
   name?: string;
+  version?: string;
+  attributes?: KeyValue[];
 }

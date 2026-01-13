@@ -23,13 +23,16 @@ export interface TracesData {
 
 export interface ResourceSpan {
   resource?: Resource;
-  scopeSpans: ScopeSpans[];
+  scopeSpans: ScopeSpan[];
 }
 
-export interface ScopeSpans {
+export interface ScopeSpan {
   scope?: InstrumentationScope;
   spans: Span[];
 }
+
+/** @deprecated this type was renamed to ScopeSpan */
+export type ScopeSpans = ScopeSpan;
 
 export interface Span {
   traceId: string;
