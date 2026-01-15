@@ -120,6 +120,24 @@ function computeSocialButtonFromURL(theme: Theme, url: string) {
   return SOCIAL_BUTTONS_MAPPING[''](theme);
 }
 
+function PersesLogo({
+  isLaptopSize,
+  isDarkModeEnabled,
+}: {
+  isLaptopSize: boolean;
+  isDarkModeEnabled: boolean;
+}): ReactElement {
+  if (!isLaptopSize) {
+    return <PersesLogoCropped />;
+  }
+
+  if (isDarkModeEnabled) {
+    return <DarkThemePersesLogo />;
+  }
+
+  return <LightThemePersesLogo />;
+}
+
 export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const { isDarkModeEnabled } = useDarkMode();
   const isLaptopSize = useIsLaptopSize();
@@ -147,7 +165,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
       justifyContent="center"
       gap={2}
     >
-      {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
+      <PersesLogo isLaptopSize={isLaptopSize} isDarkModeEnabled={isDarkModeEnabled} />
       <Divider
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"
