@@ -54,7 +54,7 @@ function useDefaultQueryDefinition(
   }
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
-    useErrorBoundary: true,
+    throwOnError: true,
     enabled: true,
   });
 
