@@ -2,7 +2,6 @@
 1. [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) - run a kubernetes cluster locally
 2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-on-linux) - CLI to connect to a kubernetes cluster
 3. [Caddy](https://caddyserver.com/docs/install) - reverse proxy to inject kubernetes Authorization token header
-4. [tmux](https://github.com/tmux/tmux/wiki/Installing) - terminal multiplexer for single script startup
 
 ## Running Locally
 1. `./scripts/run-kubernetes.sh` - Starts a kind cluster and adds all relevant data (CRD's, users, permissions)
