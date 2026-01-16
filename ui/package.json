@@ -20,13 +20,9 @@
   },
   "workspaces": [
     "app",
-    "components",
     "core",
-    "dashboards",
-    "explore",
     "e2e",
-    "internal-utils",
-    "plugin-system"
+    "internal-utils"
   ],
   "devDependencies": {
     "@swc/cli": "^0.7.8",

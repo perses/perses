@@ -79,12 +79,12 @@ checklint:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go *.cue
+	go run ./scripts/check-license --check
 
 .PHONY: fixlicense
 fixlicense:
 	@echo ">> adding license header where it's missing"
-	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go *.cue
+	go run ./scripts/check-license --fix
 
 .PHONY: fmt
 fmt:
@@ -113,11 +113,6 @@ cue-gen:
 validate-data:
 	@echo ">> Validate all data in dev/data"
 	$(GO) run ./scripts/validate-data/validate-data.go
-
-.PHONY: validate-cue
-validate-cue:
-	@echo ">> Validate CUE files against corresponding test files"
-	$(GO) run ./scripts/validate-cue/validate-cue.go
 
 .PHONY: test
 test: generate

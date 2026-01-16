@@ -1,0 +1,125 @@
+version: 2
+builds:
+  - id: "perses"
+    main: ./cmd/perses/main.go
+    binary: "perses"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+  - id: "percli"
+    main: ./cmd/percli/main.go
+    binary: "percli"
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - "{{.Env.LDFLAGS}}"
+archives:
+  - id: "default"
+    ids:
+      - "perses"
+      - "percli"
+    formats:
+      - "tar.gz"
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - plugins-archive
+      - src: "docs/examples/config.archive.yaml"
+        dst: "./config.yaml"
+dockers_v2:
+  - id: "perses"
+    ids:
+      - perses
+      - percli
+    dockerfile: Dockerfile
+    images:
+      - "docker.io/persesdev/perses"
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-distroless"
+      - "v{{ .Major }}.{{ .Minor }}-distroless"
+    extra_files:
+      - LICENSE
+      - docs/examples/config.docker.yaml
+      - plugins-archive
+    labels:
+      "org.opencontainers.image.authors": "The Perses Authors <perses-team@googlegroups.com>"
+      "org.opencontainers.image.title": "{{ .ProjectName }}"
+      "org.opencontainers.image.description": "{{ .ProjectName }}"
+      "org.opencontainers.image.url": "https://perses.dev"
+      "org.opencontainers.image.source": "https://github.com/perses/{{ .ProjectName }}"
+      "org.opencontainers.image.version": "{{ .Version }}"
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.licenses": "Apache-2.0"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    flags:
+      - "--pull"
+  - id: "perses-debug"
+    ids:
+      - perses
+      - percli
+    dockerfile: distroless-debug.Dockerfile
+    images:
+      - "docker.io/persesdev/perses"
+    tags:
+      - "latest-debug"
+      - "{{ .Tag }}-debug"
+      - "v{{ .Major }}.{{ .Minor }}-debug"
+      - "{{ .Tag }}-distroless-debug"
+      - "v{{ .Major }}.{{ .Minor }}-distroless-debug"
+    extra_files:
+      - LICENSE
+      - docs/examples/config.docker.yaml
+      - plugins-archive
+    labels:
+      "org.opencontainers.image.authors": "The Perses Authors <perses-team@googlegroups.com>"
+      "org.opencontainers.image.title": "{{ .ProjectName }}"
+      "org.opencontainers.image.description": "{{ .ProjectName }}"
+      "org.opencontainers.image.url": "https://perses.dev"
+      "org.opencontainers.image.source": "https://github.com/perses/{{ .ProjectName }}"
+      "org.opencontainers.image.version": "{{ .Version }}"
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.licenses": "Apache-2.0"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    flags:
+      - "--pull"
+release:
+  github:
+    owner: "perses"
+    name: "perses"
+  ids:
+    - "default"
+  prerelease: auto
+  name_template: "{{ .Version }} / {{ .Env.DATE }}"

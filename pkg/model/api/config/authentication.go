@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"time"
 
@@ -31,9 +32,24 @@ const (
 )
 
 type OAuthOverride struct {
-	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
-	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
-	Scopes       []string      `json:"scopes" yaml:"scopes"`
+	ClientID         secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret     secret.Hidden `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile string        `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
+	Scopes           []string      `json:"scopes" yaml:"scopes"`
+}
+
+func (o *OAuthOverride) Verify() error {
+	if len(o.ClientSecret) > 0 && len(o.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(o.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(o.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		o.ClientSecret = secret.Hidden(data)
+	}
+	return nil
 }
 
 // appendIfMissing will append the value in the slice, only if not already present.
@@ -84,6 +100,7 @@ type Provider struct {
 	Name              string         `json:"name" yaml:"name"`
 	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
 	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile  string         `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
 	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
 	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
@@ -100,6 +117,16 @@ func (p *Provider) Verify() error {
 	}
 	if p.ClientID == "" {
 		return errors.New("provider's `client_id` is mandatory")
+	}
+	if len(p.ClientSecret) > 0 && len(p.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(p.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(p.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		p.ClientSecret = secret.Hidden(data)
 	}
 	return nil
 }

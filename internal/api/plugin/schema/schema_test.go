@@ -16,6 +16,7 @@ package schema
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -431,5 +432,51 @@ func TestValidateDashboardVariables(t *testing.T) {
 				assert.ErrorContains(t, err, test.expectedErrorStr)
 			}
 		})
+	}
+}
+
+func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
+	// Successful load case
+	s := newSch()
+	module := v1.PluginModule{
+		Spec: plugin.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []plugin.Plugin{
+				{
+					Kind: plugin.KindPanel,
+					Spec: plugin.Spec{Name: "FirstChart"},
+				},
+			},
+		},
+	}
+	// should load without error
+	if err := s.load("testdata/schemas/panels", module); err != nil {
+		t.Fatalf("unexpected error while loading schema: %v", err)
+	}
+	inst, ok := s.panels.Get("FirstChart", module.Metadata)
+	if !ok || inst == nil {
+		t.Fatalf("expected panel schema instance to be registered, got ok=%v, inst=%v", ok, inst)
+	}
+
+	// Error case: module spec does not include the matching plugin
+	s2 := newSch()
+	moduleMissing := v1.PluginModule{
+		Spec: plugin.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []plugin.Plugin{
+				{
+					Kind: plugin.KindPanel,
+					Spec: plugin.Spec{Name: "SomeOtherName"},
+				},
+			},
+		},
+	}
+	if err := s2.load("testdata/schemas/panels", moduleMissing); err == nil {
+		t.Fatalf("expected error when plugin list does not contain schema kind")
+	} else {
+		// give a readable check to ensure it's the expected failure path
+		if !strings.Contains(err.Error(), "unable to find the plugin with the associated schema") {
+			t.Fatalf("unexpected error message: %v", err)
+		}
 	}
 }

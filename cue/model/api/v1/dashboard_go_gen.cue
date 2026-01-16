@@ -14,11 +14,14 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	targetBlank?:     bool   @go(TargetBlank)
 }
 
-#PanelDisplay: _
+#PanelDisplay: {
+	name?:        string @go(Name)
+	description?: string @go(Description)
+}
 
 #PanelSpec: {
-	display: #PanelDisplay  @go(Display)
-	plugin:  common.#Plugin @go(Plugin)
+	display?: null | #PanelDisplay @go(Display,*PanelDisplay)
+	plugin:   common.#Plugin       @go(Plugin)
 	queries?: [...#Query] @go(Queries,[]Query)
 	links?: [...#Link] @go(Links,[]Link)
 }

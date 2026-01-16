@@ -228,11 +228,16 @@ client_id: <secret>
 # The Client Secret of the Perses application into the provider
 client_secret: <secret>
 
+# The path to a file containing the client secret
+client_secret_file: <filename> # Optional
+
 device_code:
   # Allow to use a different Client ID for the device code flow
   client_id: <secret> # Optional
   # Allow to use a different Client Secret for the device code flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the device code flow
   scopes:
   - <string> # Optional
@@ -242,6 +247,8 @@ client_credentials:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the client credentials flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the client credentials flow
   scopes:
   - <string> # Optional
@@ -297,6 +304,8 @@ device_code:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the device code flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the device code flow
   scopes:
     - <string> # Optional
@@ -306,6 +315,8 @@ client_credentials:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the client credentials flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the client credentials flow
   scopes:
     - <string> # Optional
@@ -491,6 +502,9 @@ tls_config: <TLS config> # Optional
 # Username used for the connection
 user: <secret> # Optional
 
+# The path to a file containing the username
+user_file: <filename> # Optional
+
 # The password associated to the user. Mandatory if the user is set
 password: <secret> # Optional
 
@@ -502,6 +516,9 @@ net: <string> # Optional
 
 # The network address. If set then `net` is mandatory. Example: "localhost:3306"
 addr: <secret> # Optional
+
+# The path to a file containing the network address
+addr_file: <filename> # Optional
 
 # Database name
 db_name: <string> # Optional

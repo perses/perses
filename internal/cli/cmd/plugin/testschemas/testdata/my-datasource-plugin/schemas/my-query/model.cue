@@ -13,9 +13,14 @@
 
 package model
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/perses/shared/cue/common"
+)
 
 kind: "MyQuery"
 spec: close({
-	query: strings.MinRunes(1)
+	query:       strings.MinRunes(1)
+	thresholds?: common.#thresholds
 })

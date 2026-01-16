@@ -152,7 +152,6 @@ func (o *option) runAllTests() ([]TestResult, error) {
 		if d.Name() == "tests" {
 			// Determine the plugin kind from the parent directory (which is assumed to be the entrypoint of the `model` CUE package, cf -h)
 			parentDir := filepath.Dir(currentPath)
-
 			_, buildInstance, err := schema.LoadModelSchema(parentDir)
 			if err != nil {
 				return err
@@ -185,10 +184,17 @@ func (o *option) runAllTests() ([]TestResult, error) {
 			migrateTestsPath := filepath.Join(currentPath, "tests")
 
 			if _, err := os.Stat(migrateTestsPath); err == nil {
-				buildInstance, err := migrate.LoadMigrateSchema(currentPath)
+				migrateBuildInstance, err := migrate.LoadMigrateSchema(currentPath)
 
 				if err != nil {
 					return fmt.Errorf("failed to load migration schemas: %w", err)
+				}
+
+				// Load the model schema from the parent directory (which is assumed to be the entrypoint of the `model` CUE package, cf -h)
+				parentDir := filepath.Dir(currentPath)
+				_, modelBuildInstance, err := schema.LoadModelSchema(parentDir)
+				if err != nil {
+					return fmt.Errorf("failed to load model schema: %w", err)
 				}
 
 				migrateFilePath := filepath.Join(currentPath, "migrate.cue")
@@ -197,7 +203,7 @@ func (o *option) runAllTests() ([]TestResult, error) {
 					return fmt.Errorf("unable to find the plugin kind associated to the migration file: %w", err)
 				}
 				// Run migration tests with the loaded schema
-				migrateResults, err := o.runMigrationTestsForPath(migrateTestsPath, buildInstance, pluginKind)
+				migrateResults, err := o.runMigrationTestsForPath(migrateTestsPath, migrateBuildInstance, modelBuildInstance, pluginKind)
 				if err != nil {
 					return err
 				}
@@ -292,7 +298,7 @@ func (o *option) runModelValidationTests(testDir string, buildInstance *build.In
 }
 
 // runMigrationTestsForPath runs migration tests for a specific directory path
-func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
+func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, modelBuildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
 	var results []TestResult
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
@@ -347,16 +353,29 @@ func (o *option) runMigrationTestsForPath(testDir string, buildInstance *build.I
 
 		logrus.Debugf("Run migration test for plugin %s of type %s", expectedPlugin.Kind, pluginKind)
 
+		// Validate expected.json against the model schema (e.g to check for eventual typos)
+		logrus.Debugf("Validating expected.json for migration test %s", testName)
+		ctx := cuecontext.New()
+		expectedValue := ctx.CompileBytes(expectedData)
+		expectedFinalValue := expectedValue.Unify(ctx.BuildInstance(modelBuildInstance))
+
+		expectedValidationErr := expectedFinalValue.Validate(schema.CueValidationOptions...)
+		if expectedValidationErr != nil {
+			result.Error = fmt.Sprintf("Expected output failed model validation: %v", expectedValidationErr)
+			results = append(results, result)
+			return filepath.SkipDir
+		}
+
 		var resultPlugin *common.Plugin
 		var resultIsEmpty bool
 		// Set default definition ID and type based on the plugin kind from the loaded schema
 		switch pluginKind {
 		case v1plugin.KindVariable:
-			resultPlugin, resultIsEmpty, err = migrate.ExecuteVariableScript(buildInstance, inputData)
+			resultPlugin, resultIsEmpty, err = migrate.ExecuteVariableScript(migrateBuildInstance, inputData)
 		case v1plugin.KindQuery:
-			resultPlugin, resultIsEmpty, err = migrate.ExecuteQueryScript(buildInstance, inputData)
+			resultPlugin, resultIsEmpty, err = migrate.ExecuteQueryScript(migrateBuildInstance, inputData)
 		case v1plugin.KindPanel:
-			resultPlugin, resultIsEmpty, err = migrate.ExecutePanelScript(buildInstance, inputData)
+			resultPlugin, resultIsEmpty, err = migrate.ExecutePanelScript(migrateBuildInstance, inputData)
 		default:
 			return fmt.Errorf("unsupported migration schema kind: %s", pluginKind)
 		}
