@@ -22,6 +22,15 @@ export interface JoinByColumnValueTransform {
   };
 }
 
+export interface ExtractColumnFieldsTransform {
+  kind: 'ExtractColumnFields';
+  spec: TransformCommonSpec & {
+    column: string;
+    format: 'JSON' | 'Regex' | 'SplitByDelimiter' | 'KeyValuePairs';
+    matcher?: string;
+  };
+}
+
 export interface MergeColumnsTransform {
   kind: 'MergeColumns';
   spec: TransformCommonSpec & {
@@ -46,7 +55,8 @@ export type Transform =
   | JoinByColumnValueTransform
   | MergeColumnsTransform
   | MergeIndexedColumnsTransform
-  | MergeSeriesTransform;
+  | MergeSeriesTransform
+  | ExtractColumnFieldsTransform;
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
@@ -54,4 +64,5 @@ export const TRANSFORM_TEXT = {
   MergeColumns: 'Merge columns',
   MergeIndexedColumns: 'Merge indexed columns',
   MergeSeries: 'Merge series',
+  ExtractColumnFields: 'Extract column fields',
 };
