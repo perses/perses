@@ -8,6 +8,8 @@ application.
 
 ## Getting started (npm example)
 
+> These UI libraries now live in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to link them locally for development, follow the instructions in that repo.
+
 ```bash
 # Create new React app or modify an existing app using the dependencies below
 # Example: https://react.dev/learn/build-a-react-app-from-scratch

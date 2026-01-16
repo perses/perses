@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,11 +18,13 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/perses/perses/scripts/changelog"
+	"github.com/perses/perses/scripts/pkg/changelog"
 	"github.com/sirupsen/logrus"
 )
 
 func getPreviousTag() string {
+	// We cannot use the package command from scripts/pkg/command/command.go because it sets the output to os.Stdout while the function Output() needs to capture it.
+	// And somehow, you cannot set twice the output of a command.
 	previousVersion, err := exec.Command("git", "describe", "--abbrev=0").Output()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the latest tag")

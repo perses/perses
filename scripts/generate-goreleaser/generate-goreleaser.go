@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,16 +16,17 @@ package main
 import (
 	_ "embed"
 
-	goreleasergenerate "github.com/perses/perses/scripts/generate-docker-goreleaser-config"
+	"github.com/perses/perses/scripts/generate-goreleaser/dockerconfig"
+	"github.com/perses/perses/scripts/pkg/goreleaser"
 )
 
 //go:embed .goreleaser.base.yaml
 var baseConfig []byte
 
+func generate(cfg dockerconfig.TestConfig) {
+	goreleaser.Generate(baseConfig, dockerconfig.PersesDockerConfig(cfg))
+}
+
 func main() {
-	goreleasergenerate.GenerateGoreleaserConfig(baseConfig, "perses", []string{
-		"LICENSE",
-		"docs/examples/config.docker.yaml",
-		"plugins-archive",
-	})
+	generate(dockerconfig.TestConfig{})
 }

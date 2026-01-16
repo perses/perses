@@ -1,0 +1,42 @@
+name: dependabot
+on:
+  pull_request:
+    paths:
+      - '**/go.mod'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  go-update:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.BOT_TOKEN }}
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+          enable_cue: false
+      - name: Run go mod tidy
+        run: |
+          go mod tidy
+          cd internal/cli/cmd/dac/build/testdata/go
+          go mod tidy
+          cd -
+          cd go-sdk/test
+          go mod tidy
+          cd -
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v7.1.0
+        with:
+          commit_message: '[dependabot skip] apply go mod tidy'
+          commit_options: '--no-verify --signoff'
+          commit_user_name: 'perses-bot'
+          commit_user_email: 'perses-team+bot@googlegroups.com'
+          commit_author: 'persesbot <perses-team+bot@googlegroups.com>'

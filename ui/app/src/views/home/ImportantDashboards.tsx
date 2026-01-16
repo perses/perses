@@ -15,6 +15,7 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import { ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -47,6 +48,7 @@ function DashboardMosaic({ dashboards }: DashboardMosaicProps): ReactElement {
 }
 
 export function ImportantDashboards(): ReactElement {
+  const { t: translate } = useTranslation('dashboard');
   const { data: config } = useConfig();
   const { data: dashboards, isLoading } = useImportantDashboardList();
 
@@ -59,7 +61,7 @@ export function ImportantDashboards(): ReactElement {
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <StarFourPointsOutline />
-        <h2>Important Dashboards</h2>
+        <h2>{translate('important_dashboards')}</h2>
       </Stack>
       {isLoading ? (
         <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>

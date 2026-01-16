@@ -93,7 +93,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasourc
 	result := &v1.Panel{
 		Kind: string(plugin.KindPanel),
 		Spec: v1.PanelSpec{
-			Display: v1.PanelDisplay{
+			Display: &v1.PanelDisplay{
 				Name:        "empty",
 				Description: grafanaPanel.Description,
 			},

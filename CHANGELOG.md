@@ -1,5 +1,65 @@
 # Changelog
 
+## 0.53.0-rc.0 / 2026-01-07
+
+## Core & UI
+
+- [ENHANCEMENT] `plugin test-schemas`: match migration output against model (#3762)
+- [ENHANCEMENT] Make panel `display` attribute optional (#3751)
+
+## Plugins improvements
+
+- [FEATURE] Table: Add data link column setting to generate column config (perses/plugins#516)
+- [FEATURE] TimeSeriesChart: Adds support for log type y-axis (as well as linear) (perses/plugins#500)
+- [FEATURE] Logstable: Add back in color coded log rows (perses/plugins#512)
+- [FEATURE] Table: Add link editor to the table column setting (perses/plugins#506)
+- [ENHANCEMENT] Table: improve migration of column settings (perses/plugins#514)
+
+## 0.53.0-beta.4 / 2025-12-19
+
+### Core & UI
+
+- [FEATURE] Implement i18n (#3103)
+- [FEATURE] Add data link to the table column config (#3648)
+- [FEATURE] Implement OIDC RP initiated logout (#3587)
+- [ENHANCEMENT] Manage secret by file in config (#3617)
+- [ENHANCEMENT] CUE model: improve typing in Variable schemas (#3700)
+- [ENHANCEMENT] Improve link editor component (#3656)
+- [ENHANCEMENT] Fix wrong formatting in datasource's HTTP settings editor (#3609)
+- [ENHANCEMENT] File unmarshalling: Allow .yml as well (#3714)
+- [BUGFIX] Fix incomplete Grafana panel migration (#3726)
+- [BUGFIX] Remove deprecated info displayed on UI (#3719)
+- [BUGFIX] Datasource editor: Resolve request headers UX issues caused by direct map manipulation (#3650)
+- [BUGFIX] Generate a less strict panel unique identifier for non secure context (#3699)
+- [BUGFIX] Fix loading plugin in dev with no schema (#3663)
+- [BUGFIX] `format` data model: fix ambiguous schema (#3661)
+- [BUGFIX] Disable refetch on group onmount (#3667)
+- [BUGFIX] Add abort signal to the plugin queries (#3672)
+- [BUGFIX] Dockerfile: Switch user to `nonroot` (#3657)
+- [BUGFIX] Fix plugin path in Dockerfile (#3658)
+- [BUGFIX] Use '--' instead of '##' as URL safe character to encode the state for oauth/oidc (#3652)
+- [BUGFIX] Take apiPrefix in OIDC/OAuth2 redirections (#3647)
+- [BUGFIX] Fix the search bar to return the results regardless of important project config (#3644)
+- [BUGFIX] Ensure that oauth state in case of oauth / oidc is long enough (#3618)
+- [BUGFIX] PluginEditor - Fix createInitialOptions for plugins (#3613)
+- [BREAKINGCHANGE] remove shared packages (#3659)
+- [BREAKINGCHANGE] Ignore usage of Authorization header in datasource configuration (#3673)
+- [DOC] Fix authorization doc mentioning the right 'edit' that does not exist (#3697)
+- [DOC] Enhance dashboard concept doc (#3614)
+
+### Plugins improvements
+
+- [FEATURE] Prometheus: support query params (perses/plugins#485)
+- [ENHANCEMENT] TimeSeriesChart: migration: support byFrameRefID-based overrides (perses/plugins#486)
+- [ENHANCEMENT] Add Loki autocompletion (perses/plugins#496)
+- [ENHANCEMENT] Tempo: Show a notice if more results match the query (perses/plugins#478)
+  [BUGFIX] Tempo: encode Trace ID in lowercase hex format (perses/plugins#490)
+- [BUGFIX] Prometheus: Fixing variable form (perses/plugins#502)
+- [BUGFIX] Prometheus: calculate interval and minstep for query replacement (perses/plugins#475)
+- [BUGFIX] Table: remove duplication of columnSetting (perses/plugins#489)
+  [BUGFIX] Table: render no data if no record exists (perses/plugins#487)
+- [BREAKINGCHANGE] Markdown panel: fix CUE module name (perses/plugins#492)
+
 ## 0.53.0-beta.3 / 2025-11-21
 
 ### Core & UI

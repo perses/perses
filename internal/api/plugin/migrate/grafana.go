@@ -48,6 +48,8 @@ type Panel struct {
 	json.RawMessage
 }
 
+// Custom unmarshal to both store fields and keep raw data (used by the CUE-based migration logic).
+// Checks unmarshalling errors only when unmarshaling complex structs.
 func (p *Panel) UnmarshalJSON(data []byte) error {
 	var tmp map[string]json.RawMessage
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -70,25 +72,21 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(innerPanels, &panel.Panels); err != nil {
 			return err
 		}
-		delete(tmp, "panels")
 	}
 	if grid, ok := tmp["gridPos"]; ok {
 		if err := json.Unmarshal(grid, &panel.GridPosition); err != nil {
 			return err
 		}
-		delete(tmp, "gridPos")
 	}
 	if targets, ok := tmp["targets"]; ok {
 		if err := json.Unmarshal(targets, &panel.Targets); err != nil {
 			return err
 		}
-		delete(tmp, "targets")
 	}
 	if links, ok := tmp["links"]; ok {
 		if err := json.Unmarshal(links, &panel.Links); err != nil {
 			return err
 		}
-		delete(tmp, "links")
 	}
 	var err error
 	panel.RawMessage, err = json.Marshal(tmp)

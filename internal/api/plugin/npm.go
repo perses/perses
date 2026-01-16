@@ -15,6 +15,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -50,6 +51,25 @@ type NPMManifest struct {
 	ID       string           `json:"id"`
 	Name     string           `json:"name"`
 	Metadata ManifetsMetadata `json:"metaData"`
+}
+
+func (n *NPMManifest) UnmarshalJSON(data []byte) error {
+	var tmp NPMManifest
+	type plain NPMManifest
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if len(tmp.ID) == 0 {
+		return fmt.Errorf("manifest ID is empty")
+	}
+	if len(tmp.Name) == 0 {
+		return fmt.Errorf("manifest Name is empty")
+	}
+	if len(tmp.Metadata.BuildInfo.Version) == 0 {
+		return fmt.Errorf("manifest build version is empty")
+	}
+	*n = tmp
+	return nil
 }
 
 func ReadManifest(pluginPath string) (*NPMManifest, error) {

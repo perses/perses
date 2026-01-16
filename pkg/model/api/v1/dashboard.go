@@ -32,45 +32,12 @@ type Link struct {
 }
 
 type PanelDisplay struct {
-	Name        string `json:"name" yaml:"name"`
+	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (p *PanelDisplay) UnmarshalJSON(data []byte) error {
-	var tmp PanelDisplay
-	type plain PanelDisplay
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *PanelDisplay) UnmarshalYAML(unmarshal func(any) error) error {
-	var tmp PanelDisplay
-	type plain PanelDisplay
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *PanelDisplay) validate() error {
-	if len(p.Name) == 0 {
-		return fmt.Errorf("display.name cannot be empty")
-	}
-	return nil
-}
-
 type PanelSpec struct {
-	Display PanelDisplay  `json:"display" yaml:"display"`
+	Display *PanelDisplay `json:"display,omitempty" yaml:"display,omitempty"`
 	Plugin  common.Plugin `json:"plugin" yaml:"plugin"`
 	Queries []Query       `json:"queries,omitempty" yaml:"queries,omitempty"`
 	Links   []Link        `json:"links,omitempty" yaml:"links,omitempty"`

@@ -6,6 +6,9 @@ Perses comes with validation capabilities based on [CUE](https://cuelang.org/), 
 
 This section explains about the format any plugin should follow to be accepted & registered by Perses at runtime.
 
+!!! tip
+    Some of the below examples rely on the [`github.com/perses/shared/cue/common` package](https://registry.cue.works/docs/github.com/perses/shared/cue/common). This CUE package provides standard definitions (e.g unit, legend..) used by most of the official plugins & that any custom plugin could reuse as well. Leveraging a standard definition is likely to allow leveraging as well the frontend code that corresponds to it (e.g FormatControls, LegendOptionsEditor..)
+
 ### Variable
 
 A variable plugin looks like the following:
@@ -32,6 +35,8 @@ A panel plugin looks like the following:
 
 ```cue
 package model
+
+import "github.com/perses/shared/cue/common"
 
 kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
 spec: {
@@ -89,7 +94,7 @@ A panel migration file looks like the following:
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "bargauge"

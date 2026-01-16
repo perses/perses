@@ -25,7 +25,7 @@ metadata:
   project: MySuperProject
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "Dashboard" ]
 ```
 
@@ -42,7 +42,7 @@ metadata:
   name: variable-editor
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "Variable" ]
 ```
 
@@ -113,7 +113,7 @@ metadata:
   name: admin-editor
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "*" ]
 ```
 
