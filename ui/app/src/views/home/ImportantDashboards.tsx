@@ -69,17 +69,19 @@ export function ImportantDashboards(): ReactElement {
             : {}),
         }}
       >
-        {isLoading ? (
+        {isLoading && (
           <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Stack>
-        ) : dashboardList.length === 0 ? (
+        )}
+        {!isLoading && dashboardList.length === 0 && (
           <EmptyState
             icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
             message="No important dashboards found."
             hint="Configure important dashboards in your config file."
           />
-        ) : (
+        )}
+        {!isLoading && dashboardList.length > 0 && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {dashboardList.map((dashboard) => {
               const metricsCount = Object.keys(dashboard.spec.panels ?? {}).length;
