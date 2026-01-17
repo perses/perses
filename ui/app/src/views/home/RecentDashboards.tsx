@@ -63,17 +63,19 @@ export function RecentDashboards(): ReactElement {
         }}
       >
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          {isLoading ? (
+          {isLoading && (
             <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
               <CircularProgress size={24} />
             </Stack>
-          ) : dashboards.length === 0 ? (
+          )}
+          {!isLoading && dashboards.length === 0 && (
             <EmptyState
               icon={<HistoryIcon sx={{ fontSize: 32, color: 'text.secondary' }} />}
               message="No dashboards viewed yet."
               hint="Your recently viewed dashboards will appear here."
             />
-          ) : (
+          )}
+          {!isLoading && dashboards.length > 0 && (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {dashboards.map((item, index) => {
                 const updatedAt = item.date ?? item.dashboard.metadata.updatedAt;
