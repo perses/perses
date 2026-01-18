@@ -4,23 +4,22 @@
 3. [Caddy](https://caddyserver.com/docs/install) - reverse proxy to inject kubernetes Authorization token header
 
 ## Running Locally
-1. `./scripts/run-kubernetes.sh` - Starts a kind cluster and adds all relevant data (CRD's, users, permissions)
+1. Run `./scripts/run-kubernetes.sh`, this will create and start a kind cluster adding adds all relevant k8s resources (CRD's, users, permissions)
 
-After the kind cluster has been started the backend can be stated using:
+2. Wait until the kind cluster has been started, then start the Perses backend using:
 
 ```
 make build-api && ./bin/perses --config="./dev/config-kubernetes.yaml" --log.level="debug" --web.listen-address=":8081"
 ```
 
-The reverse-proxy can then be started using the following commands. The reverse-proxy is located at port 8080 so the frontend
-development server can be run in its default state as described in the [UI Readme](../../ui/README.md).
+3. Start the reverse-proxy using the following commands. This will expose the Perses backend running on localhost:8080, logged in as "user".
 
 ```
 export USER_TOKEN="$(kubectl --kubeconfig=./dev/kubernetes/local/kind-admin create token user --namespace perses --duration 8760h)"
 caddy run --config ./dev/kubernetes/Caddyfile --adapter caddyfile
 ```
 
-Perses should then be running on localhost:8080 logged in as "user".
+4. Start the frontend app development server running npm run start from ui/app. More details in the UI Readme. Then load http://localhost:3000 in your browser and use Perses using k8s authorization.
 
 ## Debugging
 
