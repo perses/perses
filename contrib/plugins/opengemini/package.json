@@ -1,0 +1,67 @@
+{
+    "name": "@perses-dev/opengemini-plugin",
+    "version": "0.1.0",
+    "description": "OpenGemini datasource and query plugins for Perses",
+    "license": "Apache-2.0",
+    "main": "./lib/cjs/index.js",
+    "types": "./lib/cjs/index.d.ts",
+    "files": [
+        "lib",
+        "schemas"
+    ],
+    "scripts": {
+        "clean": "rimraf dist/ lib/",
+        "build": "npm run build:lib && npm run build:plugin",
+        "build:lib": "swc ./src -d lib/cjs --config-file ../.cjs.swcrc && tsc --project tsconfig.build.json",
+        "build:plugin": "rsbuild build",
+        "start": "rsbuild dev",
+        "type-check": "tsc --noEmit",
+        "test": "cross-env TZ=UTC jest",
+        "lint": "eslint src --ext .ts,.tsx",
+        "lint:fix": "eslint --fix src --ext .ts,.tsx"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.9.3",
+        "@emotion/styled": "^11.9.3",
+        "@mui/material": "^6.1.10",
+        "@perses-dev/components": "0.53.0-rc.1",
+        "@perses-dev/core": "0.53.0-rc.0",
+        "@perses-dev/dashboards": "0.53.0-rc.1",
+        "@perses-dev/explore": "0.53.0-rc.1",
+        "@perses-dev/plugin-system": "0.53.0-rc.1",
+        "lodash": "^4.17.21",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-router-dom": "^6.30.1",
+        "use-resize-observer": "^9.0.0"
+    },
+    "devDependencies": {
+        "@module-federation/enhanced": "^0.8.8",
+        "@rsbuild/core": "^1.3.21",
+        "@rsbuild/plugin-react": "^1.3.3",
+        "@swc/cli": "^0.7.8",
+        "@swc/core": "^1.3.61",
+        "@types/lodash": "^4.14.182",
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "cross-env": "^7.0.3",
+        "rimraf": "^6.1.0",
+        "typescript": "5.4.5"
+    },
+    "peerDependencies": {
+        "react": "^17.0.0 || ^18.0.0",
+        "react-dom": "^17.0.0 || ^18.0.0"
+    },
+    "perses": {
+        "plugins": [
+            {
+                "kind": "Datasource",
+                "name": "OpenGeminiDatasource"
+            },
+            {
+                "kind": "TimeSeriesQuery",
+                "name": "OpenGeminiTimeSeriesQuery"
+            }
+        ]
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "kind": "OpenGeminiDatasource",
+    "spec": {
+        "directUrl": "http://localhost:8086"
+    }
+}
