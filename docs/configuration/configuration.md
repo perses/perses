@@ -209,6 +209,8 @@ oidc:
 # List of the OIDC authentication providers
 oauth:
   - <OAuth provider> # Optional
+# Kubernetes authentication provider
+kubernetes: <Kubernetes provider> # Optionall
 ```
 
 ##### OIDC provider
@@ -349,6 +351,16 @@ device_auth_url: <string> # Optional
 custom_login_property: <string> # Optional
 ```
 
+##### Kubernetes provider
+
+```yaml
+# Determines if the Kubernetes authentication provider is enabled. This provider must be enabled
+# alongside the kubernetes authorization provider, and cannot be used alongside any other
+# authentication providers
+enable: <boolean>
+
+```
+
 ###### Authentication provider HTTP Config
 
 ```yaml
@@ -373,15 +385,14 @@ providers: <Authorization providers> # Optional
 native:
   <Native provider>
 # Kubernetes authorization provider
-kubernetes:
-  - <Kubernetes provider> # Optional
+kubernetes: <Kubernetes provider> # Optional
 ```
 
 ##### Native provider
 ```yaml
-# Determines if the native provider is enabled. If security.enable_auth is set to true and no other
+# Determines if the native authentication provider is enabled. If security.enable_auth is set to true and no other
 # providers are set then this value will be automatically set to true
-enabled: <boolean> #Optional
+enable: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 check_latest_update_interval: <duration> | default = 30s> # Optional
 
@@ -407,10 +418,9 @@ scopes:
 # Must be the only authentication provider enabled and must be run alongside the kubernetes
 # authorization option enabled
 enabled: <boolean>
-# File path to a local kubeconfig file. The current logged in user's bearer token will be used
-# for both the backend and as the user being logged into Perses. The user should have "create"
-# permissions for the `TokenReview` and `SubjectAccessReview` resources. If this parameter isn't 
-# available the pods service account token will be used. This parameter should not be set in production
+# The active user in the kubeconfig should have "create" permissions for the `TokenReview` and 
+# `SubjectAccessReview` resources. If the kubeconfig parameter isn't set, the pods service account token
+#  will be used
 kubeconfig: <string> # Optional
 # query per second (QPS) the k8s client will use with the apiserver
 qps <int> | default 500  # Optional

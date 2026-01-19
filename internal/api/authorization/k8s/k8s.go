@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
@@ -40,15 +41,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 	authenticationclient "k8s.io/client-go/kubernetes/typed/authentication/v1"
 	authorizationclient "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 func New(conf config.Config) (*k8sImpl, error) {
 	if !conf.Security.Authorization.Provider.Kubernetes.Enable {
 		return nil, fmt.Errorf("kubernetes authorization is not enabled")
 	}
-	kubeconfig, err := initKubeConfig(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig)
+	kubeconfig, err := clientConfig.InitKubeConfig(conf.Security.Authorization.Provider.Kubernetes.Kubeconfig)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +78,6 @@ func New(conf config.Config) (*k8sImpl, error) {
 	return &k8sImpl{
 		authenticator: kubernetesAuthenticator,
 		authorizer:    k8sAuthorizer,
-		kubeconfig:    kubeconfig,
 		kubeClient:    kubeClient,
 	}, nil
 }
@@ -87,13 +85,17 @@ func New(conf config.Config) (*k8sImpl, error) {
 type k8sImpl struct {
 	authenticator authenticator.Request
 	authorizer    authorizer.Authorizer
-	kubeconfig    *rest.Config
-	kubeClient    *kubernetes.Clientset
+	kubeClient    kubernetes.Interface
 }
 
 // IsEnabled implements [Authorization]
 func (k *k8sImpl) IsEnabled() bool {
 	return true
+}
+
+// IsNativeAuthz implements [Authorization]
+func (k *k8sImpl) IsNativeAuthz() bool {
+	return false
 }
 
 // GetUser implements [Authorization]
@@ -106,6 +108,12 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 
 	if utils.IsAnonymous(ctx) {
 		return nil, nil
+	}
+
+	// Since we know that kubernetes expects the authorization header, we should check and return a
+	// specific error if it doesn't exist
+	if len(ctx.Request().Header.Get("Authorization")) == 0 {
+		return nil, errors.New("missing authorization header")
 	}
 
 	// At this point, we are sure that the context is not nil and the user is not anonymous.
@@ -140,6 +148,20 @@ func (k *k8sImpl) GetUsername(ctx echo.Context) (string, error) {
 	return k8sUser.GetName(), nil
 }
 
+// GetPublicUser implements [Authorization]
+func (k *k8sImpl) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+	username, err := k.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.PublicUser{
+		Kind:     v1.KindUser,
+		Metadata: *v1.NewMetadata(username),
+		Spec:     v1.PublicUserSpec{},
+	}, nil
+}
+
 // GetProviderInfo implements [Authorization]
 func (k *k8sImpl) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
 	// Provider Info is essentially used to know the original type of authentication provider used when using native authorization model.
@@ -154,8 +176,10 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			if skipper(ctx) {
 				return next(ctx)
 			}
+
 			_, err := k.GetUser(ctx)
 			if err != nil {
+				logrus.Error(err.Error())
 				return apiInterface.HandleUnauthorizedError("invalid authorization header")
 			}
 
@@ -183,9 +207,9 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 	}
 
 	k8sNamespaces := k.getNamespaceList()
-	var authorizedNamespaces []string
+	authorizedNamespaces := []string{}
 	for _, k8sNamespace := range k8sNamespaces {
-		if k.checkNamespacePermission(ctx, k8sNamespace, kubernetesUser) {
+		if k.hasPermissionForNamespace(ctx, k8sNamespace, kubernetesUser) {
 			authorizedNamespaces = append(authorizedNamespaces, k8sNamespace)
 		}
 	}
@@ -221,25 +245,7 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 		return false
 	}
 
-	action := getK8sAction(requestAction)
-	apiGroup := getK8sAPIGroup(scope)
-	apiVersion := getK8sAPIVersion(scope)
-
-	// Try checking the specific project for access
-	// If the namespace doesn't exist in k8s, the authorizer will return the "*" permissions
-	attributes := authorizer.AttributesRecord{
-		User:            kubernetesUser,
-		Verb:            string(action),
-		Namespace:       requestProject,
-		APIGroup:        apiGroup,
-		APIVersion:      apiVersion,
-		Resource:        string(scope),
-		Subresource:     "",
-		Name:            "",
-		ResourceRequest: true,
-	}
-
-	authorized, _, _ := k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	authorized, _ := k.checkSpecificPermision(ctx, requestProject, kubernetesUser, requestScope, requestAction)
 
 	return authorized == authorizer.DecisionAllow
 }
@@ -275,108 +281,118 @@ func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permiss
 
 	namespaces := k.getNamespaceList()
 
-scope:
-	for _, k8sScope := range k8sScopesToCheck {
-		// Contains the actions which need to be checked every loop.
-		// If action is permitted at the global scope, then we don't need to check within the namespace scope.
-		// Since each permission check is a network round trip, it is best to optimize
-		// the logic to reduce the number of permission checks we make
-		actionsToCheck := []k8sAction{
-			k8sWildcardAction,
-			k8sReadAction,
-			k8sCreateAction,
-			k8sUpdateAction,
-			k8sDeleteAction,
+	// Do an initial pass over the all namespace project so that we don't have to check the permissions available there
+	// against any of the projects we check after this point
+	allNamespacePermittedActions := map[v1Role.Scope][]v1Role.Action{}
+	allNamespacePermissions := []*v1Role.Permission{}
+	for _, scope := range globalScopesToCheck {
+		permittedActions := k.getPermittedActions(ctx, v1.WildcardProject, kubernetesUser, scope, []v1Role.Action{})
+		if len(permittedActions) > 0 {
+			allNamespacePermittedActions[scope] = permittedActions
+			allNamespacePermissions = append(allNamespacePermissions, &v1Role.Permission{
+				Scopes:  []v1Role.Scope{scope},
+				Actions: permittedActions,
+			})
 		}
-		apiGroup := getK8sAPIGroup(k8sScope)
-		apiVersion := getK8sAPIVersion(k8sScope)
-	project:
-		for _, k8sProject := range namespaces {
-			scopeActions, ok := userPermissions[k8sProject]
-			if ok {
-				scopeActions = append(scopeActions, &v1Role.Permission{
-					Scopes:  []v1Role.Scope{getPersesScope(k8sScope)},
-					Actions: []v1Role.Action{},
-				})
-			} else {
-				scopeActions = []*v1Role.Permission{{
-					Scopes:  []v1Role.Scope{getPersesScope(k8sScope)},
-					Actions: []v1Role.Action{},
-				}}
+	}
+	if len(allNamespacePermissions) > 0 {
+		userPermissions[v1.WildcardProject] = allNamespacePermissions
+	}
 
-			}
-			permissionIndex := len(scopeActions) - 1
-
-		action:
-			for _, k8sActionToCheck := range actionsToCheck {
-				attributes := authorizer.AttributesRecord{
-					User:            kubernetesUser,
-					Verb:            string(k8sActionToCheck),
-					Namespace:       k8sProject,
-					APIGroup:        apiGroup,
-					APIVersion:      apiVersion,
-					Resource:        string(getPersesScope(k8sScope)),
-					Subresource:     "",
-					Name:            "",
-					ResourceRequest: true,
-				}
-
-				authorized, _, err := k.authorizer.Authorize(ctx.Request().Context(), attributes)
-				if err != nil {
-					// If the request errors, then assume the rest of the requests will also error and break
-					// out early
-					break project
-				}
-
-				if k8sActionToCheck == k8sWildcardAction {
-					if authorized == authorizer.DecisionAllow {
-						scopeActions[permissionIndex].Actions = append(scopeActions[permissionIndex].Actions, getPersesAction(k8sWildcardAction))
-						if k8sProject == v1.WildcardProject {
-							userPermissions[k8sProject] = scopeActions
-							break project
-							// User has all permissions for this scope, no need
-							// to check other namespaces or permissions
-						}
-						// User has all permissions for this namespace, no need
-						// to check other permissions
-						break action
-					}
-				}
-
-				if k8sActionToCheck == k8sReadAction && authorized == authorizer.DecisionDeny {
-					// User can't even read the resource, no need to check the rest
-					break scope
-				}
-
-				if authorized == authorizer.DecisionAllow && slices.Contains([]k8sAction{
-					k8sReadAction,
-					k8sCreateAction,
-					k8sUpdateAction,
-					k8sDeleteAction,
-				}, k8sActionToCheck) {
-					scopeActions[permissionIndex].Actions = append(scopeActions[permissionIndex].Actions, getPersesAction(k8sActionToCheck))
-					if k8sProject == v1.WildcardProject {
-						actionsToCheck = slices.DeleteFunc(actionsToCheck, func(actionToCheck k8sAction) bool {
-							return actionToCheck == k8sActionToCheck
-						})
-						if len(actionsToCheck) == 1 {
-							// User has all permissions except for wildcard for this scope, no need
-							// to check the other namespaces or permissions
-							userPermissions[k8sProject] = scopeActions
-							break project
-						}
-					}
-				}
-			}
-			// Check if any actions are permitted for the user for the
-			// given project
-			if len(scopeActions[permissionIndex].Actions) > 0 {
-				userPermissions[k8sProject] = scopeActions
-			}
+	for _, namespace := range namespaces {
+		namespacePermissions := k.getNamespacePermissions(ctx, namespace, kubernetesUser, projectScopesToCheck, allNamespacePermittedActions)
+		if len(namespacePermissions) > 0 {
+			userPermissions[namespace] = namespacePermissions
 		}
 	}
 
 	return userPermissions, nil
+}
+
+func (k *k8sImpl) getNamespacePermissions(ctx echo.Context, namespace string, user user.Info, scopes []v1Role.Scope, knownPermissions map[v1Role.Scope][]v1Role.Action) []*v1Role.Permission {
+	namespacePermissions := []*v1Role.Permission{}
+	for _, scope := range scopes {
+		permittedActions := k.getPermittedActions(ctx, namespace, user, scope, knownPermissions[scope])
+		if len(permittedActions) > 0 {
+			namespacePermissions = append(namespacePermissions, &v1Role.Permission{
+				Scopes:  []v1Role.Scope{scope},
+				Actions: permittedActions,
+			})
+		}
+	}
+	return namespacePermissions
+}
+
+func (k *k8sImpl) getPermittedActions(ctx echo.Context, namespace string, user user.Info, scope v1Role.Scope, knownActions []v1Role.Action) []v1Role.Action {
+	// We only need to check actions which aren't already permitted
+	actionsToCheck := getUnknownActions(knownActions)
+	newlyValidActions := []v1Role.Action{}
+	for _, action := range actionsToCheck {
+		authorized, err := k.checkSpecificPermision(ctx, namespace, user, scope, action)
+
+		if err != nil {
+			// If the request errors, then assume the rest of the requests will also error and break
+			// out early
+			return newlyValidActions
+		}
+
+		if action == v1Role.WildcardAction && authorized == authorizer.DecisionAllow {
+			newlyValidActions = append(newlyValidActions, v1Role.WildcardAction)
+			return newlyValidActions
+		}
+
+		if action == v1Role.ReadAction && authorized == authorizer.DecisionDeny {
+			// If the user cannot even read the scope then assume they won't have other access
+			return newlyValidActions
+		}
+
+		if authorized == authorizer.DecisionAllow {
+			newlyValidActions = append(newlyValidActions, action)
+		}
+	}
+	return newlyValidActions
+}
+
+func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
+	// If all actions are permitted in then nothing is unknown
+	if len(knownActions) == 1 && knownActions[0] == v1Role.WildcardAction {
+		return []v1Role.Action{}
+	}
+	allActions := []v1Role.Action{
+		v1Role.WildcardAction,
+		v1Role.ReadAction,
+		v1Role.CreateAction,
+		v1Role.UpdateAction,
+		v1Role.DeleteAction,
+	}
+	return slices.DeleteFunc(allActions, func(actionToCheck v1Role.Action) bool {
+		return slices.Contains(knownActions, actionToCheck)
+	})
+}
+
+func (k *k8sImpl) checkSpecificPermision(ctx echo.Context, namespace string, user user.Info, scope v1Role.Scope, action v1Role.Action) (authorized authorizer.Decision, err error) {
+	k8sScope := getK8sScope(scope)
+	apiGroup := getK8sAPIGroup(k8sScope)
+	apiVersion := getK8sAPIVersion(k8sScope)
+
+	// To align with Perses RBAC any Global resource is not namespaced
+	if slices.Contains(globalScopes, scope) {
+		namespace = v1.WildcardProject
+	}
+
+	attributes := authorizer.AttributesRecord{
+		User:            user,
+		Verb:            string(getK8sAction(action)),
+		Namespace:       namespace,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        string(k8sScope),
+		Subresource:     "",
+		Name:            "",
+		ResourceRequest: true,
+	}
+	authorized, _, err = k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	return authorized, err
 }
 
 // RefreshPermissions implements [Authorization]
@@ -384,27 +400,14 @@ func (k *k8sImpl) RefreshPermissions() error {
 	return nil
 }
 
-func (k *k8sImpl) checkNamespacePermission(ctx echo.Context, namespace string, user user.Info) bool {
+func (k *k8sImpl) hasPermissionForNamespace(ctx echo.Context, namespace string, user user.Info) bool {
 	// Rather than checking if the user has access to the namespace, we check if the user has access
-	// to any of the perses scopes within the namespace, since namespaces which the user has access to
+	// to read any of the perses scopes within the namespace, since namespaces which the user has access to
 	// but cannot view perses scopes are irrelevant
-	for _, k8sScope := range k8sScopesToCheck {
-		attributes := authorizer.AttributesRecord{
-			User:            user,
-			Verb:            string(k8sReadAction),
-			Namespace:       namespace,
-			APIGroup:        "perses.dev",
-			APIVersion:      "v1alpha1",
-			Resource:        string(k8sScope),
-			Subresource:     "",
-			Name:            "",
-			ResourceRequest: true,
-		}
-
-		// don't need to check bool or error since if the authorized isn't allow then all other instances
-		// mean failure
-		authorized, _, _ := k.authorizer.Authorize(ctx.Request().Context(), attributes)
+	for _, scope := range projectScopesToCheck {
+		authorized, _ := k.checkSpecificPermision(ctx, namespace, user, scope, v1Role.ReadAction)
 		if authorized == authorizer.DecisionAllow {
+			// We can return early if the user can access any of the scopes
 			return true
 		}
 	}
@@ -426,25 +429,6 @@ func (k *k8sImpl) getNamespaceList() []string {
 	}
 
 	return namespaces
-}
-
-// Returns initialized config, allows local usage (outside cluster) based on provided kubeconfig or in-cluster
-// service account usage
-func initKubeConfig(kcLocation string) (*rest.Config, error) {
-	if kcLocation != "" {
-		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kcLocation)
-		if err != nil {
-			return nil, fmt.Errorf("unable to build rest config based on provided path to kubeconfig file: %w", err)
-		}
-		return kubeConfig, nil
-	}
-
-	kubeConfig, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, fmt.Errorf("cannot find service account in pod to build in-cluster rest config: %w", err)
-	}
-
-	return kubeConfig, nil
 }
 
 // getK8sAPIVersion is used to determine which API version the authorization request should use, v1
@@ -480,7 +464,7 @@ func getK8sUser(userStruct any) (user.Info, error) {
 }
 
 // newAuthorizer creates an authorizer compatible with the kubelet's needs
-func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf config.KubernetesProvider) (authorizer.Authorizer, error) {
+func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf config.KubernetesAuthorizationProvider) (authorizer.Authorizer, error) {
 	if client == nil {
 		return nil, errors.New("no client provided, cannot use webhook authorization")
 	}
@@ -494,7 +478,7 @@ func newAuthorizer(client authorizationclient.AuthorizationV1Interface, conf con
 }
 
 // newAuthenticator creates an authenticator compatible with the kubelets needs
-func newAuthenticator(client authenticationclient.AuthenticationV1Interface, conf config.KubernetesProvider) (authenticator.Request, error) {
+func newAuthenticator(client authenticationclient.AuthenticationV1Interface, conf config.KubernetesAuthorizationProvider) (authenticator.Request, error) {
 	if client == nil {
 		return nil, errors.New("tokenaccessreview client not provided, cannot use webhook authentication")
 	}

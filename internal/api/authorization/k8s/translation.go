@@ -30,15 +30,27 @@ const (
 type k8sScope string
 
 const (
-	k8sWildcardScope   k8sScope = "*"
-	k8sDashboardScope  k8sScope = "persesdashboards"
-	k8sDatasourceScope k8sScope = "persesdatasources"
-	k8sProjectScope    k8sScope = "namespaces"
+	k8sWildcardScope         k8sScope = "*"
+	k8sDashboardScope        k8sScope = "persesdashboards"
+	k8sGlobalDatasourceScope k8sScope = "persesglobaldatasources"
+	k8sDatasourceScope       k8sScope = "persesdatasources"
+	k8sProjectScope          k8sScope = "namespaces"
 )
 
-var k8sScopesToCheck = [2]k8sScope{
-	k8sDashboardScope,
-	k8sDatasourceScope,
+var globalScopesToCheck = []v1Role.Scope{
+	v1Role.GlobalDatasourceScope,
+	v1Role.DashboardScope,
+	v1Role.DatasourceScope,
+}
+
+var projectScopesToCheck = []v1Role.Scope{
+	v1Role.DashboardScope,
+	v1Role.DatasourceScope,
+}
+
+// All resources which are global scoped
+var globalScopes = []v1Role.Scope{
+	v1Role.GlobalDatasourceScope,
 }
 
 func getK8sAction(action v1Role.Action) k8sAction {
@@ -58,28 +70,13 @@ func getK8sAction(action v1Role.Action) k8sAction {
 	}
 }
 
-func getPersesAction(action k8sAction) v1Role.Action {
-	switch action {
-	case k8sReadAction:
-		return v1Role.ReadAction
-	case k8sCreateAction:
-		return v1Role.CreateAction
-	case k8sUpdateAction:
-		return v1Role.UpdateAction
-	case k8sDeleteAction:
-		return v1Role.DeleteAction
-	case k8sWildcardAction:
-		return v1Role.WildcardAction
-	default: // not reachable
-		return ""
-	}
-}
-
 // GetScope parse string to Scope (not case-sensitive)
 func getK8sScope(scope v1Role.Scope) k8sScope {
 	switch scope {
 	case v1Role.DashboardScope:
 		return k8sDashboardScope
+	case v1Role.GlobalDatasourceScope:
+		return k8sGlobalDatasourceScope
 	case v1Role.DatasourceScope:
 		return k8sDatasourceScope
 	case v1Role.ProjectScope:
@@ -87,22 +84,6 @@ func getK8sScope(scope v1Role.Scope) k8sScope {
 	case v1Role.WildcardScope:
 		return k8sWildcardScope
 	default:
-		return "" // Non-K8s Scope, use guest permissions
-	}
-}
-
-// GetScope parse string to Scope (not case-sensitive)
-func getPersesScope(scope k8sScope) v1Role.Scope {
-	switch scope {
-	case k8sDashboardScope:
-		return v1Role.DashboardScope
-	case k8sDatasourceScope:
-		return v1Role.DatasourceScope
-	case k8sProjectScope:
-		return v1Role.ProjectScope
-	case k8sWildcardScope:
-		return v1Role.WildcardScope
-	default: // not reachable
-		return ""
+		return "" // Scope doesn't have a k8s equivalent. For now default to rejecting
 	}
 }

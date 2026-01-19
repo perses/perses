@@ -186,7 +186,8 @@ func (s *Security) Verify() error {
 
 	if s.EnableAuth && !s.Authentication.Providers.EnableNative &&
 		len(s.Authentication.Providers.OIDC) == 0 &&
-		len(s.Authentication.Providers.OAuth) == 0 {
+		len(s.Authentication.Providers.OAuth) == 0 &&
+		!s.Authentication.Providers.KubernetesProvider.Enable {
 		return errors.New("impossible to enable auth if no authentication provider is setup")
 	}
 
@@ -196,6 +197,10 @@ func (s *Security) Verify() error {
 
 	if !s.EnableAuth && (s.Authorization.Provider.Native.Enable || s.Authorization.Provider.Kubernetes.Enable) {
 		return errors.New("authorization provider cannot be setup without auth enabled")
+	}
+
+	if (s.Authorization.Provider.Kubernetes.Enable && !s.Authentication.Providers.KubernetesProvider.Enable) || (!s.Authorization.Provider.Kubernetes.Enable && s.Authentication.Providers.KubernetesProvider.Enable) {
+		return errors.New("kubernetes authorization and authentication providers must be enabled at the same time")
 	}
 
 	return nil

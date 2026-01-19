@@ -155,14 +155,19 @@ export function useBanner(): Banner | undefined {
   return banner;
 }
 
-export function useIsNativeProviderEnabled(): boolean {
+export function useIsNativeAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.providers.enable_native;
 }
 
-export function useIsExternalProviderEnabled(): boolean {
+export function useIsExternalAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return (
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
+}
+
+export function useIsDelegatedAuthnProviderEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !!config.security.authentication.providers.kubernetes?.enable;
 }

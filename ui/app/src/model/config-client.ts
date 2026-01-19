@@ -86,8 +86,36 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
+  /**
+   * @deprecated use provider.native.check_latest_update_interval instead
+   */
+  check_latest_update_interval: Duration;
+  /**
+   * @deprecated use provider.native.guest_permissions instead
+   */
+  guest_permissions: Permission[];
+  provider: {
+    native?: NativeAuthorizationProvider;
+    kubernetes?: KubernetesAuthorizationProvider;
+  };
+}
+
+interface NativeAuthorizationProvider {
+  enable: boolean;
   check_latest_update_interval: Duration;
   guest_permissions: Permission[];
+}
+
+interface KubernetesAuthorizationProvider {
+  enable: boolean;
+  // remaining fields needed for backend configuration only
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // kubeconfig?: string
+  // qps?: number;
+  // burst?: number;
+  // authorizer_allow_ttl?: Duration;
+  // authorizer_deny_ttl?: Duration;
+  // authenticator_ttl?: Duration;
 }
 
 export interface OIDCProvider {
@@ -114,6 +142,11 @@ export interface AuthProviders {
   enable_native: boolean;
   oauth: OauthProvider[];
   oidc: OIDCProvider[];
+  kubernetes?: KubernetesProvider;
+}
+
+interface KubernetesProvider {
+  enable: boolean;
 }
 
 export interface AuthenticationConfig {

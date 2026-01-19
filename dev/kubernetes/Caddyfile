@@ -1,0 +1,6 @@
+:8080 {
+	reverse_proxy localhost:8081 {
+		header_up Authorization "Bearer {$USER_TOKEN}"
+		lb_try_duration 5s
+	}
+}
