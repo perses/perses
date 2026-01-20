@@ -37,11 +37,12 @@ services:
       - --number=10
       - --delay=100ms
       - --output=/var/log/output/fake.log
+      - --overwrite
 
   mariadb:
     image: mariadb
     ports:
-      - "3306:3306"
+      - '3306:3306'
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: perses
@@ -51,7 +52,7 @@ services:
   postgres:
     image: postgres:17
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       POSTGRES_DB: perses
       POSTGRES_USER: user
