@@ -88,19 +88,6 @@ services:
       - '9001:9001'
     profiles: [avalanche]
 
-  # Tempo runs as user 10001, and docker compose creates the volume as root.
-  # As such, we need to chown the volume in order for Tempo to start correctly.
-  init:
-    image: &tempoImage grafana/tempo:latest
-    user: root
-    entrypoint:
-      - 'chown'
-      - '10001:10001'
-      - '/var/tempo'
-    volumes:
-      - ./extra/tempo-data:/var/tempo
-    profiles: [tempo]
-
   memcached:
     image: memcached:1.6.29
     container_name: memcached
@@ -112,11 +99,12 @@ services:
     profiles: [tempo]
 
   tempo:
-    image: *tempoImage
+    image: grafana/tempo:latest
     command: ['-config.file=/etc/tempo.yaml']
+    user: '10001:10001'
     volumes:
       - ./extra/tempo.yaml:/etc/tempo.yaml
-      - ./extra/tempo-data:/var/tempo
+      - tempo-data:/var/tempo
     ports:
       - '14268:14268' # jaeger ingest
       - '3200:3200' # tempo
@@ -137,3 +125,6 @@ services:
     depends_on:
       - tempo
     profiles: [tempo]
+
+volumes:
+  tempo-data:
