@@ -78,6 +78,7 @@ type DashboardSpec struct {
 	// Datasources is an optional list of datasource definition.
 	Datasources map[string]*DatasourceSpec `json:"datasources,omitempty" yaml:"datasources,omitempty"`
 	Variables   []dashboard.Variable       `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Annotations []AnnotationSpec           `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 	Panels      map[string]*Panel          `json:"panels" yaml:"panels"`
 	Layouts     []dashboard.Layout         `json:"layouts" yaml:"layouts"`
 	// Duration is the default time range to use when getting data to fill the dashboard
@@ -124,6 +125,17 @@ func (d *DashboardSpec) validate() error {
 			return fmt.Errorf("variable %q (index %d) already exists", name, i)
 		}
 	}
+
+	annotations := make(map[string]bool, len(d.Annotations))
+	for i, annotation := range d.Annotations {
+		name := annotation.Display.Name
+		if !annotations[name] {
+			annotations[name] = true
+		} else {
+			return fmt.Errorf("annotation %q (index %d) already exists", name, i)
+		}
+	}
+
 	for panelKey := range d.Panels {
 		if err := common.ValidateID(panelKey); err != nil {
 			return err

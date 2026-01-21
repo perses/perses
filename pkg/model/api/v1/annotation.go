@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2026 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,15 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './annotation';
-export * from './datasource';
-export * from './display';
-export * from './duration';
-export * from './metadata';
-export * from './panel';
-export * from './plugin';
-export * from './role';
-export * from './rolebinding';
-export * from './secret';
-export * from './user';
-export * from './variable';
+package v1
+
+import (
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
+
+type Display struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+	Hidden      bool   `json:"hidden,omitempty" yaml:"hidden,omitempty"`
+}
+
+type AnnotationSpec struct {
+	Display Display       `json:"display" yaml:"display"`
+	Color   string        `json:"color" yaml:"color"`
+	Plugin  common.Plugin `json:"plugin" yaml:"plugin"`
+}
