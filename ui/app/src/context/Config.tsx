@@ -67,6 +67,11 @@ export function useIsLocalDatasourceEnabled(): boolean {
   return !config.datasource.disable_local;
 }
 
+export function useIsLocalAnnoltationEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !config.annotation.disable_local;
+}
+
 export function useIsGlobalVariableEnabled(): boolean {
   const { config } = useConfigContext();
   return !config.variable.global.disable;

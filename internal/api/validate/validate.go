@@ -124,6 +124,9 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
 		if err := sch.ValidateDashboardVariables(spec.Variables); err != nil {
 			return err
 		}
+		if err := sch.ValidateDashboardAnnotations(spec.Annotations); err != nil {
+			return err
+		}
 		if err := sch.ValidatePanels(spec.Panels); err != nil {
 			return err
 		}

@@ -224,6 +224,10 @@ export interface DatasourceConfig {
   disable_local: boolean;
 }
 
+export interface AnnotationConfig {
+  disable_local: boolean;
+}
+
 export interface ConfigModel {
   api_prefix?: string;
   security: SecurityConfig;
@@ -232,6 +236,7 @@ export interface ConfigModel {
   provisioning?: ProvisioningConfig;
   datasource: DatasourceConfig;
   variable: VariableConfig;
+  annotation: AnnotationConfig;
   ephemeral_dashboard: EphemeralDashboardConfig;
   frontend: FrontendConfig;
 }

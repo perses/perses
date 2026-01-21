@@ -56,6 +56,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   } = props;
   const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
 
+  const isLocalAnnotationEnabled = useIsLocalAnnoltationEnabled();
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
@@ -126,6 +127,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}
                   isReadonly={isReadonly}
+                  isAnnotationEnabled={isLocalAnnotationEnabled}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}

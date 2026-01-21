@@ -82,6 +82,7 @@ var availablePluginTypes = []apiv1.Kind{
 	apiv1.KindDatasource,
 	apiv1.KindTimeSeriesQuery,
 	apiv1.KindVariable,
+	apiv1.KindAnnotation,
 	apiv1.KindPanel,
 	apiv1.KindExplore,
 }
@@ -132,6 +133,8 @@ func getPluginPath(pluginName string, pluginType apiv1.Kind) (string, error) {
 		return path.Join("src", "queries", pluginSlug), nil
 	case apiv1.KindVariable:
 		return path.Join("src", "variables", pluginSlug), nil
+	case apiv1.KindAnnotation:
+		return path.Join("src", "annotations", pluginSlug), nil
 	case apiv1.KindPanel:
 		return path.Join("src", "panels", pluginSlug), nil
 	case apiv1.KindExplore:
@@ -149,6 +152,8 @@ func getTemplatePath(pluginType apiv1.Kind) (string, error) {
 		return path.Join("templates", "query", "timeseriesquery"), nil
 	case apiv1.KindVariable:
 		return path.Join("templates", "variable"), nil
+	case "Annotation":
+		return path.Join("templates", "annotations"), nil
 	case apiv1.KindPanel:
 		return path.Join("templates", "panel"), nil
 	case apiv1.KindExplore:
@@ -171,6 +176,7 @@ func (o *generateOptions) Execute() error {
 	var persesDatasourcePlugins []GeneratedPlugin
 	var persesQueryPlugins []GeneratedPlugin
 	var persesVariablePlugins []GeneratedPlugin
+	var persesAnnotationsPlugins []GeneratedPlugin
 	var persesExplorePlugins []GeneratedPlugin
 	var exposedModules []ExposedModule
 
@@ -240,6 +246,8 @@ func (o *generateOptions) Execute() error {
 				persesDatasourcePlugins = append(persesDatasourcePlugins, p)
 			case apiv1.KindVariable:
 				persesVariablePlugins = append(persesVariablePlugins, p)
+			case apiv1.KindAnnotation:
+				persesAnnotationsPlugins = append(persesAnnotationsPlugins, p)
 			case apiv1.KindExplore:
 				persesExplorePlugins = append(persesExplorePlugins, p)
 			case apiv1.KindPanel:
@@ -249,18 +257,19 @@ func (o *generateOptions) Execute() error {
 	}
 
 	data := map[string]any{
-		"ModuleName":              GetKebabCase(o.pluginModuleName),
-		"ModulePascalName":        GetPascalCase(o.pluginModuleName),
-		"ModuleOrg":               GetKebabCase(o.pluginModuleOrg),
-		"PluginName":              GetKebabCase(o.pluginName),
-		"PluginPascalName":        o.pluginPascalName,
-		"ExposedModules":          exposedModules,
-		"PersesPlugins":           persesPlugins,
-		"PersesPanelPlugins":      persesPanelPlugins,
-		"PersesDatasourcePlugins": persesDatasourcePlugins,
-		"PersesQueryPlugins":      persesQueryPlugins,
-		"PersesVariablePlugins":   persesVariablePlugins,
-		"PersesExplorePlugins":    persesExplorePlugins,
+		"ModuleName":               GetKebabCase(o.pluginModuleName),
+		"ModulePascalName":         GetPascalCase(o.pluginModuleName),
+		"ModuleOrg":                GetKebabCase(o.pluginModuleOrg),
+		"PluginName":               GetKebabCase(o.pluginName),
+		"PluginPascalName":         o.pluginPascalName,
+		"ExposedModules":           exposedModules,
+		"PersesPlugins":            persesPlugins,
+		"PersesPanelPlugins":       persesPanelPlugins,
+		"PersesDatasourcePlugins":  persesDatasourcePlugins,
+		"PersesQueryPlugins":       persesQueryPlugins,
+		"PersesVariablePlugins":    persesVariablePlugins,
+		"PersesAnnotationsPlugins": persesAnnotationsPlugins,
+		"PersesExplorePlugins":     persesExplorePlugins,
 	}
 
 	var moduleTemplateFiles []string
