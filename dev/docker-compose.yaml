@@ -114,7 +114,6 @@ services:
       - '4318:4318' # otlp http
       - '9411:9411' # zipkin
     depends_on:
-      - init
       - memcached
     profiles: [tempo]
 
