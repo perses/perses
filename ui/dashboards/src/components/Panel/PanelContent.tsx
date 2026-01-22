@@ -30,7 +30,7 @@ export interface PanelContentProps extends Omit<PanelProps<UnknownSpec>, 'queryR
  */
 export function PanelContent(props: PanelContentProps): ReactElement {
   const { panelPluginKind, definition, queryResults, spec, contentDimensions } = props;
-  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { useErrorBoundary: true });
+  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', panelPluginKind, { throwOnError: true }); // LOGZIO CHANGE: `useErrorBoundary` was changed to `throwOnError` for tanstack query v4 -> v5 support
 
   // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.

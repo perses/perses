@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { SnackbarProvider } from '@perses-dev/components';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, keepPreviousData } from '@tanstack/react-query';
 import { lazy, ReactElement, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
@@ -67,7 +67,7 @@ const queryClient = new QueryClient({
       // This sets the default to 0 retries.
       // If needed, the number of retries can be overridden in individual useQuery calls.
       retry: 0,
-      keepPreviousData: true,
+      placeholderData: keepPreviousData,
     },
   },
 });

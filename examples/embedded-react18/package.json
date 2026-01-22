@@ -16,7 +16,7 @@
     "@perses-dev/plugin-system": "latest",
     "@perses-dev/prometheus-plugin": "latest",
     "@perses-dev/timeseries-chart-plugin": "latest",
-    "@tanstack/react-query": "^4",
+    "@tanstack/react-query": "^5.28.9",
     "react": "^18",
     "react-dom": "^18"
   },

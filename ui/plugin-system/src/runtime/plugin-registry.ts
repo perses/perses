@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { BuiltinVariableDefinition } from '@perses-dev/core';
-import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { NoInfer, useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, PluginType } from '../model';
 
@@ -49,7 +49,7 @@ export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
   options?: UsePluginOptions<T>
-): UseQueryResult<PluginImplementation<T>, Error> {
+): UseQueryResult<NoInfer<PluginImplementation<T>>, Error> {
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
   options = {
     ...options,

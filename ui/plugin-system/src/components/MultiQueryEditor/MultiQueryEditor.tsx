@@ -54,7 +54,7 @@ function useDefaultQueryDefinition(
   }
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
-    useErrorBoundary: true,
+    throwOnError: true, // LOGZIO CHANGE: `useErrorBoundary` was changed to `throwOnError` for tanstack query v4 -> v5 support
     enabled: true,
   });
 

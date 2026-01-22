@@ -32,7 +32,7 @@ export interface PanelSpecEditorProps {
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
   const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
-  const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
+  const { data: plugin, isPending, error } = usePlugin('Panel', kind); // LOGZIO CHANGE: `isLoading` was changed to `isPending` for tanstack query v4 -> v5 support
 
   const { queryResults } = useDataQueriesContext();
 
@@ -40,7 +40,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     return <ErrorAlert error={error} />;
   }
 
-  if (isLoading) {
+  if (isPending) {
     return null;
   }
 
