@@ -260,6 +260,11 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return apiinterface.InternalError
 	}
 
+	if h.config.RemoveOriginAndReferer {
+		req.Header.Del("Referer")
+		req.Header.Del("Origin")
+	}
+
 	// redirect the request to the datasource
 	req.URL.Path = h.path
 	logrus.Debugf("request will be redirected to %q", h.config.URL.String())

@@ -75,3 +75,10 @@ func Secret(name string) Option {
 		return nil
 	}
 }
+
+func RemoveOriginAndReferer(isRemoved bool) Option {
+	return func(builder *Builder) error {
+		builder.Spec.RemoveOriginAndReferer = isRemoved
+		return nil
+	}
+}
