@@ -401,13 +401,13 @@ export class DashboardPage {
    * Beadcrumbs Helper
    */
   async goBackToHomePage(): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL('/');
     await this.page.getByRole('link', { name: 'Home' }).click();
     await navigationPromise;
   }
 
   async goBackToProjectPage(projectName: string): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL(`/projects/${encodeURIComponent(projectName)}`);
     await this.page.getByRole('link', { name: projectName }).first().click();
     await navigationPromise;
   }

@@ -76,7 +76,7 @@ export function RecentDashboards(): ReactElement {
             />
           )}
           {!isLoading && dashboards.length > 0 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Box id="recent-dashboard-list" sx={{ display: 'flex', flexDirection: 'column' }}>
               {dashboards.map((item, index) => {
                 const updatedAt = item.date ?? item.dashboard.metadata.updatedAt;
                 const relativeTime = updatedAt ? intlFormatDistance(new Date(updatedAt), new Date()) : 'moments ago';
@@ -88,6 +88,8 @@ export function RecentDashboards(): ReactElement {
                     <Box
                       component={RouterLink}
                       to={`/projects/${item.dashboard.metadata.project}/dashboards/${item.dashboard.metadata.name}`}
+                      role="row"
+                      aria-label={`${item.dashboard.metadata.project} ${item.dashboard.metadata.name}`}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',

@@ -82,7 +82,7 @@ export function ImportantDashboards(): ReactElement {
           />
         )}
         {!isLoading && dashboardList.length > 0 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box data-testid="important-dashboards-mosaic" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {dashboardList.map((dashboard) => {
               const metricsCount = Object.keys(dashboard.spec.panels ?? {}).length;
               const updatedAt = dashboard.metadata.updatedAt ?? dashboard.metadata.createdAt;

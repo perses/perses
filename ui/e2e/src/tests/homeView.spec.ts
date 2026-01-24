@@ -19,18 +19,17 @@ test.describe('homeView', () => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
-    await homePage.showDashboardList('perses');
+    await homePage.navigateToProject('perses');
 
-    const navigationPromise = page.waitForNavigation();
-    await homePage.clickDashboardItem('perses', 'Demo');
-    await navigationPromise;
+    const projectPage = new AppProjectPage(page);
+    await projectPage.navigateToDashboard('perses', 'Demo');
   });
 
   test('can navigate to an important dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL(new RegExp('/projects/perses/dashboards/Demo', 'i'));
     await homePage.clickImportantDashboardItem('perses', 'Demo');
     await navigationPromise;
   });
@@ -47,7 +46,7 @@ test.describe('homeView', () => {
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.goBackToHomePage();
 
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL(new RegExp(`/projects/${project}/dashboards/${dashboard}`, 'i'));
     await homePage.clickRecentDashboardItem(project, dashboard);
     await navigationPromise;
   });
@@ -57,7 +56,7 @@ test.describe('homeView', () => {
     await homePage.goto();
 
     // Go to testing project
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL('/projects/testing');
     await homePage.clickProjectLink('testing');
     await navigationPromise;
   });
@@ -70,7 +69,7 @@ test.describe('homeView', () => {
     await homePage.searchDashboardOrProject('Benchmark');
 
     // Go to testing project
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL('/projects/perses');
     await homePage.clickProjectLink('perses');
     await navigationPromise;
   });
