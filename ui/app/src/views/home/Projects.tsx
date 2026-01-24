@@ -82,6 +82,7 @@ function ProjectCard({ row }: ProjectCardProps): ReactElement {
       elevation={1}
       component={RouterLink}
       to={`/projects/${row.project.metadata.name}`}
+      aria-label={projectName}
       sx={{
         p: 2,
         borderRadius: 2,
@@ -235,6 +236,7 @@ export function Projects(): ReactElement {
             onChange={handleSearch}
             size="small"
             fullWidth
+            aria-label="Search a Project or a Dashboard"
             sx={{
               '& .MuiOutlinedInput-root': {
                 bgcolor: 'action.hover',
