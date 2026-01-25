@@ -463,21 +463,30 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	// add password if provided
 	if err := s.setupAuthentication(); err != nil {
 		logrus.WithError(err).Error("unable to setup authentication")
-		return apiinterface.InternalError
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "Authentication setup failed",
+			"error":   err.Error(),
+		})
 	}
 
 	// add tls.Config
 	tlsConfig, err := s.prepareTLSConfig()
 	if err != nil {
 		logrus.WithError(err).Error("unable to build the tls config")
-		return apiinterface.InternalError
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "TLS configuration failed",
+			"error":   err.Error(),
+		})
 	}
 
 	// get the correct SQL driver for address and open connection
 	db, err := s.sqlOpen(tlsConfig)
 	if err != nil {
 		logrus.WithError(err).Error("unable to open the database")
-		return apiinterface.InternalError
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "Database connection failed",
+			"error":   err.Error(),
+		})
 	}
 	defer func(db *sql.DB) {
 		if err = db.Close(); err != nil {
@@ -488,7 +497,10 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	rows, err := db.QueryContext(r.Context(), q.Query)
 	if err != nil {
 		logrus.WithError(err).Error("unable to execute the query")
-		return apiinterface.InternalError
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": "SQL query failed",
+			"error":   err.Error(),
+		})
 	}
 	defer func(rows *sql.Rows) {
 		if err = rows.Close(); err != nil {
@@ -496,8 +508,8 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		}
 	}(rows)
 
-	// write the SQL query result as CSV
-	if err = writeCSVResponse(c, rows); err != nil {
+	// write the SQL query result as JSON (for frontend consumption)
+	if err = writeJSONResponse(c, rows); err != nil {
 		logrus.WithError(err).Error("unable to write the query result")
 		return apiinterface.InternalError
 	}
@@ -533,7 +545,7 @@ func (s *sqlProxy) prepareTLSConfig() (*tls.Config, error) {
 // SQLOpen opens a database specified by its database driver in the address
 func (s *sqlProxy) sqlOpen(tlsConfig *tls.Config) (*sql.DB, error) {
 	switch s.config.Driver {
-	case datasourceSQL.DriverMySQL:
+	case datasourceSQL.DriverMySQL, datasourceSQL.DriverMariaDB:
 		return s.openMySQL(tlsConfig)
 	case datasourceSQL.DriverPostgreSQL:
 		return s.openPostgres(tlsConfig)
@@ -638,16 +650,82 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 		pgxConfig.MaxConns = s.config.Postgres.MaxConns
 	}
 
-	if tlsConfig != nil {
-		if s.config.Postgres.SSLMode == "" || s.config.Postgres.SSLMode == datasourceSQL.SSLModeDisable {
-			return nil, errors.New("cannot use custom TLSConfig with sslmode=disable")
-		}
+	// Only apply TLS config if SSL mode is not disable
+	// When sslmode=disable, PostgreSQL doesn't use TLS at all
+	if tlsConfig != nil && s.config.Postgres.SSLMode != "" && s.config.Postgres.SSLMode != datasourceSQL.SSLModeDisable {
 		pgxConfig.ConnConfig.TLSConfig = tlsConfig
 	}
 
 	db := stdlib.OpenDB(*pgxConfig.ConnConfig)
 
 	return db, nil
+}
+
+func writeJSONResponse(c echo.Context, rows *sql.Rows) error {
+	cols, err := rows.Columns()
+	if err != nil {
+		logrus.WithError(err).Error("unable to get columns")
+		return apiinterface.InternalError
+	}
+
+	colTypes, err := rows.ColumnTypes()
+	if err != nil {
+		logrus.WithError(err).Error("unable to get column types")
+		return apiinterface.InternalError
+	}
+
+	// Build column metadata
+	columns := make([]map[string]string, len(cols))
+	for i, col := range cols {
+		dbType := colTypes[i].DatabaseTypeName()
+		columns[i] = map[string]string{
+			"name": col,
+			"type": dbType,
+		}
+	}
+
+	// Create a slice of interface{} to hold the column values
+	values := make([]any, len(cols))
+	scanArgs := make([]any, len(cols))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+	// Collect all rows
+	rowsData := make([]map[string]any, 0)
+	for rows.Next() {
+		err = rows.Scan(scanArgs...)
+		if err != nil {
+			logrus.WithError(err).Error("unable to scan row")
+			return apiinterface.InternalError
+		}
+
+		record := make(map[string]any)
+		for i, col := range cols {
+			val := values[i]
+			if val == nil {
+				record[col] = nil
+			} else {
+				// Convert []byte to string for better JSON serialization
+				if b, ok := val.([]byte); ok {
+					record[col] = string(b)
+				} else {
+					record[col] = val
+				}
+			}
+		}
+		rowsData = append(rowsData, record)
+	}
+
+	// Build response
+	response := map[string]any{
+		"columns": columns,
+		"rows":    rowsData,
+	}
+
+	// Set Content-Type and write JSON response
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	return c.JSON(http.StatusOK, response)
 }
 
 func writeCSVResponse(c echo.Context, rows *sql.Rows) error {

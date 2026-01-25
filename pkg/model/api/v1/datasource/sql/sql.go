@@ -25,6 +25,7 @@ type Driver string
 
 const (
 	DriverMySQL      Driver = "mysql"
+	DriverMariaDB    Driver = "mariadb"
 	DriverPostgreSQL Driver = "postgres"
 )
 
@@ -149,7 +150,7 @@ func (s *Config) validate() error {
 		return errors.New("driver is required")
 	}
 
-	if s.Driver != DriverMySQL && s.Driver != DriverPostgreSQL {
+	if s.Driver != DriverMySQL && s.Driver != DriverMariaDB && s.Driver != DriverPostgreSQL {
 		return fmt.Errorf("driver %s is not supported", s.Driver)
 	}
 
