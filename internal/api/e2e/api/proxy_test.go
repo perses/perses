@@ -219,7 +219,7 @@ func TestSQLProxyGlobalDatasource(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			Body().
-			IsEqual("datname\npostgres\nperses\ntemplate1\ntemplate0\n")
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
 		return []api.Entity{dts}
 	})
 }
@@ -257,7 +257,7 @@ func TestSQLProxyProjectDatasource(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			Body().
-			IsEqual("datname\npostgres\nperses\ntemplate1\ntemplate0\n")
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
 		return []api.Entity{project, dts}
 	})
 }
@@ -299,7 +299,7 @@ func TestSQLProxyLocalDatasource(t *testing.T) {
 			Expect().
 			Status(http.StatusOK).
 			Body().
-			IsEqual("datname\npostgres\nperses\ntemplate1\ntemplate0\n")
+			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
 		return []api.Entity{project, dashboard}
 	})
 }
