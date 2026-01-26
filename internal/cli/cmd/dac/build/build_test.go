@@ -64,15 +64,15 @@ func TestDacBuildCMD(t *testing.T) {
 		},
 		{
 			Title:           "nominal case with a single Go file",
-			Args:            []string{"-f", "testdata/go/main.go"},
+			Args:            []string{"-f", "testdata/go/cmd/main.go"},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata/go/main.go at built%stestdata%sgo%smain_output.yaml\n", "%s", separator),
+			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata%sgo%scmd%smain.go at built%stestdata%sgo%scmd%smain_output.yaml\n", "%s", separator),
 		},
 		{
 			Title:           "nominal case with a Go project",
-			Args:            []string{"-d", "testdata/go"},
+			Args:            []string{"-d", "testdata/go/cmd"},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata%sgo%smain.go at built%stestdata%sgo%smain_output.yaml\n", "%s", separator),
+			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata%sgo%scmd%smain.go at built%stestdata%sgo%scmd%smain_output.yaml\n", "%s", separator),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCommonAndGo)
