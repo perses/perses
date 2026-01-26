@@ -407,7 +407,9 @@ export class DashboardPage {
   }
 
   async goBackToProjectPage(projectName: string): Promise<void> {
-    const navigationPromise = this.page.waitForURL(`/projects/${encodeURIComponent(projectName)}`);
+    const navigationPromise = this.page.waitForURL(`/projects/${encodeURIComponent(projectName)}`, {
+      waitUntil: 'domcontentloaded',
+    });
     await this.page.getByRole('link', { name: projectName }).first().click();
     await navigationPromise;
   }
