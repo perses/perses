@@ -24,6 +24,7 @@ import (
 
 var (
 	mySQLAddress    = "localhost:3306"
+	mariaDBAddress  = "localhost:3307"
 	postgresAddress = "localhost:5432"
 )
 
@@ -75,6 +76,104 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 			expectError: false,
 		},
 		{
+			name: "mysql with username",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMySQL,
+					Host:     mySQLAddress,
+					Database: "testdb",
+				},
+				username: "testuser",
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mysql with custom config",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMySQL,
+					Host:     mySQLAddress,
+					Database: "testdb",
+					MySQL: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset":   "utf8mb4",
+							"parseTime": "true",
+						},
+						MaxAllowedPacket: 67108864,
+					},
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb success",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with username and password",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+				},
+				username: "mariauser",
+				password: "mariapass",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with custom config",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+					MariaDB: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset":   "utf8mb4",
+							"collation": "utf8mb4_unicode_ci",
+						},
+						MaxAllowedPacket: 33554432,
+					},
+				},
+				username: "mariauser",
+				password: "mariapass",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with tls",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+					MariaDB: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset": "utf8mb4",
+						},
+					},
+				},
+				name:     "mariadb-ds",
+				project:  "testproject",
+				username: "mariauser",
+				password: "mariapass",
+			},
+			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
+			expectError: false,
+		},
+		{
 			name: "postgres success",
 			proxy: &sqlProxy{
 				config: &datasourceSQL.Config{
@@ -87,6 +186,22 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 			expectError: false,
 		},
 		{
+			name: "postgres with username",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModeDisable,
+					},
+				},
+				username: "pguser",
+				password: "pgpass",
+			},
+			expectError: false,
+		},
+		{
 			name: "postgres no password",
 			proxy: &sqlProxy{
 				config: &datasourceSQL.Config{
@@ -94,6 +209,35 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 					Host:   postgresAddress,
 				},
 			},
+			expectError: false,
+		},
+		{
+			name: "postgres with all ssl modes - prefer",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModePreferable,
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "postgres with ssl mode require and tls",
+			proxy: &sqlProxy{
+				config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModeRequire,
+					},
+				},
+			},
+			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
 			expectError: false,
 		},
 	}
