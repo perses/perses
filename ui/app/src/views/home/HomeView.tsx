@@ -11,23 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Grid, MenuItem, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { ReactElement, useState } from 'react';
-import HomeIcon from 'mdi-material-ui/Home';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
-import { StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
 import { useIsMobileSize } from '../../utils/browser-size';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
-import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
-import { ImportRoute } from '../../model/route';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
 import { useIsEphemeralDashboardEnabled } from '../../context/Config';
-import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
-import { ProjectsAndDashboards } from './ProjectsAndDashboards';
+import { Projects } from './Projects';
 import { ImportantDashboards } from './ImportantDashboards';
+import { HomeViewHeroSection } from './HomeViewHeroSection';
 
 function HomeView(): ReactElement {
   // Navigate to the project page if the project has been successfully added
@@ -58,59 +53,46 @@ function HomeView(): ReactElement {
   };
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
-      <Box sx={{ width: '100%' }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <StackCrumb>
-            <HomeIcon fontSize="large" />
-            <TitleCrumb>Home</TitleCrumb>
-          </StackCrumb>
-          <Stack direction="row" gap={isMobileSize ? 0.5 : 2}>
-            <CRUDButton action="create" scope="Project" variant="contained" onClick={handleAddProjectDialogOpen}>
-              Add Project
-            </CRUDButton>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={4}>
+      <Stack gap={3}>
+        <HomeViewHeroSection
+          userProjects={userProjects}
+          onAddProjectClick={handleAddProjectDialogOpen}
+          onAddDashboardClick={handleAddDashboardDialogOpen}
+        />
+        <CreateProjectDialog
+          open={isAddProjectDialogOpen}
+          onClose={handleAddProjectDialogClose}
+          onSuccess={handleAddProjectDialogSubmit}
+        />
+        <CreateDashboardDialog
+          open={isAddDashboardDialogOpen}
+          projects={userProjects}
+          onClose={handleAddDashboardDialogClose}
+          onSuccess={handleAddDashboardDialogSubmit}
+          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+        />
+      </Stack>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', lg: 'repeat(3, 1fr)' },
+          gap: 3,
+        }}
+      >
+        {/* Important Dashboards - Spans 2 columns */}
+        <Box sx={{ gridColumn: { lg: 'span 2' } }}>
+          <ImportantDashboards />
+        </Box>
 
-            <ButtonMenu>
-              <CRUDButton
-                variant="contained"
-                onClick={handleAddDashboardDialogOpen}
-                disabled={userProjects.length === 0}
-              >
-                Add Dashboard
-              </CRUDButton>
-              <MenuItem component={RouterLink} to={ImportRoute} disabled={userProjects.length === 0}>
-                <CRUDButton style={{ backgroundColor: 'transparent' }}>Import Dashboard</CRUDButton>
-              </MenuItem>
-            </ButtonMenu>
-            <CreateProjectDialog
-              open={isAddProjectDialogOpen}
-              onClose={handleAddProjectDialogClose}
-              onSuccess={handleAddProjectDialogSubmit}
-            />
-            <CreateDashboardDialog
-              open={isAddDashboardDialogOpen}
-              projects={userProjects}
-              onClose={handleAddDashboardDialogClose}
-              onSuccess={handleAddDashboardDialogSubmit}
-              isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-            />
-          </Stack>
-        </Stack>
+        {/* Recent Dashboards - 1 column */}
+        <Box>
+          <RecentDashboards />
+        </Box>
       </Box>
-      <Grid container spacing={8}>
-        <Grid item xs={12} lg={8}>
-          <Stack gap={2}>
-            <ImportantDashboards />
-            <ProjectsAndDashboards />
-          </Stack>
-        </Grid>
-        <Grid item xs={12} lg={4}>
-          <Stack gap={2}>
-            <InformationSection />
-            <RecentDashboards />
-          </Stack>
-        </Grid>
-      </Grid>
+      <Box mt={3} mb={3}>
+        <Projects />
+      </Box>
     </Stack>
   );
 }

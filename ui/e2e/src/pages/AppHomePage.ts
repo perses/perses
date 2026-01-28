@@ -15,6 +15,10 @@ import { Page } from '@playwright/test';
 
 const recentDashboardListId = 'recent-dashboard-list';
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * The Perses App home page.
  */
@@ -35,12 +39,10 @@ export class AppHomePage {
    * @param dashboardName - Name of the dashboard.
    */
   async navigateToDashboard(projectName: string, dashboardName: string): Promise<void> {
-    await this.goto();
-
-    await this.showDashboardList(projectName);
-    const navigationPromise = this.page.waitForNavigation();
-    await this.clickDashboardItem(projectName, dashboardName);
-    await navigationPromise;
+    const projectSegment = encodeURIComponent(projectName.toLowerCase());
+    const dashboardSegment = encodeURIComponent(dashboardName.toLowerCase());
+    await this.page.goto(`/projects/${projectSegment}/dashboards/${dashboardSegment}`);
+    await this.page.getByTestId('dashboard-toolbar').waitFor();
   }
 
   /**
@@ -50,7 +52,7 @@ export class AppHomePage {
   async navigateToProject(projectName: string): Promise<void> {
     await this.goto();
 
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL(`/projects/${encodeURIComponent(projectName)}`);
     await this.clickProjectLink(projectName);
     await navigationPromise;
   }
@@ -64,7 +66,8 @@ export class AppHomePage {
   }
 
   async clickProjectLink(projectName: string): Promise<void> {
-    const projectLink = this.page.getByRole('button', { name: projectName }).getByRole('link', { name: projectName });
+    const projectSegment = encodeURIComponent(projectName);
+    const projectLink = this.page.locator(`a[href="/projects/${projectSegment}"]`).first();
     await projectLink.click();
   }
 
@@ -78,18 +81,19 @@ export class AppHomePage {
   async clickRecentDashboardItem(projectName: string, dashboardName: string): Promise<void> {
     const dashboardButton = this.page
       .locator(`#${recentDashboardListId}`)
-      .getByRole('row', { name: `${projectName} ${dashboardName}` });
+      .getByRole('row', { name: new RegExp(`^${escapeRegExp(projectName)}\\s+${escapeRegExp(dashboardName)}$`, 'i') });
     await dashboardButton.click();
   }
 
   async clickImportantDashboardItem(projectName: string, dashboardName: string): Promise<void> {
-    const dashboardButton = this.page
-      .getByTestId('important-dashboards-mosaic')
-      .getByTestId(new RegExp(`^dashboard-card-${projectName}-${dashboardName}$`, 'i'));
-    await dashboardButton.click();
+    const projectSegment = encodeURIComponent(projectName);
+    const dashboardSegment = encodeURIComponent(dashboardName);
+    const href = `/projects/${projectSegment}/dashboards/${dashboardSegment}`;
+    const dashboardLink = this.page.getByTestId('important-dashboards-mosaic').locator(`a[href="${href}" i]`);
+    await dashboardLink.click();
   }
 
   async searchDashboardOrProject(search: string): Promise<void> {
-    await this.page.getByLabel('Search a Project or a Dashboard').fill(search);
+    await this.page.getByLabel('Search a Project or a Dashboard').locator('input').fill(search);
   }
 }
