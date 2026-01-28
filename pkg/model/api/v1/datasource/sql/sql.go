@@ -25,6 +25,7 @@ type Driver string
 
 const (
 	DriverMySQL      Driver = "mysql"
+	DriverMariaDB    Driver = "mariadb"
 	DriverPostgreSQL Driver = "postgres"
 )
 
@@ -114,6 +115,8 @@ type Config struct {
 	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
 	// MySQL specific driver config
 	MySQL *MySQLConfig `json:"mysql,omitempty" yaml:"mysql,omitempty"`
+	// MariaDB specific driver config (uses same structure as MySQL since MariaDB is MySQL-compatible)
+	MariaDB *MySQLConfig `json:"mariadb,omitempty" yaml:"mariadb,omitempty"`
 	// Postgres specific driver config
 	Postgres *PostgresConfig `json:"postgres,omitempty" yaml:"postgres,omitempty"`
 }
@@ -149,7 +152,7 @@ func (s *Config) validate() error {
 		return errors.New("driver is required")
 	}
 
-	if s.Driver != DriverMySQL && s.Driver != DriverPostgreSQL {
+	if s.Driver != DriverMySQL && s.Driver != DriverMariaDB && s.Driver != DriverPostgreSQL {
 		return fmt.Errorf("driver %s is not supported", s.Driver)
 	}
 
