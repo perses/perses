@@ -50,3 +50,7 @@ dev/extra/logs/*
 /prometheus
 
 !.gitkeep
+
+# For Java
+/java-sdk/target
+/target
