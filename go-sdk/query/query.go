@@ -13,28 +13,28 @@
 
 package query
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	"fmt"
 
-type Option func(panel *Builder) error
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
+)
 
-func New(options ...Option) (Builder, error) {
-	builder := &Builder{
-		Query: v1.Query{
-			Kind: "TimeSeriesQuery",
-		},
-	}
-
-	defaults := []Option{}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
+type Option struct {
+	Kind   plugin.Kind
+	Plugin common.Plugin
+	Error  error
 }
 
-type Builder struct {
-	v1.Query
+func New(option Option) (*v1.Query, error) {
+	if !option.Kind.IsQuery() {
+		return nil, fmt.Errorf("invalid plugin kind for a query: %s", option.Kind)
+	}
+	return &v1.Query{
+		Kind: string(option.Kind),
+		Spec: v1.QuerySpec{
+			Plugin: option.Plugin,
+		},
+	}, option.Error
 }
