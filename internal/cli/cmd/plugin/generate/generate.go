@@ -14,6 +14,7 @@
 package generate
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -172,7 +173,7 @@ func (o *generateOptions) Execute() error {
 	currentPlugins := []apiv1.Plugin{}
 
 	if err != nil || currentModule == nil {
-		if err != nil && os.IsNotExist(err) {
+		if err != nil && errors.Is(err, os.ErrNotExist) {
 			if o.pluginModuleName == "" || o.pluginModuleOrg == "" {
 				return fmt.Errorf("module.name and module.org are required when creating a new module as none was found under %q", o.outputDir)
 			}

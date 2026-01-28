@@ -319,7 +319,7 @@ func (o *option) preparePlugin(pluginPath string, c *color.Color) (*devserver, *
 	// First, we need to find the command to start the dev server.
 	npmPackageData, readErr := plugin.ReadPackage(pluginPath)
 	if readErr != nil {
-		return nil, nil, fmt.Errorf("failed to read package for the plugin %q", pluginPath)
+		return nil, nil, fmt.Errorf("failed to read package for the plugin %q: %w", pluginPath, readErr)
 	}
 	var rsbuildCMD string
 	for scriptName, script := range npmPackageData.Scripts {

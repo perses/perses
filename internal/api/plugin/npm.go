@@ -97,9 +97,12 @@ func ReadPackageFromNetwork(url *common.URL, pluginName string) (*NPMPackage, er
 func readFile[T any](filePath string, result *T) error {
 	data, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read file %q: %w", filePath, err)
 	}
-	return json.Unmarshal(data, result)
+	if err := json.Unmarshal(data, result); err != nil {
+		return fmt.Errorf("failed to unmarshal JSON from %q: %w", filePath, err)
+	}
+	return nil
 }
 
 func readFileFromNetwork[T any](url *common.URL, pluginName string, fileName string, result *T) error {

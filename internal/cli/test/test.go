@@ -15,7 +15,6 @@ package test
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"regexp"
 	"testing"
@@ -58,7 +57,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 				if assert.NotNil(t, err) {
 					if len(test.ExpectedRegexMessage) > 0 {
 						matched, _ := regexp.MatchString(test.ExpectedRegexMessage, err.Error())
-						assert.True(t, matched, "Expected error message to match regex: %s", test.ExpectedRegexMessage)
+						assert.True(t, matched, "Expected error message to match regex: %s\nActual error: %s", test.ExpectedRegexMessage, err.Error())
 					} else {
 						assert.Equal(t, test.ExpectedMessage, err.Error())
 					}
@@ -66,8 +65,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			} else if assert.Nil(t, err) {
 				if len(test.ExpectedRegexMessage) > 0 {
 					matched, _ := regexp.MatchString(test.ExpectedRegexMessage, buffer.String())
-					assert.True(t, matched, "Expected output to match regex: %s", test.ExpectedRegexMessage)
-					fmt.Println("output message: ", buffer.String())
+					assert.True(t, matched, "Expected output to match regex: %s\nActual output: %s", test.ExpectedRegexMessage, buffer.String())
 				} else {
 					assert.Equal(t, test.ExpectedMessage, buffer.String())
 				}
