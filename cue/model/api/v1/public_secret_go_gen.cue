@@ -21,12 +21,12 @@ import "github.com/perses/perses/cue/model/api/v1/secret"
 
 #PublicGlobalSecret: {
 	kind:     #Kind             @go(Kind)
-	metadata: #Metadata         @go(Metadata)
+	metadata: #PublicMetadata   @go(Metadata)
 	spec:     #PublicSecretSpec @go(Spec)
 }
 
 #PublicSecret: {
-	kind:     #Kind             @go(Kind)
-	metadata: #ProjectMetadata  @go(Metadata)
-	spec:     #PublicSecretSpec @go(Spec)
+	kind:     #Kind                  @go(Kind)
+	metadata: #PublicProjectMetadata @go(Metadata)
+	spec:     #PublicSecretSpec      @go(Spec)
 }

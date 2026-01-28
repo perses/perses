@@ -42,7 +42,7 @@ func NewPublicUserSpec(u UserSpec) PublicUserSpec {
 
 type PublicUser struct {
 	Kind     Kind           `json:"kind"`
-	Metadata Metadata       `json:"metadata"`
+	Metadata PublicMetadata `json:"metadata"`
 	Spec     PublicUserSpec `json:"spec"`
 }
 
@@ -64,7 +64,7 @@ func NewPublicUser(u *User) *PublicUser {
 	}
 	return &PublicUser{
 		Kind:     u.Kind,
-		Metadata: u.Metadata,
+		Metadata: PublicMetadata(u.Metadata),
 		Spec:     NewPublicUserSpec(u.Spec),
 	}
 }
