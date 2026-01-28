@@ -148,50 +148,6 @@ version: 1
 	}
 }
 
-func TestUnmarshalMetadataError(t *testing.T) {
-	testSuite := []struct {
-		title  string
-		jason  string
-		yamele string
-		err    error
-	}{
-		{
-			title: "name cannot be empty",
-			jason: `
-{
-  "version": 1
-}
-`,
-			yamele: `
-version: 1
-`,
-			err: fmt.Errorf("name cannot be empty"),
-		},
-		{
-			title: "name cannot contain spaces",
-			jason: `
-{
-  "name": "f o o",
-  "version": 1
-}
-`,
-			yamele: `
-name: "f o o"
-version: 1
-`,
-			err: fmt.Errorf("\"f o o\" is not a correct name. It should match the regexp: ^[a-zA-Z0-9_.-]+$"),
-		},
-	}
-	for _, test := range testSuite {
-		t.Run(test.title, func(t *testing.T) {
-			mFromJSON := Metadata{}
-			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &mFromJSON))
-			mFromYAML := Metadata{}
-			assert.Equal(t, test.err, yaml.Unmarshal([]byte(test.yamele), &mFromYAML))
-		})
-	}
-}
-
 func TestUnmarshalProjectMetadata(t *testing.T) {
 	dummyDate := getDummyDate()
 
@@ -240,50 +196,6 @@ project: "bar"
 			resultFromYAML := ProjectMetadata{}
 			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &resultFromYAML))
 			assert.Equal(t, test.result, resultFromYAML)
-		})
-	}
-}
-
-func TestUnmarshalProjectMetadataError(t *testing.T) {
-	testSuite := []struct {
-		title  string
-		jason  string
-		yamele string
-		err    error
-	}{
-		{
-			title: "name cannot be empty",
-			jason: `
-{
-  "project": "foo"
-}
-`,
-			yamele: `
-project: "foo"
-`,
-			err: fmt.Errorf("name cannot be empty"),
-		},
-		{
-			title: "name cannot contain spaces",
-			jason: `
-{
-  "name": "f o o",
-  "project": "bar"
-}
-`,
-			yamele: `
-name: "f o o"
-project: "bar"
-`,
-			err: fmt.Errorf("\"f o o\" is not a correct name. It should match the regexp: ^[a-zA-Z0-9_.-]+$"),
-		},
-	}
-	for _, test := range testSuite {
-		t.Run(test.title, func(t *testing.T) {
-			mFromJSON := ProjectMetadata{}
-			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &mFromJSON))
-			mfromYAML := ProjectMetadata{}
-			assert.Equal(t, test.err, yaml.Unmarshal([]byte(test.yamele), &mfromYAML))
 		})
 	}
 }

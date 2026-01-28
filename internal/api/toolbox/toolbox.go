@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 )
@@ -141,12 +142,22 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	return nil
 }
 
+func (t *toolbox[T, K, V]) checkMetadata(entity api.Entity) error {
+	if err := common.ValidateID(entity.GetMetadata().GetName()); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	return nil
+}
+
 func (t *toolbox[T, K, V]) Create(ctx echo.Context, entity T) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, entity, parameters, role.CreateAction); err != nil {
+		return err
+	}
+	if err := t.checkMetadata(entity); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Create(ctx, entity)
@@ -162,6 +173,9 @@ func (t *toolbox[T, K, V]) Update(ctx echo.Context, entity T) error {
 	}
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
+		return err
+	}
+	if err := t.checkMetadata(entity); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Update(ctx, entity, parameters)

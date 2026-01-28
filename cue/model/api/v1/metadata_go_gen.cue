@@ -4,7 +4,24 @@
 
 package v1
 
-#Metadata: _
+import "time"
+
+#Metadata: {
+	name: string @go(Name)
+
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	createdAt: time.Time @go(CreatedAt)
+
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	updatedAt: time.Time @go(UpdatedAt)
+	version:   uint64    @go(Version)
+}
 
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in

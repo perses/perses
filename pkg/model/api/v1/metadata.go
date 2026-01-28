@@ -17,8 +17,6 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
-
-	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func NewMetadata(name string) *Metadata {
@@ -78,36 +76,6 @@ func NewProjectMetadata(project string, name string) *ProjectMetadata {
 	}
 }
 
-func (m *Metadata) UnmarshalJSON(data []byte) error {
-	var tmp Metadata
-	type plain Metadata
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*m = tmp
-	return nil
-}
-
-func (m *Metadata) UnmarshalYAML(unmarshal func(any) error) error {
-	var tmp Metadata
-	type plain Metadata
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*m = tmp
-	return nil
-}
-
-func (m *Metadata) validate() error {
-	return common.ValidateID(m.Name)
-}
-
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in
 // ProjectMetadata caused Project string to be ignored when unmarshalling)
@@ -145,7 +113,7 @@ type ProjectMetadata struct {
 func (pm *ProjectMetadata) UnmarshalJSON(data []byte) error {
 	// Call UnmarshalJSON methods of the embedded structs
 	var metadataTmp Metadata
-	if err := metadataTmp.UnmarshalJSON(data); err != nil {
+	if err := json.Unmarshal(data, &metadataTmp); err != nil {
 		return err
 	}
 
@@ -164,7 +132,7 @@ func (pm *ProjectMetadata) UnmarshalJSON(data []byte) error {
 func (pm *ProjectMetadata) UnmarshalYAML(unmarshal func(any) error) error {
 	// Call UnmarshalYAML methods of the embedded structs
 	var metadataTmp Metadata
-	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
+	if err := unmarshal(&metadataTmp); err != nil {
 		return err
 	}
 
