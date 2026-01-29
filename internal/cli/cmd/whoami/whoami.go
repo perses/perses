@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 )
@@ -35,12 +34,6 @@ type option struct {
 	showURL       bool
 	authorization *secret.Authorization
 	apiClient     api.ClientInterface
-}
-
-type k8sUser struct {
-	Metadata struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
 }
 
 func (o *option) Complete(_ []string) error {
@@ -81,34 +74,12 @@ func (o *option) Execute() error {
 }
 
 func (o *option) Whoami() (string, error) {
-	res := o.apiClient.RESTClient().Get().
-		APIVersion("v1").
-		Resource(fmt.Sprintf("/%s/%s", utils.PathUser, utils.PathMe)).
-		Do()
-
-	if err := res.Error(); err != nil {
-		return "", err
-	}
-
-	// Because kubernetes usernames have less restrictions than perses ones they can contain characters which
-	// are considered invalid. Due to this, we unmarshall without performing validation on the username
-	if config.Global.RestClientConfig.K8sAuth != nil {
-		result := &k8sUser{}
-		err := res.Object(result)
-		if err != nil {
-			return "", err
-		}
-
-		return result.Metadata.Name, nil
-	}
-
-	result := &v1.PublicUser{}
-	err := res.Object(result)
+	user, err := o.apiClient.V1().User().Get(utils.PathMe)
 	if err != nil {
 		return "", err
 	}
 
-	return result.Metadata.GetName(), nil
+	return user.GetMetadata().GetName(), nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
