@@ -20,19 +20,23 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-const userResource = "users"
+const (
+	userResource   = "users"
+	whoAmIResource = "user/whoami"
+)
 
 type UserInterface interface {
-	Create(entity *v1.User) (*v1.User, error)
-	Update(entity *v1.User) (*v1.User, error)
+	Create(entity *v1.User) (*v1.PublicUser, error)
+	Update(entity *v1.User) (*v1.PublicUser, error)
 	Delete(name string) error
 	// Get is returning an unique User.
 	// As such name is the exact value of User.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
-	Get(name string) (*v1.User, error)
+	Get(name string) (*v1.PublicUser, error)
 	// prefix is a prefix of the User.metadata.name to search for.
 	// It can be empty in case you want to get the full list of User available
-	List(prefix string) ([]*v1.User, error)
+	List(prefix string) ([]*v1.PublicUser, error)
+	WhoAmI() (*v1.PublicUser, error)
 }
 
 type user struct {
@@ -46,8 +50,8 @@ func newUser(client *perseshttp.RESTClient) UserInterface {
 	}
 }
 
-func (c *user) Create(entity *v1.User) (*v1.User, error) {
-	result := &v1.User{}
+func (c *user) Create(entity *v1.User) (*v1.PublicUser, error) {
+	result := &v1.PublicUser{}
 	err := c.client.Post().
 		Resource(userResource).
 		Body(entity).
@@ -56,8 +60,8 @@ func (c *user) Create(entity *v1.User) (*v1.User, error) {
 	return result, err
 }
 
-func (c *user) Update(entity *v1.User) (*v1.User, error) {
-	result := &v1.User{}
+func (c *user) Update(entity *v1.User) (*v1.PublicUser, error) {
+	result := &v1.PublicUser{}
 	err := c.client.Put().
 		Resource(userResource).
 		Name(entity.Metadata.Name).
@@ -75,8 +79,8 @@ func (c *user) Delete(name string) error {
 		Error()
 }
 
-func (c *user) Get(name string) (*v1.User, error) {
-	result := &v1.User{}
+func (c *user) Get(name string) (*v1.PublicUser, error) {
+	result := &v1.PublicUser{}
 	err := c.client.Get().
 		Resource(userResource).
 		Name(name).
@@ -85,8 +89,8 @@ func (c *user) Get(name string) (*v1.User, error) {
 	return result, err
 }
 
-func (c *user) List(prefix string) ([]*v1.User, error) {
-	var result []*v1.User
+func (c *user) List(prefix string) ([]*v1.PublicUser, error) {
+	var result []*v1.PublicUser
 	err := c.client.Get().
 		Resource(userResource).
 		Query(&query{
@@ -94,5 +98,14 @@ func (c *user) List(prefix string) ([]*v1.User, error) {
 		}).
 		Do().
 		Object(&result)
+	return result, err
+}
+
+func (c *user) WhoAmI() (*v1.PublicUser, error) {
+	result := &v1.PublicUser{}
+	err := c.client.Get().
+		Resource(whoAmIResource).
+		Do().
+		Object(result)
 	return result, err
 }

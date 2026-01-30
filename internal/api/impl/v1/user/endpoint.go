@@ -49,19 +49,25 @@ func NewEndpoint(service user.Service, authz authorization.Authorization, disabl
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
-	group := g.Group(fmt.Sprintf("/%s", utils.PathUser))
+	// General users group is used for general manipulation of users
+	// It's used with /api/v1/users/{user}/... paths
+	generalUsersGroup := g.Group(fmt.Sprintf("/%s", utils.PathUser))
 
 	if !e.readonly {
 		if !e.disableSignUp {
-			group.POST("", e.Create, true)
+			generalUsersGroup.POST("", e.Create, true)
 		}
-		group.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
-		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
+		generalUsersGroup.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
+		generalUsersGroup.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
 	}
-	group.GET("", e.List, false)
-	group.GET(fmt.Sprintf("/%s", utils.PathMe), e.Me, false)
-	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
-	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
+	generalUsersGroup.GET("", e.List, false)
+	generalUsersGroup.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
+	generalUsersGroup.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
+
+	// Current user group is used for operations on the current authenticated user
+	// It's used with /api/v1/user/... paths
+	currentUserGroup := g.Group(fmt.Sprintf("/%s", utils.PathCurrentUser))
+	currentUserGroup.GET(fmt.Sprintf("/%s", utils.PathWhoAmI), e.WhoAmI, false)
 }
 
 func (e *endpoint) Create(ctx echo.Context) error {
@@ -87,11 +93,10 @@ func (e *endpoint) List(ctx echo.Context) error {
 	return e.toolbox.List(ctx, q)
 }
 
-func (e *endpoint) Me(ctx echo.Context) error {
+func (e *endpoint) WhoAmI(ctx echo.Context) error {
 	if !e.authz.IsEnabled() {
 		return apiinterface.HandleUnauthorizedError("authentication is required to retrieve user permissions")
 	}
-
 	publicUser, err := e.authz.GetPublicUser(ctx)
 	if err != nil || publicUser.Metadata.GetName() == "" {
 		return apiinterface.HandleUnauthorizedError("failed to retrieve user information from context")

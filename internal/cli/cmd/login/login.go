@@ -39,12 +39,8 @@ const (
 )
 
 const (
-	nativeAuthnProvider     = "native"
-	delegatedAuthnKindK8s   = utils.AuthnKindKubernetes
-	errAuthorizationPending = "authorization_pending"
-	errSlowDown             = "slow_down"
-	errAccessDenied         = "access_denied"
-	errExpiredToken         = "expired_token"
+	nativeAuthnProvider   = "native"
+	delegatedAuthnKindK8s = utils.AuthnKindKubernetes
 )
 
 type loginOption interface {

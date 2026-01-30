@@ -32,7 +32,6 @@ const (
 	PathRefresh            = "refresh"
 	PathDeviceCode         = "device/code"
 	PathToken              = "token"
-	PathMe                 = "me"
 	AuthnKindNative        = "native"
 	AuthnKindOIDC          = "oidc"
 	AuthnKindOAuth         = "oauth"
@@ -53,8 +52,10 @@ const (
 	PathSecret             = "secrets"
 	PathUnsaved            = "unsaved"
 	PathUser               = "users"
+	PathCurrentUser        = "user"
 	PathVariable           = "variables"
 	PathView               = "view"
+	PathWhoAmI             = "whoami"
 	ContextKeyAnonymous    = "anonymous"
 )
 
