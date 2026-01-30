@@ -18,6 +18,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/dac/diff"
 	"github.com/perses/perses/internal/cli/cmd/dac/preview"
 	"github.com/perses/perses/internal/cli/cmd/dac/setup"
+	"github.com/perses/perses/internal/cli/cmd/dac/watch"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/spf13/cobra"
 )
@@ -37,6 +38,7 @@ func NewCMD() *cobra.Command {
 	cmd.AddCommand(diff.NewCMD())
 	cmd.AddCommand(preview.NewCMD())
 	cmd.AddCommand(setup.NewCMD())
+	cmd.AddCommand(watch.NewCMD())
 
 	cmd.PersistentFlags().StringVar(&dacOutputFolder, "dac.output_folder", config.DefaultOutputFolder, "Path to the folder where the dac-generated files are stored.")
 
