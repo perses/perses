@@ -6,6 +6,12 @@ package v1
 
 #Metadata: _
 
+// PublicMetadata is a copy of classic metadata but that doesn't make any validation.
+// It is used when returning data to the API consumers.
+// It is particularly useful when the API returns some entities that are created on the fly and that doesn't necessarily
+// need validation like the kubernetes users.
+#PublicMetadata: _
+
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in
 // ProjectMetadata caused Project string to be ignored when unmarshalling)
@@ -13,3 +19,9 @@ package v1
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 #ProjectMetadata: _
+
+// PublicProjectMetadata is a copy of classic project metadata but that doesn't make any validation.
+// It is used when returning data to the API consumers.
+// It is particularly useful when the API returns some entities that are created on the fly and that doesn't necessarily
+// need validation like the kubernetes users.
+#PublicProjectMetadata: _

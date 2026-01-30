@@ -19,6 +19,6 @@ import "github.com/perses/perses/cue/model/api/v1/secret"
 
 #PublicUser: {
 	kind:     #Kind           @go(Kind)
-	metadata: #Metadata       @go(Metadata)
+	metadata: #PublicMetadata @go(Metadata)
 	spec:     #PublicUserSpec @go(Spec)
 }

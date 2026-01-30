@@ -157,7 +157,7 @@ func (k *k8sImpl) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
 
 	return &v1.PublicUser{
 		Kind:     v1.KindUser,
-		Metadata: *v1.NewMetadata(username),
+		Metadata: v1.NewPublicMetadata(username),
 		Spec:     v1.PublicUserSpec{},
 	}, nil
 }
