@@ -31,7 +31,7 @@ type ClaimMapping struct {
 	Role string `json:"role,omitempty" yaml:"role,omitempty"`
 }
 
-type OIDCRoleConfig struct {
+type ClaimMappingConfig struct {
 	// TODO: proper descriptions
 	RoleClaimsPath string          `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
 	ClaimMapping   []*ClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
@@ -43,6 +43,7 @@ type AuthorizationConfig struct {
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 	//
+	ClaimMappingConfig ClaimMappingConfig `json:"claim_mapping_config,omitempty" yaml:"claim_mapping_config,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
