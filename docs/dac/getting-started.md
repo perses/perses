@@ -187,6 +187,76 @@ If you want to develop multiple dashboards as code, you should have **1 dashboar
 percli dac build -d my_dashboards
 ```
 
+## Development workflow with auto-reload
+
+For an improved development experience, you can use the `dac watch` command that automatically rebuilds your dashboards whenever you save changes to your DaC files. This provides a workflow similar to frontend hot-reload development.
+
+### Basic watch mode
+
+Start watching your DaC files for changes:
+
+```bash
+# Watch current directory
+percli dac watch
+
+# Watch specific directory
+percli dac watch ./my-dashboards
+
+# Watch and output as JSON
+percli dac watch ./my-dashboards -ojson
+```
+
+The watcher will:
+- Perform an initial build of all dashboards
+- Monitor all `.go` and `.cue` files in the source directory
+- Automatically rebuild when files are modified (with a 500ms debounce)
+- Output results to the `built` folder (or custom location via `--dac.output_folder`)
+
+### Integrated development workflow
+
+To get a direct visual feedback of your changes when coding dashboards, you can run Perses with provisioning configured to watch your build directory:
+
+**Step 1: Create a Perses config file** (`perses-dev.yaml`):
+
+```yaml
+database:
+  file:
+    folder: /tmp/perses-dac-dev
+    extension: yaml
+
+provisioning:
+  interval: 5s  # Check for changes every 5 seconds
+  folders:
+    - /absolute/path/to/your/built  # Your build output folder
+
+security:
+  enable_auth: false  # Disable auth for local development
+```
+
+**Step 2: Start both processes**:
+
+```bash
+# Terminal 1: Start Perses server with provisioning
+perses --config perses-dev.yaml
+
+# Terminal 2: Start the DaC watcher
+percli dac watch ./my-dashboards
+```
+
+**Step 3: Develop with instant feedback**:
+
+1. Open `http://localhost:8080` in your browser
+2. Navigate to your dashboards
+3. Edit your DaC files (`.go` or `.cue`)
+4. Watch the terminal show automatic rebuild
+5. Refresh your browser to see changes (provisioning picks them up within 5 seconds)
+
+!!! tip
+    The provisioning interval of `5s` provides a good balance between responsiveness and system load. You can adjust it based on your needs.
+
+!!! tip
+    The watch command uses a 500ms debounce delay by default to avoid excessive rebuilds while you're actively editing. You can customize this with the `--debounce` flag.
+
 ## Deploy dashboards
 
 Once you are satisfied with the result of your DaC definition for a given dashboard, you can finally deploy it to Perses with the `apply` command:
