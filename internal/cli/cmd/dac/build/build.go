@@ -56,7 +56,7 @@ func isGoMainPackage(path string) bool {
 	return f.Name.Name == "main"
 }
 
-type option struct {
+type Option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.DirectoryOption
@@ -67,7 +67,7 @@ type option struct {
 	Mode      string
 }
 
-func (o *option) Complete(args []string) error {
+func (o *Option) Complete(args []string) error {
 	o.args = args
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
@@ -75,7 +75,7 @@ func (o *option) Complete(args []string) error {
 	return nil
 }
 
-func (o *option) Validate() error {
+func (o *Option) Validate() error {
 	if o.Mode != modeFile && o.Mode != modeStdout {
 		return fmt.Errorf("invalid mode provided: must be either `file` or `stdout`")
 	}
@@ -86,7 +86,7 @@ func (o *option) Validate() error {
 	return o.DirectoryOption.Validate()
 }
 
-func (o *option) Execute() error {
+func (o *Option) Execute() error {
 	if o.File != "" {
 		return o.processFile(o.File, filepath.Ext(o.File))
 	}
@@ -142,7 +142,7 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func (o *option) processFile(file string, extension string) error {
+func (o *Option) processFile(file string, extension string) error {
 	var cmd *exec.Cmd
 
 	if extension == goExtension { //nolint: staticcheck
@@ -201,23 +201,35 @@ func (o *option) processFile(file string, extension string) error {
 }
 
 // buildOutputFilePath generates the output file path based on the input file path
-func (o *option) buildOutputFilePath(inputFilePath string) string {
+func (o *Option) buildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
 	return filepath.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
 }
 
-func (o *option) SetWriter(writer io.Writer) {
+func (o *Option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
-func (o *option) SetErrWriter(errWriter io.Writer) {
+func (o *Option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
+// Run executes the build process programmatically.
+// This is useful for tools that need to trigger builds without going through the CLI.
+func (o *Option) Run() error {
+	if err := o.Complete(nil); err != nil {
+		return err
+	}
+	if err := o.Validate(); err != nil {
+		return err
+	}
+	return o.Execute()
+}
+
 func NewCMD() *cobra.Command {
-	o := &option{}
+	o := &Option{}
 	cmd := &cobra.Command{
 		Use:   "build",
 		Short: "Build the given DaC file(s)",
