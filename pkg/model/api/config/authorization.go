@@ -24,11 +24,25 @@ var (
 	defaultCacheInterval = 30 * time.Second
 )
 
+type ClaimMapping struct {
+	// Claim name as found in the token.
+	Claim string `json:"claim,omitempty" yaml:"claim,omitempty"`
+	// TODO: temporarily `string` used as role type until I figure out how are regular roles handled in code.
+	Role string `json:"role,omitempty" yaml:"role,omitempty"`
+}
+
+type OIDCRoleConfig struct {
+	// TODO: proper descriptions
+	RoleClaimsPath string          `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
+	ClaimMapping   []*ClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
+}
+
 type AuthorizationConfig struct {
 	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	//
 }
 
 func (a *AuthorizationConfig) Verify() error {
