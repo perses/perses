@@ -148,8 +148,7 @@ func (s *Config) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (s *Config) validate() error {
-	err := s.verifySupportedDriver()
-	if err != nil {
+	if err := s.verifySupportedDriver(); err != nil {
 		return err
 	}
 

@@ -423,10 +423,9 @@ database: test
 
 func TestValidateConfig(t *testing.T) {
 	testSuite := []struct {
-		name      string
-		config    Config
-		expectErr bool
-		errMsg    string
+		name         string
+		config       Config
+		expectErrMsg string
 	}{
 		{
 			name: "valid mysql config",
@@ -435,7 +434,6 @@ func TestValidateConfig(t *testing.T) {
 				Host:     "localhost:3306",
 				Database: "test",
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid mariadb config",
@@ -444,7 +442,6 @@ func TestValidateConfig(t *testing.T) {
 				Host:     "localhost:3306",
 				Database: "test",
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid postgres config",
@@ -453,7 +450,6 @@ func TestValidateConfig(t *testing.T) {
 				Host:     "localhost:5432",
 				Database: "test",
 			},
-			expectErr: false,
 		},
 		{
 			name: "missing driver",
@@ -461,8 +457,7 @@ func TestValidateConfig(t *testing.T) {
 				Host:     "localhost:5432",
 				Database: "test",
 			},
-			expectErr: true,
-			errMsg:    "driver is required",
+			expectErrMsg: "driver is required",
 		},
 		{
 			name: "unsupported driver",
@@ -471,8 +466,7 @@ func TestValidateConfig(t *testing.T) {
 				Host:     "localhost:1433",
 				Database: "test",
 			},
-			expectErr: true,
-			errMsg:    "not supported",
+			expectErrMsg: "not supported",
 		},
 		{
 			name: "missing host",
@@ -480,8 +474,7 @@ func TestValidateConfig(t *testing.T) {
 				Driver:   DriverMySQL,
 				Database: "test",
 			},
-			expectErr: true,
-			errMsg:    "host cannot be empty",
+			expectErrMsg: "host cannot be empty",
 		},
 		{
 			name: "missing database",
@@ -489,19 +482,16 @@ func TestValidateConfig(t *testing.T) {
 				Driver: DriverMySQL,
 				Host:   "localhost:3306",
 			},
-			expectErr: true,
-			errMsg:    "database cannot be empty",
+			expectErrMsg: "database cannot be empty",
 		},
 	}
 
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
 			err := test.config.validate()
-			if test.expectErr {
+			if len(test.expectErrMsg) > 0 {
 				assert.Error(t, err)
-				if test.errMsg != "" {
-					assert.Contains(t, err.Error(), test.errMsg)
-				}
+				assert.Contains(t, err.Error(), test.expectErrMsg)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -511,76 +501,67 @@ func TestValidateConfig(t *testing.T) {
 
 func TestPostgresConfigValidation(t *testing.T) {
 	testSuite := []struct {
-		name      string
-		config    PostgresConfig
-		expectErr bool
-		errMsg    string
+		name         string
+		config       PostgresConfig
+		expectErrMsg string
 	}{
 		{
 			name: "valid disable ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModeDisable,
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid allow ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModeAllow,
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid prefer ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModePreferable,
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid require ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModeRequire,
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid verify-full ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModeVerifyFull,
 			},
-			expectErr: false,
 		},
 		{
 			name: "valid verify-ca ssl mode",
 			config: PostgresConfig{
 				SSLMode: SSLModeVerifyCA,
 			},
-			expectErr: false,
 		},
 		{
 			name: "invalid ssl mode",
 			config: PostgresConfig{
 				SSLMode: "invalid-mode",
 			},
-			expectErr: true,
-			errMsg:    "unknown ssl mode",
+			expectErrMsg: "unknown ssl mode",
 		},
 		{
 			name: "empty ssl mode is valid",
 			config: PostgresConfig{
 				SSLMode: "",
 			},
-			expectErr: false,
 		},
 	}
 
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
 			err := test.config.validate()
-			if len(test.errMsg) > 0 {
+			if len(test.expectErrMsg) > 0 {
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), test.errMsg)
+				assert.Contains(t, err.Error(), test.expectErrMsg)
 			} else {
 				assert.NoError(t, err)
 			}
