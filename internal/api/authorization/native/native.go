@@ -197,6 +197,14 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
 		return true
 	}
+
+	// Checking permissions mapped from token claims
+	// STEP 1: get list of permissions from claim
+	// STEP 2: use listHasPermission on the returned permission
+	// if ok := listHasPermission(placeholderPermissionList, requestAction, requestScope); ok {
+	// 	return true
+	// }
+
 	// Checking cached permissions
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
