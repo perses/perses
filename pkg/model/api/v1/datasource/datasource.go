@@ -36,3 +36,30 @@ type Postgres struct {
 	Proxy          *sql.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	ScrapeInterval *common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }
+
+// InfluxDBVersion represents the InfluxDB version
+type InfluxDBVersion string
+
+const (
+	InfluxDBVersionV1 InfluxDBVersion = "v1"
+	InfluxDBVersionV3 InfluxDBVersion = "v3"
+)
+
+// InfluxDBV1 is used for testing purpose.
+// It doesn't reflect the nature of the actual InfluxDB v1.8 datasource
+type InfluxDBV1 struct {
+	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	Version   string      `json:"version" yaml:"version"`
+	Database  string      `json:"database" yaml:"database"`
+}
+
+// InfluxDBV3 is used for testing purpose.
+// It doesn't reflect the nature of the actual InfluxDB v3 datasource
+type InfluxDBV3 struct {
+	DirectURL    string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy        *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	Version      string      `json:"version" yaml:"version"`
+	Organization string      `json:"organization" yaml:"organization"`
+	Bucket       string      `json:"bucket" yaml:"bucket"`
+}
