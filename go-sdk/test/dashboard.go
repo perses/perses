@@ -16,10 +16,11 @@ package dac
 import (
 	"fmt"
 
+	"dac-test/prometheus/query"
+
 	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
-	"github.com/perses/plugins/prometheus/sdk/go/query"
 	table "github.com/perses/plugins/table/sdk/go"
 	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )

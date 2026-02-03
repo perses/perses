@@ -52,6 +52,7 @@ func getFileList(filePaths []string) string {
 
 func TestPluginGenerateCMD(t *testing.T) {
 	removeTestFiles()
+	defer removeTestFiles()
 
 	testSuite := []cmdTest.Suite{
 		{
@@ -62,7 +63,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 				testFolder,
 			},
 			IsErrorExpected:      true,
-			ExpectedRegexMessage: "module.name and module.org are required when creating a new module as none was found under",
+			ExpectedRegexMessage: `module\.name and module\.org are required when creating a new module as none was found under`,
 		},
 		{
 			Title: "Build module with a plugin",
@@ -77,6 +78,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 			ExpectedMessage: `module MyPluginModule created successfully, plugin MyTestDatasource generated successfully
 ` + getFileList([]string{
 				".cjs.swcrc",
+				".eslintrc.js",
 				".gitignore",
 				".swcrc",
 				"LICENSE",
@@ -115,6 +117,7 @@ func TestPluginGenerateCMD(t *testing.T) {
 			ExpectedMessage: `plugin MyTestPanel generated successfully
 ` + getFileList([]string{
 				".cjs.swcrc",
+				".eslintrc.js",
 				".gitignore",
 				".swcrc",
 				"LICENSE",

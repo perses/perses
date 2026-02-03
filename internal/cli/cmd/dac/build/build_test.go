@@ -16,6 +16,7 @@ package build
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -64,15 +65,15 @@ func TestDacBuildCMD(t *testing.T) {
 		},
 		{
 			Title:           "nominal case with a single Go file",
-			Args:            []string{"-f", "testdata/go/main.go"},
+			Args:            []string{"-f", filepath.Join("testdata", "go", "cmd", "main.go")},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata/go/main.go at built%stestdata%sgo%smain_output.yaml\n", "%s", separator),
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml")),
 		},
 		{
 			Title:           "nominal case with a Go project",
-			Args:            []string{"-d", "testdata/go"},
+			Args:            []string{"-d", filepath.Join("testdata", "go", "cmd")},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built testdata%sgo%smain.go at built%stestdata%sgo%smain_output.yaml\n", "%s", separator),
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml")),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCommonAndGo)
@@ -86,27 +87,27 @@ func TestDacBuildCMD(t *testing.T) {
 	testSuiteCUE := []cmdTest.Suite{
 		{
 			Title:           "nominal case with a single cue file",
-			Args:            []string{"-f", "valid/dac.cue"},
+			Args:            []string{"-f", filepath.Join("valid", "dac.cue")},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built valid/dac.cue at built%svalid%sdac_output.yaml\n", "%s", separator),
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("built", "valid", "dac_output.yaml")),
 		},
 		{
 			Title:           "nominal case with a cue directory",
 			Args:            []string{"-d", "valid"},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built valid%sdac.cue at built%svalid%sdac_output.yaml\nSuccesfully built valid%sdac_2.cue at built%svalid%sdac_2_output.yaml\n", "%s", separator),
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\nSuccessfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("built", "valid", "dac_output.yaml"), filepath.Join("valid", "dac_2.cue"), filepath.Join("built", "valid", "dac_2_output.yaml")),
 		},
 		{
 			Title:           "print on stdout as json",
-			Args:            []string{"-f", "valid/dac_2.cue", "-m", "stdout", "-o", "json"},
+			Args:            []string{"-f", filepath.Join("valid", "dac_2.cue"), "-m", "stdout", "-o", "json"},
 			IsErrorExpected: false,
 			ExpectedMessage: "{\n    \"success\": true\n}\n\n",
 		},
 		{
 			Title:           "invalid CUE definition",
-			Args:            []string{"-f", "invalid/dac.cue"},
+			Args:            []string{"-f", filepath.Join("invalid", "dac.cue")},
 			IsErrorExpected: true,
-			ExpectedMessage: strings.ReplaceAll("failed to build invalid/dac.cue: success: reference \"fals\" not found:\n    .%sinvalid%sdac.cue:16:10\n", "%s", separator),
+			ExpectedMessage: strings.ReplaceAll("failed to build invalid%sdac.cue: success: reference \"fals\" not found:\n    .%sinvalid%sdac.cue:16:10\n", "%s", separator),
 		},
 		{
 			Title:           "invalid CUE definition in a folder",
@@ -116,10 +117,10 @@ func TestDacBuildCMD(t *testing.T) {
 		},
 		{
 			Title:           "nominal case with a custom output folder",
-			Args:            []string{"-f", "valid/dac.cue"},
+			Args:            []string{"-f", filepath.Join("valid", "dac.cue")},
 			Config:          config.Config{Dac: config.Dac{OutputFolder: "test_output"}},
 			IsErrorExpected: false,
-			ExpectedMessage: strings.ReplaceAll("Succesfully built valid/dac.cue at test_output%svalid%sdac_output.yaml\n", "%s", separator),
+			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("valid", "dac.cue"), filepath.Join("test_output", "valid", "dac_output.yaml")),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCUE)

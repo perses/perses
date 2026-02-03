@@ -49,11 +49,13 @@ func Plugin(plugin common.Plugin) Option {
 
 func AddQuery(options ...query.Option) Option {
 	return func(builder *Builder) error {
-		q, err := query.New(options...)
-		if err != nil {
-			return err
+		for _, option := range options {
+			q, err := query.New(option)
+			if err != nil {
+				return err
+			}
+			builder.Spec.Queries = append(builder.Spec.Queries, *q)
 		}
-		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
 		return nil
 	}
 }

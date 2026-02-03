@@ -14,6 +14,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import HttpBackend, { HttpBackendOptions } from 'i18next-http-backend';
+import { PERSES_APP_CONFIG } from '../config';
 
 i18n
   .use(HttpBackend)
@@ -25,7 +26,7 @@ i18n
     ns: ['dashboard'],
     defaultNS: 'dashboard',
     backend: {
-      loadPath: '/locales/{{lng}}.{{ns}}.json',
+      loadPath: `${PERSES_APP_CONFIG.api_prefix}/locales/{{lng}}.{{ns}}.json`,
     },
 
     interpolation: {

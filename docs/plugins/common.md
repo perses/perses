@@ -175,7 +175,7 @@ method: <enum | possibleValue = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'>
 kind: "SQLProxy"
 spec:
   # Driver is the SQL driver for the datasource
-  driver: <enum | possibleValue = 'mysql' | 'postgres'>
+  driver: <enum | possibleValue = 'mysql' | 'mariadb' | 'postgres'>
   
   # Host is the hostname:port of datasource. It is not the hostname of the proxy.
   host: <string>
@@ -190,6 +190,24 @@ spec:
   
   # MySQL specific driver config
   mysql:
+    # params Connection parameters
+    params: 
+      <string>: <string> # Optional
+      
+    # max_allowed_packet Max packet size allowed
+    max_allowed_packet: <int> # Optional 
+    
+    # timeout Dial timeout 
+    timeout: <time.Duration> # Optional 
+    
+    # read_timeout I/O read timeout
+    read_timeout: <time.Duration> # Optional 
+    
+    # write_timeout I/O read timeout
+    write_timeout: <time.Duration> # Optional 
+
+  # MariaDB specific driver config (uses same structure as MySQL since MariaDB is MySQL-compatible)
+  mariadb:
     # params Connection parameters
     params: 
       <string>: <string> # Optional

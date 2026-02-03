@@ -17,6 +17,8 @@ import (
 	"flag"
 	"time"
 
+	"dac/prometheus/query"
+
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
@@ -24,7 +26,6 @@ import (
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
-	"github.com/perses/plugins/prometheus/sdk/go/query"
 	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
 	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
