@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, ReactElement, useState } from 'react';
+import { forwardRef, ReactElement, useCallback, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
@@ -126,6 +126,22 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
     });
   };
 
+  // LOGZ.IO CHANGE START:: APPZ-955-math-on-queries-formulas
+  const handleVisibilityToggle = useCallback(
+    (index: number, isHidden: boolean) => {
+      onChange(
+        produce(queries, (draft) => {
+          const entry = draft?.[index];
+          if (entry) {
+            entry.spec.hidden = !isHidden;
+          }
+        })
+      );
+    },
+    [onChange, queries]
+  );
+  // LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
+
   const handleQueryCollapseExpand = (index: number): void => {
     setQueriesCollapsed((queriesCollapsed) => {
       queriesCollapsed[index] = !queriesCollapsed[index];
@@ -153,8 +169,10 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             queryResult={queryResults?.[i]}
             filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
+            isHidden={query.spec.hidden ?? false}
             onChange={handleQueryChange}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
+            onVisibilityToggle={handleVisibilityToggle}
             onCollapseExpand={handleQueryCollapseExpand}
           />
         ))}

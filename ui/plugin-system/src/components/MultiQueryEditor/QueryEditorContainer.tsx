@@ -13,10 +13,12 @@
 
 import { produce } from 'immer';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
+import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
+import EyeIcon from 'mdi-material-ui/Eye';
+import EyeOffIcon from 'mdi-material-ui/EyeOff';
 import { forwardRef, ReactElement } from 'react';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
@@ -36,6 +38,8 @@ interface QueryEditorContainerProps {
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
   onDelete?: (index: number) => void;
+  isHidden?: boolean;
+  onVisibilityToggle?: (index: number, isHidden: boolean) => void;
 }
 
 /**
@@ -45,9 +49,11 @@ interface QueryEditorContainerProps {
  * @param index the index of the query in the list
  * @param query the query definition
  * @param isCollapsed whether the query editor is collapsed or not
+ * @param isHidden whether the query is hidden or not
  * @param onDelete callback when the query is deleted
  * @param onChange callback when the query is changed
  * @param onCollapseExpand callback when the query is collapsed or expanded
+ * @param onVisibilityToggle callback when the query is hidden or shown
  * @constructor
  */
 
@@ -60,9 +66,11 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       queryResult,
       filteredQueryPlugins,
       isCollapsed,
+      isHidden = false,
       onDelete,
       onChange,
       onCollapseExpand,
+      onVisibilityToggle,
     } = props;
     return (
       <Stack key={index} spacing={1}>
@@ -77,9 +85,16 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             <IconButton size="small" onClick={() => onCollapseExpand(index)}>
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
             </IconButton>
-            <Typography variant="overline" component="h4">
-              Query #{index + 1}
-            </Typography>
+            <Stack gap={0.5} direction="row" alignItems="center">
+              <Typography variant="overline" component="h4">
+                Query #{index + 1}
+              </Typography>
+              {query.spec.hidden && (
+                <Typography variant="caption" color="secondary" component="span" fontStyle="italic">
+                  Disabled
+                </Typography>
+              )}
+            </Stack>
           </Stack>
           <Stack direction="row" alignItems="center">
             {queryResult?.isFetching && <CircularProgress aria-label="loading" size="1.125rem" />}
@@ -115,6 +130,20 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                 </Stack>
               </InfoTooltip>
             )}
+            {/* LOGZ.IO CHANGE START:: APPZ-955-math-on-queries-formulas */}
+            {onVisibilityToggle && (
+              <Tooltip title={isHidden ? 'Show in chart' : 'Hide from chart'}>
+                <IconButton
+                  aria-label={isHidden ? 'show query in chart' : 'hide query from chart'}
+                  size="small"
+                  onClick={() => onVisibilityToggle?.(index, isHidden)}
+                  sx={{ color: isHidden ? 'text.disabled' : 'text.secondary' }}
+                >
+                  {isHidden ? <EyeOffIcon /> : <EyeIcon />}
+                </IconButton>
+              </Tooltip>
+            )}
+            {/* LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas */}
             {onDelete && (
               <IconButton aria-label="delete query" size="small" onClick={() => onDelete && onDelete(index)}>
                 <DeleteIcon />
@@ -130,6 +159,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             queryResult={queryResult}
             filteredQueryPlugins={filteredQueryPlugins}
             onChange={(next) => onChange(index, next)}
+            index={index} // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
           />
         )}
       </Stack>
@@ -148,6 +178,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   queryResult?: QueryData;
   filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
+  index: number; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 
 /**
@@ -159,7 +190,7 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { value, onChange, queryTypes, queryResult, filteredQueryPlugins, ...others } = props;
+  const { value, onChange, queryTypes, queryResult, filteredQueryPlugins, index, ...others } = props;
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
@@ -174,7 +205,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
     <Box {...others}>
       <PluginEditor
         ref={ref}
-        withRunQueryButton={false}
+        withRunQueryButton
         pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{
@@ -187,6 +218,7 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
         filteredQueryPlugins={filteredQueryPlugins}
         onQueryRefresh={queryResult?.refetch}
         onChange={handlePluginChange}
+        index={index} // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
       />
     </Box>
   );

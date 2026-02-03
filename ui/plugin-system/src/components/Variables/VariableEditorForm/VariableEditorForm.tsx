@@ -166,7 +166,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
               render={({ field }) => {
                 return (
                   <PluginEditor
-                    withRunQueryButton={false}
+                    withRunQueryButton
                     width="100%"
                     pluginTypes={['Variable']}
                     pluginKindLabel="Source"

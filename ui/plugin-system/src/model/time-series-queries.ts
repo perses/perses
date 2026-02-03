@@ -19,11 +19,16 @@ import { Plugin } from './plugin-base';
 /**
  * An object containing all the dependencies of a TimeSeriesQuery.
  */
-type TimeSeriesQueryPluginDependencies = {
+export type TimeSeriesQueryPluginDependencies = {
   /**
    * Returns a list of variables name this time series query depends on.
    */
   variables?: string[];
+  /**
+   * Returns a list of query indices (0-based) this time series query depends on.
+   * Used by plugins that need to reference results from other queries.
+   */
+  queries?: number[]; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 };
 
 /**
@@ -46,6 +51,18 @@ export interface TimeSeriesQueryContext {
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
+  // LOGZ.IO CHANGE START:: APPZ-955-math-on-queries-formulas
+  /**
+   * Results from other queries that this query may depend on.
+   * Map key is the query index (0-based), value is the resolved time series data.
+   * Only populated for queries that declare dependencies via dependsOn.queries.
+   */
+  resolvedQueryResults?: Map<number, TimeSeriesData>;
+  /**
+   * The index of the current query in the query list (0-based).
+   */
+  queryIndex?: number;
+  // LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
 }
 
 export type TimeSeriesDataQuery = Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;

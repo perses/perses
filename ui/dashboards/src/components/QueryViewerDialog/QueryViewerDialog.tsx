@@ -33,6 +33,7 @@ export function QueryViewerDialog({ open, queryDefinitions, onClose }: QueryView
         queryItems.push(
           <React.Fragment key={`query-${index}`}>
             <PluginSpecEditor
+              index={index}
               value={query.spec.plugin.spec}
               pluginSelection={{ kind: query.spec.plugin.kind, type: query.kind }}
               onChange={(): void => {}}

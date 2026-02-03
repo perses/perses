@@ -59,8 +59,7 @@ describe('QueryEditorContainer', () => {
   };
 
   Object.keys(renderingProps).forEach((key) => {
-    // LOGZ.IO CHANGE:: We removed the run query button and rely on blur event to run the query.
-    it(`should render ${key} without run query button`, () => {
+    test(`should render ${key} with run query button`, () => {
       renderWithContext(
         <QueryEditorContainer
           queryTypes={renderingProps[key]?.queryTypes as QueryPluginType[]}
@@ -72,8 +71,8 @@ describe('QueryEditorContainer', () => {
           onCollapseExpand={jest.fn()}
         />
       );
-      const runQuerybutton = screen.queryByTestId('run_query_button');
-      expect(runQuerybutton).not.toBeInTheDocument();
+      const runQueryButton = screen.queryByTestId('run_query_button');
+      expect(runQueryButton).toBeInTheDocument();
     });
   });
 });

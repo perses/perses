@@ -21,129 +21,123 @@ import {
   useQueryClient,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
+import { useMemo, useState, useEffect } from 'react';
+import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode } from '../model';
 import { useStableQueries } from '../hooks';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
-import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
+// LOGZ.IO CHANGE START:: APPZ-955-math-on-queries-formulas
+import {
+  TIME_SERIES_QUERY_KEY,
+  getQueryOptions,
+  extractQueryDependencies,
+  buildResolvedResults,
+  getResultsFingerprint,
+  createQueryConfig,
+} from './time-series-queries-utils';
+// LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
+
+export { TIME_SERIES_QUERY_KEY } from './time-series-queries-utils';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
   mode?: TimeSeriesQueryMode;
 }
 
-export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
-
-function getQueryOptions({
-  plugin,
-  definition,
-  context,
-}: {
-  plugin?: TimeSeriesQueryPlugin;
-  definition: TimeSeriesQueryDefinition;
-  context: TimeSeriesQueryContext;
-}): {
-  queryKey: QueryKey;
-  queryEnabled: boolean;
-} {
-  const { timeRange, suggestedStepMs, mode, variableState } = context;
-
-  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
-  const variableDependencies = dependencies?.variables;
-
-  // Determine queryKey
-  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
-  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-
-  const queryKey = [
-    'query',
-    TIME_SERIES_QUERY_KEY,
-    definition,
-    timeRange,
-    variablesValueKey,
-    suggestedStepMs,
-    mode,
-  ] as const;
-
-  // Determine queryEnabled
-  let waitToLoad = false;
-  if (variableDependencies) {
-    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
-  }
-
-  const queryEnabled = plugin !== undefined && !waitToLoad;
-
-  return {
-    queryKey,
-    queryEnabled,
-  };
-}
-
 /**
  * Runs a time series query using a plugin and returns the results.
  */
-export const useTimeSeriesQuery = (
+export function useTimeSeriesQuery(
   definition: TimeSeriesQueryDefinition,
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: QueryObserverOptions<TimeSeriesData>
-): UseQueryResult<TimeSeriesData> => {
+): UseQueryResult<TimeSeriesData> {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
-  const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
+  const { queryEnabled, queryKey } = getQueryOptions(plugin, definition, context);
+
   return useQuery({
-    enabled: (queryOptions?.enabled ?? true) || queryEnabled,
+    enabled: (queryOptions?.enabled ?? true) && queryEnabled,
     queryKey: queryKey,
     queryFn: ({ signal }) => {
-      // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
         throw new Error('Expected plugin to be loaded');
       }
-      // Keep options out of query key so we don't re-run queries because suggested step changes
       const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
       return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx, signal);
     },
   });
-};
+}
 
 /**
  * Runs multiple time series queries using plugins and returns the results.
+ * Supports queries that depend on other query results via dependsOn.queries.
+ * Handles chained dependencies of any depth via dynamic dependency resolution.
  */
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
 ): Array<UseQueryResult<TimeSeriesData>> {
+  // Track resolved results in state to trigger re-renders for dependent queries
+  const [resolvedResults, setResolvedResults] = useState<Map<number, TimeSeriesData>>(new Map());
+
   const { getPlugin } = usePluginRegistry();
-  const context = {
-    ...useTimeSeriesQueryContext(),
-    mode: options?.mode,
-    suggestedStepMs: options?.suggestedStepMs,
-  };
+  const baseContext = useTimeSeriesQueryContext();
+
+  const context = useMemo(
+    () => ({
+      ...baseContext,
+      mode: options?.mode,
+      suggestedStepMs: options?.suggestedStepMs,
+    }),
+    [baseContext, options?.mode, options?.suggestedStepMs]
+  );
 
   const pluginLoaderResponse = usePlugins(
     TIME_SERIES_QUERY_KEY,
     definitions.map((d) => ({ kind: d.spec.plugin.kind }))
   );
 
+  // LOGZ.IO CHANGE START:: APPZ-955-math-on-queries-formulas
+  const dependencies = useMemo(
+    () => extractQueryDependencies(definitions, pluginLoaderResponse, context),
+    [definitions, pluginLoaderResponse, context]
+  );
+
+  const queries = useMemo(() => {
+    return definitions.map((definition, idx) =>
+      createQueryConfig({
+        definition,
+        plugin: pluginLoaderResponse[idx]?.data,
+        context,
+        queryIndex: idx,
+        getPlugin,
+        queryOptions,
+        resolvedResults,
+        dependencies,
+      })
+    );
+  }, [definitions, pluginLoaderResponse, context, dependencies, getPlugin, queryOptions, resolvedResults]);
+
   // LOGZ.IO CHANGE:: Performance optimization [APPZ-359] useStableQueries()
-  return useStableQueries({
-    queries: definitions.map((definition, idx) => {
-      const plugin = pluginLoaderResponse[idx]?.data;
-      const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
-      return {
-        ...queryOptions,
-        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
-        queryKey: queryKey,
-        queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
-          const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
-          const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
-          return data;
-        },
-      } as QueryObserverOptions;
-    }),
-  }) as Array<UseQueryResult<TimeSeriesData>>;
+  const results = useStableQueries({ queries }) as Array<UseQueryResult<TimeSeriesData>>;
+
+  // Sync resolved results when query data changes
+  useEffect(() => {
+    const newResolved = buildResolvedResults(results);
+    const newFingerprint = getResultsFingerprint(newResolved);
+    const currentFingerprint = getResultsFingerprint(resolvedResults);
+
+    if (newFingerprint !== currentFingerprint) {
+      setResolvedResults(newResolved);
+    }
+  }, [results, resolvedResults]);
+
+  return results;
+  // LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
 }
 
 /**

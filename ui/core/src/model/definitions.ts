@@ -17,6 +17,7 @@
 export interface Definition<Spec> {
   kind: string;
   spec: Spec;
+  hidden?: boolean; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 
 /**

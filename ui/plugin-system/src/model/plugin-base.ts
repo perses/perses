@@ -43,6 +43,7 @@ export interface OptionsEditorProps<Spec> {
     watchQueryChanges: (query: string) => void;
     setWatchOtherSpecs: (otherSpecs: UnknownSpec) => void;
   };
+  index?: number; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 
 /**

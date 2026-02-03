@@ -54,6 +54,7 @@ export function PanelQueriesSharedControls({
       return {
         kind: query.spec.plugin.kind,
         spec: query.spec.plugin.spec,
+        hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
       };
     }) ?? [];
 

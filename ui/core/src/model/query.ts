@@ -19,6 +19,12 @@ import { LogData } from './log-data';
 
 interface QuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
+  /**
+   * When true, the query result is hidden from chart visualization but still executes.
+   * Hidden queries can still be referenced by other queries (e.g., Math expressions).
+   * Defaults to false (visible).
+   */
+  hidden?: boolean; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 /**
  * A generic query definition interface that can be extended to support more than just TimeSeriesQuery

@@ -24,6 +24,7 @@ export const querySpecSchema: z.ZodSchema<QueryDefinition> = z.object({
   kind: z.string().min(1),
   spec: z.object({
     plugin: pluginSchema,
+    hidden: z.boolean().optional(), // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
   }),
 });
 

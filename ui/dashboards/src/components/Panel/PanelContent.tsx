@@ -35,7 +35,15 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.
   const queryResultsWithData = useMemo(
-    () => queryResults.flatMap((q) => (q.data ? [{ data: q.data, definition: q.definition }] : [])),
+    () =>
+      queryResults.flatMap((q) =>
+        q.data && !q.definition?.spec?.hidden ? [{ data: q.data, definition: q.definition }] : []
+      ),
+    [queryResults]
+  );
+
+  const areAllQueriesHidden = useMemo(
+    () => queryResults.every((q) => q.definition?.spec?.hidden ?? false),
     [queryResults]
   );
 
@@ -51,7 +59,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     );
   }
 
-  if (queryResultsWithData.length > 0 || queryResults.length === 0) {
+  if (queryResultsWithData.length > 0 || queryResults.length === 0 || areAllQueriesHidden) {
     return (
       <PanelPluginLoader
         kind={panelPluginKind}
