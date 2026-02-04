@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/perses/perses/internal/api/utils"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
@@ -74,7 +73,7 @@ func (o *option) Execute() error {
 }
 
 func (o *option) Whoami() (string, error) {
-	user, err := o.apiClient.V1().User().Get(utils.PathMe)
+	user, err := o.apiClient.V1().User().WhoAmI()
 	if err != nil {
 		return "", err
 	}

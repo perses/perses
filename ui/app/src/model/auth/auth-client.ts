@@ -18,7 +18,6 @@ import { HTTPHeader, HTTPMethodPOST } from '../http';
 import { useCurrentUser } from '../user-client';
 
 export const authResource = 'auth';
-export const authnResource = 'authn';
 const redirectQueryParam = 'rd';
 
 /**
@@ -46,7 +45,7 @@ export function refreshToken(): Promise<Response> {
   });
 }
 
-// Retrieve the currently logged in user's username. Returns an empty string if the user is not
+// Retrieve the currently logged-in user's username. Returns an empty string if the user is not
 // logged in
 export function useUsername(): string {
   const me = useCurrentUser();

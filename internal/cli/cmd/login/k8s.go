@@ -19,7 +19,6 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/config"
 	"golang.org/x/oauth2"
@@ -48,12 +47,8 @@ func (k *k8sLogin) Login() (*oauth2.Token, error) {
 	}
 	k.apiClient.RESTClient().Headers["Authorization"] = fmt.Sprintf("Bearer %s", kubeconfig.BearerToken)
 
-	res := k.apiClient.RESTClient().Get().
-		APIVersion("v1").
-		Resource(fmt.Sprintf("/%s/%s", utils.PathUser, utils.PathMe)).
-		Do()
-
-	if err := res.Error(); err != nil {
+	_, err = k.apiClient.V1().User().WhoAmI()
+	if err != nil {
 		return nil, err
 	}
 
