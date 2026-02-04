@@ -24,30 +24,16 @@ var (
 	defaultCacheInterval = 30 * time.Second
 )
 
-type GroupClaimMapping struct {
-	//
-	RoleName string `json:"role_name,omitempty" yaml:"role_name,omitempty"`
-	// Claim name as found in the token.
-	GroupClaim []string `json:"claim,omitempty" yaml:"claim,omitempty"`
+type Mapping struct {
+	RoleName    string    `json:"role_name" yaml:"role_name"`
+	RoleClaims  []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
+	GroupClaims []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
 }
 
-type RoleClaimMapping struct {
-	// TODO: temporarily `string` used as role type until I figure out how are regular roles handled in code.
-	RoleName string `json:"role_name,omitempty" yaml:"role_name,omitempty"`
-	// Claim name as found in the token.
-	RoleClaim []string `json:"claim,omitempty" yaml:"claim,omitempty"`
-}
-
-type GroupClaimsMappingConfig struct {
-	// TODO: proper descriptions
-	GroupClaimsPath string               `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
-	ClaimMapping    []*GroupClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
-}
-
-type RoleClaimsMappingConfig struct {
-	// TODO: proper descriptions
-	RoleClaimsPath string              `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
-	ClaimMapping   []*RoleClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
+type ClaimsMappingConfig struct {
+	RoleClaimsPath  string     `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
+	GroupClaimsPath string     `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
+	Mapping         []*Mapping `json:"mapping,omitempty" yaml:"mapping,omitempty"`
 }
 
 type AuthorizationConfig struct {
@@ -56,8 +42,7 @@ type AuthorizationConfig struct {
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 	//
-	RoleClaimsMappingConfig  *RoleClaimsMappingConfig `json:"role_claim_mapping,omitempty" yaml:"role_claim_mapping,omitempty"`
-	GroupClaimsMappingConfig *RoleClaimsMappingConfig `json:"group_claim_mapping,omitempty" yaml:"group_claim_mapping,omitempty"`
+	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
 }
 
 // TODO: placeholder below
