@@ -157,6 +157,13 @@ func SetAccessToken(token string) error {
 	})
 }
 
+func SetTokens(accessToken, refreshToken string) error {
+	return Write(&Config{
+		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(accessToken)},
+		RefreshToken:     refreshToken,
+	})
+}
+
 // Write writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
 func Write(cfg *Config) error {

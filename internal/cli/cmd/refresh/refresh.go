@@ -55,7 +55,7 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	if writeErr := config.SetAccessToken(response.AccessToken); writeErr != nil {
+	if writeErr := config.SetTokens(response.AccessToken, response.RefreshToken); writeErr != nil {
 		return writeErr
 	}
 	return output.HandleString(o.writer, "access token has been refreshed")
