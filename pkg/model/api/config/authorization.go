@@ -24,17 +24,30 @@ var (
 	defaultCacheInterval = 30 * time.Second
 )
 
-type ClaimMapping struct {
+type GroupClaimMapping struct {
+	//
+	RoleName string `json:"role_name,omitempty" yaml:"role_name,omitempty"`
 	// Claim name as found in the token.
-	Claim string `json:"claim,omitempty" yaml:"claim,omitempty"`
-	// TODO: temporarily `string` used as role type until I figure out how are regular roles handled in code.
-	Role string `json:"role,omitempty" yaml:"role,omitempty"`
+	GroupClaim []string `json:"claim,omitempty" yaml:"claim,omitempty"`
 }
 
-type ClaimMappingConfig struct {
+type RoleClaimMapping struct {
+	// TODO: temporarily `string` used as role type until I figure out how are regular roles handled in code.
+	RoleName string `json:"role_name,omitempty" yaml:"role_name,omitempty"`
+	// Claim name as found in the token.
+	RoleClaim []string `json:"claim,omitempty" yaml:"claim,omitempty"`
+}
+
+type GroupClaimsMappingConfig struct {
 	// TODO: proper descriptions
-	RoleClaimsPath string          `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
-	ClaimMapping   []*ClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
+	GroupClaimsPath string               `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
+	ClaimMapping    []*GroupClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
+}
+
+type RoleClaimsMappingConfig struct {
+	// TODO: proper descriptions
+	RoleClaimsPath string              `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
+	ClaimMapping   []*RoleClaimMapping `json:"claim_mapping,omitempty" yaml:"claim_mapping,omitempty"`
 }
 
 type AuthorizationConfig struct {
@@ -43,7 +56,15 @@ type AuthorizationConfig struct {
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 	//
-	ClaimMappingConfig ClaimMappingConfig `json:"claim_mapping_config,omitempty" yaml:"claim_mapping_config,omitempty"`
+	RoleClaimsMappingConfig  *RoleClaimsMappingConfig `json:"role_claim_mapping,omitempty" yaml:"role_claim_mapping,omitempty"`
+	GroupClaimsMappingConfig *RoleClaimsMappingConfig `json:"group_claim_mapping,omitempty" yaml:"group_claim_mapping,omitempty"`
+}
+
+// TODO: placeholder below
+func (a *AuthorizationConfig) validateClaimRoles() error {
+	// validate if claim name exists
+	// validate if it has roles
+	return nil
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -52,6 +73,10 @@ func (a *AuthorizationConfig) Verify() error {
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*role.Permission{}
+	}
+	err := a.validateClaimRoles()
+	if err != nil {
+		return err
 	}
 	return nil
 }
