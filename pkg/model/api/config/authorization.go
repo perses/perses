@@ -50,11 +50,11 @@ type AuthorizationConfig struct {
 }
 
 func (a *AuthorizationConfig) validateClaimRoles() error {
+	// check if either RoleClaimsPath or GroupClaimsPath is defined
+	if a.ClaimsMappingConfig.RoleClaimsPath == "" && a.ClaimsMappingConfig.GroupClaimsPath == "" {
+		return errors.New("No role_claims_path and group_claims_path defined")
+	}
 	for _, mapping := range a.ClaimsMappingConfig.Mapping {
-		// check if either RoleClaimsPath or GroupClaimsPath is defined
-		if a.ClaimsMappingConfig.RoleClaimsPath == "" && a.ClaimsMappingConfig.GroupClaimsPath == "" {
-			return errors.New("No role_claims_path and group_claims_path defined")
-		}
 		// check if role name defined
 		// If role name defined in config does not match any existing RBAC roles, warning raised when assigning roles to permission (or simply entry omitted?)
 		if mapping.RoleName == "" {
