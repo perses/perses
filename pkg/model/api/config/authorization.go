@@ -14,6 +14,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -24,12 +26,14 @@ var (
 	defaultCacheInterval = 30 * time.Second
 )
 
+// TODO: documentation
 type Mapping struct {
 	RoleName    string    `json:"role_name" yaml:"role_name"`
 	RoleClaims  []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
 	GroupClaims []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
 }
 
+// TODO: documentation
 type ClaimsMappingConfig struct {
 	RoleClaimsPath  string     `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
 	GroupClaimsPath string     `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
@@ -45,10 +49,18 @@ type AuthorizationConfig struct {
 	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
 }
 
-// TODO: placeholder below
 func (a *AuthorizationConfig) validateClaimRoles() error {
-	// validate if claim name exists
-	// validate if it has roles
+	for _, mapping := range a.ClaimsMappingConfig.Mapping {
+		// check if role name defined
+		// If role name defined in config does not match any existing RBAC roles, warning raised when assigning roles to permission (or simply entry omitted?)
+		if mapping.RoleName == "" {
+			return errors.New("No role name defined for role mapping")
+		}
+		// check if it has any roles/groups assigned; if not, error or remove from list?
+		if mapping.RoleClaims == nil && mapping.GroupClaims == nil {
+			return fmt.Errorf("No role or group claims defined for role %s", mapping.RoleName)
+		}
+	}
 	return nil
 }
 
