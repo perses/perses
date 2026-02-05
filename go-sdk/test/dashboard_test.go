@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -39,6 +39,7 @@ func TestDashboardBuilder(t *testing.T) {
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.Name("Containers monitoring"),
 		dashboard.ProjectName("MyProject"),
+		dashboard.Description("A dashboard to monitor containers"),
 
 		// VARIABLES
 		dashboard.AddVariable("stack",

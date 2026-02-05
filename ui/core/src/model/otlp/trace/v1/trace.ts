@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,13 +23,16 @@ export interface TracesData {
 
 export interface ResourceSpan {
   resource?: Resource;
-  scopeSpans: ScopeSpans[];
+  scopeSpans: ScopeSpan[];
 }
 
-export interface ScopeSpans {
+export interface ScopeSpan {
   scope?: InstrumentationScope;
   spans: Span[];
 }
+
+/** @deprecated this type was renamed to ScopeSpan */
+export type ScopeSpans = ScopeSpan;
 
 export interface Span {
   traceId: string;

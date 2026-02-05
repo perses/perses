@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -120,6 +120,24 @@ function computeSocialButtonFromURL(theme: Theme, url: string) {
   return SOCIAL_BUTTONS_MAPPING[''](theme);
 }
 
+export function PersesLogo({
+  isLaptopSize,
+  isDarkModeEnabled,
+}: {
+  isLaptopSize: boolean;
+  isDarkModeEnabled: boolean;
+}): ReactElement {
+  if (!isLaptopSize) {
+    return <PersesLogoCropped />;
+  }
+
+  if (isDarkModeEnabled) {
+    return <DarkThemePersesLogo />;
+  }
+
+  return <LightThemePersesLogo />;
+}
+
 export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const { isDarkModeEnabled } = useDarkMode();
   const isLaptopSize = useIsLaptopSize();
@@ -147,7 +165,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
       justifyContent="center"
       gap={2}
     >
-      {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
+      <PersesLogo isLaptopSize={isLaptopSize} isDarkModeEnabled={isDarkModeEnabled} />
       <Divider
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"
