@@ -67,5 +67,10 @@ func TestNewURL(t *testing.T) {
 	// Create a new URL
 	u := MustParseURL("https://example.com/")
 	assert.Equal(t, "https://example.com/foo/bar/zob/lob", NewURL(u, "foo/", "bar", "/zob/lob").String())
-	assert.Equal(t, "https://example.com", NewURL(u).String())
+	assert.Equal(t, "https://example.com/", NewURL(u).String())
+
+	// Test with api_prefix in the base URL - the path should be preserved when paths are provided
+	uWithPrefix := MustParseURL("https://example.com/perses")
+	assert.Equal(t, "https://example.com/perses/api/v1/projects", NewURL(uWithPrefix, "/api/v1/projects").String())
+	assert.Equal(t, "https://example.com/perses", NewURL(uWithPrefix).String())
 }

@@ -43,7 +43,9 @@ func NewURL(u *URL, paths ...string) *URL {
 		return result
 	}
 	*result.URL = *u.URL
-	result.Path = path.Join(paths...)
+	if len(paths) > 0 {
+		result.Path = path.Join(append([]string{u.Path}, paths...)...)
+	}
 	return result
 }
 

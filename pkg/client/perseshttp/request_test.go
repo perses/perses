@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -80,6 +81,54 @@ func TestRequest_BuildPath(t *testing.T) {
 		t.Run(test.title, func(t *testing.T) {
 			path := test.request.buildPath()
 			assert.Equal(t, test.expectedResult, path)
+		})
+
+	}
+}
+
+func TestRequest_URL(t *testing.T) {
+	testSuites := []struct {
+		title          string
+		request        *Request
+		expectedResult string
+	}{
+		{
+			title: "URL without api_prefix",
+			request: &Request{
+				baseURL:    common.MustParseURL("https://example.com"),
+				apiPrefix:  defaultAPIPrefix,
+				apiVersion: defaultAPIVersion,
+				resource:   "projects",
+			},
+			expectedResult: "https://example.com/api/v1/projects",
+		},
+		{
+			title: "URL with api_prefix in base URL",
+			request: &Request{
+				baseURL:    common.MustParseURL("https://example.com/perses"),
+				apiPrefix:  defaultAPIPrefix,
+				apiVersion: defaultAPIVersion,
+				resource:   "projects",
+			},
+			expectedResult: "https://example.com/perses/api/v1/projects",
+		},
+		{
+			title: "URL with api_prefix and project path",
+			request: &Request{
+				baseURL:    common.MustParseURL("https://example.com/perses"),
+				apiPrefix:  defaultAPIPrefix,
+				apiVersion: defaultAPIVersion,
+				project:    "myproject",
+				resource:   "dashboards",
+				name:       "mydashboard",
+			},
+			expectedResult: "https://example.com/perses/api/v1/projects/myproject/dashboards/mydashboard",
+		},
+	}
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			url := test.request.url()
+			assert.Equal(t, test.expectedResult, url)
 		})
 
 	}
