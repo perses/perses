@@ -34,11 +34,11 @@ const authResource = "auth"
 type Interface interface {
 	Login(user, password string) (*oauth2.Token, error)
 	Refresh(refreshToken string) (*oauth2.Token, error)
-	// Used for device_code auth flow
-	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
-	// Used for device_code auth flow
-	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse) (*oauth2.Token, error)
-	// Used for robotic auth flow
+	// DeviceCode is used for device_code auth flow
+	DeviceCode(authKind, authProvider string, opts ...oauth2.AuthCodeOption) (*oauth2.DeviceAuthResponse, error)
+	// DeviceAccessToken is used for device_code auth flow
+	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+	// ClientCredentialsToken is used for robotic auth flow
 	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*oauth2.Token, error)
 }
 
@@ -79,14 +79,14 @@ func (c *auth) Refresh(refreshToken string) (*oauth2.Token, error) {
 		Object(result)
 }
 
-func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, error) {
+func (c *auth) DeviceCode(authKind, slugID string, opts ...oauth2.AuthCodeOption) (*oauth2.DeviceAuthResponse, error) {
 	config := oauth2.Config{
 		Endpoint: oauth2.Endpoint{
 			DeviceAuthURL: c.deviceAuthURL(authKind, slugID),
 		},
 	}
 
-	resp, err := config.DeviceAuth(context.Background())
+	resp, err := config.DeviceAuth(context.Background(), opts...)
 
 	// Strangely enough, the oauth2.DeviceAuth function does not parse the error body, so we have to it ourselves
 	oauthErr := &oauth2.RetrieveError{}
@@ -101,13 +101,13 @@ func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, 
 	return resp, nil
 }
 
-func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse) (*oauth2.Token, error) {
+func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
 	config := &oauth2.Config{
 		Endpoint: oauth2.Endpoint{
 			TokenURL: c.tokenURL(authKind, slugID),
 		},
 	}
-	token, err := config.DeviceAccessToken(context.Background(), deviceAuthResp)
+	token, err := config.DeviceAccessToken(context.Background(), deviceAuthResp, opts...)
 	if err != nil {
 		return nil, &perseshttp.RequestError{Err: err}
 	}

@@ -32,7 +32,7 @@ func (b *K8sAuth) GetToken() (string, error) {
 	return kubeconfig.BearerToken, nil
 }
 
-// Returns initialized config, allows local usage (outside cluster) based on provided kubeconfig or in-cluster
+// InitKubeConfig returns initialized config, allows local usage (outside cluster) based on provided kubeconfig or in-cluster
 // service account usage
 func InitKubeConfig(kcLocation string) (*rest.Config, error) {
 	if kcLocation != "" {

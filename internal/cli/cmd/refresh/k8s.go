@@ -26,7 +26,7 @@ type k8sRefresh struct {
 }
 
 func (k *k8sRefresh) refresh() error {
-	// If the k8sAuth secret hasn't been set yet then we know that the user hasn't attempted to log in
+	// If the k8sAuth secret hasn't been set, yet then we know that the user hasn't attempted to log in
 	if config.Global.RestClientConfig.K8sAuth == nil {
 		return fmt.Errorf("kubeconfig location has not been set yet, please use the command login to set it")
 	}

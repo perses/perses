@@ -65,6 +65,7 @@ type option struct {
 	kube                  bool
 	kubeconfig            string
 	insecureTLS           bool
+	enablePKCE            bool
 	apiClient             api.ClientInterface
 	restConfig            clientConfig.RestConfigClient
 	remoteConfig          *backendConfig.Config
@@ -226,6 +227,7 @@ func (o *option) newLoginOption() (loginOption, error) {
 			writer:                o.writer,
 			externalAuthnKind:     o.externalAuthnKind,
 			externalAuthnProvider: o.externalAuthnProvider,
+			enablePKCE:            o.enablePKCE,
 			apiClient:             o.apiClient,
 		}, nil
 	}
@@ -368,7 +370,7 @@ percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id
 	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
 	cmd.Flags().BoolVar(&o.kube, "kube", false, "Sets if the login should use the users login")
 	cmd.Flags().StringVar(&o.kubeconfig, "kubeconfig-file", "", "Kubeconfig file location to load Kubernetes token from. Defaults to KUBECONFIG env variable, then HOME/.kube/config if empty")
-
 	cmd.Flags().StringVar(&o.externalAuthnProvider, "provider", "", "External authentication provider identifier. (slug_id)")
+	cmd.Flags().BoolVar(&o.enablePKCE, "enable-pkce", false, "Enable PKCE (Proof Key for Code Exchange) for the device code flow.")
 	return cmd
 }
