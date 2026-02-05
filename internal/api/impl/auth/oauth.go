@@ -393,16 +393,7 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
 	}
 
-	// Forward PKCE code_challenge if provided by the client
-	var opts []oauth2.AuthCodeOption
-	if codeChallenge := ctx.FormValue("code_challenge"); codeChallenge != "" {
-		opts = append(opts, oauth2.SetAuthURLParam("code_challenge", codeChallenge))
-		if method := ctx.FormValue("code_challenge_method"); method != "" {
-			opts = append(opts, oauth2.SetAuthURLParam("code_challenge_method", method))
-		}
-	}
-
-	resp, err := e.deviceCodeConf.DeviceAuth(e.newQueryContext(ctx), opts...)
+	resp, err := e.deviceCodeConf.DeviceAuth(e.newQueryContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -421,8 +412,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
-		codeVerifier := ctx.FormValue("code_verifier")
-		accessToken, err = e.retrieveDeviceAccessToken(providerCtx, deviceCode, codeVerifier)
+		accessToken, err = e.retrieveDeviceAccessToken(providerCtx, deviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
@@ -495,14 +485,11 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 // retrieveDeviceAccessToken exchanges the device code for an access token,
 // from the OAuth 2.0 provider.
 // We need to recreate it as the oauth2 package only exposes the poll mechanism in a whole.
-func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCode string, codeVerifier string) (*oauth2.Token, error) {
+func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCode string) (*oauth2.Token, error) {
 	// Prepare the request body
 	values := url.Values{}
 	values.Set("grant_type", string(oidc.GrantTypeDeviceCode))
 	values.Set("device_code", deviceCode)
-	if codeVerifier != "" {
-		values.Set("code_verifier", codeVerifier)
-	}
 
 	// Create a new request using http
 	req, newReqErr := http.NewRequest(http.MethodPost, e.deviceCodeConf.Endpoint.TokenURL, strings.NewReader(values.Encode()))

@@ -15,13 +15,10 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/gorilla/securecookie"
@@ -312,28 +309,13 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
 	}
 
-	// Build the device authorization request, including PKCE code_challenge if provided
+	// Send the device authorization request
 	conf := e.deviceCodeRelyingParty.OAuthConfig()
-	deviceAuthConf := oauth2.Config{
-		ClientID: conf.ClientID,
-		Scopes:   conf.Scopes,
-		Endpoint: oauth2.Endpoint{
-			DeviceAuthURL: e.deviceCodeRelyingParty.GetDeviceAuthorizationEndpoint(),
-		},
-	}
-
-	opts := []oauth2.AuthCodeOption{
-		oauth2.SetAuthURLParam("client_secret", conf.ClientSecret),
-	}
-	if codeChallenge := ctx.FormValue("code_challenge"); codeChallenge != "" {
-		opts = append(opts, oauth2.SetAuthURLParam("code_challenge", codeChallenge))
-		if method := ctx.FormValue("code_challenge_method"); method != "" {
-			opts = append(opts, oauth2.SetAuthURLParam("code_challenge_method", method))
-		}
-	}
-
-	httpCtx := context.WithValue(ctx.Request().Context(), oauth2.HTTPClient, e.deviceCodeRelyingParty.HttpClient())
-	resp, err := deviceAuthConf.DeviceAuth(httpCtx, opts...)
+	resp, err := client.CallDeviceAuthorizationEndpoint(ctx.Request().Context(), &oidc.ClientCredentialsRequest{
+		Scope:        conf.Scopes,
+		ClientID:     conf.ClientID,
+		ClientSecret: conf.ClientSecret,
+	}, e.deviceCodeRelyingParty, nil)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send device authorization request")
 		return err
@@ -352,8 +334,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
-		codeVerifier := ctx.FormValue("code_verifier")
-		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), e.deviceCodeRelyingParty, deviceCode, codeVerifier)
+		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), e.deviceCodeRelyingParty, deviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
@@ -432,22 +413,20 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 
 // retrieveDeviceAccessToken exchanges the device code for an access token,
 // from the OAuth 2.0 provider.
-// It builds a raw HTTP request to support PKCE code_verifier, which the zitadel
-// library's DeviceAccessTokenRequest struct does not include.
-func retrieveDeviceAccessToken(ctx context.Context, relyingParty *RelyingPartyWithTokenEndpoint, deviceCode string, codeVerifier string) (*oidc.AccessTokenResponse, error) {
+// It duplicates the original implementation of OIDC library to make only one query instead of polling.
+func retrieveDeviceAccessToken(ctx context.Context, relyingParty *RelyingPartyWithTokenEndpoint, deviceCode string) (*oidc.AccessTokenResponse, error) {
+	// Create a new device access token request
 	conf := relyingParty.OAuthConfig()
-
-	// Prepare the request body
-	values := url.Values{}
-	values.Set("grant_type", string(oidc.GrantTypeDeviceCode))
-	values.Set("device_code", deviceCode)
-	values.Set("client_id", conf.ClientID)
-	values.Set("client_secret", conf.ClientSecret)
-	if len(conf.Scopes) > 0 {
-		values.Set("scope", strings.Join(conf.Scopes, " "))
-	}
-	if codeVerifier != "" {
-		values.Set("code_verifier", codeVerifier)
+	req := &client.DeviceAccessTokenRequest{
+		DeviceAccessTokenRequest: oidc.DeviceAccessTokenRequest{
+			GrantType:  oidc.GrantTypeDeviceCode,
+			DeviceCode: deviceCode,
+		},
+		ClientCredentialsRequest: &oidc.ClientCredentialsRequest{
+			Scope:        conf.Scopes,
+			ClientID:     conf.ClientID,
+			ClientSecret: conf.ClientSecret,
+		},
 	}
 
 	if signer := relyingParty.Signer(); signer != nil {
@@ -455,45 +434,12 @@ func retrieveDeviceAccessToken(ctx context.Context, relyingParty *RelyingPartyWi
 		if err != nil {
 			return nil, fmt.Errorf("failed to build assertion: %w", err)
 		}
-		values.Set("client_assertion", assertion)
-		values.Set("client_assertion_type", string(oidc.ClientAssertionTypeJWTAssertion))
+		req.ClientAssertion = assertion
+		req.ClientAssertionType = oidc.ClientAssertionTypeJWTAssertion
 	}
 
-	// Create and send the HTTP request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, relyingParty.TokenEndpoint(), strings.NewReader(values.Encode()))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := relyingParty.HttpClient().Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var tokenResp oidc.AccessTokenResponse
-	if err := json.Unmarshal(body, &tokenResp); err != nil {
-		return nil, err
-	}
-
-	if tokenResp.AccessToken == "" {
-		var oauthErr api.OAuthError
-		if decErr := json.Unmarshal(body, &oauthErr); decErr == nil && len(oauthErr.ErrorCode) > 0 {
-			return nil, &oauthErr
-		}
-		return nil, errors.New("invalid token received")
-	}
-
-	return &tokenResp, nil
+	// Call the device access token endpoint
+	return client.CallDeviceAccessTokenEndpoint(ctx, req, relyingParty)
 }
 
 // retrieveClientCredentialsToken exchanges the client credentials for an access token,

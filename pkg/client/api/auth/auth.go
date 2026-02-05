@@ -34,8 +34,8 @@ const authResource = "auth"
 type Interface interface {
 	Login(user, password string) (*oauth2.Token, error)
 	Refresh(refreshToken string) (*oauth2.Token, error)
-	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, string, error)
-	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse, codeVerifier string) (*oauth2.Token, error)
+	DeviceCode(authKind, authProvider string, opts ...oauth2.AuthCodeOption) (*oauth2.DeviceAuthResponse, error)
+	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*oauth2.Token, error)
 }
 
@@ -76,36 +76,35 @@ func (c *auth) Refresh(refreshToken string) (*oauth2.Token, error) {
 		Object(result)
 }
 
-func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, string, error) {
-	verifier := oauth2.GenerateVerifier()
+func (c *auth) DeviceCode(authKind, slugID string, opts ...oauth2.AuthCodeOption) (*oauth2.DeviceAuthResponse, error) {
 	config := oauth2.Config{
 		Endpoint: oauth2.Endpoint{
 			DeviceAuthURL: c.deviceAuthURL(authKind, slugID),
 		},
 	}
 
-	resp, err := config.DeviceAuth(context.Background(), oauth2.S256ChallengeOption(verifier))
+	resp, err := config.DeviceAuth(context.Background(), opts...)
 
 	// Strangely enough, the oauth2.DeviceAuth function does not parse the error body, so we have to it ourselves
 	oauthErr := &oauth2.RetrieveError{}
 	if err != nil && errors.As(err, &oauthErr) {
 		unmErr := json.Unmarshal(oauthErr.Body, &oauthErr)
 		if unmErr != nil {
-			return nil, "", &perseshttp.RequestError{Err: unmErr}
+			return nil, &perseshttp.RequestError{Err: unmErr}
 		}
-		return nil, "", &perseshttp.RequestError{Err: oauthErr}
+		return nil, &perseshttp.RequestError{Err: oauthErr}
 	}
 
-	return resp, verifier, nil
+	return resp, nil
 }
 
-func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse, codeVerifier string) (*oauth2.Token, error) {
+func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
 	config := &oauth2.Config{
 		Endpoint: oauth2.Endpoint{
 			TokenURL: c.tokenURL(authKind, slugID),
 		},
 	}
-	token, err := config.DeviceAccessToken(context.Background(), deviceAuthResp, oauth2.VerifierOption(codeVerifier))
+	token, err := config.DeviceAccessToken(context.Background(), deviceAuthResp, opts...)
 	if err != nil {
 		return nil, &perseshttp.RequestError{Err: err}
 	}
