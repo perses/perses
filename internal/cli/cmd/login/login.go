@@ -66,6 +66,7 @@ type option struct {
 	accessToken          string
 	refreshToken         string
 	insecureTLS          bool
+	enablePKCE           bool
 	apiClient            api.ClientInterface
 	restConfig           clientConfig.RestConfigClient
 	remoteConfig         *backendConfig.Config
@@ -219,6 +220,7 @@ func (o *option) newLoginOption() (loginOption, error) {
 			writer:               o.writer,
 			externalAuthKind:     o.externalAuthKind,
 			externalAuthProvider: o.externalAuthProvider,
+			enablePKCE:           o.enablePKCE,
 			apiClient:            o.apiClient,
 		}, nil
 	}
@@ -322,5 +324,6 @@ percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id
 	cmd.Flags().StringVar(&o.clientSecret, "client-secret", "", "Client Secret used for robotic access when using external authentication provider.")
 	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
 	cmd.Flags().StringVar(&o.externalAuthProvider, "provider", "", "External authentication provider identifier. (slug_id)")
+	cmd.Flags().BoolVar(&o.enablePKCE, "enable-pkce", false, "Enable PKCE (Proof Key for Code Exchange) for the device code flow.")
 	return cmd
 }
