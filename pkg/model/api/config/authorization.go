@@ -29,8 +29,11 @@ var (
 // TODO: documentation
 type Mapping struct {
 	RoleName    string    `json:"role_name" yaml:"role_name"`
+	Project     string    `json:"project,omitempty" yaml:"project,omitempty"`
 	RoleClaims  []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
 	GroupClaims []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
+	// Permissions matched to role name
+	Permissions []role.Permission
 }
 
 // TODO: documentation
@@ -49,6 +52,9 @@ type AuthorizationConfig struct {
 	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
 }
 
+// TODO: extend this validation function
+// TODO: if no project default to wildcard?
+// TODO: change to ClaimsMappingConfig method?
 func (a *AuthorizationConfig) validateClaimRoles() error {
 	// check if either RoleClaimsPath or GroupClaimsPath is defined
 	if a.ClaimsMappingConfig.RoleClaimsPath == "" && a.ClaimsMappingConfig.GroupClaimsPath == "" {
