@@ -49,6 +49,7 @@ var (
 		"/config",
 		"/explore",
 		"/profile",
+		"/delegated-auth-error",
 	}
 	capturingPluginName = regexp.MustCompile(`/plugins/([a-zA-Z0-9_-]+)/?.*`)
 )
