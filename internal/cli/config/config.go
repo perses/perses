@@ -151,12 +151,6 @@ func SetProject(project string) error {
 	})
 }
 
-func SetAccessToken(token string) error {
-	return Write(&Config{
-		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(token)},
-	})
-}
-
 func SetTokens(accessToken, refreshToken string) error {
 	return Write(&Config{
 		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(accessToken)},
