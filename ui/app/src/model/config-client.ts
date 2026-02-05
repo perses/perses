@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,6 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
-import { PERSES_APP_CONFIG } from '../config';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -248,6 +247,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiURL: '/api', apiPrefix: PERSES_APP_CONFIG.api_prefix });
+  const url = buildURL({ resource: resource, apiURL: '/api' });
   return fetchJson<ConfigModel>(url);
 }

@@ -36,6 +36,8 @@ cue.mod/gen
 
 dev/local_db
 dev/extra/tempo-data
+dev/extra/loki-data
+dev/extra/logs/*
 dev/kubernetes/local
 
 .goreleaser.yaml

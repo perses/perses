@@ -15,9 +15,7 @@ import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-
 import { fetchJson } from '@perses-dev/core';
 
 import { HTTPHeader, HTTPMethodPOST } from '../http';
-import buildQueryKey from '../querykey-builder';
 import buildURL from '../url-builder';
-import { userResource } from '../user-client';
 import { authResource } from './auth-client';
 
 interface NativeAuthnBody {
@@ -30,18 +28,15 @@ export function useNativeAuthnMutation(): UseMutationResult<void, Error, NativeA
   return useMutation<void, Error, NativeAuthnBody>({
     mutationKey: [authResource],
     mutationFn: (body: NativeAuthnBody) => {
-      return nativeAuthn(body);
+      return nativeAuth(body);
     },
     onSuccess: () => {
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: [authResource] }),
-        queryClient.invalidateQueries({ queryKey: buildQueryKey({ resource: userResource, name: 'me' }) }),
-      ]);
+      return queryClient.invalidateQueries({ queryKey: [authResource] });
     },
   });
 }
 
-function nativeAuthn(body: NativeAuthnBody): Promise<void> {
+export function nativeAuth(body: NativeAuthnBody): Promise<void> {
   const url = buildURL({ resource: `${authResource}/providers/native/login`, apiURL: '/api' });
   return fetchJson<void>(url, {
     method: HTTPMethodPOST,

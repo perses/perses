@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/perses/common/set"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,16 +42,66 @@ const (
 // limitations under the License.`
 )
 
-type License struct {
-	ExcludedFiles    []string
-	ExcludedPatterns []string
-	ExcludedDirs     []string
-	Patterns         []string
+// DefaultLicense returns a License struct with default excluded directories and file patterns that matches most common use cases in the Perses project.
+func DefaultLicense() License {
+	return New().
+		AddExcludedDir(
+			"node_modules",
+			".git",
+			".github",
+			".idea",
+			"dist",
+			"cue.mod",
+		).
+		AddPattern(
+			"*.go",
+			"*.cue",
+			"*.js",
+			"*.ts",
+			"*.jsx",
+			"*.tsx",
+		)
+}
+
+func New() License {
+	return &license{
+		excludedFiles:    set.New[string](),
+		excludedPatterns: set.New[string](),
+		excludedDirs:     set.New[string](),
+		patterns:         set.New[string](),
+	}
+}
+
+type License interface {
+	// AddExcludedFile adds files to be excluded from license checking.
+	// Adding the same file multiple times has no effect.
+	AddExcludedFile(files ...string) License
+	// AddExcludedDir adds directories to be excluded from license checking.
+	// Adding the same directory multiple times has no effect.
+	AddExcludedDir(dirs ...string) License
+	// AddExcludedPattern adds file patterns to be excluded from license checking.
+	// Adding the same pattern multiple times has no effect.
+	AddExcludedPattern(patterns ...string) License
+	// AddPattern adds file patterns to be included in license checking.
+	// Adding the same pattern multiple times has no effect.
+	AddPattern(patterns ...string) License
+	// RegisterFlags registers command-line flags for license checking.
+	// This is mandatory to call this method before calling Execute.
+	RegisterFlags()
+	// Execute performs the license checking or fixing based on the registered flags.
+	Execute()
+}
+
+type license struct {
+	excludedFiles    set.Set[string]
+	excludedPatterns set.Set[string]
+	excludedDirs     set.Set[string]
+	patterns         set.Set[string]
 	checkLicenseFlag bool
 	fixLicenseFlag   bool
 }
 
-func (l *License) openFile(path string, do func(f *os.File) error) error {
+func (l *license) openFile(path string, do func(f *os.File) error) error {
 	f, err := os.Open(path) // nolint:gosec
 	if err != nil {
 		return err
@@ -59,26 +110,26 @@ func (l *License) openFile(path string, do func(f *os.File) error) error {
 	return do(f)
 }
 
-func (l *License) collectFilesNotContainingLicense(rootPath string) []string {
+func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
 	var filesNotContainingLicense []string
 	err := filepath.WalkDir(rootPath, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			for _, excludedDir := range l.ExcludedDirs {
+			for excludedDir := range l.excludedDirs {
 				if info.Name() == excludedDir {
 					return filepath.SkipDir
 				}
 			}
 			return nil
 		}
-		for _, excludedFile := range l.ExcludedFiles {
+		for excludedFile := range l.excludedFiles {
 			if info.Name() == excludedFile {
 				return nil
 			}
 		}
-		for _, excludedPattern := range l.ExcludedPatterns {
+		for excludedPattern := range l.excludedPatterns {
 			matched, matchErr := filepath.Match(excludedPattern, info.Name())
 			if matchErr != nil {
 				logrus.Fatalf("Failed to match excluded pattern %q: %s", excludedPattern, matchErr)
@@ -87,7 +138,7 @@ func (l *License) collectFilesNotContainingLicense(rootPath string) []string {
 				return nil
 			}
 		}
-		for _, pattern := range l.Patterns {
+		for pattern := range l.patterns {
 			matched, matchErr := filepath.Match(pattern, info.Name())
 			if matchErr != nil {
 				logrus.Fatalf("Failed to match pattern %q: %s", pattern, matchErr)
@@ -116,7 +167,7 @@ func (l *License) collectFilesNotContainingLicense(rootPath string) []string {
 	return filesNotContainingLicense
 }
 
-func (l *License) check() {
+func (l *license) check() {
 	filesNotContainingLicense := l.collectFilesNotContainingLicense(".")
 	if len(filesNotContainingLicense) == 0 {
 		fmt.Println("All files contain the license header.")
@@ -129,7 +180,7 @@ func (l *License) check() {
 	logrus.Fatal("License header missing in some files")
 }
 
-func (l *License) fix() {
+func (l *license) fix() {
 	filesNotContainingLicense := l.collectFilesNotContainingLicense(".")
 	for _, file := range filesNotContainingLicense {
 		err := l.openFile(file, func(f *os.File) error {
@@ -165,16 +216,36 @@ func (l *License) fix() {
 	}
 }
 
-func (l *License) RegisterFlags() {
+func (l *license) RegisterFlags() {
 	flag.BoolVar(&l.checkLicenseFlag, "check", false, "Check if all files contain the license header")
 	flag.BoolVar(&l.fixLicenseFlag, "fix", false, "Fix files to add the license header where missing")
 }
 
-func (l *License) Execute() {
+func (l *license) Execute() {
 	if l.checkLicenseFlag {
 		l.check()
 	}
 	if l.fixLicenseFlag {
 		l.fix()
 	}
+}
+
+func (l *license) AddExcludedFile(files ...string) License {
+	l.excludedFiles.Add(files...)
+	return l
+}
+
+func (l *license) AddExcludedDir(dirs ...string) License {
+	l.excludedDirs.Add(dirs...)
+	return l
+}
+
+func (l *license) AddExcludedPattern(patterns ...string) License {
+	l.excludedPatterns.Add(patterns...)
+	return l
+}
+
+func (l *license) AddPattern(patterns ...string) License {
+	l.patterns.Add(patterns...)
+	return l
 }

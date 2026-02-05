@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import { isProjectMetadata, Resource } from '@perses-dev/core';
 import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
-import { Box, Button, Chip, Typography } from '@mui/material';
+import { Box, Button, Chip, Theme, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
 import { Link as RouterLink } from 'react-router-dom';
@@ -40,6 +40,24 @@ function buildRouting(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
     ? `${ProjectRoute}/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
     : `/${resource.kind.toLowerCase()}s/${resource.metadata.name}`;
+}
+
+function getHighlightBackgroundColor(theme: Theme, isHighlighted: boolean): string {
+  if (!isHighlighted) {
+    return 'inherit';
+  }
+  return theme.palette.mode === 'dark' ? 'rgba(255, 165, 0, 0.2)' : 'rgba(255, 223, 186, 0.3)';
+}
+
+function getHighlightBorderColor(theme: Theme, isHighlighted: boolean): string {
+  if (!isHighlighted) {
+    return 'inherit';
+  }
+  return theme.palette.mode === 'dark' ? 'orange' : 'darkorange';
+}
+
+function getHighlightTextColor(theme: Theme, isHighlighted: boolean): string {
+  return isHighlighted && theme.palette.mode === 'dark' ? theme.palette.warning.light : 'inherit';
 }
 
 export interface SearchListProps {
@@ -96,54 +114,46 @@ export function SearchList(props: SearchListProps): ReactElement | null {
         <props.icon sx={{ marginRight: 0.5 }} fontSize="medium" />
         <Typography variant="h3">{filteredList[0]?.original.kind}s</Typography>
       </Box>
+      {filteredList.slice(0, currentSizeList).map((search) => {
+        const isHighlighted = Boolean(search.original.highlight);
 
-      {filteredList.slice(0, currentSizeList).map((search) => (
-        <Button
-          variant="outlined"
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: 1,
-            marginLeft: 1,
-            marginRight: 1,
-            backgroundColor: (theme) =>
-              search.original.highlight
-                ? theme.palette.mode === 'dark'
-                  ? 'rgba(255, 165, 0, 0.2)'
-                  : 'rgba(255, 223, 186, 0.3)'
-                : 'inherit',
-            borderColor: (theme) =>
-              search.original.highlight ? (theme.palette.mode === 'dark' ? 'orange' : 'darkorange') : 'inherit',
-            fontWeight: search.original.highlight ? 'bold' : 'normal',
-            color: (theme) =>
-              search.original.highlight
-                ? theme.palette.mode === 'dark'
-                  ? theme.palette.warning.light
-                  : 'inherit'
-                : 'inherit',
-          }}
-          component={RouterLink}
-          onClick={props.onClick}
-          to={`${props.buildRouting ? props.buildRouting(search.original) : buildRouting(search.original)}`}
-          key={`${buildBoxSearchKey(search.original)}`}
-        >
-          <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
-            {search.original.highlight && <MiddleAlertIcon sx={{ marginRight: 0.5 }} />}
-            <span
-              dangerouslySetInnerHTML={{
-                __html: kvSearch.render(search.original, search.matched, {
-                  pre: '<strong style="color:darkorange">',
-                  post: '</strong>',
-                  escapeHTML: true,
-                }).metadata.name,
-              }}
-            />
-          </Box>
-          {isProjectMetadata(search.original.metadata) && props.chip && (
-            <Chip label={`${search.original.metadata.project}`} size="small" variant="outlined" />
-          )}
-        </Button>
-      ))}
+        return (
+          <Button
+            variant="outlined"
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: 1,
+              marginLeft: 1,
+              marginRight: 1,
+              backgroundColor: (theme) => getHighlightBackgroundColor(theme, isHighlighted),
+              borderColor: (theme) => getHighlightBorderColor(theme, isHighlighted),
+              fontWeight: isHighlighted ? 'bold' : 'normal',
+              color: (theme) => getHighlightTextColor(theme, isHighlighted),
+            }}
+            component={RouterLink}
+            onClick={props.onClick}
+            to={`${props.buildRouting ? props.buildRouting(search.original) : buildRouting(search.original)}`}
+            key={`${buildBoxSearchKey(search.original)}`}
+          >
+            <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
+              {isHighlighted && <MiddleAlertIcon sx={{ marginRight: 0.5 }} />}
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: kvSearch.render(search.original, search.matched, {
+                    pre: '<strong style="color:darkorange">',
+                    post: '</strong>',
+                    escapeHTML: true,
+                  }).metadata.name,
+                }}
+              />
+            </Box>
+            {isProjectMetadata(search.original.metadata) && props.chip && (
+              <Chip label={`${search.original.metadata.project}`} size="small" variant="outlined" />
+            )}
+          </Button>
+        );
+      })}
       {filteredList.length > currentSizeList && (
         <Button onClick={() => setCurrentSizeList(currentSizeList + 10)}> see more...</Button>
       )}

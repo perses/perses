@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,8 +23,20 @@ export type AnyValue =
   | { intValue: string }
   | { doubleValue: number }
   | { boolValue: boolean }
-  | { arrayValue: { values?: AnyValue[] } };
+  | { arrayValue: ArrayValue }
+  | { kvlistValue: KeyValueList }
+  | { bytesValue: string };
+
+export interface ArrayValue {
+  values?: AnyValue[];
+}
+
+export interface KeyValueList {
+  values?: KeyValue[];
+}
 
 export interface InstrumentationScope {
   name?: string;
+  version?: string;
+  attributes?: KeyValue[];
 }

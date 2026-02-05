@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -533,7 +533,7 @@ func (s *sqlProxy) prepareTLSConfig() (*tls.Config, error) {
 // SQLOpen opens a database specified by its database driver in the address
 func (s *sqlProxy) sqlOpen(tlsConfig *tls.Config) (*sql.DB, error) {
 	switch s.config.Driver {
-	case datasourceSQL.DriverMySQL:
+	case datasourceSQL.DriverMySQL, datasourceSQL.DriverMariaDB:
 		return s.openMySQL(tlsConfig)
 	case datasourceSQL.DriverPostgreSQL:
 		return s.openPostgres(tlsConfig)
@@ -558,11 +558,17 @@ func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
 		mysqlConfig.Passwd = s.password
 	}
 
-	if s.config.MySQL != nil {
-		mysqlConfig.Params = s.config.MySQL.Params
-		mysqlConfig.MaxAllowedPacket = s.config.MySQL.MaxAllowedPacket
-		mysqlConfig.ReadTimeout = s.config.MySQL.ReadTimeout
-		mysqlConfig.WriteTimeout = s.config.MySQL.WriteTimeout
+	// Use MariaDB config if a driver is MariaDB, otherwise use MySQL config
+	driverConfig := s.config.MySQL
+	if s.config.MariaDB != nil {
+		driverConfig = s.config.MariaDB
+	}
+
+	if driverConfig != nil {
+		mysqlConfig.Params = driverConfig.Params
+		mysqlConfig.MaxAllowedPacket = driverConfig.MaxAllowedPacket
+		mysqlConfig.ReadTimeout = driverConfig.ReadTimeout
+		mysqlConfig.WriteTimeout = driverConfig.WriteTimeout
 	}
 
 	if tlsConfig != nil {

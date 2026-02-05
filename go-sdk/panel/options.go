@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -49,11 +49,13 @@ func Plugin(plugin common.Plugin) Option {
 
 func AddQuery(options ...query.Option) Option {
 	return func(builder *Builder) error {
-		q, err := query.New(options...)
-		if err != nil {
-			return err
+		for _, option := range options {
+			q, err := query.New(option)
+			if err != nil {
+				return err
+			}
+			builder.Spec.Queries = append(builder.Spec.Queries, *q)
 		}
-		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
 		return nil
 	}
 }

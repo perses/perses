@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +17,8 @@ import (
 	"flag"
 	"time"
 
+	"dac/prometheus/query"
+
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
@@ -24,7 +26,6 @@ import (
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
-	"github.com/perses/plugins/prometheus/sdk/go/query"
 	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
 	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"

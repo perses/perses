@@ -25,7 +25,7 @@ const redirectQueryParam = 'rd';
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
 export function useRedirectQueryParam(): string {
-  const [path] = useQueryParam<string | undefined>('name');
+  const [path] = useQueryParam<string | undefined>(redirectQueryParam);
   return path ?? '/';
 }
 
@@ -38,7 +38,7 @@ export function buildRedirectQueryString(path: string): string {
 }
 
 export function refreshToken(): Promise<Response> {
-  const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
+  const url = buildURL({ resource: `${authResource}/refresh`, apiURL: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,

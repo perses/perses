@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,7 +31,7 @@ var (
 		template.New("endpoint").Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -128,7 +128,7 @@ func (e *Endpoint) List(ctx echo.Context) error {
 		template.New("interface").Funcs(tplFunc).Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -183,7 +183,7 @@ type Service interface {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -260,7 +260,7 @@ func (d *dao) List(q databaseModel.Query) ([]*v1.{{ $kind }}, error) {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at

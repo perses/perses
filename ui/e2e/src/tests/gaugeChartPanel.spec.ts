@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -58,7 +58,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
         await panelEditor.selectTab('Settings');
         await panelEditor.toggleThresholdModes('percent');
         await panelEditor.editThreshold('T1', '50');
-        await panelEditor.container.getByLabel('Max').fill('200');
+        await panelEditor.container.getByLabel('Max').last().fill('200');
       });
       const panel = dashboardPage.getPanelByName('Single Gauge');
       await panel.isLoaded();
