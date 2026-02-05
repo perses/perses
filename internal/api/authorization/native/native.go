@@ -44,7 +44,8 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	if err != nil {
 		return nil, err
 	}
-	return &native{
+
+	n := &native{
 		cache:                &cache{},
 		userDAO:              userDAO,
 		roleDAO:              roleDAO,
@@ -53,7 +54,13 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
 		accessKey:            key,
-	}, err
+	}
+
+	err = n.buildTokenPermissions(conf.Security.Authorization)
+	if err != nil {
+		return nil, err
+	}
+	return n, nil
 }
 
 // native is expecting a JWT token to extract the user information and validate its permissions.
@@ -68,6 +75,7 @@ type native struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	guestPermissions     []*v1Role.Permission
+	tokenPermissions     []*config.Mapping
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -198,12 +206,10 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return true
 	}
 
-	// Checking permissions mapped from token claims
-	// STEP 1: get list of permissions from claim
-	// STEP 2: use listHasPermission on the returned permission
-	// if ok := listHasPermission(placeholderPermissionList, requestAction, requestScope); ok {
-	// 	return true
-	// }
+	// Checking token permissions
+	if ok := n.checkTokenPermission(requestProject, requestAction, requestScope); ok {
+		return true
+	}
 
 	// Checking cached permissions
 	n.mutex.RLock()
@@ -299,4 +305,63 @@ func (n *native) loadAllPermissions() (usersPermissions, error) {
 		}
 	}
 	return permissionBuild, nil
+}
+
+// buildTokenPermissions builds a list of permissions based on the list of roles specified in AuthorizationConfig
+func (n *native) buildTokenPermissions(ac config.AuthorizationConfig) error {
+	// get all roles
+	roles, err := n.roleDAO.List(&role.Query{})
+	if err != nil {
+		return err
+	}
+	globalRoles, err := n.globalRoleDAO.List(&globalrole.Query{})
+	if err != nil {
+		return err
+	}
+
+	for _, mapping := range ac.ClaimsMappingConfig.Mapping {
+		if mapping.Project == v1.WildcardProject {
+			globalRole := findGlobalRole(globalRoles, mapping.RoleName)
+			if globalRole == nil {
+				// Is Warn the proper log lvl for this?
+				logrus.Warnf("unable to find global role named %s", mapping.RoleName)
+				continue
+			}
+			mapping.Permissions = globalRole.Spec.Permissions
+		} else {
+			role := findRole(roles, mapping.Project, mapping.RoleName)
+			if role == nil {
+				// Is Warn the proper log lvl for this?
+				logrus.Warnf("Unable to find role %s for project %s", mapping.RoleName, mapping.Project)
+				continue
+			}
+			mapping.Permissions = role.Spec.Permissions
+		}
+	}
+
+	n.tokenPermissions = ac.ClaimsMappingConfig.Mapping
+	return nil
+}
+
+// checkTokenPermission tests permissions taken from the token with the requested project, action and scope
+func (n *native) checkTokenPermission(requestProject string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
+	for _, mapping := range n.tokenPermissions {
+		if mapping.Project != requestProject && mapping.Project != v1.WildcardProject {
+			continue
+		}
+		for _, permission := range mapping.Permissions {
+			for _, action := range permission.Actions {
+				if action != requestAction && action != v1Role.WildcardAction {
+					continue
+				}
+				for _, scope := range permission.Scopes {
+					if scope != requestScope && scope != v1Role.WildcardScope {
+						continue
+					}
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
