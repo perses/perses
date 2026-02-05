@@ -30,7 +30,7 @@ type deviceCodeLogin struct {
 }
 
 func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
-	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
+	deviceCodeResponse, codeVerifier, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 		return nil, outErr
 	}
 
-	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse)
+	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse, codeVerifier)
 }
 
 func (l *deviceCodeLogin) SetMissingInput() error {
