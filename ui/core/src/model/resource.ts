@@ -22,6 +22,7 @@ export interface Metadata {
   createdAt?: string;
   updatedAt?: string;
   version?: number;
+  tags?: string[];
 }
 
 export interface ProjectMetadata extends Metadata {

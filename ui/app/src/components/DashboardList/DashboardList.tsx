@@ -33,6 +33,7 @@ import {
   DISPLAY_NAME_COL_DEF,
   ListProperties,
   PROJECT_COL_DEF,
+  TAGS_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
@@ -76,6 +77,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       version: dashboard.metadata.version ?? 0,
       createdAt: dashboard.metadata.createdAt ?? '',
       updatedAt: dashboard.metadata.updatedAt ?? '',
+      tags: dashboard.metadata.tags ?? [],
     }));
   }, [dashboardList]);
 
@@ -168,6 +170,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
     () => [
       PROJECT_COL_DEF,
       DISPLAY_NAME_COL_DEF,
+      TAGS_COL_DEF,
       VERSION_COL_DEF,
       CREATED_AT_COL_DEF,
       UPDATED_AT_COL_DEF,
