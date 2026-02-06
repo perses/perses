@@ -189,7 +189,7 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 }
 
 // GetUserProjects implements [Authorization]
-func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Scope) ([]string, error) {
+func (k *k8sImpl) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
 	if utils.IsAnonymous(ctx) {
 		// This method should not be called if the endpoint is anonymous or the username is not found.
 		logrus.Error("failed to get username from context to list the user projects")
@@ -204,6 +204,18 @@ func (k *k8sImpl) GetUserProjects(ctx echo.Context, _ v1Role.Action, _ v1Role.Sc
 	kubernetesUser, err := getK8sUser(usr)
 	if err != nil {
 		return nil, err
+	}
+
+	// Global-scoped resources (e.g. GlobalDatasource, GlobalVariable) are not tied to any project/namespace.
+	// Check that the user actually has the requested permission on the global scope, and if so return
+	// WildcardProject so callers treat this as full access without iterating over namespaces,
+	// which would otherwise duplicate global resources once per namespace.
+	if v1Role.IsGlobalScope(requestScope) {
+		authorized, _ := k.checkSpecificPermision(ctx, v1.WildcardProject, kubernetesUser, requestScope, requestAction)
+		if authorized == authorizer.DecisionAllow {
+			return []string{v1.WildcardProject}, nil
+		}
+		return []string{}, nil
 	}
 
 	k8sNamespaces := k.getNamespaceList()

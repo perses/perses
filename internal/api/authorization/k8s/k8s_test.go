@@ -159,6 +159,8 @@ var (
 	// user2 has read permissions in all namespaces and create permissions in project0
 	// but no globaldatasource permissions
 	userTwo = "user2"
+	// user3 has read access to GlobalDatasource only, no project-scoped permissions
+	userThree = "user3"
 )
 
 var (
@@ -197,6 +199,12 @@ func mockAuthentication(clientset *fake.Clientset) {
 				tr.Status.Authenticated = true
 				tr.Status.User = authnv1.UserInfo{
 					Username: userTwo,
+					Groups:   []string{"system:authenticated"},
+				}
+			case "user3-token":
+				tr.Status.Authenticated = true
+				tr.Status.User = authnv1.UserInfo{
+					Username: userThree,
 					Groups:   []string{"system:authenticated"},
 				}
 			default:
@@ -254,6 +262,14 @@ func mockAuthorization(clientset *fake.Clientset) {
 					spec.ResourceAttributes.Resource == string(k8sGlobalDatasourceScope) {
 
 					sar.Status.Allowed = true
+				}
+			case userThree:
+				if spec.ResourceAttributes.Verb == string(k8sReadAction) &&
+					spec.ResourceAttributes.Resource == string(k8sGlobalDatasourceScope) {
+
+					sar.Status.Allowed = true
+				} else {
+					sar.Status.Reason = fmt.Sprintf("Mock RBAC: user3 cannot '%s' on '%s'", spec.ResourceAttributes.Verb, spec.ResourceAttributes.Resource)
 				}
 			default:
 				sar.Status.Reason = "Mock RBAC: User does not exist"
@@ -398,6 +414,22 @@ func TestHasPermission(t *testing.T) {
 			reqScope:       "GlobalDatasource",
 			expectedResult: false,
 		},
+		{
+			title:          "user3 has read globaldatasource perm in wildcard project",
+			user:           userThree,
+			reqAction:      "read",
+			reqProject:     "*",
+			reqScope:       "GlobalDatasource",
+			expectedResult: true,
+		},
+		{
+			title:          "user3 doesn't have read dashboard perm in project0",
+			user:           userThree,
+			reqAction:      "read",
+			reqProject:     projectZero,
+			reqScope:       "Dashboard",
+			expectedResult: false,
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
@@ -418,34 +450,129 @@ func TestGetUserProjects(t *testing.T) {
 	testSuites := []struct {
 		title          string
 		user           string
+		reqScope       v1Role.Scope
 		expectedResult []string
 	}{
 		{
 			title:          "admin has access to all projects",
 			user:           userAdmin,
+			reqScope:       "",
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
 			title:          "user0 has access to project0",
 			user:           userZero,
+			reqScope:       "",
 			expectedResult: []string{projectZero},
 		},
 		{
 			title:          "user1 has access to no projects",
 			user:           userOne,
+			reqScope:       "",
 			expectedResult: []string{},
 		},
 		{
 			title:          "user2 has access to all projects",
 			user:           userTwo,
+			reqScope:       "",
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
+		},
+		// Global scope tests: global resources are not tied to namespaces, so
+		// GetUserProjects should return WildcardProject only if the user has
+		// permission on the global scope. This prevents global resources from
+		// being duplicated per namespace.
+		{
+			title:          "global scope GlobalDatasource returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.GlobalDatasourceScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope GlobalDatasource returns wildcard for user0 who has read access",
+			user:           userZero,
+			reqScope:       v1Role.GlobalDatasourceScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope GlobalDatasource returns empty for user1 who has no access",
+			user:           userOne,
+			reqScope:       v1Role.GlobalDatasourceScope,
+			expectedResult: []string{},
+		},
+		{
+			title:          "global scope GlobalDatasource returns empty for user2 who only has namespace-scoped access",
+			user:           userTwo,
+			reqScope:       v1Role.GlobalDatasourceScope,
+			expectedResult: []string{},
+		},
+		{
+			title:          "global scope GlobalVariable returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.GlobalVariableScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope GlobalSecret returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.GlobalSecretScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope GlobalRole returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.GlobalRoleScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope GlobalRoleBinding returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.GlobalRoleBindingScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "global scope User returns wildcard for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.UserScope,
+			expectedResult: []string{"*"},
+		},
+		// user3 has only GlobalDatasource access, no project-scoped permissions.
+		{
+			title:          "global scope GlobalDatasource returns wildcard for user3 who has read access",
+			user:           userThree,
+			reqScope:       v1Role.GlobalDatasourceScope,
+			expectedResult: []string{"*"},
+		},
+		{
+			title:          "user3 has access to no projects with empty scope",
+			user:           userThree,
+			reqScope:       "",
+			expectedResult: []string{},
+		},
+		{
+			title:          "project scope Dashboard returns empty for user3 who has no project access",
+			user:           userThree,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: []string{},
+		},
+		// Project-scoped resources returns the per-namespace list.
+		{
+			title:          "project scope Dashboard still returns namespace list for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
+		},
+		{
+			title:          "project scope Datasource still returns namespace list for user0",
+			user:           userZero,
+			reqScope:       v1Role.DatasourceScope,
+			expectedResult: []string{projectZero},
 		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s-token", test.user))
-			userProjects, err := mockK8s.GetUserProjects(e.NewContext(req, rec), "", "")
+			userProjects, err := mockK8s.GetUserProjects(e.NewContext(req, rec), v1Role.ReadAction, test.reqScope)
 			assert.NoError(t, err)
 			assert.Equal(t, test.expectedResult, userProjects)
 		})
@@ -497,6 +624,13 @@ func TestGetPermissions(t *testing.T) {
 			}, projectZero: {
 				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				&v1Role.Permission{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Datasource"}},
+			}},
+		},
+		{
+			title: "user3 has only GlobalDatasource read permissions and no project-scoped permissions",
+			user:  userThree,
+			expectedResult: map[string][]*v1Role.Permission{"*": {
+				&v1Role.Permission{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
 			}},
 		},
 	}
