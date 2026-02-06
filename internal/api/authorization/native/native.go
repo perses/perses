@@ -51,7 +51,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		roleBindingDAO:       roleBindingDAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
-		guestPermissions:     conf.Security.Authorization.GuestPermissions,
+		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
 		accessKey:            key,
 	}, err
 }
@@ -73,6 +73,10 @@ type native struct {
 }
 
 func (n *native) IsEnabled() bool {
+	return true
+}
+
+func (n *native) IsNativeAuthz() bool {
 	return true
 }
 
@@ -115,6 +119,20 @@ func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) 
 		return crypto.ProviderInfo{}, nil // No user found in the context, this is an anonymous endpoint
 	}
 	return usr.(*crypto.JWTClaims).ProviderInfo, nil
+}
+
+func (n *native) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := n.userDAO.Get(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return v1.NewPublicUser(user), nil
 }
 
 func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {

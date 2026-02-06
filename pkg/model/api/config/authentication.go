@@ -131,6 +131,10 @@ func (p *Provider) Verify() error {
 	return nil
 }
 
+type K8sAuthnProvider struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
 type OIDCLogout struct {
 	Enabled bool `json:"enabled" yaml:"enabled"`
 }
@@ -173,13 +177,15 @@ func (p *OAuthProvider) Verify() error {
 	return nil
 }
 
-type AuthProviders struct {
-	EnableNative bool            `json:"enable_native" yaml:"enable_native"`
-	OAuth        []OAuthProvider `json:"oauth,omitempty" yaml:"oauth,omitempty"`
-	OIDC         []OIDCProvider  `json:"oidc,omitempty" yaml:"oidc,omitempty"`
+type AuthenticationProviders struct {
+	EnableNative bool `json:"enable_native" yaml:"enable_native"`
+	// +optional
+	KubernetesProvider K8sAuthnProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	OAuth              []OAuthProvider  `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OIDC               []OIDCProvider   `json:"oidc,omitempty" yaml:"oidc,omitempty"`
 }
 
-func (p *AuthProviders) Verify() error {
+func (p *AuthenticationProviders) Verify() error {
 	var tmpOIDCSlugIDs []string
 	for _, prov := range p.OIDC {
 		var ok bool
@@ -210,7 +216,7 @@ type AuthenticationConfig struct {
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
 	// Providers configure the different authentication providers
-	Providers AuthProviders `json:"providers" yaml:"providers"`
+	Providers AuthenticationProviders `json:"providers" yaml:"providers"`
 }
 
 func (a *AuthenticationConfig) Verify() error {

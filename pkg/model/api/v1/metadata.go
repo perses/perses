@@ -67,17 +67,6 @@ func (m *Metadata) Flatten(sensitive bool) {
 	}
 }
 
-func NewProjectMetadata(project string, name string) *ProjectMetadata {
-	return &ProjectMetadata{
-		Metadata: Metadata{
-			Name: name,
-		},
-		ProjectMetadataWrapper: ProjectMetadataWrapper{
-			Project: project,
-		},
-	}
-}
-
 func (m *Metadata) UnmarshalJSON(data []byte) error {
 	var tmp Metadata
 	type plain Metadata
@@ -106,6 +95,87 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(any) error) error {
 
 func (m *Metadata) validate() error {
 	return common.ValidateID(m.Name)
+}
+
+// PublicMetadata is a copy of classic metadata but that doesn't make any validation.
+// It is used when returning data to the API consumers.
+// It is particularly useful when the API returns some entities that are created on the fly and that doesn't necessarily
+// need validation like the kubernetes users.
+type PublicMetadata struct {
+	Name string `json:"name" yaml:"name"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	CreatedAt time.Time `json:"createdAt" yaml:"createdAt"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
+	Version   uint64    `json:"version" yaml:"version"`
+}
+
+func NewPublicMetadata(name string) PublicMetadata {
+	return PublicMetadata{
+		Name: name,
+	}
+}
+
+func (m *PublicMetadata) CreateNow() {
+	m.CreatedAt = time.Now().UTC()
+	m.UpdatedAt = m.CreatedAt
+	m.Version = 0
+}
+
+func (m *PublicMetadata) Update(previous PublicMetadata) {
+	// update the immutable field of the newEntity with the old one
+	m.CreatedAt = previous.CreatedAt
+	// update the field UpdatedAt with the new time
+	m.UpdatedAt = time.Now().UTC()
+	// increase the version number
+	m.Version = previous.Version + 1
+}
+
+func (m *PublicMetadata) GetName() string {
+	return m.Name
+}
+
+func (m *PublicMetadata) Flatten(sensitive bool) {
+	if !sensitive {
+		m.Name = strings.ToLower(m.Name)
+	}
+}
+
+func (m *PublicMetadata) UnmarshalJSON(data []byte) error {
+	var tmp PublicMetadata
+	type plain PublicMetadata
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
+}
+
+func (m *PublicMetadata) UnmarshalYAML(unmarshal func(any) error) error {
+	var tmp PublicMetadata
+	type plain PublicMetadata
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
+}
+
+func NewProjectMetadata(project string, name string) *ProjectMetadata {
+	return &ProjectMetadata{
+		Metadata: Metadata{
+			Name: name,
+		},
+		ProjectMetadataWrapper: ProjectMetadataWrapper{
+			Project: project,
+		},
+	}
 }
 
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata
@@ -192,4 +262,80 @@ func (pm *ProjectMetadata) Flatten(sensitive bool) {
 
 func (pm *ProjectMetadata) Update(previous ProjectMetadata) {
 	pm.Metadata.Update(previous.Metadata)
+}
+
+// PublicProjectMetadata is a copy of classic project metadata but that doesn't make any validation.
+// It is used when returning data to the API consumers.
+// It is particularly useful when the API returns some entities that are created on the fly and that doesn't necessarily
+// need validation like the kubernetes users.
+type PublicProjectMetadata struct {
+	ProjectMetadataWrapper `json:",inline" yaml:",inline"`
+	PublicMetadata         `json:",inline" yaml:",inline"`
+}
+
+func NewPublicProjectMetadata(project string, name string) PublicProjectMetadata {
+	return PublicProjectMetadata{
+		ProjectMetadataWrapper: ProjectMetadataWrapper{
+			Project: project,
+		},
+		PublicMetadata: PublicMetadata{
+			Name: name,
+		},
+	}
+}
+
+func NewPublicProjectMetadataFromCopy(metadata ProjectMetadata) PublicProjectMetadata {
+	return PublicProjectMetadata{
+		ProjectMetadataWrapper: metadata.ProjectMetadataWrapper,
+		PublicMetadata:         PublicMetadata(metadata.Metadata),
+	}
+}
+
+func (pm *PublicProjectMetadata) GetName() string {
+	return pm.Name
+}
+
+func (pm *PublicProjectMetadata) Flatten(sensitive bool) {
+	if !sensitive {
+		pm.Name = strings.ToLower(pm.Name)
+		pm.Project = strings.ToLower(pm.Project)
+	}
+}
+
+// This method is needed in the case of JSON otherwise parts of the fields are missed when unmarshalling
+func (pm *PublicProjectMetadata) UnmarshalJSON(data []byte) error {
+	// Call UnmarshalJSON methods of the embedded structs
+	var metadataTmp PublicMetadata
+	if err := metadataTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	var projectMetadataWrapperTmp ProjectMetadataWrapper
+	if err := projectMetadataWrapperTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	pm.PublicMetadata = metadataTmp
+	pm.ProjectMetadataWrapper = projectMetadataWrapperTmp
+
+	return nil
+}
+
+// This method is needed in the case of YAML otherwise parts of the fields are missed when unmarshalling
+func (pm *PublicProjectMetadata) UnmarshalYAML(unmarshal func(any) error) error {
+	// Call UnmarshalYAML methods of the embedded structs
+	var metadataTmp PublicMetadata
+	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	var projectMetadataWrapperTmp ProjectMetadataWrapper
+	if err := projectMetadataWrapperTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	pm.PublicMetadata = metadataTmp
+	pm.ProjectMetadataWrapper = projectMetadataWrapperTmp
+
+	return nil
 }

@@ -13,15 +13,17 @@
 
 import { fetchJson, Permission, StatusError, UserResource } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useIsAuthEnabled } from '../context/Config';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildQueryKey from './querykey-builder';
 
-const resource = 'users';
+export const userResource = 'users';
+export const whoamiResource = 'user/whoami';
 export const userKey = 'user';
 
 function createUser(entity: UserResource): Promise<UserResource> {
-  const url = buildURL({ resource });
+  const url = buildURL({ resource: userResource });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
@@ -29,8 +31,8 @@ function createUser(entity: UserResource): Promise<UserResource> {
   });
 }
 
-function getUser(name: string): Promise<UserResource> {
-  const url = buildURL({ resource, name });
+function getCurrentUser(): Promise<UserResource> {
+  const url = buildURL({ resource: whoamiResource });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
@@ -38,7 +40,7 @@ function getUser(name: string): Promise<UserResource> {
 }
 
 function getUsers(): Promise<UserResource[]> {
-  const url = buildURL({ resource });
+  const url = buildURL({ resource: userResource });
   return fetchJson<UserResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
@@ -47,7 +49,7 @@ function getUsers(): Promise<UserResource[]> {
 
 function updateUser(entity: UserResource): Promise<UserResource> {
   const name = entity.metadata.name;
-  const url = buildURL({ resource, name });
+  const url = buildURL({ resource: userResource, name });
   return fetchJson<UserResource>(url, {
     method: HTTPMethodPUT,
     headers: HTTPHeader,
@@ -56,7 +58,7 @@ function updateUser(entity: UserResource): Promise<UserResource> {
 }
 function deleteUser(entity: UserResource): Promise<Response> {
   const name = entity.metadata.name;
-  const url = buildURL({ resource, name });
+  const url = buildURL({ resource: userResource, name });
   return fetch(url, {
     method: HTTPMethodDELETE,
     headers: HTTPHeader,
@@ -64,7 +66,7 @@ function deleteUser(entity: UserResource): Promise<Response> {
 }
 
 function getUserPermissions(username: string): Promise<Record<string, Permission[]>> {
-  const url = buildURL({ resource, name: username, pathSuffix: ['permissions'] });
+  const url = buildURL({ resource: userResource, name: username, pathSuffix: ['permissions'] });
   // If username is empty it's useless to request API
   if (!username) {
     return Promise.resolve({});
@@ -76,25 +78,27 @@ function getUserPermissions(username: string): Promise<Record<string, Permission
 }
 
 /**
- * Used to get a global secret from the API.
+ * Used to retrieve information on the current logged in User
  * Will automatically be refreshed when cache is invalidated
  */
-export function useUser(name: string): UseQueryResult<UserResource, StatusError> {
+export function useCurrentUser(): UseQueryResult<UserResource, StatusError> {
+  const isAuthEnabled = useIsAuthEnabled();
   return useQuery<UserResource, StatusError>({
-    queryKey: buildQueryKey({ resource, name }),
+    queryKey: buildQueryKey({ resource: whoamiResource }),
     queryFn: () => {
-      return getUser(name);
+      return getCurrentUser();
     },
+    enabled: isAuthEnabled,
   });
 }
 
 /**
- * Used to get global secrets from the API.
+ * Used to get users from the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useUserList(): UseQueryResult<UserResource[], StatusError> {
   return useQuery<UserResource[], StatusError>({
-    queryKey: buildQueryKey({ resource }),
+    queryKey: buildQueryKey({ resource: userResource }),
     queryFn: () => {
       return getUsers();
     },
@@ -102,12 +106,12 @@ export function useUserList(): UseQueryResult<UserResource[], StatusError> {
 }
 
 /**
- * Returns a mutation that can be used to create a global secret.
+ * Returns a mutation that can be used to create a user.
  * Will automatically refresh the cache for all the list.
  */
 export function useCreateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
@@ -121,12 +125,12 @@ export function useCreateUserMutation(): UseMutationResult<UserResource, StatusE
 }
 
 /**
- * Returns a mutation that can be used to update a global secret.
+ * Returns a mutation that can be used to update a user.
  * Will automatically refresh the cache for all the list.
  */
 export function useUpdateUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
@@ -143,12 +147,12 @@ export function useUpdateUserMutation(): UseMutationResult<UserResource, StatusE
 }
 
 /**
- * Returns a mutation that can be used to delete a global secret.
+ * Returns a mutation that can be used to delete a user.
  * Will automatically refresh the cache for all the list.
  */
 export function useDeleteUserMutation(): UseMutationResult<UserResource, StatusError, UserResource> {
   const queryClient = useQueryClient();
-  const queryKey = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource: userResource });
 
   return useMutation<UserResource, StatusError, UserResource>({
     mutationKey: queryKey,
@@ -164,7 +168,7 @@ export function useDeleteUserMutation(): UseMutationResult<UserResource, StatusE
 }
 
 /**
- * Used to get users from the API.
+ * Used to get user permissions from the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useUserPermissions(username: string): UseQueryResult<Record<string, Permission[]>, StatusError> {

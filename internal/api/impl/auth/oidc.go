@@ -217,7 +217,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 }
 
 func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
-	oidcGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOIDC, e.slugID), withOAuthErrorMdw)
+	oidcGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthnKindOIDC, e.slugID), withOAuthErrorMdw)
 
 	// Add routes for the "Authorization Code" flow
 	oidcGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.auth, true)
@@ -233,7 +233,7 @@ func (e *oIDCEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
 }
 
 func (e *oIDCEndpoint) GetAuthKind() string {
-	return utils.AuthKindOIDC
+	return utils.AuthnKindOIDC
 }
 
 func (e *oIDCEndpoint) GetSlugID() string {
@@ -250,7 +250,7 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 	}
 	// If the Redirect URL is not setup by config, we build it from request
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID, e.apiPrefix)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.AuthURLHandler(func() string {
 		redirectPath := ctx.Request().URL.Query().Get(redirectQueryParam)
@@ -290,7 +290,7 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 	// If the Redirect URL is not setup by config, we build it from request
 	// TODO: Is it really necessary for a token redeem?
 	if e.relyingParty.OAuthConfig().RedirectURL == "" {
-		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID, e.apiPrefix)))
+		opts = append(opts, rp.WithURLParam(redirectURIQueryParam, getRedirectURI(ctx.Request(), utils.AuthnKindOIDC, e.slugID, e.apiPrefix)))
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
 	handler := echo.WrapHandler(codeExchangeHandler)
@@ -390,7 +390,7 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 	// Generate and save access and refresh tokens
 	username := usr.GetMetadata().GetName()
 	providerInfo := crypto.ProviderInfo{
-		ProviderKind: utils.AuthKindOIDC,
+		ProviderKind: utils.AuthnKindOIDC,
 		ProviderID:   e.slugID,
 	}
 	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)

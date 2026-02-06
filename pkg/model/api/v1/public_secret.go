@@ -39,7 +39,7 @@ func NewPublicSecretSpec(s SecretSpec) PublicSecretSpec {
 
 type PublicGlobalSecret struct {
 	Kind     Kind             `json:"kind" yaml:"kind"`
-	Metadata Metadata         `json:"metadata" yaml:"metadata"`
+	Metadata PublicMetadata   `json:"metadata" yaml:"metadata"`
 	Spec     PublicSecretSpec `json:"spec" yaml:"spec"`
 }
 
@@ -49,7 +49,7 @@ func NewPublicGlobalSecret(s *GlobalSecret) *PublicGlobalSecret {
 	}
 	return &PublicGlobalSecret{
 		Kind:     s.Kind,
-		Metadata: s.Metadata,
+		Metadata: PublicMetadata(s.Metadata),
 		Spec:     NewPublicSecretSpec(s.Spec),
 	}
 }
@@ -67,9 +67,9 @@ func (g *PublicGlobalSecret) GetSpec() any {
 }
 
 type PublicSecret struct {
-	Kind     Kind             `json:"kind" yaml:"kind"`
-	Metadata ProjectMetadata  `json:"metadata" yaml:"metadata"`
-	Spec     PublicSecretSpec `json:"spec" yaml:"spec"`
+	Kind     Kind                  `json:"kind" yaml:"kind"`
+	Metadata PublicProjectMetadata `json:"metadata" yaml:"metadata"`
+	Spec     PublicSecretSpec      `json:"spec" yaml:"spec"`
 }
 
 func NewPublicSecret(s *Secret) *PublicSecret {
@@ -78,7 +78,7 @@ func NewPublicSecret(s *Secret) *PublicSecret {
 	}
 	return &PublicSecret{
 		Kind:     s.Kind,
-		Metadata: s.Metadata,
+		Metadata: NewPublicProjectMetadataFromCopy(s.Metadata),
 		Spec:     NewPublicSecretSpec(s.Spec),
 	}
 }

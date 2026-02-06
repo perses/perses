@@ -23,11 +23,11 @@ import (
 )
 
 type deviceCodeLogin struct {
-	writer               io.Writer
-	externalAuthKind     externalAuthKind
-	externalAuthProvider string
-	enablePKCE           bool
-	apiClient            api.ClientInterface
+	writer                io.Writer
+	externalAuthnKind     externalAuthnKind
+	externalAuthnProvider string
+	enablePKCE            bool
+	apiClient             api.ClientInterface
 }
 
 func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
@@ -39,7 +39,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 		tokenOpts = append(tokenOpts, oauth2.VerifierOption(verifier))
 	}
 
-	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeOpts...)
+	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthnKind), l.externalAuthnProvider, deviceCodeOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 		return nil, outErr
 	}
 
-	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse, tokenOpts...)
+	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthnKind), l.externalAuthnProvider, deviceCodeResponse, tokenOpts...)
 }
 
 func (l *deviceCodeLogin) SetMissingInput() error {

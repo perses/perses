@@ -176,27 +176,10 @@ func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.
 	}
 }
 
-func newProjectMetadata(projectName string, name string) v1.ProjectMetadata {
-	return v1.ProjectMetadata{
-		Metadata: v1.Metadata{
-			Name: name,
-		},
-		ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
-			Project: projectName,
-		},
-	}
-}
-
-func newMetadata(name string) v1.Metadata {
-	return v1.Metadata{
-		Name: name,
-	}
-}
-
 func NewProject(name string) *v1.Project {
 	entity := &v1.Project{
 		Kind:     v1.KindProject,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 	}
 	entity.Metadata.CreateNow()
 	return entity
@@ -264,7 +247,7 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
 	entity := &v1.Datasource{
 		Kind:     v1.KindDatasource,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: *v1.NewProjectMetadata(projectName, name),
 		Spec:     newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
@@ -274,7 +257,7 @@ func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource
 func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	entity := &v1.GlobalDatasource{
 		Kind:     v1.KindGlobalDatasource,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 		Spec:     newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
@@ -284,7 +267,7 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 func NewVariable(projectName string, name string) *v1.Variable {
 	entity := &v1.Variable{
 		Kind:     v1.KindVariable,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: *v1.NewProjectMetadata(projectName, name),
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
@@ -306,7 +289,7 @@ func NewVariable(projectName string, name string) *v1.Variable {
 func NewGlobalVariable(name string) *v1.GlobalVariable {
 	entity := &v1.GlobalVariable{
 		Kind:     v1.KindGlobalVariable,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
@@ -355,11 +338,22 @@ func newRoleSpec() v1.RoleSpec {
 	}
 }
 
+func newGlobalRoleSpec() v1.RoleSpec {
+	return v1.RoleSpec{
+		Permissions: []role.Permission{
+			{
+				Actions: []role.Action{role.WildcardAction},
+				Scopes:  []role.Scope{role.WildcardScope},
+			},
+		},
+	}
+}
+
 func NewGlobalRole(name string) *v1.GlobalRole {
 	entity := &v1.GlobalRole{
 		Kind:     v1.KindGlobalRole,
-		Metadata: newMetadata(name),
-		Spec:     newRoleSpec(),
+		Metadata: *v1.NewMetadata(name),
+		Spec:     newGlobalRoleSpec(),
 	}
 	entity.Metadata.CreateNow()
 	return entity
@@ -368,7 +362,7 @@ func NewGlobalRole(name string) *v1.GlobalRole {
 func NewRole(projectName string, name string) *v1.Role {
 	entity := &v1.Role{
 		Kind:     v1.KindRole,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: *v1.NewProjectMetadata(projectName, name),
 		Spec:     newRoleSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -390,7 +384,7 @@ func newRoleBindingSpec() v1.RoleBindingSpec {
 func NewGlobalRoleBinding(name string) *v1.GlobalRoleBinding {
 	entity := &v1.GlobalRoleBinding{
 		Kind:     v1.KindGlobalRoleBinding,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 		Spec:     newRoleBindingSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -400,7 +394,7 @@ func NewGlobalRoleBinding(name string) *v1.GlobalRoleBinding {
 func NewRoleBinding(projectName string, name string) *v1.RoleBinding {
 	entity := &v1.RoleBinding{
 		Kind:     v1.KindRoleBinding,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: *v1.NewProjectMetadata(projectName, name),
 		Spec:     newRoleBindingSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -430,7 +424,7 @@ func newPublicSecretSpec() v1.PublicSecretSpec {
 func NewSecret(projectName string, name string) *v1.Secret {
 	entity := &v1.Secret{
 		Kind:     v1.KindSecret,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: *v1.NewProjectMetadata(projectName, name),
 		Spec:     newSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -440,7 +434,7 @@ func NewSecret(projectName string, name string) *v1.Secret {
 func NewPublicSecret(projectName string, name string) *v1.PublicSecret {
 	entity := &v1.PublicSecret{
 		Kind:     v1.KindSecret,
-		Metadata: newProjectMetadata(projectName, name),
+		Metadata: v1.NewPublicProjectMetadata(projectName, name),
 		Spec:     newPublicSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -450,7 +444,7 @@ func NewPublicSecret(projectName string, name string) *v1.PublicSecret {
 func NewGlobalSecret(name string) *v1.GlobalSecret {
 	entity := &v1.GlobalSecret{
 		Kind:     v1.KindGlobalSecret,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 		Spec:     newSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -460,7 +454,7 @@ func NewGlobalSecret(name string) *v1.GlobalSecret {
 func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
 	entity := &v1.PublicGlobalSecret{
 		Kind:     v1.KindGlobalSecret,
-		Metadata: newMetadata(name),
+		Metadata: v1.NewPublicMetadata(name),
 		Spec:     newPublicSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
@@ -470,7 +464,7 @@ func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
 func NewUser(name string, password string) *v1.User {
 	entity := &v1.User{
 		Kind:     v1.KindUser,
-		Metadata: newMetadata(name),
+		Metadata: *v1.NewMetadata(name),
 		Spec: v1.UserSpec{
 			NativeProvider: v1.NativeProvider{
 				Password: password,
@@ -484,7 +478,7 @@ func NewUser(name string, password string) *v1.User {
 func NewPublicUser(name string) *v1.PublicUser {
 	entity := &v1.PublicUser{
 		Kind:     v1.KindUser,
-		Metadata: newMetadata(name),
+		Metadata: v1.NewPublicMetadata(name),
 		Spec: v1.PublicUserSpec{
 			NativeProvider: v1.PublicNativeProvider{Password: "<secret>"},
 		},

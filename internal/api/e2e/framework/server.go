@@ -18,6 +18,7 @@ package e2eframework
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -32,6 +33,7 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
@@ -57,7 +59,7 @@ func DefaultConfig() apiConfig.Config {
 			Authentication: apiConfig.AuthenticationConfig{
 				AccessTokenTTL:  common.Duration(apiConfig.DefaultAccessTokenTTL),
 				RefreshTokenTTL: common.Duration(apiConfig.DefaultRefreshTokenTTL),
-				Providers:       apiConfig.AuthProviders{EnableNative: true},
+				Providers:       apiConfig.AuthenticationProviders{EnableNative: true},
 			},
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
@@ -78,16 +80,23 @@ func DefaultAuthConfig() apiConfig.Config {
 		SameSite: apiConfig.SameSite(http.SameSiteNoneMode),
 		Secure:   true,
 	}
-	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
-		{
-			Actions: []role.Action{role.ReadAction},
-			Scopes:  []role.Scope{role.WildcardScope},
+	conf.Security.Authorization = apiConfig.AuthorizationConfig{
+		Provider: apiConfig.AuthorizationProvider{
+			Native: apiConfig.NativeAuthorizationProvider{
+				Enable: true,
+				GuestPermissions: []*role.Permission{
+					{
+						Actions: []role.Action{role.ReadAction},
+						Scopes:  []role.Scope{role.WildcardScope},
+					},
+					{
+						Actions: []role.Action{role.CreateAction},
+						Scopes:  []role.Scope{role.ProjectScope},
+					},
+				},
+			},
 		},
-		{
-			Actions: []role.Action{role.CreateAction},
-			Scopes:  []role.Scope{role.ProjectScope},
-		},
-	}}
+	}
 	return conf
 }
 
@@ -108,7 +117,47 @@ func defaultFileConfig() *apiConfig.File {
 	}
 }
 
-func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
+func createAliceUserAndLogin(expect *httpexpect.Expect) (string, modelAPI.Entity) {
+	usrEntity := NewUser("alice", "password")
+	expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+		WithJSON(usrEntity).
+		Expect().
+		Status(http.StatusOK)
+
+	authEntity := modelAPI.Auth{
+		Login:    usrEntity.GetMetadata().GetName(),
+		Password: usrEntity.Spec.NativeProvider.Password,
+	}
+	authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
+		WithJSON(authEntity).
+		Expect().
+		Status(http.StatusOK)
+
+	authResponse.JSON().Object().Keys().ContainsAll("access_token", "refresh_token")
+	return authResponse.JSON().Object().Value("access_token").String().Raw(), usrEntity
+}
+
+// CreateRoleAndBidingForAlice creates a GlobalRole and a GlobalRoleBinding for Alice.
+// This is useful to ensure that Alice has the necessary permissions to create any other entity.
+// It also refreshes the permissions to ensure that Alice has the latest permissions.
+func createRoleAndBidingForAlice(t *testing.T, manager dependency.Manager) (*modelV1.GlobalRole, *modelV1.GlobalRoleBinding) {
+	globalRole := NewGlobalRole("admin")
+	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRole)
+	globalRoleBinding := NewGlobalRoleBinding("admin")
+	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRoleBinding)
+	// Refresh the permissions to ensure Alice has the latest permissions
+	err := manager.Service().GetAuthorization().RefreshPermissions()
+	if err != nil {
+		t.Fatalf("failed to refresh permissions: %v", err)
+	}
+	return globalRole, globalRoleBinding
+}
+
+func CreateAuthorizationHeader(token string) (string, string) {
+	return "Authorization", fmt.Sprintf("Bearer %s", token)
+}
+
+func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.Manager) {
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{
@@ -127,7 +176,7 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 		}
 	}
 	registerer := prometheus.NewRegistry()
-	runner, persistenceManager, err := core.New(conf, false, registerer, "")
+	runner, dependencyManager, err := core.New(conf, false, registerer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,24 +188,35 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	return server, httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
-	}), persistenceManager
+	}), dependencyManager
 }
 
 func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	conf := DefaultConfig()
-	server, expect, persistenceManager := CreateServer(t, conf)
-	defer persistenceManager.GetPersesDAO().Close()
+	server, expect, dependencyManager := CreateServer(t, conf)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, persistenceManager)
-	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+	entities := testFunc(server, expect, dependencyManager.Persistence())
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
+}
+
+func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager, string) []modelAPI.Entity) {
+	conf := DefaultAuthConfig()
+	server, expect, dependencyManager := CreateServer(t, conf)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
+	defer server.Close()
+	token, usrEntity := createAliceUserAndLogin(expect)
+	globalRole, globalRoleBinding := createRoleAndBidingForAlice(t, dependencyManager)
+	entities := testFunc(server, expect, dependencyManager, token)
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), append(entities, usrEntity, globalRole, globalRoleBinding)...)
 }
 
 func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
-	server, expect, persistenceManager := CreateServer(t, config)
-	defer persistenceManager.GetPersesDAO().Close()
+	server, expect, dependencyManager := CreateServer(t, config)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, persistenceManager)
-	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+	entities := testFunc(server, expect, dependencyManager.Persistence())
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 }
 
 // NewOAuthProviderTestServer creates a new OAuth provider server that will be used to test the OAuth login.

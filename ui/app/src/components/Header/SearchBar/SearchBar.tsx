@@ -42,7 +42,7 @@ interface ResourceListProps {
   isResources?: (type: ResourceType, available: boolean) => void;
 }
 
-function SearchProjectList(props: ResourceListProps): ReactElement {
+function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
   const { query, onClick, isResources } = props;
   return (
@@ -56,7 +56,7 @@ function SearchProjectList(props: ResourceListProps): ReactElement {
   );
 }
 
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
+function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
   const { query, onClick, isResources } = props;
   return (

@@ -28,7 +28,7 @@ func TestJWTClaims_Serialization(t *testing.T) {
 			Subject: "jdoe",
 		},
 		ProviderInfo: ProviderInfo{
-			ProviderKind: utils.AuthKindOIDC,
+			ProviderKind: utils.AuthnKindOIDC,
 			ProviderID:   "azure",
 		},
 	})

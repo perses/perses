@@ -107,9 +107,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
-    "authorization": {
-      "check_latest_update_interval": "30s"
-    },
+    "authorization": {},
     "authentication": {
       "access_token_ttl": "15m",
       "refresh_token_ttl": "1d",
@@ -194,24 +192,33 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     "encryption_key": "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
     "enable_auth": true,
     "authorization": {
-      "guest_permissions": [
-        {
-          "actions": [
-            "read"
-          ],
-          "scopes": [
-            "*"
-          ]
-        },
-        {
-          "actions": [
-            "create"
-          ],
-          "scopes": [
-            "Project"
+      "provider": {
+        "native": {
+          "guest_permissions": [
+            {
+              "actions": [
+                "read"
+              ],
+              "scopes": [
+                "*"
+              ]
+            },
+            {
+              "actions": [
+                "create"
+              ],
+              "scopes": [
+                "Project"
+              ]
+            }
           ]
         }
-      ]
+      }
+    },
+    "authentication": {
+      "providers": {
+        "enable_native": true
+      }
     },
     "cors": {
       "enable": true,
@@ -265,22 +272,32 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					Readonly:      false,
 					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
 					EnableAuth:    true,
+					Authentication: AuthenticationConfig{
+						Providers: AuthenticationProviders{
+							EnableNative: true,
+						},
+					},
 					Authorization: AuthorizationConfig{
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable: false,
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},
@@ -361,15 +378,17 @@ security:
     providers:
       enable_native: true
   authorization:
-    guest_permissions:
-      - actions:
-          - read
-        scopes:
-          - "*"
-      - actions:
-          - create
-        scopes:
-          - Project
+    provider:
+      native:
+        guest_permissions:
+          - actions:
+              - read
+            scopes:
+              - "*"
+          - actions:
+              - create
+            scopes:
+              - Project
   cors:
     enable: true
     allow_origins:
@@ -424,22 +443,27 @@ plugin:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
-						CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable:                    true,
+								CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},
@@ -448,7 +472,7 @@ plugin:
 						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
 						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
-						Providers: AuthProviders{
+						Providers: AuthenticationProviders{
 							EnableNative: true,
 						},
 					},

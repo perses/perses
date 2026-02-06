@@ -29,34 +29,27 @@ import (
 )
 
 func TestMainScenarioGlobalRoleBinding(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice", "password")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
-		globalRole := e2eframework.NewGlobalRole("admin")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)
-		entity := e2eframework.NewGlobalRoleBinding("admin")
+	e2eframework.WithServerAuthConfig(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []api.Entity {
+		entity := e2eframework.NewGlobalRoleBinding("foo")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRoleBinding)).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK)
-		return []api.Entity{entity, globalRole, user}
+		return []api.Entity{entity}
 	})
 }
 
 func TestUpdateScenarioGlobalRoleBindingRole(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice", "password")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
-		globalRole := e2eframework.NewGlobalRole("admin")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)
-		entity := e2eframework.NewGlobalRoleBinding("admin")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
-
+	e2eframework.WithServerAuthConfig(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []api.Entity {
+		entity := e2eframework.NewGlobalRoleBinding("foo")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), entity)
 		entity.Spec.Role = "newRoleName"
 		expect.PUT(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathGlobalRoleBinding, entity.Metadata.Name)).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusBadRequest)
-		return []api.Entity{entity, globalRole, user}
+		return []api.Entity{entity}
 	})
 }

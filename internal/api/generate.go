@@ -422,9 +422,7 @@ func generatePersistence(ept endpoint) {
 func generateClient(ept endpoint) {
 	folder := "../../pkg/client/api/v1/"
 	fileName := fmt.Sprintf("%s.go", ept.PackageName)
-	// as the endpoint is generated and not adds in git, the client that reflects exactly what is exposed by the endpoint,
-	// then should be also ignored by git, and so we can override it.
-	generateFile(folder, fileName, clientTemplate, ept, true)
+	generateFile(folder, fileName, clientTemplate, ept, false)
 }
 
 func generateFile(folder string, fileName string, tpl *template.Template, ept endpoint, shouldOverride bool) {

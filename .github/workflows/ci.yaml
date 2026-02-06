@@ -149,6 +149,8 @@ jobs:
           path: ui
       - name: Generate endpoints
         run: make generate
+      - name: Install go deps
+        run: go mod download
       - name: Extract Changelog
         run: make extract-changelog
       - # Add support for more platforms with QEMU (optional)

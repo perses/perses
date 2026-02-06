@@ -34,8 +34,11 @@ const authResource = "auth"
 type Interface interface {
 	Login(user, password string) (*oauth2.Token, error)
 	Refresh(refreshToken string) (*oauth2.Token, error)
+	// DeviceCode is used for device_code auth flow
 	DeviceCode(authKind, authProvider string, opts ...oauth2.AuthCodeOption) (*oauth2.DeviceAuthResponse, error)
+	// DeviceAccessToken is used for device_code auth flow
 	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+	// ClientCredentialsToken is used for robotic auth flow
 	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*oauth2.Token, error)
 }
 

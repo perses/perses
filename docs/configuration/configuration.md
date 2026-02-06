@@ -144,6 +144,8 @@ authorization: <Authorization config> # Optional
 
 # When it is true, the authentication and authorization config are considered.
 # And you will need a valid JWT token to contact most of the endpoints exposed by the API
+# If no other authorization provider is set, and enable_auth is set to true, then the perses
+# native authorization provider will be used
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
@@ -202,6 +204,8 @@ oidc:
 # List of the OIDC authentication providers
 oauth:
   - <OAuth provider> # Optional
+# Kubernetes authentication provider
+kubernetes: <Kubernetes provider> # Optionall
 ```
 
 ##### OIDC provider
@@ -342,6 +346,16 @@ device_auth_url: <string> # Optional
 custom_login_property: <string> # Optional
 ```
 
+##### Kubernetes provider
+
+```yaml
+# Determines if the Kubernetes authentication provider is enabled. This provider must be enabled
+# alongside the kubernetes authorization provider, and cannot be used alongside any other
+# authentication providers
+enable: <boolean>
+
+```
+
 ###### Authentication provider HTTP Config
 
 ```yaml
@@ -355,6 +369,25 @@ tls_config: <TLS config> # Optional
 #### Authorization config
 
 ```yaml
+# Authorization providers
+providers: <Authorization providers> # Optional
+```
+
+##### Authorization Providers
+
+```yaml
+# native authorization provider
+native:
+  <Native provider>
+# Kubernetes authorization provider
+kubernetes: <Kubernetes provider> # Optional
+```
+
+##### Native provider
+```yaml
+# Determines if the native authentication provider is enabled. If security.enable_auth is set to true and no other
+# providers are set then this value will be automatically set to true
+enable: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 check_latest_update_interval: <duration> | default = 30s> # Optional
 
@@ -372,6 +405,28 @@ actions:
 # Resource kinds that are concerned by the permission
 scopes:
   - <enum= kind | "*">
+```
+
+
+##### Kubernetes provider
+```yaml
+# Must be the only authentication provider enabled and must be run alongside the kubernetes
+# authorization option enabled
+enabled: <boolean>
+# The active user in the kubeconfig should have "create" permissions for the `TokenReview` and 
+# `SubjectAccessReview` resources. If the kubeconfig parameter isn't set, the pods service account token
+#  will be used
+kubeconfig: <string> # Optional
+# query per second (QPS) the k8s client will use with the apiserver
+qps <int> | default 500  # Optional
+# burst QPS the k8s client will use with the apiserver
+burst <int> | default 1000  # Optional
+# time an authorizer allow response will be cached for
+authorizer_allow_ttl <duration> | default 5m  # Optional
+# time an authorizer denied will be cached for
+authorizer_deny_ttl <duration> | default 30s  # Optional
+# time an authenticator response will be cached for
+authenticator_ttl <duration> | default 2m  # Optional
 ```
 
 #### CORS config

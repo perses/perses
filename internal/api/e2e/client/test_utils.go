@@ -28,11 +28,11 @@ import (
 )
 
 func withClient(t *testing.T, testFunc func(v1.ClientInterface, dependency.PersistenceManager) []api.Entity) {
-	server, _, persistenceManager := e2eframework.CreateServer(t, e2eframework.DefaultConfig())
+	server, _, dependencyManager := e2eframework.CreateServer(t, e2eframework.DefaultConfig())
 	defer server.Close()
 	persesClient := createClient(t, server)
-	entities := testFunc(persesClient, persistenceManager)
-	e2eframework.ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+	entities := testFunc(persesClient, dependencyManager.Persistence())
+	e2eframework.ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 
 }
 
