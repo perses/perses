@@ -22,6 +22,7 @@ import {
   DataGridPropertiesWithCallback,
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
+  DATA_GRID_SLOT_PROPS,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -74,6 +75,7 @@ export function SecretDataGrid(props: DataGridPropertiesWithCallback<Row>): Reac
         }
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
+        slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />
     </div>
