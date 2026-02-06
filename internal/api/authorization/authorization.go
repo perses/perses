@@ -54,8 +54,11 @@ type Authorization interface {
 	// The middleware should be used before any other middleware that requires the user information to be set in the context.
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 	// GetUserProjects returns the list of the project the user has access to in the context of the role and the scope requested.
+	// If the request scope is global, then it should return a single project with the wildcard value ("*") as it means that the user has access to a global resource and not a project resource.
+	// The function can return also a single project with the wildcard value ("*") if the user has access to all the projects with the requested scope and action.
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
+	// Be aware also this function is called after checking if the user has the permission to access to the resource with the requested scope and action, so it is not necessary to check the permission again in this function.
 	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error)
 	// HasPermission checks if the user has the permission to perform the action on the project with the given scope.
 	// In case the endpoint is anonymous, or the context is empty, it will return true.

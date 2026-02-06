@@ -494,18 +494,6 @@ func TestGetUserProjects(t *testing.T) {
 			expectedResult: []string{"*"},
 		},
 		{
-			title:          "global scope GlobalDatasource returns empty for user1 who has no access",
-			user:           userOne,
-			reqScope:       v1Role.GlobalDatasourceScope,
-			expectedResult: []string{},
-		},
-		{
-			title:          "global scope GlobalDatasource returns empty for user2 who only has namespace-scoped access",
-			user:           userTwo,
-			reqScope:       v1Role.GlobalDatasourceScope,
-			expectedResult: []string{},
-		},
-		{
 			title:          "global scope GlobalVariable returns wildcard for admin",
 			user:           userAdmin,
 			reqScope:       v1Role.GlobalVariableScope,
