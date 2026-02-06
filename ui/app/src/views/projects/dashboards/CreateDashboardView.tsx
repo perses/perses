@@ -29,6 +29,7 @@ import { HelperDashboardView } from './HelperDashboardView';
 export interface CreateDashboardState {
   name: string;
   spec?: DashboardSpec;
+  tags?: string[];
 }
 
 /**
@@ -54,6 +55,7 @@ function CreateDashboardView(): ReactElement | null {
       name: generateMetadataName(dashboardName),
       project: projectName,
       version: 0,
+      tags: state.tags ?? [],
     },
     spec: state.spec ?? {
       display: {

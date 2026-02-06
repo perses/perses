@@ -19,7 +19,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { useSnackbar } from '@perses-dev/components';
-import { DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
+import { DeleteResourceDialog, EditDashboardDialog } from '../dialogs';
 import { DatedDashboards, useDeleteDashboardMutation } from '../../model/dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
@@ -175,7 +175,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope="Dashboard"
             project={params.row.project}
@@ -221,7 +221,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
       />
       {targetedDashboard && (
         <Box>
-          <RenameDashboardDialog
+          <EditDashboardDialog
             open={isRenameDashboardDialogStateOpened}
             onClose={() => setRenameDashboardDialogStateOpened(false)}
             dashboard={targetedDashboard}

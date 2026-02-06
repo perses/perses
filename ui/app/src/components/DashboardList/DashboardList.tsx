@@ -26,7 +26,7 @@ import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useSnackbar } from '@perses-dev/components';
-import { CreateDashboardDialog, DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
+import { CreateDashboardDialog, DeleteResourceDialog, EditDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {
   CREATED_AT_COL_DEF,
@@ -184,7 +184,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope="Dashboard"
             project={params.row.project}
@@ -225,7 +225,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       />
       {targetedDashboard && (
         <>
-          <RenameDashboardDialog
+          <EditDashboardDialog
             open={isRenameDashboardDialogStateOpened}
             dashboard={targetedDashboard}
             onClose={() => setRenameDashboardDialogStateOpened(false)}
