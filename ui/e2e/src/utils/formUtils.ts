@@ -30,5 +30,5 @@ export async function selectMenuItem(
     })
     .click();
   // Need to look up to the page because MUI uses portals for the dropdown.
-  await container.page().getByRole('option', { name: itemName }).click();
+  await container.page().getByRole('option', { name: itemName }).first().click();
 }

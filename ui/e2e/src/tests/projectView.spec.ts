@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
-import { AppProjectPage, DashboardPage } from '../pages';
+import { AppProjectPage } from '../pages';
 
 test.describe('ProjectView', () => {
   const project = 'perses';
@@ -31,9 +31,6 @@ test.describe('ProjectView', () => {
     await projectPage.goto(project);
 
     await projectPage.navigateToDashboard(project, 'Demo');
-
-    const dashboardPage = new DashboardPage(page);
-    await dashboardPage.goBackToProjectPage(project);
 
     await projectPage.goto(project);
     await projectPage.navigateToDashboardFromRecentDashboards(project, 'Demo');
