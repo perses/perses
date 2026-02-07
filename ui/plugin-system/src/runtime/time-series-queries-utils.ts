@@ -147,35 +147,34 @@ export function buildResolvedResults(results: Array<UseQueryResult<TimeSeriesDat
   return map;
 }
 
-export function getResultsFingerprint(map: Map<number, TimeSeriesData>): string {
-  return Array.from(map.entries())
-    .map(([idx, data]) => `${idx}:${data.series?.length ?? 0}`)
-    .join(',');
-}
-
 export function getDependencyFingerprint(
   resolvedResults: Map<number, TimeSeriesData>,
   dependencies: Map<number, number[]>,
   queryIndex: number
-): string {
+): Array<TimeSeriesData | undefined> {
   const deps = dependencies.get(queryIndex) ?? [];
   const externalDeps = deps.filter((depIdx) => depIdx !== queryIndex);
 
-  if (externalDeps.length === 0) return '';
+  if (externalDeps.length === 0) return [];
 
-  return externalDeps
-    .map((depIdx) => {
-      const data = resolvedResults.get(depIdx);
-      if (!data) return `${depIdx}:null`;
+  return externalDeps.map((depIdx) => {
+    const data = resolvedResults.get(depIdx);
+    if (!data) return undefined;
 
-      const seriesCount = data.series?.length ?? 0;
-      const firstTs = data.series?.[0]?.values?.[0]?.[0] ?? 0;
-      const lastTs = data.series?.[0]?.values?.slice(-1)?.[0]?.[0] ?? 0;
-
-      return `${depIdx}:${seriesCount}:${firstTs}:${lastTs}`;
-    })
-    .join('|');
+    return data;
+  });
 }
+
+export const areMapsEqual = (map1: Map<number, TimeSeriesData>, map2: Map<number, TimeSeriesData>): boolean => {
+  if (map1.size !== map2.size) return false;
+
+  for (const [key, value] of map1.entries()) {
+    const otherValue = map2.get(key);
+    if (otherValue !== value) return false;
+  }
+
+  return true;
+};
 
 export interface CreateQueryConfigParams {
   definition: TimeSeriesQueryDefinition;

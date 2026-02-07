@@ -34,8 +34,8 @@ import {
   getQueryOptions,
   extractQueryDependencies,
   buildResolvedResults,
-  getResultsFingerprint,
   createQueryConfig,
+  areMapsEqual,
 } from './time-series-queries-utils';
 // LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
 
@@ -125,16 +125,15 @@ export function useTimeSeriesQueries(
   // LOGZ.IO CHANGE:: Performance optimization [APPZ-359] useStableQueries()
   const results = useStableQueries({ queries }) as Array<UseQueryResult<TimeSeriesData>>;
 
-  // Sync resolved results when query data changes
-  useEffect(() => {
-    const newResolved = buildResolvedResults(results);
-    const newFingerprint = getResultsFingerprint(newResolved);
-    const currentFingerprint = getResultsFingerprint(resolvedResults);
+  // Memoize resolved results computation to avoid rebuilding in every effect run
+  const newResolved = useMemo(() => buildResolvedResults(results), [results]);
 
-    if (newFingerprint !== currentFingerprint) {
+  // Sync resolved results when data references change
+  useEffect(() => {
+    if (!areMapsEqual(newResolved, resolvedResults)) {
       setResolvedResults(newResolved);
     }
-  }, [results, resolvedResults]);
+  }, [newResolved, resolvedResults]);
 
   return results;
   // LOGZ.IO CHANGE END:: APPZ-955-math-on-queries-formulas
