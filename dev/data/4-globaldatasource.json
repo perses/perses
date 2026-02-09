@@ -58,5 +58,63 @@
         }
       }
     }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "LokiLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "LokiDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "allowedEndpoints": [
+                {
+                  "endpointPattern": "/loki/api/v1/query",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/query_range",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/labels",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/series",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/volume",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/volume_range",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/index/stats",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/loki/api/v1/tail",
+                  "method": "GET"
+                }
+              ],
+              "url": "http://localhost:3100"
+            }
+          }
+        }
+      }
+    }
   }
 ]
