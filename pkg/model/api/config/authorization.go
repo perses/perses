@@ -14,6 +14,7 @@
 package config
 
 import (
+	"slices"
 	"time"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -25,19 +26,41 @@ var (
 	defaultCacheInterval = 30 * time.Second
 )
 
+type Assignment struct {
+	Name        string   `json:"name" yaml:"name"`
+	RoleClaims  []string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
+	GroupClaims []string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
+}
+
+func (a *Assignment) CheckRoleClaim(userRoleClaims []string) bool {
+	for _, urc := range userRoleClaims {
+		ok := slices.Contains(a.RoleClaims, urc)
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (a *Assignment) CheckGroupClaim(userGroupClaims []string) bool {
+	for _, urc := range userGroupClaims {
+		ok := slices.Contains(a.GroupClaims, urc)
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
 type RoleAssignment struct {
-	RoleName    string    `json:"role_name" yaml:"role_name"`
-	Project     string    `json:"project" yaml:"project"`
-	RoleClaims  []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
-	GroupClaims []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
-	Role        *v1.Role
+	Assignment
+	Project string `json:"project" yaml:"project"`
+	Role    *v1.Role
 }
 
 type GlobalRoleAssignment struct {
-	GlobalRoleName string    `json:"global_role_name" yaml:"global_role_name"`
-	RoleClaims     []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
-	GroupClaims    []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
-	GlobalRole     *v1.GlobalRole
+	Assignment
+	GlobalRole *v1.GlobalRole
 }
 
 type ClaimsMappingConfig struct {
