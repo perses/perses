@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
@@ -58,6 +59,10 @@ type Authorization interface {
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
 	GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error)
+	// GetUserTokenRoles returns the user roles based on the role claims extracted from the token
+	GetUserTokenRoles(ctx echo.Context) []*v1.Role
+	// GetUserTokenGlobalRoles returns the user global roles based on the role claims extracted from the token
+	GetUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole
 	// RefreshPermissions refreshes the permissions.
 	// We know this method is relative to the implementation and should not appear in the interface.
 	// This is convenient to have it here when the implementation is keeping the permissions in memory.
