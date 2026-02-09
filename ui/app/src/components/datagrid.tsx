@@ -64,6 +64,12 @@ export const DATA_GRID_STYLES = {
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
+export const DATA_GRID_SLOT_PROPS = {
+  panel: {
+    placement: 'top-end' as const,
+  },
+};
+
 export function GridToolbar(): ReactElement {
   return (
     <GridToolbarContainer>
