@@ -123,7 +123,7 @@ func (n *native) IsEnabled() bool {
 	return true
 }
 
-func (n *native) GetUserTokenRoles(ctx echo.Context) []*v1.Role {
+func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
 	roleClaims := n.getUserRoleClaims(ctx)
 	groupClaims := n.getUserGroupClaims(ctx)
@@ -137,7 +137,7 @@ func (n *native) GetUserTokenRoles(ctx echo.Context) []*v1.Role {
 	return userRoles
 }
 
-func (n *native) GetUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
+func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
 	roleClaims := n.getUserRoleClaims(ctx)
 	groupClaims := n.getUserGroupClaims(ctx)
@@ -289,6 +289,11 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return true
 	}
 
+	// Check token permissions
+	if ok := n.hasPermissionFromClaim(ctx, requestProject, requestAction, requestScope); ok {
+		return true
+	}
+
 	// Checking cached permissions
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
@@ -383,4 +388,23 @@ func (n *native) loadAllPermissions() (usersPermissions, error) {
 		}
 	}
 	return permissionBuild, nil
+}
+
+func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
+	if project != v1.WildcardProject {
+		roles := n.getUserTokenRoles(ctx)
+		for _, r := range roles {
+			if r.CheckPermission(project, requestAction, requestScope) {
+				return true
+			}
+		}
+	} else {
+		globalRoles := n.getUserTokenGlobalRoles(ctx)
+		for _, gr := range globalRoles {
+			if gr.CheckPermission(requestAction, requestScope) {
+				return true
+			}
+		}
+	}
+	return false
 }
