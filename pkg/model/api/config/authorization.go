@@ -14,64 +14,46 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/role"
+	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 var (
 	defaultCacheInterval = 30 * time.Second
 )
 
-// TODO: documentation
-type Mapping struct {
+type RoleAssignment struct {
 	RoleName    string    `json:"role_name" yaml:"role_name"`
-	Project     string    `json:"project,omitempty" yaml:"project,omitempty"`
+	Project     string    `json:"project" yaml:"project"`
 	RoleClaims  []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
 	GroupClaims []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
-	// Permissions matched to role name
-	Permissions []role.Permission
+	Role        *v1.Role
 }
 
-// TODO: documentation
+type GlobalRoleAssignment struct {
+	GlobalRoleName string    `json:"global_role_name" yaml:"global_role_name"`
+	RoleClaims     []*string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
+	GroupClaims    []*string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
+	GlobalRole     *v1.GlobalRole
+}
+
 type ClaimsMappingConfig struct {
-	RoleClaimsPath  string     `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
-	GroupClaimsPath string     `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
-	Mapping         []*Mapping `json:"mapping,omitempty" yaml:"mapping,omitempty"`
+	RoleClaimsPath    string                  `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
+	GroupClaimsPath   string                  `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
+	RoleMapping       []*RoleAssignment       `json:"role_mapping,omitempty" yaml:"role_mapping,omitempty"`
+	GlobalRoleMapping []*GlobalRoleAssignment `json:"global_role_mapping,omitempty" yaml:"global_role_mapping,omitempty"`
 }
 
 type AuthorizationConfig struct {
 	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
-	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
-	//
+	GuestPermissions []*v1Role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
+	// TODO: documentation
 	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
-}
-
-// TODO: extend this validation function
-// TODO: if no project default to wildcard?
-// TODO: change to ClaimsMappingConfig method?
-func (a *AuthorizationConfig) validateClaimRoles() error {
-	// check if either RoleClaimsPath or GroupClaimsPath is defined
-	if a.ClaimsMappingConfig.RoleClaimsPath == "" && a.ClaimsMappingConfig.GroupClaimsPath == "" {
-		return errors.New("No role_claims_path and group_claims_path defined")
-	}
-	for _, mapping := range a.ClaimsMappingConfig.Mapping {
-		// check if role name defined
-		// If role name defined in config does not match any existing RBAC roles, warning raised when assigning roles to permission (or simply entry omitted?)
-		if mapping.RoleName == "" {
-			return errors.New("No role name defined for role mapping")
-		}
-		// check if it has any roles/groups assigned; if not, error or remove from list?
-		if mapping.RoleClaims == nil && mapping.GroupClaims == nil {
-			return fmt.Errorf("No role or group claims defined for role %s", mapping.RoleName)
-		}
-	}
-	return nil
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -79,11 +61,7 @@ func (a *AuthorizationConfig) Verify() error {
 		a.CheckLatestUpdateInterval = common.Duration(defaultCacheInterval)
 	}
 	if a.GuestPermissions == nil {
-		a.GuestPermissions = []*role.Permission{}
-	}
-	err := a.validateClaimRoles()
-	if err != nil {
-		return err
+		a.GuestPermissions = []*v1Role.Permission{}
 	}
 	return nil
 }
