@@ -125,8 +125,8 @@ func (n *native) IsEnabled() bool {
 
 func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
-	roleClaims := n.getUserRoleClaims(ctx)
-	groupClaims := n.getUserGroupClaims(ctx)
+	roleClaims := utils.GetUserRoleClaims(ctx)
+	groupClaims := utils.GetUserGroupClaims(ctx)
 
 	for _, mappedRole := range n.tokenRolesMap {
 		if mappedRole.CheckRoleClaim(roleClaims) || mappedRole.CheckGroupClaim(groupClaims) {
@@ -139,8 +139,8 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 
 func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
-	roleClaims := n.getUserRoleClaims(ctx)
-	groupClaims := n.getUserGroupClaims(ctx)
+	roleClaims := utils.GetUserRoleClaims(ctx)
+	groupClaims := utils.GetUserGroupClaims(ctx)
 
 	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
 		if mappedGlobalRole.CheckRoleClaim(roleClaims) || mappedGlobalRole.CheckGroupClaim(groupClaims) {
@@ -149,22 +149,6 @@ func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 		}
 	}
 	return userRoles
-}
-
-func (n *native) getUserRoleClaims(ctx echo.Context) []string {
-	roleClaims, ok := ctx.Get("roleclaims").([]string)
-	if !ok {
-		return nil
-	}
-	return roleClaims
-}
-
-func (n *native) getUserGroupClaims(ctx echo.Context) []string {
-	groupClaims, ok := ctx.Get("groupclaims").([]string)
-	if !ok {
-		return nil
-	}
-	return groupClaims
 }
 
 func (n *native) GetUser(ctx echo.Context) (any, error) {

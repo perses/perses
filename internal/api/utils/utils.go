@@ -88,3 +88,21 @@ func GetMetadataProject(metadata api.Metadata) string {
 	}
 	return ""
 }
+
+// GetUserRoleClaims retrieves role claims injected into context from token
+func GetUserRoleClaims(ctx echo.Context) []string {
+	roleClaims, ok := ctx.Get("roleclaims").([]string)
+	if !ok {
+		return nil
+	}
+	return roleClaims
+}
+
+// GetUserRoleClaims retrieves group claims injected into context from token
+func GetUserGroupClaims(ctx echo.Context) []string {
+	groupClaims, ok := ctx.Get("groupclaims").([]string)
+	if !ok {
+		return nil
+	}
+	return groupClaims
+}
