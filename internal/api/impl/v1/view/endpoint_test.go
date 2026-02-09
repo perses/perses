@@ -52,14 +52,6 @@ func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
 	return "", nil
 }
 
-func (t *testRBAC) GetUserTokenRoles(_ echo.Context) []*v1.Role {
-	return nil
-}
-
-func (t *testRBAC) GetUserTokenGlobalRoles(_ echo.Context) []*v1.GlobalRole {
-	return nil
-}
-
 func (t *testRBAC) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
 	return crypto.ProviderInfo{}, nil
 }
