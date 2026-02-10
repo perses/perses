@@ -1,13 +1,55 @@
 # Changelog
 
+## 0.53.0-rc.1 / 2026-02-10
+
+### Core & UI
+
+- [FEATURE] Add MariaDB proxy support (#3813)
+- [FEATURE] Support native Kubernetes authentication and authorization (#3184) (#3545) (#3065) (#3822) (#3826) (#3842) (#3863)
+- [FEATURE] Core: add extract column fields transformation (#3791)
+- [FEATURE] Enable role, rolebinding and user only when native authz is used (#3117)
+- [ENHANCEMENT] allow to configure the server with tls min/max versions and ciphers (#3861)
+- [ENHANCEMENT] New home view layout (#3670)
+- [ENHANCEMENT] Better positioning of the filtering and column properties (#3850)
+- [ENHANCEMENT] Adds `--enable-pkce` to `percli` (#3841)
+- [ENHANCEMENT] Add new ESLINT rule to avoid nested ternary operators and fix (#3589)
+- [ENHANCEMENT] trace data model: add version, attributes to InstrumentationScope and kvlistValue and bytesValue to AnyValue (#3781)
+- [BUGFIX] Kube discovery: fix issue with inline references in CUE (#3860)
+- [BUGFIX] Fix user projects response to avoid global resources duplication (#3848)
+- [BUGFIX] Store refreshed refresh token (#3839)
+- [BUGFIX] percli respects api_prefix in base URL (#3837)
+- [BUGFIX] i18n locales files must be prefixed by api_prefix (#3831)
+- [BUGFIX] Include lint command in plugin module generation (#3808)
+- [BUGFIX] Add RP client_id to the redirect URL when logging out of the OIDC IDP (#3767)
+- [BREAKINGCHANGE] Change the query api to manage the high level query kind (#3817)
+- [BREAKINGCHANGE] Manage plugin version and registry (#3711)
+- [DOC] API_PREFIX can be used again (#3792)
+
+### Plugins improvements
+
+[FEATURE] add header and row actions to logstable (perses/plugins#558)
+[FEATURE] add header and row actions to timeseriestable (perses/plugins#556)
+[FEATURE] add header and row actions to table (perses/plugins#557)
+[FEATURE] add header and row actions to tracetable (perses/plugins#554)
+[FEATURE] Table: migrate column datalink overrides (perses/plugins#545)
+[FEATURE] LogsTable: Improve copy/pasting from logstable panel (perses/plugins#523)
+[FEATURE] Table: embed variables into datalink (perses/plugins#521)
+[ENHANCEMENT] TracingGanttChart: show error message if panel query is a search query instead of a single trace (perses/plugins#537)
+[BUGFIX] table go-sdk - add flag for filtering (perses/plugins#544)
+[BUGFIX] Table: restore data transform memoization (perses/plugins#541)
+[BUGFIX] Logstable: all queries results must be included (perses/plugins#533)
+[BUGFIX] Logstable: consistent No Data style for plugins (perses/plugins#528)
+[BUGFIX] DatasourceVariable: Queries referencing DatasourceVariable couldn't be saved for multiple datasources (perses/plugins#540)
+[BUGFIX] Add lint command in ClickHouse and fix linter errors (perses/plugins#547)
+
 ## 0.53.0-rc.0 / 2026-01-07
 
-## Core & UI
+### Core & UI
 
 - [ENHANCEMENT] `plugin test-schemas`: match migration output against model (#3762)
 - [ENHANCEMENT] Make panel `display` attribute optional (#3751)
 
-## Plugins improvements
+### Plugins improvements
 
 - [FEATURE] Table: Add data link column setting to generate column config (perses/plugins#516)
 - [FEATURE] TimeSeriesChart: Adds support for log type y-axis (as well as linear) (perses/plugins#500)
