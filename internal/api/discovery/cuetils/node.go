@@ -192,9 +192,15 @@ func buildTree(queue []iteratorQueue) error {
 			it, _ := value.Fields()
 			for it.Next() {
 				node.Type = StructNodeType
+				// We have to evaluate the value to resolve eventual references in the schema before going further.
+				// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
+				valueWithResolvedRefs := it.Value().Eval()
+				if valueWithResolvedRefs.Err() != nil {
+					return valueWithResolvedRefs.Err()
+				}
 				queue = append(queue, iteratorQueue{
 					fieldName: it.Selector().String(),
-					value:     it.Value(),
+					value:     valueWithResolvedRefs,
 					parent:    node,
 				})
 			}
@@ -270,7 +276,10 @@ func buildMapFromStructValue(v cue.Value) map[string]cue.Value {
 	result := make(map[string]cue.Value)
 	it, _ := v.Fields()
 	for it.Next() {
-		result[it.Selector().String()] = it.Value()
+		// We have to evaluate the value to resolve eventual reference in the schema before going further.
+		// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
+		valueWithResolvedRefs := it.Value().Eval()
+		result[it.Selector().String()] = valueWithResolvedRefs
 	}
 	return result
 }
