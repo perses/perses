@@ -204,7 +204,11 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
                   freeSolo
                   options={[]}
                   value={field.value ?? []}
-                  onChange={(_, newValue) => field.onChange(newValue)}
+                  onChange={(_, newValue) =>
+                    field.onChange(
+                      Array.from(new Set(newValue.map((tag) => tag.trim()).filter((tag) => tag.length > 0)))
+                    )
+                  }
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                       <Chip {...getTagProps({ index })} key={option} label={option} size="small" />

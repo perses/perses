@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
@@ -47,18 +47,34 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
-  const processForm: SubmitHandler<EditDashboardValidationType> = (data) => {
-    // Update display name
-    if (dashboard.spec.display) {
-      dashboard.spec.display.name = data.dashboardName;
-    } else {
-      dashboard.spec.display = { name: data.dashboardName };
+  useEffect(() => {
+    if (!open) {
+      return;
     }
 
-    // Update tags in metadata
-    dashboard.metadata.tags = data.tags;
+    form.reset({
+      dashboardName: getResourceDisplayName(dashboard),
+      tags: dashboard.metadata.tags ?? [],
+    });
+  }, [dashboard, form, open]);
 
-    updateDashboardMutation.mutate(dashboard, {
+  const processForm: SubmitHandler<EditDashboardValidationType> = (data) => {
+    const updatedDashboard: DashboardResource = {
+      ...dashboard,
+      metadata: {
+        ...dashboard.metadata,
+        tags: data.tags,
+      },
+      spec: {
+        ...dashboard.spec,
+        display: {
+          ...dashboard.spec.display,
+          name: data.dashboardName,
+        },
+      },
+    };
+
+    updateDashboardMutation.mutate(updatedDashboard, {
       onSuccess: (updatedDashboard: DashboardResource) => {
         successSnackbar(`Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`);
         onClose();
@@ -112,7 +128,11 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
                     freeSolo
                     options={[]}
                     value={field.value ?? []}
-                    onChange={(_, newValue) => field.onChange(newValue)}
+                    onChange={(_, newValue) =>
+                      field.onChange(
+                        Array.from(new Set(newValue.map((tag) => tag.trim()).filter((tag) => tag.length > 0)))
+                      )
+                    }
                     renderTags={(value, getTagProps) =>
                       value.map((option, index) => (
                         <Chip {...getTagProps({ index })} key={option} label={option} size="small" />

@@ -22,7 +22,12 @@ export const dashboardDisplayNameValidationSchema = z
   .min(1, 'Required')
   .max(75, 'Must be 75 or fewer characters long');
 
-export const tagsValidationSchema = z.array(z.string()).optional().default([]);
+export const tagsValidationSchema = z
+  .array(z.string().trim().min(1, 'Tag cannot be empty').max(50, 'Tag must be 50 or fewer characters long'))
+  .max(20, 'Must be 20 or fewer tags')
+  .optional()
+  .default([])
+  .transform((tags) => Array.from(new Set(tags)));
 
 export const createDashboardDialogValidationSchema = z.object({
   projectName: nameSchema,

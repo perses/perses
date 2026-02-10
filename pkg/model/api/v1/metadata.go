@@ -15,8 +15,10 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -95,7 +97,39 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (m *Metadata) validate() error {
-	return common.ValidateID(m.Name)
+	if err := common.ValidateID(m.Name); err != nil {
+		return err
+	}
+
+	return validateTags(m.Tags)
+}
+
+func validateTags(tags []string) error {
+	const maxTags = 20
+	const maxTagLength = 50
+
+	if len(tags) > maxTags {
+		return fmt.Errorf("cannot contain more than %d tags", maxTags)
+	}
+
+	seenTags := make(map[string]struct{}, len(tags))
+	for _, tag := range tags {
+		if len(strings.TrimSpace(tag)) == 0 {
+			return fmt.Errorf("tag cannot be empty")
+		}
+		if strings.TrimSpace(tag) != tag {
+			return fmt.Errorf("tag %q cannot start or end with whitespace", tag)
+		}
+		if utf8.RuneCountInString(tag) > maxTagLength {
+			return fmt.Errorf("tag %q cannot contain more than %d characters", tag, maxTagLength)
+		}
+		if _, ok := seenTags[tag]; ok {
+			return fmt.Errorf("tag %q is duplicated", tag)
+		}
+		seenTags[tag] = struct{}{}
+	}
+
+	return nil
 }
 
 // PublicMetadata is a copy of classic metadata but that doesn't make any validation.
