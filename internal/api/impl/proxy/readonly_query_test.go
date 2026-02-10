@@ -19,173 +19,284 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsReadOnlyQuery(t *testing.T) {
+func TestProjectForLog(t *testing.T) {
 	tests := []struct {
 		name     string
-		query    string
-		expected bool
+		project  string
+		expected string
 	}{
-		// Valid read-only queries
 		{
-			name:     "simple SELECT",
-			query:    "SELECT * FROM users",
-			expected: true,
+			name:     "empty project returns global marker",
+			project:  "",
+			expected: "<global>",
 		},
 		{
-			name:     "SELECT with WHERE",
-			query:    "SELECT id, name FROM users WHERE id = 1",
-			expected: true,
+			name:     "non-empty project returns project name",
+			project:  "my-project",
+			expected: "my-project",
 		},
 		{
-			name:     "SELECT with JOIN",
-			query:    "SELECT u.id, o.order_id FROM users u JOIN orders o ON u.id = o.user_id",
-			expected: true,
-		},
-		{
-			name:     "SELECT with GROUP BY",
-			query:    "SELECT department, COUNT(*) FROM employees GROUP BY department",
-			expected: true,
-		},
-		{
-			name:     "SELECT with ORDER BY",
-			query:    "SELECT * FROM products ORDER BY price DESC",
-			expected: true,
-		},
-		{
-			name:     "SELECT with LIMIT",
-			query:    "SELECT * FROM logs LIMIT 100 OFFSET 10",
-			expected: true,
-		},
-		{
-			name:     "SELECT with single-line comment",
-			query:    "-- get all users\nSELECT * FROM users",
-			expected: true,
-		},
-		{
-			name:     "SELECT with multi-line comment",
-			query:    "/* get all users */ SELECT * FROM users",
-			expected: true,
-		},
-		{
-			name:     "SELECT with leading whitespace",
-			query:    "   \n   SELECT * FROM users",
-			expected: true,
-		},
-		{
-			name:     "lowercase select",
-			query:    "select * from users",
-			expected: true,
-		},
-		{
-			name:     "mixed case select",
-			query:    "SeLeCt * FrOm users",
-			expected: true,
-		},
-		// Invalid queries with write operations
-		{
-			name:     "INSERT query",
-			query:    "INSERT INTO users (name) VALUES ('John')",
-			expected: false,
-		},
-		{
-			name:     "UPDATE query",
-			query:    "UPDATE users SET name = 'Jane' WHERE id = 1",
-			expected: false,
-		},
-		{
-			name:     "DELETE query",
-			query:    "DELETE FROM users WHERE id = 1",
-			expected: false,
-		},
-		{
-			name:     "DROP TABLE query",
-			query:    "DROP TABLE users",
-			expected: false,
-		},
-		{
-			name:     "ALTER TABLE query",
-			query:    "ALTER TABLE users ADD COLUMN email VARCHAR(255)",
-			expected: false,
-		},
-		{
-			name:     "CREATE TABLE query",
-			query:    "CREATE TABLE users (id INT PRIMARY KEY)",
-			expected: false,
-		},
-		{
-			name:     "TRUNCATE query",
-			query:    "TRUNCATE TABLE users",
-			expected: false,
-		},
-		{
-			name:     "REPLACE query",
-			query:    "REPLACE INTO users VALUES (1, 'John')",
-			expected: false,
-		},
-		{
-			name:     "GRANT query",
-			query:    "GRANT SELECT ON users TO role_name",
-			expected: false,
-		},
-		{
-			name:     "REVOKE query",
-			query:    "REVOKE SELECT ON users FROM role_name",
-			expected: false,
-		},
-		// Dangerous queries hidden in comments - being extra cautious
-		{
-			name:     "DELETE in single-line comment with SELECT (rejected for safety)",
-			query:    "-- DELETE FROM users\nSELECT * FROM users",
-			expected: false, // We reject even though DELETE is commented, for maximum safety
-		},
-		{
-			name:     "INSERT after multi-line comment prefix",
-			query:    "/* comment */ INSERT INTO users VALUES (1)",
-			expected: false,
-		},
-		{
-			name:     "UPDATE after multi-line comment",
-			query:    "/* multi\nline\ncomment */ UPDATE users SET name = 'John'",
-			expected: false,
-		},
-		// Edge cases
-		{
-			name:     "empty query",
-			query:    "",
-			expected: false,
-		},
-		{
-			name:     "whitespace only should be rejected",
-			query:    "   \n  \t  ",
-			expected: false,
-		},
-		{
-			name:     "comment with no actual query should be rejected",
-			query:    "-- just a comment",
-			expected: false,
-		},
-		{
-			name:     "multi-line comment with no actual query should be rejected",
-			query:    "/* just a comment */",
-			expected: false,
-		},
-		// Query strings with writing keywords not at the start
-		{
-			name:     "SELECT with DELETE in string literal",
-			query:    "SELECT name FROM users WHERE description LIKE '%DELETE%'",
-			expected: true,
-		},
-		{
-			name:     "SELECT with INSERT in column name reference",
-			query:    "SELECT user_insert_date FROM users",
-			expected: true,
+			name:     "whitespace-only project is not treated as empty",
+			project:  "  ",
+			expected: "  ",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isReadOnlyQuery(tt.query)
-			assert.Equal(t, tt.expected, result, "query: %q", tt.query)
+			result := projectForLog(tt.project)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestSanitizeAndValidateQuery(t *testing.T) {
+	tests := []struct {
+		name          string
+		query         string
+		expectedValid bool
+		expectClean   bool // whether we should check that cleanQuery is not empty
+	}{
+		// Valid read-only queries
+		{
+			name:          "simple SELECT",
+			query:         "SELECT * FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with WHERE",
+			query:         "SELECT id, name FROM users WHERE id = 1",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with JOIN",
+			query:         "SELECT u.id, o.order_id FROM users u JOIN orders o ON u.id = o.user_id",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with GROUP BY",
+			query:         "SELECT department, COUNT(*) FROM employees GROUP BY department",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with ORDER BY",
+			query:         "SELECT * FROM products ORDER BY price DESC",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with LIMIT",
+			query:         "SELECT * FROM logs LIMIT 100 OFFSET 10",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with single-line comment - comment is removed",
+			query:         "-- get all users\nSELECT * FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with multi-line comment - comment is removed",
+			query:         "/* get all users */ SELECT * FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with leading whitespace",
+			query:         "   \n   SELECT * FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "lowercase select",
+			query:         "select * from users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "mixed case select",
+			query:         "SeLeCt * FrOm users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		// Invalid queries with write operations
+		{
+			name:          "INSERT query",
+			query:         "INSERT INTO users (name) VALUES ('John')",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "UPDATE query",
+			query:         "UPDATE users SET name = 'Jane' WHERE id = 1",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "DELETE query",
+			query:         "DELETE FROM users WHERE id = 1",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "DROP TABLE query",
+			query:         "DROP TABLE users",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "ALTER TABLE query",
+			query:         "ALTER TABLE users ADD COLUMN email VARCHAR(255)",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "CREATE TABLE query",
+			query:         "CREATE TABLE users (id INT PRIMARY KEY)",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "TRUNCATE query",
+			query:         "TRUNCATE TABLE users",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "REPLACE query",
+			query:         "REPLACE INTO users VALUES (1, 'John')",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "GRANT query",
+			query:         "GRANT SELECT ON users TO role_name",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "REVOKE query",
+			query:         "REVOKE SELECT ON users FROM role_name",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		// Dangerous queries hidden in comments - comments are removed so the query is safe
+		{
+			name:          "DELETE in single-line comment with SELECT (now safe after comment removal)",
+			query:         "-- DELETE FROM users\nSELECT * FROM users",
+			expectedValid: true, // After removing comment, only SELECT remains
+			expectClean:   true,
+		},
+		{
+			name:          "INSERT after multi-line comment prefix",
+			query:         "/* comment */ INSERT INTO users VALUES (1)",
+			expectedValid: false, // After removing comment, INSERT remains
+			expectClean:   false,
+		},
+		{
+			name:          "UPDATE after multi-line comment",
+			query:         "/* multi\nline\ncomment */ UPDATE users SET name = 'John'",
+			expectedValid: false, // After removing comment, UPDATE remains
+			expectClean:   false,
+		},
+		// Edge cases
+		{
+			name:          "empty query",
+			query:         "",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "whitespace only should be rejected",
+			query:         "   \n  \t  ",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "comment with no actual query should be rejected",
+			query:         "-- just a comment",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "multi-line comment with no actual query should be rejected",
+			query:         "/* just a comment */",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		// Query strings with writing keywords not at the start
+		{
+			name:          "SELECT with DELETE in string literal",
+			query:         "SELECT name FROM users WHERE description LIKE '%DELETE%'",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT with INSERT in column name reference",
+			query:         "SELECT user_insert_date FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleanQuery, isValid := sanitizeAndValidateQuery(tt.query)
+			assert.Equal(t, tt.expectedValid, isValid, "query: %q", tt.query)
+			if tt.expectClean {
+				assert.NotEmpty(t, cleanQuery, "expected non-empty clean query for: %q", tt.query)
+			} else {
+				assert.Empty(t, cleanQuery, "expected empty clean query for: %q", tt.query)
+			}
+		})
+	}
+}
+
+func TestSanitizeAndValidateQuery_CleanQueryOutput(t *testing.T) {
+	// Test that the cleaned query has comments removed
+	tests := []struct {
+		name               string
+		query              string
+		expectedCleanQuery string
+		expectedValid      bool
+	}{
+		{
+			name:               "single-line comment removed",
+			query:              "-- comment\nSELECT * FROM users",
+			expectedCleanQuery: "SELECT * FROM users",
+			expectedValid:      true,
+		},
+		{
+			name:               "multi-line comment removed",
+			query:              "/* comment */ SELECT * FROM users",
+			expectedCleanQuery: "SELECT * FROM users",
+			expectedValid:      true,
+		},
+		{
+			name:               "inline comment removed",
+			query:              "SELECT * FROM users /* where id = 1 */",
+			expectedCleanQuery: "SELECT * FROM users",
+			expectedValid:      true,
+		},
+		{
+			name:               "multiple comments removed",
+			query:              "-- first\n/* second */ SELECT * FROM users -- third",
+			expectedCleanQuery: "SELECT * FROM users",
+			expectedValid:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleanQuery, isValid := sanitizeAndValidateQuery(tt.query)
+			assert.Equal(t, tt.expectedValid, isValid)
+			// The clean query should be trimmed and have comments removed
+			assert.Equal(t, tt.expectedCleanQuery, cleanQuery)
 		})
 	}
 }

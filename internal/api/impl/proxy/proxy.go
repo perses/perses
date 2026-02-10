@@ -69,6 +69,15 @@ type SQLResponse struct {
 	Rows    []SQLRow            `json:"rows"`
 }
 
+// projectForLog returns a meaningful log value for the project field.
+// For global datasources (where project is empty), it returns "<global>" to make logs clearer.
+func projectForLog(project string) string {
+	if project == "" {
+		return "<global>"
+	}
+	return project
+}
+
 var _ = json.Unmarshaler(&unsavedProxyBody{})
 
 // unsavedProxyBody is the body of the request when the datasource is not saved yet.
@@ -196,7 +205,7 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": datasourceName,
-			"project":    projectName,
+			"project":    projectForLog(projectName),
 		}).Error("unable to build or find the config in the datasource spec")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
 	}
@@ -218,7 +227,7 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 					"datasource": datasourceName,
-					"project":    projectName,
+					"project":    projectForLog(projectName),
 				}).Error("unable to decrypt the datasource secret")
 				return nil, apiinterface.InternalError
 			}
@@ -239,7 +248,7 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 					"datasource": datasourceName,
-					"project":    projectName,
+					"project":    projectForLog(projectName),
 				}).Error("unable to decrypt the datasource secret")
 				return nil, apiinterface.InternalError
 			}
@@ -487,7 +496,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	if r.Method != http.MethodPost {
 		logrus.WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 			"method":     r.Method,
 		}).Error("SQL proxy requires POST request method when using SQLProxy kind")
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", s.path, r.Method))
@@ -498,26 +507,28 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	if err := json.NewDecoder(r.Body).Decode(q); err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 		}).Error("unable to decode the query body")
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 
-	// Validate that the query is read-only (SELECT only) to prevent data modification
-	if !isReadOnlyQuery(q.Query) {
+	// Sanitize and validate that the query is read-only (SELECT only) to prevent data modification
+	// The cleaned query (without comments) is used for both validation and execution
+	cleanQuery, isValid := sanitizeAndValidateQuery(q.Query)
+	if !isValid {
 		logrus.WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 			"query":      q.Query,
 		}).Error("rejected query with write operations; only SELECT queries are allowed through the SQL proxy")
-		return apiinterface.InternalError
+		return apiinterface.BadRequestError
 	}
 
 	// add password if provided
 	if err := s.setupAuthentication(); err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 		}).Error("unable to setup authentication")
 		return apiinterface.InternalError
 	}
@@ -527,7 +538,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 		}).Error("unable to build the tls config")
 		return apiinterface.InternalError
 	}
@@ -537,7 +548,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 			"driver":     s.config.Driver,
 		}).Error("unable to open the database")
 		return apiinterface.InternalError
@@ -546,17 +557,18 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		if err = db.Close(); err != nil {
 			logrus.WithError(err).WithFields(map[string]interface{}{
 				"datasource": s.name,
-				"project":    s.project,
+				"project":    projectForLog(s.project),
 			}).Error("unable to close the database")
 		}
 	}(db)
 
-	rows, err := db.QueryContext(r.Context(), q.Query)
+	// Execute the cleaned query (without comments) for safety
+	rows, err := db.QueryContext(r.Context(), cleanQuery)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
-			"query":      q.Query,
+			"project":    projectForLog(s.project),
+			"query":      cleanQuery,
 		}).Error("unable to execute the query")
 		return apiinterface.InternalError
 	}
@@ -564,7 +576,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		if err = rows.Close(); err != nil {
 			logrus.WithError(err).WithFields(map[string]interface{}{
 				"datasource": s.name,
-				"project":    s.project,
+				"project":    projectForLog(s.project),
 			}).Error("unable to close rows")
 		}
 	}(rows)
@@ -573,7 +585,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	if err = writeJSONResponse(c, rows, s.name, s.project); err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": s.name,
-			"project":    s.project,
+			"project":    projectForLog(s.project),
 		}).Error("unable to write the query result")
 		return apiinterface.InternalError
 	}
@@ -737,7 +749,7 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": datasourceName,
-			"project":    projectName,
+			"project":    projectForLog(projectName),
 		}).Error("unable to get columns from query result")
 		return apiinterface.InternalError
 	}
@@ -746,7 +758,7 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
 			"datasource": datasourceName,
-			"project":    projectName,
+			"project":    projectForLog(projectName),
 		}).Error("unable to get column types from query result")
 		return apiinterface.InternalError
 	}
@@ -775,7 +787,7 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 		if err != nil {
 			logrus.WithError(err).WithFields(map[string]interface{}{
 				"datasource": datasourceName,
-				"project":    projectName,
+				"project":    projectForLog(projectName),
 			}).Error("unable to scan row from query result")
 			return apiinterface.InternalError
 		}
@@ -808,29 +820,30 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 	return c.JSON(http.StatusOK, response)
 }
 
-// isReadOnlyQuery validates that a SQL query is read-only (SELECT only)
-// Returns true if the query is safe to execute, false if it contains write operations
-func isReadOnlyQuery(query string) bool {
+// sanitizeAndValidateQuery removes comments from a SQL query and validates it is read-only.
+// Returns the cleaned query (without comments) and true if the query is safe to execute.
+// Returns an empty string and false if the query contains write operations or is invalid.
+func sanitizeAndValidateQuery(query string) (string, bool) {
 	if query == "" {
-		return false
+		return "", false
 	}
 
-	// Normalize the query: trim whitespace and convert to uppercase for comparison
+	// Normalize and remove comments
 	normalizedQuery := strings.TrimSpace(query)
 	if normalizedQuery == "" {
-		return false
+		return "", false
 	}
 
-	// Remove comments to check if there's any actual query left
-	queryWithoutComments := removeSQLComments(normalizedQuery)
-	queryWithoutComments = strings.TrimSpace(queryWithoutComments)
+	// Remove all comments to get a clean query for both validation and execution
+	cleanQuery := removeSQLComments(normalizedQuery)
+	cleanQuery = strings.TrimSpace(cleanQuery)
 
 	// If nothing is left after removing comments, reject the query
-	if queryWithoutComments == "" {
-		return false
+	if cleanQuery == "" {
+		return "", false
 	}
 
-	upperQuery := strings.ToUpper(normalizedQuery)
+	upperQuery := strings.ToUpper(cleanQuery)
 
 	// Define dangerous SQL operations that modify data
 	dangerousKeywords := []string{
@@ -846,35 +859,15 @@ func isReadOnlyQuery(query string) bool {
 		"REVOKE",
 	}
 
-	// Check if a query starts with any dangerous keyword
-	// This catches both standalone and commented cases
+	// Check if the clean query starts with any dangerous keyword
 	for _, keyword := range dangerousKeywords {
 		if strings.HasPrefix(upperQuery, keyword) {
-			return false
-		}
-
-		// Also check after common comment patterns
-		// e.g., "/* comment */ DELETE FROM table" or "-- comment\nDELETE FROM table"
-		if strings.Contains(upperQuery, keyword) {
-			// Find the keyword position
-			idx := strings.Index(upperQuery, keyword)
-			if idx == -1 {
-				continue
-			}
-
-			// Check if it's preceded only by whitespace and comments
-			precedingText := strings.TrimSpace(normalizedQuery[:idx])
-
-			// Remove SQL comments to check if there's any actual code before the keyword
-			precedingWithoutComments := removeSQLComments(precedingText)
-			if strings.TrimSpace(precedingWithoutComments) == "" {
-				return false
-			}
+			return "", false
 		}
 	}
 
-	// Query appears to be read-only
-	return true
+	// Query is valid and read-only, return the cleaned version
+	return cleanQuery, true
 }
 
 // removeSQLComments removes SQL comments from a string
