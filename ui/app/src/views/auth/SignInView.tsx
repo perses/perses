@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useNativeAuthnMutation } from '../../model/auth/native-authn-client';
-import { useIsLoggedIn, useRedirectQueryParam } from '../../model/auth/auth-client';
+import { useRedirectQueryParam } from '../../model/auth/auth-client';
 import { SignUpRoute } from '../../model/route';
 import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
@@ -24,7 +24,6 @@ import { SignWrapper } from './SignWrapper';
 function SignInView(): ReactElement {
   const isSignUpDisable = useIsSignUpDisable();
   const authMutation = useNativeAuthnMutation();
-  const isLoggedIn = useIsLoggedIn();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const [login, setLogin] = useState<string>('');
@@ -35,19 +34,16 @@ function SignInView(): ReactElement {
     authMutation.mutate(
       { login: login, password: password },
       {
+        onSuccess: () => {
+          successSnackbar(`Successfully login`);
+          navigate(redirectPath);
+        },
         onError: (err) => {
           exceptionSnackbar(err);
         },
       }
     );
   };
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      successSnackbar(`Successfully login`);
-      navigate(redirectPath);
-    }
-  }, [isLoggedIn, navigate, redirectPath, successSnackbar]);
 
   const isSignInDisabled = (): boolean => {
     return authMutation.isPending || login === '' || password === '';
