@@ -33,6 +33,7 @@ import (
 	createdAt: "0001-01-01T00:00:00Z"
 	updatedAt: "0001-01-01T00:00:00Z"
 	version:   0
+	tags?: [...string]
 }
 
 #ProjectMetadataWrapper: {

@@ -35,6 +35,7 @@ export interface Row extends CommonRow {
   project: string;
   displayName: string;
   viewedAt?: string;
+  tags?: string[];
 }
 
 function NoDashboardRowOverlay(): ReactElement {
