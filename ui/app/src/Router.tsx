@@ -47,7 +47,7 @@ import HomeView from './views/home/HomeView';
 // Default route is eagerly loaded
 import App from './App';
 import { PERSES_APP_CONFIG } from './config';
-import { buildRedirectQueryString, useIsLoggedIn } from './model/auth/auth-client';
+import { buildRedirectQueryString, useIsLoggedIn, useRedirectQueryParam } from './model/auth/auth-client';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -154,19 +154,25 @@ function Router(): ReactElement {
             ],
           },
           {
-            path: SignInRoute,
-            element: <RequireAuthEnabled />,
-            children: [{ index: true, Component: SignInView }],
-          },
-          {
-            path: SignUpRoute,
-            element: <RequireAuthEnabled />,
-            children: [{ index: true, Component: SignUpView }],
-          },
-          {
-            path: DelegatedAuthnErrorRoute,
-            element: <RequireAuthEnabled />,
-            children: [{ index: true, Component: DelegatedAuthnErrorView }],
+            path: '',
+            element: <AlreadyLoggedIn />,
+            children: [
+              {
+                path: SignInRoute,
+                element: <RequireAuthEnabled />,
+                children: [{ index: true, Component: SignInView }],
+              },
+              {
+                path: SignUpRoute,
+                element: <RequireAuthEnabled />,
+                children: [{ index: true, Component: SignUpView }],
+              },
+              {
+                path: DelegatedAuthnErrorRoute,
+                element: <RequireAuthEnabled />,
+                children: [{ index: true, Component: DelegatedAuthnErrorView }],
+              },
+            ],
           },
         ],
       },
@@ -198,6 +204,15 @@ function RequireEphemeralDashboardEnabled(): ReactElement {
   return <Outlet />;
 }
 
+function AlreadyLoggedIn(): ReactElement {
+  const isLoggedIn = useIsLoggedIn();
+  const params = useRedirectQueryParam();
+  if (isLoggedIn) {
+    return <Navigate to={params} replace />;
+  }
+  return <Outlet />;
+}
+
 /**
  * This component aims to redirect the user to the SignIn page if not logged in
  * or to the delegated authn error page if there is an error with the delegated authn.
@@ -207,7 +222,7 @@ function RequireEphemeralDashboardEnabled(): ReactElement {
  * https://gist.github.com/mjackson/d54b40a094277b7afdd6b81f51a0393f
  * @constructor
  */
-function RequireAuth(): ReactElement | null {
+function RequireAuth(): ReactElement {
   const isDelegatedAuthnProviderEnabled = useIsDelegatedAuthnProviderEnabled();
   const isAuthEnabled = useIsAuthEnabled();
   const isLoggedIn = useIsLoggedIn();

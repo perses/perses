@@ -13,6 +13,8 @@
 
 import { fetchJson, Permission, StatusError, UserResource } from '@perses-dev/core';
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useCookies } from 'react-cookie';
+import { useEffect, useState } from 'react';
 import { useIsAuthEnabled } from '../context/Config';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -77,18 +79,35 @@ function getUserPermissions(username: string): Promise<Record<string, Permission
   });
 }
 
+export function useIsAccessTokenExist(): boolean {
+  const [cookies] = useCookies();
+
+  // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
+  const [debouncedValue, setDebouncedValue] = useState(cookies);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(cookies);
+    }, 500);
+
+    return (): void => clearTimeout(timer);
+  }, [cookies]);
+
+  return debouncedValue['jwtPayload'] !== undefined;
+}
+
 /**
  * Used to retrieve information on the current logged in User
  * Will automatically be refreshed when cache is invalidated
  */
 export function useCurrentUser(): UseQueryResult<UserResource, StatusError> {
   const isAuthEnabled = useIsAuthEnabled();
+  const isAccessTokenExist = useIsAccessTokenExist();
   return useQuery<UserResource, StatusError>({
     queryKey: buildQueryKey({ resource: whoamiResource }),
     queryFn: () => {
       return getCurrentUser();
     },
-    enabled: isAuthEnabled,
+    enabled: isAuthEnabled || isAccessTokenExist,
   });
 }
 

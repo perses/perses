@@ -49,7 +49,6 @@ export function refreshToken(): Promise<Response> {
 // logged in
 export function useUsername(): string {
   const me = useCurrentUser();
-
   return me.data?.metadata?.name ?? '';
 }
 
