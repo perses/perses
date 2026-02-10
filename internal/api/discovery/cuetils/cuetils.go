@@ -40,9 +40,15 @@ func NewFromSchema(v cue.Value) ([]*Node, error) {
 		FieldName: "root",
 	}
 	for it.Next() {
+		// We have to evaluate the value to resolve eventual references in the schema before going further.
+		// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
+		valueWithResolvedRefs := it.Value().Eval()
+		if valueWithResolvedRefs.Err() != nil {
+			return nil, valueWithResolvedRefs.Err()
+		}
 		queue = append(queue, iteratorQueue{
 			fieldName: it.Selector().String(),
-			value:     it.Value(),
+			value:     valueWithResolvedRefs,
 			parent:    root,
 		})
 	}
