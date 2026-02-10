@@ -6,23 +6,29 @@ Perses is configured via command-line flags and a configuration file
 
 ```bash
   -config string
-        Path to the yaml configuration file for the api. Configuration can be overridden when using the environment variable
+    	Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.
   -log.level string
-        log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
+    	log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
   -log.method-trace
-        Include the calling method as a field in the log. Can be useful to see immediately where the log comes from
+    	include the calling method as a field in the log. Can be useful to see immediately where the log comes from
   -pprof
-        Enable pprof
+    	Enable pprof
   -web.hide-port
-        If true, it won t be print on stdout the port listened to receive the HTTP request
+    	If true, it will not be print on stdout the port listened to receive the HTTP request
   -web.listen-address string
-        The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
+    	The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
-        Path under which to expose metrics. (default "/metrics")
+    	Path under which to expose metrics. (default "/metrics")
   -web.tls-cert-file string
     	The path to the cert to use for the HTTPS server
+  -web.tls-cipher-suites string
+    	Comma-separated list of TLS cipher suite names
   -web.tls-key-file string
     	The path to the key to use for the HTTPS server
+  -web.tls-max-version string
+    	Maximum TLS version (e.g., "1.2", "1.3")
+  -web.tls-min-version string
+    	Minimum TLS version (e.g., "1.2", "1.3")
 ```
 
 Example:
