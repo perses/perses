@@ -54,21 +54,6 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-// SQLColumnMetadata represents metadata for a single column in SQL result
-type SQLColumnMetadata struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-// SQLRow represents a single row in an SQL result with column name to value mapping
-type SQLRow map[string]any
-
-// SQLResponse represents the complete SQL query response
-type SQLResponse struct {
-	Columns []SQLColumnMetadata `json:"columns"`
-	Rows    []SQLRow            `json:"rows"`
-}
-
 // projectForLog returns a meaningful log value for the project field.
 // For global datasources (where project is empty), it returns "<global>" to make logs clearer.
 func projectForLog(project string) string {
@@ -521,7 +506,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 			"project":    projectForLog(s.project),
 			"query":      q.Query,
 		}).Error("rejected query with write operations; only SELECT queries are allowed through the SQL proxy")
-		return apiinterface.BadRequestError
+		return apiinterface.HandleBadRequestError("only SELECT queries are allowed through the SQL proxy")
 	}
 
 	// add password if provided
@@ -742,6 +727,21 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 	db := stdlib.OpenDB(*pgxConfig.ConnConfig)
 
 	return db, nil
+}
+
+// SQLColumnMetadata represents metadata for a single column in SQL result
+type SQLColumnMetadata struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+// SQLRow represents a single row in an SQL result with column name to value mapping
+type SQLRow map[string]any
+
+// SQLResponse represents the complete SQL query response
+type SQLResponse struct {
+	Columns []SQLColumnMetadata `json:"columns"`
+	Rows    []SQLRow            `json:"rows"`
 }
 
 func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectName string) error {
