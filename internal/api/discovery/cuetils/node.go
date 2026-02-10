@@ -23,6 +23,7 @@ import (
 	"cuelang.org/go/cue"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/sirupsen/logrus"
 )
 
 type NodeType string
@@ -279,7 +280,11 @@ func buildMapFromStructValue(v cue.Value) map[string]cue.Value {
 		// We have to evaluate the value to resolve eventual reference in the schema before going further.
 		// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
 		valueWithResolvedRefs := it.Value().Eval()
-		result[it.Selector().String()] = valueWithResolvedRefs
+		if valueWithResolvedRefs.Err() != nil {
+			logrus.WithError(valueWithResolvedRefs.Err()).Error("failed to evaluate the schema")
+		} else {
+			result[it.Selector().String()] = valueWithResolvedRefs
+		}
 	}
 	return result
 }
