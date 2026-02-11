@@ -52,3 +52,7 @@ dev/kubernetes/local
 /prometheus
 
 !.gitkeep
+
+# For Java
+/java-sdk/target
+/target
