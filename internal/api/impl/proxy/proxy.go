@@ -54,6 +54,15 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
+// projectForLog returns a meaningful log value for the project field.
+// For global datasources (where project is empty), it returns "<global>" to make logs clearer.
+func projectForLog(project string) string {
+	if project == "" {
+		return "<global>"
+	}
+	return project
+}
+
 var _ = json.Unmarshaler(&unsavedProxyBody{})
 
 // unsavedProxyBody is the body of the request when the datasource is not saved yet.
@@ -179,8 +188,11 @@ type proxy interface {
 func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
-		logrus.WithError(err).Error("unable to build or find the config in the datasource")
-		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to find the config")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": datasourceName,
+			"project":    projectForLog(projectName),
+		}).Error("unable to build or find the config in the datasource spec")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
 	}
 
 	if !strings.HasPrefix(path, "/") {
@@ -198,7 +210,10 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 				return nil, err
 			}
 			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(err).Errorf("unable to decrypt the secret")
+				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
+					"datasource": datasourceName,
+					"project":    projectForLog(projectName),
+				}).Error("unable to decrypt the datasource secret")
 				return nil, apiinterface.InternalError
 			}
 		}
@@ -216,7 +231,10 @@ func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path s
 				return nil, err
 			}
 			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(err).Errorf("unable to decrypt the secret")
+				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
+					"datasource": datasourceName,
+					"project":    projectForLog(projectName),
+				}).Error("unable to decrypt the datasource secret")
 				return nil, apiinterface.InternalError
 			}
 		}
@@ -256,19 +274,28 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 
 	if err := h.prepareRequest(c); err != nil {
-		logrus.WithError(err).Errorf("unable to prepare the request")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": h.datasourceName,
+			"url":        h.config.URL.String(),
+		}).Error("unable to prepare the HTTP request")
 		return apiinterface.InternalError
 	}
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
-	logrus.Debugf("request will be redirected to %q", h.config.URL.String())
+	logrus.WithFields(map[string]interface{}{
+		"datasource": h.datasourceName,
+		"path":       h.path,
+	}).Debug("request will be redirected to datasource")
 
 	// Set up the proxy
 	var proxyErr error
 	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL.URL)
 	reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
-		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", h.config.URL.String(), err)
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": h.datasourceName,
+			"target":     h.config.URL.String(),
+		}).Errorf("error proxying, remote unreachable: err=%v", err)
 		proxyErr = err
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
@@ -407,7 +434,10 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 	tlsConfig, err := h.prepareTLSConfig()
 	if err != nil {
-		logrus.WithError(err).Error("unable to build the tls config")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": h.datasourceName,
+			"url":        h.config.URL.String(),
+		}).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
 	return &http.Transport{
@@ -449,56 +479,99 @@ func (s *sqlProxy) serve(c echo.Context) error {
 
 	// if this isn't a POST request don't perform the SQL query
 	if r.Method != http.MethodPost {
-		logrus.Error("must be a POST request when using SQLProxy kind")
+		logrus.WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+			"method":     r.Method,
+		}).Error("SQL proxy requires POST request method when using SQLProxy kind")
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", s.path, r.Method))
 	}
 
-	// TODO: validate the query is readonly
+	// Validate query is read-only before proceeding
 	q := &sqlQuery{}
 	if err := json.NewDecoder(r.Body).Decode(q); err != nil {
-		logrus.WithError(err).Error("unable to decode the query body")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+		}).Error("unable to decode the query body")
 		return apiinterface.HandleBadRequestError(err.Error())
+	}
+
+	// Sanitize and validate that the query is read-only (SELECT only) to prevent data modification
+	// The cleaned query (without comments) is used for both validation and execution
+	cleanQuery, isValid := sanitizeAndValidateQuery(q.Query)
+	if !isValid {
+		logrus.WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+			"query":      q.Query,
+		}).Error("rejected query with write operations; only SELECT queries are allowed through the SQL proxy")
+		return apiinterface.HandleBadRequestError("only SELECT queries are allowed through the SQL proxy")
 	}
 
 	// add password if provided
 	if err := s.setupAuthentication(); err != nil {
-		logrus.WithError(err).Error("unable to setup authentication")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+		}).Error("unable to setup authentication")
 		return apiinterface.InternalError
 	}
 
 	// add tls.Config
 	tlsConfig, err := s.prepareTLSConfig()
 	if err != nil {
-		logrus.WithError(err).Error("unable to build the tls config")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+		}).Error("unable to build the tls config")
 		return apiinterface.InternalError
 	}
 
 	// get the correct SQL driver for address and open connection
 	db, err := s.sqlOpen(tlsConfig)
 	if err != nil {
-		logrus.WithError(err).Error("unable to open the database")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+			"driver":     s.config.Driver,
+		}).Error("unable to open the database")
 		return apiinterface.InternalError
 	}
 	defer func(db *sql.DB) {
 		if err = db.Close(); err != nil {
-			logrus.WithError(err).Error("unable to close the database")
+			logrus.WithError(err).WithFields(map[string]interface{}{
+				"datasource": s.name,
+				"project":    projectForLog(s.project),
+			}).Error("unable to close the database")
 		}
 	}(db)
 
-	rows, err := db.QueryContext(r.Context(), q.Query)
+	// Execute the cleaned query (without comments) for safety
+	rows, err := db.QueryContext(r.Context(), cleanQuery)
 	if err != nil {
-		logrus.WithError(err).Error("unable to execute the query")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+			"query":      cleanQuery,
+		}).Error("unable to execute the query")
 		return apiinterface.InternalError
 	}
 	defer func(rows *sql.Rows) {
 		if err = rows.Close(); err != nil {
-			logrus.WithError(err).Error("unable to close rows")
+			logrus.WithError(err).WithFields(map[string]interface{}{
+				"datasource": s.name,
+				"project":    projectForLog(s.project),
+			}).Error("unable to close rows")
 		}
 	}(rows)
 
-	// write the SQL query result as CSV
-	if err = writeCSVResponse(c, rows); err != nil {
-		logrus.WithError(err).Error("unable to write the query result")
+	// write the SQL query result as JSON (for frontend consumption)
+	if err = writeJSONResponse(c, rows, s.name, s.project); err != nil {
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": s.name,
+			"project":    projectForLog(s.project),
+		}).Error("unable to write the query result")
 		return apiinterface.InternalError
 	}
 
@@ -656,55 +729,181 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func writeCSVResponse(c echo.Context, rows *sql.Rows) error {
+// SQLColumnMetadata represents metadata for a single column in SQL result
+type SQLColumnMetadata struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+// SQLRow represents a single row in an SQL result with column name to value mapping
+type SQLRow map[string]any
+
+// SQLResponse represents the complete SQL query response
+type SQLResponse struct {
+	Columns []SQLColumnMetadata `json:"columns"`
+	Rows    []SQLRow            `json:"rows"`
+}
+
+func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectName string) error {
 	cols, err := rows.Columns()
 	if err != nil {
-		logrus.WithError(err).Error("unable to get columns")
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": datasourceName,
+			"project":    projectForLog(projectName),
+		}).Error("unable to get columns from query result")
 		return apiinterface.InternalError
+	}
+
+	colTypes, err := rows.ColumnTypes()
+	if err != nil {
+		logrus.WithError(err).WithFields(map[string]interface{}{
+			"datasource": datasourceName,
+			"project":    projectForLog(projectName),
+		}).Error("unable to get column types from query result")
+		return apiinterface.InternalError
+	}
+
+	// Build column metadata using proper struct
+	columns := make([]SQLColumnMetadata, len(cols))
+	for i, col := range cols {
+		columns[i] = SQLColumnMetadata{
+			Name: col,
+			Type: colTypes[i].DatabaseTypeName(),
+		}
 	}
 
 	// Create a slice of interface{} to hold the column values
 	values := make([]any, len(cols))
-
-	// Create a slice of sql.RawBytes to hold the raw bytes of the column values
+	// Create a slice of interface{} pointers to hold references to actual column values
 	scanArgs := make([]any, len(cols))
 	for i := range values {
 		scanArgs[i] = &values[i]
 	}
 
-	// set the Content-Type header to text/csv
-	c.Response().Header().Set(echo.HeaderContentType, "text/csv")
-	c.Response().Header().Set(echo.HeaderContentDisposition, "attachment; filename=result.csv")
-
-	// write the CSV header
-	_, err = c.Response().Write([]byte(strings.Join(cols, ",") + "\n"))
-	if err != nil {
-		logrus.WithError(err).Error("unable to csv header")
-		return apiinterface.InternalError
-	}
-
-	// add each row to the csv response
+	// Collect all rows using a proper struct
+	rowsData := make([]SQLRow, 0)
 	for rows.Next() {
 		err = rows.Scan(scanArgs...)
 		if err != nil {
-			logrus.WithError(err).Error("unable to scan row")
+			logrus.WithError(err).WithFields(map[string]interface{}{
+				"datasource": datasourceName,
+				"project":    projectForLog(projectName),
+			}).Error("unable to scan row from query result")
 			return apiinterface.InternalError
 		}
 
-		record := make([]string, len(cols))
-		for i, col := range values {
-			if col == nil {
-				record[i] = ""
+		row := make(SQLRow)
+		for i, col := range cols {
+			val := values[i]
+			if val == nil {
+				row[col] = nil
 			} else {
-				record[i] = fmt.Sprintf("%v", col)
+				// Convert []byte to string for better JSON serialization
+				if b, ok := val.([]byte); ok {
+					row[col] = string(b)
+				} else {
+					row[col] = val
+				}
 			}
 		}
-		_, err = c.Response().Write([]byte(strings.Join(record, ",") + "\n"))
-		if err != nil {
-			logrus.WithError(err).Error("unable to write response")
-			return apiinterface.InternalError
+		rowsData = append(rowsData, row)
+	}
+
+	// Build response using a proper struct
+	response := SQLResponse{
+		Columns: columns,
+		Rows:    rowsData,
+	}
+
+	// Set Content-Type and write JSON response
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	return c.JSON(http.StatusOK, response)
+}
+
+// sanitizeAndValidateQuery removes comments from a SQL query and validates it is read-only.
+// Returns the cleaned query (without comments) and true if the query is safe to execute.
+// Returns an empty string and false if the query contains write operations or is invalid.
+func sanitizeAndValidateQuery(query string) (string, bool) {
+	if query == "" {
+		return "", false
+	}
+
+	// Normalize and remove comments
+	normalizedQuery := strings.TrimSpace(query)
+	if normalizedQuery == "" {
+		return "", false
+	}
+
+	// Remove all comments to get a clean query for both validation and execution
+	cleanQuery := removeSQLComments(normalizedQuery)
+	cleanQuery = strings.TrimSpace(cleanQuery)
+
+	// If nothing is left after removing comments, reject the query
+	if cleanQuery == "" {
+		return "", false
+	}
+
+	upperQuery := strings.ToUpper(cleanQuery)
+
+	// Define dangerous SQL operations that modify data
+	dangerousKeywords := []string{
+		"INSERT",
+		"UPDATE",
+		"DELETE",
+		"DROP",
+		"ALTER",
+		"CREATE",
+		"REPLACE",
+		"TRUNCATE",
+		"GRANT",
+		"REVOKE",
+	}
+
+	// Check if the clean query starts with any dangerous keyword
+	for _, keyword := range dangerousKeywords {
+		if strings.HasPrefix(upperQuery, keyword) {
+			return "", false
 		}
 	}
 
-	return nil
+	// Query is valid and read-only, return the cleaned version
+	return cleanQuery, true
+}
+
+// removeSQLComments removes SQL comments from a string
+// Supports both -- single-line comments and /* */ multi-line comments
+func removeSQLComments(query string) string {
+	var result strings.Builder
+	i := 0
+
+	for i < len(query) {
+		// Check for single-line comment (-- or #)
+		if i+1 < len(query) && (query[i:i+2] == "--" || query[i:i+2] == "/*") {
+			if query[i:i+2] == "--" {
+				// Skip until the end of line
+				for i < len(query) && query[i] != '\n' {
+					i++
+				}
+				if i < len(query) {
+					result.WriteByte('\n')
+					i++
+				}
+			} else if query[i:i+2] == "/*" {
+				// Skip until closing */
+				i += 2
+				for i+1 < len(query) {
+					if query[i:i+2] == "*/" {
+						i += 2
+						break
+					}
+					i++
+				}
+			}
+		} else if i < len(query) {
+			result.WriteByte(query[i])
+			i++
+		}
+	}
+
+	return result.String()
 }
