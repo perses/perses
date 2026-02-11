@@ -29,7 +29,7 @@ export const tagsValidationSchema = z
       .trim()
       .min(1, 'Tag cannot be empty')
       .max(50, 'Tag must be 50 or fewer characters long')
-      .regex(/^[A-Za-z0-9 _-]+$/, 'Tag can only contain letters, numbers, spaces, hyphens, and underscores')
+      .regex(/^[a-z0-9 _-]+$/, 'Tag can only contain lowercase letters, numbers, spaces, hyphens, and underscores')
   )
   .max(20, 'Must be 20 or fewer tags')
   .optional()

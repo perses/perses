@@ -30,7 +30,7 @@ func NewMetadata(name string) *Metadata {
 	}
 }
 
-var tagsAllowedCharactersRegexp = regexp.MustCompile(`^[A-Za-z0-9 _-]+$`)
+var tagsAllowedCharactersRegexp = regexp.MustCompile(`^[a-z0-9 _-]+$`)
 
 type Metadata struct {
 	Name string `json:"name" yaml:"name"`
@@ -129,7 +129,7 @@ func validateTags(tags []string) error {
 			return fmt.Errorf("tag %q cannot contain more than %d characters", tag, maxTagLength)
 		}
 		if !tagsAllowedCharactersRegexp.MatchString(tag) {
-			return fmt.Errorf("tag %q contains invalid characters; only letters, numbers, spaces, hyphens, and underscores are allowed", tag)
+			return fmt.Errorf("tag %q contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed", tag)
 		}
 
 		normalizedTag := strings.ToLower(tag)
