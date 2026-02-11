@@ -250,12 +250,6 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 		return false
 	}
 
-	scope := getK8sScope(requestScope)
-	if scope == "" {
-		// The permission isn't k8s related, default to false for now
-		return false
-	}
-
 	authorized, _ := k.checkSpecificPermission(ctx, requestProject, kubernetesUser, requestAction, requestScope)
 
 	return authorized == authorizer.DecisionAllow
@@ -383,6 +377,14 @@ func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
 
 func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, user user.Info, action v1Role.Action, scope v1Role.Scope) (authorized authorizer.Decision, err error) {
 	translatedK8sScope := getK8sScope(scope)
+
+	// For resources without a K8s CRD (e.g. Variable, Secret, Role, User, Folder, etc.),
+	// fall back to checking the user's permission on the project/namespace resource.
+	if translatedK8sScope == "" {
+		logrus.Debugf("scope %q has no k8s CRD equivalent, falling back to project/namespace permission check", scope)
+		translatedK8sScope = k8sProjectScope
+	}
+
 	apiGroup := getK8sAPIGroup(translatedK8sScope)
 	apiVersion := getK8sAPIVersion(translatedK8sScope)
 
@@ -431,7 +433,7 @@ func (k *k8sImpl) getNamespaceList() []string {
 // for namespaces and v1alpha1 for all other perses related kubernetes resources
 func getK8sAPIVersion(scope k8sScope) string {
 	switch scope {
-	case k8sProjectScope:
+	case k8sProjectScope, k8sSecretScope:
 		return "v1"
 	default:
 		return "v1alpha1"
@@ -442,7 +444,7 @@ func getK8sAPIVersion(scope k8sScope) string {
 // string for namespaces and the perses.dev for all other perses related kubernetes resources
 func getK8sAPIGroup(scope k8sScope) string {
 	switch scope {
-	case k8sProjectScope:
+	case k8sProjectScope, k8sSecretScope:
 		return ""
 	default:
 		return "perses.dev"
