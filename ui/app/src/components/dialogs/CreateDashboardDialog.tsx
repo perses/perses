@@ -206,7 +206,9 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
                   value={field.value ?? []}
                   onChange={(_, newValue) =>
                     field.onChange(
-                      Array.from(new Set(newValue.map((tag) => tag.trim()).filter((tag) => tag.length > 0)))
+                      Array.from(
+                        new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
+                      )
                     )
                   }
                   renderTags={(value, getTagProps) =>

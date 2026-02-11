@@ -23,11 +23,18 @@ export const dashboardDisplayNameValidationSchema = z
   .max(75, 'Must be 75 or fewer characters long');
 
 export const tagsValidationSchema = z
-  .array(z.string().trim().min(1, 'Tag cannot be empty').max(50, 'Tag must be 50 or fewer characters long'))
+  .array(
+    z
+      .string()
+      .trim()
+      .min(1, 'Tag cannot be empty')
+      .max(50, 'Tag must be 50 or fewer characters long')
+      .regex(/^[A-Za-z0-9 _-]+$/, 'Tag can only contain letters, numbers, spaces, hyphens, and underscores')
+  )
   .max(20, 'Must be 20 or fewer tags')
   .optional()
   .default([])
-  .transform((tags) => Array.from(new Set(tags)));
+  .transform((tags) => Array.from(new Set(tags.map((tag) => tag.toLowerCase()))));
 
 export const createDashboardDialogValidationSchema = z.object({
   projectName: nameSchema,

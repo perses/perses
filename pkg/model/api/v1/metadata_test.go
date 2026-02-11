@@ -259,6 +259,24 @@ tags:
 			err: fmt.Errorf("tag \"dup\" is duplicated"),
 		},
 		{
+			title: "tag cannot be duplicated ignoring case",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["dup", "Dup"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "dup"
+  - "Dup"
+`,
+			err: fmt.Errorf("tag \"Dup\" is duplicated"),
+		},
+		{
 			title: "tag cannot have leading or trailing spaces",
 			jason: `
 {
@@ -274,6 +292,23 @@ tags:
   - "  tag  "
 `,
 			err: fmt.Errorf("tag \"  tag  \" cannot start or end with whitespace"),
+		},
+		{
+			title: "tag cannot contain invalid characters",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["tag!"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "tag!"
+`,
+			err: fmt.Errorf("tag \"tag!\" contains invalid characters; only letters, numbers, spaces, hyphens, and underscores are allowed"),
 		},
 	}
 	for _, test := range testSuite {

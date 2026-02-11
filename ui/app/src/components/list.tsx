@@ -158,7 +158,7 @@ export const TAGS_COL_DEF: GridColDef = {
     };
   },
   renderCell: (params) => (
-    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
       {(params.value ?? []).map((tag: string) => (
         <Chip key={tag} label={tag} size="small" />
       ))}

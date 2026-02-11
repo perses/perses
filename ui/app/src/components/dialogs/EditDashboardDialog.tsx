@@ -44,6 +44,7 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
       tags: dashboard.metadata.tags ?? [],
     },
   });
+  const { reset } = form;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
@@ -52,11 +53,11 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
       return;
     }
 
-    form.reset({
+    reset({
       dashboardName: getResourceDisplayName(dashboard),
       tags: dashboard.metadata.tags ?? [],
     });
-  }, [dashboard, form, open]);
+  }, [dashboard, open, reset]);
 
   const processForm: SubmitHandler<EditDashboardValidationType> = (data) => {
     const updatedDashboard: DashboardResource = {
@@ -91,7 +92,7 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
 
   const handleClose = (): void => {
     onClose();
-    form.reset();
+    reset();
   };
 
   return (
@@ -130,7 +131,9 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
                     value={field.value ?? []}
                     onChange={(_, newValue) =>
                       field.onChange(
-                        Array.from(new Set(newValue.map((tag) => tag.trim()).filter((tag) => tag.length > 0)))
+                        Array.from(
+                          new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
+                        )
                       )
                     }
                     renderTags={(value, getTagProps) =>

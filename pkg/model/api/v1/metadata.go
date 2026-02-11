@@ -16,6 +16,7 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -28,6 +29,8 @@ func NewMetadata(name string) *Metadata {
 		Name: name,
 	}
 }
+
+var tagsAllowedCharactersRegexp = regexp.MustCompile(`^[A-Za-z0-9 _-]+$`)
 
 type Metadata struct {
 	Name string `json:"name" yaml:"name"`
@@ -42,7 +45,9 @@ type Metadata struct {
 	// +kubebuilder:validation:Optional
 	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
 	Version   uint64    `json:"version" yaml:"version"`
-	Tags      []string  `json:"tags,omitempty" yaml:"tags,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=20
+	Tags []string `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func (m *Metadata) CreateNow() {
@@ -123,10 +128,15 @@ func validateTags(tags []string) error {
 		if utf8.RuneCountInString(tag) > maxTagLength {
 			return fmt.Errorf("tag %q cannot contain more than %d characters", tag, maxTagLength)
 		}
-		if _, ok := seenTags[tag]; ok {
+		if !tagsAllowedCharactersRegexp.MatchString(tag) {
+			return fmt.Errorf("tag %q contains invalid characters; only letters, numbers, spaces, hyphens, and underscores are allowed", tag)
+		}
+
+		normalizedTag := strings.ToLower(tag)
+		if _, ok := seenTags[normalizedTag]; ok {
 			return fmt.Errorf("tag %q is duplicated", tag)
 		}
-		seenTags[tag] = struct{}{}
+		seenTags[normalizedTag] = struct{}{}
 	}
 
 	return nil
