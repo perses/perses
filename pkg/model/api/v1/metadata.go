@@ -21,6 +21,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/perses/common/set"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
@@ -117,7 +118,7 @@ func validateTags(tags []string) error {
 		return fmt.Errorf("cannot contain more than %d tags", maxTags)
 	}
 
-	seenTags := make(map[string]struct{}, len(tags))
+	seenTags := set.New[string]()
 	for _, tag := range tags {
 		if len(strings.TrimSpace(tag)) == 0 {
 			return fmt.Errorf("tag cannot be empty")
