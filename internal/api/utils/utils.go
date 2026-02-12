@@ -95,25 +95,8 @@ func GetMetadataProject(metadata api.Metadata) string {
 	return ""
 }
 
-// GetUserRoleClaims retrieves role claims injected into context from token
-func GetUserRoleClaims(ctx echo.Context) []string {
-	roleClaims, ok := ctx.Get("roleclaims").([]string)
-	if !ok {
-		return nil
-	}
-	return roleClaims
-}
-
-// GetUserRoleClaims retrieves group claims injected into context from token
-func GetUserGroupClaims(ctx echo.Context) []string {
-	groupClaims, ok := ctx.Get("groupclaims").([]string)
-	if !ok {
-		return nil
-	}
-	return groupClaims
-}
-
 // GetClaimsFromAccessToken retrieves claims from access token according to the given JMESpath
+// TODO: explore the possibility of using jwt package instead of manually splitting and unmarshalling the token
 func GetClaimsFromAccessToken(ctx echo.Context, jmesPath string) ([]string, error) {
 	token := ctx.Get("access_token").(string)
 	if token == "" {
