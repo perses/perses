@@ -64,6 +64,13 @@ type Authorization interface {
 	// In case the endpoint is anonymous, or the context is empty, it will return true.
 	// In case the user information is not found in the context, the implementation should return false.
 	HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	// HasCreateProjectPermission checks if the user has the permission to create a Perses project.
+	// This is separated from HasPermission because the way project creation permission is evaluated differs
+	// between authorization providers:
+	//   - For native auth, creating a project requires a global permission (i.e. a GlobalRole granting create on ProjectScope).
+	//   - For delegated auth (e.g. k8s), creating a project is driven by having write access to the corresponding
+	//     namespace rather than a global permission, since Perses projects map 1:1 to k8s namespaces.
+	HasCreateProjectPermission(ctx echo.Context, projectName string) bool
 	// GetPermissions returns the permissions of the user found in the context.
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.

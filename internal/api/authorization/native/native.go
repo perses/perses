@@ -221,6 +221,11 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
+// For native auth, creating a project requires a global permission.
+func (n *native) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
+	return n.HasPermission(ctx, v1Role.CreateAction, v1.WildcardProject, v1Role.ProjectScope)
+}
+
 func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
