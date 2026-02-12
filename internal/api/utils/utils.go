@@ -14,6 +14,12 @@
 package utils
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"strings"
+
+	"github.com/jmespath/go-jmespath"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -105,4 +111,36 @@ func GetUserGroupClaims(ctx echo.Context) []string {
 		return nil
 	}
 	return groupClaims
+}
+
+// GetClaimsFromAccessToken retrieves claims from access token according to the given JMESpath
+func GetClaimsFromAccessToken(ctx echo.Context, jmesPath string) ([]string, error) {
+	token := ctx.Get("access_token").(string)
+	if token == "" {
+		return nil, nil
+	}
+
+	tokenContents := strings.Split(token, ".")
+	if len(tokenContents) != 3 {
+		return nil, errors.New("unknown token format")
+	}
+
+	// decoding the payload section of the token
+	decodedToken, err := base64.StdEncoding.DecodeString(tokenContents[1])
+	if err != nil {
+		return nil, err
+	}
+
+	var data interface{}
+	err = json.Unmarshal(decodedToken, data)
+	if err != nil {
+		return nil, err
+	}
+
+	dataFromToken, err := jmespath.Search(jmesPath, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return dataFromToken.([]string), nil
 }
