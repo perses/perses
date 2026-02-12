@@ -17,7 +17,7 @@ import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isProjectMetadata, Resource } from '@perses-dev/core';
 import IconButton from '@mui/material/IconButton';
 import Close from 'mdi-material-ui/Close';
@@ -35,6 +35,11 @@ function shortcutCTRL(): string {
 }
 
 type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
+
+const dashboardSearchIndexedKeys = [
+  ['metadata', 'name'],
+  ['metadata', 'tags'],
+];
 
 interface ResourceListProps {
   query: string;
@@ -121,6 +126,8 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
+      indexedKeys={dashboardSearchIndexedKeys}
+      showMatchingTagChips={true}
       isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
     />
   );
@@ -172,6 +179,7 @@ export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
     dashboards: false,
     projects: false,
@@ -179,13 +187,25 @@ export function SearchBar(): ReactElement {
     datasources: false,
   });
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+  }, [open]);
+
   function handleIsResourceAvailable(type: ResourceType, available: boolean): void {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }
 
-  const handleOpen = (): void => setOpen(true);
-  const handleClose = (): void => setOpen(false);
+  const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
+  const handleOpen = useCallback((): void => setOpen(true), []);
+  const handleClose = useCallback((): void => setOpen(false), []);
   useHandleShortCut(handleOpen);
+
   return (
     <Paper sx={{ width: '100%', flexShrink: 1 }}>
       <Button size="small" fullWidth sx={{ display: 'flex', justifyContent: 'space-between' }} onClick={handleOpen}>
@@ -221,6 +241,7 @@ export function SearchBar(): ReactElement {
             size="medium"
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus={open}
+            inputRef={searchInputRef}
             variant="outlined"
             placeholder="What are you looking for?"
             fullWidth
@@ -245,7 +266,7 @@ export function SearchBar(): ReactElement {
               ),
             }}
           />
-          {!!query.length && !Object.values(hasResource).some((v) => v) && (
+          {query.length > 0 && !hasAnyResource && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
