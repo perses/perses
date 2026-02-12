@@ -53,6 +53,8 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
+		rolesJMESPath:        conf.Security.Authorization.ClaimsMappingConfig.RoleClaimsPath,
+		groupsJMESPath:       conf.Security.Authorization.ClaimsMappingConfig.GroupClaimsPath,
 		accessKey:            key,
 	}
 
@@ -81,6 +83,8 @@ type native struct {
 	guestPermissions     []*v1Role.Permission
 	tokenRolesMap        []*config.RoleAssignment
 	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
+	rolesJMESPath        string
+	groupsJMESPath       string
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -125,8 +129,14 @@ func (n *native) IsEnabled() bool {
 
 func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
-	roleClaims := utils.GetUserRoleClaims(ctx)
-	groupClaims := utils.GetUserGroupClaims(ctx)
+	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.rolesJMESPath)
+	if err != nil {
+		return nil
+	}
+	groupClaims, err := utils.GetClaimsFromAccessToken(ctx, n.groupsJMESPath)
+	if err != nil {
+		return nil
+	}
 
 	for _, mappedRole := range n.tokenRolesMap {
 		if mappedRole.CheckRoleClaim(roleClaims) || mappedRole.CheckGroupClaim(groupClaims) {
@@ -139,8 +149,14 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 
 func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
-	roleClaims := utils.GetUserRoleClaims(ctx)
-	groupClaims := utils.GetUserGroupClaims(ctx)
+	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.rolesJMESPath)
+	if err != nil {
+		return nil
+	}
+	groupClaims, err := utils.GetClaimsFromAccessToken(ctx, n.groupsJMESPath)
+	if err != nil {
+		return nil
+	}
 
 	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
 		if mappedGlobalRole.CheckRoleClaim(roleClaims) || mappedGlobalRole.CheckGroupClaim(groupClaims) {

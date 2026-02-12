@@ -447,6 +447,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	ctx.Set("access_token", resp.AccessToken)
 	return ctx.JSON(http.StatusOK, resp)
 }
 
