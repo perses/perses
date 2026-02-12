@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -36,6 +37,7 @@ type watcher struct {
 	errWriter     io.Writer
 	buildChan     chan struct{}
 	buildOption   *build.Option
+	changedFiles  map[string]bool // Track files changed during debounce period
 }
 
 // newWatcher creates a new file watcher that monitors DaC files and triggers rebuilds
@@ -57,6 +59,7 @@ func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, de
 		errWriter:     errWriter,
 		buildChan:     make(chan struct{}, 1),
 		buildOption:   buildOpt,
+		changedFiles:  make(map[string]bool),
 	}
 }
 
@@ -75,10 +78,9 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 
 	fmt.Fprintf(w.writer, "👀 Watching %s for changes...\n", w.sourceDir)
 
-	// Initial build using build command logic
-	if err := w.buildOption.Run(); err != nil {
-		fmt.Fprintf(w.errWriter, "❌ Initial build failed: %v\n", err)
-	}
+	// Initial build - build all dashboard files
+	fmt.Fprintf(w.writer, "🔨 Running initial build...\n")
+	w.buildAllDashboards()
 
 	var debounceTimer *time.Timer
 	var debouncePending bool
@@ -94,6 +96,8 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				continue
 			}
 
+			fmt.Fprintf(w.writer, "📝 File event: %s (%s)\n", event.Name, event.Op)
+
 			// Handle new directories
 			if event.Op&fsnotify.Create == fsnotify.Create {
 				info, err := os.Stat(event.Name)
@@ -105,6 +109,8 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			}
 
 			if event.Op&(fsnotify.Write|fsnotify.Create) != 0 {
+				// Track the changed file
+				w.changedFiles[event.Name] = true
 				if debounceTimer == nil {
 					debounceTimer = time.NewTimer(w.debounceDelay)
 				} else if !debouncePending {
@@ -120,22 +126,170 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			return nil
 		}():
 			debouncePending = false
-			fmt.Fprintf(w.writer, "🔄 Changes detected, rebuilding...\n")
-			if err := w.buildOption.Run(); err != nil {
-				fmt.Fprintf(w.errWriter, "❌ Build failed: %v\n", err)
-			} else {
-				fmt.Fprintf(w.writer, "✅ Build successful!\n")
-				// Notify build completion (non-blocking)
-				select {
-				case w.buildChan <- struct{}{}:
-				default:
-				}
-			}
+			w.rebuildAffectedFiles()
 
 		case err := <-fsWatcher.Errors:
 			fmt.Fprintf(w.errWriter, "⚠️ Watcher error: %v\n", err)
 		}
 	}
+}
+
+// rebuildAffectedFiles rebuilds only the files that changed, with fallback to full rebuild
+func (w *watcher) rebuildAffectedFiles() {
+	if len(w.changedFiles) == 0 {
+		return
+	}
+
+	// Get list of changed files
+	filesToBuild := make([]string, 0, len(w.changedFiles))
+	for file := range w.changedFiles {
+		filesToBuild = append(filesToBuild, file)
+	}
+	// Clear the changed files map
+	w.changedFiles = make(map[string]bool)
+
+	fmt.Fprintf(w.writer, "🔄 Changes detected in %d file(s), rebuilding...\n", len(filesToBuild))
+
+	// Check if any changed files are library/shared files (not buildable as main packages)
+	hasLibraryFiles := false
+	for _, file := range filesToBuild {
+		isLib := w.isLibraryFile(file)
+		fmt.Fprintf(w.writer, "   - %s (library: %v)\n", file, isLib)
+		if isLib {
+			hasLibraryFiles = true
+		}
+	}
+
+	// If library files changed, do full rebuild
+	// TODO: Phase 2 - Parse imports and rebuild only affected dashboards
+	if hasLibraryFiles {
+		fmt.Fprintf(w.writer, "Library file(s) changed, rebuilding all dashboards...\n")
+		w.buildAllDashboards()
+		return
+	} else if len(filesToBuild) > 10 {
+		// Too many files changed, do full rebuild
+		fmt.Fprintf(w.writer, "Multiple files changed, rebuilding all dashboards...\n")
+		w.buildAllDashboards()
+		return
+	} else {
+		// Build each changed file individually
+		hasErrors := false
+		for _, file := range filesToBuild {
+			if err := w.buildFile(file); err != nil {
+				fmt.Fprintf(w.errWriter, "❌ Build failed for %s: %v\n", file, err)
+				hasErrors = true
+			}
+		}
+		if hasErrors {
+			return
+		}
+	}
+
+	fmt.Fprintf(w.writer, "✅ Build successful!\n")
+	// Notify build completion (non-blocking)
+	select {
+	case w.buildChan <- struct{}{}:
+	default:
+	}
+}
+
+// buildFile builds a single file using the build option
+func (w *watcher) buildFile(file string) error {
+	// Create a temporary build option for this specific file
+	fileOpt := &build.Option{
+		FileOption:   opt.FileOption{File: file},
+		OutputOption: w.buildOption.OutputOption,
+		Mode:         "file",
+	}
+	fileOpt.SetWriter(w.writer)
+	fileOpt.SetErrWriter(w.errWriter)
+	return fileOpt.Run()
+}
+
+// findDashboardFiles finds all dashboard files (main packages) in the source directory
+func (w *watcher) findDashboardFiles() []string {
+	var dashboards []string
+	filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if info.IsDir() {
+			// Skip ignored directories
+			name := info.Name()
+			if name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		ext := filepath.Ext(path)
+		if ext == ".go" || ext == ".cue" {
+			// Check if it's NOT a library file
+			if !w.isLibraryFile(path) {
+				dashboards = append(dashboards, path)
+			}
+		}
+		return nil
+	})
+	return dashboards
+}
+
+// buildAllDashboards builds all dashboard files in the source directory
+func (w *watcher) buildAllDashboards() {
+	dashboards := w.findDashboardFiles()
+	if len(dashboards) == 0 {
+		fmt.Fprintf(w.writer, "⚠️  No dashboard files found\n")
+		return
+	}
+
+	fmt.Fprintf(w.writer, "Building %d dashboard(s)...\n", len(dashboards))
+	hasErrors := false
+	successCount := 0
+
+	for _, file := range dashboards {
+		if err := w.buildFile(file); err != nil {
+			fmt.Fprintf(w.errWriter, "❌ Build failed for %s: %v\n", file, err)
+			hasErrors = true
+		} else {
+			successCount++
+		}
+	}
+
+	if hasErrors {
+		fmt.Fprintf(w.writer, "⚠️  Build completed with errors (%d/%d succeeded)\n", successCount, len(dashboards))
+	} else {
+		fmt.Fprintf(w.writer, "✅ Build successful! (%d dashboard(s))\n", len(dashboards))
+		// Notify build completion (non-blocking)
+		select {
+		case w.buildChan <- struct{}{}:
+		default:
+		}
+	}
+}
+
+// isLibraryFile checks if a file is a library/shared file that shouldn't be built directly
+func (w *watcher) isLibraryFile(file string) bool {
+	// Library files are typically in directories like: library/, lib/, pkg/, shared/, etc.
+	// Dashboard files are typically in: dashboards/, or are direct main.go files
+	relPath, err := filepath.Rel(w.sourceDir, file)
+	if err != nil {
+		return false
+	}
+
+	// Check if file is NOT in a dashboards directory
+	// Common patterns: dashboards/, dashboard/, or files directly in root with main package
+	dir := filepath.Dir(relPath)
+	if dir == "." {
+		return false // Files in root are likely main dashboards
+	}
+
+	// Check if path contains "dashboard" - likely a dashboard file
+	if strings.Contains(strings.ToLower(relPath), "dashboard") {
+		return false
+	}
+
+	// Otherwise, it's likely a library file
+	return true
 }
 
 // shouldRebuild determines if a file change event should trigger a rebuild (.go or .cue files)
