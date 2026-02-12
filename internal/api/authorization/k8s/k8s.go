@@ -261,6 +261,14 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 	return authorized == authorizer.DecisionAllow
 }
 
+// For k8s auth, the permission to create a project is driven by having write access
+// to the corresponding namespace, since Perses projects map 1:1 to k8s namespaces.
+// We check if the user can create a dashboard in the target namespace as a proxy for
+// editor/admin access.
+func (k *k8sImpl) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
+	return k.HasPermission(ctx, v1Role.CreateAction, projectName, v1Role.DashboardScope)
+}
+
 // GetPermissions implements [Authorization]
 func (k *k8sImpl) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
 	// If the context is nil, it means the function is called internally without a request context.

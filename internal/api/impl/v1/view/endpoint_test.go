@@ -76,6 +76,10 @@ func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role
 	return t.allow
 }
 
+func (t *testRBAC) HasCreateProjectPermission(_ echo.Context, _ string) bool {
+	return t.allow
+}
+
 func (t *testRBAC) IsEnabled() bool {
 	return true
 }
