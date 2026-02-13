@@ -28,6 +28,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/perses/common/set"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -244,6 +245,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
 				Name: grafanaDashboard.UID,
+				Tags: set.New(grafanaDashboard.Tags...),
 			},
 		},
 		Spec: v1.DashboardSpec{

@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/perses/common/set"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -88,6 +89,19 @@ func TestMig_Migrate(t *testing.T) {
 			assert.JSONEq(t, string(expected), string(output))
 		})
 	}
+}
+
+func TestMig_MigrateTags(t *testing.T) {
+	pl := LoadTestPlugins()
+	grafanaDashboard := &migrate.SimplifiedDashboard{
+		UID:   "dashboard-with-tags",
+		Title: "Dashboard with tags",
+		Tags:  []string{"ops", "prod", "ops"},
+	}
+
+	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+	assert.NoError(t, err)
+	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
 }
 
 func TestLinkConversionLogic(t *testing.T) {
