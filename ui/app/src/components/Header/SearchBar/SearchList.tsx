@@ -32,7 +32,7 @@ const kvSearchConfig: KVSearchConfiguration = {
 };
 
 const SIZE_LIST = 10;
-const MAX_VISIBLE_DASHBOARD_TAGS = 3;
+const MAX_VISIBLE_RESOURCE_TAGS = 3;
 const matchedTagChipSx = {
   backgroundColor: (theme: Theme): string =>
     theme.palette.mode === 'dark' ? 'rgba(255, 193, 7, 0.18)' : 'rgba(255, 243, 205, 0.9)',
@@ -93,7 +93,7 @@ function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched'], en
   return Array.from(new Set((matched ?? []).filter(isTagMatch).map((match) => match.value)));
 }
 
-function getDashboardTagDisplayValues(
+function getTagDisplayValues(
   tags: string[] | undefined,
   matchingTagValues: string[]
 ): {
@@ -110,8 +110,8 @@ function getDashboardTagDisplayValues(
 
   return {
     normalizedMatchingTags,
-    visibleTags: orderedTags.slice(0, MAX_VISIBLE_DASHBOARD_TAGS),
-    hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_DASHBOARD_TAGS),
+    visibleTags: orderedTags.slice(0, MAX_VISIBLE_RESOURCE_TAGS),
+    hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_RESOURCE_TAGS),
     hasAnyTags: orderedTags.length > 0,
   };
 }
@@ -124,20 +124,10 @@ export interface SearchListProps {
   chip?: boolean;
   buildRouting?: (resource: Resource) => string;
   isResource?: (isAvailable: boolean) => void;
-  showMatchingTagChips?: boolean;
 }
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const {
-    list,
-    query,
-    onClick,
-    icon: Icon,
-    chip,
-    buildRouting: customBuildRouting,
-    isResource,
-    showMatchingTagChips,
-  } = props;
+  const { list, query, onClick, icon: Icon, chip, buildRouting: customBuildRouting, isResource } = props;
 
   const [currentSizeList, setCurrentSizeList] = useState<number>(SIZE_LIST);
   const kvSearch = useRef(new KVSearch<Resource>(kvSearchConfig)).current;
@@ -186,16 +176,16 @@ export function SearchList(props: SearchListProps): ReactElement | null {
       {filteredList.slice(0, currentSizeList).map((search) => {
         const isHighlighted = Boolean(search.original.highlight);
         const isDashboard = search.original.kind === 'Dashboard';
-        const matchingTagValues = getMatchingTagValues(search.matched, Boolean(showMatchingTagChips && query));
-        const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getDashboardTagDisplayValues(
-          isDashboard ? search.original.metadata.tags : undefined,
+        const matchingTagValues = getMatchingTagValues(search.matched, Boolean(query));
+        const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
+          search.original.metadata.tags,
           matchingTagValues
         );
 
         const projectName = isProjectMetadata(search.original.metadata) ? search.original.metadata.project : undefined;
         const showInlineProjectName = Boolean(projectName && isDashboard);
         const showProjectChip = Boolean(projectName && chip && !isDashboard);
-        const showDashboardTagChips = Boolean(showMatchingTagChips && isDashboard && hasAnyTags);
+        const showResourceTagChips = hasAnyTags;
 
         return (
           <Button
@@ -244,7 +234,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
                 )}
               </Box>
             </Box>
-            {(showDashboardTagChips || showProjectChip) && (
+            {(showResourceTagChips || showProjectChip) && (
               <Box
                 sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, flexWrap: 'wrap' }}
               >

@@ -121,7 +121,6 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
-      showMatchingTagChips={true}
       isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
     />
   );
