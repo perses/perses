@@ -31,6 +31,12 @@ import (
 	"github.com/perses/perses/internal/cli/opt"
 )
 
+// fileExists checks if a file or directory exists
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 type watcher struct {
 	async.SimpleTask
 	sourceDir     string
@@ -42,6 +48,7 @@ type watcher struct {
 	buildOption   *build.Option
 	changedFiles  map[string]bool     // Track files changed during debounce period
 	dependencyMap map[string][]string // Maps library files to dashboard files that import them
+	allDashboards map[string]bool     // Track all known dashboard files for deletion detection
 }
 
 // newWatcher creates a new file watcher that monitors DaC files and triggers rebuilds
@@ -101,28 +108,91 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			return ctx.Err()
 
 		case event := <-fsWatcher.Events:
+			// Handle deletions (REMOVE or RENAME where file no longer exists)
+			if event.Op&fsnotify.Remove != 0 || (event.Op&fsnotify.Rename != 0 && !fileExists(event.Name)) {
+				// Could be a file or directory deletion - rebuild dependency map
+				fmt.Fprintf(w.writer, "📝 File/directory removed: %s\n", event.Name)
+				
+				// Get list of all dashboards we knew about BEFORE the deletion
+				// Must use cached state, not filesystem scan (folder already deleted!)
+				dashboardsBefore := make(map[string]bool)
+				for dash := range w.allDashboards {
+					dashboardsBefore[dash] = true
+				}
+				
+				fmt.Fprintf(w.writer, "   Rebuilding dependency map...\n")
+				w.buildDependencyMap()
+				
+				// Find removed dashboards by comparing before/after
+				for dashboard := range dashboardsBefore {
+					if !w.allDashboards[dashboard] {
+						relPath, _ := filepath.Rel(w.sourceDir, dashboard)
+						fmt.Fprintf(w.writer, "   ❌ Dashboard removed: %s\n", relPath)
+					}
+				}
+				
+				continue
+			}
+
+			// Handle new directories BEFORE checking file extensions
+			// (directories don't have .go/.cue extensions but still need to be tracked)
+			if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 {
+				info, err := os.Stat(event.Name)
+				if err == nil && info.IsDir() {
+					if err := w.addWatchRecursive(fsWatcher, event.Name); err != nil {
+						fmt.Fprintf(w.errWriter, "Failed to watch new directory %s: %v\n", event.Name, err)
+					} else {
+						// Directory created or renamed - scan for existing files and rebuild dependency map
+						fmt.Fprintf(w.writer, "   New directory detected: %s\n", event.Name)
+
+						// Scan for dashboard files in the new directory
+						// (copying a folder means files are already there, not created individually)
+						filepath.Walk(event.Name, func(path string, info os.FileInfo, err error) error {
+							if err != nil || info.IsDir() {
+								return nil
+							}
+							ext := filepath.Ext(path)
+							if (ext == ".go" || ext == ".cue") && !w.isLibraryFile(path) {
+								w.changedFiles[path] = true
+								fmt.Fprintf(w.writer, "   Found new dashboard: %s\n", path)
+							}
+							return nil
+						})
+
+						// Rebuild dependency map to include new files
+						w.buildDependencyMap()
+
+						// Trigger build if we found dashboard files
+						if len(w.changedFiles) > 0 {
+							if debounceTimer == nil {
+								debounceTimer = time.NewTimer(w.debounceDelay)
+							} else if !debouncePending {
+								debounceTimer.Reset(w.debounceDelay)
+							}
+							debouncePending = true
+						}
+					}
+					continue
+				}
+			}
+
+			// Now check if it's a file we care about (.go or .cue)
 			if !w.shouldRebuild(event) {
 				continue
 			}
 
 			fmt.Fprintf(w.writer, "📝 File event: %s (%s)\n", event.Name, event.Op)
 
-			// Handle new directories
-			if event.Op&fsnotify.Create == fsnotify.Create {
-				info, err := os.Stat(event.Name)
-				if err == nil && info.IsDir() {
-					if err := w.addWatchRecursive(fsWatcher, event.Name); err != nil {
-						fmt.Fprintf(w.errWriter, "Failed to watch new directory %s: %v\n", event.Name, err)
-					}
-				}
-			}
-
-			if event.Op&(fsnotify.Write|fsnotify.Create) != 0 {
+			// Handle file operations: CREATE, WRITE, RENAME (move)
+			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Rename) != 0 {
 				// Track the changed file
 				w.changedFiles[event.Name] = true
 
-				// If a dashboard file changed, rebuild dependency map to catch new imports
-				if !w.isLibraryFile(event.Name) {
+				// If it's a CREATE or RENAME, rebuild dependency map to discover new files
+				if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 {
+					w.buildDependencyMap()
+				} else if !w.isLibraryFile(event.Name) {
+					// For WRITE on existing dashboards, rebuild dependency map to catch new imports
 					w.buildDependencyMap()
 				}
 
@@ -335,6 +405,12 @@ func (w *watcher) buildDependencyMap() {
 	w.dependencyMap = make(map[string][]string)
 	dashboards := w.findDashboardFiles()
 
+	// Track all dashboards for deletion detection
+	w.allDashboards = make(map[string]bool)
+	for _, dash := range dashboards {
+		w.allDashboards[dash] = true
+	}
+
 	fmt.Fprintf(w.writer, "🔍 Building dependency graph...\n")
 
 	for _, dashboard := range dashboards {
@@ -483,7 +559,10 @@ func (w *watcher) findAffectedDashboards(changedFiles []string) []string {
 		// Look up dashboards that depend on this library file
 		if dashboards, exists := w.dependencyMap[changedFile]; exists {
 			for _, dashboard := range dashboards {
-				dashboardSet[dashboard] = true
+				// Check if the dashboard file still exists
+				if _, err := os.Stat(dashboard); err == nil {
+					dashboardSet[dashboard] = true
+				}
 			}
 		}
 	}
