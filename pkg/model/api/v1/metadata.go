@@ -48,7 +48,7 @@ type Metadata struct {
 	Version   uint64    `json:"version" yaml:"version"`
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:MaxItems=20
-	Tags []string `json:"tags,omitempty" yaml:"tags,omitempty"`
+	Tags set.Set[string] `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func (m *Metadata) CreateNow() {
@@ -110,7 +110,7 @@ func (m *Metadata) validate() error {
 	return validateTags(m.Tags)
 }
 
-func validateTags(tags []string) error {
+func validateTags(tags set.Set[string]) error {
 	const maxTags = 20
 	const maxTagLength = 50
 
@@ -118,8 +118,7 @@ func validateTags(tags []string) error {
 		return fmt.Errorf("cannot contain more than %d tags", maxTags)
 	}
 
-	seenTags := set.New[string]()
-	for _, tag := range tags {
+	for tag := range tags {
 		if len(strings.TrimSpace(tag)) == 0 {
 			return fmt.Errorf("tag cannot be empty")
 		}
@@ -132,12 +131,6 @@ func validateTags(tags []string) error {
 		if !tagsAllowedCharactersRegexp.MatchString(tag) {
 			return fmt.Errorf("tag %q contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed", tag)
 		}
-
-		normalizedTag := strings.ToLower(tag)
-		if _, ok := seenTags[normalizedTag]; ok {
-			return fmt.Errorf("tag %q is duplicated", tag)
-		}
-		seenTags[normalizedTag] = struct{}{}
 	}
 
 	return nil
@@ -158,9 +151,9 @@ type PublicMetadata struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=date-time
 	// +kubebuilder:validation:Optional
-	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
-	Version   uint64    `json:"version" yaml:"version"`
-	Tags      []string  `json:"tags,omitempty" yaml:"tags,omitempty"`
+	UpdatedAt time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version   uint64          `json:"version" yaml:"version"`
+	Tags      set.Set[string] `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func NewPublicMetadata(name string) PublicMetadata {

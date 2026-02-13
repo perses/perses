@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/common/set"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -137,7 +138,35 @@ tags:
 				CreatedAt: dummyDate,
 				UpdatedAt: dummyDate,
 				Version:   1,
-				Tags:      []string{"tag-a", "tag-b"},
+				Tags:      set.New("tag-a", "tag-b"),
+			},
+		},
+		{
+			title: "duplicate tags are deduplicated",
+			jason: `
+{
+  "name": "foo",
+  "createdAt": "1970-01-01T00:00:00.000000000Z",
+  "updatedAt": "1970-01-01T00:00:00.000000000Z",
+  "version": 1,
+  "tags": ["dup", "dup"]
+}
+`,
+			yamele: `
+name: "foo"
+createdAt: "1970-01-01T00:00:00.000000000Z"
+updatedAt: "1970-01-01T00:00:00.000000000Z"
+version: 1
+tags:
+  - "dup"
+  - "dup"
+`,
+			result: Metadata{
+				Name:      "foo",
+				CreatedAt: dummyDate,
+				UpdatedAt: dummyDate,
+				Version:   1,
+				Tags:      set.New("dup"),
 			},
 		},
 	}
@@ -239,24 +268,6 @@ tags:
   - "21"
 `,
 			err: fmt.Errorf("cannot contain more than 20 tags"),
-		},
-		{
-			title: "tag cannot be duplicated",
-			jason: `
-{
-  "name": "foo",
-  "version": 1,
-  "tags": ["dup", "dup"]
-}
-`,
-			yamele: `
-name: "foo"
-version: 1
-tags:
-  - "dup"
-  - "dup"
-`,
-			err: fmt.Errorf("tag \"dup\" is duplicated"),
 		},
 		{
 			title: "tag cannot have leading or trailing spaces",
