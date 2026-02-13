@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/common/set"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -119,7 +120,8 @@ func TestUnmarshalMetadata(t *testing.T) {
   "name": "foo",
   "createdAt": "1970-01-01T00:00:00.000000000Z",
   "updatedAt": "1970-01-01T00:00:00.000000000Z",
-  "version": 1
+  "version": 1,
+  "tags": ["tag-a", "tag-b"]
 }
 `,
 			yamele: `
@@ -127,12 +129,44 @@ name: "foo"
 createdAt: "1970-01-01T00:00:00.000000000Z"
 updatedAt: "1970-01-01T00:00:00.000000000Z"
 version: 1
+tags:
+  - "tag-a"
+  - "tag-b"
 `,
 			result: Metadata{
 				Name:      "foo",
 				CreatedAt: dummyDate,
 				UpdatedAt: dummyDate,
 				Version:   1,
+				Tags:      set.New("tag-a", "tag-b"),
+			},
+		},
+		{
+			title: "duplicate tags are deduplicated",
+			jason: `
+{
+  "name": "foo",
+  "createdAt": "1970-01-01T00:00:00.000000000Z",
+  "updatedAt": "1970-01-01T00:00:00.000000000Z",
+  "version": 1,
+  "tags": ["dup", "dup"]
+}
+`,
+			yamele: `
+name: "foo"
+createdAt: "1970-01-01T00:00:00.000000000Z"
+updatedAt: "1970-01-01T00:00:00.000000000Z"
+version: 1
+tags:
+  - "dup"
+  - "dup"
+`,
+			result: Metadata{
+				Name:      "foo",
+				CreatedAt: dummyDate,
+				UpdatedAt: dummyDate,
+				Version:   1,
+				Tags:      set.New("dup"),
 			},
 		},
 	}
@@ -180,6 +214,111 @@ name: "f o o"
 version: 1
 `,
 			err: fmt.Errorf("\"f o o\" is not a correct name. It should match the regexp: ^[a-zA-Z0-9_.-]+$"),
+		},
+		{
+			title: "tag cannot exceed 50 chars",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+`,
+			err: fmt.Errorf("tag \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" cannot contain more than 50 characters"),
+		},
+		{
+			title: "cannot contain more than 20 tags",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+  - "7"
+  - "8"
+  - "9"
+  - "10"
+  - "11"
+  - "12"
+  - "13"
+  - "14"
+  - "15"
+  - "16"
+  - "17"
+  - "18"
+  - "19"
+  - "20"
+  - "21"
+`,
+			err: fmt.Errorf("cannot contain more than 20 tags"),
+		},
+		{
+			title: "tag cannot have leading or trailing spaces",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["  tag  "]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "  tag  "
+`,
+			err: fmt.Errorf("tag \"  tag  \" cannot start or end with whitespace"),
+		},
+		{
+			title: "tag cannot contain invalid characters",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["tag!"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "tag!"
+`,
+			err: fmt.Errorf("tag \"tag!\" contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed"),
+		},
+		{
+			title: "tag cannot contain uppercase letters",
+			jason: `
+{
+  "name": "foo",
+  "version": 1,
+  "tags": ["Tag"]
+}
+`,
+			yamele: `
+name: "foo"
+version: 1
+tags:
+  - "Tag"
+`,
+			err: fmt.Errorf("tag \"Tag\" contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed"),
 		},
 	}
 	for _, test := range testSuite {

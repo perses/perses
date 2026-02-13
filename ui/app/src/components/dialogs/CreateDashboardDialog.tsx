@@ -12,7 +12,17 @@
 // limitations under the License.
 
 import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
-import { Button, CircularProgress, FormControlLabel, MenuItem, Stack, Switch, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Button,
+  Chip,
+  CircularProgress,
+  FormControlLabel,
+  MenuItem,
+  Stack,
+  Switch,
+  TextField,
+} from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -102,14 +112,14 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
   const dashboardForm = useForm<CreateDashboardValidationType>({
     resolver: dashboardSchemaValidation ? zodResolver(dashboardSchemaValidation) : undefined,
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '' },
+    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', tags: [] },
   });
 
   const handleProcessDashboardForm = useCallback((): SubmitHandler<CreateDashboardValidationType> => {
     return (data) => {
       onClose();
       if (onSuccess) {
-        onSuccess({ project: data.projectName, dashboard: data.dashboardName } as DashboardSelector);
+        onSuccess({ project: data.projectName, dashboard: data.dashboardName, tags: data.tags } as DashboardSelector);
       }
     };
   }, [onClose, onSuccess]);
@@ -181,6 +191,44 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
                   fullWidth
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              control={dashboardForm.control}
+              name="tags"
+              render={({ field, fieldState }) => (
+                <Autocomplete
+                  {...field}
+                  multiple
+                  freeSolo
+                  options={[]}
+                  value={field.value ?? []}
+                  onChange={(_, newValue) =>
+                    field.onChange(
+                      Array.from(
+                        new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
+                      )
+                    )
+                  }
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip {...getTagProps({ index })} key={option} label={option} size="small" />
+                    ))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Tags"
+                      placeholder="Type a tag and press Enter"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      inputProps={{
+                        ...params.inputProps,
+                        maxLength: 50,
+                      }}
+                    />
+                  )}
                 />
               )}
             />

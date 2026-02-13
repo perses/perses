@@ -38,4 +38,5 @@ export interface DashboardSpec {
 export interface DashboardSelector {
   project: string;
   dashboard: string;
+  tags?: string[];
 }

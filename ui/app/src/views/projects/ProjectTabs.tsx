@@ -96,7 +96,9 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector): void => {
-    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, {
+      state: { name: dashboardSelector.dashboard, tags: dashboardSelector.tags },
+    });
   };
 
   const { data } = useRoleList(projectName);

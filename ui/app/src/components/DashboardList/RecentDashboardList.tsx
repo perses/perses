@@ -19,7 +19,8 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { useSnackbar } from '@perses-dev/components';
-import { DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
+import { DeleteResourceDialog, EditDashboardDialog } from '../dialogs';
+import { TAGS_COL_DEF } from '../list';
 import { DatedDashboards, useDeleteDashboardMutation } from '../../model/dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
@@ -56,6 +57,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
       createdAt: datedDashboard.dashboard.metadata.createdAt ?? '',
       updatedAt: datedDashboard.dashboard.metadata.updatedAt ?? '',
       viewedAt: datedDashboard.date,
+      tags: datedDashboard.dashboard.metadata.tags ?? [],
     }));
   }, [dashboardList]);
 
@@ -101,6 +103,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
       { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
+      TAGS_COL_DEF,
       {
         field: 'version',
         headerName: 'Version',
@@ -159,7 +162,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope="Dashboard"
             project={params.row.project}
@@ -205,7 +208,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties): React
       />
       {targetedDashboard && (
         <Box>
-          <RenameDashboardDialog
+          <EditDashboardDialog
             open={isRenameDashboardDialogStateOpened}
             onClose={() => setRenameDashboardDialogStateOpened(false)}
             dashboard={targetedDashboard}

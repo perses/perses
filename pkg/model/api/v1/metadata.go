@@ -15,9 +15,13 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
+	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
+	"github.com/perses/common/set"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
@@ -26,6 +30,8 @@ func NewMetadata(name string) *Metadata {
 		Name: name,
 	}
 }
+
+var tagsAllowedCharactersRegexp = regexp.MustCompile(`^[a-z0-9 _-]+$`)
 
 type Metadata struct {
 	Name string `json:"name" yaml:"name"`
@@ -40,6 +46,9 @@ type Metadata struct {
 	// +kubebuilder:validation:Optional
 	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
 	Version   uint64    `json:"version" yaml:"version"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=20
+	Tags set.Set[string] `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func (m *Metadata) CreateNow() {
@@ -94,7 +103,37 @@ func (m *Metadata) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (m *Metadata) validate() error {
-	return common.ValidateID(m.Name)
+	if err := common.ValidateID(m.Name); err != nil {
+		return err
+	}
+
+	return m.validateTags()
+}
+
+func (m *Metadata) validateTags() error {
+	const maxTags = 20
+	const maxTagLength = 50
+
+	if len(m.Tags) > maxTags {
+		return fmt.Errorf("cannot contain more than %d tags", maxTags)
+	}
+
+	for tag := range m.Tags {
+		if len(strings.TrimSpace(tag)) == 0 {
+			return fmt.Errorf("tag cannot be empty")
+		}
+		if strings.TrimSpace(tag) != tag {
+			return fmt.Errorf("tag %q cannot start or end with whitespace", tag)
+		}
+		if utf8.RuneCountInString(tag) > maxTagLength {
+			return fmt.Errorf("tag %q cannot contain more than %d characters", tag, maxTagLength)
+		}
+		if !tagsAllowedCharactersRegexp.MatchString(tag) {
+			return fmt.Errorf("tag %q contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed", tag)
+		}
+	}
+
+	return nil
 }
 
 // PublicMetadata is a copy of classic metadata but that doesn't make any validation.
@@ -112,8 +151,9 @@ type PublicMetadata struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=date-time
 	// +kubebuilder:validation:Optional
-	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
-	Version   uint64    `json:"version" yaml:"version"`
+	UpdatedAt time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version   uint64          `json:"version" yaml:"version"`
+	Tags      set.Set[string] `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 func NewPublicMetadata(name string) PublicMetadata {

@@ -14,6 +14,6 @@
 export * from './CreateDashboardDialog';
 export * from './CreateProjectDialog';
 export * from './DeleteResourceDialog';
-export * from './RenameDashboardDialog';
+export * from './EditDashboardDialog';
 export * from './RenameResourceDialog';
 export * from './UpdateEphemeralDashboardDialog';

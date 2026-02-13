@@ -17,7 +17,7 @@ import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { isProjectMetadata, Resource } from '@perses-dev/core';
 import IconButton from '@mui/material/IconButton';
 import Close from 'mdi-material-ui/Close';
@@ -183,12 +183,26 @@ export function SearchBar(): ReactElement {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }
 
-  const handleOpen = (): void => setOpen(true);
-  const handleClose = (): void => setOpen(false);
+  const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
+  const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
+    inputElement?.focus();
+  }, []);
+  const handleOpenMouseDown = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
+  }, []);
+  const handleOpen = useCallback((): void => setOpen(true), []);
+  const handleClose = useCallback((): void => setOpen(false), []);
   useHandleShortCut(handleOpen);
+
   return (
     <Paper sx={{ width: '100%', flexShrink: 1 }}>
-      <Button size="small" fullWidth sx={{ display: 'flex', justifyContent: 'space-between' }} onClick={handleOpen}>
+      <Button
+        size="small"
+        fullWidth
+        sx={{ display: 'flex', justifyContent: 'space-between' }}
+        onMouseDown={handleOpenMouseDown}
+        onClick={handleOpen}
+      >
         <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
           <Typography>Search...</Typography>
@@ -220,7 +234,8 @@ export function SearchBar(): ReactElement {
           <TextField
             size="medium"
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
-            autoFocus={open}
+            autoFocus={true}
+            inputRef={handleSearchInputRef}
             variant="outlined"
             placeholder="What are you looking for?"
             fullWidth
@@ -245,7 +260,7 @@ export function SearchBar(): ReactElement {
               ),
             }}
           />
-          {!!query.length && !Object.values(hasResource).some((v) => v) && (
+          {query.length > 0 && !hasAnyResource && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
