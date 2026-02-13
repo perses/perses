@@ -1,12 +1,12 @@
 // Copyright The Perses Authors
-// Licensed under the Apache License, Version 2.0 (the \"License\");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an \"AS IS\" BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -20,6 +20,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/perses/common/set"
@@ -29,18 +30,20 @@ import (
 const (
 	licenseCopyright = "The Perses Authors"
 	licenseHeader    = `// Copyright The Perses Authors
-// Licensed under the Apache License, Version 2.0 (the \"License\");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an \"AS IS\" BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.`
 )
+
+var licenseCopyrightWithDate = regexp.MustCompile(`Copyright \d{4} The Perses Authors`)
 
 // DefaultLicense returns a License struct with default excluded directories and file patterns that matches most common use cases in the Perses project.
 func DefaultLicense() License {
@@ -110,8 +113,12 @@ func (l *license) openFile(path string, do func(f *os.File) error) error {
 	return do(f)
 }
 
-func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
+// collectFiles walks through the file tree starting from rootPath and collects files that match the included patterns and do not match the excluded patterns, files, or directories.
+// It returns a list of files that do not contain the license header and a list of files that contains the license header with a date (e.g. "Copyright 2024 The Perses Authors").
+// The second list is used to collect the files that are not compliant with the expected license header format.
+func (l *license) collectFiles(rootPath string) ([]string, []string) {
 	var filesNotContainingLicense []string
+	var filesContainingLicenseWithDate []string
 	err := filepath.WalkDir(rootPath, func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -150,8 +157,13 @@ func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
 			// The license header must be at the top of the file.
 			openErr := l.openFile(path, func(f *os.File) error {
 				scanner := bufio.NewScanner(f)
-				if scanner.Scan() && !strings.Contains(scanner.Text(), licenseCopyright) {
-					filesNotContainingLicense = append(filesNotContainingLicense, path)
+				if scanner.Scan() {
+					line := scanner.Text()
+					if licenseCopyrightWithDate.MatchString(line) {
+						filesContainingLicenseWithDate = append(filesContainingLicenseWithDate, path)
+					} else if !strings.Contains(line, licenseCopyright) {
+						filesNotContainingLicense = append(filesNotContainingLicense, path)
+					}
 				}
 				return nil
 			})
@@ -164,25 +176,40 @@ func (l *license) collectFilesNotContainingLicense(rootPath string) []string {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	return filesNotContainingLicense
+	return filesNotContainingLicense, filesContainingLicenseWithDate
 }
 
 func (l *license) check() {
-	filesNotContainingLicense := l.collectFilesNotContainingLicense(".")
-	if len(filesNotContainingLicense) == 0 {
-		fmt.Println("All files contain the license header.")
+	filesNotContainingLicense, filesContainingLicenseWithDate := l.collectFiles(".")
+	if len(filesNotContainingLicense) == 0 && len(filesContainingLicenseWithDate) == 0 {
+		fmt.Println("All files contain the license header and are compliant with the expected format.")
 		return
 	}
-	fmt.Println("Files not containing license header:")
-	for _, file := range filesNotContainingLicense {
-		fmt.Println(file)
+	if len(filesNotContainingLicense) > 0 {
+		fmt.Println("Files not containing license header:")
+		for _, file := range filesNotContainingLicense {
+			fmt.Println(file)
+		}
 	}
-	logrus.Fatal("License header missing in some files")
+
+	if len(filesContainingLicenseWithDate) > 0 {
+		fmt.Println("Files containing license header with date:")
+		for _, file := range filesContainingLicenseWithDate {
+			fmt.Println(file)
+		}
+	}
+
+	logrus.Fatal("License header missing in some files or some files contain a date in the license header, which is not compliant with the expected format.")
 }
 
 func (l *license) fix() {
-	filesNotContainingLicense := l.collectFilesNotContainingLicense(".")
-	for _, file := range filesNotContainingLicense {
+	filesNotContainingLicense, filesContainingLicenseWithDate := l.collectFiles(".")
+	l.fixFiles(filesNotContainingLicense, licenseHeader+"\n\n", 0)
+	l.fixFiles(filesContainingLicenseWithDate, "// Copyright The Perses Authors\n", 1)
+}
+
+func (l *license) fixFiles(files []string, header string, numberOfLinesToSkip int) {
+	for _, file := range files {
 		err := l.openFile(file, func(f *os.File) error {
 			dir := filepath.Dir(file)
 			tmpFile, err := os.CreateTemp(dir, "license_fix_*.tmp")
@@ -191,12 +218,17 @@ func (l *license) fix() {
 			}
 			defer tmpFile.Close() // nolint:errcheck
 			// Write the license header to the temp file
-			if _, writeErr := tmpFile.WriteString(licenseHeader + "\n\n"); writeErr != nil {
+			if _, writeErr := tmpFile.WriteString(header); writeErr != nil {
 				logrus.Fatalf("Failed to write license header to temp file for %q: %s", file, writeErr)
 			}
 			// Copy the original file content to the temp file
 			scanner := bufio.NewScanner(f)
+			// Skip the specified number of lines in the original file
+			for i := 0; i < numberOfLinesToSkip && scanner.Scan(); i++ {
+				// Do nothing, just skip the line
+			}
 			for scanner.Scan() {
+				// Write the remaining lines to the temp file
 				if _, writeErr := tmpFile.WriteString(scanner.Text() + "\n"); writeErr != nil {
 					logrus.Fatalf("Failed to write content to temp file for %q: %s", file, writeErr)
 				}

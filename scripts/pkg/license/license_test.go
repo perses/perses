@@ -42,6 +42,7 @@ func TestCollectFilesNotContainingLicense(t *testing.T) {
 		filepath.Join("dir1", "nested_without.go"): "// something else\npackage main\n",
 		filepath.Join("excludeDir", "skip.go"):     "// nothing\npackage main\n",
 		"excluded_pattern_test.go":                 "// no license\npackage main\n",
+		"file_with_license_and_date.go":            "// Copyright 2024 The Perses Authors\npackage main\n",
 	}
 
 	for name, content := range files {
@@ -59,9 +60,10 @@ func TestCollectFilesNotContainingLicense(t *testing.T) {
 		AddExcludedDir("excludeDir").
 		AddExcludedFile("excluded.go")
 
-	res := l.(*license).collectFilesNotContainingLicense(".")
+	res, resWithDate := l.(*license).collectFiles(".")
 
 	// Expect these files to be reported as missing the license
 	want := []string{filepath.Join("dir1", "nested_without.go"), "file_without_license.go"}
 	assert.Equal(t, res, want)
+	assert.Equal(t, resWithDate, []string{"file_with_license_and_date.go"})
 }
