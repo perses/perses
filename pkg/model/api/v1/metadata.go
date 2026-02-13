@@ -107,18 +107,18 @@ func (m *Metadata) validate() error {
 		return err
 	}
 
-	return validateTags(m.Tags)
+	return m.validateTags()
 }
 
-func validateTags(tags set.Set[string]) error {
+func (m *Metadata) validateTags() error {
 	const maxTags = 20
 	const maxTagLength = 50
 
-	if len(tags) > maxTags {
+	if len(m.Tags) > maxTags {
 		return fmt.Errorf("cannot contain more than %d tags", maxTags)
 	}
 
-	for tag := range tags {
+	for tag := range m.Tags {
 		if len(strings.TrimSpace(tag)) == 0 {
 			return fmt.Errorf("tag cannot be empty")
 		}
