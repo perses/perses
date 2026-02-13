@@ -36,11 +36,6 @@ function shortcutCTRL(): string {
 
 type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
 
-const dashboardSearchIndexedKeys = [
-  ['metadata', 'name'],
-  ['metadata', 'tags'],
-];
-
 interface ResourceListProps {
   query: string;
   onClick: () => void;
@@ -126,7 +121,6 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
-      indexedKeys={dashboardSearchIndexedKeys}
       showMatchingTagChips={true}
       isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
     />

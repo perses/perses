@@ -21,7 +21,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ProjectRoute } from '../../../model/route';
 
 const kvSearchConfig: KVSearchConfiguration = {
-  indexedKeys: [['metadata', 'name']],
+  indexedKeys: [
+    ['metadata', 'name'],
+    ['metadata', 'tags'],
+  ],
   shouldSort: true,
   includeMatches: true,
   shouldRender: false,
@@ -121,7 +124,6 @@ export interface SearchListProps {
   chip?: boolean;
   buildRouting?: (resource: Resource) => string;
   isResource?: (isAvailable: boolean) => void;
-  indexedKeys?: KVSearchConfiguration['indexedKeys'];
   showMatchingTagChips?: boolean;
 }
 
@@ -134,19 +136,11 @@ export function SearchList(props: SearchListProps): ReactElement | null {
     chip,
     buildRouting: customBuildRouting,
     isResource,
-    indexedKeys,
     showMatchingTagChips,
   } = props;
 
   const [currentSizeList, setCurrentSizeList] = useState<number>(SIZE_LIST);
   const kvSearch = useRef(new KVSearch<Resource>(kvSearchConfig)).current;
-  const searchConfig = useMemo(
-    (): KVSearchConfiguration => ({
-      ...kvSearchConfig,
-      ...(indexedKeys ? { indexedKeys } : {}),
-    }),
-    [indexedKeys]
-  );
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
     if (!query && list?.[0]?.kind === 'Dashboard') {
@@ -158,8 +152,8 @@ export function SearchList(props: SearchListProps): ReactElement | null {
         matched: [],
       }));
     }
-    return kvSearch.filter(query, list, searchConfig);
-  }, [kvSearch, list, query, searchConfig]);
+    return kvSearch.filter(query, list);
+  }, [kvSearch, list, query]);
 
   useEffect(() => {
     // Reset the size of the filtered list when query or the actual list change.
