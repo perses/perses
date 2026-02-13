@@ -107,7 +107,6 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	if !t.authz.IsEnabled() {
 		return nil
 	}
-	projectName := parameters.Project
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return err
@@ -119,22 +118,26 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		return nil
 	}
 
-	// Project is not a global scope to be attached to a Role (or GlobalRole) and have user able to delete their own projects
+	// For ProjectScope, the project name is the resource name itself.
+	// For other scoped resources, it comes from the project URL parameter or the entity metadata.
+	projectName := parameters.Project
 	if *scope == role.ProjectScope {
-		// Create is still a "Global" only permission
-		if action == role.CreateAction {
-			if ok := t.authz.HasPermission(ctx, action, v1.WildcardProject, *scope); !ok {
-				return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
-			}
-			return nil
-		}
 		projectName = parameters.Name
-	}
-
-	if len(projectName) == 0 && entity != nil {
-		// Retrieving project name from payload if project name not provided in the url
+		if len(projectName) == 0 && entity != nil {
+			projectName = entity.GetMetadata().GetName()
+		}
+	} else if len(projectName) == 0 && entity != nil {
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
+
+	// Project creation permission is handled separately as the check differs between authorization providers.
+	if *scope == role.ProjectScope && action == role.CreateAction {
+		if ok := t.authz.HasCreateProjectPermission(ctx, projectName); !ok {
+			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission for '%s' kind", action, *scope))
+		}
+		return nil
+	}
+
 	if ok := t.authz.HasPermission(ctx, action, projectName, *scope); !ok {
 		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 	}
