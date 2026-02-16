@@ -25,6 +25,7 @@ export const querySpecSchema: z.ZodSchema<QueryDefinition> = z.object({
   spec: z.object({
     plugin: pluginSchema,
   }),
+  hidden: z.boolean().optional(),
 });
 
 export const linkSchema: z.ZodSchema<Link> = z.object({

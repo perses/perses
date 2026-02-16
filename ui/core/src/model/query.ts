@@ -28,6 +28,7 @@ interface QuerySpec<PluginSpec> {
 export interface QueryDefinition<Kind = any, PluginSpec = UnknownSpec> {
   kind: Kind;
   spec: QuerySpec<PluginSpec>;
+  hidden?: boolean;
 }
 
 /**
