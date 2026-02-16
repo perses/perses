@@ -24,10 +24,10 @@ const (
 )
 
 type GridPosition struct {
-	Height int `json:"h"`
-	Width  int `json:"w"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
+	Height int     `json:"h"`
+	Width  int     `json:"w"`
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
 }
 
 type GrafanaLink struct {
