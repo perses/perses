@@ -1,4 +1,4 @@
-Perses Upgrade Guide
+# Perses Upgrade Guide
 
 This document provides instructions for upgrading Perses specially when dealing with breaking changes. As Perses is a
 rapidly evolving project, it's important to keep your installation up to date to benefit from the latest features and
@@ -10,6 +10,20 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 ## Perses application
 
 ### Upgrading from v0.52.0 to v0.53.0
+
+#### User change in container image
+
+In order to simplify the build of the docker image, we have changed the default user used in the container from `nobody`
+to `nonroot`. As a based image we are using now `gcr.io/distroless/static-debian12:non-root` instead of
+`ggcr.io/distroless/static-debian12:latest`, which gives us a non-root user by default.
+
+This change can impact users that is using as a database the file system inside the container, specially when running
+the container with docker (not within Kubernetes). In that case, you should ensure that the `nonroot` user has the right
+permissions to read and write into the database folder. If this is not the case, when upgrading the image, you will face
+permission errors when Perses is trying to load the data coming from the file system.
+
+You should not be impacted if you have overridden the user used in the container or if you are using a SQL database to
+store the Perses data.²
 
 #### TLS config changes
 
