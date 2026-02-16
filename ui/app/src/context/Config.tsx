@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import DOMPurify from 'dompurify';
 import { DashboardSelector, DurationString } from '@perses-dev/core';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
-import { ConfigModel, useConfig } from '../model/config-client';
+import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
 
 interface ConfigContextType {
@@ -34,9 +34,9 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
   return (
     <ConfigContext.Provider value={{ config: data }}>
       <TimeRangeSettingsProvider
-        showCustom={!data.frontend.time_range.disable_custom}
-        showZoomButtons={!data.frontend.time_range.disable_zoom}
-        options={data.frontend.time_range.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+        showCustom={!data.frontend.time_range?.disable_custom}
+        showZoomButtons={!data.frontend.time_range?.disable_zoom}
+        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
       >
         {props.children}
       </TimeRangeSettingsProvider>
@@ -132,14 +132,42 @@ export function useInformation(): string {
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
 
-export function useIsNativeProviderEnabled(): boolean {
+export function useBanner(): Banner | undefined {
+  const { config } = useConfigContext();
+
+  const html = useMemo(
+    () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
+    [config.frontend.banner?.message]
+  );
+
+  const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);
+
+  const banner = useMemo(() => {
+    if (!config.frontend.banner?.message || !config.frontend.banner?.severity) {
+      return undefined;
+    }
+    return {
+      severity: config.frontend.banner.severity,
+      message: sanitizedHtml,
+    };
+  }, [config.frontend.banner?.message, config.frontend.banner?.severity, sanitizedHtml]);
+
+  return banner;
+}
+
+export function useIsNativeAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.providers.enable_native;
 }
 
-export function useIsExternalProviderEnabled(): boolean {
+export function useIsExternalAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return (
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
+}
+
+export function useIsDelegatedAuthnProviderEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !!config.security.authentication.providers.kubernetes?.enable;
 }

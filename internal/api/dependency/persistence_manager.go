@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -92,7 +92,7 @@ type persistence struct {
 	variable           variable.DAO
 }
 
-func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
+func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	persesDAO, err := database.New(conf)
 	if err != nil {
 		return nil, err

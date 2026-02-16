@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,6 +25,7 @@ type Driver string
 
 const (
 	DriverMySQL      Driver = "mysql"
+	DriverMariaDB    Driver = "mariadb"
 	DriverPostgreSQL Driver = "postgres"
 )
 
@@ -114,6 +115,8 @@ type Config struct {
 	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
 	// MySQL specific driver config
 	MySQL *MySQLConfig `json:"mysql,omitempty" yaml:"mysql,omitempty"`
+	// MariaDB specific driver config (uses same structure as MySQL since MariaDB is MySQL-compatible)
+	MariaDB *MySQLConfig `json:"mariadb,omitempty" yaml:"mariadb,omitempty"`
 	// Postgres specific driver config
 	Postgres *PostgresConfig `json:"postgres,omitempty" yaml:"postgres,omitempty"`
 }
@@ -145,12 +148,8 @@ func (s *Config) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (s *Config) validate() error {
-	if s.Driver == "" {
-		return errors.New("driver is required")
-	}
-
-	if s.Driver != DriverMySQL && s.Driver != DriverPostgreSQL {
-		return fmt.Errorf("driver %s is not supported", s.Driver)
+	if err := s.verifySupportedDriver(); err != nil {
+		return err
 	}
 
 	if s.Host == "" {
@@ -159,6 +158,41 @@ func (s *Config) validate() error {
 
 	if s.Database == "" {
 		return errors.New("database cannot be empty")
+	}
+
+	return nil
+}
+
+func (s *Config) verifySupportedDriver() error {
+	if s.Driver == "" {
+		if s.MySQL != nil {
+			s.Driver = DriverMySQL
+		} else if s.MariaDB != nil {
+			s.Driver = DriverMariaDB
+		} else if s.Postgres != nil {
+			s.Driver = DriverPostgreSQL
+		}
+	}
+
+	// Varify if the driver is still empty
+	if s.Driver == "" {
+		return errors.New("driver is required")
+	}
+
+	if s.Driver != DriverMySQL && s.Driver != DriverMariaDB && s.Driver != DriverPostgreSQL {
+		return fmt.Errorf("driver %s is not supported", s.Driver)
+	}
+
+	if s.Driver == DriverMySQL && (s.MariaDB != nil || s.Postgres != nil) {
+		return errors.New("driver mysql cannot be set if mariaDB or postgres config is set ")
+	}
+
+	if s.Driver == DriverMariaDB && (s.MySQL != nil || s.Postgres != nil) {
+		return errors.New("driver mariaDB cannot be set if mysql or postgres config is set ")
+	}
+
+	if s.Driver == DriverPostgreSQL && (s.MySQL != nil || s.MariaDB != nil) {
+		return errors.New("driver postgres cannot be set if mysql or mariaDB config is set ")
 	}
 
 	return nil

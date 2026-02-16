@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -401,13 +401,15 @@ export class DashboardPage {
    * Beadcrumbs Helper
    */
   async goBackToHomePage(): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL('/');
     await this.page.getByRole('link', { name: 'Home' }).click();
     await navigationPromise;
   }
 
   async goBackToProjectPage(projectName: string): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL(`/projects/${encodeURIComponent(projectName)}`, {
+      waitUntil: 'domcontentloaded',
+    });
     await this.page.getByRole('link', { name: projectName }).first().click();
     await navigationPromise;
   }

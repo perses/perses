@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -88,10 +88,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    },
-    "time_range": {
-      "disable_custom": false,
-      "disable_zoom": false
     }
   },
   "plugin": {
@@ -111,9 +107,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
-    "authorization": {
-      "check_latest_update_interval": "30s"
-    },
+    "authorization": {},
     "authentication": {
       "access_token_ttl": "15m",
       "refresh_token_ttl": "1d",
@@ -163,21 +157,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    },
-    "time_range": {
-      "disable_custom": false,
-      "disable_zoom": false,
-      "options": [
-        "5m",
-        "15m",
-        "30m",
-        "1h",
-        "6h",
-        "12h",
-        "1d",
-        "1w",
-        "2w"
-      ]
     }
   },
   "plugin": {
@@ -213,24 +192,33 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     "encryption_key": "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
     "enable_auth": true,
     "authorization": {
-      "guest_permissions": [
-        {
-          "actions": [
-            "read"
-          ],
-          "scopes": [
-            "*"
-          ]
-        },
-        {
-          "actions": [
-            "create"
-          ],
-          "scopes": [
-            "Project"
+      "provider": {
+        "native": {
+          "guest_permissions": [
+            {
+              "actions": [
+                "read"
+              ],
+              "scopes": [
+                "*"
+              ]
+            },
+            {
+              "actions": [
+                "create"
+              ],
+              "scopes": [
+                "Project"
+              ]
+            }
           ]
         }
-      ]
+      }
+    },
+    "authentication": {
+      "providers": {
+        "enable_native": true
+      }
     },
     "cors": {
       "enable": true,
@@ -265,7 +253,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     ],
     "information": "# Hello World\n## File Database setup"
   },
-  "plugin": { 
+  "plugin": {
     "path": "plugins",
     "archive_path": "plugins-archive"
 	},
@@ -284,22 +272,32 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					Readonly:      false,
 					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
 					EnableAuth:    true,
+					Authentication: AuthenticationConfig{
+						Providers: AuthenticationProviders{
+							EnableNative: true,
+						},
+					},
 					Authorization: AuthorizationConfig{
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable: false,
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},
@@ -380,15 +378,17 @@ security:
     providers:
       enable_native: true
   authorization:
-    guest_permissions:
-      - actions:
-          - read
-        scopes:
-          - "*"
-      - actions:
-          - create
-        scopes:
-          - Project
+    provider:
+      native:
+        guest_permissions:
+          - actions:
+              - read
+            scopes:
+              - "*"
+          - actions:
+              - create
+            scopes:
+              - Project
   cors:
     enable: true
     allow_origins:
@@ -443,22 +443,27 @@ plugin:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
-						CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
-						GuestPermissions: []*role.Permission{
-							{
-								Actions: []role.Action{
-									role.ReadAction,
-								},
-								Scopes: []role.Scope{
-									role.WildcardScope,
-								},
-							},
-							{
-								Actions: []role.Action{
-									role.CreateAction,
-								},
-								Scopes: []role.Scope{
-									role.ProjectScope,
+						Provider: AuthorizationProvider{
+							Native: NativeAuthorizationProvider{
+								Enable:                    true,
+								CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+								GuestPermissions: []*role.Permission{
+									{
+										Actions: []role.Action{
+											role.ReadAction,
+										},
+										Scopes: []role.Scope{
+											role.WildcardScope,
+										},
+									},
+									{
+										Actions: []role.Action{
+											role.CreateAction,
+										},
+										Scopes: []role.Scope{
+											role.ProjectScope,
+										},
+									},
 								},
 							},
 						},
@@ -467,7 +472,7 @@ plugin:
 						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
 						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
-						Providers: AuthProviders{
+						Providers: AuthenticationProviders{
 							EnableNative: true,
 						},
 					},
@@ -503,10 +508,6 @@ plugin:
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
-					TimeRange: TimeRange{
-						DisableCustomTimeRange: false,
-						Options:                defaultTimeRangeOptions,
-					},
 				},
 				Plugin: Plugin{
 					Path:        "custom/plugins",

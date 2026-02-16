@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -108,8 +108,9 @@ func visit(dir string) ([]string, error) {
 			return nil
 		}
 		fileName := info.Name()
-		if filepath.Ext(fileName) != ".json" && filepath.Ext(fileName) != ".yaml" {
+		if filepath.Ext(fileName) != ".json" && filepath.Ext(fileName) != ".yaml" && filepath.Ext(fileName) != ".yml" {
 			// skip every file that doesn't have the correct extension
+			logrus.Tracef("Skipping %s", fileName)
 			return nil
 		}
 		files = append(files, path)

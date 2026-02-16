@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -85,8 +85,36 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
+  /**
+   * @deprecated use provider.native.check_latest_update_interval instead
+   */
+  check_latest_update_interval: Duration;
+  /**
+   * @deprecated use provider.native.guest_permissions instead
+   */
+  guest_permissions: Permission[];
+  provider: {
+    native?: NativeAuthorizationProvider;
+    kubernetes?: KubernetesAuthorizationProvider;
+  };
+}
+
+interface NativeAuthorizationProvider {
+  enable: boolean;
   check_latest_update_interval: Duration;
   guest_permissions: Permission[];
+}
+
+interface KubernetesAuthorizationProvider {
+  enable: boolean;
+  // remaining fields needed for backend configuration only
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // kubeconfig?: string
+  // qps?: number;
+  // burst?: number;
+  // authorizer_allow_ttl?: Duration;
+  // authorizer_deny_ttl?: Duration;
+  // authenticator_ttl?: Duration;
 }
 
 export interface OIDCProvider {
@@ -113,6 +141,11 @@ export interface AuthProviders {
   enable_native: boolean;
   oauth: OauthProvider[];
   oidc: OIDCProvider[];
+  kubernetes?: KubernetesProvider;
+}
+
+interface KubernetesProvider {
+  enable: boolean;
 }
 
 export interface AuthenticationConfig {
@@ -135,17 +168,25 @@ export interface ExplorerConfig {
   enable: boolean;
 }
 
+export type Severity = 'warning' | 'info' | 'error';
+
+export interface Banner {
+  severity?: Severity;
+  message: string;
+}
+
 export interface TimeRangeConfig {
-  disable_custom: boolean;
-  disable_zoom: boolean;
-  options: DurationString[];
+  disable_custom?: boolean;
+  disable_zoom?: boolean;
+  options?: DurationString[];
 }
 
 export interface FrontendConfig {
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
-  time_range: TimeRangeConfig;
+  time_range?: TimeRangeConfig;
+  banner?: Banner;
 }
 
 export interface EphemeralDashboardConfig {
@@ -182,6 +223,7 @@ export interface DatasourceConfig {
 }
 
 export interface ConfigModel {
+  api_prefix?: string;
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
@@ -205,6 +247,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiPrefix: '/api' });
+  const url = buildURL({ resource: resource, apiURL: '/api' });
   return fetchJson<ConfigModel>(url);
 }

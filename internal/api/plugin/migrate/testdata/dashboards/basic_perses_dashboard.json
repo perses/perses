@@ -131,7 +131,8 @@
           "plugin": {
             "kind": "FooChart",
             "spec": {
-              "iwas": "timeseries"
+              "iwas": "timeseries",
+              "expr": "up{$MyTextBox,$MyConst} * 100"
             }
           },
           "queries": [

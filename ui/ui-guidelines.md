@@ -41,7 +41,6 @@ Below is a list of notable tooling that is used throughout the Perses UI.
 - Testing tools
   - Unit/integration testing for components & utilities: [Jest](https://jestjs.io/), [React Testing library](https://testing-library.com/docs/react-testing-library/intro/)
   - Browser testing: [Playwright](https://playwright.dev/)
-  - Visual testing: [Happo](https://happo.io/)
 
 ### Modifying tooling
 
@@ -253,11 +252,6 @@ End-to-end and browser tests are written using [Playwright](https://playwright.d
 - Tests live in the `ui/e2e` directory. See the [README](./e2e) in that directory for additional guidance.
 - Each large feature should include at least one e2e test to ensure the most
   common flow works.
-
-### Visual testing
-
-- Visualization-heavy components (e.g. charts using `canvas`) should have visual tests using [Happo](https://happo.io/).
-- Visual tests can be generated during the execution of an end-to-end test with Playwright.
 
 ## Documentation
 

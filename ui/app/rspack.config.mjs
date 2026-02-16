@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,20 +18,64 @@ import TerserPlugin from 'terser-webpack-plugin';
 import { defineConfig } from '@rspack/cli';
 
 const isDev = process.env.NODE_ENV === 'development';
+const isSharedDev = isDev && process.env.SHARED_DEV === 'true';
+
+// When SHARED_DEV=true, resolve shared packages from an adjacent perses/shared checkout (see that repo for linking instructions).
+const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.meta.dirname, '../../../shared');
+const nodeModulesPath = resolve(import.meta.dirname, '../node_modules');
+const sharedNodeModulesPath = resolve(sharedPackagesPath, 'node_modules');
+
+const localAliases = {
+  '@perses-dev/core': resolve(nodeModulesPath, '@perses-dev/core/dist'),
+  '@perses-dev/internal-utils': resolve(nodeModulesPath, '@perses-dev/internal-utils/dist'),
+};
+
+const sharedAliases = {
+  '@perses-dev/explore': resolve(sharedPackagesPath, 'explore/src'),
+  '@perses-dev/components': resolve(sharedPackagesPath, 'components/src'),
+  '@perses-dev/dashboards': resolve(sharedPackagesPath, 'dashboards/src'),
+  '@perses-dev/plugin-system': resolve(sharedPackagesPath, 'plugin-system/src'),
+
+  // packages only in shared node_modules
+  zustand: resolve(sharedNodeModulesPath, 'zustand'),
+  immer: resolve(sharedNodeModulesPath, 'immer'),
+  'use-immer': resolve(sharedNodeModulesPath, 'use-immer'),
+};
+
+// ensure all packages use the same singleton/context-based library instances
+// this prevents "multiple instances" errors when developing with shared packages
+const singletonAliases = {
+  react: resolve(nodeModulesPath, 'react'),
+  'react-dom': resolve(nodeModulesPath, 'react-dom'),
+  'react/jsx-runtime': resolve(nodeModulesPath, 'react/jsx-runtime'),
+  'react/jsx-dev-runtime': resolve(nodeModulesPath, 'react/jsx-dev-runtime'),
+  'react-router-dom': resolve(nodeModulesPath, 'react-router-dom'),
+  'react-router': resolve(nodeModulesPath, 'react-router'),
+  'use-query-params': resolve(nodeModulesPath, 'use-query-params'),
+  '@tanstack/react-query': resolve(nodeModulesPath, '@tanstack/react-query'),
+  '@mui/material': resolve(nodeModulesPath, '@mui/material'),
+  '@mui/system': resolve(nodeModulesPath, '@mui/system'),
+  '@mui/styles': resolve(nodeModulesPath, '@mui/styles'),
+  '@emotion/react': resolve(nodeModulesPath, '@emotion/react'),
+  '@emotion/styled': resolve(nodeModulesPath, '@emotion/styled'),
+  'react-hook-form': resolve(nodeModulesPath, 'react-hook-form'),
+};
+
 export default defineConfig({
   output: {
     path: resolve(import.meta.dirname, './dist'),
     publicPath: isDev ? undefined : 'PREFIX_PATH_PLACEHOLDER/',
+    filename: isDev ? '[name].js' : '[name].[contenthash].js',
+    cssFilename: isDev ? '[name].css' : '[name].[contenthash].css',
+    cssChunkFilename: isDev ? '[id].css' : '[id].[contenthash].css',
+    clean: true,
   },
   mode: isDev ? 'development' : 'production',
   devtool: isDev ? 'cheap-module-source-map' : false,
   entry: './src/bundle.ts',
   resolve: {
     extensions: ['...', '.ts', '.tsx', '.jsx'],
-    tsConfig: {
-      configFile: resolve(import.meta.dirname, './tsconfig.json'),
-      references: 'auto',
-    },
+    alias: isSharedDev ? { ...sharedAliases, ...localAliases, ...singletonAliases } : {},
   },
   experiments: {
     css: true,
@@ -51,33 +95,39 @@ export default defineConfig({
       },
       {
         test: /\.(jsx?|tsx?)$/,
-        exclude: [/node_modules/],
         type: 'javascript/auto',
-        loader: 'builtin:swc-loader',
-        options: {
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: true,
-            },
-            transform: {
-              react: {
-                runtime: 'automatic',
-                development: isDev,
-                refresh: isDev,
+        exclude: [/node_modules/],
+        use: [
+          {
+            loader: 'builtin:swc-loader',
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                    development: isDev,
+                    refresh: isDev,
+                  },
+                },
+              },
+              env: {
+                targets: ['chrome >= 87', 'edge >= 88', 'firefox >= 78', 'safari >= 14'],
               },
             },
           },
-          env: {
-            targets: ['chrome >= 87', 'edge >= 88', 'firefox >= 78', 'safari >= 14'],
-          },
-        },
+        ],
       },
     ],
   },
   devServer: isDev
     ? {
         historyApiFallback: true,
+        hot: true,
+        liveReload: false,
         port: parseInt(process.env.PORT ?? '3000'),
         allowedHosts: 'all',
         proxy: [
@@ -89,7 +139,7 @@ export default defineConfig({
         client: {
           // By default, the error overlay is not shown because it can get in the
           // way of e2e tests and can be annoying for some developer workflows.
-          // If you like the overlay, you can enable it by setting the the specified
+          // If you like the overlay, you can enable it by setting the specified
           // env var.
           overlay: process.env.ERROR_OVERLAY === 'true',
         },
@@ -98,6 +148,7 @@ export default defineConfig({
   plugins: [
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.API_PREFIX': JSON.stringify(isDev ? '' : 'PREFIX_PATH_PLACEHOLDER'),
     }),
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({
@@ -105,6 +156,15 @@ export default defineConfig({
       favicon: './favicon.ico',
       publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
+    new rspack.CopyRspackPlugin({
+        patterns: [
+            {
+                from: 'src/locales',
+                to: 'locales',
+                noErrorOnMissing: true,
+            },
+        ],
+    }),    
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),
 });

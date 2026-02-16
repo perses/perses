@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -80,7 +80,9 @@ type GridLayoutCollapse struct {
 }
 
 type GridLayoutDisplay struct {
-	Title    string              `json:"title" yaml:"title"`
+	Title string `json:"title" yaml:"title"`
+	// If Collapse is defined, the grid layout will be rendered in a collapsible group.
+	// If not defined, the grid layout will be rendered expanded without the ability to collapse it.
 	Collapse *GridLayoutCollapse `json:"collapse,omitempty" yaml:"collapse,omitempty"`
 }
 

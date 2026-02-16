@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Notice } from './notice';
+import { BaseMetadata } from './base-metadata';
 import { AbsoluteTimeRange } from './time';
 import { Labels } from './time-series-queries';
 
@@ -30,16 +30,7 @@ export interface LogData {
   direction?: 'forward' | 'backward';
 }
 
-export interface LogMetadata {
-  notices?: Notice[];
-
-  /**
-   * The raw query that is executed to generate this data.
-   * Useful when needing to inspect the query that was executed
-   * after variables and other context modifications have been applied.
-   */
-  executedQueryString?: string;
-
+export interface LogMetadata extends BaseMetadata {
   /**
    * Statistics about the log query execution
    */

@@ -22,7 +22,7 @@
 
 - [ ] Changes that impact the UI include screenshots and/or screencasts of the relevant changes.
 - [ ] Code follows the [UI guidelines](https://github.com/perses/perses/blob/main/ui/ui-guidelines.md).
-- [ ] Visual tests are stable and unlikely to be flaky.
+- [ ] E2E tests are stable and unlikely to be flaky.
   See [e2e](https://github.com/perses/perses/tree/main/ui/e2e#visual-tests) docs for more details. Common issues include:
   - Is the data inconsistent? You need to mock API requests.
   - Does the time change? You need to use consistent time values or mock time utilities.

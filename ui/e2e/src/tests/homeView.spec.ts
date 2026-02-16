@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,34 +12,24 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
-import happoPlaywright from 'happo-playwright';
 import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
 test.describe('homeView', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   test('can navigate to a dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
-    await homePage.showDashboardList('perses');
+    await homePage.navigateToProject('perses');
 
-    const navigationPromise = page.waitForNavigation();
-    await homePage.clickDashboardItem('perses', 'Demo');
-    await navigationPromise;
+    const projectPage = new AppProjectPage(page);
+    await projectPage.navigateToDashboard('perses', 'Demo');
   });
 
   test('can navigate to an important dashboard', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL(new RegExp('/projects/perses/dashboards/Demo', 'i'));
     await homePage.clickImportantDashboardItem('perses', 'Demo');
     await navigationPromise;
   });
@@ -56,7 +46,7 @@ test.describe('homeView', () => {
     const dashboardPage = new DashboardPage(page);
     await dashboardPage.goBackToHomePage();
 
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL(new RegExp(`/projects/${project}/dashboards/${dashboard}`, 'i'));
     await homePage.clickRecentDashboardItem(project, dashboard);
     await navigationPromise;
   });
@@ -66,7 +56,7 @@ test.describe('homeView', () => {
     await homePage.goto();
 
     // Go to testing project
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL('/projects/testing');
     await homePage.clickProjectLink('testing');
     await navigationPromise;
   });
@@ -79,7 +69,7 @@ test.describe('homeView', () => {
     await homePage.searchDashboardOrProject('Benchmark');
 
     // Go to testing project
-    const navigationPromise = page.waitForNavigation();
+    const navigationPromise = page.waitForURL('/projects/perses');
     await homePage.clickProjectLink('perses');
     await navigationPromise;
   });
@@ -97,14 +87,9 @@ test.describe('homeView', () => {
 
     const dashboardPage = new DashboardPage(page);
 
-    await dashboardPage.forEachTheme(async (themeName) => {
+    await dashboardPage.forEachTheme(async () => {
       // Should see empty state
       await expect(page.getByRole('main')).toContainText("Let's get started");
-
-      await happoPlaywright.screenshot(page, dashboardPage.root, {
-        component: 'Empty State',
-        variant: themeName,
-      });
     });
 
     // Use empty state to add a new panel

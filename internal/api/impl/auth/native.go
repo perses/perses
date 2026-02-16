@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
@@ -35,7 +35,19 @@ type nativeEndpoint struct {
 	tokenManagement tokenManagement
 }
 
-func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) route.Endpoint {
+func (e *nativeEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
+	return nil // No specific logout handler for native auth
+}
+
+func (e *nativeEndpoint) GetAuthKind() string {
+	return utils.AuthnKindNative
+}
+
+func (e *nativeEndpoint) GetSlugID() string {
+	return "" // no slug ID needed for native auth
+}
+
+func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) authEndpoint {
 	return &nativeEndpoint{
 		dao:             dao,
 		jwt:             jwt,
@@ -44,7 +56,7 @@ func newNativeEndpoint(dao user.DAO, jwt crypto.JWT) route.Endpoint {
 }
 
 func (e *nativeEndpoint) CollectRoutes(g *route.Group) {
-	g.POST(fmt.Sprintf("/%s/%s", utils.AuthKindNative, utils.PathLogin), e.auth, true)
+	g.POST(fmt.Sprintf("/%s/%s", utils.AuthnKindNative, utils.PathLogin), e.auth, true)
 }
 
 func (e *nativeEndpoint) auth(ctx echo.Context) error {
@@ -64,11 +76,15 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		return apiinterface.HandleBadRequestError("wrong login or password ")
 	}
 	login := body.Login
-	accessToken, err := e.tokenManagement.accessToken(login, ctx.SetCookie)
+	providerInfo := crypto.ProviderInfo{
+		ProviderKind: utils.AuthnKindNative,
+		ProviderID:   "", // no provider ID needed for native auth
+	}
+	accessToken, err := e.tokenManagement.accessToken(login, providerInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(login, ctx.SetCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(login, providerInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import (
 
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -51,6 +52,14 @@ func (t *testRBAC) GetUsername(_ echo.Context) (string, error) {
 	return "", nil
 }
 
+func (t *testRBAC) GetPublicUser(_ echo.Context) (*v1.PublicUser, error) {
+	return nil, nil
+}
+
+func (t *testRBAC) GetProviderInfo(_ echo.Context) (crypto.ProviderInfo, error) {
+	return crypto.ProviderInfo{}, nil
+}
+
 func (t *testRBAC) Middleware(_ middleware.Skipper) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -67,7 +76,15 @@ func (t *testRBAC) HasPermission(_ echo.Context, _ role.Action, _ string, _ role
 	return t.allow
 }
 
+func (t *testRBAC) HasCreateProjectPermission(_ echo.Context, _ string) bool {
+	return t.allow
+}
+
 func (t *testRBAC) IsEnabled() bool {
+	return true
+}
+
+func (t *testRBAC) IsNativeAuthz() bool {
 	return true
 }
 

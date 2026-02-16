@@ -6,4 +6,5 @@ package migrate
 kind: "FooChart"
 spec: {
 	iwas: #panel.type
+	expr: *#panel.targets[0].expr | "not found"
 }

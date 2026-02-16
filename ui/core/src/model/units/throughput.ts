@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,13 +12,16 @@
 // limitations under the License.
 
 import { formatBytes } from './bytes';
+import { formatBits } from './bits';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
 type ThroughputUnit =
   | 'bits/sec'
+  | 'decbits/sec'
   | 'bytes/sec'
+  | 'decbytes/sec'
   | 'counts/sec'
   | 'events/sec'
   | 'messages/sec'
@@ -42,12 +45,21 @@ const THROUGHPUT_GROUP = 'Throughput';
 export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>> = {
   'bits/sec': {
     group: THROUGHPUT_GROUP,
-    label: 'Bits/sec',
+    label: 'Bits/sec (IEC)',
+  },
+  'decbits/sec': {
+    group: THROUGHPUT_GROUP,
+    label: 'Bits/sec (SI)',
   },
   'bytes/sec': {
     group: THROUGHPUT_GROUP,
-    label: 'Bytes/sec',
+    label: 'Bytes/sec (IEC)',
   },
+  'decbytes/sec': {
+    group: THROUGHPUT_GROUP,
+    label: 'Bytes/sec (SI)',
+  },
+
   'counts/sec': {
     group: THROUGHPUT_GROUP,
     label: 'Counts/sec',
@@ -92,8 +104,23 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
 
 export function formatThroughput(value: number, { unit, shortValues, decimalPlaces }: ThroughputFormatOptions): string {
   // special case for data throughput
-  if (unit === 'bytes/sec') {
+  if (unit === 'bits/sec') {
+    const denominator = Math.abs(value) < 1024 ? 'sec' : 's';
+    return formatBits(value, { unit: 'bits', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
+  if (unit === 'decbits/sec') {
     const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
+    return formatBits(value, { unit: 'decbits', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
+  if (unit === 'decbytes/sec') {
+    const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
+    return formatBytes(value, { unit: 'decbytes', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
+  if (unit === 'bytes/sec') {
+    const denominator = Math.abs(value) < 1024 ? 'sec' : 's';
     return formatBytes(value, { unit: 'bytes', shortValues, decimalPlaces }) + '/' + denominator;
   }
 

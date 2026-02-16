@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -51,7 +51,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		roleBindingDAO:       roleBindingDAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
-		guestPermissions:     conf.Security.Authorization.GuestPermissions,
+		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
 		accessKey:            key,
 	}, err
 }
@@ -73,6 +73,10 @@ type native struct {
 }
 
 func (n *native) IsEnabled() bool {
+	return true
+}
+
+func (n *native) IsNativeAuthz() bool {
 	return true
 }
 
@@ -103,7 +107,32 @@ func (n *native) GetUsername(ctx echo.Context) (string, error) {
 	if usr == nil {
 		return "", nil // No user found in the context, this is an anonymous endpoint
 	}
-	return usr.(jwt.Claims).GetSubject()
+	return usr.(*crypto.JWTClaims).GetSubject()
+}
+
+func (n *native) GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error) {
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return crypto.ProviderInfo{}, err
+	}
+	if usr == nil {
+		return crypto.ProviderInfo{}, nil // No user found in the context, this is an anonymous endpoint
+	}
+	return usr.(*crypto.JWTClaims).ProviderInfo, nil
+}
+
+func (n *native) GetPublicUser(ctx echo.Context) (*v1.PublicUser, error) {
+	username, err := n.GetUsername(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := n.userDAO.Get(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return v1.NewPublicUser(user), nil
 }
 
 func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
@@ -125,7 +154,7 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
 		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
-			return &jwt.RegisteredClaims{}
+			return &crypto.JWTClaims{}
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
 		SigningKey:    n.accessKey,
@@ -190,6 +219,11 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
+}
+
+// For native auth, creating a project requires a global permission.
+func (n *native) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
+	return n.HasPermission(ctx, v1Role.CreateAction, v1.WildcardProject, v1Role.ProjectScope)
 }
 
 func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {

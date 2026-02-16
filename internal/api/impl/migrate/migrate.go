@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -49,12 +49,13 @@ func (e *endpoint) Migrate(ctx echo.Context) error {
 	if err := ctx.Bind(body); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
+
 	rawGrafanaDashboard := []byte(migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard)))
 	grafanaDashboard := &migrate.SimplifiedDashboard{}
 	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard)
+	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard, body.UseDefaultDatasource)
 	if err != nil {
 		return err
 	}

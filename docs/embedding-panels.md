@@ -8,6 +8,8 @@ application.
 
 ## Getting started (npm example)
 
+> These UI libraries now live in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to link them locally for development, follow the instructions in that repo.
+
 ```bash
 # Create new React app or modify an existing app using the dependencies below
 # Example: https://react.dev/learn/build-a-react-app-from-scratch
@@ -53,8 +55,10 @@ import {
 } from "@perses-dev/dashboards";
 import {
   DashboardResource,
+  DurationString,
   GlobalDatasourceResource,
   DatasourceResource,
+  TimeRangeValue,
 } from "@perses-dev/core";
 import { DatasourceApi } from "@perses-dev/dashboards";
 import * as prometheusPlugin from "@perses-dev/prometheus-plugin";
@@ -104,6 +108,9 @@ export const fakeDashboard = {
 } as DashboardResource;
 
 function App() {
+  const [timeRange, setTimeRange] = React.useState<TimeRangeValue>({ pastDuration: "30m" });
+  const [refreshInterval, setRefreshInterval] = React.useState<DurationString>("0s");
+
   const muiTheme = getTheme("light");
   const chartsTheme = generateChartsTheme(muiTheme, {});
   const pluginLoader = dynamicImportPluginLoader([
@@ -141,10 +148,7 @@ function App() {
             }}
           >
             <QueryClientProvider client={queryClient}>
-              <TimeRangeProvider
-                refreshInterval="0s"
-                timeRange={{ pastDuration: "30m" }}
-              >
+              <TimeRangeProvider timeRange={timeRange} refreshInterval={refreshInterval} setTimeRange={setTimeRange} setRefreshInterval={setRefreshInterval}>
                 <VariableProvider>
                   <DatasourceStoreProvider
                     dashboardResource={fakeDashboard}
@@ -193,9 +197,9 @@ function App() {
 export default App;
 ```
 
-You should see a perses panel going to your browser
+You should now see a Perses panel in your app's UI:
 
-<img src="./images/embedded-panel-screenshot.png">
+![embedded_panel](./images/embedded-panel.png)
 
 ## Definitions by provider
 

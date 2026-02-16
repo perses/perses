@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,7 +20,6 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -53,9 +52,11 @@ func (f *File) Verify() error {
 
 type SQL struct {
 	// TLS configuration
-	TLSConfig *config.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
+	TLSConfig *secret.PublicTLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	// Username
 	User secret.Hidden `json:"user,omitempty" yaml:"user,omitempty"`
+	// UserFile is a path to a file that contains a username
+	UserFile string `json:"user_file,omitempty" yaml:"user_file,omitempty"`
 	// Password (requires User)
 	Password secret.Hidden `json:"password,omitempty" yaml:"password,omitempty"`
 	// PasswordFile is a path to a file that contains a password
@@ -64,6 +65,8 @@ type SQL struct {
 	Net string `json:"net,omitempty" yaml:"net,omitempty"`
 	// Network address (requires Net)
 	Addr secret.Hidden `json:"addr,omitempty" yaml:"addr,omitempty"`
+	// AddrFile is a path to a file that contains the network address
+	AddrFile string `json:"addr_file,omitempty" yaml:"addr_file,omitempty"`
 	// Database name
 	DBName string `json:"db_name" yaml:"db_name"`
 	// Connection collation
@@ -111,6 +114,16 @@ func (s *SQL) Verify() error {
 	if len(s.DBName) == 0 {
 		return fmt.Errorf("db_name must be specified")
 	}
+	if len(s.User) > 0 && len(s.UserFile) > 0 {
+		return fmt.Errorf("user and user_file are mutually exclusive. Use one or the other not both at the same time")
+	}
+	if len(s.UserFile) > 0 {
+		data, err := os.ReadFile(s.UserFile)
+		if err != nil {
+			return err
+		}
+		s.User = secret.Hidden(data)
+	}
 	if (len(s.Password) > 0 || len(s.PasswordFile) > 0) && len(s.User) == 0 {
 		return fmt.Errorf("password or password_file cannot be filled if no user is provided")
 	}
@@ -124,6 +137,16 @@ func (s *SQL) Verify() error {
 			return err
 		}
 		s.Password = secret.Hidden(data)
+	}
+	if len(s.Addr) > 0 && len(s.AddrFile) > 0 {
+		return fmt.Errorf("addr and addr_file are mutually exclusive. Use one or the other not both at the same time")
+	}
+	if len(s.AddrFile) > 0 {
+		data, err := os.ReadFile(s.AddrFile)
+		if err != nil {
+			return err
+		}
+		s.Addr = secret.Hidden(data)
 	}
 	return nil
 }

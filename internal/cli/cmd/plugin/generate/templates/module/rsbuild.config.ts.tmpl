@@ -1,4 +1,7 @@
-import { ModuleFederationOptions, pluginModuleFederation } from "@module-federation/rsbuild-plugin";
+import {
+  ModuleFederationOptions,
+  pluginModuleFederation,
+} from "@module-federation/rsbuild-plugin";
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
@@ -12,7 +15,21 @@ const exposedModules: ModuleFederationOptions["exposes"] = [
 ];
 
 export default defineConfig({
-  server: { port: 3119 },
+  server: {
+    port: 3000 + Math.floor(Math.random() * 1000),
+    strictPort: false,
+    printUrls: process.env.PERSES_CLI
+      ? ({ port, protocol }) => {
+          // custom output for `percli plugin start` to detect port for dev server
+          console.log(
+            `[PERSES_PLUGIN] NAME="${name}" PORT="${port}" PROTOCOL="${protocol}"\n`,
+          );
+          console.log(`Local: ${protocol}://localhost:${port}`);
+          return [];
+        }
+      : true,
+    cors: { origin: "*" },
+  },
   dev: { assetPrefix },
   source: { entry: { main: "./src/index-federation.ts" } },
   output: {
@@ -54,9 +71,17 @@ export default defineConfig({
       },
       dts: false,
       runtime: false,
+      getPublicPath: `function() { return (window.PERSES_PLUGIN_ASSETS_PATH || window.PERSES_APP_CONFIG?.api_prefix || "") + "${assetPrefix}"; }`,
     }),
   ],
   tools: {
     htmlPlugin: false,
+    rspack: (config) => {
+      config.output = config.output || {};
+      if (process.env.NODE_ENV !== "development") {
+        config.output.publicPath = "auto";
+      }
+      return config;
+    },
   },
 });

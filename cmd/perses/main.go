@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -57,12 +57,12 @@ func main() {
 	promRegistry := prometheus.NewRegistry()
 	registerMetrics(promRegistry)
 
-	runner, persistentManager, err := core.New(conf, *pprof, promRegistry, banner)
+	runner, dependencyManager, err := core.New(conf, *pprof, promRegistry, banner)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	defer func() {
-		if daoCloseErr := persistentManager.GetPersesDAO().Close(); daoCloseErr != nil {
+		if daoCloseErr := dependencyManager.Persistence().GetPersesDAO().Close(); daoCloseErr != nil {
 			logrus.WithError(daoCloseErr).Error("unable to close the connection to the database")
 		}
 	}()

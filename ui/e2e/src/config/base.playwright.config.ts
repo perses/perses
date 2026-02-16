@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -63,9 +63,8 @@ const config: PlaywrightTestConfig = {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Keep this in sync with the setting in `.happo.js` for consistency for
-        // canvas elements, which are converted into images when run in playwright
-        // and sent to happo.
+        // Keep this in sync with settings in visual test (happo/playbook/...) for consistency for
+        // canvas elements, which are converted into images when run in playwright and sent to them.
         viewport: { width: 1200, height: 1000 },
       },
     },

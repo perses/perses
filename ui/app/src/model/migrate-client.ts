@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,19 +21,23 @@ const resource = 'migrate';
 export interface MigrateBodyRequest {
   input?: Record<string, string>;
   grafanaDashboard: Record<string, unknown>;
+  useDefaultDatasource?: boolean;
 }
 
 export function useMigrate(): UseMutationResult<DashboardResource, StatusError, MigrateBodyRequest> {
   return useMutation<DashboardResource, StatusError, MigrateBodyRequest>({
     mutationKey: [resource],
     mutationFn: (body) => {
-      const url = buildURL({ apiPrefix: '/api', resource: resource });
+      const url = buildURL({ resource: resource, apiURL: '/api' });
+      const requestBody = {
+        input: body.input || {},
+        grafanaDashboard: body.grafanaDashboard,
+        useDefaultDatasource: !!body.useDefaultDatasource,
+      };
       return fetchJson<DashboardResource>(url, {
         method: HTTPMethodPOST,
         headers: HTTPHeader,
-        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${JSON.stringify(
-          body.grafanaDashboard
-        )}}`,
+        body: JSON.stringify(requestBody),
       });
     },
   });

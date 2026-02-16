@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -62,6 +62,26 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
   },
   { value: 0, format: { unit: 'counts/sec' }, expected: '0 counts/sec' },
   { value: 1, format: { unit: 'ops/sec' }, expected: '1 ops/sec' },
+  {
+    value: 1000,
+    format: { unit: 'decbytes/sec' },
+    expected: '1 KB/s',
+  },
+  {
+    value: 1024,
+    format: { unit: 'bytes/sec' },
+    expected: '1 KiB/s',
+  },
+  {
+    value: 1000,
+    format: { unit: 'decbits/sec' },
+    expected: '1 Kb/s',
+  },
+  {
+    value: 1024,
+    format: { unit: 'bits/sec' },
+    expected: '1 Kib/s',
+  },
 ];
 
 describe('formatValue', () => {

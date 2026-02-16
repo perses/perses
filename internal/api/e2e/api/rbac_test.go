@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -43,7 +43,7 @@ func TestNewProjectEndpoints(t *testing.T) {
 			Login:    usrEntity.GetMetadata().GetName(),
 			Password: usrEntity.Spec.NativeProvider.Password,
 		}
-		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
 			Expect().
 			Status(http.StatusOK)
@@ -84,7 +84,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 			Login:    usrEntity.GetMetadata().GetName(),
 			Password: usrEntity.Spec.NativeProvider.Password,
 		}
-		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
 			Expect().
 			Status(http.StatusOK)
@@ -114,7 +114,7 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 			Login:    usrEntity.GetMetadata().GetName(),
 			Password: usrEntity.Spec.NativeProvider.Password,
 		}
-		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
 			Expect().
 			Status(http.StatusOK)

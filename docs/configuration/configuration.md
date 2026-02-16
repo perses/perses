@@ -6,23 +6,29 @@ Perses is configured via command-line flags and a configuration file
 
 ```bash
   -config string
-        Path to the yaml configuration file for the api. Configuration can be overridden when using the environment variable
+    	Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.
   -log.level string
-        log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
+    	log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
   -log.method-trace
-        Include the calling method as a field in the log. Can be useful to see immediately where the log comes from
+    	include the calling method as a field in the log. Can be useful to see immediately where the log comes from
   -pprof
-        Enable pprof
+    	Enable pprof
   -web.hide-port
-        If true, it won t be print on stdout the port listened to receive the HTTP request
+    	If true, it will not be print on stdout the port listened to receive the HTTP request
   -web.listen-address string
-        The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
+    	The address to listen on for HTTP requests, web interface and telemetry. (default ":8080")
   -web.telemetry-path string
-        Path under which to expose metrics. (default "/metrics")
+    	Path under which to expose metrics. (default "/metrics")
   -web.tls-cert-file string
     	The path to the cert to use for the HTTPS server
+  -web.tls-cipher-suites string
+    	Comma-separated list of TLS cipher suite names
   -web.tls-key-file string
     	The path to the key to use for the HTTPS server
+  -web.tls-max-version string
+    	Maximum TLS version (e.g., "1.2", "1.3")
+  -web.tls-min-version string
+    	Minimum TLS version (e.g., "1.2", "1.3")
 ```
 
 Example:
@@ -82,8 +88,11 @@ Generic placeholders are defined as follows:
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
-# Use it in case you want to prefix the API path. By default the API is served with the path /api. 
+# Use it in case you want to prefix the API path.
+# This can be useful if you are running Perses behind a reverse proxy.
+# By default, the API is served with the path /api.
 # With this config, it will be served with the path <api_prefix>/api
+# Example: "/perses"
 api_prefix: <string> # Optional
   
 # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
@@ -141,6 +150,8 @@ authorization: <Authorization config> # Optional
 
 # When it is true, the authentication and authorization config are considered.
 # And you will need a valid JWT token to contact most of the endpoints exposed by the API
+# If no other authorization provider is set, and enable_auth is set to true, then the perses
+# native authorization provider will be used
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
@@ -199,6 +210,8 @@ oidc:
 # List of the OIDC authentication providers
 oauth:
   - <OAuth provider> # Optional
+# Kubernetes authentication provider
+kubernetes: <Kubernetes provider> # Optionall
 ```
 
 ##### OIDC provider
@@ -216,11 +229,16 @@ client_id: <secret>
 # The Client Secret of the Perses application into the provider
 client_secret: <secret>
 
+# The path to a file containing the client secret
+client_secret_file: <filename> # Optional
+
 device_code:
   # Allow to use a different Client ID for the device code flow
   client_id: <secret> # Optional
   # Allow to use a different Client Secret for the device code flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the device code flow
   scopes:
   - <string> # Optional
@@ -230,6 +248,8 @@ client_credentials:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the client credentials flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the client credentials flow
   scopes:
   - <string> # Optional
@@ -257,6 +277,12 @@ disable_pkce: <boolean> | default = false # Optional
 # The additional url params that will be appended to /authorize provider's endpoint
 url_params:
   <string>: <string> # Optional
+
+# Logout is the configuration used to perform OIDC logout
+logout:
+  # Setting this to true will redirect the user to the provider's logout endpoint after the logout process.
+  # If false, the user will be logged out from Perses only.
+  enabled: <boolean> | default = false # Optional
 ```
 
 ##### OAuth provider
@@ -279,6 +305,8 @@ device_code:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the device code flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the device code flow
   scopes:
     - <string> # Optional
@@ -288,6 +316,8 @@ client_credentials:
   client_id: <secret> # Optional
   # Allow using a different Client Secret for the client credentials flow
   client_secret: <secret> # Optional
+  # The path to a file containing the client secret
+  client_secret_file: <filename> # Optional
   # Allow using different Scopes for the client credentials flow
   scopes:
     - <string> # Optional
@@ -322,6 +352,16 @@ device_auth_url: <string> # Optional
 custom_login_property: <string> # Optional
 ```
 
+##### Kubernetes provider
+
+```yaml
+# Determines if the Kubernetes authentication provider is enabled. This provider must be enabled
+# alongside the kubernetes authorization provider, and cannot be used alongside any other
+# authentication providers
+enable: <boolean>
+
+```
+
 ###### Authentication provider HTTP Config
 
 ```yaml
@@ -335,6 +375,25 @@ tls_config: <TLS config> # Optional
 #### Authorization config
 
 ```yaml
+# Authorization providers
+providers: <Authorization providers> # Optional
+```
+
+##### Authorization Providers
+
+```yaml
+# native authorization provider
+native:
+  <Native provider>
+# Kubernetes authorization provider
+kubernetes: <Kubernetes provider> # Optional
+```
+
+##### Native provider
+```yaml
+# Determines if the native authentication provider is enabled. If security.enable_auth is set to true and no other
+# providers are set then this value will be automatically set to true
+enable: <boolean> #Optional
 # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 check_latest_update_interval: <duration> | default = 30s> # Optional
 
@@ -352,6 +411,28 @@ actions:
 # Resource kinds that are concerned by the permission
 scopes:
   - <enum= kind | "*">
+```
+
+
+##### Kubernetes provider
+```yaml
+# Must be the only authentication provider enabled and must be run alongside the kubernetes
+# authorization option enabled
+enabled: <boolean>
+# The active user in the kubeconfig should have "create" permissions for the `TokenReview` and 
+# `SubjectAccessReview` resources. If the kubeconfig parameter isn't set, the pods service account token
+#  will be used
+kubeconfig: <string> # Optional
+# query per second (QPS) the k8s client will use with the apiserver
+qps <int> | default 500  # Optional
+# burst QPS the k8s client will use with the apiserver
+burst <int> | default 1000  # Optional
+# time an authorizer allow response will be cached for
+authorizer_allow_ttl <duration> | default 5m  # Optional
+# time an authorizer denied will be cached for
+authorizer_deny_ttl <duration> | default 30s  # Optional
+# time an authenticator response will be cached for
+authenticator_ttl <duration> | default 2m  # Optional
 ```
 
 #### CORS config
@@ -422,6 +503,9 @@ tls_config: <TLS config> # Optional
 # Username used for the connection
 user: <secret> # Optional
 
+# The path to a file containing the username
+user_file: <filename> # Optional
+
 # The password associated to the user. Mandatory if the user is set
 password: <secret> # Optional
 
@@ -433,6 +517,9 @@ net: <string> # Optional
 
 # The network address. If set then `net` is mandatory. Example: "localhost:3306"
 addr: <secret> # Optional
+
+# The path to a file containing the network address
+addr_file: <filename> # Optional
 
 # Database name
 db_name: <string> # Optional
@@ -515,39 +602,7 @@ interval: <duration> | default = 1h # Optional
 
 ### TLS config
 
-A TLS config allows configuring TLS connections.
-
-```yaml
-# CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
-ca: <string> # Optional
-ca_file: <filename> # Optional
-
-# Certificate and key for client cert authentication to the server.
-# At most one of cert and cert_file is allowed.
-# At most one of key and key_file is allowed.
-cert: <string> # Optional
-cert_file: <filename> # Optional
-key: <secret> # Optional
-key_file: <filename> # Optional
-
-# ServerName extension to indicate the name of the server.
-# https://tools.ietf.org/html/rfc4366#section-3.1
-server_name: <string> # Optional
-
-# Disable validation of the server certificate.
-insecure_skip_verify: <boolean> # Optional
-
-# Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default minimum version, which is TLS 1.2.
-# See MinVersion in https://pkg.go.dev/crypto/tls#Config.
-min_version: <string> # Optional
-# Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
-# 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
-# If unset, Perses will use Go default maximum version, which is TLS 1.3.
-# See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
-max_version: <string> # Optional
-```
+See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ### Provisioning config
 
@@ -630,7 +685,7 @@ oauth: <Oauth specification> # Optional
 authorization: <Authorization specification> # Optional
 
 # Config used to connect to the targets.
-tls_config: <TLS Config specification> # Optional
+tls_config: <TLS config> # Optional
 
 headers:
   <string>: <string> # Optional
@@ -656,10 +711,6 @@ See the [BasicAuth](../api/secret.md#basic-auth-specification) specification.
 ###### Authorization specification
 
 See the [Authorization](../api/secret.md#authorization-specification) specification.
-
-###### TLS Config specification
-
-See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ##### KubernetesSD Config
 

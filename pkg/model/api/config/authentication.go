@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,8 +14,10 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"time"
 
@@ -30,9 +32,24 @@ const (
 )
 
 type OAuthOverride struct {
-	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
-	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
-	Scopes       []string      `json:"scopes" yaml:"scopes"`
+	ClientID         secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret     secret.Hidden `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile string        `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
+	Scopes           []string      `json:"scopes" yaml:"scopes"`
+}
+
+func (o *OAuthOverride) Verify() error {
+	if len(o.ClientSecret) > 0 && len(o.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(o.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(o.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		o.ClientSecret = secret.Hidden(data)
+	}
+	return nil
 }
 
 // appendIfMissing will append the value in the slice, only if not already present.
@@ -49,6 +66,28 @@ type HTTP struct {
 	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
 }
 
+func (h HTTP) MarshalYAML() (any, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return struct {
+		Timeout   common.Duration         `json:"timeout" yaml:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config" yaml:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	}, nil
+}
+
+func (h HTTP) MarshalJSON() ([]byte, error) {
+	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
+	return json.Marshal(struct {
+		Timeout   common.Duration         `json:"timeout"`
+		TLSConfig *secret.PublicTLSConfig `json:"tls_config"`
+	}{
+		Timeout:   h.Timeout,
+		TLSConfig: cfg,
+	})
+}
+
 func (h *HTTP) Verify() error {
 	if h.Timeout == 0 {
 		h.Timeout = common.Duration(DefaultProviderTimeout)
@@ -61,6 +100,7 @@ type Provider struct {
 	Name              string         `json:"name" yaml:"name"`
 	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
 	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
+	ClientSecretFile  string         `json:"client_secret_file,omitempty" yaml:"client_secret_file,omitempty"`
 	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
 	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
@@ -78,7 +118,25 @@ func (p *Provider) Verify() error {
 	if p.ClientID == "" {
 		return errors.New("provider's `client_id` is mandatory")
 	}
+	if len(p.ClientSecret) > 0 && len(p.ClientSecretFile) > 0 {
+		return errors.New("only one of `client_secret` or `client_secret_file` can be set")
+	}
+	if len(p.ClientSecretFile) > 0 {
+		data, err := os.ReadFile(p.ClientSecretFile)
+		if err != nil {
+			return fmt.Errorf("failed to read client_secret_file: %w", err)
+		}
+		p.ClientSecret = secret.Hidden(data)
+	}
 	return nil
+}
+
+type K8sAuthnProvider struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
+type OIDCLogout struct {
+	Enabled bool `json:"enabled" yaml:"enabled"`
 }
 
 type OIDCProvider struct {
@@ -87,6 +145,7 @@ type OIDCProvider struct {
 	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
+	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
 }
 
 func (p *OIDCProvider) Verify() error {
@@ -118,13 +177,15 @@ func (p *OAuthProvider) Verify() error {
 	return nil
 }
 
-type AuthProviders struct {
-	EnableNative bool            `json:"enable_native" yaml:"enable_native"`
-	OAuth        []OAuthProvider `json:"oauth,omitempty" yaml:"oauth,omitempty"`
-	OIDC         []OIDCProvider  `json:"oidc,omitempty" yaml:"oidc,omitempty"`
+type AuthenticationProviders struct {
+	EnableNative bool `json:"enable_native" yaml:"enable_native"`
+	// +optional
+	KubernetesProvider K8sAuthnProvider `json:"kubernetes,omitzero" yaml:"kubernetes,omitempty"`
+	OAuth              []OAuthProvider  `json:"oauth,omitempty" yaml:"oauth,omitempty"`
+	OIDC               []OIDCProvider   `json:"oidc,omitempty" yaml:"oidc,omitempty"`
 }
 
-func (p *AuthProviders) Verify() error {
+func (p *AuthenticationProviders) Verify() error {
 	var tmpOIDCSlugIDs []string
 	for _, prov := range p.OIDC {
 		var ok bool
@@ -155,7 +216,7 @@ type AuthenticationConfig struct {
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
 	// Providers configure the different authentication providers
-	Providers AuthProviders `json:"providers" yaml:"providers"`
+	Providers AuthenticationProviders `json:"providers" yaml:"providers"`
 }
 
 func (a *AuthenticationConfig) Verify() error {

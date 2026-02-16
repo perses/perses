@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,6 +19,15 @@ export interface JoinByColumnValueTransform {
   kind: 'JoinByColumnValue';
   spec: TransformCommonSpec & {
     columns: string[];
+  };
+}
+
+export interface ExtractColumnFieldsTransform {
+  kind: 'ExtractColumnFields';
+  spec: TransformCommonSpec & {
+    column: string;
+    format: 'JSON' | 'Regex' | 'SplitByDelimiter' | 'KeyValuePairs';
+    matcher?: string;
   };
 }
 
@@ -46,7 +55,8 @@ export type Transform =
   | JoinByColumnValueTransform
   | MergeColumnsTransform
   | MergeIndexedColumnsTransform
-  | MergeSeriesTransform;
+  | MergeSeriesTransform
+  | ExtractColumnFieldsTransform;
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
@@ -54,4 +64,5 @@ export const TRANSFORM_TEXT = {
   MergeColumns: 'Merge columns',
   MergeIndexedColumns: 'Merge indexed columns',
   MergeSeries: 'Merge series',
+  ExtractColumnFields: 'Extract column fields',
 };

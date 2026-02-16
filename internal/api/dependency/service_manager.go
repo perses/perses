@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -111,7 +111,7 @@ type service struct {
 	view               view.Service
 }
 
-func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err

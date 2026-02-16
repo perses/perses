@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -19,8 +19,9 @@ import (
 )
 
 type Migrate struct {
-	Input            map[string]string `json:"input,omitempty"`
-	GrafanaDashboard json.RawMessage   `json:"grafanaDashboard"`
+	Input                map[string]string `json:"input,omitempty"`
+	GrafanaDashboard     json.RawMessage   `json:"grafanaDashboard"`
+	UseDefaultDatasource bool              `json:"useDefaultDatasource,omitempty"`
 }
 
 func (m *Migrate) UnmarshalJSON(data []byte) error {

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -172,7 +172,7 @@ func (o *option) processFile(file string, extension string) error {
 	if writeErr := os.WriteFile(outputFilePath, cmdOutput, 0644); writeErr != nil { // nolint: gosec
 		return fmt.Errorf("error writing to %s: %v", outputFilePath, writeErr)
 	}
-	return output.HandleString(o.writer, fmt.Sprintf("Succesfully built %s at %s", file, outputFilePath))
+	return output.HandleString(o.writer, fmt.Sprintf("Successfully built %s at %s", file, outputFilePath))
 }
 
 // buildOutputFilePath generates the output file path based on the input file path

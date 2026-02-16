@@ -25,7 +25,7 @@ metadata:
   project: MySuperProject
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "Dashboard" ]
 ```
 
@@ -42,7 +42,7 @@ metadata:
   name: variable-editor
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "Variable" ]
 ```
 
@@ -113,7 +113,7 @@ metadata:
   name: admin-editor
 spec:
   permissions:
-    - actions: [ "edit" ]
+    - actions: [ "update" ]
       scopes: [ "*" ]
 ```
 
@@ -128,3 +128,9 @@ To do that, there are multiple mechanisms:
 - cache is refreshed if roles and rolebindings retrieved from the user's JWT are different from the cache
 - cache is refreshed when a new role is created, edited or deleted
 - cache is refreshed when a new rolebinding is created, edited or deleted
+
+
+## Kubernetes
+
+When enabled in config, Perses can use Kubernetes RBAC for Namespaces, PersesDashboards (operator CRD), and PersesDatasources (operator CRD). 
+More information can be found in the [config docs](../configuration/configuration.md).All other permissions for a user are pulled from the `authorization.guest_permissions` permission set. 

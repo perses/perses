@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -59,6 +59,7 @@ func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
 		Body(body).
 		Do().
 		Object(result)
+
 	return result, err
 }
 

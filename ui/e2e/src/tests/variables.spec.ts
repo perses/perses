@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,8 +20,7 @@ test.use({
 
 test.describe('Dashboard: Variables', () => {
   test('can add simple text variable', async ({ dashboardPage }) => {
-    const initialCount = await dashboardPage.variableList.count();
-    // const initialCount = await dashboardPage.variableList.getByTestId(/variable-.+/).count(); // TODO (gladorme): this test is wrong, it should based this locator
+    const initialCount = await dashboardPage.variableList.getByTestId(/variable-.+/).count();
 
     await dashboardPage.startEditing();
     await dashboardPage.startEditingVariables();
@@ -41,14 +40,12 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.applyChanges();
     await dashboardPage.saveChanges();
 
-    await expect(dashboardPage.variableList).toHaveCount(initialCount + 1);
-    // await expect(dashboardPage.variableList.getByTestId(/variable-.+/)).toHaveCount(initialCount + 1); // TODO (gladorme): this test is wrong, it should based this locator
+    await expect(dashboardPage.variableList.getByTestId(/variable-.+/)).toHaveCount(initialCount + 1);
     await expect(dashboardPage.variableList).toContainText([/Text Var/]);
   });
 
   test('can add simple list variable', async ({ dashboardPage }) => {
-    const initialCount = await dashboardPage.variableList.count(); // Builtin variables are hidden
-    // const initialCount = await dashboardPage.variableList.getByTestId(/variable-.+/).count();  // TODO (gladorme): this test is wrong, it should based this locator
+    const initialCount = await dashboardPage.variableList.getByTestId(/variable-.+/).count();
     await dashboardPage.startEditing();
     await dashboardPage.startEditingVariables();
     const variableEditor = dashboardPage.getVariableEditor();
@@ -68,8 +65,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.applyChanges();
     await dashboardPage.saveChanges();
 
-    await expect(dashboardPage.variableList).toHaveCount(initialCount + 1);
-    // await expect(dashboardPage.variableList.getByTestId(/variable-.+/)).toHaveCount(initialCount + 1); // TODO (gladorme): this test is wrong, it should based this locator
+    await expect(dashboardPage.variableList.getByTestId(/variable-.+/)).toHaveCount(initialCount + 1);
     await expect(dashboardPage.variableList).toContainText([/List Var/]);
   });
 });

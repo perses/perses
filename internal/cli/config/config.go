@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -151,9 +151,10 @@ func SetProject(project string) error {
 	})
 }
 
-func SetAccessToken(token string) error {
+func SetTokens(accessToken, refreshToken string) error {
 	return Write(&Config{
-		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(token)},
+		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(accessToken)},
+		RefreshToken:     refreshToken,
 	})
 }
 
@@ -196,6 +197,9 @@ func Write(cfg *Config) error {
 				}
 				if restConfig.NativeAuth != nil {
 					previousConf.RestClientConfig.NativeAuth = restConfig.NativeAuth
+				}
+				if restConfig.K8sAuth != nil {
+					previousConf.RestClientConfig.K8sAuth = restConfig.K8sAuth
 				}
 				if len(restConfig.Headers) > 0 {
 					previousConf.RestClientConfig.Headers = restConfig.Headers

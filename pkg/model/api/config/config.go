@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -48,6 +48,10 @@ type dashboardSelector struct {
 }
 type Config struct {
 	// Use it in case you want to prefix the API path.
+	// This can be useful if you are running Perses behind a reverse proxy.
+	// By default, the API is served with the path /api.
+	// With this config, it will be served with the path <api_prefix>/api
+	// Example: "/perses"
 	APIPrefix string `json:"api_prefix,omitempty" yaml:"api_prefix,omitempty"`
 	// Security contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
 	Security Security `json:"security,omitempty" yaml:"security,omitempty"`

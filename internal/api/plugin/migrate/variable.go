@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -177,5 +177,5 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 }
 
 func ExecuteVariableScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangScript(cueScript, grafanaVariableData, "#var", "variable")
+	return executeCuelangScript(cueScript, grafanaVariableData, varDefID, "variable")
 }

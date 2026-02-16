@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,7 +23,14 @@ package v1
 
 import "github.com/perses/perses/cue/model/api/v1/variable"
 
+#Variable: kind: #KindVariable @go(Kind)
+
+#GlobalVariable: kind: #KindGlobalVariable @go(Kind)
+
 #VariableSpec: {
-	kind: variable.#Kind @go(Kind)
-	spec: _              @go(Spec)
+	kind: variable.#KindText @go(Kind)
+	spec: variable.#TextSpec  @go(Spec)
+} | {
+	kind: variable.#KindList @go(Kind)
+	spec: variable.#ListSpec  @go(Spec)
 }

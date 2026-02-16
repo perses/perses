@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,10 +12,10 @@
 // limitations under the License.
 
 /**
- * Calls `global.fetch` and determines which type of error to show for non-200 responses.
+ * Calls `globalThis.fetch` and determines which type of error to show for non-200 responses.
  */
-export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
-  const response = await global.fetch(...args);
+export async function fetch(...args: Parameters<typeof globalThis.fetch>): Promise<Response> {
+  const response = await globalThis.fetch(...args);
   if (response.ok === false) {
     const contentType = response.headers.get('content-type');
     if (contentType?.includes('application/json')) {
@@ -38,11 +38,11 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
 }
 
 /**
- * Calls `global.fetch` and throws a `FetchError` on non-200 responses, but also
+ * Calls `globalThis.fetch` and throws a `FetchError` on non-200 responses, but also
  * decodes the response body as JSON, casting it to type `T`. Returns the
  * decoded body.
  */
-export async function fetchJson<T>(...args: Parameters<typeof global.fetch>): Promise<T> {
+export async function fetchJson<T>(...args: Parameters<typeof globalThis.fetch>): Promise<T> {
   const response = await fetch(...args);
   if (!response.ok) {
     throw new FetchError(response);

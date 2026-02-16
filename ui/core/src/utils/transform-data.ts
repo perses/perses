@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Transform } from '@perses-dev/core';
-import { useMemo } from 'react';
 
 /*
  * Join: Regroup rows with equal cell value in a column.
@@ -145,7 +144,7 @@ export function applyMergeIndexedColumnsTransform(
 
   for (const entry of data) {
     const indexedColumns = Object.keys(entry).filter((k) =>
-      new RegExp('^(' + column + ' #\\d+)|(' + column + ')$').test(k)
+      new RegExp('^((' + column + ' #\\d+)|(' + column + '))$').test(k)
     );
     const indexedColumnValues: Record<string, unknown> = {};
 
@@ -253,11 +252,4 @@ export function transformData(
       }, {});
   });
   return result;
-}
-
-export function useTransformData(
-  data: Array<Record<string, unknown>>,
-  transforms: Transform[]
-): Array<Record<string, unknown>> {
-  return useMemo(() => transformData(data, transforms), [data, transforms]);
 }

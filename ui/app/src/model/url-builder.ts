@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getBasePathName } from './route';
+import { PERSES_APP_CONFIG } from '../config';
 
-const apiPrefix = '/api/v1';
+const apiUrl = '/api/v1';
 
 export type URLParams = {
   resource: string;
@@ -21,12 +21,12 @@ export type URLParams = {
   project?: string;
   pathSuffix?: string[];
   queryParams?: URLSearchParams;
-  apiPrefix?: string;
+  apiURL?: string;
 };
 
 export default function buildURL(params: URLParams): string {
-  const basePath = getBasePathName();
-  let url = params.apiPrefix === undefined ? apiPrefix : params.apiPrefix;
+  const basePath = PERSES_APP_CONFIG.api_prefix;
+  let url = params.apiURL === undefined ? apiUrl : params.apiURL;
   if (params.project !== undefined && params.project.length > 0) {
     url = `${url}/projects/${encodeURIComponent(params.project)}`;
   }

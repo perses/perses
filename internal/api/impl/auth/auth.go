@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,10 +14,13 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -30,6 +33,7 @@ import (
 	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/sirupsen/logrus"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
 )
@@ -39,33 +43,41 @@ const (
 	xForwardedHost  = "X-Forwarded-Host"
 	// redirectQueryParam is a query param key used to retrieve the original path that
 	// a user desired before being redirected to the login page.
-	// It is used in native and external authentication flows.
+	// It is used in native, external and delegated authentication flows.
 	redirectQueryParam = "rd"
 	// redirectURLQueryParam is a query param key used to send to external provider the
 	// callback URL that will serve to retrieve the token.
 	// It is used only in external authentication flows.
 	redirectURIQueryParam = "redirect_uri"
+	// stateSeparator is the separator used to separate the state and the redirect path in the oauth2 flow's state.
+	// It is used only in external authentication flows (oauth2 and oidc)
+	stateSeparator = "--"
 )
 
-func getRedirectURI(r *http.Request, authKind string, slugID string) string {
-	rd := url.URL{}
+func getRootURL(r *http.Request, apiPrefix string) url.URL {
+	u := url.URL{}
 
 	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
-	rd.Host = r.Header.Get(xForwardedHost)
-	if rd.Host == "" {
-		rd.Host = r.Host
+	u.Host = r.Header.Get(xForwardedHost)
+	if u.Host == "" {
+		u.Host = r.Host
 	}
 
 	// Get the scheme trying first the X-Forwarded-Proto header, otherwise take it from request
-	rd.Scheme = r.Header.Get(xForwardedProto)
-	if rd.Scheme == "" {
-		rd.Scheme = "http"
+	u.Scheme = r.Header.Get(xForwardedProto)
+	if u.Scheme == "" {
+		u.Scheme = "http"
 		if r.TLS != nil {
-			rd.Scheme = "https"
+			u.Scheme = "https"
 		}
 	}
+	u.Path = apiPrefix
+	return u
+}
 
-	rd.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
+func getRedirectURI(r *http.Request, authKind, slugID, apiPrefix string) string {
+	rd := getRootURL(r, apiPrefix)
+	rd.Path += fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
 	return rd.String()
 }
 
@@ -81,18 +93,30 @@ func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
 	}, nil
 }
 
-type endpoint struct {
-	endpoints       []route.Endpoint
-	jwt             crypto.JWT
-	tokenManagement tokenManagement
-	isAuthEnable    bool
+type authEndpoint interface {
+	route.Endpoint
+	GetAuthKind() string
+	GetSlugID() string
+	GetExtraProviderLogoutHandler() echo.HandlerFunc
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+type endpoint struct {
+	endpoints        []authEndpoint
+	jwt              crypto.JWT
+	tokenManagement  tokenManagement
+	authz            authorization.Authorization
+	isAuthnEnable    bool
+	isDelegatedAuthn bool
+}
+
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
-		isAuthEnable:    isAuthEnable,
+		authz:           authz,
+		isAuthnEnable:   isAuthnEnable,
+		// Currently only k8s is a delegated authentication provider
+		isDelegatedAuthn: providers.KubernetesProvider.Enable,
 	}
 
 	// Register the native provider if enabled
@@ -102,7 +126,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz)
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +135,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz)
+		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
 			return nil, err
 		}
@@ -121,15 +145,17 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
-	if !e.isAuthEnable {
+	if !e.isAuthnEnable {
 		return
 	}
 	providersGroup := g.Group(fmt.Sprintf("/%s", utils.PathAuthProviders))
 	for _, ep := range e.endpoints {
 		ep.CollectRoutes(providersGroup)
 	}
-	g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
-	g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, true)
+	if !e.isDelegatedAuthn {
+		g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
+		g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, false)
+	}
 }
 
 func (e *endpoint) refresh(ctx echo.Context) error {
@@ -153,7 +179,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	accessToken, err := e.tokenManagement.accessToken(claims.Subject, ctx.SetCookie)
+	accessToken, err := e.tokenManagement.accessToken(claims.Subject, claims.ProviderInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -169,6 +195,20 @@ func (e *endpoint) logout(ctx echo.Context) error {
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
+
+	providerInfo, err := e.authz.GetProviderInfo(ctx)
+	if err != nil {
+		logrus.WithError(err).Error("error while retrieving provider info from session")
+		return apiinterface.InternalError
+	}
+
+	for _, ep := range e.endpoints {
+		if ep.GetAuthKind() == providerInfo.ProviderKind && ep.GetSlugID() == providerInfo.ProviderID {
+			if logoutHandler := ep.GetExtraProviderLogoutHandler(); logoutHandler != nil {
+				return logoutHandler(ctx)
+			}
+		}
+	}
 
 	return ctx.Redirect(302, "/")
 }
@@ -212,4 +252,24 @@ func withOAuthErrorMdw(handler echo.HandlerFunc) echo.HandlerFunc {
 
 		return err
 	}
+}
+
+// encodeOAuthState generates a random state to be used in the OAuth flow.
+// It should contain a redirect path to be able to redirect the user back to the right page after authentication.
+// Note that we don't reuse only the redirectPath because we want a secure enough state to prevent CSRF attacks.
+func encodeOAuthState(redirectPath string) string {
+	b := make([]byte, 8) // 8 bytes = 16 hexadecimals
+	_, _ = rand.Read(b)
+	randomPart := hex.EncodeToString(b)
+	return fmt.Sprintf("%s%s%s", randomPart, stateSeparator, redirectPath)
+}
+
+// decodeOAuthState extracts the redirect path from the state string.
+// If the format is invalid or the redirect path is missing, returns an empty string.
+func decodeOAuthState(state string) string {
+	parts := strings.SplitN(state, stateSeparator, 2)
+	if len(parts) == 2 {
+		return parts[1]
+	}
+	return ""
 }

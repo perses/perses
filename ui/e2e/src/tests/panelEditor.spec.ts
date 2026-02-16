@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -57,7 +57,7 @@ test.describe('Dashboard: Panel Editor', () => {
     await dashboardPage.addPanel();
     const panelEditor = dashboardPage.getPanelEditor();
     await panelEditor.isVisible();
-    const settingsTab = dashboardPage.page.getByRole('tab', { name: 'Settings', exact: true });
+    const settingsTab = dashboardPage.page.getByRole('tab', { name: 'General Settings', exact: true });
     await settingsTab.click();
     const resetButton = dashboardPage.page.getByRole('button', { name: 'Reset To Defaults', exact: true });
     await resetButton.click();

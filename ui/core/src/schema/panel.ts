@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, Quer
 import { PluginSchema, pluginSchema } from './plugin';
 
 export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
-  name: z.string().min(1, { message: 'Required' }),
+  name: z.string().optional(),
   description: z.string().optional(),
 });
 
@@ -37,7 +37,7 @@ export const linkSchema: z.ZodSchema<Link> = z.object({
 });
 
 export const panelSpecSchema: z.ZodSchema<PanelSpec> = z.object({
-  display: panelDisplaySpec,
+  display: panelDisplaySpec.optional(),
   plugin: pluginSchema,
   queries: z.array(querySpecSchema).optional(),
   links: z.array(linkSchema).optional(),
@@ -45,7 +45,7 @@ export const panelSpecSchema: z.ZodSchema<PanelSpec> = z.object({
 
 export function buildPanelSpecSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelSpec> {
   return z.object({
-    display: panelDisplaySpec,
+    display: panelDisplaySpec.optional(),
     plugin: pluginSchema,
     queries: z.array(querySpecSchema).optional(),
     links: z.array(linkSchema).optional(),

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,19 +12,10 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
-import happoPlaywright from 'happo-playwright';
-import { AppProjectPage, DashboardPage } from '../pages';
+import { AppProjectPage } from '../pages';
 
 test.describe('ProjectView', () => {
   const project = 'perses';
-
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
 
   test('can navigate to a dashboard', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
@@ -40,9 +31,6 @@ test.describe('ProjectView', () => {
     await projectPage.goto(project);
 
     await projectPage.navigateToDashboard(project, 'Demo');
-
-    const dashboardPage = new DashboardPage(page);
-    await dashboardPage.goBackToProjectPage(project);
 
     await projectPage.goto(project);
     await projectPage.navigateToDashboardFromRecentDashboards(project, 'Demo');

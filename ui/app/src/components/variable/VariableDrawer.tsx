@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,12 +20,12 @@ import {
   ValidationProvider,
   VariableEditorForm,
   useInitialTimeRange,
-  remotePluginLoader,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
 import { useDatasourceApi } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -45,6 +45,7 @@ export function VariableDrawer<T extends Variable>({
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
   const datasourceApi = useDatasourceApi();
+  const pluginLoader = useRemotePluginLoader();
 
   const variableDef = useMemo(() => {
     const result = structuredClone(variable.spec);
@@ -71,7 +72,7 @@ export function VariableDrawer<T extends Variable>({
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={remotePluginLoader()}>
+        <PluginRegistry pluginLoader={pluginLoader}>
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>

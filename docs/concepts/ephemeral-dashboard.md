@@ -1,20 +1,18 @@
 # Ephemeral Dashboard
 
-## What it is
-
-An ephemeral dashboard is a standalone dashboard with a time-to-live (TTL), which is why it's referred to as 'ephemeral'.
+An ephemeral dashboard is like a regular dashboard but with a time-to-live (TTL), which is why it's referred to as 'ephemeral'.
 
 Using this feature, a user can create a real, but temporary, dashboard, that can be shared with others and will be automatically removed from the database, after a specified period.
 
 ## Why you might need it
 
-The Ephemeral Dashboard resource addresses the need of generating preview dashboards when working with [Dashboard-as-Code](../concepts/dashboard-as-code.md).
+Ephemeral Dashboards were initially introduced to address the need of generating preview dashboards when working with [Dashboard-as-Code](../concepts/dashboard-as-code.md). Besides, other usages could be considered: temporary dashboard clone to better manage or share info around an ongoing incident, or simply to create a playground dashboard you won't have to remember to clean up later.
 
 ## How it can be used
 
-### In the CLI:
+### Using the CLI:
 
-The ephemeral dashboard was introduced with the continuous integration use-case in mind, hence why it integrates with [percli](../cli.md).
+Ephemeral dashboards were designed with continuous integration in mind, hence why it integrates with [percli](../cli.md).
 
 ```bash
 $ percli dac preview -h
@@ -32,9 +30,9 @@ $ percli dac preview -d ./build
 
 It's thus also integrated in the [standard workflow for Dashboard-as-Code](https://github.com/perses/cli-actions/blob/main/README.md#dac) since it relies on percli.
 
-### In the Perses UI:
+### Using the UI:
 
-When duplicating a dashboard in the Perses UI, you have the possibility to make it ephemeral by providing a time-to-live(TTL):
+When duplicating a dashboard in the Perses UI, you have the possibility to make it ephemeral by providing a time-to-live (TTL):
 
 ![temporary copy](https://github.com/user-attachments/assets/3d2cb1e6-958e-42d2-8964-4419b7490653)
 

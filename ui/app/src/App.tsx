@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,10 +14,12 @@
 import { Box } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
 import { ReactElement, Suspense } from 'react';
+import { ReactRouterProvider } from '@perses-dev/plugin-system';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
-import { SignInRoute, SignUpRoute } from './model/route';
+import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
 import { PersesLoader } from './components/PersesLoader';
+import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {
   return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
@@ -35,7 +37,9 @@ function App(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+      {location.pathname !== SignInRoute &&
+        location.pathname !== SignUpRoute &&
+        location.pathname !== DelegatedAuthnErrorRoute && <Header />}
 
       <Box
         sx={{
@@ -47,9 +51,11 @@ function App(): ReactElement {
           '--perses-colors-primary': (theme) => theme.palette.primary.main,
         }}
       >
-        <Suspense fallback={<PersesLoader />}>
-          <Outlet />
-        </Suspense>
+        <ReactRouterProvider>
+          <Suspense fallback={<PersesLoader />}>
+            <Outlet />
+          </Suspense>
+        </ReactRouterProvider>
       </Box>
       {!isDashboardViewRoute(location.pathname) && <Footer />}
     </Box>

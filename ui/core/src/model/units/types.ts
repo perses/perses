@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,16 @@ import { Duration } from 'date-fns';
 import { AbsoluteTimeRange, DurationString } from '../time';
 import { FormatOptions } from './units';
 
-export type UnitGroup = 'Time' | 'Percent' | 'Decimal' | 'Bytes' | 'Throughput' | 'Currency';
+export type UnitGroup =
+  | 'Time'
+  | 'Percent'
+  | 'Decimal'
+  | 'Bytes'
+  | 'Bits'
+  | 'Throughput'
+  | 'Currency'
+  | 'Temperature'
+  | 'Date';
 
 /**
  * Configuration for rendering units that are part of a group.

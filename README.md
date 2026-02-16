@@ -4,9 +4,9 @@
     <a href="https://github.com/perses" target="_blank"><img alt="Perses" src="/docs/images/perses_logo_cropped.svg"></a><br>Perses
 </h1>
 
-[![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci)
-[![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago)
-[![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3AReact)
+[![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci+branch%3Amain)
+[![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago+branch%3Amain)
+[![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3AReact+branch%3Amain)
 [![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9410/badge)](https://www.bestpractices.dev/projects/9410)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/perses/perses/badge)](https://securityscorecards.dev/viewer/?uri=github.com/perses/perses)
@@ -15,11 +15,11 @@
 
 ## Overview
 
-Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics & Tempo traces, with plans to expand its capabilities in the future to include logging, profiling, additional technologies for monitoring and tracing, and more.
+Perses is first and foremost a dashboard tool that you can use to display a variety of observability data. It currently supports Prometheus metrics, Tempo traces, Loki for logs, Pyroscope for profiling, bringing together all four observability pillars in one place. As the project continues to evolve, it will expand support for additional tools to give users even more flexibility and insight.
 
 Perses is a [Cloud Native Computing Foundation](https://cncf.io) sandbox project.
 
-![img.png](https://perses.dev/assets/images/perses_overview.gif)
+![img.png](https://perses.dev/assets/images/home/perses_overview.gif)
 
 Beyond its core usage, Perses aims to achieve several broader goals:
 
@@ -71,6 +71,13 @@ You can launch a Perses container for trying it out with:
 ```bash
 docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 ```
+
+### Homebrew
+
+We have [a Homebrew tap](https://github.com/perses/homebrew-tap) so macOS and Linux users can install with:
+
+`brew install perses/tap/perses` for the server and web UI
+`brew install perses/tap/percli` for the CLI tool
 
 ### Building from source
 

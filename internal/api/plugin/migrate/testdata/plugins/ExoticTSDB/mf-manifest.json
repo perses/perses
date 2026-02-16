@@ -1,3 +1,12 @@
 {
-  "this has no use for this test right?": true
+  "id": "ExoticQuery",
+  "name": "ExoticQuery",
+  "metaData": {
+    "name": "ExoticQuery",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "0.10.0",
+      "buildName": "@perses-dev/exotic-query-plugin"
+    }
+  }
 }

@@ -6,6 +6,9 @@ Perses comes with validation capabilities based on [CUE](https://cuelang.org/), 
 
 This section explains about the format any plugin should follow to be accepted & registered by Perses at runtime.
 
+!!! tip
+    Some of the below examples rely on the [`github.com/perses/shared/cue/common` package](https://registry.cue.works/docs/github.com/perses/shared/cue/common). This CUE package provides standard definitions (e.g unit, legend..) used by most of the official plugins & that any custom plugin could reuse as well. Leveraging a standard definition is likely to allow leveraging as well the frontend code that corresponds to it (e.g FormatControls, LegendOptionsEditor..)
+
 ### Variable
 
 A variable plugin looks like the following:
@@ -32,6 +35,8 @@ A panel plugin looks like the following:
 
 ```cue
 package model
+
+import "github.com/perses/shared/cue/common"
 
 kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
 spec: {
@@ -89,7 +94,7 @@ A panel migration file looks like the following:
 package migrate
 
 import (
-	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
+	commonMigrate "github.com/perses/shared/cue/common/migrate"
 )
 
 #grafanaType: "bargauge"
@@ -113,10 +118,8 @@ spec: {
 
 - The file must be named `migrate.cue`.
 - `#grafanaType` is a mandatory definition to provide, whose string value must match the `type` of the Grafana panel you want to migrate.
-- `#panel` is the reference used by Perses to inject the Grafana panel objects to migrate.
-    - You can access the different fields via the `#panel.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-    - Declaring `#panel: _` like in the above example is optional, it's just there to enable standalone validation of the file (`_` means "any" in CUE).
-- The file consists of field assignments, using the content of `#panel`. The end result must match the model of the considered Perses panel plugin.
+- `#panel` is the reference used by Perses to inject the Grafana panel objects to migrate. You can access the different fields via the `#panel.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#panel`. The end result must match the model of the considered Perses panel plugin.
     - Optionally, you can use the `github.com/perses/perses/cue/schemas/common/migrate` package that Perses provides in order to remap some of the attributes:
         - `#mapping.unit`: mapping table for the `unit` attribute (key = grafana unit, value = perses equivalent).
         - `#mapping.calc`: mapping table for the `calculation` attribute (key = grafana unit, value = perses equivalent).
@@ -132,8 +135,6 @@ package migrate
 
 #target: _
 
-// NB we would need `if` to support short-circuit in order to avoid code duplication here.
-//    See https://github.com/cue-lang/cue/issues/2232
 if (*#target.datasource.type | null) == "prometheus" && #target.expr != _|_ {
 	kind: "PrometheusTimeSeriesQuery"
 	spec: {
@@ -150,19 +151,43 @@ if (*#target.datasource.type | null) == "prometheus" && #target.expr != _|_ {
 			minStep: #target.interval
 		}
 	}
-},
+}
+```
+
+Alternatively, the same migration logic can be written this way:
+
+```cue
+package migrate
+
+#target: {
+	type: "prometheus"
+	expr: string
+	...
+}
+
+kind: "PrometheusTimeSeriesQuery"
+spec: {
+	datasource: {
+		kind: "PrometheusDatasource"
+		name: #target.datasource.uid
+	}
+	query:         #target.expr
+	#legendFormat: *#target.legendFormat | "__auto"
+	if #legendFormat != "__auto" {
+		seriesNameFormat: #legendFormat
+	}
+	if #target.interval != _|_ {
+		minStep: #target.interval
+	}
+}
 ```
 
 - The file must be named `migrate.cue`.
-- `#target` is the reference used by Perses to inject the Grafana target objects to migrate.
-    - You can access the different fields via the `#target.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-    - Declaring `#target: _` like in the above example is optional, it's just there to enable standalone validation of the file (`_` means "any" in CUE).
-- The migration logic must be wrapped into **one or more conditional block(s)**. For each of them:
-    - The condition is about one or more attributes from the `#target` definition. You most certainly want a check on the `#target.datasource.type` value like shown in above example.
-    - The body consists of field assignments, using the content of `#target`. The end result must match the model of the considered Perses query plugin.
+- `#target` is the reference used by Perses to inject the Grafana target objects to migrate. You can access the different fields via the `#target.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the targets (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#target`. The end result must match the model of the considered Perses query plugin.
 
 !!! warning
-    Ensure that your file evaluates to an empty result if the provided `#target` value does not match the expected type.
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#target` value does not match the expected payload.
 
 ### Variable
 
@@ -173,23 +198,38 @@ package migrate
 
 import "strings"
 
-#var: _
+#grafanaVar: _ 
 
-if #var.type == "custom" || #var.type == "interval" {
+if #grafanaVar.type == "custom" || #grafanaVar.type == "interval" {
 	kind: "StaticListVariable"
     spec: {
-        values: strings.Split(#var.query, ",")
+        values: strings.Split(#grafanaVar.query, ",")
     }
 }
 ```
 
+Alternatively, the same migration logic can be written this way:
+
+```cue
+package migrate
+
+import "strings"
+
+#grafanaVar: {
+	type: "custom" | "interval"
+	query: string
+	...
+}
+
+kind: "StaticListVariable"
+spec: {
+	values: strings.Split(#grafanaVar.query, ",")
+}
+```
+
 - The file must be named `migrate.cue`.
-- `#var` is the reference used by Perses to inject the Grafana variable objects to migrate.
-    - You can access the different fields via the `#var.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
-    - Declaring `#var: _` like in the above example is optional, it's just there to enable standalone validation of the file (`_` means "any" in CUE).
-- The migration logic must be wrapped into **one or more conditional block(s)**. For each of them:
-    - The condition is about one or more attributes from the `#var` definition. You most certainly want a check on the `#var.type` value like shown in above example.
-    - The body consists of field assignments, using the content of `#var`. The end result must match the model of the considered Perses variable plugin.
+- `#grafanaVar` is the reference used by Perses to inject the Grafana variable objects to migrate. You can access the different fields via the `#grafanaVar.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant variable type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
+- The logic consists of field assignments, using the content of `#grafanaVar`. The end result must match the model of the considered Perses variable plugin.
 
 !!! warning
-    Ensure that your file evaluates to an empty result if the provided `#var` value does not match the expected type.
+    Ensure that your file evaluates to an invalid result (error or empty) if the provided `#grafanaVar` value does not match the expected payload.

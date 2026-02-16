@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -38,6 +38,7 @@ type PublicRestConfigClient struct {
 	NativeAuth *api.PublicAuth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
 	Oauth      *secret.PublicOAuth     `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
 	BasicAuth  *secret.PublicBasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	K8sAuth    *K8sAuth                `json:"k8s_auth,omitempty" yaml:"k8s_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -55,6 +56,7 @@ func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient
 		NativeAuth:    api.NewPublicAuth(config.NativeAuth),
 		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
 		Oauth:         secret.NewPublicOAuth(config.OAuth),
+		K8sAuth:       config.K8sAuth,
 		Authorization: secret.NewPublicAuthorization(config.Authorization),
 		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
 		Headers:       config.Headers,
@@ -67,6 +69,7 @@ type RestConfigClient struct {
 	NativeAuth *api.Auth         `json:"native_auth,omitempty" yaml:"native_auth,omitempty"`
 	OAuth      *secret.OAuth     `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	K8sAuth    *K8sAuth          `json:"k8s_auth,omitempty" yaml:"k8s_auth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -88,6 +91,9 @@ func (c *RestConfigClient) Validate() error {
 	if c.BasicAuth != nil {
 		nbAuthConfigured++
 	}
+	if c.K8sAuth != nil {
+		nbAuthConfigured++
+	}
 	if c.Authorization != nil {
 		nbAuthConfigured++
 	}
@@ -98,7 +104,7 @@ func (c *RestConfigClient) Validate() error {
 }
 
 func NewRoundTripper(timeout time.Duration, tlsConfig *secret.TLSConfig) (http.RoundTripper, error) {
-	tlsCfg, err := secret.BuildTLSConfig(tlsConfig)
+	tlsCfg, err := tlsConfig.BuildTLSConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -164,6 +170,16 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		}
 
 		httpClient = oauthConfig.Client(ctx)
+	}
+	if config.K8sAuth != nil {
+		token, getTokenErr := config.K8sAuth.GetToken()
+		if getTokenErr != nil {
+			return nil, getTokenErr
+		}
+		if len(config.Headers) == 0 {
+			config.Headers = map[string]string{}
+		}
+		config.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
 	}
 
 	if httpClient == nil {

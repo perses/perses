@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
 import WhitePersesLogo from '../logo/WhitePersesLogo';
 import PersesLogoCropped from '../logo/PersesLogoCropped';
+import { BannerInfo } from '../BannerInfo';
 import { ToolMenu } from './ToolMenu';
 import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
@@ -131,6 +132,7 @@ export default function Header(): JSX.Element {
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>
+      <BannerInfo />
     </AppBar>
   );
 }

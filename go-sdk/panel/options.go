@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,11 +16,15 @@ package panel
 import (
 	"github.com/perses/perses/go-sdk/link"
 	"github.com/perses/perses/go-sdk/query"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func Title(title string) Option {
 	return func(builder *Builder) error {
+		if builder.Spec.Display == nil {
+			builder.Spec.Display = &v1.PanelDisplay{}
+		}
 		builder.Spec.Display.Name = title
 		return nil
 	}
@@ -28,6 +32,9 @@ func Title(title string) Option {
 
 func Description(description string) Option {
 	return func(builder *Builder) error {
+		if builder.Spec.Display == nil {
+			builder.Spec.Display = &v1.PanelDisplay{}
+		}
 		builder.Spec.Display.Description = description
 		return nil
 	}
@@ -42,11 +49,13 @@ func Plugin(plugin common.Plugin) Option {
 
 func AddQuery(options ...query.Option) Option {
 	return func(builder *Builder) error {
-		q, err := query.New(options...)
-		if err != nil {
-			return err
+		for _, option := range options {
+			q, err := query.New(option)
+			if err != nil {
+				return err
+			}
+			builder.Spec.Queries = append(builder.Spec.Queries, *q)
 		}
-		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
 		return nil
 	}
 }

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -45,6 +45,19 @@ const noAuthIndex = 'noAuth';
 const basicAuthIndex = 'basicAuth';
 const authorizationIndex = 'authorization';
 const oauthIndex = 'oauth';
+
+function getTooltipTitle(value: number | undefined): string {
+  if (value === 0 || value === undefined) {
+    return 'Automatically detect the best auth style to use based on the provider';
+  }
+  if (value === 1) {
+    return 'Send OAuth credentials as URL parameters';
+  }
+  if (value === 2) {
+    return 'Send OAuth credentials using HTTP Basic Authorization';
+  }
+  return '';
+}
 
 type SecretEditorFormProps = FormEditorProps<Secret>;
 
@@ -111,15 +124,12 @@ export function SecretEditorForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.formState.isValid]);
 
-  const [tabValue, setTabValue] = useState<string>(
-    initialSecretClean.spec.basicAuth
-      ? basicAuthIndex
-      : initialSecretClean.spec.authorization
-        ? authorizationIndex
-        : initialSecretClean.spec.oauth
-          ? oauthIndex
-          : noAuthIndex
-  );
+  const [tabValue, setTabValue] = useState<string>(() => {
+    if (initialSecretClean.spec.basicAuth) return basicAuthIndex;
+    if (initialSecretClean.spec.authorization) return authorizationIndex;
+    if (initialSecretClean.spec.oauth) return oauthIndex;
+    return noAuthIndex;
+  });
 
   const handleTabChange = (event: SyntheticEvent, newValue: string): void => {
     form.setValue('spec.authorization', undefined);
@@ -652,18 +662,7 @@ export function SecretEditorForm({
                   control={form.control}
                   name="spec.oauth.authStyle"
                   render={({ field, fieldState }) => (
-                    <Tooltip
-                      title={
-                        field.value === 0
-                          ? 'Automatically detect the best auth style to use based on the provider'
-                          : field.value === 1
-                            ? 'Send OAuth credentials as URL parameters'
-                            : field.value === 2
-                              ? 'Send OAuth credentials using HTTP Basic Authorization'
-                              : ''
-                      }
-                      placement="right"
-                    >
+                    <Tooltip title={getTooltipTitle(field.value)} placement="right">
                       <FormControl fullWidth error={!!fieldState.error}>
                         <InputLabel id="auth-style-label" shrink={action === 'read' ? true : undefined}>
                           Auth Style
@@ -717,8 +716,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="CA"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',
@@ -761,8 +762,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="Cert"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',
@@ -805,8 +808,10 @@ export function SecretEditorForm({
                     <TextField
                       {...field}
                       fullWidth
+                      multiline
+                      minRows={4}
+                      maxRows={8}
                       label="Key"
-                      type="password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',

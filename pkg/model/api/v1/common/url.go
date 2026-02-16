@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -43,7 +43,9 @@ func NewURL(u *URL, paths ...string) *URL {
 		return result
 	}
 	*result.URL = *u.URL
-	result.Path = path.Join(paths...)
+	if len(paths) > 0 {
+		result.Path = path.Join(append([]string{u.Path}, paths...)...)
+	}
 	return result
 }
 

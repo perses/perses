@@ -28,7 +28,14 @@ typedoc
 # Ignore turborepo cache
 .turbo
 
+# Ignore test coverage output
+coverage
+
 # ignore file copied during the release process of the UI
 LICENSE
 CHANGELOG.md
 /embed.go
+
+# ignore shared package links
+.perses-shared-link-bk.json
+.perses-shared-link-lock-bk.json

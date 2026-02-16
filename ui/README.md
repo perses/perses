@@ -44,17 +44,16 @@ Perses is broken up in to a number of separate packages to allow for flexibility
 
 ### Libraries
 
-The following packages include components, plugins, utilities, and other code that is used to compose the Perses UI React application and can be used by consumers to compose their own applications.
+The following packages include components, plugins, utilities, and other code that is used to compose the Perses UI React application and can be used by consumers to compose their own applications. These packages now live in the [`perses/shared`](https://github.com/perses/shared) repository and are published to npm with the `@perses-dev` namespace. If you want to work on them locally, follow the linking instructions documented in the shared repo.
 
-These packages are published to npm with the `@perses-dev` namespace.
-
-- [`components`](./components): common components available to the app, plugins, or users who want to embed common Perses UI elements into their own applications.
-- [`core`](./core): Core functionality that's exposed to plugins and also
-  consumed by the app.
-- [`dashboards`](./dashboards): Dashboard components and related utilities.
-- [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the
+- [`components`](https://github.com/perses/shared/tree/main/components): common components available to the app, plugins, or users who want to embed common Perses UI elements into their own applications.
+- [`dashboards`](https://github.com/perses/shared/tree/main/dashboards): Dashboard components and related utilities.
+- [`explore`](https://github.com/perses/shared/tree/main/explore): Explore UI and related utilities.
+- [`plugin-system`](https://github.com/perses/shared/tree/main/plugin-system): All the type definitions and components that power our plugins, also includes the
   definitions for the runtime available to plugins (e.g. the current time range state, the current variable
   state).
+
+The `core` package remains part of this repository and is consumed by the app and ashared packages.
 
 ### Internal tooling
 

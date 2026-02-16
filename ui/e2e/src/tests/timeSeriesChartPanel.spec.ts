@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import happoPlaywright from 'happo-playwright';
 import {
   mockTimeSeriesResponseWithStableValue,
   mockTimeSeriesResponseWithNullValues,
@@ -26,14 +25,6 @@ test.use({
 });
 
 test.describe('Dashboard: Time Series Chart Panel', () => {
-  test.beforeEach(async ({ context }) => {
-    await happoPlaywright.init(context);
-  });
-
-  test.afterEach(async () => {
-    await happoPlaywright.finish();
-  });
-
   [
     'Single Line',
     'Custom Visual Options',
@@ -42,12 +33,12 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     'Legend Position Right',
     'Legend Tall Formatted',
   ].forEach((panelName) => {
-    test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
+    test(`displays ${panelName} as expected`, async ({ dashboardPage, mockNow }) => {
       // Mock data response, so we can make assertions on consistent response data.
       await dashboardPage.mockQueryRangeRequests({
         queries: [
           {
-            query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+            query: 'up{job="avalanche",instance="avalanche:9001"}',
             response: {
               status: 200,
               body: JSON.stringify(
@@ -56,8 +47,8 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                     {
                       metric: {
                         __name__: 'up',
-                        instance: 'demo.do.prometheus.io:3000',
-                        job: 'grafana',
+                        instance: 'avalanche:9001',
+                        job: 'avalanche',
                       },
                       value: '1',
                     },
@@ -83,15 +74,10 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
         ],
       });
 
-      await dashboardPage.forEachTheme(async (themeName) => {
+      await dashboardPage.forEachTheme(async () => {
         const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
         await timeSeriesPanel.isLoaded();
         await waitForStableCanvas(timeSeriesPanel.canvas);
-
-        await happoPlaywright.screenshot(page, timeSeriesPanel.parent, {
-          component: 'Time Series Chart Panel',
-          variant: `${panelName} [${themeName}]`,
-        });
       });
     });
   });
@@ -101,7 +87,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     await dashboardPage.mockQueryRangeRequests({
       queries: [
         {
-          query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+          query: 'up{job="avalanche",instance="avalanche:9001"}',
           response: {
             status: 200,
             body: JSON.stringify(
@@ -110,8 +96,8 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                   {
                     metric: {
                       __name__: 'up',
-                      instance: 'demo.do.prometheus.io:3000',
-                      job: 'grafana',
+                      instance: 'avalanche:9001',
+                      job: 'avalanche',
                     },
                     value: '1',
                   },
@@ -127,7 +113,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
 
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Single Line', async (panelEditor) => {
-      await panelEditor.selectTab('Settings');
+      await panelEditor.selectTab('General Settings');
       await panelEditor.addThreshold();
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '50');
@@ -148,10 +134,5 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
     const panel = dashboardPage.getPanelByName('Single Line');
     await panel.isLoaded();
     await waitForStableCanvas(panel.canvas);
-
-    await happoPlaywright.screenshot(page, panel.parent, {
-      component: 'Time Series Chart Panel',
-      variant: `Single Line with Percent Threshold`,
-    });
   });
 });

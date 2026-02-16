@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import (
 	createdAt: "0001-01-01T00:00:00Z"
 	updatedAt: "0001-01-01T00:00:00Z"
 	version:   0
+	tags?: [...string]
 }
 
 #ProjectMetadataWrapper: {

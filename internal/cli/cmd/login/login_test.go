@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -38,6 +38,30 @@ func TestLoginCMD(t *testing.T) {
 			Args:            []string{"--username", "foo", "--client-id", "bar", "https://demo.perses.dev"},
 			IsErrorExpected: true,
 			ExpectedMessage: "you can not set --username or --token at the same time than --client-id or --client-secret or --provider",
+		},
+		{
+			Title:           "k8s login flag and provider flag cannot be set at the same time (1)",
+			Args:            []string{"--kube", "--provider", "google", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --kube or --kubeconfig-file at the same time than --client-id or --client-secret or --provider",
+		},
+		{
+			Title:           "k8s login flag and provider flag cannot be set at the same time (2)",
+			Args:            []string{"--kube", "--client-id", "bar", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --kube or --kubeconfig-file at the same time than --client-id or --client-secret or --provider",
+		},
+		{
+			Title:           "k8s login flag and native login flag cannot be set at the same time (1)",
+			Args:            []string{"--kube", "--username", "foo", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --username or --token at the same time as --kube or --kubeconfig-file",
+		},
+		{
+			Title:           "k8s login flag and native login flag cannot be set at the same time (2)",
+			Args:            []string{"--kube", "--token", "tok", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --username or --token at the same time as --kube or --kubeconfig-file",
 		},
 		{
 			Title:           "provider not known",

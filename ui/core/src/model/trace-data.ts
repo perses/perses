@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { BaseMetadata } from './base-metadata';
 import { TracesData } from './otlp/trace/v1/trace';
 
 /**
@@ -45,8 +46,10 @@ export interface TraceData {
   metadata?: TraceMetaData;
 }
 
-export interface TraceMetaData {
-  executedQueryString?: string;
+export interface TraceMetaData extends BaseMetadata {
+  /** this field indicates if there are more traces matching the search query, however not all traces were returned */
+  hasMoreResults?: boolean;
+  [key: string]: unknown;
 }
 
 export function isValidTraceId(traceId: string): boolean {

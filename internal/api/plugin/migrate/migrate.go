@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,6 +28,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/perses/common/set"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -40,6 +41,7 @@ import (
 const (
 	grafanaType     = "#grafanaType"
 	migrationFolder = "migrate"
+	varDefID        = "#grafanaVar"
 )
 
 var kindRegexp = regexp.MustCompile(`(?m)kind\s*:\s*"(\w+)"`)
@@ -128,7 +130,7 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 	if strings.Contains(string(data), grafanaType) {
 		return plugin.KindPanel, nil
 	}
-	if strings.Contains(string(data), "#var.type") {
+	if strings.Contains(string(data), varDefID) {
 		return plugin.KindVariable, nil
 	}
 	return plugin.KindQuery, nil
@@ -143,6 +145,11 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		ctx.CompileBytes(grafanaData),
 	)
 
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Grafana %s to migrate:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%# v\n", grafanaValue)
+	}
+
 	// Probably it is unnecessary to do that as JSON should be valid.
 	// Otherwise, we won't be able to unmarshal the grafana dashboard.
 	if err := grafanaValue.Validate(cue.Final()); err != nil {
@@ -156,6 +163,12 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
 		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
+
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Final Perses %s:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%v\n", finalVal)
+	}
+
 	return convertToPlugin(finalVal)
 }
 
@@ -179,7 +192,7 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
@@ -224,7 +237,7 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 	result := &v1.Dashboard{
@@ -232,6 +245,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
 				Name: grafanaDashboard.UID,
+				Tags: set.New(grafanaDashboard.Tags...),
 			},
 		},
 		Spec: v1.DashboardSpec{
@@ -242,7 +256,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 		},
 	}
 
-	panels, err := m.migratePanels(grafanaDashboard)
+	panels, err := m.migratePanels(grafanaDashboard, useDefaultDatasource)
 	if err != nil {
 		return nil, err
 	}
@@ -254,17 +268,24 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.
 
 func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
-	defaultSpec := &dashboard.GridLayoutSpec{}
-	defaultLayout := dashboard.Layout{
+	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
+	// Thus we have to create a first grid to gather the eventual orphans found at the beginning of the
+	// Grafana dashboard.
+	orphansGridSpec := &dashboard.GridLayoutSpec{
+		Display: &dashboard.GridLayoutDisplay{
+			Title: "Panel Group 1", // placeholder value since we don't want an empty string.
+		},
+	}
+	orphansGrid := dashboard.Layout{
 		Kind: dashboard.KindGridLayout,
-		Spec: defaultSpec,
+		Spec: orphansGridSpec,
 	}
 
-	result = append(result, defaultLayout)
+	result = append(result, orphansGrid)
 
 	for i, panel := range grafanaDashboard.Panels {
 		if panel.Type != grafanaPanelRowType {
-			defaultSpec.Items = append(defaultSpec.Items, dashboard.GridItem{
+			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
 				X:      panel.GridPosition.X,
@@ -275,7 +296,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				},
 			})
 		} else {
-			spec := &dashboard.GridLayoutSpec{
+			gridSpec := &dashboard.GridLayoutSpec{
 				Display: &dashboard.GridLayoutDisplay{
 					Title: panel.Title,
 					Collapse: &dashboard.GridLayoutCollapse{
@@ -283,12 +304,12 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					},
 				},
 			}
-			layout := dashboard.Layout{
+			grid := dashboard.Layout{
 				Kind: dashboard.KindGridLayout,
-				Spec: spec,
+				Spec: gridSpec,
 			}
 			for j, innerPanel := range panel.Panels {
-				spec.Items = append(spec.Items, dashboard.GridItem{
+				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
 					X:      innerPanel.GridPosition.X,
@@ -299,13 +320,13 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					},
 				})
 			}
-			if len(spec.Items) > 0 {
-				result = append(result, layout)
+			if len(gridSpec.Items) > 0 {
+				result = append(result, grid)
 			}
 		}
 	}
-	if len(defaultSpec.Items) == 0 {
-		// Since there are no items, we should remove the default layout
+	if len(orphansGridSpec.Items) == 0 {
+		// Since no orphan panel was found, we can remove the orphans grid
 		result = result[1:]
 	}
 	return result
@@ -435,7 +456,7 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 
 func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
 	// The idea here is to know the query instance name we are dealing with.
-	// Then based on that, we will loop other the plugins listed in the module to get the high level query kind.
+	// Then based on that, we will loop over the plugins listed in the module to get the high level query kind.
 	// It will be useful to know which query plugin to use when migrating the Grafana dashboard.
 	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
 	if err != nil {
