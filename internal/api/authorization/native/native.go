@@ -53,8 +53,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
-		rolesJMESPath:        conf.Security.Authorization.ClaimsMappingConfig.RoleClaimsPath,
-		groupsJMESPath:       conf.Security.Authorization.ClaimsMappingConfig.GroupClaimsPath,
+		authJMESPath:         conf.Security.Authorization.ClaimsMappingConfig.AuthClaimsPath,
 		accessKey:            key,
 	}
 
@@ -83,8 +82,7 @@ type native struct {
 	guestPermissions     []*v1Role.Permission
 	tokenRolesMap        []*config.RoleAssignment
 	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
-	rolesJMESPath        string
-	groupsJMESPath       string
+	authJMESPath         string
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -129,17 +127,13 @@ func (n *native) IsEnabled() bool {
 
 func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
-	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.rolesJMESPath)
-	if err != nil {
-		return nil
-	}
-	groupClaims, err := utils.GetClaimsFromAccessToken(ctx, n.groupsJMESPath)
+	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
 	if err != nil {
 		return nil
 	}
 
 	for _, mappedRole := range n.tokenRolesMap {
-		if mappedRole.CheckRoleClaim(roleClaims) || mappedRole.CheckGroupClaim(groupClaims) {
+		if mappedRole.CheckRoleClaim(roleClaims) {
 			userRoles = append(userRoles, mappedRole.Role)
 			continue
 		}
@@ -149,17 +143,13 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 
 func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
-	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.rolesJMESPath)
-	if err != nil {
-		return nil
-	}
-	groupClaims, err := utils.GetClaimsFromAccessToken(ctx, n.groupsJMESPath)
+	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
 	if err != nil {
 		return nil
 	}
 
 	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
-		if mappedGlobalRole.CheckRoleClaim(roleClaims) || mappedGlobalRole.CheckGroupClaim(groupClaims) {
+		if mappedGlobalRole.CheckRoleClaim(roleClaims) {
 			userRoles = append(userRoles, mappedGlobalRole.GlobalRole)
 			continue
 		}

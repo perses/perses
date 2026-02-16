@@ -27,24 +27,13 @@ var (
 )
 
 type Assignment struct {
-	Name        string   `json:"name" yaml:"name"`
-	RoleClaims  []string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
-	GroupClaims []string `json:"group_claims,omitempty" yaml:"group_claims,omitempty"`
+	Name       string   `json:"name" yaml:"name"`
+	RoleClaims []string `json:"role_claims,omitempty" yaml:"role_claims,omitempty"`
 }
 
 func (a *Assignment) CheckRoleClaim(userRoleClaims []string) bool {
 	for _, urc := range userRoleClaims {
 		ok := slices.Contains(a.RoleClaims, urc)
-		if ok {
-			return true
-		}
-	}
-	return false
-}
-
-func (a *Assignment) CheckGroupClaim(userGroupClaims []string) bool {
-	for _, urc := range userGroupClaims {
-		ok := slices.Contains(a.GroupClaims, urc)
 		if ok {
 			return true
 		}
@@ -64,8 +53,7 @@ type GlobalRoleAssignment struct {
 }
 
 type ClaimsMappingConfig struct {
-	RoleClaimsPath    string                  `json:"role_claims_path,omitempty" yaml:"role_claims_path,omitempty"`
-	GroupClaimsPath   string                  `json:"group_claims_path,omitempty" yaml:"group_claims_path,omitempty"`
+	AuthClaimsPath    string                  `json:"auth_claims_path,omitempty" yaml:"auth_claims_path,omitempty"`
 	RoleMapping       []*RoleAssignment       `json:"role_mapping,omitempty" yaml:"role_mapping,omitempty"`
 	GlobalRoleMapping []*GlobalRoleAssignment `json:"global_role_mapping,omitempty" yaml:"global_role_mapping,omitempty"`
 }
