@@ -19,6 +19,7 @@ import { LogData } from './log-data';
 
 interface QuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
+  hidden?: boolean;
 }
 /**
  * A generic query definition interface that can be extended to support more than just TimeSeriesQuery
@@ -28,7 +29,6 @@ interface QuerySpec<PluginSpec> {
 export interface QueryDefinition<Kind = any, PluginSpec = UnknownSpec> {
   kind: Kind;
   spec: QuerySpec<PluginSpec>;
-  hidden?: boolean;
 }
 
 /**
