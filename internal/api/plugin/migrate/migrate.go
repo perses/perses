@@ -288,8 +288,8 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
-				X:      panel.GridPosition.X,
-				Y:      panel.GridPosition.Y,
+				X:      int(panel.GridPosition.X),
+				Y:      int(panel.GridPosition.Y),
 				Content: &common.JSONRef{
 					Ref:  fmt.Sprintf("#/spec/panels/%d", i),
 					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
@@ -312,8 +312,8 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
-					X:      innerPanel.GridPosition.X,
-					Y:      innerPanel.GridPosition.Y,
+					X:      int(innerPanel.GridPosition.X),
+					Y:      int(innerPanel.GridPosition.Y),
 					Content: &common.JSONRef{
 						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
 						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
