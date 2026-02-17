@@ -219,9 +219,8 @@ dashboardBuilder & {
 	}
 	#datasources: myPromDemo: {
 		default: true
-		plugin: promDs & {spec: close({ // TODO remove close() when @experiment(explicitopen) is added to dashboardBuilder (or when new closedness behavior is made default)
-			directUrl: "http://localhost:9090"
-		})}
+		// TODO remove close() when @experiment(explicitopen) is added to dashboardBuilder (or when new closedness behavior is made default)
+		plugin: promDs & {spec: close({directUrl: "http://localhost:9090"})}
 	}
 	#duration:        "3h"
 	#refreshInterval: "30s"
