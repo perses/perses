@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -135,21 +135,27 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiIn
 		result := make([]K, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	case []api.Entity:
 		result := make([]api.Entity, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	case []json.RawMessage:
 		result := make([]json.RawMessage, 0, len(typedList))
 		buildMap := buildRawMapFromList(typedList)
 		for _, project := range projects {
-			result = append(result, buildMap[project])
+			if proj, ok := buildMap[project]; ok {
+				result = append(result, proj)
+			}
 		}
 		return result, nil
 	}

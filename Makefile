@@ -79,12 +79,12 @@ checklint:
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"
-	./scripts/check_license.sh --check *.js *.jsx *.ts *.tsx *.go *.cue
+	go run ./scripts/check-license --check
 
 .PHONY: fixlicense
 fixlicense:
 	@echo ">> adding license header where it's missing"
-	./scripts/check_license.sh --add *.js *.jsx *.ts *.tsx *.go *.cue
+	go run ./scripts/check-license --fix
 
 .PHONY: fmt
 fmt:
@@ -114,10 +114,10 @@ validate-data:
 	@echo ">> Validate all data in dev/data"
 	$(GO) run ./scripts/validate-data/validate-data.go
 
-.PHONY: validate-cue
-validate-cue:
-	@echo ">> Validate CUE files against corresponding test files"
-	$(GO) run ./scripts/validate-cue/validate-cue.go
+.PHONY: go-sdk-test
+go-sdk-test:
+	@echo ">> running perses go sdk tests"
+	cd ./go-sdk/test && $(GO) test -v -count=1 ./...
 
 .PHONY: test
 test: generate
@@ -125,11 +125,11 @@ test: generate
 	$(GO) test -count=1 -v ./...
 
 .PHONY: integration-test
-integration-test: generate
+integration-test: generate go-sdk-test
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: mysql-integration-test
-mysql-integration-test: generate
+mysql-integration-test: generate go-sdk-test
 	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: coverage-html

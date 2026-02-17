@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -155,14 +155,19 @@ export function useBanner(): Banner | undefined {
   return banner;
 }
 
-export function useIsNativeProviderEnabled(): boolean {
+export function useIsNativeAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.providers.enable_native;
 }
 
-export function useIsExternalProviderEnabled(): boolean {
+export function useIsExternalAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return (
     !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
   );
+}
+
+export function useIsDelegatedAuthnProviderEnabled(): boolean {
+  const { config } = useConfigContext();
+  return !!config.security.authentication.providers.kubernetes?.enable;
 }

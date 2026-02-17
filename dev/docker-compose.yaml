@@ -1,9 +1,44 @@
 # TO RUN THIS FILE: docker-compose --file dev/docker-compose.yaml up --detach
 # TO RUN WITH POSTGRES AND PROMETHEUS: docker-compose --file dev/docker-compose.yaml --profile postgres --profile prometheus up --detach
 # TO RUN WITH PROMETHEUS AND TEMPO: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile tempo up --detach
+# TO RUN WITH LOKI: docker-compose --file dev/docker-compose.yaml --profile loki up --detach
 
-name: "perses-dev"
+name: 'perses-dev'
 services:
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - '3100:3100'
+    profiles: [loki]
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./extra/loki-data:/loki
+
+  promtail:
+    image: grafana/promtail:latest
+    profiles: [loki]
+    volumes:
+      - ./extra/promtail.yaml:/etc/promtail/config.yaml
+      - ./extra/logs:/var/log/fake
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+      - log-generator
+
+  log-generator:
+    image: mingrammer/flog
+    profiles: [loki]
+    volumes:
+      - ./extra/logs:/var/log/output
+    command:
+      - --loop
+      - --format=json
+      - --type=log
+      - --number=10
+      - --delay=100ms
+      - --output=/var/log/output/fake.log
+      - --overwrite
+
   mariadb:
     image: mariadb
     ports:
@@ -34,64 +69,51 @@ services:
     volumes:
       - ./extra/prometheus.yaml:/etc/prometheus.yaml
     ports:
-      - "9090:9090"
+      - '9090:9090'
     profiles: [prometheus]
 
   # Generate fake metrics
   avalanche:
     image: quay.io/prometheuscommunity/avalanche:latest
     command:
-      - "--gauge-metric-count=5"
-      - "--counter-metric-count=5"
-      - "--histogram-metric-count=5"
-      - "--histogram-metric-bucket-count=5"
-      - "--native-histogram-metric-count=5"
-      - "--summary-metric-count=5"
-      - "--summary-metric-objective-count=5"
-      - "--label-count=5"
-      - "--series-count=100"
+      - '--gauge-metric-count=5'
+      - '--counter-metric-count=5'
+      - '--histogram-metric-count=5'
+      - '--histogram-metric-bucket-count=5'
+      - '--native-histogram-metric-count=5'
+      - '--summary-metric-count=5'
+      - '--summary-metric-objective-count=5'
+      - '--label-count=5'
+      - '--series-count=100'
     ports:
-      - "9001:9001"
+      - '9001:9001'
     profiles: [avalanche]
-
-  # Tempo runs as user 10001, and docker compose creates the volume as root.
-  # As such, we need to chown the volume in order for Tempo to start correctly.
-  init:
-    image: &tempoImage grafana/tempo:latest
-    user: root
-    entrypoint:
-      - "chown"
-      - "10001:10001"
-      - "/var/tempo"
-    volumes:
-      - ./extra/tempo-data:/var/tempo
-    profiles: [tempo]
 
   memcached:
     image: memcached:1.6.29
     container_name: memcached
     ports:
-      - "11211:11211"
+      - '11211:11211'
     environment:
-      - MEMCACHED_MAX_MEMORY=64m  # Set the maximum memory usage
-      - MEMCACHED_THREADS=4       # Number of threads to use
+      - MEMCACHED_MAX_MEMORY=64m # Set the maximum memory usage
+      - MEMCACHED_THREADS=4 # Number of threads to use
     profiles: [tempo]
 
   tempo:
-    image: *tempoImage
-    command: [ "-config.file=/etc/tempo.yaml" ]
+    image: grafana/tempo:latest
+    command: ['-config.file=/etc/tempo.yaml']
+    user: '10001:10001'
     volumes:
       - ./extra/tempo.yaml:/etc/tempo.yaml
-      - ./extra/tempo-data:/var/tempo
+      - tempo-data:/var/tempo
     ports:
-      - "14268:14268"  # jaeger ingest
-      - "3200:3200"   # tempo
-      - "9095:9095" # tempo grpc
-      - "4317:4317"  # otlp grpc
-      - "4318:4318"  # otlp http
-      - "9411:9411"   # zipkin
+      - '14268:14268' # jaeger ingest
+      - '3200:3200' # tempo
+      - '9095:9095' # tempo grpc
+      - '4317:4317' # otlp grpc
+      - '4318:4318' # otlp http
+      - '9411:9411' # zipkin
     depends_on:
-      - init
       - memcached
     profiles: [tempo]
 
@@ -103,3 +125,6 @@ services:
     depends_on:
       - tempo
     profiles: [tempo]
+
+volumes:
+  tempo-data:

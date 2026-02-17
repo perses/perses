@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -27,6 +27,9 @@ type disabledImpl struct {
 func (r *disabledImpl) IsEnabled() bool {
 	return false
 }
+func (r *disabledImpl) IsNativeAuthz() bool {
+	return true
+}
 
 func (r *disabledImpl) GetUser(_ echo.Context) (any, error) {
 	return nil, nil
@@ -53,6 +56,10 @@ func (r *disabledImpl) GetUserProjects(_ echo.Context, _ v1Role.Action, _ v1Role
 }
 
 func (r *disabledImpl) HasPermission(_ echo.Context, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
+	return true
+}
+
+func (r *disabledImpl) HasProjectCreatePermission(_ echo.Context, _ string) bool {
 	return true
 }
 

@@ -19,7 +19,7 @@ These 2 SDKs come with different pros & cons:
 
 |                           | CUE | Go |
 |---------------------------|-----|----|
-| IDE Support               | 🟡  | 🟢 |
+| IDE Support               | 🟢  | 🟢 |
 | Plugins integration*      | 🟢  | 🟡 |
 | Validation                | 🟢  | 🟡 |
 | Dependency management     | 🟡  | 🟢 |

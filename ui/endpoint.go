@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -31,6 +31,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -48,6 +49,7 @@ var (
 		"/config",
 		"/explore",
 		"/profile",
+		"/delegated-auth-error",
 	}
 	capturingPluginName = regexp.MustCompile(`/plugins/([a-zA-Z0-9_-]+)/?.*`)
 )
@@ -87,7 +89,10 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		logrus.Errorf("unable to find the plugin name in the URL path: %s", req.URL.Path)
 		return apiinterface.NotFoundError
 	}
-	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName)
+	// TODO: These hardcoded values should be replaced once the frontend is able to manage multiple registries and plugin versions.
+	// This suppose to update the plugin system first.
+	// These hardocded values are matching the default behavior of the plugin system and it helps to keep backward compatibility.
+	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName, pluginModel.LatestVersion, pluginModel.DefaultRegistry)
 	if !isLoaded || !loaded.Module.Status.IsLoaded {
 		logrus.Errorf("unable to find the plugin %s", pluginName)
 		return apiinterface.NotFoundError

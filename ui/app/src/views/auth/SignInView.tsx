@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,14 +15,15 @@ import { Button, LinearProgress, Link, TextField, Typography } from '@mui/materi
 import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useNativeAuthMutation, useRedirectQueryParam } from '../../model/auth-client';
+import { useNativeAuthnMutation } from '../../model/auth/native-authn-client';
+import { useRedirectQueryParam } from '../../model/auth/auth-client';
 import { SignUpRoute } from '../../model/route';
 import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView(): ReactElement {
   const isSignUpDisable = useIsSignUpDisable();
-  const authMutation = useNativeAuthMutation();
+  const authMutation = useNativeAuthnMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const [login, setLogin] = useState<string>('');

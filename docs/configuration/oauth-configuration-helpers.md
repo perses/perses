@@ -52,9 +52,7 @@ security:
 !!! tip
     The **scope** used to generate a token from client credentials is different from the one used in other flows.
 
-```
-*Ref: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
-```
+*Reference: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
 
 ##### Logout redirection with Entra ID
 
@@ -62,7 +60,29 @@ Logout redirection is partially supported with Entra ID. When you click on logou
 But there can be some situations where Entra will not redirect you back to Perses.
 - The user logged out directly from Entra ID.
 - The user session expired.
-In this case, you will be logged out from Perses, but you will have to manually go back to Perses.
+  In this case, you will be logged out from Perses, but you will have to manually go back to Perses.
+
+#### Keycloak
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: keycloak
+          name: "Keycloak"
+          client_id: "<your client ID>"
+          client_secret: "<your client Secret>"
+          issuer: "https://<keycloak host>/realms/<realm>" // For Keycloak versions <17: https://<keycloak host>/auth/realms/<realm>
+          scopes: [ "openid", "profile", "email" ]
+          logout:
+            enabled: true # Generally advised, but you can disable it if you don't want to redirect to the provider's logout page
+```
+
+!!! tip
+    Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). As of now, the Perses does not support `RoleBinding` or `GlobalRoleBinding` based on the roles assigned to user in the OIDC provider.
+
+*Reference: [Keycloak OpenID Connect](https://www.keycloak.org/securing-apps/oidc-layers)*
 
 #### <Place Your Provider here ...\>
 

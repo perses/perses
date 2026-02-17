@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import {
   DataGridPropertiesWithCallback,
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
+  DATA_GRID_SLOT_PROPS,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -71,6 +72,7 @@ export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): Re
         }
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
+        slotProps={DATA_GRID_SLOT_PROPS}
         sx={DATA_GRID_STYLES}
       />
     </div>

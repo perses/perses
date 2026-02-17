@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -115,9 +115,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   dashboardTitleComponent={
                     <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
                   }
-                  emptyDashboardProps={{
-                    additionalText: 'In order to save this dashboard, you need to add at least one panel!',
-                  }}
                   onSave={onSave}
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}

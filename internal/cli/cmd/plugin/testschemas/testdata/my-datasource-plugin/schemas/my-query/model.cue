@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,14 @@
 
 package model
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/perses/shared/cue/common"
+)
 
 kind: "MyQuery"
 spec: close({
-	query: strings.MinRunes(1)
+	query:       strings.MinRunes(1)
+	thresholds?: common.#thresholds
 })

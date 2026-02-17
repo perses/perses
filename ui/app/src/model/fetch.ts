@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StatusError } from '@perses-dev/core';
-import { refreshToken } from './auth-client';
+import { refreshToken } from './auth/auth-client';
 
 const JWT_COOKIES = ['jwtPayload', 'jwtSignature', 'jwtRefreshToken'];
 

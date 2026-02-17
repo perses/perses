@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,14 +23,23 @@ import (
 )
 
 type deviceCodeLogin struct {
-	writer               io.Writer
-	externalAuthKind     externalAuthKind
-	externalAuthProvider string
-	apiClient            api.ClientInterface
+	writer                io.Writer
+	externalAuthnKind     externalAuthnKind
+	externalAuthnProvider string
+	enablePKCE            bool
+	apiClient             api.ClientInterface
 }
 
 func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
-	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
+	var deviceCodeOpts []oauth2.AuthCodeOption
+	var tokenOpts []oauth2.AuthCodeOption
+	if l.enablePKCE {
+		verifier := oauth2.GenerateVerifier()
+		deviceCodeOpts = append(deviceCodeOpts, oauth2.S256ChallengeOption(verifier))
+		tokenOpts = append(tokenOpts, oauth2.VerifierOption(verifier))
+	}
+
+	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthnKind), l.externalAuthnProvider, deviceCodeOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +49,7 @@ func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 		return nil, outErr
 	}
 
-	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse)
+	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthnKind), l.externalAuthnProvider, deviceCodeResponse, tokenOpts...)
 }
 
 func (l *deviceCodeLogin) SetMissingInput() error {

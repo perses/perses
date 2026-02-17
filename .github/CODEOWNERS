@@ -1,4 +1,3 @@
-/cue-test @AntoineThebaud
 /cue @AntoineThebaud
 /docs @AntoineThebaud
 /go-sdk @Gladorme
@@ -8,4 +7,4 @@
 /internal/cli @Nexucis
 /pkg/client @Nexucis @celian-garcia
 /pkg/model @Nexucis @AntoineThebaud
-/ui @Gladorme @jgbernalp @shahrokni
+/ui @perses/frontend-maintainers

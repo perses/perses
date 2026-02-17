@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -42,7 +42,7 @@ func NewPublicUserSpec(u UserSpec) PublicUserSpec {
 
 type PublicUser struct {
 	Kind     Kind           `json:"kind"`
-	Metadata Metadata       `json:"metadata"`
+	Metadata PublicMetadata `json:"metadata"`
 	Spec     PublicUserSpec `json:"spec"`
 }
 
@@ -64,7 +64,7 @@ func NewPublicUser(u *User) *PublicUser {
 	}
 	return &PublicUser{
 		Kind:     u.Kind,
-		Metadata: u.Metadata,
+		Metadata: PublicMetadata(u.Metadata),
 		Spec:     NewPublicUserSpec(u.Spec),
 	}
 }

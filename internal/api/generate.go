@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,6 @@
 // limitations under the License.
 
 //go:build ignore
-// +build ignore
 
 package main
 
@@ -32,7 +31,7 @@ var (
 		template.New("endpoint").Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -129,7 +128,7 @@ func (e *Endpoint) List(ctx echo.Context) error {
 		template.New("interface").Funcs(tplFunc).Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -184,7 +183,7 @@ type Service interface {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -261,7 +260,7 @@ func (d *dao) List(q databaseModel.Query) ([]*v1.{{ $kind }}, error) {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -423,9 +422,7 @@ func generatePersistence(ept endpoint) {
 func generateClient(ept endpoint) {
 	folder := "../../pkg/client/api/v1/"
 	fileName := fmt.Sprintf("%s.go", ept.PackageName)
-	// as the endpoint is generated and not adds in git, the client that reflects exactly what is exposed by the endpoint,
-	// then should be also ignored by git, and so we can override it.
-	generateFile(folder, fileName, clientTemplate, ept, true)
+	generateFile(folder, fileName, clientTemplate, ept, false)
 }
 
 func generateFile(folder string, fileName string, tpl *template.Template, ept endpoint, shouldOverride bool) {

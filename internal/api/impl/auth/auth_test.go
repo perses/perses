@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -41,7 +41,7 @@ func TestGetRedirectURI_WithAPIPrefix(t *testing.T) {
 					Scheme: "http",
 				},
 				Host: "localhost:8080",
-			}, utils.AuthKindOIDC, "azure", tc.apiPrefix)
+			}, utils.AuthnKindOIDC, "azure", tc.apiPrefix)
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -51,19 +51,19 @@ func TestGetRedirectURI_WithAPIPrefix(t *testing.T) {
 func TestEncodeOAuthState(t *testing.T) {
 	redirect := "/dashboard"
 	state := encodeOAuthState(redirect)
-	assert.Contains(t, state, "##/dashboard")
+	assert.Contains(t, state, "--/dashboard")
 	assert.Len(t, state, 16+2+10)
 }
 
 // Test for decodeOAuthState: ensures correct extraction and empty string for invalid formats.
 func TestDecodeOAuthState(t *testing.T) {
 	redirect := "/dashboard"
-	state := "1234567890abcdef##" + redirect
+	state := "1234567890abcdef--" + redirect
 	assert.Equal(t, redirect, decodeOAuthState(state))
 
 	state = "invalidformat"
 	assert.Equal(t, "", decodeOAuthState(state))
 
-	state = "short##"
+	state = "short--"
 	assert.Equal(t, "", decodeOAuthState(state))
 }

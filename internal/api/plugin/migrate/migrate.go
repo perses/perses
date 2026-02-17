@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,6 +28,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/perses/common/set"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -144,6 +145,11 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		ctx.CompileBytes(grafanaData),
 	)
 
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Grafana %s to migrate:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%# v\n", grafanaValue)
+	}
+
 	// Probably it is unnecessary to do that as JSON should be valid.
 	// Otherwise, we won't be able to unmarshal the grafana dashboard.
 	if err := grafanaValue.Validate(cue.Final()); err != nil {
@@ -157,6 +163,12 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
 		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
+
+	if logrus.IsLevelEnabled(logrus.TraceLevel) {
+		logrus.Tracef("Final Perses %s:", typeOfDataToMigrate)
+		fmt.Fprintf(os.Stderr, "%v\n", finalVal)
+	}
+
 	return convertToPlugin(finalVal)
 }
 
@@ -233,6 +245,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
 				Name: grafanaDashboard.UID,
+				Tags: set.New(grafanaDashboard.Tags...),
 			},
 		},
 		Spec: v1.DashboardSpec{
@@ -275,8 +288,8 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
-				X:      panel.GridPosition.X,
-				Y:      panel.GridPosition.Y,
+				X:      int(panel.GridPosition.X),
+				Y:      int(panel.GridPosition.Y),
 				Content: &common.JSONRef{
 					Ref:  fmt.Sprintf("#/spec/panels/%d", i),
 					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
@@ -299,8 +312,8 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
-					X:      innerPanel.GridPosition.X,
-					Y:      innerPanel.GridPosition.Y,
+					X:      int(innerPanel.GridPosition.X),
+					Y:      int(innerPanel.GridPosition.Y),
 					Content: &common.JSONRef{
 						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
 						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},

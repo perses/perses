@@ -1,5 +1,107 @@
 # Changelog
 
+## 0.53.0-rc.1 / 2026-02-10
+
+### Core & UI
+
+- [FEATURE] Add MariaDB proxy support (#3813)
+- [FEATURE] Support native Kubernetes authentication and authorization (#3184) (#3545) (#3065) (#3822) (#3826) (#3842) (#3863)
+- [FEATURE] Core: add extract column fields transformation (#3791)
+- [FEATURE] Enable role, rolebinding and user only when native authz is used (#3117)
+- [ENHANCEMENT] allow to configure the server with tls min/max versions and ciphers (#3861)
+- [ENHANCEMENT] New home view layout (#3670)
+- [ENHANCEMENT] Better positioning of the filtering and column properties (#3850)
+- [ENHANCEMENT] Adds `--enable-pkce` to `percli` (#3841)
+- [ENHANCEMENT] Add new ESLINT rule to avoid nested ternary operators and fix (#3589)
+- [ENHANCEMENT] trace data model: add version, attributes to InstrumentationScope and kvlistValue and bytesValue to AnyValue (#3781)
+- [BUGFIX] Kube discovery: fix issue with inline references in CUE (#3860)
+- [BUGFIX] Fix user projects response to avoid global resources duplication (#3848)
+- [BUGFIX] Store refreshed refresh token (#3839)
+- [BUGFIX] percli respects api_prefix in base URL (#3837)
+- [BUGFIX] i18n locales files must be prefixed by api_prefix (#3831)
+- [BUGFIX] Include lint command in plugin module generation (#3808)
+- [BUGFIX] Add RP client_id to the redirect URL when logging out of the OIDC IDP (#3767)
+- [BREAKINGCHANGE] Change the query api to manage the high level query kind (#3817)
+- [BREAKINGCHANGE] Manage plugin version and registry (#3711)
+- [DOC] API_PREFIX can be used again (#3792)
+
+### Plugins improvements
+
+[FEATURE] add header and row actions to logstable (perses/plugins#558)
+[FEATURE] add header and row actions to timeseriestable (perses/plugins#556)
+[FEATURE] add header and row actions to table (perses/plugins#557)
+[FEATURE] add header and row actions to tracetable (perses/plugins#554)
+[FEATURE] Table: migrate column datalink overrides (perses/plugins#545)
+[FEATURE] LogsTable: Improve copy/pasting from logstable panel (perses/plugins#523)
+[FEATURE] Table: embed variables into datalink (perses/plugins#521)
+[ENHANCEMENT] TracingGanttChart: show error message if panel query is a search query instead of a single trace (perses/plugins#537)
+[BUGFIX] table go-sdk - add flag for filtering (perses/plugins#544)
+[BUGFIX] Table: restore data transform memoization (perses/plugins#541)
+[BUGFIX] Logstable: all queries results must be included (perses/plugins#533)
+[BUGFIX] Logstable: consistent No Data style for plugins (perses/plugins#528)
+[BUGFIX] DatasourceVariable: Queries referencing DatasourceVariable couldn't be saved for multiple datasources (perses/plugins#540)
+[BUGFIX] Add lint command in ClickHouse and fix linter errors (perses/plugins#547)
+
+## 0.53.0-rc.0 / 2026-01-07
+
+### Core & UI
+
+- [ENHANCEMENT] `plugin test-schemas`: match migration output against model (#3762)
+- [ENHANCEMENT] Make panel `display` attribute optional (#3751)
+
+### Plugins improvements
+
+- [FEATURE] Table: Add data link column setting to generate column config (perses/plugins#516)
+- [FEATURE] TimeSeriesChart: Adds support for log type y-axis (as well as linear) (perses/plugins#500)
+- [FEATURE] Logstable: Add back in color coded log rows (perses/plugins#512)
+- [FEATURE] Table: Add link editor to the table column setting (perses/plugins#506)
+- [ENHANCEMENT] Table: improve migration of column settings (perses/plugins#514)
+
+## 0.53.0-beta.4 / 2025-12-19
+
+### Core & UI
+
+- [FEATURE] Implement i18n (#3103)
+- [FEATURE] Add data link to the table column config (#3648)
+- [FEATURE] Implement OIDC RP initiated logout (#3587)
+- [ENHANCEMENT] Manage secret by file in config (#3617)
+- [ENHANCEMENT] CUE model: improve typing in Variable schemas (#3700)
+- [ENHANCEMENT] Improve link editor component (#3656)
+- [ENHANCEMENT] Fix wrong formatting in datasource's HTTP settings editor (#3609)
+- [ENHANCEMENT] File unmarshalling: Allow .yml as well (#3714)
+- [BUGFIX] Fix incomplete Grafana panel migration (#3726)
+- [BUGFIX] Remove deprecated info displayed on UI (#3719)
+- [BUGFIX] Datasource editor: Resolve request headers UX issues caused by direct map manipulation (#3650)
+- [BUGFIX] Generate a less strict panel unique identifier for non secure context (#3699)
+- [BUGFIX] Fix loading plugin in dev with no schema (#3663)
+- [BUGFIX] `format` data model: fix ambiguous schema (#3661)
+- [BUGFIX] Disable refetch on group onmount (#3667)
+- [BUGFIX] Add abort signal to the plugin queries (#3672)
+- [BUGFIX] Dockerfile: Switch user to `nonroot` (#3657)
+- [BUGFIX] Fix plugin path in Dockerfile (#3658)
+- [BUGFIX] Use '--' instead of '##' as URL safe character to encode the state for oauth/oidc (#3652)
+- [BUGFIX] Take apiPrefix in OIDC/OAuth2 redirections (#3647)
+- [BUGFIX] Fix the search bar to return the results regardless of important project config (#3644)
+- [BUGFIX] Ensure that oauth state in case of oauth / oidc is long enough (#3618)
+- [BUGFIX] PluginEditor - Fix createInitialOptions for plugins (#3613)
+- [BREAKINGCHANGE] remove shared packages (#3659)
+- [BREAKINGCHANGE] Ignore usage of Authorization header in datasource configuration (#3673)
+- [DOC] Fix authorization doc mentioning the right 'edit' that does not exist (#3697)
+- [DOC] Enhance dashboard concept doc (#3614)
+
+### Plugins improvements
+
+- [FEATURE] Prometheus: support query params (perses/plugins#485)
+- [ENHANCEMENT] TimeSeriesChart: migration: support byFrameRefID-based overrides (perses/plugins#486)
+- [ENHANCEMENT] Add Loki autocompletion (perses/plugins#496)
+- [ENHANCEMENT] Tempo: Show a notice if more results match the query (perses/plugins#478)
+  [BUGFIX] Tempo: encode Trace ID in lowercase hex format (perses/plugins#490)
+- [BUGFIX] Prometheus: Fixing variable form (perses/plugins#502)
+- [BUGFIX] Prometheus: calculate interval and minstep for query replacement (perses/plugins#475)
+- [BUGFIX] Table: remove duplication of columnSetting (perses/plugins#489)
+  [BUGFIX] Table: render no data if no record exists (perses/plugins#487)
+- [BREAKINGCHANGE] Markdown panel: fix CUE module name (perses/plugins#492)
+
 ## 0.53.0-beta.3 / 2025-11-21
 
 ### Core & UI

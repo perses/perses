@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -63,6 +63,12 @@ export const DATA_GRID_STYLES = {
 };
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+export const DATA_GRID_SLOT_PROPS = {
+  panel: {
+    placement: 'top-end' as const,
+  },
+};
 
 export function GridToolbar(): ReactElement {
   return (

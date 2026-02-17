@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,11 +13,11 @@
 
 import React, { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 import { Action, Permission, ProjectResource, Scope } from '@perses-dev/core';
-import { useAuthToken } from '../model/auth-client';
 import { useUserPermissions } from '../model/user-client';
 import { useProjectList } from '../model/project-client';
 import { enableRefreshFetch } from '../model/fetch';
-import { useIsAuthEnabled } from './Config';
+import { useUsername } from '../model/auth/auth-client';
+import { useIsDelegatedAuthnProviderEnabled, useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
 export const GlobalProject = '*';
@@ -33,13 +33,13 @@ const AuthorizationContext = createContext<AuthorizationContext | undefined>(und
 // Provide RBAC helpers for checking current user permissions
 export function AuthorizationProvider(props: { children: ReactNode }): ReactElement {
   const enabled = useIsAuthEnabled();
-  if (enabled) {
+  const isdelegatedAuthnProviderEnabled = useIsDelegatedAuthnProviderEnabled();
+  if (enabled && !isdelegatedAuthnProviderEnabled) {
     // Will refresh the access token if it has expired when fetching data
     enableRefreshFetch();
   }
 
-  const { data: decodedToken } = useAuthToken();
-  const username = decodedToken?.sub ?? '';
+  const username = useUsername();
   const { data } = useUserPermissions(username);
   const userPermissions: Record<string, Permission[]> = useMemo(() => {
     if (!data) {

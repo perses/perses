@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -23,16 +23,16 @@ import (
 )
 
 type roboticLogin struct {
-	writer               io.Writer
-	externalAuthKind     externalAuthKind
-	externalAuthProvider string
-	clientID             string
-	clientSecret         string
-	apiClient            api.ClientInterface
+	writer                io.Writer
+	externalAuthnKind     externalAuthnKind
+	externalAuthnProvider string
+	clientID              string
+	clientSecret          string
+	apiClient             api.ClientInterface
 }
 
 func (l *roboticLogin) Login() (*oauth2.Token, error) {
-	return l.apiClient.Auth().ClientCredentialsToken(string(l.externalAuthKind), l.externalAuthProvider, l.clientID, l.clientSecret)
+	return l.apiClient.Auth().ClientCredentialsToken(string(l.externalAuthnKind), l.externalAuthnProvider, l.clientID, l.clientSecret)
 }
 
 func (l *roboticLogin) SetMissingInput() error {

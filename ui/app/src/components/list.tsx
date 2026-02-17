@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Tooltip } from '@mui/material';
-import { GridColDef } from '@mui/x-data-grid';
+import { Box, Chip, Tooltip } from '@mui/material';
+import { GridColDef, GridFilterInputValue, GridFilterItem, GridFilterOperator } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DispatchWithPromise } from '@perses-dev/core';
 import { intlFormatDistance } from 'date-fns';
@@ -84,6 +84,85 @@ export const UPDATED_AT_COL_DEF: GridColDef = {
     <Tooltip title={params.value.toUTCString()} placement="top">
       <span>{intlFormatDistance(params.value, new Date())}</span>
     </Tooltip>
+  ),
+};
+
+// MUI DataGrid does not provide built-in filter operators for array column types,
+// so we define custom operators for the tags field.
+const tagsFilterOperators: Array<GridFilterOperator<{ tags?: string[] }, string[]>> = [
+  {
+    label: 'contains',
+    value: 'contains',
+    getApplyFilterFn: (filterItem: GridFilterItem): ((value: string[]) => boolean) | null => {
+      if (!filterItem.value) {
+        return null;
+      }
+      const searchValue = filterItem.value.toLowerCase();
+      return (value): boolean => {
+        return value?.some((tag) => tag.toLowerCase().includes(searchValue)) ?? false;
+      };
+    },
+    InputComponent: GridFilterInputValue,
+  },
+  {
+    label: 'equals',
+    value: 'equals',
+    getApplyFilterFn: (filterItem: GridFilterItem): ((value: string[]) => boolean) | null => {
+      if (!filterItem.value) {
+        return null;
+      }
+      const searchValue = filterItem.value.toLowerCase();
+      return (value): boolean => {
+        return value?.some((tag) => tag.toLowerCase() === searchValue) ?? false;
+      };
+    },
+    InputComponent: GridFilterInputValue,
+  },
+  {
+    label: 'is empty',
+    value: 'isEmpty',
+    getApplyFilterFn: (): ((value: string[]) => boolean) => {
+      return (value): boolean => {
+        return !value || value.length === 0;
+      };
+    },
+    requiresFilterValue: false,
+  },
+  {
+    label: 'is not empty',
+    value: 'isNotEmpty',
+    getApplyFilterFn: (): ((value: string[]) => boolean) => {
+      return (value): boolean => {
+        return value !== undefined && value.length > 0;
+      };
+    },
+    requiresFilterValue: false,
+  },
+];
+
+export const TAGS_COL_DEF: GridColDef = {
+  field: 'tags',
+  headerName: 'Tags',
+  flex: 2,
+  minWidth: 150,
+  sortable: false,
+  filterOperators: tagsFilterOperators,
+  getApplyQuickFilterFn: (value: string) => {
+    if (!value) {
+      return null;
+    }
+    const searchValue = value.toLowerCase();
+    return (cellValue): boolean => {
+      const tags = cellValue as string[] | undefined;
+      return tags?.some((tag) => tag.toLowerCase().includes(searchValue)) ?? false;
+    };
+  },
+  renderCell: (params) => (
+    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', height: '100%' }}>
+      {(params.value ?? []).map((tag: string) => (
+        <Chip key={tag} label={tag} size="small" />
+      ))}
+    </Box>
   ),
 };
 

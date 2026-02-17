@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -30,5 +30,5 @@ export async function selectMenuItem(
     })
     .click();
   // Need to look up to the page because MUI uses portals for the dropdown.
-  await container.page().getByRole('option', { name: itemName }).click();
+  await container.page().getByRole('option', { name: itemName }).first().click();
 }

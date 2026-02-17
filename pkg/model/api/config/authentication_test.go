@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,10 +22,10 @@ import (
 )
 
 func TestAuthProviders_Verify(t *testing.T) {
-	wrongOAuth := AuthProviders{OAuth: []OAuthProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
+	wrongOAuth := AuthenticationProviders{OAuth: []OAuthProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
 	assert.ErrorContains(t, wrongOAuth.Verify(), "several OAuth providers exist with the same slug_id")
 
-	wrongOIDC := AuthProviders{OIDC: []OIDCProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
+	wrongOIDC := AuthenticationProviders{OIDC: []OIDCProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
 	assert.ErrorContains(t, wrongOIDC.Verify(), "several OIDC providers exist with the same slug_id")
 }
 

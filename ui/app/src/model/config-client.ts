@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,6 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
-import { PERSES_APP_CONFIG } from '../config';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -86,8 +85,36 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
+  /**
+   * @deprecated use provider.native.check_latest_update_interval instead
+   */
+  check_latest_update_interval: Duration;
+  /**
+   * @deprecated use provider.native.guest_permissions instead
+   */
+  guest_permissions: Permission[];
+  provider: {
+    native?: NativeAuthorizationProvider;
+    kubernetes?: KubernetesAuthorizationProvider;
+  };
+}
+
+interface NativeAuthorizationProvider {
+  enable: boolean;
   check_latest_update_interval: Duration;
   guest_permissions: Permission[];
+}
+
+interface KubernetesAuthorizationProvider {
+  enable: boolean;
+  // remaining fields needed for backend configuration only
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // kubeconfig?: string
+  // qps?: number;
+  // burst?: number;
+  // authorizer_allow_ttl?: Duration;
+  // authorizer_deny_ttl?: Duration;
+  // authenticator_ttl?: Duration;
 }
 
 export interface OIDCProvider {
@@ -114,6 +141,11 @@ export interface AuthProviders {
   enable_native: boolean;
   oauth: OauthProvider[];
   oidc: OIDCProvider[];
+  kubernetes?: KubernetesProvider;
+}
+
+interface KubernetesProvider {
+  enable: boolean;
 }
 
 export interface AuthenticationConfig {
@@ -215,6 +247,6 @@ export function useConfig(options?: ConfigOptions): UseQueryResult<ConfigModel, 
 }
 
 export function fetchConfig(): Promise<ConfigModel> {
-  const url = buildURL({ resource: resource, apiURL: '/api', apiPrefix: PERSES_APP_CONFIG.api_prefix });
+  const url = buildURL({ resource: resource, apiURL: '/api' });
   return fetchJson<ConfigModel>(url);
 }

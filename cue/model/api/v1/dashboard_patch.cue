@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,11 +25,6 @@ import (
 	"github.com/perses/perses/cue/model/api/v1/common"
 	"github.com/perses/perses/cue/model/api/v1/dashboard"
 )
-
-#PanelDisplay: {
-	name:         string @go(Name)
-	description?: string @go(Description)
-}
 
 #Panel: {
 	kind: "Panel"

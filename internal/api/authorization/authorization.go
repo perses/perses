@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package authorization
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/internal/api/authorization/k8s"
 	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -24,21 +25,27 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type Authorization interface {
 	// IsEnabled returns true if the authorization is enabled, false otherwise.
 	IsEnabled() bool
+	// IsNativeAuthz returns if the authorization is being handled internally or is delegated, ie. if the User
+	// information is saved in the perses backend. Currently the only delegated authorization provider is k8s
+	IsNativeAuthz() bool
 	// GetUser returns the user information from the context. The user information will depend on the implementation.
 	// While implementing this method, consider that the user information is not guaranteed to be set in the context.
 	// You should consider the case where the context can be empty and that the function can be called from an anonymous endpoint.
 	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
 	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
-	// If it is not the case, you should return an error.
+	// If it is not the case, you should return an error. All further functions are dependant on the results of theses decisions.
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)
+	// GetPublicUser returns the PublicUser of the user from the context.
+	GetPublicUser(ctx echo.Context) (*v1.PublicUser, error)
 	// GetProviderInfo return some information about the provider used to authenticate the user.
 	GetProviderInfo(ctx echo.Context) (crypto.ProviderInfo, error)
 	// Middleware returns the middleware function to be used in the echo server.
@@ -47,13 +54,23 @@ type Authorization interface {
 	// The middleware should be used before any other middleware that requires the user information to be set in the context.
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 	// GetUserProjects returns the list of the project the user has access to in the context of the role and the scope requested.
+	// If the request scope is global, then it should return a single project with the wildcard value ("*") as it means that the user has access to a global resource and not a project resource.
+	// The function can return also a single project with the wildcard value ("*") if the user has access to all the projects with the requested scope and action.
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
+	// Be aware also this function is called after checking if the user has the permission to access to the resource with the requested scope and action, so it is not necessary to check the permission again in this function.
 	GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error)
 	// HasPermission checks if the user has the permission to perform the action on the project with the given scope.
 	// In case the endpoint is anonymous, or the context is empty, it will return true.
 	// In case the user information is not found in the context, the implementation should return false.
 	HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	// HasCreateProjectPermission checks if the user has the permission to create a Perses project.
+	// This is separated from HasPermission because the way project creation permission is evaluated differs
+	// between authorization providers:
+	//   - For native auth, creating a project requires a global permission (i.e. a GlobalRole granting create on ProjectScope).
+	//   - For delegated auth (e.g. k8s), creating a project is driven by having write access to the corresponding
+	//     namespace rather than a global permission, since Perses projects map 1:1 to k8s namespaces.
+	HasCreateProjectPermission(ctx echo.Context, projectName string) bool
 	// GetPermissions returns the permissions of the user found in the context.
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
@@ -68,8 +85,16 @@ type Authorization interface {
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
+	// If the higher level auth enabled is false then ignore all authorization configuration
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
+
+	if conf.Security.Authorization.Provider.Kubernetes.Enable {
+		return k8s.New(conf)
+	}
+
+	// If no providers are explicitly set but auth is enabled, then use the perses native authz
 	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+
 }

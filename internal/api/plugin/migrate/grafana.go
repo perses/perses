@@ -1,4 +1,4 @@
-// Copyright 2025 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,10 +24,10 @@ const (
 )
 
 type GridPosition struct {
-	Height int `json:"h"`
-	Width  int `json:"w"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
+	Height int     `json:"h"`
+	Width  int     `json:"w"`
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
 }
 
 type GrafanaLink struct {
@@ -48,6 +48,8 @@ type Panel struct {
 	json.RawMessage
 }
 
+// Custom unmarshal to both store fields and keep raw data (used by the CUE-based migration logic).
+// Checks unmarshalling errors only when unmarshaling complex structs.
 func (p *Panel) UnmarshalJSON(data []byte) error {
 	var tmp map[string]json.RawMessage
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -70,25 +72,21 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(innerPanels, &panel.Panels); err != nil {
 			return err
 		}
-		delete(tmp, "panels")
 	}
 	if grid, ok := tmp["gridPos"]; ok {
 		if err := json.Unmarshal(grid, &panel.GridPosition); err != nil {
 			return err
 		}
-		delete(tmp, "gridPos")
 	}
 	if targets, ok := tmp["targets"]; ok {
 		if err := json.Unmarshal(targets, &panel.Targets); err != nil {
 			return err
 		}
-		delete(tmp, "targets")
 	}
 	if links, ok := tmp["links"]; ok {
 		if err := json.Unmarshal(links, &panel.Links); err != nil {
 			return err
 		}
-		delete(tmp, "links")
 	}
 	var err error
 	panel.RawMessage, err = json.Marshal(tmp)
@@ -179,9 +177,10 @@ func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
 }
 
 type SimplifiedDashboard struct {
-	UID        string  `json:"uid,omitempty"`
-	Title      string  `json:"title"`
-	Panels     []Panel `json:"panels"`
+	UID        string   `json:"uid,omitempty"`
+	Title      string   `json:"title"`
+	Tags       []string `json:"tags"`
+	Panels     []Panel  `json:"panels"`
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -96,7 +96,9 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector): void => {
-    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, {
+      state: { name: dashboardSelector.dashboard, tags: dashboardSelector.tags },
+    });
   };
 
   const { data } = useRoleList(projectName);

@@ -5,3 +5,4 @@ patch: {}
 exclude:
   global:
     - internal/cli/cmd/dac/setup/testdata
+    - internal/cli/cmd/plugin/build/testdata
