@@ -13,6 +13,7 @@
 
 // This package offers an utility to build a dashboards easily, by allowing
 // to provide panels together with their layout.
+@experiment(explicitopen)
 
 package dashboard
 
