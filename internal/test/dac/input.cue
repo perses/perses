@@ -186,7 +186,10 @@ import (
 
 dashboardBuilder & {
 	#name: "ContainersMonitoring"
-	#display: name: "Containers monitoring"
+	#display: {
+		name: "Containers monitoring"
+		description: "A dashboard to monitor containers"
+	}
 	#project:   "MyProject"
 	#variables: #myVarsBuilder.variables
 	#panelGroups: panelGroupsBuilder & {
@@ -194,6 +197,7 @@ dashboardBuilder & {
 			{
 				#title: "Resource usage"
 				#cols:  3
+				#height: 8 // TODO remove when panelgroup with 8 as default is released
 				#panels: [
 					#memoryPanel,
 					#cpuPanel,
@@ -211,6 +215,7 @@ dashboardBuilder & {
 			{
 				#title: "Misc"
 				#cols:  1
+				#height: 8 // TODO remove when panelgroup with 8 as default is released
 				#panels: [
 					#targetsPanel,
 				]
