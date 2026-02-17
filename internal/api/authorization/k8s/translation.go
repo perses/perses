@@ -38,16 +38,21 @@ const (
 	k8sSecretScope           k8sScope = "secrets"
 )
 
-// projectScopesToCheck contains all project-scoped resources that should be checked per-namespace
-// when computing permissions.
-var projectScopesToCheck = []v1Role.Scope{
+// Contains all project-scoped resources that have a corresponding kubernetes resource to
+// check against. Used when determining if a user has access to any resource within a namespace
+var kubernetesResourcesProjectScopesToCheck = []v1Role.Scope{
 	v1Role.DashboardScope,
 	v1Role.DatasourceScope,
-	v1Role.VariableScope,
 	v1Role.SecretScope,
+}
+
+// projectScopesToCheck contains all project-scoped resources that should be checked per-namespace
+// when computing permissions. Used to create full permissions lists
+var projectScopesToCheck = append(kubernetesResourcesProjectScopesToCheck,
+	v1Role.VariableScope,
 	v1Role.EphemeralDashboardScope,
 	v1Role.FolderScope,
-}
+)
 
 // globalScopesToCheck contains all scopes that should be checked at the wildcard (all-namespace)
 // level when computing permissions. This includes both global-only scopes and project-scoped
