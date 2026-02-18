@@ -385,7 +385,7 @@ func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
 }
 
 func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, user user.Info, action v1Role.Action, scope v1Role.Scope) (authorized authorizer.Decision, err error) {
-	if scope == v1Role.ProjectScope || scope == "" {
+	if scope == v1Role.ProjectScope {
 		return k.checkNamespaceAccess(ctx, namespace, user, action)
 	}
 

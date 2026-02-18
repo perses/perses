@@ -704,40 +704,40 @@ func TestGetUserProjects(t *testing.T) {
 		expectedResult []string
 	}{
 		{
-			title:          "user4 has access to project0",
-			user:           userFour,
-			reqScope:       "",
-			expectedResult: []string{projectZero},
-		},
-		{
 			title:          "admin has access to all projects",
 			user:           userAdmin,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
 			title:          "user0 has access to project0",
 			user:           userZero,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{projectZero},
 		},
 		{
 			title:          "user1 has access to no projects",
 			user:           userOne,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{},
 		},
 		{
 			title:          "user2 has access to all projects",
 			user:           userTwo,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
-			title:          "user3 has access to no projects with empty scope",
+			title:          "user3 has access to no projects",
 			user:           userThree,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{},
+		},
+		{
+			title:          "user4 has access to project0",
+			user:           userFour,
+			reqScope:       v1Role.ProjectScope,
+			expectedResult: []string{projectZero},
 		},
 		// Global scope tests: global resources are not tied to namespaces, so
 		// GetUserProjects should return WildcardProject only if the user has
