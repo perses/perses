@@ -112,17 +112,17 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			if event.Op&fsnotify.Remove != 0 || (event.Op&fsnotify.Rename != 0 && !fileExists(event.Name)) {
 				// Could be a file or directory deletion - rebuild dependency map
 				fmt.Fprintf(w.writer, "📝 File/directory removed: %s\n", event.Name)
-				
+
 				// Get list of all dashboards we knew about BEFORE the deletion
 				// Must use cached state, not filesystem scan (folder already deleted!)
 				dashboardsBefore := make(map[string]bool)
 				for dash := range w.allDashboards {
 					dashboardsBefore[dash] = true
 				}
-				
+
 				fmt.Fprintf(w.writer, "   Rebuilding dependency map...\n")
 				w.buildDependencyMap()
-				
+
 				// Find removed dashboards by comparing before/after
 				for dashboard := range dashboardsBefore {
 					if !w.allDashboards[dashboard] {
@@ -130,7 +130,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 						fmt.Fprintf(w.writer, "   ❌ Dashboard removed: %s\n", relPath)
 					}
 				}
-				
+
 				continue
 			}
 
@@ -376,6 +376,7 @@ func (w *watcher) buildAllDashboards() {
 }
 
 // isLibraryFile checks if a file is a library/shared file that shouldn't be built directly
+// TODO too simplist, "root files are dashboards" assumption is wrong
 func (w *watcher) isLibraryFile(file string) bool {
 	// Library files are typically in directories like: library/, lib/, pkg/, shared/, etc.
 	// Dashboard files are typically in: dashboards/, or are direct main.go files
