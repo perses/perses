@@ -259,6 +259,7 @@ func (k *k8sImpl) HasPermission(ctx echo.Context, requestAction v1Role.Action, r
 // to the corresponding namespace, since Perses projects map 1:1 to k8s namespaces.
 // We check if the user can create a dashboard in the target namespace as a proxy for
 // editor/admin access.
+// HasCreateProjectPermission implements [Authorization]
 func (k *k8sImpl) HasCreateProjectPermission(ctx echo.Context, projectName string) bool {
 	return k.HasPermission(ctx, v1Role.CreateAction, projectName, v1Role.DashboardScope)
 }
@@ -384,13 +385,17 @@ func getUnknownActions(knownActions []v1Role.Action) []v1Role.Action {
 }
 
 func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, user user.Info, action v1Role.Action, scope v1Role.Scope) (authorized authorizer.Decision, err error) {
+	if scope == v1Role.ProjectScope {
+		return k.checkNamespaceAccess(ctx, namespace, user, action)
+	}
+
 	translatedK8sScope := getK8sScope(scope)
 
-	// For resources without a K8s CRD (e.g. Variable, Secret, Role, User, Folder, etc.),
-	// fall back to checking the user's permission on the project/namespace resource.
+	// For resources without a K8s CRD (e.g. Variable, Folder, etc.),
+	// fall back to checking the user's permission on the dashboard resource resource.
 	if translatedK8sScope == "" {
-		logrus.Debugf("scope %q has no k8s CRD equivalent, falling back to project/namespace permission check", scope)
-		translatedK8sScope = k8sProjectScope
+		logrus.Debugf("scope %q has no k8s CRD equivalent, falling back to dashboard permission check", scope)
+		translatedK8sScope = k8sDashboardScope
 	}
 
 	apiGroup := getK8sAPIGroup(translatedK8sScope)
@@ -414,6 +419,27 @@ func (k *k8sImpl) checkSpecificPermission(ctx echo.Context, namespace string, us
 	}
 	authorized, _, err = k.authorizer.Authorize(ctx.Request().Context(), attributes)
 	return authorized, err
+}
+
+// Kubernetes requires both a namespace and a resource to check permissions against. Checking the permissions
+// a user has directly against a namespace returns a `NoOpinion` verdict. This function is used to determine if
+// the user has access to any perses-related kubernetes resources within the namespace to determine if the
+// user has access to a project, in the perses sense
+func (k *k8sImpl) checkNamespaceAccess(ctx echo.Context, namespace string, user user.Info, action v1Role.Action) (authorized authorizer.Decision, err error) {
+	var decision authorizer.Decision
+	for _, scope := range kubernetesResourcesProjectScopesToCheck {
+		decision, err := k.checkSpecificPermission(ctx, namespace, user, action, scope)
+		// If the request errors, then assume the rest of the requests will also error and break
+		// out early
+		if err != nil {
+			return decision, err
+		}
+		// If any of the permission checks are allowed then the user has access to the namespace
+		if decision == authorizer.DecisionAllow {
+			return decision, err
+		}
+	}
+	return decision, err
 }
 
 // RefreshPermissions implements [Authorization]

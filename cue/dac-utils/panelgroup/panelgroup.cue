@@ -33,7 +33,7 @@ import (
 #repeatVariable?: string
 #groupIndex:      number
 #cols:            >0 & <=#gridCols
-#height:          number | *6
+#height:          number | *8
 
 // intermediary compute
 #gridCols: 24

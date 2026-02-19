@@ -186,7 +186,10 @@ import (
 
 dashboardBuilder & {
 	#name: "ContainersMonitoring"
-	#display: name: "Containers monitoring"
+	#display: {
+		name:        "Containers monitoring"
+		description: "A dashboard to monitor containers"
+	}
 	#project:   "MyProject"
 	#variables: #myVarsBuilder.variables
 	#panelGroups: panelGroupsBuilder & {
@@ -194,6 +197,8 @@ dashboardBuilder & {
 			{
 				#title: "Resource usage"
 				#cols:  3
+
+				#height: 8 // TODO remove when panelgroup with 8 as default is released
 				#panels: [
 					#memoryPanel,
 					#cpuPanel,
@@ -211,18 +216,19 @@ dashboardBuilder & {
 			{
 				#title: "Misc"
 				#cols:  1
+
+				#height: 8 // TODO remove when panelgroup with 8 as default is released
 				#panels: [
 					#targetsPanel,
 				]
 			},
 		]
 	}
-	#datasources: {myPromDemo: {
+	#datasources: myPromDemo: {
 		default: true
-		plugin: promDs & {spec: {
-			directUrl: "http://localhost:9090"
-		}}
-	}}
+		// TODO remove close() when @experiment(explicitopen) is added to dashboardBuilder (or when new closedness behavior is made default)
+		plugin: promDs & {spec: close({directUrl: "http://localhost:9090"})}
+	}
 	#duration:        "3h"
 	#refreshInterval: "30s"
 }

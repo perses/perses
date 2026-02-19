@@ -161,6 +161,9 @@ var (
 	userTwo = "user2"
 	// user3 has read access to GlobalDatasource only, no project-scoped permissions
 	userThree = "user3"
+	// user4 has read access to Datasource in project0 only. Tests that this user has
+	// read access to a project, but not access to the non-k8s resources
+	userFour = "user4"
 )
 
 var (
@@ -207,6 +210,12 @@ func mockAuthentication(clientset *fake.Clientset) {
 					Username: userThree,
 					Groups:   []string{"system:authenticated"},
 				}
+			case "user4-token":
+				tr.Status.Authenticated = true
+				tr.Status.User = authnv1.UserInfo{
+					Username: userFour,
+					Groups:   []string{"system:authenticated"},
+				}
 			default:
 				tr.Status.Authenticated = false
 				tr.Status.Error = "unknown token"
@@ -226,6 +235,13 @@ func mockAuthorization(clientset *fake.Clientset) {
 
 			spec := sar.Spec
 			sar.Status.Allowed = false
+			// For users without full admin permissions to all namespaces, permission checks against
+			// namespace resources return `NoOpinion`. Mock it here as a denial
+			if spec.User != userAdmin && spec.ResourceAttributes.Resource == string(k8sProjectScope) {
+				sar.Status.Denied = true
+				sar.Status.Reason = "Cannot evaluate permission checks against namespaces"
+				return true, sar, nil
+			}
 
 			switch spec.User {
 			case userAdmin:
@@ -270,6 +286,15 @@ func mockAuthorization(clientset *fake.Clientset) {
 					sar.Status.Allowed = true
 				} else {
 					sar.Status.Reason = fmt.Sprintf("Mock RBAC: user3 cannot '%s' on '%s'", spec.ResourceAttributes.Verb, spec.ResourceAttributes.Resource)
+				}
+			case userFour:
+				if spec.ResourceAttributes.Verb == string(k8sReadAction) &&
+					spec.ResourceAttributes.Resource == string(k8sDatasourceScope) &&
+					spec.ResourceAttributes.Namespace == projectZero {
+
+					sar.Status.Allowed = true
+				} else {
+					sar.Status.Reason = fmt.Sprintf("Mock RBAC: uer4 cannot '%s' on '%s'", spec.ResourceAttributes.Verb, spec.ResourceAttributes.Resource)
 				}
 			default:
 				sar.Status.Reason = "Mock RBAC: User does not exist"
@@ -351,6 +376,22 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
+			title:          "user0 does have read project perm in project0",
+			user:           userZero,
+			reqAction:      "read",
+			reqProject:     "project0",
+			reqScope:       "Project",
+			expectedResult: true,
+		},
+		{
+			title:          "user0 does not have read project perm in project1",
+			user:           userZero,
+			reqAction:      "read",
+			reqProject:     "project1",
+			reqScope:       "Project",
+			expectedResult: false,
+		},
+		{
 			title:          "user0 doesn't have create dashboard perm in project0",
 			user:           userZero,
 			reqAction:      "create",
@@ -430,9 +471,33 @@ func TestHasPermission(t *testing.T) {
 			reqScope:       "Dashboard",
 			expectedResult: false,
 		},
+		{
+			title:          "user4 has read datasource perm in project0",
+			user:           userFour,
+			reqAction:      "read",
+			reqProject:     projectZero,
+			reqScope:       "Datasource",
+			expectedResult: true,
+		},
+		{
+			title:          "user4 doesn't have read dashboard perm in project0",
+			user:           userFour,
+			reqAction:      "read",
+			reqProject:     projectZero,
+			reqScope:       "Dashboard",
+			expectedResult: false,
+		},
+		{
+			title:          "user4 does have read project perm in project0",
+			user:           userFour,
+			reqAction:      "read",
+			reqProject:     projectZero,
+			reqScope:       "Project",
+			expectedResult: true,
+		},
 		// Non-K8s scope tests: scopes without a CRD fall back to project/namespace permission checks.
 		{
-			title:          "admin has read variable perm in project0 (fallback to namespace access)",
+			title:          "admin has read variable perm in project0 (fallback to dashboard access)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -440,7 +505,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "admin has read globalvariable perm (fallback to namespace access at cluster level)",
+			title:          "admin has read globalvariable perm (fallback to dashboard access at cluster level)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -448,7 +513,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user0 has read variable perm in project0 (fallback to namespace access)",
+			title:          "user0 has read variable perm in project0 (fallback to dashboard access)",
 			user:           userZero,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -456,7 +521,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user0 doesn't have read variable perm in project1 (fallback to namespace access)",
+			title:          "user0 doesn't have read variable perm in project1 (fallback to dashboard access)",
 			user:           userZero,
 			reqAction:      "read",
 			reqProject:     projectOne,
@@ -464,7 +529,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user0 doesn't have create variable perm in project0 (fallback to namespace access)",
+			title:          "user0 doesn't have create variable perm in project0 (fallback to dashboard access)",
 			user:           userZero,
 			reqAction:      "create",
 			reqProject:     projectZero,
@@ -472,7 +537,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user0 doesn't have read globalvariable perm (global scope, no wildcard namespace access)",
+			title:          "user0 doesn't have read globalvariable perm (global scope, no wildcard dashboard access)",
 			user:           userZero,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -480,7 +545,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user1 doesn't have read variable perm in project0 (fallback to namespace access)",
+			title:          "user1 doesn't have read variable perm in project0 (fallback to dashboard access)",
 			user:           userOne,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -496,7 +561,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user2 has read variable perm in project0 (fallback to namespace access)",
+			title:          "user2 has read variable perm in project0 (fallback to dashboard access)",
 			user:           userTwo,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -504,7 +569,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user2 has create variable perm in project0 (fallback to namespace access)",
+			title:          "user2 has create variable perm in project0 (fallback to dashboard access)",
 			user:           userTwo,
 			reqAction:      "create",
 			reqProject:     projectZero,
@@ -512,7 +577,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user2 doesn't have create variable perm in project1 (fallback to namespace access)",
+			title:          "user2 doesn't have create variable perm in project1 (fallback to dashboard access)",
 			user:           userTwo,
 			reqAction:      "create",
 			reqProject:     projectOne,
@@ -520,7 +585,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user2 has read globalvariable perm (fallback to namespace access, non-GlobalDatasource)",
+			title:          "user2 has read globalvariable perm (fallback to dashboard access, non-GlobalDatasource)",
 			user:           userTwo,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -528,7 +593,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user3 doesn't have read variable perm in project0 (no namespace access)",
+			title:          "user3 doesn't have read variable perm in project0 (no namedashboardspace access)",
 			user:           userThree,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -536,7 +601,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: false,
 		},
 		{
-			title:          "user3 doesn't have read globalvariable perm (no namespace access at cluster level)",
+			title:          "user3 doesn't have read globalvariable perm (no dashboard access at cluster level)",
 			user:           userThree,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -560,7 +625,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "admin has read globalsecret perm (fallback to namespace access at cluster level)",
+			title:          "admin has read globalsecret perm (fallback to dashboard access at cluster level)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -568,7 +633,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "admin has read globalrole perm (fallback to namespace access at cluster level)",
+			title:          "admin has read globalrole perm (fallback to dashboard access at cluster level)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -576,7 +641,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "admin has read rolebinding perm in project0 (fallback to namespace access)",
+			title:          "admin has read rolebinding perm in project0 (fallback to dashboard access)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -584,7 +649,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "admin has read globalrolebinding perm (fallback to namespace access at cluster level)",
+			title:          "admin has read globalrolebinding perm (fallback to dashboard access at cluster level)",
 			user:           userAdmin,
 			reqAction:      "read",
 			reqProject:     "*",
@@ -592,7 +657,7 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user0 has read folder perm in project0 (fallback to namespace access)",
+			title:          "user0 has read folder perm in project0 (fallback to dashboard access)",
 			user:           userZero,
 			reqAction:      "read",
 			reqProject:     projectZero,
@@ -600,12 +665,20 @@ func TestHasPermission(t *testing.T) {
 			expectedResult: true,
 		},
 		{
-			title:          "user0 has read ephemeraldashboard perm in project0 (fallback to namespace access)",
+			title:          "user0 has read ephemeraldashboard perm in project0 (fallback to dashboard access)",
 			user:           userZero,
 			reqAction:      "read",
 			reqProject:     projectZero,
 			reqScope:       v1Role.EphemeralDashboardScope,
 			expectedResult: true,
+		},
+		{
+			title:          "user4 doesn't have read variable perm (fallback to dashboard access)",
+			user:           userFour,
+			reqAction:      "read",
+			reqProject:     projectZero,
+			reqScope:       v1Role.VariableScope,
+			expectedResult: false,
 		},
 	}
 	for i := range testSuites {
@@ -633,26 +706,38 @@ func TestGetUserProjects(t *testing.T) {
 		{
 			title:          "admin has access to all projects",
 			user:           userAdmin,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
 			title:          "user0 has access to project0",
 			user:           userZero,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{projectZero},
 		},
 		{
 			title:          "user1 has access to no projects",
 			user:           userOne,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{},
 		},
 		{
 			title:          "user2 has access to all projects",
 			user:           userTwo,
-			reqScope:       "",
+			reqScope:       v1Role.ProjectScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
+		},
+		{
+			title:          "user3 has access to no projects",
+			user:           userThree,
+			reqScope:       v1Role.ProjectScope,
+			expectedResult: []string{},
+		},
+		{
+			title:          "user4 has access to project0",
+			user:           userFour,
+			reqScope:       v1Role.ProjectScope,
+			expectedResult: []string{projectZero},
 		},
 		// Global scope tests: global resources are not tied to namespaces, so
 		// GetUserProjects should return WildcardProject only if the user has
@@ -695,13 +780,13 @@ func TestGetUserProjects(t *testing.T) {
 			expectedResult: []string{"*"},
 		},
 		{
-			title:          "project scope Role returns all namespaces for admin (fallback to namespace access)",
+			title:          "project scope Role returns all namespaces for admin (fallback to dashboard access)",
 			user:           userAdmin,
 			reqScope:       v1Role.RoleScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
-			title:          "project scope RoleBinding returns all namespaces for admin (fallback to namespace access)",
+			title:          "project scope RoleBinding returns all namespaces for admin (fallback to dashboard access)",
 			user:           userAdmin,
 			reqScope:       v1Role.RoleBindingScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
@@ -712,18 +797,24 @@ func TestGetUserProjects(t *testing.T) {
 			reqScope:       v1Role.UserScope,
 			expectedResult: []string{"*"},
 		},
+		{
+			title:          "project scope Secret returns namespace list for admin",
+			user:           userAdmin,
+			reqScope:       v1Role.SecretScope,
+			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
+		},
+		{
+			title:          "project scope Secret returns empty for user1",
+			user:           userOne,
+			reqScope:       v1Role.SecretScope,
+			expectedResult: []string{},
+		},
 		// user3 has only GlobalDatasource access, no project-scoped permissions.
 		{
 			title:          "global scope GlobalDatasource returns wildcard for user3 who has read access",
 			user:           userThree,
 			reqScope:       v1Role.GlobalDatasourceScope,
 			expectedResult: []string{"*"},
-		},
-		{
-			title:          "user3 has access to no projects with empty scope",
-			user:           userThree,
-			reqScope:       "",
-			expectedResult: []string{},
 		},
 		{
 			title:          "project scope Dashboard returns empty for user3 who has no project access",
@@ -744,35 +835,47 @@ func TestGetUserProjects(t *testing.T) {
 			reqScope:       v1Role.DatasourceScope,
 			expectedResult: []string{projectZero},
 		},
+		{
+			title:          "project scope Datasource still returns namespace list for user4",
+			user:           userFour,
+			reqScope:       v1Role.DatasourceScope,
+			expectedResult: []string{projectZero},
+		},
+		{
+			title:          "project scope Dashboard returns empty for user4",
+			user:           userFour,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: []string{},
+		},
 		// Non-K8s project-scoped resources fall back to namespace access for GetUserProjects
 		{
-			title:          "project scope Variable returns namespace list for user0 (fallback to namespace access)",
+			title:          "project scope Variable returns namespace list for user0 (fallback to dashboard access)",
 			user:           userZero,
 			reqScope:       v1Role.VariableScope,
 			expectedResult: []string{projectZero},
 		},
 		{
-			title:          "project scope Variable returns all namespaces for user2 (fallback to namespace access)",
+			title:          "project scope Variable returns all namespaces for user2 (fallback to dashboard access)",
 			user:           userTwo,
 			reqScope:       v1Role.VariableScope,
 			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
 		},
 		{
-			title:          "project scope Variable returns empty for user3 (no namespace access)",
+			title:          "project scope Variable returns empty for user3 (no dashboard access)",
 			user:           userThree,
 			reqScope:       v1Role.VariableScope,
 			expectedResult: []string{},
 		},
 		{
-			title:          "project scope Secret returns namespace list for admin (fallback to namespace access)",
-			user:           userAdmin,
-			reqScope:       v1Role.SecretScope,
-			expectedResult: []string{"*", projectPerses, projectZero, projectOne},
+			title:          "project scope Variable returns empty list for user1 (no dashboard access)",
+			user:           userOne,
+			reqScope:       v1Role.VariableScope,
+			expectedResult: []string{},
 		},
 		{
-			title:          "project scope Secret returns empty for user1 (no namespace access)",
-			user:           userOne,
-			reqScope:       v1Role.SecretScope,
+			title:          "project scope Variable returns empty for user4 (no dashboard access)",
+			user:           userFour,
+			reqScope:       v1Role.VariableScope,
 			expectedResult: []string{},
 		},
 	}
@@ -805,8 +908,8 @@ func TestGetPermissions(t *testing.T) {
 			expectedResult: map[string][]*v1Role.Permission{"*": {
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Datasource"}},
-				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Secret"}},
+				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"Folder"}},
 				{Actions: []v1Role.Action{"*"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
@@ -822,8 +925,8 @@ func TestGetPermissions(t *testing.T) {
 			}, projectZero: {
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Secret"}},
+				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Folder"}},
 			}},
@@ -839,8 +942,8 @@ func TestGetPermissions(t *testing.T) {
 			expectedResult: map[string][]*v1Role.Permission{"*": {
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Secret"}},
+				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Folder"}},
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalVariable"}},
@@ -848,8 +951,8 @@ func TestGetPermissions(t *testing.T) {
 			}, projectZero: {
 				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Dashboard"}},
 				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Datasource"}},
-				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Secret"}},
+				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Variable"}},
 				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
 				{Actions: []v1Role.Action{"create"}, Scopes: []v1Role.Scope{"Folder"}},
 			}},
@@ -859,6 +962,13 @@ func TestGetPermissions(t *testing.T) {
 			user:  userThree,
 			expectedResult: map[string][]*v1Role.Permission{"*": {
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+			}},
+		},
+		{
+			title: "user4 has read datasource in project0",
+			user:  userFour,
+			expectedResult: map[string][]*v1Role.Permission{projectZero: {
+				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},
 	}
