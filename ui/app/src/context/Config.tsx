@@ -107,6 +107,11 @@ export function useIsSignUpDisable(): boolean {
   return config.security.authentication.disable_sign_up;
 }
 
+export function useHasImportantDashboards(): boolean {
+  const { config } = useConfigContext();
+  return Boolean(config.frontend.important_dashboards?.length);
+}
+
 export function useImportantDashboardSelectors(): DashboardSelector[] {
   const { config } = useConfigContext();
   return useMemo(() => {
