@@ -376,29 +376,55 @@ func (w *watcher) buildAllDashboards() {
 }
 
 // isLibraryFile checks if a file is a library/shared file that shouldn't be built directly
-// TODO too simplist, "root files are dashboards" assumption is wrong
 func (w *watcher) isLibraryFile(file string) bool {
-	// Library files are typically in directories like: library/, lib/, pkg/, shared/, etc.
-	// Dashboard files are typically in: dashboards/, or are direct main.go files
-	relPath, err := filepath.Rel(w.sourceDir, file)
+	ext := filepath.Ext(file)
+
+	if ext == ".go" {
+		return w.isGoLibraryFile(file)
+	} else if ext == ".cue" {
+		return w.isCueLibraryFile(file)
+	}
+
+	return true // Unknown files are libraries by default
+}
+
+// isGoLibraryFile checks if a Go file is a library (not a main package)
+func (w *watcher) isGoLibraryFile(file string) bool {
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, file, nil, parser.PackageClauseOnly)
 	if err != nil {
-		return false
+		return true // Can't parse = treat as library
 	}
 
-	// Check if file is NOT in a dashboards directory
-	// Common patterns: dashboards/, dashboard/, or files directly in root with main package
-	dir := filepath.Dir(relPath)
-	if dir == "." {
-		return false // Files in root are likely main dashboards
+	// Go dashboards MUST be "package main"
+	return node.Name.Name != "main"
+}
+
+// isCueLibraryFile checks if a CUE file is a library based on import patterns and filename
+func (w *watcher) isCueLibraryFile(file string) bool {
+	content, err := os.ReadFile(file)
+	if err != nil {
+		return true
 	}
 
-	// Check if path contains "dashboard" - likely a dashboard file
-	if strings.Contains(strings.ToLower(relPath), "dashboard") {
-		return false
+	parsed, err := cueparser.ParseFile(file, content)
+	if err != nil {
+		return true
 	}
 
-	// Otherwise, it's likely a library file
-	return true
+	// Strategy 1: Check for named import "dashboardBuilder"
+	for imp := range parsed.ImportSpecs() {
+		if imp.Name != nil && imp.Name.String() == "dashboardBuilder" {
+			return false // This is a dashboard file!
+		}
+	}
+
+	// Strategy 2: Check if filename contains "dashboard"
+	if strings.Contains(strings.ToLower(filepath.Base(file)), "dashboard") {
+		return false // This is a dashboard file!
+	}
+
+	return true // It's a library file
 }
 
 // findAllDependencies recursively finds all dependencies (direct + transitive) for a file
