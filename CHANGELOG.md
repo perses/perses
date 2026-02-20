@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.53.0-rc.2 / 2026-02-20
+
+- [FEATURE] Add/Modify tags for Dashboard (#3865)
+- [ENHANCEMENT] Home page layout when there are no important dashboards (#3892)
+- [ENHANCEMENT] Use project scope for non k8s perses resources (#3866)
+- [ENHANCEMENT] Add specific project creation permission check for auth providers (#3870)
+- [ENHANCEMENT] Support additional query parameter for the redirect URI with OIDC when logout (#3890)
+- [BUGFIX] Project permission is determinate based on the Perses resources in namespace (#3887)
+- [BUGFIX] CUE DaC utils: rely on new closedness behavior in dashboard builder to fix SDK usage (#3888)
+- [BUGFIX] Grid x,y coordination is a float in Grafana (#3883)
+- [BREAKINGCHANGE] Improve SQL proxy error handling and switch to JSON responses (#3815)
+- [DOC] Add upgrade guide (#3882)
+
 ## 0.53.0-rc.1 / 2026-02-10
 
 ### Core & UI
