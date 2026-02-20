@@ -25,6 +25,7 @@ import (
 	"github.com/perses/common/async/taskhelper"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -66,11 +67,13 @@ func (o *option) Validate() error {
 func (o *option) Execute() error {
 	buildDir := config.Global.Dac.OutputFolder
 
-	fmt.Fprintf(o.writer, "📦 Dashboard-as-Code Watcher\n")
-	fmt.Fprintf(o.writer, "   Source: %s\n", o.sourceDir)
-	fmt.Fprintf(o.writer, "   Output: %s\n", buildDir)
-	fmt.Fprintf(o.writer, "   Format: %s\n", o.output)
-	fmt.Fprintln(o.writer)
+	logrus.Info("📦 Dashboard-as-Code Watcher")
+	logrus.Infof("   Source: %s", o.sourceDir)
+	logrus.Infof("   Output: %s", buildDir)
+	logrus.Infof("   Format: %s", o.output)
+	logrus.Info("")
+	logrus.Info("👀 Watching for changes... (Ctrl+C to stop)")
+	logrus.Info("")
 
 	// Create the primary context
 	ctx, cancel := context.WithCancel(context.Background())
