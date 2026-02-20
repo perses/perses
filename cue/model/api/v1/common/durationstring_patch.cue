@@ -21,6 +21,4 @@
 
 package common
 
-import "strings"
-
-#DurationString: strings
+#DurationString: "" | =~"^(\\d+y)?(\\d+w)?(\\d+d)?(\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?$"
