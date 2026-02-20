@@ -401,7 +401,38 @@ func (w *watcher) isLibraryFile(file string) bool {
 	return true
 }
 
-// buildDependencyMap builds a map of library files to dashboards that import them
+// findAllDependencies recursively finds all dependencies (direct + transitive) for a file
+func (w *watcher) findAllDependencies(file string, visited map[string]bool) map[string]bool {
+	deps := make(map[string]bool)
+
+	// Prevent infinite loops from circular imports
+	if visited[file] {
+		return deps
+	}
+	visited[file] = true
+
+	// Get direct imports
+	imports := w.parseImports(file)
+
+	for _, importPath := range imports {
+		libraryFiles := w.resolveImportToFiles(importPath)
+
+		for _, libFile := range libraryFiles {
+			// Add this library file
+			deps[libFile] = true
+
+			// Recursively get its dependencies (transitive)
+			transitiveDeps := w.findAllDependencies(libFile, visited)
+			for transFile := range transitiveDeps {
+				deps[transFile] = true
+			}
+		}
+	}
+
+	return deps
+}
+
+// buildDependencyMap builds a map of library files to dashboards that import them (including transitive dependencies)
 func (w *watcher) buildDependencyMap() {
 	w.dependencyMap = make(map[string][]string)
 	dashboards := w.findDashboardFiles()
@@ -412,16 +443,14 @@ func (w *watcher) buildDependencyMap() {
 		w.allDashboards[dash] = true
 	}
 
-	fmt.Fprintf(w.writer, "🔍 Building dependency graph...\n")
+	fmt.Fprintf(w.writer, "🔍 Building dependency graph (including transitive dependencies)...\n")
 
 	for _, dashboard := range dashboards {
-		imports := w.parseImports(dashboard)
-		for _, importPath := range imports {
-			// Try to resolve import path to actual file
-			libraryFiles := w.resolveImportToFiles(importPath)
-			for _, libFile := range libraryFiles {
-				w.dependencyMap[libFile] = append(w.dependencyMap[libFile], dashboard)
-			}
+		// Recursively find ALL dependencies (direct + transitive)
+		allDeps := w.findAllDependencies(dashboard, make(map[string]bool))
+
+		for libFile := range allDeps {
+			w.dependencyMap[libFile] = append(w.dependencyMap[libFile], dashboard)
 		}
 	}
 
