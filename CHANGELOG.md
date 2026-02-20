@@ -11,6 +11,7 @@
 - [BUGFIX] CUE DaC utils: rely on new closedness behavior in dashboard builder to fix SDK usage (#3888)
 - [BUGFIX] Grid x,y coordination is a float in Grafana (#3883)
 - [BREAKINGCHANGE] Improve SQL proxy error handling and switch to JSON responses (#3815)
+- [BREAKINGCHANGE] Fix duration and refreshinterval in dashboard (#3895)
 - [DOC] Add upgrade guide (#3882)
 
 ## 0.53.0-rc.1 / 2026-02-10
