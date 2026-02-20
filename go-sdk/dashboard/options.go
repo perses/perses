@@ -59,16 +59,36 @@ func ProjectName(name string) Option {
 	}
 }
 
+func RefreshIntervalAsString(duration string) Option {
+	return func(builder *Builder) error {
+		if _, err := common.ParseDuration(duration); err != nil {
+			return fmt.Errorf("invalid refresh interval %q: %w", duration, err)
+		}
+		builder.Dashboard.Spec.RefreshInterval = common.DurationString(duration)
+		return nil
+	}
+}
+
 func RefreshInterval(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Dashboard.Spec.RefreshInterval = common.Duration(seconds)
+		builder.Dashboard.Spec.RefreshInterval = common.DurationString(common.Duration(seconds).String())
+		return nil
+	}
+}
+
+func DurationAsString(duration string) Option {
+	return func(builder *Builder) error {
+		if _, err := common.ParseDuration(duration); err != nil {
+			return fmt.Errorf("invalid duration %q: %w", duration, err)
+		}
+		builder.Dashboard.Spec.Duration = common.DurationString(duration)
 		return nil
 	}
 }
 
 func Duration(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Dashboard.Spec.Duration = common.Duration(seconds)
+		builder.Dashboard.Spec.Duration = common.DurationString(common.Duration(seconds).String())
 		return nil
 	}
 }

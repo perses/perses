@@ -18,7 +18,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -197,7 +196,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  common.Duration(6 * time.Hour),
+					Duration:  "6h",
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyFirstPanel": {
@@ -230,7 +229,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  common.Duration(6 * time.Hour),
+					Duration:  "6h",
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -251,7 +250,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  common.Duration(6 * time.Hour),
+					Duration:  "6h",
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -272,7 +271,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  common.Duration(6 * time.Hour),
+					Duration:  "6h",
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -293,7 +292,7 @@ func TestValidatePanels(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration:  common.Duration(6 * time.Hour),
+					Duration:  "6h",
 					Variables: nil,
 					Panels: map[string]*v1.Panel{
 						"MyInvalidPanel": {
@@ -350,7 +349,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration: common.Duration(6 * time.Hour),
+					Duration: "6h",
 					Variables: []dashboard.Variable{
 						{
 							Kind: variable.KindList,
@@ -397,7 +396,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
 				Spec: v1.DashboardSpec{
-					Duration: common.Duration(6 * time.Hour),
+					Duration: "6h",
 					Variables: []dashboard.Variable{
 						{
 							Kind: "ListVariable",

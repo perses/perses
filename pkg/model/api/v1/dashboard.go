@@ -65,9 +65,9 @@ type DashboardSpec struct {
 	Panels      map[string]*Panel          `json:"panels" yaml:"panels"`
 	Layouts     []dashboard.Layout         `json:"layouts" yaml:"layouts"`
 	// Duration is the default time range to use when getting data to fill the dashboard
-	Duration common.Duration `json:"duration" yaml:"duration"`
+	Duration common.DurationString `json:"duration" yaml:"duration"`
 	// RefreshInterval is the default refresh interval to use when landing on the dashboard
-	RefreshInterval common.Duration `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
+	RefreshInterval common.DurationString `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
@@ -110,6 +110,9 @@ func (d *DashboardSpec) validate() error {
 		if err := common.ValidateID(panelKey); err != nil {
 			return err
 		}
+	}
+	if len(d.Duration) == 0 {
+		d.Duration = "1h"
 	}
 	return nil
 }

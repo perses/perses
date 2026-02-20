@@ -32,7 +32,5 @@ type Prometheus struct {
 // Postgres is only used for testing purpose.
 // It doesn't reflect the nature of an actual Postgres datasource
 type Postgres struct {
-	DirectURL      string           `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *sql.Proxy       `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval *common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	Proxy *sql.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 }

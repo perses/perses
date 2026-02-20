@@ -16,21 +16,20 @@ package config
 import (
 	"fmt"
 	"slices"
-	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-var defaultTimeRangeOptions = []common.Duration{
-	common.Duration(5 * time.Minute),
-	common.Duration(15 * time.Minute),
-	common.Duration(30 * time.Minute),
-	common.Duration(1 * time.Hour),
-	common.Duration(6 * time.Hour),
-	common.Duration(12 * time.Hour),
-	common.Duration(24 * time.Hour),
-	common.Duration(7 * 24 * time.Hour),
-	common.Duration(14 * 24 * time.Hour),
+var defaultTimeRangeOptions = []common.DurationString{
+	"5m",
+	"15m",
+	"30m",
+	"1h",
+	"6h",
+	"12h",
+	"24h",
+	"7d",
+	"14d",
 }
 
 type Explorer struct {
@@ -57,9 +56,9 @@ func (b *Banner) Verify() error {
 }
 
 type TimeRange struct {
-	DisableCustomTimeRange bool              `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
-	DisableZoomTimeRange   bool              `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
-	Options                []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
+	DisableCustomTimeRange bool                    `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
+	DisableZoomTimeRange   bool                    `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
+	Options                []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func (t *TimeRange) Verify() error {

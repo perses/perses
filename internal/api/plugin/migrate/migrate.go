@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
@@ -147,7 +146,7 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 
 	if logrus.IsLevelEnabled(logrus.TraceLevel) {
 		logrus.Tracef("Grafana %s to migrate:", typeOfDataToMigrate)
-		fmt.Fprintf(os.Stderr, "%# v\n", grafanaValue)
+		_, _ = fmt.Fprintf(os.Stderr, "%# v\n", grafanaValue)
 	}
 
 	// Probably it is unnecessary to do that as JSON should be valid.
@@ -166,7 +165,7 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 
 	if logrus.IsLevelEnabled(logrus.TraceLevel) {
 		logrus.Tracef("Final Perses %s:", typeOfDataToMigrate)
-		fmt.Fprintf(os.Stderr, "%v\n", finalVal)
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", finalVal)
 	}
 
 	return convertToPlugin(finalVal)
@@ -252,7 +251,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 			Display: &common.Display{
 				Name: grafanaDashboard.Title,
 			},
-			Duration: common.Duration(time.Hour),
+			Duration: "1h",
 		},
 	}
 
@@ -451,7 +450,7 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 			}
 		}
 	}
-	logrus.Infof("unable to reconize the variable kind from the migrate script %q", schemaPath)
+	logrus.Infof("unable to recognize the variable kind from the migrate script %q", schemaPath)
 }
 
 func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
@@ -477,7 +476,7 @@ func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.P
 			}
 		}
 	}
-	logrus.Infof("unable to reconize the query kind from the migrate script %q", schemaPath)
+	logrus.Infof("unable to recognize the query kind from the migrate script %q", schemaPath)
 }
 
 func (m *mig) remove(kind plugin.Kind, name string) {

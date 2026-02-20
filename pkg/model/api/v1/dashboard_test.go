@@ -17,7 +17,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -87,8 +86,8 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Duration:        common.Duration(6 * time.Hour),
-					RefreshInterval: common.Duration(20 * time.Second),
+					Duration:        "6h",
+					RefreshInterval: "20s",
 				},
 			},
 			result: `{
@@ -227,8 +226,8 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
-					Duration:        common.Duration(6 * time.Hour),
-					RefreshInterval: common.Duration(15 * time.Second),
+					Duration:        "6h",
+					RefreshInterval: "15s",
 				},
 			},
 			result: `{
@@ -494,8 +493,8 @@ func TestUnmarshallDashboard(t *testing.T) {
 					},
 				},
 			},
-			Duration:        common.Duration(6 * time.Hour),
-			RefreshInterval: common.Duration(30 * time.Second),
+			Duration:        "6h",
+			RefreshInterval: "30s",
 		},
 	}
 	result := &Dashboard{}
