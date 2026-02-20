@@ -28,7 +28,9 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/cli/cmd/dac/build"
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
+	"github.com/sirupsen/logrus"
 )
 
 // fileExists checks if a file or directory exists
@@ -91,12 +93,10 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 		return err
 	}
 
-	fmt.Fprintf(w.writer, "👀 Watching %s for changes...\n", w.sourceDir)
-
 	// Initial build - build all dashboard files
-	fmt.Fprintf(w.writer, "🔨 Running initial build...\n")
+	logrus.Debug("🔨 Running initial build...")
 	w.buildAllDashboards()
-	fmt.Fprintf(w.writer, "📊 Dependency tracking enabled (%d library -> dashboard mappings)\n", len(w.dependencyMap))
+	logrus.Debugf("📊 Dependency tracking enabled (%d library -> dashboard mappings)", len(w.dependencyMap))
 
 	var debounceTimer *time.Timer
 	var debouncePending bool
@@ -111,7 +111,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			// Handle deletions (REMOVE or RENAME where file no longer exists)
 			if event.Op&fsnotify.Remove != 0 || (event.Op&fsnotify.Rename != 0 && !fileExists(event.Name)) {
 				// Could be a file or directory deletion - rebuild dependency map
-				fmt.Fprintf(w.writer, "📝 File/directory removed: %s\n", event.Name)
+				logrus.Debugf("📝 File/directory removed: %s", event.Name)
 
 				// Get list of all dashboards we knew about BEFORE the deletion
 				// Must use cached state, not filesystem scan (folder already deleted!)
@@ -120,14 +120,14 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 					dashboardsBefore[dash] = true
 				}
 
-				fmt.Fprintf(w.writer, "   Rebuilding dependency map...\n")
+				logrus.Debug("   Rebuilding dependency map...")
 				w.buildDependencyMap()
 
 				// Find removed dashboards by comparing before/after
 				for dashboard := range dashboardsBefore {
 					if !w.allDashboards[dashboard] {
 						relPath, _ := filepath.Rel(w.sourceDir, dashboard)
-						fmt.Fprintf(w.writer, "   ❌ Dashboard removed: %s\n", relPath)
+						logrus.Debugf("   ❌ Dashboard removed: %s", relPath)
 					}
 				}
 
@@ -140,10 +140,10 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				info, err := os.Stat(event.Name)
 				if err == nil && info.IsDir() {
 					if err := w.addWatchRecursive(fsWatcher, event.Name); err != nil {
-						fmt.Fprintf(w.errWriter, "Failed to watch new directory %s: %v\n", event.Name, err)
+						logrus.Errorf("Failed to watch new directory %s: %v", event.Name, err)
 					} else {
 						// Directory created or renamed - scan for existing files and rebuild dependency map
-						fmt.Fprintf(w.writer, "   New directory detected: %s\n", event.Name)
+						logrus.Debugf("   New directory detected: %s", event.Name)
 
 						// Scan for dashboard files in the new directory
 						// (copying a folder means files are already there, not created individually)
@@ -154,7 +154,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 							ext := filepath.Ext(path)
 							if (ext == ".go" || ext == ".cue") && w.isDashboardFile(path) {
 								w.changedFiles[path] = true
-								fmt.Fprintf(w.writer, "   Found new dashboard: %s\n", path)
+								logrus.Debugf("   Found new dashboard: %s", path)
 							}
 							return nil
 						})
@@ -181,7 +181,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				continue
 			}
 
-			fmt.Fprintf(w.writer, "📝 File event: %s (%s)\n", event.Name, event.Op)
+			logrus.Debugf("📝 File event: %s (%s)", event.Name, event.Op)
 
 			// Handle file operations: CREATE, WRITE, RENAME (move)
 			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Rename) != 0 {
@@ -214,7 +214,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			w.rebuildAffectedFiles()
 
 		case err := <-fsWatcher.Errors:
-			fmt.Fprintf(w.errWriter, "⚠️ Watcher error: %v\n", err)
+			logrus.Warnf("⚠️ Watcher error: %v", err)
 		}
 	}
 }
@@ -233,13 +233,13 @@ func (w *watcher) rebuildAffectedFiles() {
 	// Clear the changed files map
 	w.changedFiles = make(map[string]bool)
 
-	fmt.Fprintf(w.writer, "🔄 Changes detected in %d file(s), rebuilding...\n", len(filesToBuild))
+	logrus.Debugf("🔄 Changes detected in %d file(s), rebuilding...", len(filesToBuild))
 
 	// Check if any changed files are library/shared files (not buildable as main packages)
 	hasLibraryFiles := false
 	for _, file := range filesToBuild {
 		isDash := w.isDashboardFile(file)
-		fmt.Fprintf(w.writer, "   - %s (library: %v)\n", file, !isDash)
+		logrus.Debugf("   - %s (library: %v)", file, !isDash)
 		if !isDash {
 			hasLibraryFiles = true
 		}
@@ -250,24 +250,29 @@ func (w *watcher) rebuildAffectedFiles() {
 		affectedDashboards := w.findAffectedDashboards(filesToBuild)
 		if len(affectedDashboards) == 0 {
 			// Fallback: if we can't determine dependencies, rebuild all
-			fmt.Fprintf(w.writer, "Library file(s) changed (dependencies unknown), rebuilding all dashboards...\n")
+			logrus.Debug("Library file(s) changed (dependencies unknown), rebuilding all dashboards...")
 			w.buildAllDashboards()
 			return
 		}
-		fmt.Fprintf(w.writer, "Library file(s) changed, rebuilding %d affected dashboard(s)...\n", len(affectedDashboards))
-		for _, dashboard := range affectedDashboards {
-			relPath, _ := filepath.Rel(w.sourceDir, dashboard)
-			fmt.Fprintf(w.writer, "   → %s\n", relPath)
+		logrus.Debugf("Library file(s) changed, rebuilding %d affected dashboard(s)...", len(affectedDashboards))
+		if logrus.IsLevelEnabled(logrus.DebugLevel) {
+			for _, dashboard := range affectedDashboards {
+				relPath, _ := filepath.Rel(w.sourceDir, dashboard)
+				logrus.Debugf("   → %s", relPath)
+			}
 		}
 		hasErrors := false
 		for _, dashboard := range affectedDashboards {
-			if err := w.buildFile(dashboard); err != nil {
-				fmt.Fprintf(w.errWriter, "❌ Build failed for %s: %v\n", dashboard, err)
+			outputPath, err := w.buildFile(dashboard)
+			if err != nil {
+				logrus.Errorf("❌ Build failed for %s: %v", dashboard, err)
 				hasErrors = true
+			} else {
+				logrus.Debugf("Successfully built %s at %s", dashboard, outputPath)
 			}
 		}
 		if !hasErrors {
-			fmt.Fprintf(w.writer, "✅ Build successful!\n")
+			logrus.Debug("✅ Build successful!")
 			select {
 			case w.buildChan <- struct{}{}:
 			default:
@@ -276,16 +281,19 @@ func (w *watcher) rebuildAffectedFiles() {
 		return
 	} else if len(filesToBuild) > 10 {
 		// Too many files changed, do full rebuild
-		fmt.Fprintf(w.writer, "Multiple files changed, rebuilding all dashboards...\n")
+		logrus.Debug("Multiple files changed, rebuilding all dashboards...")
 		w.buildAllDashboards()
 		return
 	} else {
 		// Build each changed file individually
 		hasErrors := false
 		for _, file := range filesToBuild {
-			if err := w.buildFile(file); err != nil {
-				fmt.Fprintf(w.errWriter, "❌ Build failed for %s: %v\n", file, err)
+			outputPath, err := w.buildFile(file)
+			if err != nil {
+				logrus.Errorf("❌ Build failed for %s: %v", file, err)
 				hasErrors = true
+			} else {
+				logrus.Debugf("Successfully built %s at %s", file, outputPath)
 			}
 		}
 		if hasErrors {
@@ -293,7 +301,7 @@ func (w *watcher) rebuildAffectedFiles() {
 		}
 	}
 
-	fmt.Fprintf(w.writer, "✅ Build successful!\n")
+	logrus.Debug("✅ Build successful!")
 	// Notify build completion (non-blocking)
 	select {
 	case w.buildChan <- struct{}{}:
@@ -301,17 +309,28 @@ func (w *watcher) rebuildAffectedFiles() {
 	}
 }
 
-// buildFile builds a single file using the build option
-func (w *watcher) buildFile(file string) error {
+// buildFile builds a single file using the build option and returns the output path
+func (w *watcher) buildFile(file string) (string, error) {
 	// Create a temporary build option for this specific file
 	fileOpt := &build.Option{
 		FileOption:   opt.FileOption{File: file},
 		OutputOption: w.buildOption.OutputOption,
 		Mode:         "file",
 	}
-	fileOpt.SetWriter(w.writer)
+	// Suppress build option's own output - we'll log via logrus instead
+	fileOpt.SetWriter(io.Discard)
 	fileOpt.SetErrWriter(w.errWriter)
-	return fileOpt.Run()
+
+	err := fileOpt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	// Compute output path (same logic as build.Option.buildOutputFilePath)
+	baseName := strings.TrimSuffix(file, filepath.Ext(file))
+	outputPath := filepath.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s_output.%s", baseName, w.buildOption.Output))
+
+	return outputPath, nil
 }
 
 // findDashboardFiles finds all dashboard files (main packages) in the source directory
@@ -346,27 +365,32 @@ func (w *watcher) findDashboardFiles() []string {
 func (w *watcher) buildAllDashboards() {
 	dashboards := w.findDashboardFiles()
 	if len(dashboards) == 0 {
-		fmt.Fprintf(w.writer, "⚠️  No dashboard files found\n")
+		logrus.Warn("⚠️  No dashboard files found")
 		return
 	}
 
-	fmt.Fprintf(w.writer, "Building %d dashboard(s)...\n", len(dashboards))
+	logrus.Debugf("Building %d dashboard(s)...", len(dashboards))
 	hasErrors := false
 	successCount := 0
 
 	for _, file := range dashboards {
-		if err := w.buildFile(file); err != nil {
-			fmt.Fprintf(w.errWriter, "❌ Build failed for %s: %v\n", file, err)
+		outputPath, err := w.buildFile(file)
+		if err != nil {
+			logrus.Errorf("❌ Build failed for %s: %v", file, err)
 			hasErrors = true
 		} else {
+			logrus.Debugf("Successfully built %s at %s", file, outputPath)
 			successCount++
 		}
 	}
 
 	if hasErrors {
-		fmt.Fprintf(w.writer, "⚠️  Build completed with errors (%d/%d succeeded)\n", successCount, len(dashboards))
+		logrus.Warnf("⚠️  Build completed with errors (%d/%d succeeded)", successCount, len(dashboards))
 	} else {
-		fmt.Fprintf(w.writer, "✅ Build successful! (%d dashboard(s))\n", len(dashboards))
+		logrus.Debugf("✅ Build successful! (%d dashboard(s))", len(dashboards))
+	}
+
+	if !hasErrors {
 		// Notify build completion (non-blocking)
 		select {
 		case w.buildChan <- struct{}{}:
@@ -469,7 +493,7 @@ func (w *watcher) buildDependencyMap() {
 		w.allDashboards[dash] = true
 	}
 
-	fmt.Fprintf(w.writer, "🔍 Building dependency graph (including transitive dependencies)...\n")
+	logrus.Debug("🔍 Building dependency graph (including transitive dependencies)...")
 
 	for _, dashboard := range dashboards {
 		// Recursively find ALL dependencies (direct + transitive)
@@ -481,14 +505,16 @@ func (w *watcher) buildDependencyMap() {
 	}
 
 	// Log dependency map summary
-	if len(w.dependencyMap) > 0 {
-		fmt.Fprintf(w.writer, "   Found %d library file(s) with dependencies\n", len(w.dependencyMap))
-		for libFile, dashboards := range w.dependencyMap {
-			relLib, _ := filepath.Rel(w.sourceDir, libFile)
-			fmt.Fprintf(w.writer, "   - %s → %d dashboard(s)\n", relLib, len(dashboards))
+	if logrus.IsLevelEnabled(logrus.DebugLevel) {
+		if len(w.dependencyMap) > 0 {
+			logrus.Debugf("   Found %d library file(s) with dependencies", len(w.dependencyMap))
+			for libFile, dashboards := range w.dependencyMap {
+				relLib, _ := filepath.Rel(w.sourceDir, libFile)
+				logrus.Debugf("   - %s → %d dashboard(s)", relLib, len(dashboards))
+			}
+		} else {
+			logrus.Debug("   No library dependencies found")
 		}
-	} else {
-		fmt.Fprintf(w.writer, "   No library dependencies found\n")
 	}
 }
 

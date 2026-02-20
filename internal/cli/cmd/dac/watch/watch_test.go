@@ -285,6 +285,7 @@ func TestNewWatcher(t *testing.T) {
 		500*time.Millisecond,
 		&buf,
 		&buf,
+
 	)
 
 	if w == nil {
