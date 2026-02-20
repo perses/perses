@@ -63,7 +63,7 @@ type AuthorizationConfig struct {
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*v1Role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
-	// TODO: documentation
+	// Contains oidc/oAuth token role claims to Perses RBAC role mapping
 	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
 }
 
@@ -73,6 +73,9 @@ func (a *AuthorizationConfig) Verify() error {
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*v1Role.Permission{}
+	}
+	if a.ClaimsMappingConfig == nil {
+		a.ClaimsMappingConfig = &ClaimsMappingConfig{}
 	}
 	return nil
 }

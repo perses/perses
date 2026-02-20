@@ -57,13 +57,16 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		accessKey:            key,
 	}
 
-	err = n.buildTokenRoles(conf.Security.Authorization)
-	if err != nil {
-		return nil, err
-	}
-	err = n.buildTokenGlobalRoles(conf.Security.Authorization)
-	if err != nil {
-		return nil, err
+	// No need to build roles if JMESPath is not specified
+	if n.authJMESPath != "" {
+		err = n.buildTokenRoles(conf.Security.Authorization)
+		if err != nil {
+			return nil, err
+		}
+		err = n.buildTokenGlobalRoles(conf.Security.Authorization)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return n, nil
 }
@@ -82,7 +85,8 @@ type native struct {
 	guestPermissions     []*v1Role.Permission
 	tokenRolesMap        []*config.RoleAssignment
 	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
-	authJMESPath         string
+	// authJMESPath specifies the path to roles in oidc/oAuth token
+	authJMESPath string
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -127,8 +131,8 @@ func (n *native) IsEnabled() bool {
 
 func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
-	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	if err != nil {
+	roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
+	if roleClaims == nil {
 		return nil
 	}
 
@@ -143,8 +147,8 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 
 func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
-	roleClaims, err := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	if err != nil {
+	roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
+	if roleClaims == nil {
 		return nil
 	}
 
@@ -279,9 +283,11 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return true
 	}
 
-	// Check token permissions
-	if ok := n.hasPermissionFromClaim(ctx, requestProject, requestAction, requestScope); ok {
-		return true
+	// Check token permissions; no need to check if JMESPath is not specified
+	if n.authJMESPath != "" {
+		if ok := n.hasPermissionFromClaim(ctx, requestProject, requestAction, requestScope); ok {
+			return true
+		}
 	}
 
 	// Checking cached permissions

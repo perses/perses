@@ -16,7 +16,7 @@ package utils
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"net/http"
 	"strings"
 
 	"github.com/jmespath/go-jmespath"
@@ -60,6 +60,7 @@ const (
 	PathVariable           = "variables"
 	PathView               = "view"
 	ContextKeyAnonymous    = "anonymous"
+	PersistedClaims        = "persisted_claims"
 )
 
 const MetricNamespace = "perses"
@@ -96,34 +97,92 @@ func GetMetadataProject(metadata api.Metadata) string {
 }
 
 // GetClaimsFromAccessToken retrieves claims from access token according to the given JMESpath
-// TODO: explore the possibility of using jwt package instead of manually splitting and unmarshalling the token
-func GetClaimsFromAccessToken(ctx echo.Context, jmesPath string) ([]string, error) {
-	token := ctx.Get("access_token").(string)
-	if token == "" {
-		return nil, nil
+func GetClaimsFromAccessToken(ctx echo.Context, jmesPath string) []string {
+	data := getPersistedClaimsToken(ctx)
+
+	claims, ok := data[jmesPath]
+	if !ok {
+		return nil
 	}
 
+	return claims.([]string)
+}
+
+func CreateCookie(name string, payload any) (http.Cookie, error) {
+	// marshal payload into json
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return http.Cookie{}, err
+	}
+	// b64 encode marshaled payload
+	encodedPayload := base64.StdEncoding.EncodeToString([]byte(jsonPayload))
+	return http.Cookie{
+		Name:  name,
+		Value: encodedPayload,
+	}, nil
+}
+
+func CopyClaims(token string, keys []string) map[string]interface{} {
+	data := decodeTokenPayload(token)
+	if data == nil {
+		return nil
+	}
+
+	copiedClaims := make(map[string]any)
+	for _, key := range keys {
+		c := lookupClaim(data, key)
+		if c != nil {
+			copiedClaims[key] = c
+		}
+	}
+
+	return copiedClaims
+}
+
+func decodeTokenPayload(token string) []byte {
 	tokenContents := strings.Split(token, ".")
 	if len(tokenContents) != 3 {
-		return nil, errors.New("unknown token format")
+		return nil
 	}
 
 	// decoding the payload section of the token
 	decodedToken, err := base64.StdEncoding.DecodeString(tokenContents[1])
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	var data interface{}
 	err = json.Unmarshal(decodedToken, data)
 	if err != nil {
-		return nil, err
+		return nil
 	}
+	return decodedToken
+}
 
-	dataFromToken, err := jmespath.Search(jmesPath, data)
+func getPersistedClaimsToken(ctx echo.Context) map[string]any {
+	// get `persisted_claims` cookie
+	cookie, err := ctx.Cookie(PersistedClaims)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return dataFromToken.([]string), nil
+	// decode cookie value
+	decodedCookie, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return nil
+	}
+
+	// unmarshal value
+	var data map[string]any
+	json.Unmarshal(decodedCookie, &data)
+
+	return data
+}
+
+func lookupClaim(data any, key string) any {
+	extractedData, err := jmespath.Search(key, data)
+	if err != nil {
+		return nil
+	}
+	return extractedData
 }

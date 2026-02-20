@@ -148,6 +148,7 @@ type oIDCEndpoint struct {
 	clientCredRelyingParty *RelyingPartyWithTokenEndpoint
 	jwt                    crypto.JWT
 	tokenManagement        tokenManagement
+	savedClaims            []string
 	slugID                 string
 	urlParams              map[string]string
 	issuer                 string
@@ -176,7 +177,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, authnCfg config.AuthenticationConfig) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -207,6 +208,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		clientCredRelyingParty: clientCredRelyingParty,
 		jwt:                    jwt,
 		tokenManagement:        tokenManagement{jwt: jwt},
+		savedClaims:            authnCfg.PersistClaims,
 		slugID:                 provider.SlugID,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
@@ -373,7 +375,19 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Set("access_token", resp.AccessToken)
+
+	// Persist claims from the provider token
+	// claims are passed down through the `persisted_claims` cookie
+	if e.savedClaims != nil {
+		persistedClaims := utils.CopyClaims(resp.AccessToken, e.savedClaims)
+		cookie, err := utils.CreateCookie("persisted_claims", persistedClaims)
+		if err != nil {
+			logrus.Warning("could not create `persisted_claims` cookie")
+		} else {
+			ctx.SetCookie(&cookie)
+		}
+	}
+
 	return ctx.JSON(http.StatusOK, resp)
 }
 

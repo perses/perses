@@ -135,6 +135,7 @@ type oAuthEndpoint struct {
 	tokenManagement tokenManagement
 	slugID          string
 	userInfoURL     string
+	savedClaims     []string
 	authURL         url.URL
 	svc             service
 	loginProps      []string
@@ -153,7 +154,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, authnCfg config.AuthenticationConfig) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -187,6 +188,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		secureCookie:    secureCookie,
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
+		savedClaims:     authnCfg.PersistClaims,
 		slugID:          provider.SlugID,
 		userInfoURL:     provider.UserInfosURL.String(),
 		authURL:         *provider.AuthURL.URL,
@@ -378,6 +380,8 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return err
 	}
 
+	// extract claims from provider access token here?
+
 	return ctx.Redirect(http.StatusFound, redirectURI)
 }
 
@@ -447,7 +451,19 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx.Set("access_token", resp.AccessToken)
+
+	// Persist claims from the provider token
+	// claims are passed down through the `persisted_claims` cookie
+	if e.savedClaims != nil {
+		persistedClaims := utils.CopyClaims(resp.AccessToken, e.savedClaims) // get proper claims from config
+		cookie, err := utils.CreateCookie("persisted_claims", persistedClaims)
+		if err != nil {
+			logrus.Warning("could not create `persisted_claims` cookie")
+		} else {
+			ctx.SetCookie(&cookie)
+		}
+	}
+
 	return ctx.JSON(http.StatusOK, resp)
 }
 
@@ -592,6 +608,7 @@ func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token
 		return nil, err
 	}
 
+	// TODO: possible token claims extraction here?
 	// Parse a second time into a more generic structure in order to possibly make some extra retrievals.
 	// Indeed, oauth providers are not constraint to respect any guidance and login/subject can come from any field.
 	if err = json.Unmarshal(body, &userInfos.RawProperties); err != nil {
