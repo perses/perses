@@ -152,7 +152,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 								return nil
 							}
 							ext := filepath.Ext(path)
-							if (ext == ".go" || ext == ".cue") && !w.isLibraryFile(path) {
+							if (ext == ".go" || ext == ".cue") && w.isDashboardFile(path) {
 								w.changedFiles[path] = true
 								fmt.Fprintf(w.writer, "   Found new dashboard: %s\n", path)
 							}
@@ -191,7 +191,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				// If it's a CREATE or RENAME, rebuild dependency map to discover new files
 				if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 {
 					w.buildDependencyMap()
-				} else if !w.isLibraryFile(event.Name) {
+				} else if w.isDashboardFile(event.Name) {
 					// For WRITE on existing dashboards, rebuild dependency map to catch new imports
 					w.buildDependencyMap()
 				}
@@ -238,9 +238,9 @@ func (w *watcher) rebuildAffectedFiles() {
 	// Check if any changed files are library/shared files (not buildable as main packages)
 	hasLibraryFiles := false
 	for _, file := range filesToBuild {
-		isLib := w.isLibraryFile(file)
-		fmt.Fprintf(w.writer, "   - %s (library: %v)\n", file, isLib)
-		if isLib {
+		isDash := w.isDashboardFile(file)
+		fmt.Fprintf(w.writer, "   - %s (library: %v)\n", file, !isDash)
+		if !isDash {
 			hasLibraryFiles = true
 		}
 	}
@@ -332,8 +332,8 @@ func (w *watcher) findDashboardFiles() []string {
 
 		ext := filepath.Ext(path)
 		if ext == ".go" || ext == ".cue" {
-			// Check if it's NOT a library file
-			if !w.isLibraryFile(path) {
+			// Check if it's a dashboard file
+			if w.isDashboardFile(path) {
 				dashboards = append(dashboards, path)
 			}
 		}
@@ -375,56 +375,56 @@ func (w *watcher) buildAllDashboards() {
 	}
 }
 
-// isLibraryFile checks if a file is a library/shared file that shouldn't be built directly
-func (w *watcher) isLibraryFile(file string) bool {
+// isDashboardFile checks if a file is a dashboard file that should be built directly
+func (w *watcher) isDashboardFile(file string) bool {
 	ext := filepath.Ext(file)
 
 	if ext == ".go" {
-		return w.isGoLibraryFile(file)
+		return w.isGoDashboardFile(file)
 	} else if ext == ".cue" {
-		return w.isCueLibraryFile(file)
+		return w.isCueDashboardFile(file)
 	}
 
-	return true // Unknown files are libraries by default
+	return false // Unknown files are not dashboards by default
 }
 
-// isGoLibraryFile checks if a Go file is a library (not a main package)
-func (w *watcher) isGoLibraryFile(file string) bool {
+// isGoDashboardFile checks if a Go file is a dashboard (main package)
+func (w *watcher) isGoDashboardFile(file string) bool {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.PackageClauseOnly)
 	if err != nil {
-		return true // Can't parse = treat as library
+		return false // Can't parse = not a dashboard
 	}
 
 	// Go dashboards MUST be "package main"
-	return node.Name.Name != "main"
+	return node.Name.Name == "main"
 }
 
-// isCueLibraryFile checks if a CUE file is a library based on import patterns and filename
-func (w *watcher) isCueLibraryFile(file string) bool {
+// isCueDashboardFile checks if a CUE file is a dashboard based on import patterns and filename
+func (w *watcher) isCueDashboardFile(file string) bool {
 	content, err := os.ReadFile(file)
 	if err != nil {
-		return true
+		return false
 	}
 
 	parsed, err := cueparser.ParseFile(file, content)
 	if err != nil {
-		return true
+		return false
 	}
 
 	// Strategy 1: Check for named import "dashboardBuilder"
 	for imp := range parsed.ImportSpecs() {
 		if imp.Name != nil && imp.Name.String() == "dashboardBuilder" {
-			return false // This is a dashboard file!
+			return true
 		}
 	}
 
 	// Strategy 2: Check if filename contains "dashboard"
 	if strings.Contains(strings.ToLower(filepath.Base(file)), "dashboard") {
-		return false // This is a dashboard file!
+		return true
 	}
 
-	return true // It's a library file
+	return false
 }
 
 // findAllDependencies recursively finds all dependencies (direct + transitive) for a file
@@ -591,7 +591,7 @@ func (w *watcher) resolveImportToFiles(importPath string) []string {
 				}
 				filePath := filepath.Join(path, entry.Name())
 				ext := filepath.Ext(filePath)
-				if (ext == ".go" || ext == ".cue") && w.isLibraryFile(filePath) {
+				if (ext == ".go" || ext == ".cue") && !w.isDashboardFile(filePath) {
 					files = append(files, filePath)
 				}
 			}
@@ -608,7 +608,7 @@ func (w *watcher) findAffectedDashboards(changedFiles []string) []string {
 	dashboardSet := make(map[string]bool)
 
 	for _, changedFile := range changedFiles {
-		if !w.isLibraryFile(changedFile) {
+		if w.isDashboardFile(changedFile) {
 			continue
 		}
 
