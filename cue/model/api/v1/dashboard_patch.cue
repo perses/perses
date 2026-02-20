@@ -40,8 +40,8 @@ import (
 		[string]: #Panel @go(Panels)
 	}
 	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
-	duration:         common.#Duration | *"1h" @go(Duration)
-	refreshInterval?: common.#Duration         @go(RefreshInterval)
+	duration:         common.#DurationString | *"1h" @go(Duration)
+	refreshInterval?: common.#DurationString         @go(RefreshInterval)
 }
 
 #Dashboard: {
