@@ -25,12 +25,14 @@ import (
 	"time"
 
 	cueparser "cuelang.org/go/cue/parser"
+	cuemodfile "cuelang.org/go/mod/modfile"
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/cli/cmd/dac/build"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/mod/modfile"
 )
 
 // fileExists checks if a file or directory exists
@@ -44,6 +46,47 @@ func (w *watcher) shouldSkipDirectory(name string) bool {
 	return name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir
 }
 
+// detectModulePaths finds module paths for both Go and CUE projects.
+// This information is used to determine if an import is local (part of the project).
+func detectModulePaths(sourceDir string) []string {
+	var paths []string
+
+	// Check for go.mod
+	goModPath := filepath.Join(sourceDir, "go.mod")
+	if data, err := os.ReadFile(goModPath); err == nil {
+		if parsed, err := modfile.Parse(goModPath, data, nil); err == nil && parsed.Module != nil {
+			paths = append(paths, parsed.Module.Mod.Path)
+		}
+	}
+
+	// Check for cue.mod/module.cue
+	cueModPath := filepath.Join(sourceDir, "cue.mod", "module.cue")
+	if data, err := os.ReadFile(cueModPath); err == nil {
+		if parsed, err := cuemodfile.Parse(data, cueModPath); err == nil {
+			paths = append(paths, parsed.Module)
+		}
+	}
+
+	return paths
+}
+
+// isLocalImport checks if an import path belongs to this project (not a remote dependency)
+func (w *watcher) isLocalImport(importPath string) bool {
+	// If no module paths detected, fall back to checking all imports (legacy behavior)
+	if len(w.modulePaths) == 0 {
+		return true
+	}
+
+	// Check if the import starts with any of our module paths
+	for _, modulePath := range w.modulePaths {
+		if strings.HasPrefix(importPath, modulePath+"/") || importPath == modulePath {
+			return true
+		}
+	}
+
+	return false
+}
+
 type watcher struct {
 	async.SimpleTask
 	sourceDir     string
@@ -52,6 +95,7 @@ type watcher struct {
 	writer        io.Writer
 	errWriter     io.Writer
 	buildOption   *build.Option
+	modulePaths   []string            // Module paths from go.mod and cue.mod for identifying local imports
 	changedFiles  map[string]bool     // Track files changed during debounce period
 	dependencyMap map[string][]string // Maps library files to dashboard files that import them
 	allDashboards map[string]bool     // Track all known dashboard files for deletion detection
@@ -75,6 +119,7 @@ func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, de
 		writer:        writer,
 		errWriter:     errWriter,
 		buildOption:   buildOpt,
+		modulePaths:   detectModulePaths(sourceDir),
 		changedFiles:  make(map[string]bool),
 		dependencyMap: make(map[string][]string),
 	}
@@ -550,6 +595,11 @@ func (w *watcher) parseCueImports(filePath string) []string {
 
 // resolveImportToFiles attempts to resolve an import path to actual library files
 func (w *watcher) resolveImportToFiles(importPath string) []string {
+	// Skip remote/external imports - we only track local project files
+	if !w.isLocalImport(importPath) {
+		return nil
+	}
+
 	var files []string
 
 	// For local imports, we need to find the directory that matches the import path
