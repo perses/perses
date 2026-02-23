@@ -26,36 +26,38 @@ import (
 )
 
 type arch struct {
-	folder       string
+	folders      []string
 	targetFolder string
 }
 
 func (a *arch) unzipAll() error {
-	files, err := os.ReadDir(a.folder)
-	if err != nil {
-		return fmt.Errorf("unable to read directory %s: %w", a.folder, err)
-	}
-	for _, file := range files {
-		if file.IsDir() {
-			// we are only looking for archive, so we can skip any sub-folder
-			continue
+	for _, folder := range a.folders {
+		files, err := os.ReadDir(folder)
+		if err != nil {
+			return fmt.Errorf("unable to read directory %s: %w", folder, err)
 		}
+		for _, file := range files {
+			if file.IsDir() {
+				// we are only looking for archive, so we can skip any sub-folder
+				continue
+			}
 
-		if unzipErr := a.unzip(file.Name()); unzipErr != nil {
-			return fmt.Errorf("unable to unzip plugin archive %q: %w", file.Name(), unzipErr)
+			if unzipErr := a.unzip(folder, file.Name()); unzipErr != nil {
+				return fmt.Errorf("unable to unzip plugin archive %q: %w", file.Name(), unzipErr)
+			}
 		}
 	}
 	return nil
 }
 
-func (a *arch) unzip(archiveFileName string) error {
+func (a *arch) unzip(folder string, archiveFileName string) error {
 	if !archive.IsArchiveFile(archiveFileName) {
 		logrus.Debugf("skipping unarchive file %s", archiveFileName)
 		return nil
 	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveName := archive.ExtractArchiveName(archiveFileName)
-	archiveFile := filepath.Join(a.folder, archiveFileName)
+	archiveFile := filepath.Join(folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile) //nolint: gosec
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {

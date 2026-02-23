@@ -350,8 +350,8 @@ security:
 					Information:         "",
 				},
 				Plugin: Plugin{
-					Path:        "plugins",
-					ArchivePath: "plugins-archive",
+					Path:         "plugins",
+					ArchivePaths: []string{"plugins-archive"},
 				},
 				Provisioning: ProvisioningConfig{
 					Interval: common.Duration(defaultInterval),

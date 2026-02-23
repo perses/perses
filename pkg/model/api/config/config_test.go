@@ -161,7 +161,9 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "plugin": {
     "path": "plugins",
-    "archive_path": "plugins-archive",
+    "archive_paths": [
+      "plugins-archive"
+    ],
     "enable_dev": false
   }
 }`,
@@ -510,8 +512,8 @@ plugin:
 					Information: "# Hello World\n## File Database setup",
 				},
 				Plugin: Plugin{
-					Path:        "custom/plugins",
-					ArchivePath: "custom/plugins/archive",
+					Path:         "custom/plugins",
+					ArchivePaths: []string{"custom/plugins/archive"},
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{

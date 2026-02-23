@@ -63,8 +63,8 @@ type Plugin interface {
 func StrictLoad() Plugin {
 	projectPath := test.GetRepositoryPath()
 	cfg := config.Plugin{
-		Path:        filepath.Join(projectPath, config.DefaultPluginPath),
-		ArchivePath: filepath.Join(projectPath, config.DefaultArchivePluginPath),
+		Path:         filepath.Join(projectPath, config.DefaultPluginPath),
+		ArchivePaths: []string{filepath.Join(projectPath, config.DefaultArchivePluginPath)},
 	}
 	pluginService := New(cfg)
 	if err := pluginService.UnzipArchives(); err != nil {
@@ -80,7 +80,7 @@ func New(cfg config.Plugin) Plugin {
 	return &pluginFile{
 		path: cfg.Path,
 		archibal: &arch{
-			folder:       cfg.ArchivePath,
+			folders:      cfg.ArchivePaths,
 			targetFolder: cfg.Path,
 		},
 		sch:       schema.New(),
