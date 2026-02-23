@@ -23,7 +23,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const CookieName = "persistedCookie"
+const CookieName = "persistedClaims"
 
 func NewClaimsManager() ClaimsManager {
 	return ClaimsManager{
@@ -73,7 +73,7 @@ func (cm *ClaimsManager) createCookie(data Claims) *http.Cookie {
 // GetPersistentClaims returns the claims persisted via the cookie
 func (cm *ClaimsManager) GetPersistentClaims(ctx echo.Context) Claims {
 	// get cookie
-	cookie := cm.readCookie(ctx)
+	cookie := cm.getCookie(ctx)
 	if cookie == nil {
 		return nil
 	}
@@ -85,7 +85,7 @@ func (cm *ClaimsManager) GetPersistentClaims(ctx echo.Context) Claims {
 	return data
 }
 
-func (cm *ClaimsManager) readCookie(ctx echo.Context) *http.Cookie {
+func (cm *ClaimsManager) getCookie(ctx echo.Context) *http.Cookie {
 	cookie, err := ctx.Cookie(cm.cookieName)
 	if err != nil {
 		return nil
@@ -121,6 +121,7 @@ func (cm *ClaimsManager) lookupClaim(data any, key string) any {
 // ExtractClaimsFromJWTPayload takes the jwtPayload cookie and extracts additional claims
 // Assumes jwtPayloadCookie value containing only the Header and Payload section of the provider JWT token
 // TODO: double check the structure of the jwtPayloadCookie (full token or just the header&payload part?)
+// returns a map in a general format of map[<JMESPath to requested claim>]<requested claim>
 func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(jwtPayloadCookie *http.Cookie, wantedClaims []string) Claims {
 	// check if there are only two parts of the JWT token; return nil otherwise
 	cookieValue := strings.Split(jwtPayloadCookie.Value, ".")
