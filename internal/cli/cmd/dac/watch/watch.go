@@ -25,14 +25,15 @@ import (
 	"github.com/perses/common/async/taskhelper"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/opt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 type option struct {
 	persesCMD.Option
+	opt.OutputOption
 	sourceDir     string
-	output        string
 	debounceDelay time.Duration
 	buildArgs     []string
 	writer        io.Writer
@@ -46,16 +47,14 @@ func (o *option) Complete(args []string) error {
 	} else {
 		o.sourceDir = "."
 	}
+	if outputErr := o.OutputOption.Complete(); outputErr != nil {
+		return outputErr
+	}
 	return nil
 }
 
 // Validate ensures the output directory is properly configured and exists
 func (o *option) Validate() error {
-	// Use the configured output folder from dac command
-	if config.Global.Dac.OutputFolder == "" {
-		config.Global.Dac.OutputFolder = "built"
-	}
-
 	// Ensure output directory exists
 	if err := os.MkdirAll(config.Global.Dac.OutputFolder, 0750); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
@@ -70,7 +69,7 @@ func (o *option) Execute() error {
 	logrus.Info("📦 Dashboard-as-Code Watcher")
 	logrus.Infof("   Source: %s", o.sourceDir)
 	logrus.Infof("   Output: %s", buildDir)
-	logrus.Infof("   Format: %s", o.output)
+	logrus.Infof("   Format: %s", o.Output)
 	logrus.Info("")
 	logrus.Info("👀 Watching for changes... (Ctrl+C to stop)")
 	logrus.Info("")
@@ -83,7 +82,7 @@ func (o *option) Execute() error {
 	watcher := newWatcher(
 		o.sourceDir,
 		buildDir,
-		o.output,
+		o.Output,
 		o.buildArgs,
 		o.debounceDelay,
 		o.writer,
@@ -125,7 +124,6 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{
 		debounceDelay: 500 * time.Millisecond,
-		output:        "yaml",
 	}
 
 	cmd := &cobra.Command{
@@ -167,7 +165,7 @@ percli dac watch ./my-dashboards -- --arg1=value1 --arg2=value2`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&o.output, "output", "o", "yaml", "Output format (json or yaml)")
+	opt.AddOutputFlags(cmd, &o.OutputOption)
 	cmd.Flags().DurationVar(&o.debounceDelay, "debounce", 500*time.Millisecond, "Debounce delay for file changes")
 
 	return cmd
