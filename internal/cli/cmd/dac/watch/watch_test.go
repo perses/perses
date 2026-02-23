@@ -281,7 +281,6 @@ func TestNewWatcher(t *testing.T) {
 		filepath.Join("testdata", "go-simple"),
 		"built",
 		"yaml",
-		nil,
 		500*time.Millisecond,
 		&buf,
 		&buf,
