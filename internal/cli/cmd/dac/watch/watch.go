@@ -141,6 +141,11 @@ The watcher will:
 - Rebuild automatically when files are modified
 - Output results to the build directory (default: ./built)
 
+File identification:
+- Go files: Must be "package main" to be built as dashboards
+- CUE files: Identified as dashboards if they have a named import "dashboardBuilder" OR if the filename contains "dashboard"
+- Library files: Other .go/.cue files are treated as libraries and trigger rebuilds of dependent dashboards
+
 Combine this with Perses provisioning to see your dashboard changes reflected in the UI automatically.`,
 		Example: `# Watch current directory, output to ./built
 percli dac watch

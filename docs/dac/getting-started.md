@@ -189,7 +189,7 @@ percli dac build -d my_dashboards
 
 ## Development workflow with auto-reload
 
-For an improved development experience, you can use the `dac watch` command that automatically rebuilds your dashboards whenever you save changes to your DaC files. This provides a workflow similar to frontend hot-reload development.
+For an improved development experience, instead of building the files each time manually with `dac build`, you can use the `dac watch` command that automatically rebuilds your dashboards whenever you save changes to your DaC files. This provides a workflow similar to frontend hot-reload development.
 
 ### Basic watch mode
 
@@ -209,7 +209,7 @@ percli dac watch ./my-dashboards -ojson
 The watcher will:
 - Perform an initial build of all dashboards
 - Monitor all `.go` and `.cue` files in the source directory
-- Automatically rebuild when files are modified (with a 500ms debounce)
+- Automatically rebuild when files are modified
 - Output results to the `built` folder (or custom location via `--dac.output_folder`)
 
 ### Integrated development workflow
