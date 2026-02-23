@@ -34,6 +34,7 @@ type option struct {
 	persesCMD.Option
 	opt.OutputOption
 	sourceDir     string
+	buildArgs     []string
 	debounceDelay time.Duration
 	writer        io.Writer
 	errWriter     io.Writer
@@ -43,6 +44,9 @@ type option struct {
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		o.sourceDir = args[0]
+		if len(args) > 1 {
+			o.buildArgs = args[1:]
+		}
 	} else {
 		o.sourceDir = "."
 	}
@@ -82,6 +86,7 @@ func (o *option) Execute() error {
 		o.sourceDir,
 		buildDir,
 		o.Output,
+		o.buildArgs,
 		o.debounceDelay,
 		o.writer,
 		o.errWriter,
@@ -157,7 +162,6 @@ percli dac watch ./my-dashboards --dac.output_folder=./provisioning/dashboards
 
 # Pass extra arguments to Go programs
 percli dac watch ./my-dashboards -- --arg1=value1 --arg2=value2`,
-		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
