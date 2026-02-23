@@ -108,7 +108,7 @@ type endpoint struct {
 	isAuthEnable    bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, authnCfg config.AuthenticationConfig, providers config.AuthProviders, isAuthEnable bool, apiPrefix string) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, claimsMngr *utils.ClaimsManager, providers config.AuthProviders, isAuthEnable bool, apiPrefix string) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
@@ -123,7 +123,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, authnC
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz, apiPrefix, authnCfg)
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz, apiPrefix, claimsMngr)
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +132,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, authnC
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz, apiPrefix, authnCfg)
+		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz, apiPrefix, claimsMngr)
 		if err != nil {
 			return nil, err
 		}

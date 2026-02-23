@@ -25,9 +25,10 @@ import (
 
 const CookieName = "persistedClaims"
 
-func NewClaimsManager() ClaimsManager {
+func NewClaimsManager(persistClaims []string) ClaimsManager {
 	return ClaimsManager{
-		cookieName: CookieName,
+		cookieName:    CookieName,
+		PersistClaims: persistClaims,
 	}
 }
 
@@ -36,11 +37,11 @@ type Claims map[string]any
 // ClaimsManager is a helper struct responsible for extracting extra claims from the provider JWT token
 // and providing helper functions to persist these claims via cookies
 type ClaimsManager struct {
-	cookieName  string
-	savedClaims []string
+	cookieName    string
+	PersistClaims []string
 }
 
-// SetCookie creates and adds the cookie with claims persisted from the provider token
+// SetCookie creates and sets the cookie with claims persisted from the provider token;
 // returns true if cookie was successfuly created and set; otherwise false
 func (cm *ClaimsManager) SetCookie(ctx echo.Context, data Claims) bool {
 	// marshal & encode data
@@ -118,26 +119,24 @@ func (cm *ClaimsManager) lookupClaim(data any, key string) any {
 	return extractedData
 }
 
-// ExtractClaimsFromJWTPayload takes the jwtPayload cookie and extracts additional claims
-// Assumes jwtPayloadCookie value containing only the Header and Payload section of the provider JWT token
-// TODO: double check the structure of the jwtPayloadCookie (full token or just the header&payload part?)
+// ExtractClaimsFromJWTPayload takes the oidc/oAuth access token and extracts additional claims;
 // returns a map in a general format of map[<JMESPath to requested claim>]<requested claim>
-func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(jwtPayloadCookie *http.Cookie, wantedClaims []string) Claims {
-	// check if there are only two parts of the JWT token; return nil otherwise
-	cookieValue := strings.Split(jwtPayloadCookie.Value, ".")
-	if len(cookieValue) != 2 {
+func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(accessToken string) Claims {
+	// check if the token is generally resembling a JWT token ; return nil otherwise
+	tokenPayload := strings.Split(accessToken, ".")
+	if len(tokenPayload) != 3 {
 		return nil
 	}
 
-	// decode & unmarshal cookie value
-	decoded := cm.decodeCookie(cookieValue[1])
+	// decode & unmarshal token payload
+	decoded := cm.decodeCookie(tokenPayload[1])
 	if decoded == nil {
 		return nil
 	}
 
-	// extract wanted claims from the decoded cookie
+	// extract wanted claims from the decoded token payload
 	extractedClaims := make(Claims)
-	for _, key := range wantedClaims {
+	for _, key := range cm.PersistClaims {
 		c := cm.lookupClaim(decoded, key)
 		if c != nil {
 			extractedClaims[key] = c

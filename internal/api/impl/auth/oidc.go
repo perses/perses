@@ -155,6 +155,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
+	claimsManager          *utils.ClaimsManager
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -177,7 +178,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, authnCfg config.AuthenticationConfig) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *utils.ClaimsManager) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -208,13 +209,13 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		clientCredRelyingParty: clientCredRelyingParty,
 		jwt:                    jwt,
 		tokenManagement:        tokenManagement{jwt: jwt},
-		savedClaims:            authnCfg.PersistClaims,
 		slugID:                 provider.SlugID,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
 		apiPrefix:              apiPrefix,
+		claimsManager:          claimsMngr,
 	}, nil
 }
 
@@ -377,14 +378,13 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	}
 
 	// Persist claims from the provider token
-	// claims are passed down through the `persisted_claims` cookie
-	if e.savedClaims != nil {
-		persistedClaims := utils.CopyClaims(resp.AccessToken, e.savedClaims)
-		cookie, err := utils.CreateCookie("persisted_claims", persistedClaims)
-		if err != nil {
-			logrus.Warning("could not create `persisted_claims` cookie")
-		} else {
-			ctx.SetCookie(&cookie)
+	// claims are passed down through the `persistedClaims` cookie
+	if e.claimsManager.PersistClaims != nil {
+		// TODO: is resp.AccessToken the right one to use?
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
+		ok := e.claimsManager.SetCookie(ctx, data)
+		if !ok {
+			logrus.Warning("could not set the persistedClaims cookie")
 		}
 	}
 

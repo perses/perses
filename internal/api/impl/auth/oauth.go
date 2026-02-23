@@ -135,11 +135,11 @@ type oAuthEndpoint struct {
 	tokenManagement tokenManagement
 	slugID          string
 	userInfoURL     string
-	savedClaims     []string
 	authURL         url.URL
 	svc             service
 	loginProps      []string
 	apiPrefix       string
+	claimsManager   *utils.ClaimsManager
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -154,7 +154,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, authnCfg config.AuthenticationConfig) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *utils.ClaimsManager) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -188,13 +188,13 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		secureCookie:    secureCookie,
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
-		savedClaims:     authnCfg.PersistClaims,
 		slugID:          provider.SlugID,
 		userInfoURL:     provider.UserInfosURL.String(),
 		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
 		apiPrefix:       apiPrefix,
+		claimsManager:   claimsMngr,
 	}, nil
 }
 
@@ -453,14 +453,12 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	}
 
 	// Persist claims from the provider token
-	// claims are passed down through the `persisted_claims` cookie
-	if e.savedClaims != nil {
-		persistedClaims := utils.CopyClaims(resp.AccessToken, e.savedClaims) // get proper claims from config
-		cookie, err := utils.CreateCookie("persisted_claims", persistedClaims)
-		if err != nil {
-			logrus.Warning("could not create `persisted_claims` cookie")
-		} else {
-			ctx.SetCookie(&cookie)
+	// claims are passed down through the `persistedClaims` cookie
+	if e.claimsManager.PersistClaims != nil {
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(accessToken.AccessToken)
+		ok := e.claimsManager.SetCookie(ctx, data)
+		if !ok {
+			logrus.Warning("could not set the persistedClaims cookie")
 		}
 	}
 
