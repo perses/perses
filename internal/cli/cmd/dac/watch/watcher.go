@@ -39,6 +39,11 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
+// shouldSkipDirectory checks if a directory should be skipped during file walks
+func (w *watcher) shouldSkipDirectory(name string) bool {
+	return name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir
+}
+
 type watcher struct {
 	async.SimpleTask
 	sourceDir     string
@@ -46,7 +51,6 @@ type watcher struct {
 	debounceDelay time.Duration
 	writer        io.Writer
 	errWriter     io.Writer
-	buildChan     chan struct{}
 	buildOption   *build.Option
 	changedFiles  map[string]bool     // Track files changed during debounce period
 	dependencyMap map[string][]string // Maps library files to dashboard files that import them
@@ -70,7 +74,6 @@ func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, de
 		debounceDelay: debounceDelay,
 		writer:        writer,
 		errWriter:     errWriter,
-		buildChan:     make(chan struct{}, 1),
 		buildOption:   buildOpt,
 		changedFiles:  make(map[string]bool),
 		dependencyMap: make(map[string][]string),
@@ -96,7 +99,6 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 	// Initial build - build all dashboard files
 	logrus.Debug("🔨 Running initial build...")
 	w.buildAllDashboards()
-	logrus.Debugf("📊 Dependency tracking enabled (%d library -> dashboard mappings)", len(w.dependencyMap))
 
 	var debounceTimer *time.Timer
 	var debouncePending bool
@@ -104,14 +106,13 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 	for {
 		select {
 		case <-ctx.Done():
-			close(w.buildChan)
 			logrus.Info("Watch stopped")
 			return nil
 
 		case event := <-fsWatcher.Events:
 			// Handle deletions (REMOVE or RENAME where file no longer exists)
+			// In such cases, the dependency map should be rebuilt
 			if event.Op&fsnotify.Remove != 0 || (event.Op&fsnotify.Rename != 0 && !fileExists(event.Name)) {
-				// Could be a file or directory deletion - rebuild dependency map
 				logrus.Debugf("📝 File/directory removed: %s", event.Name)
 
 				// Get list of all dashboards we knew about BEFORE the deletion
@@ -177,11 +178,11 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				}
 			}
 
-			// Now check if it's a file we care about (.go or .cue)
-			if !w.shouldRebuild(event) {
+			// Now check if it's a file we care about
+			ext := filepath.Ext(event.Name)
+			if ext != ".go" && ext != ".cue" {
 				continue
 			}
-
 			logrus.Debugf("📝 File event: %s (%s)", event.Name, event.Op)
 
 			// Handle file operations: CREATE, WRITE, RENAME (move)
@@ -189,11 +190,8 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				// Track the changed file
 				w.changedFiles[event.Name] = true
 
-				// If it's a CREATE or RENAME, rebuild dependency map to discover new files
-				if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 {
-					w.buildDependencyMap()
-				} else if w.isDashboardFile(event.Name) {
-					// For WRITE on existing dashboards, rebuild dependency map to catch new imports
+				// Rebuild dependency map to discover new files or catch new imports in dashboards
+				if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 || w.isDashboardFile(event.Name) {
 					w.buildDependencyMap()
 				}
 
@@ -205,6 +203,7 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 				debouncePending = true
 			}
 
+		// Debounce: waits for a pause in file changes before triggering rebuild
 		case <-func() <-chan time.Time {
 			if debounceTimer != nil {
 				return debounceTimer.C
@@ -274,40 +273,26 @@ func (w *watcher) rebuildAffectedFiles() {
 		}
 		if !hasErrors {
 			logrus.Debug("✅ Build successful!")
-			select {
-			case w.buildChan <- struct{}{}:
-			default:
-			}
 		}
 		return
-	} else if len(filesToBuild) > 10 {
-		// Too many files changed, do full rebuild
-		logrus.Debug("Multiple files changed, rebuilding all dashboards...")
-		w.buildAllDashboards()
+	}
+
+	// Build each changed dashboard file individually
+	hasErrors := false
+	for _, file := range filesToBuild {
+		outputPath, err := w.buildFile(file)
+		if err != nil {
+			logrus.Errorf("❌ Build failed for %s: %v", file, err)
+			hasErrors = true
+		} else {
+			logrus.Debugf("Successfully built %s at %s", file, outputPath)
+		}
+	}
+	if hasErrors {
 		return
-	} else {
-		// Build each changed file individually
-		hasErrors := false
-		for _, file := range filesToBuild {
-			outputPath, err := w.buildFile(file)
-			if err != nil {
-				logrus.Errorf("❌ Build failed for %s: %v", file, err)
-				hasErrors = true
-			} else {
-				logrus.Debugf("Successfully built %s at %s", file, outputPath)
-			}
-		}
-		if hasErrors {
-			return
-		}
 	}
 
 	logrus.Debug("✅ Build successful!")
-	// Notify build completion (non-blocking)
-	select {
-	case w.buildChan <- struct{}{}:
-	default:
-	}
 }
 
 // buildFile builds a single file using the build option and returns the output path
@@ -334,7 +319,7 @@ func (w *watcher) buildFile(file string) (string, error) {
 	return outputPath, nil
 }
 
-// findDashboardFiles finds all dashboard files (main packages) in the source directory
+// findDashboardFiles finds all dashboard files in the source directory
 func (w *watcher) findDashboardFiles() []string {
 	var dashboards []string
 	filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
@@ -342,9 +327,7 @@ func (w *watcher) findDashboardFiles() []string {
 			return nil
 		}
 		if info.IsDir() {
-			// Skip ignored directories
-			name := info.Name()
-			if name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir {
+			if w.shouldSkipDirectory(info.Name()) {
 				return filepath.SkipDir
 			}
 			return nil
@@ -386,17 +369,9 @@ func (w *watcher) buildAllDashboards() {
 	}
 
 	if hasErrors {
-		logrus.Warnf("⚠️  Build completed with errors (%d/%d succeeded)", successCount, len(dashboards))
+		logrus.Warnf("⚠️ Build completed with errors (%d/%d succeeded)", successCount, len(dashboards))
 	} else {
 		logrus.Debugf("✅ Build successful! (%d dashboard(s))", len(dashboards))
-	}
-
-	if !hasErrors {
-		// Notify build completion (non-blocking)
-		select {
-		case w.buildChan <- struct{}{}:
-		default:
-		}
 	}
 }
 
@@ -404,16 +379,18 @@ func (w *watcher) buildAllDashboards() {
 func (w *watcher) isDashboardFile(file string) bool {
 	ext := filepath.Ext(file)
 
-	if ext == ".go" {
+	switch ext {
+	case ".go":
 		return w.isGoDashboardFile(file)
-	} else if ext == ".cue" {
+	case ".cue":
 		return w.isCueDashboardFile(file)
 	}
 
 	return false // Unknown files are not dashboards by default
 }
 
-// isGoDashboardFile checks if a Go file is a dashboard (main package)
+// isGoDashboardFile checks if a Go file is to be considered a dashboard.
+// It simply checks if the package is "main"
 func (w *watcher) isGoDashboardFile(file string) bool {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.PackageClauseOnly)
@@ -425,7 +402,8 @@ func (w *watcher) isGoDashboardFile(file string) bool {
 	return node.Name.Name == "main"
 }
 
-// isCueDashboardFile checks if a CUE file is a dashboard based on import patterns and filename
+// isCueDashboardFile checks if a CUE file is to be considered a dashboard
+// No 100% reliable way here, thus we take a heuristic approach based on import patterns and filename
 func (w *watcher) isCueDashboardFile(file string) bool {
 	content, err := os.ReadFile(file)
 	if err != nil {
@@ -546,7 +524,7 @@ func (w *watcher) parseGoImports(filePath string) []string {
 	return imports
 }
 
-// parseCueImports parses import statements from a CUE file using the official parser
+// parseCueImports parses import statements from a CUE file
 func (w *watcher) parseCueImports(filePath string) []string {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -588,9 +566,7 @@ func (w *watcher) resolveImportToFiles(importPath string) []string {
 			return nil
 		}
 
-		// Skip ignored directories
-		name := info.Name()
-		if name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir {
+		if w.shouldSkipDirectory(info.Name()) {
 			return filepath.SkipDir
 		}
 
@@ -658,13 +634,6 @@ func (w *watcher) findAffectedDashboards(changedFiles []string) []string {
 	return result
 }
 
-// shouldRebuild determines if a file change event should trigger a rebuild (.go or .cue files)
-func (w *watcher) shouldRebuild(event fsnotify.Event) bool {
-	// Watch .go and .cue files
-	ext := filepath.Ext(event.Name)
-	return ext == ".go" || ext == ".cue"
-}
-
 // addWatchRecursive recursively adds directories to the file watcher, skipping ignored folders
 func (w *watcher) addWatchRecursive(watcher *fsnotify.Watcher, root string) error {
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -672,20 +641,13 @@ func (w *watcher) addWatchRecursive(watcher *fsnotify.Watcher, root string) erro
 			return err
 		}
 		if info.IsDir() {
-			// Skip vendor, node_modules, .git, build output folder
-			name := info.Name()
-			if name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir {
+			if w.shouldSkipDirectory(info.Name()) {
 				return filepath.SkipDir
 			}
 			return watcher.Add(path)
 		}
 		return nil
 	})
-}
-
-// GetBuildNotifications returns a channel that signals when a build completes
-func (w *watcher) GetBuildNotifications() <-chan struct{} {
-	return w.buildChan
 }
 
 // String returns a human-readable description of the watcher task
