@@ -96,6 +96,7 @@ type watcher struct {
 	async.SimpleTask
 	sourceDir     string
 	buildDir      string
+	buildArgs     []string
 	debounceDelay time.Duration
 	writer        io.Writer
 	errWriter     io.Writer
@@ -107,7 +108,7 @@ type watcher struct {
 }
 
 // newWatcher creates a new file watcher that monitors DaC files and triggers rebuilds
-func newWatcher(sourceDir, buildDir, outputFormat string, debounceDelay time.Duration, writer, errWriter io.Writer) *watcher {
+func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, debounceDelay time.Duration, writer, errWriter io.Writer) *watcher {
 	// Create build option to reuse build logic
 	buildOpt := &build.Option{
 		DirectoryOption: opt.DirectoryOption{Directory: sourceDir},
@@ -120,6 +121,7 @@ func newWatcher(sourceDir, buildDir, outputFormat string, debounceDelay time.Dur
 	w := &watcher{
 		sourceDir:     sourceDir,
 		buildDir:      buildDir,
+		buildArgs:     buildArgs,
 		debounceDelay: debounceDelay,
 		writer:        writer,
 		errWriter:     errWriter,
@@ -385,7 +387,12 @@ func (w *watcher) buildFile(file string) (string, error) {
 	fileOpt.SetWriter(io.Discard)
 	fileOpt.SetErrWriter(w.errWriter)
 
-	err := fileOpt.Run()
+	// Pass build args to the build option
+	if err := fileOpt.Complete(w.buildArgs); err != nil {
+		return "", err
+	}
+
+	err := fileOpt.Execute()
 	if err != nil {
 		return "", err
 	}
