@@ -6,6 +6,6 @@ import (
 )
 
 dashboardBuilder & {
-	#name: "test-dashboard"
+	#name:   "test-dashboard"
 	#panels: panels
 }
