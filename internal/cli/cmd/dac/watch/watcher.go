@@ -35,6 +35,11 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
+const (
+	goFileExt  = ".go"
+	cueFileExt = ".cue"
+)
+
 // fileExists checks if a file or directory exists
 func fileExists(path string) bool {
 	_, err := os.Stat(path)
@@ -53,7 +58,7 @@ func detectModulePaths(sourceDir string) []string {
 
 	// Check for go.mod
 	goModPath := filepath.Join(sourceDir, "go.mod")
-	if data, err := os.ReadFile(goModPath); err == nil {
+	if data, err := os.ReadFile(goModPath); err == nil { //nolint: gosec
 		if parsed, err := modfile.Parse(goModPath, data, nil); err == nil && parsed.Module != nil {
 			paths = append(paths, parsed.Module.Mod.Path)
 		}
@@ -61,7 +66,7 @@ func detectModulePaths(sourceDir string) []string {
 
 	// Check for cue.mod/module.cue
 	cueModPath := filepath.Join(sourceDir, "cue.mod", "module.cue")
-	if data, err := os.ReadFile(cueModPath); err == nil {
+	if data, err := os.ReadFile(cueModPath); err == nil { //nolint: gosec
 		if parsed, err := cuemodfile.Parse(data, cueModPath); err == nil {
 			paths = append(paths, parsed.Module)
 		}
@@ -102,7 +107,7 @@ type watcher struct {
 }
 
 // newWatcher creates a new file watcher that monitors DaC files and triggers rebuilds
-func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, debounceDelay time.Duration, writer, errWriter io.Writer) *watcher {
+func newWatcher(sourceDir, buildDir, outputFormat string, debounceDelay time.Duration, writer, errWriter io.Writer) *watcher {
 	// Create build option to reuse build logic
 	buildOpt := &build.Option{
 		DirectoryOption: opt.DirectoryOption{Directory: sourceDir},
@@ -134,7 +139,11 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 	if err != nil {
 		return err
 	}
-	defer fsWatcher.Close()
+	defer func() {
+		if err := fsWatcher.Close(); err != nil {
+			logrus.Warnf("Failed to close file watcher: %v", err)
+		}
+	}()
 
 	// Watch source directory recursively
 	if err := w.addWatchRecursive(fsWatcher, w.sourceDir); err != nil {
@@ -156,97 +165,20 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 
 		case event := <-fsWatcher.Events:
 			// Handle deletions (REMOVE or RENAME where file no longer exists)
-			// In such cases, the dependency map should be rebuilt
 			if event.Op&fsnotify.Remove != 0 || (event.Op&fsnotify.Rename != 0 && !fileExists(event.Name)) {
-				logrus.Debugf("📝 File/directory removed: %s", event.Name)
-
-				// Get list of all dashboards we knew about BEFORE the deletion
-				// Must use cached state, not filesystem scan (folder already deleted!)
-				dashboardsBefore := make(map[string]bool)
-				for dash := range w.allDashboards {
-					dashboardsBefore[dash] = true
-				}
-
-				logrus.Debug("   Rebuilding dependency map...")
-				w.buildDependencyMap()
-
-				// Find removed dashboards by comparing before/after
-				for dashboard := range dashboardsBefore {
-					if !w.allDashboards[dashboard] {
-						relPath, _ := filepath.Rel(w.sourceDir, dashboard)
-						logrus.Debugf("   ❌ Dashboard removed: %s", relPath)
-					}
-				}
-
+				w.handleDeletion(event.Name)
 				continue
 			}
 
-			// Handle new directories BEFORE checking file extensions
-			// (directories don't have .go/.cue extensions but still need to be tracked)
+			// Handle new directories
 			if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 {
-				info, err := os.Stat(event.Name)
-				if err == nil && info.IsDir() {
-					if err := w.addWatchRecursive(fsWatcher, event.Name); err != nil {
-						logrus.Errorf("Failed to watch new directory %s: %v", event.Name, err)
-					} else {
-						// Directory created or renamed - scan for existing files and rebuild dependency map
-						logrus.Debugf("   New directory detected: %s", event.Name)
-
-						// Scan for dashboard files in the new directory
-						// (copying a folder means files are already there, not created individually)
-						filepath.Walk(event.Name, func(path string, info os.FileInfo, err error) error {
-							if err != nil || info.IsDir() {
-								return nil
-							}
-							ext := filepath.Ext(path)
-							if (ext == ".go" || ext == ".cue") && w.isDashboardFile(path) {
-								w.changedFiles[path] = true
-								logrus.Debugf("   Found new dashboard: %s", path)
-							}
-							return nil
-						})
-
-						// Rebuild dependency map to include new files
-						w.buildDependencyMap()
-
-						// Trigger build if we found dashboard files
-						if len(w.changedFiles) > 0 {
-							if debounceTimer == nil {
-								debounceTimer = time.NewTimer(w.debounceDelay)
-							} else if !debouncePending {
-								debounceTimer.Reset(w.debounceDelay)
-							}
-							debouncePending = true
-						}
-					}
+				if w.handleNewDirectory(fsWatcher, event.Name, &debounceTimer, &debouncePending) {
 					continue
 				}
 			}
 
-			// Now check if it's a file we care about
-			ext := filepath.Ext(event.Name)
-			if ext != ".go" && ext != ".cue" {
-				continue
-			}
-			logrus.Debugf("📝 File event: %s (%s)", event.Name, event.Op)
-
-			// Handle file operations: CREATE, WRITE, RENAME (move)
-			if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Rename) != 0 {
-				// Track the changed file
-				w.changedFiles[event.Name] = true
-
-				// Rebuild dependency map to discover new files or catch new imports in dashboards
-				if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 || w.isDashboardFile(event.Name) {
-					w.buildDependencyMap()
-				}
-
-				if debounceTimer == nil {
-					debounceTimer = time.NewTimer(w.debounceDelay)
-				} else if !debouncePending {
-					debounceTimer.Reset(w.debounceDelay)
-				}
-				debouncePending = true
-			}
+			// Handle file events
+			w.handleFileEvent(event, &debounceTimer, &debouncePending)
 
 		// Debounce: waits for a pause in file changes before triggering rebuild
 		case <-func() <-chan time.Time {
@@ -262,6 +194,107 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 			logrus.Warnf("⚠️ Watcher error: %v", err)
 		}
 	}
+}
+
+// handleDeletion handles file/directory deletion events
+func (w *watcher) handleDeletion(name string) {
+	logrus.Debugf("📝 File/directory removed: %s", name)
+
+	// Get list of all dashboards we knew about BEFORE the deletion
+	// Must use cached state, not filesystem scan (folder already deleted!)
+	dashboardsBefore := make(map[string]bool)
+	for dash := range w.allDashboards {
+		dashboardsBefore[dash] = true
+	}
+
+	logrus.Debug("   Rebuilding dependency map...")
+	w.buildDependencyMap()
+
+	// Find removed dashboards by comparing before/after
+	for dashboard := range dashboardsBefore {
+		if !w.allDashboards[dashboard] {
+			relPath, _ := filepath.Rel(w.sourceDir, dashboard)
+			logrus.Debugf("   ❌ Dashboard removed: %s", relPath)
+		}
+	}
+}
+
+// handleNewDirectory handles new directory creation events
+// Returns true if the event was a directory creation and was handled
+func (w *watcher) handleNewDirectory(fsWatcher *fsnotify.Watcher, name string, debounceTimer **time.Timer, debouncePending *bool) bool {
+	info, err := os.Stat(name)
+	if err != nil || !info.IsDir() {
+		return false
+	}
+
+	if err := w.addWatchRecursive(fsWatcher, name); err != nil {
+		logrus.Errorf("Failed to watch new directory %s: %v", name, err)
+		return true
+	}
+
+	// Directory created or renamed - scan for existing files and rebuild dependency map
+	logrus.Debugf("   New directory detected: %s", name)
+
+	// Scan for dashboard files in the new directory
+	// (copying a folder means files are already there, not created individually)
+	if err := filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if (ext == goFileExt || ext == cueFileExt) && w.isDashboardFile(path) {
+			w.changedFiles[path] = true
+			logrus.Debugf("   Found new dashboard: %s", path)
+		}
+		return nil
+	}); err != nil {
+		logrus.Warnf("Failed to scan directory %s: %v", name, err)
+	}
+
+	// Rebuild dependency map to include new files
+	w.buildDependencyMap()
+
+	// Trigger build if we found dashboard files
+	if len(w.changedFiles) > 0 {
+		w.triggerDebounce(debounceTimer, debouncePending)
+	}
+	return true
+}
+
+// handleFileEvent handles file modification events
+func (w *watcher) handleFileEvent(event fsnotify.Event, debounceTimer **time.Timer, debouncePending *bool) {
+	// Check if it's a file we care about
+	ext := filepath.Ext(event.Name)
+	if ext != goFileExt && ext != cueFileExt {
+		return
+	}
+
+	// Only handle write, create, and rename operations
+	if event.Op&(fsnotify.Write|fsnotify.Create|fsnotify.Rename) == 0 {
+		return
+	}
+
+	logrus.Debugf("📝 File event: %s (%s)", event.Name, event.Op)
+
+	// Track the changed file
+	w.changedFiles[event.Name] = true
+
+	// Rebuild dependency map to discover new files or catch new imports in dashboards
+	if event.Op&(fsnotify.Create|fsnotify.Rename) != 0 || w.isDashboardFile(event.Name) {
+		w.buildDependencyMap()
+	}
+
+	w.triggerDebounce(debounceTimer, debouncePending)
+}
+
+// triggerDebounce starts or resets the debounce timer
+func (w *watcher) triggerDebounce(debounceTimer **time.Timer, debouncePending *bool) {
+	if *debounceTimer == nil {
+		*debounceTimer = time.NewTimer(w.debounceDelay)
+	} else if !*debouncePending {
+		(*debounceTimer).Reset(w.debounceDelay)
+	}
+	*debouncePending = true
 }
 
 // rebuildAffectedFiles rebuilds only the files that changed, with fallback to full rebuild
@@ -367,7 +400,7 @@ func (w *watcher) buildFile(file string) (string, error) {
 // findDashboardFiles finds all dashboard files in the source directory
 func (w *watcher) findDashboardFiles() []string {
 	var dashboards []string
-	filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -379,14 +412,16 @@ func (w *watcher) findDashboardFiles() []string {
 		}
 
 		ext := filepath.Ext(path)
-		if ext == ".go" || ext == ".cue" {
+		if ext == goFileExt || ext == cueFileExt {
 			// Check if it's a dashboard file
 			if w.isDashboardFile(path) {
 				dashboards = append(dashboards, path)
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		logrus.Warnf("Failed to walk source directory %s: %v", w.sourceDir, err)
+	}
 	return dashboards
 }
 
@@ -425,9 +460,9 @@ func (w *watcher) isDashboardFile(file string) bool {
 	ext := filepath.Ext(file)
 
 	switch ext {
-	case ".go":
+	case goFileExt:
 		return w.isGoDashboardFile(file)
-	case ".cue":
+	case cueFileExt:
 		return w.isCueDashboardFile(file)
 	}
 
@@ -450,7 +485,7 @@ func (w *watcher) isGoDashboardFile(file string) bool {
 // isCueDashboardFile checks if a CUE file is to be considered a dashboard
 // No 100% reliable way here, thus we take a heuristic approach based on import patterns and filename
 func (w *watcher) isCueDashboardFile(file string) bool {
-	content, err := os.ReadFile(file)
+	content, err := os.ReadFile(file) //nolint: gosec
 	if err != nil {
 		return false
 	}
@@ -545,9 +580,10 @@ func (w *watcher) buildDependencyMap() {
 // parseImports extracts import paths from a Go or CUE file
 func (w *watcher) parseImports(filePath string) []string {
 	ext := filepath.Ext(filePath)
-	if ext == ".go" {
+	switch ext {
+	case goFileExt:
 		return w.parseGoImports(filePath)
-	} else if ext == ".cue" {
+	case cueFileExt:
 		return w.parseCueImports(filePath)
 	}
 	return nil
@@ -571,7 +607,7 @@ func (w *watcher) parseGoImports(filePath string) []string {
 
 // parseCueImports parses import statements from a CUE file
 func (w *watcher) parseCueImports(filePath string) []string {
-	content, err := os.ReadFile(filePath)
+	content, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
 		return nil
 	}
@@ -608,7 +644,7 @@ func (w *watcher) resolveImportToFiles(importPath string) []string {
 	//   "dac-example.com/m/mylibrary/panels" -> should match mylibrary/panels/
 
 	// Look for directories matching the import in the source tree
-	filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -644,14 +680,16 @@ func (w *watcher) resolveImportToFiles(importPath string) []string {
 				}
 				filePath := filepath.Join(path, entry.Name())
 				ext := filepath.Ext(filePath)
-				if (ext == ".go" || ext == ".cue") && !w.isDashboardFile(filePath) {
+				if (ext == goFileExt || ext == cueFileExt) && !w.isDashboardFile(filePath) {
 					files = append(files, filePath)
 				}
 			}
 			return filepath.SkipDir
 		}
 		return nil
-	})
+	}); err != nil {
+		logrus.Warnf("Failed to resolve import %s: %v", importPath, err)
+	}
 
 	return files
 }

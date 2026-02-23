@@ -35,7 +35,6 @@ type option struct {
 	opt.OutputOption
 	sourceDir     string
 	debounceDelay time.Duration
-	buildArgs     []string
 	writer        io.Writer
 	errWriter     io.Writer
 }
@@ -83,7 +82,6 @@ func (o *option) Execute() error {
 		o.sourceDir,
 		buildDir,
 		o.Output,
-		o.buildArgs,
 		o.debounceDelay,
 		o.writer,
 		o.errWriter,
