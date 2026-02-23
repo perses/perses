@@ -105,7 +105,8 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 		select {
 		case <-ctx.Done():
 			close(w.buildChan)
-			return ctx.Err()
+			logrus.Info("Watch stopped")
+			return nil
 
 		case event := <-fsWatcher.Events:
 			// Handle deletions (REMOVE or RENAME where file no longer exists)
