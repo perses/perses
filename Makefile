@@ -49,62 +49,63 @@ tag:
 
 .PHONY: checkformat
 checkformat:
-	@echo ">> checking go code format"
+	@echo ">> Check Go code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
-	@echo ">> running check for CUE file format"
+	@echo ">> Check CUE files format"
 	./scripts/cue.sh --checkformat
 
 .PHONY: checkdocs
 checkdocs:
-	@echo ">> check format markdown docs"
+	@echo ">> Check markdown docs format"
 	@make fmt-docs
 	@git diff --exit-code -- *.md
 
 .PHONY: checkunused
 checkunused:
-	@echo ">> running check for unused/missing packages in go.mod"
+	@echo ">> Check for unused/missing packages in go.mod"
 	$(GO) mod tidy
 	@git diff --exit-code -- go.sum go.mod
 
 .PHONY: checkstyle
 checkstyle:
-	@echo ">> checking Go code style"
+	@echo ">> Check Go code style"
 	$(GOCI) run --timeout 5m
 
 .PHONY: checklint
 checklint:
-	@echo ">> checking TS code style"
+	@echo ">> Check TS code style"
 	cd ui && npm run lint
 
 .PHONY: checklicense
 checklicense:
-	@echo ">> checking license"
+	@echo ">> Check license"
 	go run ./scripts/check-license --check
 
 .PHONY: fixlicense
 fixlicense:
-	@echo ">> adding license header where it's missing"
+	@echo ">> Add license header where it's missing"
 	go run ./scripts/check-license --fix
 
 .PHONY: fmt
 fmt:
-	@echo ">> format code"
+	@echo ">> Format Go code"
 	$(GOFMT) -w -l $$(find . -name '*.go' -not -path "./ui/*" -print)
+	@echo ">> Format CUE files"
 	./scripts/cue.sh --fmt
 
 .PHONY: fmt-docs
 fmt-docs:
-	@echo ">> format markdown document"
+	@echo ">> Format markdown documents"
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
 cue-eval:
-	@echo ">> validate CUE schemas"
+	@echo ">> Validate CUE schemas"
 	cd cue && $(CUE) eval ./...
 
 .PHONY: cue-gen
 cue-gen:
-	@echo ">> generate CUE definitions from golang datamodel"
+	@echo ">> Generate CUE definitions from golang datamodel"
 	$(CUE) get go github.com/perses/perses/pkg/model/api/v1
 	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
 	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
@@ -116,20 +117,22 @@ validate-data:
 
 .PHONY: go-sdk-test
 go-sdk-test:
-	@echo ">> running perses go sdk tests"
+	@echo ">> Run Perses Go SDK tests"
 	cd ./go-sdk/test && $(GO) test -v -count=1 ./...
 
 .PHONY: test
 test: generate
-	@echo ">> running all tests"
+	@echo ">> Run all tests"
 	$(GO) test -count=1 -v ./...
 
 .PHONY: integration-test
 integration-test: generate go-sdk-test
+	@echo ">> Run integration tests"
 	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: mysql-integration-test
 mysql-integration-test: generate go-sdk-test
+	@echo ">> Run MySQL integration tests"
 	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: coverage-html
@@ -139,7 +142,7 @@ coverage-html: integration-test
 
 .PHONY: assets-compress
 assets-compress:
-	@echo '>> compressing assets'
+	@echo ">> Compress assets"
 	scripts/compress_assets.sh
 
 ## Cross build binaries for all platforms (Use "make build" in development)
@@ -156,16 +159,17 @@ build: build-ui build-api build-cli
 
 .PHONY: build-api
 build-api: generate
-	@echo ">> build the perses api"
+	@echo ">> Build the Perses API"
 	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/perses ./cmd/perses
 
 .PHONY: build-ui
 build-ui:
+	@echo ">> Build the Perses UI"
 	cd ./ui && npm install $(NPM_INSTALL_FLAGS) && npm run build
 
 .PHONY: build-cli
 build-cli:
-	@echo ">> build the perses cli"
+	@echo ">> Build the Perses CLI"
 	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
@@ -197,19 +201,19 @@ clean:
 
 .PHONY: update-go-deps
 update-go-deps:
-	@echo ">> updating Go dependencies"
+	@echo ">> Update Go dependencies"
 	@for m in $$($(GO) list -mod=readonly -m -f '{{ if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all); do \
 		$(GO) get -d $$m; \
 	done
 
 .PHONY: update-npm-deps
 update-npm-deps:
-	@echo ">> updating npm dependencies"
+	@echo ">> Update npm dependencies"
 	./scripts/npm-deps.sh "minor"
 
 .PHONY: upgrade-npm-deps
 upgrade-npm-deps:
-	@echo ">> upgrading npm dependencies"
+	@echo ">> Upgrade npm dependencies"
 	./scripts/npm-deps.sh "latest"
 
 .PHONY: update-helm-readme
@@ -219,7 +223,7 @@ update-helm-readme:
 
 .PHONY: install-default-plugins
 install-default-plugins:
-	@echo ">> install default plugins"
+	@echo ">> Install default plugins"
 	$(GO) run ./scripts/plugin/install_plugin.go
 
 .PHONY: container-dev
