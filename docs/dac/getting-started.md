@@ -239,8 +239,8 @@ security:
 # Terminal 1: Start Perses server with provisioning
 perses --config perses-dev.yaml
 
-# Terminal 2: Start the DaC watcher
-percli dac watch ./my-dashboards
+# Terminal 2: At the root of your DaC repo, start the DaC watcher
+percli dac watch
 ```
 
 **Step 3: Develop with instant feedback**:

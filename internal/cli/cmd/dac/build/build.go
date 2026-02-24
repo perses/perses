@@ -192,7 +192,7 @@ func (o *Option) SetErrWriter(errWriter io.Writer) {
 }
 
 // Run executes the build process programmatically.
-// This is useful for tools that need to trigger builds without going through the CLI.
+// This is useful for other commands to trigger builds without going through the CLI (e.g watch command).
 func (o *Option) Run() error {
 	if err := o.Complete(nil); err != nil {
 		return err
