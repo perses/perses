@@ -39,7 +39,7 @@ import (
 )
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (*native, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *utils.ClaimsManager) (*native, error) {
 	key, err := hex.DecodeString(string(conf.Security.EncryptionKey))
 	if err != nil {
 		return nil, err
@@ -54,6 +54,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
 		authJMESPath:         conf.Security.Authorization.ClaimsMappingConfig.AuthClaimsPath,
+		claimsManager:        claimsMngr,
 		accessKey:            key,
 	}
 
@@ -86,7 +87,8 @@ type native struct {
 	tokenRolesMap        []*config.RoleAssignment
 	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
 	// authJMESPath specifies the path to roles in oidc/oAuth token
-	authJMESPath string
+	authJMESPath  string
+	claimsManager *utils.ClaimsManager
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -131,13 +133,22 @@ func (n *native) IsEnabled() bool {
 
 func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	userRoles := []*v1.Role{}
-	roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	if roleClaims == nil {
+
+	claims := n.claimsManager.GetPersistentClaims(ctx)
+	if claims == nil {
 		return nil
 	}
+	roleClaims, ok := claims[n.authJMESPath]
+	if !ok {
+		return nil
+	}
+	// roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
+	// if roleClaims == nil {
+	// 	return nil
+	// }
 
 	for _, mappedRole := range n.tokenRolesMap {
-		if mappedRole.CheckRoleClaim(roleClaims) {
+		if mappedRole.CheckRoleClaim(roleClaims.([]string)) {
 			userRoles = append(userRoles, mappedRole.Role)
 			continue
 		}
@@ -147,13 +158,22 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 
 func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
-	roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	if roleClaims == nil {
+
+	claims := n.claimsManager.GetPersistentClaims(ctx)
+	if claims == nil {
 		return nil
 	}
+	roleClaims, ok := claims[n.authJMESPath]
+	if !ok {
+		return nil
+	}
+	// roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
+	// if roleClaims == nil {
+	// 	return nil
+	// }
 
 	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
-		if mappedGlobalRole.CheckRoleClaim(roleClaims) {
+		if mappedGlobalRole.CheckRoleClaim(roleClaims.([]string)) {
 			userRoles = append(userRoles, mappedGlobalRole.GlobalRole)
 			continue
 		}

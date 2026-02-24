@@ -80,7 +80,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetAuthorization(), serviceManager.GetDashboard()),
 	}
 
-	claimsManager := utils.NewClaimsManager(cfg.Security.Authentication.PersistClaims)
+	claimsManager := serviceManager.GetClaimsManager()
 
 	authEndpoint, err := authendpoint.New(
 		persistenceManager.GetUser(),

@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
@@ -67,9 +68,9 @@ type Authorization interface {
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *utils.ClaimsManager) (Authorization, error) {
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
 	}
-	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf, claimsMngr)
 }

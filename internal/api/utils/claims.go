@@ -94,7 +94,7 @@ func (cm *ClaimsManager) getCookie(ctx echo.Context) *http.Cookie {
 	return cookie
 }
 
-func (cm *ClaimsManager) decodeCookie(cookieValue string) Claims {
+func (_ *ClaimsManager) decodeCookie(cookieValue string) Claims {
 	// b64 decode cookie value
 	decoded, err := base64.StdEncoding.DecodeString(cookieValue)
 	if err != nil {
@@ -111,7 +111,7 @@ func (cm *ClaimsManager) decodeCookie(cookieValue string) Claims {
 	return data
 }
 
-func (cm *ClaimsManager) lookupClaim(data any, key string) any {
+func (_ *ClaimsManager) lookupClaim(data any, key string) any {
 	extractedData, err := jmespath.Search(key, data)
 	if err != nil {
 		return nil

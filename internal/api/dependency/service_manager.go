@@ -55,11 +55,13 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
 type ServiceManager interface {
 	GetAuthorization() authorization.Authorization
+	GetClaimsManager() utils.ClaimsManager
 	GetCrypto() crypto.Crypto
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
@@ -87,6 +89,7 @@ type ServiceManager interface {
 type service struct {
 	ServiceManager
 	authorization      authorization.Authorization
+	claimsManager      utils.ClaimsManager
 	crypto             crypto.Crypto
 	dashboard          dashboard.Service
 	datasource         datasource.Service
@@ -116,7 +119,8 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
+	claimsMngrService := utils.NewClaimsManager(conf.Security.Authentication.PersistClaims)
+	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf, &claimsMngrService)
 	if err != nil {
 		return nil, err
 	}
@@ -143,6 +147,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 
 	svc := &service{
 		authorization:      authzService,
+		claimsManager:      claimsMngrService,
 		crypto:             cryptoService,
 		dashboard:          dashboardService,
 		datasource:         datasourceService,
@@ -171,6 +176,10 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 
 func (s *service) GetAuthorization() authorization.Authorization {
 	return s.authorization
+}
+
+func (s *service) GetClaimsManager() utils.ClaimsManager {
+	return s.claimsManager
 }
 
 func (s *service) GetCrypto() crypto.Crypto {
