@@ -142,10 +142,6 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	if !ok {
 		return nil
 	}
-	// roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	// if roleClaims == nil {
-	// 	return nil
-	// }
 
 	for _, mappedRole := range n.tokenRolesMap {
 		if mappedRole.CheckRoleClaim(roleClaims.([]string)) {
@@ -167,10 +163,6 @@ func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	if !ok {
 		return nil
 	}
-	// roleClaims := utils.GetClaimsFromAccessToken(ctx, n.authJMESPath)
-	// if roleClaims == nil {
-	// 	return nil
-	// }
 
 	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
 		if mappedGlobalRole.CheckRoleClaim(roleClaims.([]string)) {
