@@ -82,7 +82,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
         const legendItemRole = panelName.includes('table') ? 'row' : 'listitem';
 
         const legendItems = timeSeriesPanel.container.getByRole(legendItemRole);
-        await legendItems.nth(2).hover();
+        await legendItems.first().hover();
       });
     });
   });
