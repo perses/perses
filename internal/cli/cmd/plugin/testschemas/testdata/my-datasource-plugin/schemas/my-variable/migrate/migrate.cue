@@ -16,7 +16,7 @@ package migrate
 import "strings"
 
 #grafanaVar: {
-	type: "custom"
+	type:    "custom"
 	options: string
 	...
 }

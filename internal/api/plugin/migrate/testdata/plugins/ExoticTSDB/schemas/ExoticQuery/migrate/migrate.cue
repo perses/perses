@@ -7,4 +7,4 @@ if (*#target.datasource.type | null) == "exotic-tsdb" {
 	spec: {
 		query: #target.expr
 	}
-},
+}

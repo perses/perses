@@ -20,4 +20,4 @@ if (*#target.datasource.type | null) == "mydatasource" {
 	spec: {
 		query: #target.expr
 	}
-},
+}

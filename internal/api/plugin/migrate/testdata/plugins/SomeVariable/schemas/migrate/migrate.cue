@@ -3,7 +3,7 @@ package migrate
 import "strings"
 
 #grafanaVar: {
-	type: "custom"
+	type:  "custom"
 	query: string
 	...
 }

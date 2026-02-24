@@ -4,14 +4,15 @@
 
 set -e
 
+DIRS=(./internal ./pkg ./cue)
+
 function fmt() {
-  # exclude migration files from the formatting since it removes the trailing commas we need
-  find ./internal ./pkg ./cue -name "*.cue" -and -not -name "migrate.cue" -exec cue fmt {} \;
+  find "${DIRS[@]}" -name "*.cue" -exec cue fmt {} \;
 }
 
 function checkfmt {
   fmt
-  git diff --exit-code -- ./internal ./pkg ./cue/schemas
+  git diff --exit-code -- "${DIRS[@]}"
 }
 
 if [[ "$1" == "--fmt" ]]; then
