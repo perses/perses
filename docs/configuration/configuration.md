@@ -7,6 +7,8 @@ Perses is configured via command-line flags and a configuration file
 ```bash
   -config string
     	Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.
+  -log.format string
+    	log format. Possible value: text, json (default "text")
   -log.level string
     	log level. Possible value: panic, fatal, error, warning, info, debug, trace (default "info")
   -log.method-trace
