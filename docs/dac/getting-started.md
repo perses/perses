@@ -52,12 +52,70 @@ For each [plugin](../concepts/plugin.md) you would like to use in your DaC, it i
 !!! note
 	To resolve the dependencies added after the initial setup, use `cue mod tidy`.
 
+Quick start example:
+
 ```cue
 package mydac
 
-import tsModel "github.com/perses/plugins/timeserieschart/schemas@v0:model"
+import (
+	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	labelValuesVarBuilder "github.com/perses/plugins/prometheus/sdk/cue/variable/labelvalues"
+	panelBuilder "github.com/perses/plugins/prometheus/sdk/cue/panel"
+	timeseriesChart "github.com/perses/plugins/timeserieschart/schemas:model"
+	promQuery "github.com/perses/plugins/prometheus/schemas/prometheus-time-series-query:model"
+	promDs "github.com/perses/plugins/prometheus/schemas/datasource:model"
+)
 
-spec: tsModel.spec & { legend: position: "right" }
+dashboardBuilder & {
+	#name:    "ContainersMonitoring"
+	#project: "MyProject"
+
+	#variables: {varGroupBuilder & {
+		#input: [
+			labelValuesVarBuilder & {
+				#name: "stack"
+				#display: name: "My Super PaaS"
+				#metric:         "thanos_build_info"
+				#label:          "paas"
+				#datasourceName: "promDemo"
+			},
+		]
+	}}.variables
+
+	#panelGroups: panelGroupsBuilder & {
+		#input: [
+			{
+				#title: "Resource usage"
+				#cols:  3
+				#panels: [
+					panelBuilder & {
+						spec: {
+							display: name: "Container memory"
+							plugin: timeseriesChart
+							queries: [
+								{
+									kind: "TimeSeriesQuery"
+									spec: plugin: promQuery & {
+										spec: query: "max by (container) (container_memory_rss{paas=\"$paas\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"
+									}
+								},
+							]
+						}
+					},
+				]
+			},
+		]
+	}
+
+	#datasources: promDemo: {
+		default: true
+		plugin: promDs & {
+			spec: close({directUrl: "https://demo.prometheus.com"})
+		}
+	}
+}
 ```
 
 ## Getting started with the Go SDK
