@@ -129,7 +129,9 @@ func (o *option) processFile(file string, extension string) error {
 		// we must be in the closest directory to the file.
 		folder := filepath.Dir(file)
 		extractedFile := filepath.Base(file)
-		cmd = exec.Command("go", "run", extractedFile, "--output", o.Output, strings.Join(o.args, " ")) // #nosec
+		goArgs := []string{"run", extractedFile, "--output", o.Output}
+		goArgs = append(goArgs, o.args...)
+		cmd = exec.Command("go", goArgs...) // #nosec
 		cmd.Dir = folder
 	} else if extension == cueExtension {
 		// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.

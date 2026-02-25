@@ -25,6 +25,39 @@ import (
 	cmdTest "github.com/perses/perses/internal/cli/test"
 )
 
+func TestDacBuildCMD_GoExtraArgsAreSplit(t *testing.T) {
+	buffer := strings.Builder{}
+	cmd := NewCMD()
+	cmd.SetOut(&buffer)
+	cmd.SetErr(&buffer)
+	cmd.SetArgs([]string{"-f", filepath.Join("testdata", "go", "args", "main.go"), "--", "--project-name=demo", "--dashboard-name=ContainerMonitoringDemo"})
+
+	config.Global = &config.Config{}
+	config.Global.Dac.OutputFolder = config.DefaultOutputFolder
+
+	err := cmd.Execute()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	outputFilePath := filepath.Join(config.DefaultOutputFolder, "testdata", "go", "args", "main_output.yaml")
+	builtContent, readErr := os.ReadFile(outputFilePath)
+	if readErr != nil {
+		t.Fatalf("unable to read generated output file: %v", readErr)
+	}
+
+	builtYAML := string(builtContent)
+	if !strings.Contains(builtYAML, "name: ContainerMonitoringDemo") {
+		t.Fatalf("expected dashboard name from flag in generated YAML, got:\n%s", builtYAML)
+	}
+	if !strings.Contains(builtYAML, "project: demo") {
+		t.Fatalf("expected project from flag in generated YAML, got:\n%s", builtYAML)
+	}
+	if strings.Contains(builtYAML, "project: demo --dashboard-name=ContainerMonitoringDemo") {
+		t.Fatalf("expected CLI flags to be passed as distinct args, got merged value:\n%s", builtYAML)
+	}
+}
+
 func TestDacBuildCMD(t *testing.T) {
 	// os-specific separator is required for the tests that go through the code that calls filepath.Walk
 	separator := string(os.PathSeparator)
