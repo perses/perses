@@ -41,7 +41,7 @@ func TestDacBuildCMD_GoExtraArgsAreSplit(t *testing.T) {
 	}
 
 	outputFilePath := filepath.Join(config.DefaultOutputFolder, "testdata", "go", "args", "main_output.yaml")
-	builtContent, readErr := os.ReadFile(outputFilePath)
+	builtContent, readErr := os.ReadFile(outputFilePath) // nolint: gosec
 	if readErr != nil {
 		t.Fatalf("unable to read generated output file: %v", readErr)
 	}
