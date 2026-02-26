@@ -138,7 +138,7 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	if claims == nil {
 		return nil
 	}
-	roleClaims, ok := claims[n.authJMESPath]
+	roleClaims, ok := claims.(utils.Claims)[n.authJMESPath]
 	if !ok {
 		return nil
 	}
@@ -159,7 +159,7 @@ func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
 	if claims == nil {
 		return nil
 	}
-	roleClaims, ok := claims[n.authJMESPath]
+	roleClaims, ok := claims.(utils.Claims)[n.authJMESPath]
 	if !ok {
 		return nil
 	}
