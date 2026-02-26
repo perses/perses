@@ -21,15 +21,30 @@ import (
 
 	"github.com/jmespath/go-jmespath"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 const CookieName = "persistedClaims"
 
+// returns a new ClaimsManager
+// precompiles JMESPath queries for later use
 func NewClaimsManager(persistClaims []string) ClaimsManager {
-	return ClaimsManager{
+	cm := ClaimsManager{
 		cookieName:    CookieName,
-		PersistClaims: persistClaims,
+		PersistClaims: []JMESPathQuery{},
 	}
+	for _, c := range persistClaims {
+		precompiled, err := jmespath.Compile(c)
+		if err != nil {
+			logrus.Warningf("unable to precompile claim jmespath: %s", err.Error())
+			continue
+		}
+		cm.PersistClaims = append(cm.PersistClaims, JMESPathQuery{
+			path:  c,
+			query: precompiled,
+		})
+	}
+	return cm
 }
 
 type Claims map[string]any
@@ -38,7 +53,12 @@ type Claims map[string]any
 // and providing helper functions to persist these claims via cookies
 type ClaimsManager struct {
 	cookieName    string
-	PersistClaims []string
+	PersistClaims []JMESPathQuery
+}
+
+type JMESPathQuery struct {
+	path  string
+	query *jmespath.JMESPath
 }
 
 // SetCookie creates and sets the cookie with claims persisted from the provider token;
@@ -72,7 +92,7 @@ func (cm *ClaimsManager) createCookie(data Claims) *http.Cookie {
 }
 
 // GetPersistentClaims returns the claims persisted via the cookie
-func (cm *ClaimsManager) GetPersistentClaims(ctx echo.Context) Claims {
+func (cm *ClaimsManager) GetPersistentClaims(ctx echo.Context) any {
 	// get cookie
 	cookie := cm.getCookie(ctx)
 	if cookie == nil {
@@ -94,7 +114,12 @@ func (cm *ClaimsManager) getCookie(ctx echo.Context) *http.Cookie {
 	return cookie
 }
 
-func (_ *ClaimsManager) decodeCookie(cookieValue string) Claims {
+func (_ *ClaimsManager) decodeCookie(cookieValue string) interface{} {
+	// recreate padding
+	if i := len(cookieValue) % 4; i != 0 {
+		cookieValue += strings.Repeat("=", 4-i)
+	}
+
 	// b64 decode cookie value
 	decoded, err := base64.StdEncoding.DecodeString(cookieValue)
 	if err != nil {
@@ -102,7 +127,7 @@ func (_ *ClaimsManager) decodeCookie(cookieValue string) Claims {
 	}
 
 	// unmarshal decoded cookie value
-	var data Claims
+	var data interface{}
 	err = json.Unmarshal(decoded, &data)
 	if err != nil {
 		return nil
@@ -111,16 +136,16 @@ func (_ *ClaimsManager) decodeCookie(cookieValue string) Claims {
 	return data
 }
 
-func (_ *ClaimsManager) lookupClaim(data any, key string) any {
-	extractedData, err := jmespath.Search(key, data)
+func (_ *ClaimsManager) lookupClaim(data interface{}, query *jmespath.JMESPath) (any, error) {
+	extractedData, err := query.Search(data)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return extractedData
+	return extractedData, nil
 }
 
 // ExtractClaimsFromJWTPayload takes the oidc/oAuth access token and extracts additional claims;
-// returns a map in a general format of map[<JMESPath to requested claim>]<requested claim>
+// returns a map in a general format of map[claim_name]<requested claim>
 func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(accessToken string) Claims {
 	// check if the token is generally resembling a JWT token ; return nil otherwise
 	tokenPayload := strings.Split(accessToken, ".")
@@ -136,11 +161,16 @@ func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(accessToken string) Claims 
 
 	// extract wanted claims from the decoded token payload
 	extractedClaims := make(Claims)
-	for _, key := range cm.PersistClaims {
-		c := cm.lookupClaim(decoded, key)
-		if c != nil {
-			extractedClaims[key] = c
+	for _, pc := range cm.PersistClaims {
+		c, err := cm.lookupClaim(decoded, pc.query)
+		if c == nil || err != nil {
+			continue
 		}
+		extractedClaims[pc.path] = c
+	}
+
+	if len(extractedClaims) == 0 {
+		return nil
 	}
 
 	return extractedClaims
