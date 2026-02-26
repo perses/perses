@@ -23,6 +23,7 @@ export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
 export const querySpecSchema: z.ZodSchema<QueryDefinition> = z.object({
   kind: z.string().min(1),
   spec: z.object({
+    name: z.string().optional(),
     plugin: pluginSchema,
   }),
 });

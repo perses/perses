@@ -18,6 +18,7 @@ import { ProfileData } from './profile-data';
 import { LogData } from './log-data';
 
 interface QuerySpec<PluginSpec> {
+  name?: string;
   plugin: Definition<PluginSpec>;
 }
 /**
