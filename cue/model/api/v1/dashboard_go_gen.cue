@@ -37,6 +37,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 }
 
 #QuerySpec: {
+	name?:  string         @go(Name)
 	plugin: common.#Plugin @go(Plugin)
 }
 
