@@ -106,7 +106,9 @@ cue-eval:
 .PHONY: cue-gen
 cue-gen:
 	@echo ">> Generate CUE definitions from golang datamodel"
-	$(CUE) get go github.com/perses/perses/pkg/model/api/v1
+	@for pkg in $$($(GO) list github.com/perses/perses/pkg/model/api/v1/...); do \
+		$(CUE) get go $$pkg; \
+	done
 	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
 	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
 

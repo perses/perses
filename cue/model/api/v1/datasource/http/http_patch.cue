@@ -39,10 +39,3 @@ package http
 	// It will contain any sensitive information such as password, token, certificate.
 	secret?: string @go(Secret)
 }
-
-#Proxy: {
-	kind: string  @go(Kind)
-	spec: #Config @go(Spec)
-}
-
-#ProxyKindName: "httpproxy"

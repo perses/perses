@@ -25,49 +25,6 @@ import (
 	"time"
 )
 
-// Driver the SQL driver to use
-#Driver: string // #enumDriver
-
-#enumDriver:
-	#DriverMySQL |
-	#DriverMariaDB |
-	#DriverPostgreSQL
-
-#DriverMySQL:      #Driver & "mysql"
-#DriverMariaDB:    #Driver & "mariadb"
-#DriverPostgreSQL: #Driver & "postgres"
-
-// SSLMode postgres ssl modes
-#SSLMode: string // #enumSSLMode
-
-#enumSSLMode:
-	#SSLModeDisable |
-	#SSLModeAllow |
-	#SSLModePreferable |
-	#SSLModeRequire |
-	#SSLModeVerifyFull |
-	#SSLModeVerifyCA
-
-#SSLModeDisable:    #SSLMode & "disable"
-#SSLModeAllow:      #SSLMode & "allow"
-#SSLModePreferable: #SSLMode & "prefer"
-#SSLModeRequire:    #SSLMode & "require"
-#SSLModeVerifyFull: #SSLMode & "verify-full"
-#SSLModeVerifyCA:   #SSLMode & "verify-ca"
-
-#MySQLConfig: {
-	// params Connection parameters
-	params?: {[string]: string} @go(Params,map[string]string)
-	// max_allowed_packet Max packet size allowed
-	maxAllowedPacket?: int @go(MaxAllowedPacket)
-	// timeout Dial timeout
-	timeout?:          int @go(Timeout,time.Duration)
-	// read_timeout I/O read timeout
-	readTimeout?:      int @go(ReadTimeout,time.Duration)
-	// write_timeout I/O read timeout
-	writeTimeout?:     int @go(WriteTimeout,time.Duration)
-}
-
 #PostgresConfig: {
 	// options specifies command-line options to send to the server at connection start
 	options?: string @go(Options,string)
@@ -96,10 +53,3 @@ import (
 	// postgres specific driver configurations
 	postgres?: #Postgres
 }
-
-#Proxy: {
-	kind: "SQLProxy"  @go(Kind)
-	spec: #Config @go(Spec)
-}
-
-#ProxyKindName: "sqlproxy"
