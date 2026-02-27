@@ -84,9 +84,7 @@ function HomeView(): ReactElement {
         }}
       >
         {/* Left section - Spans 2 columns: ImportantDashboards when configured, otherwise Projects */}
-        <Box sx={{ minWidth: 0 }}>
-          {hasImportantDashboards ? <ImportantDashboards /> : <Projects />}
-        </Box>
+        <Box sx={{ minWidth: 0 }}>{hasImportantDashboards ? <ImportantDashboards /> : <Projects />}</Box>
 
         {/* Recent Dashboards - 1 column */}
         <Box sx={{ minWidth: 0 }}>
