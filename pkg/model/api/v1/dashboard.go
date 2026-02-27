@@ -54,6 +54,7 @@ type Query struct {
 }
 
 type QuerySpec struct {
+	Name   string        `json:"name,omitempty" yaml:"name,omitempty"`
 	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
