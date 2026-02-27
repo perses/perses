@@ -41,3 +41,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	// It will contain any sensitive information such as password, token, certificate.
 	secret?: string @go(Secret)
 }
+
+#Proxy: {
+	kind: "HTTPProxy" @go(Kind)
+}

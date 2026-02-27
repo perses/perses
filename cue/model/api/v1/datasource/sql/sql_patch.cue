@@ -53,3 +53,7 @@ import (
 	// postgres specific driver configurations
 	postgres?: #PostgresConfig
 }
+
+#Proxy: {
+	kind: "SQLProxy" @go(Kind)
+}
