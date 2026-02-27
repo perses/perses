@@ -49,7 +49,7 @@ import (
 	// It will contain any sensitive information such as username, password, token, certificate.
 	secret?: string
 	// mysql specific driver configurations
-	mysql?: #MySQL
+	mysql?: #MySQLConfig
 	// postgres specific driver configurations
-	postgres?: #Postgres
+	postgres?: #PostgresConfig
 }

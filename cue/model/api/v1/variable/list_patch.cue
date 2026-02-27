@@ -21,8 +21,6 @@
 
 package variable
 
-import "github.com/perses/perses/cue/model/api/v1/common"
-
 #DefaultValue: {
 	singleValue: string @go(SingleValue)
 	sliceValues: [...string] @go(SliceValues)

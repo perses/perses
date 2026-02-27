@@ -21,6 +21,8 @@
 
 package http
 
+import "github.com/perses/perses/cue/model/api/v1/common"
+
 #AllowedEndpoint: {
 	endpointPattern: string                                      @go(EndpointPattern)
 	method:          "POST" | "PUT" | "PATCH" | "GET" | "DELETE" @go(Method)
@@ -29,10 +31,10 @@ package http
 #Config: {
 	// url is the url of the datasource. It is not the url of the proxy.
 	// The Perses server is the proxy, so it needs to know where to redirect the request.
-	url: common.#url @go(URL)
+	url: common.#URL @go(URL)
 	// allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
 	// Leave it empty if you don't want to restrict the access to the datasource.
-	allowedEndpoints?: [...#HTTPAllowedEndpoint] @go(AllowedEndpoints)
+	allowedEndpoints?: [...#AllowedEndpoint] @go(AllowedEndpoints)
 	// headers can be used to provide additional headers that need to be forwarded when requesting the datasource
 	headers?: {[string]: string} @go(Headers)
 	// secret is the name of the secret that should be used for the proxy or discovery configuration

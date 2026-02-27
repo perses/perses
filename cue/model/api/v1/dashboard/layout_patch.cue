@@ -21,8 +21,6 @@
 
 package dashboard
 
-import "github.com/perses/perses/cue/model/api/v1/common"
-
 #LayoutKind: #enumLayoutKind
 
 #LayoutSpec: #GridLayoutSpec
