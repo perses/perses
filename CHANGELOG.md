@@ -2,7 +2,7 @@
 
 ## 0.53.0 / 2026-02-26
 
-Welcome to Perses v0.53.0! 
+Welcome to Perses v0.53.0!
 
 In this release, on top of many improvements and bug fixes, we have introduced several changes that break the compatibility with previous versions.
 
