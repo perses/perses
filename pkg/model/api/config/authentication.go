@@ -218,6 +218,8 @@ type AuthenticationConfig struct {
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
 	// Providers configure the different authentication providers
 	Providers AuthenticationProviders `json:"providers" yaml:"providers"`
+	// PersistClaims defines which oAuth/oidc token claims should be persisted in a separate cookie
+	PersistClaims []string `json:"persist_claims,omitempty" yaml:"persist_claims,omitempty"`
 }
 
 func (a *AuthenticationConfig) Verify() error {
