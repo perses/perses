@@ -154,6 +154,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
+	claimsManager          *ClaimsManager
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -184,7 +185,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *ClaimsManager) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -221,6 +222,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
 		apiPrefix:              apiPrefix,
+		claimsManager:          claimsMngr,
 	}, nil
 }
 
@@ -380,6 +382,17 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
+	}
+
+	// Persist claims from the provider token
+	// claims are passed down through the `persistedClaims` cookie
+	if e.claimsManager.PersistClaims != nil {
+		// TODO: is resp.AccessToken the right one to use?
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
+		ok := e.claimsManager.SetCookie(ctx, data)
+		if !ok {
+			logrus.Warning("could not set the persistedClaims cookie")
+		}
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }

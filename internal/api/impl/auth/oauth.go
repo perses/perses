@@ -139,6 +139,7 @@ type oAuthEndpoint struct {
 	svc             service
 	loginProps      []string
 	apiPrefix       string
+	claimsManager   *ClaimsManager
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -153,7 +154,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *ClaimsManager) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -193,6 +194,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
 		apiPrefix:       apiPrefix,
+		claimsManager:   claimsMngr,
 	}, nil
 }
 
@@ -446,6 +448,15 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
+	}
+	// Persist claims from the provider token
+	// claims are passed down through the `persistedClaims` cookie
+	if e.claimsManager.PersistClaims != nil {
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(accessToken.AccessToken)
+		ok := e.claimsManager.SetCookie(ctx, data)
+		if !ok {
+			logrus.Warning("could not set the persistedClaims cookie")
+		}
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }
