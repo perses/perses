@@ -26,6 +26,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -139,7 +140,7 @@ type oAuthEndpoint struct {
 	svc             service
 	loginProps      []string
 	apiPrefix       string
-	claimsManager   *ClaimsManager
+	claimsManager   *native.ClaimsManager
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -154,7 +155,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *ClaimsManager) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *native.ClaimsManager) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)

@@ -25,6 +25,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -109,7 +110,7 @@ type endpoint struct {
 	isDelegatedAuthn bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, claimsMngr *ClaimsManager, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, claimsMngr *native.ClaimsManager, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
