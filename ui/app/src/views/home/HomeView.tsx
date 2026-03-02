@@ -79,17 +79,15 @@ function HomeView(): ReactElement {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: 'repeat(3, 1fr)' },
+          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' },
           gap: 3,
         }}
       >
         {/* Left section - Spans 2 columns: ImportantDashboards when configured, otherwise Projects */}
-        <Box sx={{ gridColumn: { lg: 'span 2' } }}>
-          {hasImportantDashboards ? <ImportantDashboards /> : <Projects />}
-        </Box>
+        <Box sx={{ minWidth: 0 }}>{hasImportantDashboards ? <ImportantDashboards /> : <Projects />}</Box>
 
         {/* Recent Dashboards - 1 column */}
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <RecentDashboards />
         </Box>
       </Box>
