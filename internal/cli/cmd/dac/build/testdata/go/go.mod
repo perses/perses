@@ -1,6 +1,6 @@
 module dac
 
-go 1.25.5
+go 1.25.7
 
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
