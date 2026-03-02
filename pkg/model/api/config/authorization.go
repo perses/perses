@@ -41,18 +41,21 @@ func (a *Assignment) CheckRoleClaim(userRoleClaims []string) bool {
 	return false
 }
 
+// RoleAssignment contains the mapping of role found in the token to Perses role.
 type RoleAssignment struct {
 	Assignment
 	Project string `json:"project" yaml:"project"`
 	Role    *v1.Role
 }
 
+// RoleAssignment contains the mapping of role found in the token to Perses global role.
 type GlobalRoleAssignment struct {
 	Assignment
 	GlobalRole *v1.GlobalRole
 }
 
 type ClaimsMappingConfig struct {
+	// AuthClaimsPath is the JMESPath to the role claims in the provider token payload section
 	AuthClaimsPath    string                  `json:"auth_claims_path,omitempty" yaml:"auth_claims_path,omitempty"`
 	RoleMapping       []*RoleAssignment       `json:"role_mapping,omitempty" yaml:"role_mapping,omitempty"`
 	GlobalRoleMapping []*GlobalRoleAssignment `json:"global_role_mapping,omitempty" yaml:"global_role_mapping,omitempty"`

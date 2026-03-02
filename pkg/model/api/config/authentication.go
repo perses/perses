@@ -212,6 +212,7 @@ type AuthenticationConfig struct {
 	// Providers configure the different authentication providers
 	Providers AuthProviders `json:"providers" yaml:"providers"`
 	// PersistClaims defines which oAuth/oidc token claims should be persisted in a separate cookie
+	// Claims are defined via the JMESpath to the specific part of the token payload section
 	PersistClaims []string `json:"persist_claims,omitempty" yaml:"persist_claims,omitempty"`
 }
 
@@ -221,6 +222,9 @@ func (a *AuthenticationConfig) Verify() error {
 	}
 	if a.RefreshTokenTTL == 0 {
 		a.RefreshTokenTTL = common.Duration(DefaultRefreshTokenTTL)
+	}
+	if a.PersistClaims == nil {
+		a.PersistClaims = []string{}
 	}
 	return nil
 }
