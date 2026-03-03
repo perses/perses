@@ -21,6 +21,7 @@ import {
 import { Duration } from 'date-fns';
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const TIME_TESTS: UnitTestCase[] = [
   {
@@ -376,4 +377,36 @@ describe('formatDuration', () => {
       expect(formatDuration(duration)).toEqual(expected);
     }
   );
+
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('time')).toBe(25);
+    expect(getKeys('time')).toStrictEqual([
+      'unit|nanosecond|narrow|3|nanoseconds|en-US',
+      'unit|nanosecond|narrow|3|microseconds|en-US',
+      'unit|microsecond|narrow|3|milliseconds|en-US',
+      'unit|millisecond|narrow|3|seconds|en-US',
+      'unit|millisecond|narrow|3|minutes|en-US',
+      'unit|second|narrow|3|hours|en-US',
+      'unit|minute|narrow|3|days|en-US',
+      'unit|minute|narrow|3|weeks|en-US',
+      'unit|minute|narrow|3|months|en-US',
+      'unit|hour|narrow|3|years|en-US',
+      'unit|microsecond|narrow|3|microseconds|en-US',
+      'unit|millisecond|narrow|3|milliseconds|en-US',
+      'unit|second|narrow|3|seconds|en-US',
+      'unit|minute|narrow|3|minutes|en-US',
+      'unit|hour|narrow|3|hours|en-US',
+      'unit|day|narrow|3|days|en-US',
+      'unit|week|narrow|3|weeks|en-US',
+      'unit|month|long|3|months|en-US',
+      'unit|year|long|3|years|en-US',
+      'unit|minute|narrow|3|seconds|en-US',
+      'unit|hour|narrow|3|minutes|en-US',
+      'unit|day|narrow|3|hours|en-US',
+      'unit|month|long|3|days|en-US',
+      'unit|year|long|3|weeks|en-US',
+      'unit|year|long|3|months|en-US',
+    ]);
+  });
 });

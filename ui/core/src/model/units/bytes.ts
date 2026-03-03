@@ -16,6 +16,7 @@ import numbro from 'numbro';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
+import { getFormatterFromCache } from './formatterCache';
 
 /**
  * We support both SI (decimal) and IEC (binary) units for bytes:
@@ -78,8 +79,19 @@ export function formatBytes(bytes: number, { unit = 'bytes', shortValues, decima
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
     }
-    const formatter = Intl.NumberFormat('en-US', formatterOptions);
-    return formatter.format(bytes);
+
+    const key = [
+      formatterOptions.style,
+      formatterOptions.unit,
+      formatterOptions.unitDisplay,
+      formatterOptions.useGrouping,
+      formatterOptions.maximumSignificantDigits,
+      decimalPlaces,
+      shortValues,
+      unit,
+    ];
+
+    return getFormatterFromCache(key, 'bytes', formatterOptions, 'en-US')(bytes);
   }
 
   // If we're showing the shorten value, we use numbro.
