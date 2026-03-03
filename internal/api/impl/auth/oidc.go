@@ -155,7 +155,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
-	claimsManager          *native.ClaimsManager
+	claimsManager          native.ClaimsManager
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -186,7 +186,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *native.ClaimsManager) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr native.ClaimsManager) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err

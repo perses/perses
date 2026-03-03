@@ -89,13 +89,11 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		)
 	}
 
-	claimsManager := serviceManager.GetClaimsManager()
-
 	authEndpoint, err := authendpoint.New(
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
 		serviceManager.GetAuthorization(),
-		&claimsManager,
+		serviceManager.GetClaimsManager(),
 		cfg.Security.Authentication.Providers,
 		cfg.Security.EnableAuth,
 		cfg.APIPrefix,

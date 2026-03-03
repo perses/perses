@@ -140,7 +140,7 @@ type oAuthEndpoint struct {
 	svc             service
 	loginProps      []string
 	apiPrefix       string
-	claimsManager   *native.ClaimsManager
+	claimsManager   native.ClaimsManager
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -155,7 +155,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr *native.ClaimsManager) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr native.ClaimsManager) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
