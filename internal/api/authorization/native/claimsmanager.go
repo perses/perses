@@ -84,7 +84,7 @@ func (cm *ClaimsManager) createCookie(data Claims) *http.Cookie {
 		return nil
 	}
 	// b64 encode marshaled payload
-	encodedPayload := base64.StdEncoding.EncodeToString([]byte(jsonPayload))
+	encodedPayload := base64.StdEncoding.EncodeToString(jsonPayload)
 	return &http.Cookie{
 		Name:  cm.cookieName,
 		Value: encodedPayload,
@@ -114,7 +114,7 @@ func (cm *ClaimsManager) getCookie(ctx echo.Context) *http.Cookie {
 	return cookie
 }
 
-func (_ *ClaimsManager) decodeCookie(cookieValue string) interface{} {
+func (cm *ClaimsManager) decodeCookie(cookieValue string) interface{} {
 	// recreate padding
 	if i := len(cookieValue) % 4; i != 0 {
 		cookieValue += strings.Repeat("=", 4-i)
@@ -136,7 +136,7 @@ func (_ *ClaimsManager) decodeCookie(cookieValue string) interface{} {
 	return data
 }
 
-func (_ *ClaimsManager) lookupClaim(data interface{}, query *jmespath.JMESPath) (any, error) {
+func (cm *ClaimsManager) lookupClaim(data interface{}, query *jmespath.JMESPath) (any, error) {
 	extractedData, err := query.Search(data)
 	if err != nil {
 		return nil, err
