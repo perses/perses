@@ -16,6 +16,7 @@ package fakev1
 import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	dashboardSpec "github.com/perses/spec/go/dashboard"
 )
 
 type dashboard struct {
@@ -44,7 +45,7 @@ func (d *dashboard) Get(name string) (*modelV1.Dashboard, error) {
 				Project: d.project,
 			},
 		},
-		Spec: modelV1.DashboardSpec{},
+		Spec: dashboardSpec.Spec{},
 	}, nil
 }
 func (d *dashboard) List(_ string) ([]*modelV1.Dashboard, error) {

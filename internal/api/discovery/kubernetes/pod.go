@@ -22,6 +22,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/spec/go/datasource"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,7 +82,7 @@ func (d *podDiscovery) podToGlobalDatasource(pod corev1.Pod, decodedSchema []*cu
 		Metadata: v1.Metadata{
 			Name: fmt.Sprintf("%s.%s", pod.Namespace, pod.Name),
 		},
-		Spec: v1.DatasourceSpec{
+		Spec: datasource.Spec{
 			Plugin: plugin,
 		},
 	}, nil

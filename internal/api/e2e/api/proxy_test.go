@@ -34,9 +34,12 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
+	commonSpec "github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
-func newHTTPDatasourceSpec(t *testing.T) v1.DatasourceSpec {
+func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 	promURL, err := common.ParseURL("http://localhost:9090")
 	if err != nil {
 		t.Fatal(err)
@@ -60,16 +63,16 @@ func newHTTPDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 		t.Fatal(umarshallErr)
 	}
 
-	return v1.DatasourceSpec{
+	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: commonSpec.Plugin{
 			Kind: "PrometheusDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
 	}
 }
 
-func newSQLDatasourceSpec(t *testing.T) v1.DatasourceSpec {
+func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 	pluginSpec := &datasource.Postgres{
 		Proxy: &datasourceSQL.Proxy{
 			Kind: "SQLProxy",
@@ -93,9 +96,9 @@ func newSQLDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 		t.Fatal(umarshallErr)
 	}
 
-	return v1.DatasourceSpec{
+	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: commonSpec.Plugin{
 			Kind: "PostgresDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -113,8 +116,8 @@ func newDashboard(projectName string, dashboardName string, dtsName string, dts 
 				Project: projectName,
 			},
 		},
-		Spec: v1.DashboardSpec{
-			Datasources: map[string]*v1.DatasourceSpec{
+		Spec: dashboard.Spec{
+			Datasources: map[string]*datasourceSpec.Spec{
 				dtsName: &dts.Spec,
 			},
 		},
@@ -268,15 +271,15 @@ func TestHTTPProxyLocalDatasource(t *testing.T) {
 		dashboardName := "myDashboard"
 		projectName := "perses"
 		dts := newHTTPDatasource(t, projectName, dtsName)
-		dashboard := newDashboard(projectName, dashboardName, dtsName, dts)
+		dash := newDashboard(projectName, dashboardName, dtsName, dts)
 		project := e2eframework.NewProject(projectName)
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dashboard)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dash)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			Expect().
 			Status(http.StatusOK)
-		return []api.Entity{project, dashboard}
+		return []api.Entity{project, dash}
 	})
 }
 
@@ -289,10 +292,10 @@ func TestSQLProxyLocalDatasource(t *testing.T) {
 		dashboardName := "myDashboard"
 		projectName := "perses"
 		dts := newSQLDatasource(t, projectName, dtsName)
-		dashboard := newDashboard(projectName, dashboardName, dtsName, dts)
+		dash := newDashboard(projectName, dashboardName, dtsName, dts)
 		project := e2eframework.NewProject(projectName)
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dashboard)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dash)
 
 		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
@@ -300,24 +303,24 @@ func TestSQLProxyLocalDatasource(t *testing.T) {
 			Status(http.StatusOK).
 			Body().
 			IsEqual("{\"columns\":[{\"name\":\"datname\",\"type\":\"NAME\"}],\"rows\":[{\"datname\":\"postgres\"},{\"datname\":\"perses\"},{\"datname\":\"template1\"},{\"datname\":\"template0\"}]}\n")
-		return []api.Entity{project, dashboard}
+		return []api.Entity{project, dash}
 	})
 }
 
 func TestHTTPProxyLocalDatasourceWithRealDashboard(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		var dashboard v1.Dashboard
-		testUtils.JSONUnmarshalFromFile(filepath.Join("testdata", "dashboard.json"), &dashboard)
+		var dash v1.Dashboard
+		testUtils.JSONUnmarshalFromFile(filepath.Join("testdata", "dashboard.json"), &dash)
 		dtsName := "Victoria Metrics"
 		dashboardName := "myDashboard"
 		projectName := "perses"
 		project := e2eframework.NewProject(projectName)
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, &dashboard)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, &dash)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			Expect().
 			Status(http.StatusOK)
-		return []api.Entity{project, &dashboard}
+		return []api.Entity{project, &dash}
 	})
 }

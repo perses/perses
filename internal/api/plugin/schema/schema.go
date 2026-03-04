@@ -25,10 +25,10 @@ import (
 	"cuelang.org/go/cue/build"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/sirupsen/logrus"
 )
 
@@ -104,7 +104,7 @@ type Schema interface {
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnloadDevPlugin(module v1.PluginModule)
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
-	ValidatePanels(panels map[string]*v1.Panel) error
+	ValidatePanels(panels map[string]*dashboard.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
 	ValidateGlobalVariable(v v1.VariableSpec) error
 	ValidateDashboardVariables([]dashboard.Variable) error
@@ -158,7 +158,7 @@ func (s *completeSchema) ValidateDatasource(plugin common.Plugin, dtsName string
 // ValidatePanels verify a list of panels.
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
-func (s *completeSchema) ValidatePanels(panels map[string]*v1.Panel) error {
+func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) error {
 	if len(s.devSch.panels) == 0 && len(s.sch.panels) == 0 {
 		return fmt.Errorf("panel schemas are not loaded")
 	}

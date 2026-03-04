@@ -19,10 +19,10 @@ import (
 
 	"github.com/perses/perses/internal/api/plugin/schema"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 )
 
 // We want to keep only variables that are not only a number.
@@ -31,7 +31,7 @@ import (
 // For example, in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
 var variableNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
-func DashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
+func DashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func DashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
 
 }
 
-func DashboardSpecWithVars(spec modelV1.DashboardSpec, sch schema.Schema, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+func DashboardSpecWithVars(spec dashboard.Spec, sch schema.Schema, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, projectVariables, globalVariables); err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func validateDatasourcePlugin(plugin common.Plugin, name string, sch schema.Sche
 	return sch.ValidateDatasource(plugin, name)
 }
 
-func validateDashboardSpec(spec modelV1.DashboardSpec, sch schema.Schema) error {
+func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
 	if err := validateVariableNames(spec.Variables); err != nil {
 		return err
 	}

@@ -31,7 +31,9 @@ import (
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	commonSpec "github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard/variable"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
 type GetFunc func() (api.Entity, error)
@@ -185,7 +187,7 @@ func NewProject(name string) *v1.Project {
 	return entity
 }
 
-func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
+func newDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 	promURL, err := common.ParseURL("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
 		t.Fatal(err)
@@ -235,9 +237,9 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 		t.Fatal(err)
 	}
 
-	return v1.DatasourceSpec{
+	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: commonSpec.Plugin{
 			Kind: "PrometheusDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -271,7 +273,7 @@ func NewVariable(projectName string, name string) *v1.Variable {
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
-				Plugin: common.Plugin{
+				Plugin: commonSpec.Plugin{
 					Kind: "PrometheusLabelNamesVariable",
 					Spec: map[string]interface{}{
 						"matchers": []interface{}{
@@ -293,7 +295,7 @@ func NewGlobalVariable(name string) *v1.GlobalVariable {
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
-				Plugin: common.Plugin{
+				Plugin: commonSpec.Plugin{
 					Kind: "PrometheusLabelNamesVariable",
 					Spec: map[string]interface{}{
 						"matchers": []interface{}{

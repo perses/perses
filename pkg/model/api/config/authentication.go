@@ -23,6 +23,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
+	commonSpec "github.com/perses/spec/go/common"
 )
 
 const (
@@ -62,14 +63,14 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 }
 
 type HTTP struct {
-	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
-	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+	Timeout   commonSpec.Duration `json:"timeout" yaml:"timeout"`
+	TLSConfig *secret.TLSConfig   `json:"tls_config" yaml:"tls_config"`
 }
 
 func (h HTTP) MarshalYAML() (any, error) {
 	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
 	return struct {
-		Timeout   common.Duration         `json:"timeout" yaml:"timeout"`
+		Timeout   commonSpec.Duration     `json:"timeout" yaml:"timeout"`
 		TLSConfig *secret.PublicTLSConfig `json:"tls_config" yaml:"tls_config"`
 	}{
 		Timeout:   h.Timeout,
@@ -80,7 +81,7 @@ func (h HTTP) MarshalYAML() (any, error) {
 func (h HTTP) MarshalJSON() ([]byte, error) {
 	cfg := secret.NewPublicTLSConfig(h.TLSConfig)
 	return json.Marshal(struct {
-		Timeout   common.Duration         `json:"timeout"`
+		Timeout   commonSpec.Duration     `json:"timeout"`
 		TLSConfig *secret.PublicTLSConfig `json:"tls_config"`
 	}{
 		Timeout:   h.Timeout,
@@ -90,7 +91,7 @@ func (h HTTP) MarshalJSON() ([]byte, error) {
 
 func (h *HTTP) Verify() error {
 	if h.Timeout == 0 {
-		h.Timeout = common.Duration(DefaultProviderTimeout)
+		h.Timeout = commonSpec.Duration(DefaultProviderTimeout)
 	}
 	return nil
 }
@@ -208,11 +209,11 @@ func (p *AuthenticationProviders) Verify() error {
 
 type AuthenticationConfig struct {
 	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
-	AccessTokenTTL common.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	AccessTokenTTL commonSpec.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
-	RefreshTokenTTL common.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	RefreshTokenTTL commonSpec.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
 	// DisableSignUp deactivates the Sign-up page in the UI.
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
@@ -222,10 +223,10 @@ type AuthenticationConfig struct {
 
 func (a *AuthenticationConfig) Verify() error {
 	if a.AccessTokenTTL == 0 {
-		a.AccessTokenTTL = common.Duration(DefaultAccessTokenTTL)
+		a.AccessTokenTTL = commonSpec.Duration(DefaultAccessTokenTTL)
 	}
 	if a.RefreshTokenTTL == 0 {
-		a.RefreshTokenTTL = common.Duration(DefaultRefreshTokenTTL)
+		a.RefreshTokenTTL = commonSpec.Duration(DefaultRefreshTokenTTL)
 	}
 	return nil
 }

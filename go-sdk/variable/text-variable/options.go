@@ -15,7 +15,7 @@ package textvariable
 
 import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/dashboard/variable"
 )
 
 func Value(value string) Option {
