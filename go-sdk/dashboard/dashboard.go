@@ -14,9 +14,11 @@
 package dashboard
 
 import (
+	"fmt"
 	"time"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type Option func(dashboard *Builder) error
@@ -27,9 +29,9 @@ func New(name string, options ...Option) (Builder, error) {
 			Kind: v1.KindDashboard,
 		},
 	}
+	builder.Dashboard.Metadata.Name = name
 
 	defaults := []Option{
-		Name(name),
 		Duration(time.Hour),
 	}
 
@@ -37,6 +39,10 @@ func New(name string, options ...Option) (Builder, error) {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
+	}
+
+	if err := common.ValidateID(builder.Dashboard.Metadata.Name); err != nil {
+		return *builder, fmt.Errorf("invalid dashboard metadata name %q: %w", builder.Dashboard.Metadata.Name, err)
 	}
 
 	return *builder, nil
