@@ -55,7 +55,9 @@ test.describe('SearchBar', () => {
     await searchBar.close();
   });
 
-  test('highlights important dashboards in search results while non-important remain unhighlighted', async ({ page }) => {
+  test('highlights important dashboards in search results while non-important remain unhighlighted', async ({
+    page,
+  }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
