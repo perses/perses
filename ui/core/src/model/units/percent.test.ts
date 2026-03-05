@@ -13,6 +13,7 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const PERCENT_TESTS: UnitTestCase[] = [
   // percent
@@ -99,5 +100,18 @@ describe('formatValue', () => {
   it.each(PERCENT_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
     const { value, format: unit, expected } = args;
     expect(formatValue(value, unit)).toEqual(expected);
+  });
+
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('percent')).toBe(6);
+    expect(getKeys('percent')).toStrictEqual([
+      'percent|true|3|percent|en-US',
+      'percent|true|4|percent|en-US',
+      'percent|true|0|percent|en-US',
+      'percent|true|3|percent-decimal|en-US',
+      'percent|true|4|percent-decimal|en-US',
+      'percent|true|0|percent-decimal|en-US',
+    ]);
   });
 });

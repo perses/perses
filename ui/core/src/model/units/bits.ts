@@ -16,6 +16,7 @@ import numbro from 'numbro';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
+import { getFormatterFromCache } from './formatterCache';
 
 /**
  * We support both SI (decimal) and IEC (binary) units for bits:
@@ -78,8 +79,17 @@ export function formatBits(bits: number, { unit = 'bits', shortValues, decimalPl
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
     }
-    const formatter = Intl.NumberFormat('en-US', formatterOptions);
-    return formatter.format(bits) + ' bits';
+
+    const key = [
+      formatterOptions.style,
+      formatterOptions.useGrouping,
+      formatterOptions.maximumSignificantDigits,
+      decimalPlaces,
+      shortValues,
+      unit,
+    ];
+
+    return `${getFormatterFromCache(key, 'bits', formatterOptions, 'en-US')(bits)} bits`;
   }
 
   // If we're showing the shorten value, we use numbro.
