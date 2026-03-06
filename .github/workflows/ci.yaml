@@ -165,6 +165,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: 'docker.io'
+      - name: Login to Quay.io
+        uses: docker/login-action@v3
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || github.ref_name == 'main') }}
+        with:
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+          registry: 'quay.io'
       - name: Override version
         if: ${{ github.ref_name == 'main' }}
         run: ./scripts/override_version.sh
