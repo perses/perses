@@ -23,11 +23,16 @@ export interface OAuthProvider {
   subject?: string;
 }
 
+export interface Preferences {
+  timezone?: string;
+}
+
 export interface UserSpec {
   firstName?: string;
   lastName?: string;
   nativeProvider?: NativeProvider;
   oauthProviders?: OAuthProvider[];
+  preferences?: Preferences;
 }
 
 export interface UserResource {

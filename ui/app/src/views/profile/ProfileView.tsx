@@ -16,10 +16,12 @@ import { lazy, ReactElement, Suspense, useState } from 'react';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useAuthorizationContext } from '../../context/Authorization';
 import { ProfileSettings } from './ProfileSettings';
+import { Preferences } from './Preferences';
 
 export enum ProfileSections {
   AUTHENTICATION,
   PERMISSIONS,
+  PREFERENCES,
 }
 
 const ProfilePermissions = lazy(() => import('./ProfilePermissions'));
@@ -39,6 +41,8 @@ const ProfileView = (): ReactElement => {
     switch (activeSection) {
       case ProfileSections.PERMISSIONS:
         return <ProfilePermissions />;
+      case ProfileSections.PREFERENCES:
+        return <Preferences />;
       default:
         return null;
     }
