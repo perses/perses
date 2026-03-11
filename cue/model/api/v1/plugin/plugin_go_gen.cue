@@ -4,7 +4,7 @@
 
 package plugin
 
-import "github.com/perses/perses/cue/model/api/v1/common"
+import "github.com/perses/spec/go/common"
 
 #LatestVersion:   "latest"
 #DefaultRegistry: "perses.dev"

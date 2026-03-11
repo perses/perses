@@ -6,6 +6,8 @@ package dashboard
 
 import "github.com/perses/perses/cue/model/api/v1/common"
 
+// LayoutKind
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.LayoutKind
 #LayoutKind: _ // #enumLayoutKind
 
 #enumLayoutKind:
@@ -13,6 +15,8 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 
 #KindGridLayout: #LayoutKind & "Grid"
 
+// GridItem
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridItem
 #GridItem: {
 	x:        int                    @go(X)
 	y:        int                    @go(Y)
@@ -21,10 +25,14 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	content?: null | common.#JSONRef @go(Content,*common.JSONRef)
 }
 
+// GridLayoutCollapse
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutCollapse
 #GridLayoutCollapse: {
 	open: bool @go(Open)
 }
 
+// GridLayoutDisplay
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutDisplay
 #GridLayoutDisplay: {
 	title: string @go(Title)
 
@@ -33,12 +41,16 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	collapse?: null | #GridLayoutCollapse @go(Collapse,*GridLayoutCollapse)
 }
 
+// GridLayoutSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutSpec
 #GridLayoutSpec: {
 	display?: null | #GridLayoutDisplay @go(Display,*GridLayoutDisplay)
 	items: [...#GridItem] @go(Items,[]GridItem)
 	repeatVariable?: string @go(RepeatVariable)
 }
 
+// LayoutSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.LayoutSpec
 #LayoutSpec: _
 
 _#tmpDashboardLayout: {
@@ -46,4 +58,6 @@ _#tmpDashboardLayout: {
 	spec: {...} @go(Spec,map[string]any)
 }
 
+// Layout
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Layout
 #Layout: _

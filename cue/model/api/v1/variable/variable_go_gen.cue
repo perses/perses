@@ -4,6 +4,8 @@
 
 package variable
 
+// Kind
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Kind
 #Kind: _ // #enumKind
 
 #enumKind:
@@ -13,6 +15,8 @@ package variable
 #KindText: #Kind & "TextVariable"
 #KindList: #Kind & "ListVariable"
 
+// Display
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Display
 #Display: {
 	name?:        string @go(Name)
 	description?: string @go(Description)
