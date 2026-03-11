@@ -23,7 +23,7 @@ package panelgroup
 import (
 	"math"
 	"github.com/perses/perses/cue/model/api/v1"
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
+	"github.com/perses/spec/cue/dashboard"
 )
 
 // expected user inputs
@@ -46,8 +46,8 @@ import (
 }]
 
 // output: the final layout & panels as map.
-layout: v1Dashboard.#Layout & {
-	spec: v1Dashboard.#GridLayoutSpec & {
+layout: dashboard.#Layout & {
+	spec: dashboard.#GridLayoutSpec & {
 		display: {
 			title: #title
 			if #isCollapsed != _|_ {
