@@ -14,8 +14,8 @@
 package list
 
 import (
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	"github.com/perses/spec/cue/dashboard"
+	dashboardVariable "github.com/perses/spec/cue/dashboard/variable"
 	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
@@ -27,18 +27,18 @@ varBuilder
 #display?: _ // this is needed for below reference
 
 // specify the constraints for this variable
-#kind:             v1Variable.#KindList
+#kind:             dashboardVariable.#KindList
 #allowAllValue:    bool | *false
 #allowMultiple:    bool | *false
 #customAllValue?:  string
 #capturingRegexp?: string
-#sort?:            v1Variable.#Sort
+#sort?:            dashboardVariable.#Sort
 #pluginKind:       string
 
 variable: {
 	kind: #kind
 	spec: {
-		v1Dashboard.#ListVariableSpec & {
+		dashboard.#ListVariableSpec & {
 			name: #name
 			if #display != _|_ {
 				display: #display

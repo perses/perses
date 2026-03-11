@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
@@ -61,6 +62,13 @@ export function formatPercent(value: number, { unit, decimalPlaces }: PercentFor
     value = value / 100;
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  const key = [
+    formatterOptions.style,
+    formatterOptions.useGrouping,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+    unit,
+  ];
+
+  return getFormatterFromCache(key, 'percent', formatterOptions, 'en-US')(value);
 }

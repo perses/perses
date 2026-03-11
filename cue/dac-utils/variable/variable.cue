@@ -14,14 +14,14 @@
 package variable
 
 import (
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	"github.com/perses/spec/cue/dashboard"
+	dashboardVariable "github.com/perses/spec/cue/dashboard/variable"
 )
 
 #kind: string
 #name: string
-#display?: v1Variable.#Display & {
+#display?: dashboardVariable.#Display & {
 	hidden: bool | *false
 }
 
-variable: v1Dashboard.#Variable
+variable: dashboard.#Variable

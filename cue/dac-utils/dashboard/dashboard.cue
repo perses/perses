@@ -19,20 +19,21 @@ package dashboard
 
 import (
 	"github.com/perses/perses/cue/model/api/v1"
-	v1Common "github.com/perses/perses/cue/model/api/v1/common"
-	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
+	"github.com/perses/spec/cue/common"
+	"github.com/perses/spec/cue/dashboard"
+	"github.com/perses/spec/cue/datasource"
 )
 
 // expected user inputs
 #name:     string
 #project?: string
-#display?: v1Common.#Display
+#display?: common.#Display
 #panelGroups: [string]: {
-	layout: v1Dashboard.#Layout
-	panels: [string]: v1.#Panel
+	layout: dashboard.#Layout
+	panels: [string]: dashboard.#Panel
 }
-#variables?: [...v1Dashboard.#Variable]
-#datasources?: [string]: v1.#DatasourceSpec
+#variables?: [...dashboard.#Variable]
+#datasources?: [string]: datasource.#Spec
 #duration?:        string
 #refreshInterval?: string
 
