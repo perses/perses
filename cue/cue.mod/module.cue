@@ -10,4 +10,8 @@ deps: {
 		v:       "v0.53.0-rc.2"
 		default: true
 	}
+	"github.com/perses/spec/cue@v0": {
+		v:       "v0.1.2"
+		default: true
+	}
 }
