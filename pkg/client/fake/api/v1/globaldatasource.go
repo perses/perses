@@ -21,6 +21,8 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	commonSpec "github.com/perses/spec/go/common"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
 func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
@@ -32,9 +34,9 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemo",
 			},
-			Spec: modelV1.DatasourceSpec{
+			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: commonSpec.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						Proxy: &http.Proxy{
@@ -52,9 +54,9 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusDemoBrowser",
 			},
-			Spec: modelV1.DatasourceSpec{
+			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: commonSpec.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						DirectURL: u.URL,
@@ -67,9 +69,9 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			Metadata: modelV1.Metadata{
 				Name: "PrometheusLocal",
 			},
-			Spec: modelV1.DatasourceSpec{
+			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: commonSpec.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						Proxy: &http.Proxy{
@@ -114,7 +116,7 @@ func (c *globalDatasource) Get(name string) (*modelV1.GlobalDatasource, error) {
 		Metadata: modelV1.Metadata{
 			Name: name,
 		},
-		Spec: modelV1.DatasourceSpec{},
+		Spec: datasourceSpec.Spec{},
 	}, nil
 }
 

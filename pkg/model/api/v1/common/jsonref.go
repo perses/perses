@@ -27,6 +27,8 @@ var (
 	jsonRefCapturedGroup = regexp.MustCompile(`(?:/([a-zA-Z0-9_-]+))`)
 )
 
+// JSONRef
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.JSONRef
 type JSONRef struct {
 	// Ref is the JSON reference.
 	// That's the only thing used during the marshalling / unmarshalling process.

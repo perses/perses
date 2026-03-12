@@ -8,6 +8,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 
 #DatasourceInterface: _
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/datasource.Spec
 #DatasourceSpec: {
 	display?: null | common.#Display @go(Display,*common.Display)
 	default:  bool                   @go(Default)

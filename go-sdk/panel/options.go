@@ -16,14 +16,14 @@ package panel
 import (
 	"github.com/perses/perses/go-sdk/link"
 	"github.com/perses/perses/go-sdk/query"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 )
 
 func Title(title string) Option {
 	return func(builder *Builder) error {
 		if builder.Spec.Display == nil {
-			builder.Spec.Display = &v1.PanelDisplay{}
+			builder.Spec.Display = &dashboard.PanelDisplay{}
 		}
 		builder.Spec.Display.Name = title
 		return nil
@@ -33,7 +33,7 @@ func Title(title string) Option {
 func Description(description string) Option {
 	return func(builder *Builder) error {
 		if builder.Spec.Display == nil {
-			builder.Spec.Display = &v1.PanelDisplay{}
+			builder.Spec.Display = &dashboard.PanelDisplay{}
 		}
 		builder.Spec.Display.Description = description
 		return nil

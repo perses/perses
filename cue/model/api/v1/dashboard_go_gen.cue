@@ -6,6 +6,8 @@ package v1
 
 import "github.com/perses/perses/cue/model/api/v1/common"
 
+// Link
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Link
 #Link: {
 	name?:            string @go(Name)
 	url:              string @go(URL)
@@ -14,11 +16,14 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	targetBlank?:     bool   @go(TargetBlank)
 }
 
+// PanelDisplay
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.PanelDisplay
 #PanelDisplay: {
 	name?:        string @go(Name)
 	description?: string @go(Description)
 }
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.PanelSpec
 #PanelSpec: {
 	display?: null | #PanelDisplay @go(Display,*PanelDisplay)
 	plugin:   common.#Plugin       @go(Plugin)
@@ -26,21 +31,29 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	links?: [...#Link] @go(Links,[]Link)
 }
 
+// Panel
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Panel
 #Panel: {
 	kind: string     @go(Kind)
 	spec: #PanelSpec @go(Spec)
 }
 
+// Query
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Query
 #Query: {
 	kind: string     @go(Kind)
 	spec: #QuerySpec @go(Spec)
 }
 
+// QuerySpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.QuerySpec
 #QuerySpec: {
 	name?:  string         @go(Name)
 	plugin: common.#Plugin @go(Plugin)
 }
 
+// DashboardSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Spec
 #DashboardSpec: _
 
 #Dashboard: _

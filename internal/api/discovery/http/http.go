@@ -25,7 +25,7 @@ import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
 

@@ -49,6 +49,7 @@ import (
 	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -69,9 +70,9 @@ var _ = json.Unmarshaler(&unsavedProxyBody{})
 // It contains the body of the request and the datasource spec, which is used to build the proxy rather than
 // retrieving the datasource from the database.
 type unsavedProxyBody struct {
-	Method string            `json:"method" yaml:"method"`
-	Body   []byte            `json:"body,omitempty" yaml:"body"`
-	Spec   v1.DatasourceSpec `json:"spec" yaml:"spec"`
+	Method string              `json:"method" yaml:"method"`
+	Body   []byte              `json:"body,omitempty" yaml:"body"`
+	Spec   datasourceSpec.Spec `json:"spec" yaml:"spec"`
 }
 
 func (u *unsavedProxyBody) UnmarshalJSON(data []byte) error {
@@ -185,7 +186,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{

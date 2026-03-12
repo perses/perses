@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 )
 
 var defaultTimeRangeOptions = []common.DurationString{
@@ -74,7 +74,7 @@ type Frontend struct {
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
-	// Information contains markdown content to be display on the home page
+	// Information contains Markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`

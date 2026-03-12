@@ -6,8 +6,10 @@ package variable
 
 import "github.com/perses/perses/cue/model/api/v1/common"
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.DefaultValue
 #DefaultValue: _
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Sort
 #Sort: _ // #enumSort
 
 #enumSort:
@@ -27,6 +29,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 #SortAlphabeticalCaseInsensitiveAsc:  #Sort & "alphabetical-ci-asc"
 #SortAlphabeticalCaseInsensitiveDesc: #Sort & "alphabetical-ci-desc"
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.ListSpec
 #ListSpec: {
 	display?: null | #Display @go(Display,*Display)
 

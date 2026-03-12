@@ -20,6 +20,7 @@ import (
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/datasource"
 )
 
 func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list []T) []T {
@@ -36,9 +37,10 @@ func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list
 
 type DatasourceInterface interface {
 	GetMetadata() modelAPI.Metadata
-	GetDatasourceSpec() DatasourceSpec
+	GetDatasourceSpec() datasource.Spec
 }
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/datasource.Spec
 type DatasourceSpec struct {
 	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 	Default bool            `json:"default" yaml:"default"`
@@ -50,9 +52,9 @@ type DatasourceSpec struct {
 // GlobalDatasource is the struct representing the datasource shared to everybody.
 // Any Dashboard can reference it.
 type GlobalDatasource struct {
-	Kind     Kind           `json:"kind" yaml:"kind"`
-	Metadata Metadata       `json:"metadata" yaml:"metadata"`
-	Spec     DatasourceSpec `json:"spec" yaml:"spec"`
+	Kind     Kind            `json:"kind" yaml:"kind"`
+	Metadata Metadata        `json:"metadata" yaml:"metadata"`
+	Spec     datasource.Spec `json:"spec" yaml:"spec"`
 }
 
 func (d *GlobalDatasource) UnmarshalJSON(data []byte) error {
@@ -85,7 +87,7 @@ func (d *GlobalDatasource) validate() error {
 	if d.Kind != KindGlobalDatasource {
 		return fmt.Errorf("invalid kind: %q for a GlobalDatasource type", d.Kind)
 	}
-	if reflect.DeepEqual(d.Spec, DatasourceSpec{}) {
+	if reflect.DeepEqual(d.Spec, datasource.Spec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
 	return nil
@@ -99,7 +101,7 @@ func (d *GlobalDatasource) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *GlobalDatasource) GetDatasourceSpec() DatasourceSpec {
+func (d *GlobalDatasource) GetDatasourceSpec() datasource.Spec {
 	return d.Spec
 }
 
@@ -113,7 +115,7 @@ func (d *GlobalDatasource) GetSpec() any {
 type Datasource struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
-	Spec     DatasourceSpec  `json:"spec" yaml:"spec"`
+	Spec     datasource.Spec `json:"spec" yaml:"spec"`
 }
 
 func (d *Datasource) UnmarshalJSON(data []byte) error {
@@ -146,7 +148,7 @@ func (d *Datasource) validate() error {
 	if d.Kind != KindDatasource {
 		return fmt.Errorf("invalid kind: %q for a Datasource type", d.Kind)
 	}
-	if reflect.DeepEqual(d.Spec, DatasourceSpec{}) {
+	if reflect.DeepEqual(d.Spec, datasource.Spec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
 	return nil
@@ -160,7 +162,7 @@ func (d *Datasource) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *Datasource) GetDatasourceSpec() DatasourceSpec {
+func (d *Datasource) GetDatasourceSpec() datasource.Spec {
 	return d.Spec
 }
 

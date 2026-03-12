@@ -21,9 +21,9 @@ import (
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
 func Name(name string) Option {
@@ -105,7 +105,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 		}
 
 		if builder.Dashboard.Spec.Panels == nil {
-			builder.Dashboard.Spec.Panels = make(map[string]*v1.Panel)
+			builder.Dashboard.Spec.Panels = make(map[string]*dashboard.Panel)
 		}
 
 		gridLayoutSpec := dashboard.GridLayoutSpec{
@@ -152,7 +152,7 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 			return err
 		}
 		if builder.Dashboard.Spec.Datasources == nil {
-			builder.Dashboard.Spec.Datasources = make(map[string]*v1.DatasourceSpec)
+			builder.Dashboard.Spec.Datasources = make(map[string]*datasourceSpec.Spec)
 		}
 		builder.Dashboard.Spec.Datasources[name] = &ds.Spec
 		return nil

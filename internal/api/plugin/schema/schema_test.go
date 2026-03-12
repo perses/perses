@@ -20,10 +20,10 @@ import (
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,13 +42,13 @@ func loadPluginFromJSON(testDataPath string, t *testing.T) common.Plugin {
 	return plg
 }
 
-func loadQueriesFromJSON(testDataPath string, t *testing.T) []v1.Query {
+func loadQueriesFromJSON(testDataPath string, t *testing.T) []dashboard.Query {
 	data, readErr := os.ReadFile(testDataPath) //nolint: gosec
 	if readErr != nil {
 		t.Fatal(readErr)
 	}
 
-	var queries []v1.Query
+	var queries []dashboard.Query
 	unmarshallErr := json.Unmarshal(data, &queries)
 	if unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
@@ -195,24 +195,24 @@ func TestValidatePanels(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration:  "6h",
 					Variables: nil,
-					Panels: map[string]*v1.Panel{
+					Panels: map[string]*dashboard.Panel{
 						"MyFirstPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validFirstPanel,
 								Queries: validCustomQueries,
 							},
 						},
 						"MySecondPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validSecondPanel,
 								Queries: validSQLQuery,
 							},
 						},
 						"MyThirdPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validThirdPanel,
 								Queries: validCustomQueries,
 							},
@@ -228,12 +228,12 @@ func TestValidatePanels(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration:  "6h",
 					Variables: nil,
-					Panels: map[string]*v1.Panel{
+					Panels: map[string]*dashboard.Panel{
 						"MyInvalidPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  invalidKindPanel,
 								Queries: validCustomQueries,
 							},
@@ -249,12 +249,12 @@ func TestValidatePanels(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration:  "6h",
 					Variables: nil,
-					Panels: map[string]*v1.Panel{
+					Panels: map[string]*dashboard.Panel{
 						"MyInvalidPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validFirstPanel,
 								Queries: invalidKindQuery,
 							},
@@ -270,12 +270,12 @@ func TestValidatePanels(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration:  "6h",
 					Variables: nil,
-					Panels: map[string]*v1.Panel{
+					Panels: map[string]*dashboard.Panel{
 						"MyInvalidPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validSecondPanel,
 								Queries: invalidUnwantedFieldQuery,
 							},
@@ -291,12 +291,12 @@ func TestValidatePanels(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration:  "6h",
 					Variables: nil,
-					Panels: map[string]*v1.Panel{
+					Panels: map[string]*dashboard.Panel{
 						"MyInvalidPanel": {
-							Spec: v1.PanelSpec{
+							Spec: dashboard.PanelSpec{
 								Plugin:  validSecondPanel,
 								Queries: invalidDatasourceMismatchQuery,
 							},
@@ -348,7 +348,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration: "6h",
 					Variables: []dashboard.Variable{
 						{
@@ -384,7 +384,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 							},
 						},
 					},
-					Panels:  map[string]*v1.Panel{},
+					Panels:  map[string]*dashboard.Panel{},
 					Layouts: []dashboard.Layout{},
 				},
 			},
@@ -395,7 +395,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 			dashboard: &v1.Dashboard{
 				Kind:     v1.KindDashboard,
 				Metadata: metadata,
-				Spec: v1.DashboardSpec{
+				Spec: dashboard.Spec{
 					Duration: "6h",
 					Variables: []dashboard.Variable{
 						{
@@ -415,7 +415,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 							},
 						},
 					},
-					Panels:  map[string]*v1.Panel{},
+					Panels:  map[string]*dashboard.Panel{},
 					Layouts: []dashboard.Layout{},
 				},
 			},

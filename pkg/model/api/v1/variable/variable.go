@@ -18,6 +18,8 @@ import (
 	"fmt"
 )
 
+// Kind
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Kind
 type Kind string
 
 const (
@@ -66,6 +68,8 @@ func (k *Kind) validate() error {
 	return nil
 }
 
+// Display
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Display
 type Display struct {
 	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`

@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.DefaultValue
 type DefaultValue struct {
 	SingleValue string
 	SliceValues []string
@@ -65,6 +66,7 @@ func (v *DefaultValue) MarshalYAML() (any, error) {
 	return v.SliceValues, nil
 }
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.Sort
 type Sort string
 
 const (
@@ -77,6 +79,7 @@ const (
 	SortAlphabeticalCaseInsensitiveDesc Sort = "alphabetical-ci-desc"
 )
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.SortMap
 var SortMap = map[Sort]bool{
 	SortNone:                            true,
 	SortAlphabeticalAsc:                 true,
@@ -123,6 +126,7 @@ func (s *Sort) validate() error {
 	return nil
 }
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard/variable.ListSpec
 type ListSpec struct {
 	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
 	// Value from the list to be selected by default.

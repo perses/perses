@@ -21,8 +21,9 @@ import (
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	commonSpec "github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/dashboard/variable"
 	"golang.org/x/exp/slices"
 )
 
@@ -179,7 +180,7 @@ func buildVariableDependencies(variables []dashboard.Variable, projectVariables 
 	return definedDeps, nil
 }
 
-func findAllVariableUsedInPlugin(plugin common.Plugin) [][]string {
+func findAllVariableUsedInPlugin(plugin commonSpec.Plugin) [][]string {
 	var matches [][]string
 	findAllVariableUsed(reflect.ValueOf(plugin.Spec), &matches)
 	return matches

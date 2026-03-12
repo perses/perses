@@ -111,6 +111,7 @@ cue-gen:
 	done
 	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
 	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/spec\/go/\"github.com\/perses\/spec\/cue/g' {} \;
 
 .PHONY: validate-data
 validate-data:

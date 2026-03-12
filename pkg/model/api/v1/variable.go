@@ -19,7 +19,7 @@ import (
 	"regexp"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/dashboard/variable"
 	"gopkg.in/yaml.v3"
 )
 
