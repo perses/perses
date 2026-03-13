@@ -64,10 +64,38 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 		}
 		currentDir, _ := filepath.Split(currentPath)
 		logrus.Tracef("Loading model package from %s", currentDir)
+		// Name is the lowest type level of the plugin. For example, for the Prometheus module, it can return PrometheusTimeseriesQuery.
+		// It is called named because in the plugin definition located in package.json, this value is present in the field name.
+		// Example - extract from package.json:
+		//       {
+		//        "kind": "TimeSeriesQuery",
+		//        "spec": {
+		//          "display": {
+		//            "name": "Prometheus Time Series Query"
+		//          },
+		//          "name": "PrometheusTimeSeriesQuery"
+		//        }
+		//      },
+		//
+		// Then in the schema PrometheusTimeSeriesQuery is defined in the field `kind`
+		// Example - extract from query.cue:
+		//
+		// kind: "PrometheusTimeSeriesQuery"
+		// spec: close({
+		//	ds.#selector
+		//	query:             strings.MinRunes(1)
+		//	seriesNameFormat?: string
+		//	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
+		//	resolution?:       number
+		// })
+		//
+		// #variableSyntaxRegex: "^\\$\\w+$"
 		name, instance, schemaErr := LoadModelSchema(currentDir)
 		if schemaErr != nil {
 			return schemaErr
 		}
+		// getPlugin is extracting the plugin definition in package.json.
+		// So here, with the previous example, pl.kind is equal to `TimeSeriesQuery`
 		pl := getPlugin(moduleSpec.Plugins, name)
 		if pl == nil {
 			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", name)
@@ -244,7 +272,7 @@ func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance
 	defer s.mutex.RUnlock()
 
 	// For the moment, we are only supporting the plugin datasource from the perses registry for the datasource discovery.
-	// The discovery is not really well used and having multiple registries for datasources is not a common use case currently.
+	// The discovery is not really well-used and having multiple registries for datasources is not a common use case currently.
 	// This hack should be fine for a while.
 
 	if _, ok := s.devSch.datasources.GetWithPluginMetadata(pluginName, nil); ok {
@@ -285,6 +313,8 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	}
 	for _, schema := range schemas {
 		if schema.Kind.IsQuery() {
+			// Here the information about the super type of the query (aka is a TimeSeriesQuery for example) disappear.
+			// This is not good because then you might be able to associate the super type `LogQuery` with the plugin implementation `PrometheusTimeSeriesQuery`
 			s.queries.Add(schema.Name, module.Metadata, schema.Instance)
 		} else {
 			switch schema.Kind {
