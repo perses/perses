@@ -25,8 +25,14 @@ func TestPluginLintCMD(t *testing.T) {
 	projectPath := testutil.GetRepositoryPath()
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "Lint plugin",
+			Title:           "Lint simple plugin",
 			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "barchart")},
+			IsErrorExpected: false,
+			ExpectedMessage: "current plugin is valid\n",
+		},
+		{
+			Title:           "Lint complex plugin module",
+			Args:            []string{"--plugin.path", filepath.Join(projectPath, "internal", "cli", "cmd", "plugin", "build", "testdata", "tempo")},
 			IsErrorExpected: false,
 			ExpectedMessage: "current plugin is valid\n",
 		},
