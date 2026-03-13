@@ -93,6 +93,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
 		serviceManager.GetAuthorization(),
+		serviceManager.GetClaimsManager(),
 		cfg.Security.Authentication.Providers,
 		cfg.Security.EnableAuth,
 		cfg.APIPrefix,

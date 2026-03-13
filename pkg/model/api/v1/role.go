@@ -154,3 +154,43 @@ func (r *Role) GetKind() string {
 func (r *Role) GetSpec() any {
 	return r.Spec
 }
+
+// Checks if the global role permits requested action and scope
+func (g *GlobalRole) CheckPermission(requestAction role.Action, requestScope role.Scope) bool {
+	for _, permission := range g.Spec.Permissions {
+		for _, action := range permission.Actions {
+			if action != role.WildcardAction && action != requestAction {
+				continue
+			}
+			for _, scope := range permission.Scopes {
+				if scope != role.WildcardScope && scope != requestScope {
+					continue
+				}
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Checks if the role permits requested action and scope within the specified project
+func (r *Role) CheckPermission(project string, requestAction role.Action, requestScope role.Scope) bool {
+	if project != r.Metadata.Project {
+		return false
+	}
+
+	for _, permission := range r.Spec.Permissions {
+		for _, action := range permission.Actions {
+			if action != role.WildcardAction && action != requestAction {
+				continue
+			}
+			for _, scope := range permission.Scopes {
+				if scope != role.WildcardScope && scope != requestScope {
+					continue
+				}
+				return true
+			}
+		}
+	}
+	return false
+}

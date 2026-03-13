@@ -103,6 +103,8 @@ type AuthorizationConfig struct {
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 	// +optional
 	Provider AuthorizationProvider `json:"provider,omitzero" yaml:"provider,omitempty"`
+	// Contains oidc/oAuth token role claims to Perses RBAC role mapping
+	ClaimsMappingConfig *ClaimsMappingConfig `json:"claims_mapping_config,omitempty" yaml:"claims_mapping_config,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -115,6 +117,9 @@ func (a *AuthorizationConfig) Verify() error {
 		logrus.Warn("'security.authorization.guest_permissions' is deprecated, use 'security.authorization.provider.native.guest_permissions' instead.")
 		a.Provider.Native.GuestPermissions = a.GuestPermissions
 		a.GuestPermissions = nil
+	}
+	if a.ClaimsMappingConfig == nil {
+		a.ClaimsMappingConfig = &ClaimsMappingConfig{}
 	}
 	return nil
 }

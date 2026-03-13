@@ -84,7 +84,7 @@ type Authorization interface {
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (Authorization, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *native.ClaimsManager) (Authorization, error) {
 	// If the higher level auth enabled is false then ignore all authorization configuration
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil
@@ -95,6 +95,6 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	}
 
 	// If no providers are explicitly set but auth is enabled, then use the perses native authz
-	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf)
+	return native.New(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, conf, claimsMngr)
 
 }

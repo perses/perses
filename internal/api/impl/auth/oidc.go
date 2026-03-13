@@ -24,6 +24,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -154,6 +155,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
+	claimsManager          native.ClaimsManager
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -184,7 +186,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr native.ClaimsManager) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -221,6 +223,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
 		apiPrefix:              apiPrefix,
+		claimsManager:          claimsMngr,
 	}, nil
 }
 
@@ -380,6 +383,17 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
+	}
+
+	// Persist claims from the provider token
+	// claims are passed down through the `persistedClaims` cookie
+	if e.claimsManager.PersistClaims != nil {
+		// TODO: is resp.AccessToken the right one to use?
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
+		ok := e.claimsManager.SetCookie(ctx, data)
+		if !ok {
+			logrus.Warning("could not set the persistedClaims cookie")
+		}
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }

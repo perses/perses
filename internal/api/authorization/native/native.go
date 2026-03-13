@@ -39,12 +39,12 @@ import (
 )
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (*native, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *ClaimsManager) (*native, error) {
 	key, err := hex.DecodeString(string(conf.Security.EncryptionKey))
 	if err != nil {
 		return nil, err
 	}
-	return &native{
+	n := &native{
 		cache:                &cache{},
 		userDAO:              userDAO,
 		roleDAO:              roleDAO,
@@ -52,8 +52,23 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
+		authJMESPath:         conf.Security.Authorization.ClaimsMappingConfig.AuthClaimsPath,
+		claimsManager:        claimsMngr,
 		accessKey:            key,
-	}, err
+	}
+
+	// No need to build roles if JMESPath is not specified
+	if n.authJMESPath != "" {
+		err = n.buildTokenRoles(conf.Security.Authorization)
+		if err != nil {
+			return nil, err
+		}
+		err = n.buildTokenGlobalRoles(conf.Security.Authorization)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return n, nil
 }
 
 // native is expecting a JWT token to extract the user information and validate its permissions.
@@ -68,8 +83,89 @@ type native struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	guestPermissions     []*v1Role.Permission
+	tokenRolesMap        []*config.RoleAssignment
+	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
+	// authJMESPath specifies the path to roles in oidc/oAuth token
+	authJMESPath  string
+	claimsManager *ClaimsManager
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
+}
+
+func (n *native) buildTokenRoles(ac config.AuthorizationConfig) error {
+	// get all roles
+	roles, err := n.roleDAO.List(&role.Query{})
+	if err != nil {
+		return err
+	}
+	for _, ra := range ac.ClaimsMappingConfig.RoleMapping {
+		foundRole := findRole(roles, ra.Project, ra.Name)
+		if foundRole == nil {
+			logrus.Warningf("role %s does not exist", ra.Name)
+		}
+		ra.Role = foundRole
+	}
+	n.tokenRolesMap = ac.ClaimsMappingConfig.RoleMapping
+	return nil
+}
+
+func (n *native) buildTokenGlobalRoles(ac config.AuthorizationConfig) error {
+	// get all global roles
+	globalRoles, err := n.globalRoleDAO.List(&globalrole.Query{})
+	if err != nil {
+		return err
+	}
+	for _, gra := range ac.ClaimsMappingConfig.GlobalRoleMapping {
+		foundGlobalRole := findGlobalRole(globalRoles, gra.Name)
+		if foundGlobalRole == nil {
+			logrus.Warningf("global role %s does not exist", gra.Name)
+		}
+		gra.GlobalRole = foundGlobalRole
+	}
+	n.tokenGlobalRoleMap = ac.ClaimsMappingConfig.GlobalRoleMapping
+	return nil
+}
+
+func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
+	userRoles := []*v1.Role{}
+
+	claims := n.claimsManager.GetPersistentClaims(ctx)
+	if claims == nil {
+		return nil
+	}
+	roleClaims, ok := claims.(Claims)[n.authJMESPath]
+	if !ok {
+		return nil
+	}
+
+	for _, mappedRole := range n.tokenRolesMap {
+		if mappedRole.CheckRoleClaim(roleClaims.([]string)) {
+			userRoles = append(userRoles, mappedRole.Role)
+			continue
+		}
+	}
+	return userRoles
+}
+
+func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
+	userRoles := []*v1.GlobalRole{}
+
+	claims := n.claimsManager.GetPersistentClaims(ctx)
+	if claims == nil {
+		return nil
+	}
+	roleClaims, ok := claims.(Claims)[n.authJMESPath]
+	if !ok {
+		return nil
+	}
+
+	for _, mappedGlobalRole := range n.tokenGlobalRoleMap {
+		if mappedGlobalRole.CheckRoleClaim(roleClaims.([]string)) {
+			userRoles = append(userRoles, mappedGlobalRole.GlobalRole)
+			continue
+		}
+	}
+	return userRoles
 }
 
 func (n *native) IsEnabled() bool {
@@ -215,10 +311,35 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
 		return true
 	}
+	// Check token permissions; no need to check if JMESPath is not specified
+	if n.authJMESPath != "" {
+		if ok := n.hasPermissionFromClaim(ctx, requestProject, requestAction, requestScope); ok {
+			return true
+		}
+	}
 	// Checking cached permissions
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
+}
+
+func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
+	if project != v1.WildcardProject {
+		roles := n.getUserTokenRoles(ctx)
+		for _, r := range roles {
+			if r.CheckPermission(project, requestAction, requestScope) {
+				return true
+			}
+		}
+	} else {
+		globalRoles := n.getUserTokenGlobalRoles(ctx)
+		for _, gr := range globalRoles {
+			if gr.CheckPermission(requestAction, requestScope) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // For native auth, creating a project requires a global permission.

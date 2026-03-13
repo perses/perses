@@ -17,6 +17,7 @@ package dependency
 
 import (
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
@@ -60,6 +61,7 @@ import (
 
 type ServiceManager interface {
 	GetAuthorization() authorization.Authorization
+	GetClaimsManager() native.ClaimsManager
 	GetCrypto() crypto.Crypto
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
@@ -87,6 +89,7 @@ type ServiceManager interface {
 type service struct {
 	ServiceManager
 	authorization      authorization.Authorization
+	claimsManager      native.ClaimsManager
 	crypto             crypto.Crypto
 	dashboard          dashboard.Service
 	datasource         datasource.Service
@@ -116,7 +119,8 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
+	claimsMngrService := native.NewClaimsManager(conf.Security.Authentication.PersistClaims)
+	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf, &claimsMngrService)
 	if err != nil {
 		return nil, err
 	}
@@ -143,6 +147,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 
 	svc := &service{
 		authorization:      authzService,
+		claimsManager:      claimsMngrService,
 		crypto:             cryptoService,
 		dashboard:          dashboardService,
 		datasource:         datasourceService,
@@ -171,6 +176,10 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 
 func (s *service) GetAuthorization() authorization.Authorization {
 	return s.authorization
+}
+
+func (s *service) GetClaimsManager() native.ClaimsManager {
+	return s.claimsManager
 }
 
 func (s *service) GetCrypto() crypto.Crypto {
