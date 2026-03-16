@@ -16,7 +16,6 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -30,8 +29,6 @@ func NewMetadata(name string) *Metadata {
 		Name: name,
 	}
 }
-
-var tagsAllowedCharactersRegexp = regexp.MustCompile(`^[a-z0-9 _-]+$`)
 
 type Metadata struct {
 	Name string `json:"name" yaml:"name"`
@@ -127,9 +124,6 @@ func (m *Metadata) validateTags() error {
 		}
 		if utf8.RuneCountInString(tag) > maxTagLength {
 			return fmt.Errorf("tag %q cannot contain more than %d characters", tag, maxTagLength)
-		}
-		if !tagsAllowedCharactersRegexp.MatchString(tag) {
-			return fmt.Errorf("tag %q contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed", tag)
 		}
 	}
 
