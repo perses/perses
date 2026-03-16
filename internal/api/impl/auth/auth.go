@@ -110,7 +110,7 @@ type endpoint struct {
 	isDelegatedAuthn bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, claimsMngr *native.ClaimsManager, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, claimsMngr native.ClaimsManager, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},

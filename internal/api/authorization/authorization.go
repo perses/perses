@@ -84,7 +84,7 @@ type Authorization interface {
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *native.ClaimsManager) (Authorization, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr native.ClaimsManager) (Authorization, error) {
 	// If the higher level auth enabled is false then ignore all authorization configuration
 	if !conf.Security.EnableAuth {
 		return &disabledImpl{}, nil

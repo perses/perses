@@ -39,7 +39,7 @@ import (
 )
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
-	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr *ClaimsManager) (*native, error) {
+	globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config, claimsMngr ClaimsManager) (*native, error) {
 	key, err := hex.DecodeString(string(conf.Security.EncryptionKey))
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ type native struct {
 	tokenGlobalRoleMap   []*config.GlobalRoleAssignment
 	// authJMESPath specifies the path to roles in oidc/oAuth token
 	authJMESPath  string
-	claimsManager *ClaimsManager
+	claimsManager ClaimsManager
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }

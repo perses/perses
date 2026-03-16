@@ -120,7 +120,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		return nil, err
 	}
 	claimsMngrService := native.NewClaimsManager(conf.Security.Authentication.PersistClaims)
-	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf, &claimsMngrService)
+	authzService, err := authorization.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf, claimsMngrService)
 	if err != nil {
 		return nil, err
 	}
