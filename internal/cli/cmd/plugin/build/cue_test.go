@@ -35,10 +35,10 @@ func TestGetDependency(t *testing.T) {
 			modulePath: filepath.Join("testdata", "barchart", "cue.mod", "module.cue"),
 			expected: []cueDep{
 				{
-					moduleName:               "github.com/perses/perses/cue@v0",
-					modulePathInCueCaching:   filepath.Join("github.com", "perses", "perses", "cue@v0.51.0-preview"),
-					modulePathWithoutVersion: filepath.Join("github.com", "perses", "perses", "cue"),
-					version:                  "v0.51.0-preview",
+					moduleName:               "github.com/perses/shared/cue@v0",
+					modulePathInCueCaching:   filepath.Join("github.com", "perses", "shared", "cue@v0.53.1"),
+					modulePathWithoutVersion: filepath.Join("github.com", "perses", "shared", "cue"),
+					version:                  "v0.53.1",
 				},
 			},
 		},

@@ -120,7 +120,7 @@ spec: {
 - `#grafanaType` is a mandatory definition to provide, whose string value must match the `type` of the Grafana panel you want to migrate.
 - `#panel` is the reference used by Perses to inject the Grafana panel objects to migrate. You can access the different fields via the `#panel.field.subfield` syntax. To find the list of available fields, refer to the Grafana data model for the relevant panel type (from Grafana repo, or by inspecting the JSON of the dashboard on the Grafana UI).
 - The logic consists of field assignments, using the content of `#panel`. The end result must match the model of the considered Perses panel plugin.
-    - Optionally, you can use the `github.com/perses/perses/cue/schemas/common/migrate` package that Perses provides in order to remap some of the attributes:
+    - Optionally, you can use the `github.com/perses/shared/cue/common/migrate` package that Perses provides in order to remap some of the attributes:
         - `#mapping.unit`: mapping table for the `unit` attribute (key = grafana unit, value = perses equivalent).
         - `#mapping.calc`: mapping table for the `calculation` attribute (key = grafana unit, value = perses equivalent).
         - `#mapping.color`: mapping table for the "standard" colors used by Grafana (key = color name, value = hex code).

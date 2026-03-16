@@ -5,10 +5,10 @@ go 1.25.7
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.0-rc.2
-	github.com/perses/plugins/prometheus v0.57.0
-	github.com/perses/plugins/timeserieschart v0.12.0
-	github.com/perses/spec v0.1.1
+	github.com/perses/perses v0.53.0
+	github.com/perses/plugins/prometheus v0.57.1
+	github.com/perses/plugins/timeserieschart v0.12.1
+	github.com/perses/spec v0.1.2
 )
 
 require (
@@ -29,10 +29,10 @@ require (
 	github.com/zitadel/oidc/v3 v3.45.5 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
