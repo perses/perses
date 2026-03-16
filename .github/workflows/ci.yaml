@@ -49,6 +49,18 @@ jobs:
       - name: Build the app and all packages
         working-directory: ./ui
         run: npm run build
+
+      - name: Generate frontend SBOM (CycloneDX)
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
+        working-directory: ./ui
+        run: npx @cyclonedx/cyclonedx-npm --output-file ../ui-sbom.cdx.json --output-format JSON
+      - name: store frontend SBOM
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-sbom
+          path: ui-sbom.cdx.json
+
       - name: store react production build
         uses: actions/upload-artifact@v7
         with:
@@ -147,6 +159,12 @@ jobs:
         with:
           name: ui-libs
           path: ui
+      - name: Download frontend SBOM
+        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
+        uses: actions/download-artifact@v8
+        with:
+          name: ui-sbom
+          path: .
       - name: Generate endpoints
         run: make generate
       - name: Install go deps
@@ -165,17 +183,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          registry: 'docker.io'
+          registry: "docker.io"
       - name: Login to Quay.io
         uses: docker/login-action@v4
         if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || github.ref_name == 'main') }}
         with:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-          registry: 'quay.io'
+          registry: "quay.io"
       - name: Override version
         if: ${{ github.ref_name == 'main' }}
         run: ./scripts/override_version.sh
+      - name: Install syft (for SBOM generation)
+        uses: anchore/sbom-action/download-syft@v0
       - name: install goreleaser
         uses: goreleaser/goreleaser-action@v7
         with:

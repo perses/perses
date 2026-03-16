@@ -50,6 +50,15 @@ archives:
       - plugins-archive
       - src: "docs/examples/config.archive.yaml"
         dst: "./config.yaml"
+sboms:
+  - id: "archive-sbom"
+    artifacts: archive
+    documents:
+      - "${artifact}.sbom.spdx.json"
+  - id: "source-sbom"
+    artifacts: source
+    documents:
+      - "${artifact}.sbom.spdx.json"
 release:
   github:
     owner: "perses"
@@ -58,3 +67,5 @@ release:
     - "default"
   prerelease: auto
   name_template: "{{ .Version }} / {{ .Env.DATE }}"
+  extra_files:
+    - glob: "ui-sbom.cdx.json"

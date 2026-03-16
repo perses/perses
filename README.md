@@ -62,6 +62,16 @@ Precompiled binaries for released versions are available in
 the [GitHub release](https://github.com/perses/perses/releases). Using the latest release binary is the recommended way
 of installing Perses.
 
+### Software Bill of Materials (SBOM)
+
+Each [GitHub release](https://github.com/perses/perses/releases) includes SBOM artifacts that document the full set of dependencies shipped with Perses:
+
+| Artifact                                             | Format         | Description                                            |
+|------------------------------------------------------|----------------|--------------------------------------------------------|
+| `perses_<version>_<os>_<arch>.tar.gz.sbom.spdx.json` | SPDX JSON      | Dependencies for the Go release archive (per platform) |
+| `perses_<version>_source.tar.gz.sbom.spdx.json`      | SPDX JSON      | Dependencies for the full source tree                  |
+| `ui-sbom.cdx.json`                                   | CycloneDX JSON | Dependencies for the React frontend (npm packages)     |
+
 ### Docker images
 
 Docker images are available on [Docker Hub](https://hub.docker.com/r/persesdev/perses).
