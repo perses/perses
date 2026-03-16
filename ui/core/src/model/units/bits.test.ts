@@ -13,6 +13,7 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const BITS_TESTS: UnitTestCase[] = [
   {
@@ -132,5 +133,16 @@ const BITS_TESTS: UnitTestCase[] = [
 describe('formatBits', () => {
   it.each(BITS_TESTS)('formats $value with $format as $expected', ({ value, format, expected }) => {
     expect(formatValue(value, format)).toBe(expected);
+  });
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('bits')).toBe(5);
+    expect(getKeys('bits')).toStrictEqual([
+      'decimal|true|false|decbits|en-US',
+      'decimal|true|4|false|decbits|en-US',
+      'decimal|true|3|bits|en-US',
+      'decimal|true|3|decbits|en-US',
+      'decimal|true|false|bits|en-US',
+    ]);
   });
 });

@@ -15,7 +15,7 @@ package listvariable
 
 import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/dashboard/variable"
 )
 
 func DefaultValue(value string) Option {

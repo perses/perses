@@ -13,6 +13,7 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const BYTES_TESTS: UnitTestCase[] = [
   {
@@ -356,5 +357,18 @@ describe('formatValue', () => {
   it.each(BYTES_TESTS)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
     const { value, format: format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
+  });
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('bytes')).toBe(7);
+    expect(getKeys('bytes')).toStrictEqual([
+      'unit|byte|long|true|false|decbytes|en-US',
+      'unit|byte|long|true|4|false|decbytes|en-US',
+      'unit|byte|long|true|3|bytes|en-US',
+      'unit|byte|long|true|3|decbytes|en-US',
+      'unit|byte|long|true|3|true|decbytes|en-US',
+      'unit|byte|long|true|4|true|decbytes|en-US',
+      'unit|byte|long|true|false|bytes|en-US',
+    ]);
   });
 });

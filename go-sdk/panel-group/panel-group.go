@@ -13,7 +13,9 @@
 
 package panelgroup
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	"github.com/perses/spec/go/dashboard"
+)
 
 type PanelGroup struct {
 	Title          string
@@ -21,7 +23,7 @@ type PanelGroup struct {
 	PanelsHeight   int
 	IsCollapsed    bool
 	RepeatVariable string
-	Panels         []v1.Panel
+	Panels         []dashboard.Panel
 }
 
 type Option func(plugin *Builder) error

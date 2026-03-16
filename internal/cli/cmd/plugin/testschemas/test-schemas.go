@@ -30,8 +30,8 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -260,8 +260,8 @@ func (o *option) runModelValidationTests(testDir string, buildInstance *build.In
 		}
 
 		// Unmarshal the JSON to the plugin struct
-		var plugin common.Plugin
-		if err := json.Unmarshal(data, &plugin); err != nil {
+		var plg common.Plugin
+		if err := json.Unmarshal(data, &plg); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse JSON: %v", err)
 			results = append(results, result)
 			return nil
@@ -414,13 +414,13 @@ func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, 
 
 		expectedNormalizedData, _ := json.MarshalIndent(expectedNormalized, "", "  ")
 
-		diff := diff.Diff(string(actualData), string(expectedNormalizedData))
+		dff := diff.Diff(string(actualData), string(expectedNormalizedData))
 
 		// Compare JSON outputs
-		if diff == "" {
+		if dff == "" {
 			result.Success = true
 		} else {
-			result.Error = fmt.Sprintf("Migration output mismatch.\nDiff: %s", diff)
+			result.Error = fmt.Sprintf("Migration output mismatch.\nDiff: %s", dff)
 		}
 
 		results = append(results, result)

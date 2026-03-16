@@ -4,6 +4,8 @@
 
 package common
 
+// Display
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.Display
 #Display: {
 	name?:        string @go(Name)
 	description?: string @go(Description)

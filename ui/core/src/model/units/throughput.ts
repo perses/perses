@@ -16,6 +16,7 @@ import { formatBits } from './bits';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
+import { getFormatterFromCache } from './formatterCache';
 
 type ThroughputUnit =
   | 'bits/sec'
@@ -142,6 +143,15 @@ export function formatThroughput(value: number, { unit, shortValues, decimalPlac
     }
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value) + ' ' + unit;
+  const key = [
+    formatterOptions.style,
+    formatterOptions.useGrouping,
+    formatterOptions.notation,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+    shortValues,
+    unit,
+  ];
+
+  return `${getFormatterFromCache(key, 'throughput', formatterOptions, 'en-US')(value)} ${unit}`;
 }

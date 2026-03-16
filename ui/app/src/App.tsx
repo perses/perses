@@ -35,7 +35,6 @@ function App(): ReactElement {
         flexDirection: 'column',
         minHeight: '100vh',
         backgroundColor: ({ palette }) => palette.background.default,
-        colorScheme: ({ palette }) => palette.mode,
       }}
     >
       {location.pathname !== SignInRoute &&

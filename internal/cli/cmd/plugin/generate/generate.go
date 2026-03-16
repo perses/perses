@@ -28,8 +28,8 @@ import (
 	plugin "github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/output"
-	common "github.com/perses/perses/pkg/model/api/v1/common"
 	apiv1 "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
 	"github.com/spf13/cobra"
 )
 
@@ -161,16 +161,16 @@ func (o *generateOptions) Execute() error {
 
 	isModuleGeneration := false
 
-	persesPlugins := []GeneratedPlugin{}
-	persesPanelPlugins := []GeneratedPlugin{}
-	persesDatasourcePlugins := []GeneratedPlugin{}
-	persesQueryPlugins := []GeneratedPlugin{}
-	persesVariablePlugins := []GeneratedPlugin{}
-	persesExplorePlugins := []GeneratedPlugin{}
-	exposedModules := []ExposedModule{}
+	var persesPlugins []GeneratedPlugin
+	var persesPanelPlugins []GeneratedPlugin
+	var persesDatasourcePlugins []GeneratedPlugin
+	var persesQueryPlugins []GeneratedPlugin
+	var persesVariablePlugins []GeneratedPlugin
+	var persesExplorePlugins []GeneratedPlugin
+	var exposedModules []ExposedModule
 
 	currentModule, err := plugin.ReadPackage(o.outputDir)
-	currentPlugins := []apiv1.Plugin{}
+	var currentPlugins []apiv1.Plugin
 
 	if err != nil || currentModule == nil {
 		if err != nil && errors.Is(err, os.ErrNotExist) {
@@ -194,14 +194,14 @@ func (o *generateOptions) Execute() error {
 		if GetKebabCase(p.Spec.Name) != GetKebabCase(o.pluginName) {
 			persesPlugins = append(persesPlugins, toGeneratedPlugin(p))
 
-			path, err := getPluginPath(p.Spec.Name, string(p.Kind))
-			if err != nil {
-				return fmt.Errorf("could not get existing plugin path %q: %w", o.pluginName, err)
+			pluginPath, errPath := getPluginPath(p.Spec.Name, string(p.Kind))
+			if errPath != nil {
+				return fmt.Errorf("could not get existing plugin path %q: %w", o.pluginName, errPath)
 			}
 
 			exposedModules = append(exposedModules, ExposedModule{
 				ID:   GetPascalCase(p.Spec.Name),
-				Path: path,
+				Path: pluginPath,
 			})
 		}
 	}
@@ -283,7 +283,7 @@ func (o *generateOptions) Execute() error {
 
 	allTemplateFiles := append(append(moduleTemplateFiles, blocksTemplateFiles...), pluginTypeTemplateFiles...)
 
-	createdPaths := []string{}
+	var createdPaths []string
 
 	for _, relTemplatePath := range allTemplateFiles {
 		outputRelativePath := strings.TrimSuffix(relTemplatePath, tmplExt)
@@ -322,8 +322,8 @@ func (o *generateOptions) Execute() error {
 		msg = fmt.Sprintf("module %s created successfully, %s", o.pluginModuleName, msg)
 	}
 
-	for _, path := range createdPaths {
-		msg += fmt.Sprintf("\n- %s", path)
+	for _, p := range createdPaths {
+		msg += fmt.Sprintf("\n- %s", p)
 	}
 
 	return output.HandleString(o.writer, msg)

@@ -21,6 +21,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// LayoutKind
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.LayoutKind
 type LayoutKind string
 
 const (
@@ -67,6 +69,8 @@ func (k *LayoutKind) validate() error {
 	return nil
 }
 
+// GridItem
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridItem
 type GridItem struct {
 	X       int             `json:"x" yaml:"x"`
 	Y       int             `json:"y" yaml:"y"`
@@ -75,10 +79,14 @@ type GridItem struct {
 	Content *common.JSONRef `json:"content" yaml:"content"`
 }
 
+// GridLayoutCollapse
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutCollapse
 type GridLayoutCollapse struct {
 	Open bool `json:"open" yaml:"open"`
 }
 
+// GridLayoutDisplay
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutDisplay
 type GridLayoutDisplay struct {
 	Title string `json:"title" yaml:"title"`
 	// If Collapse is defined, the grid layout will be rendered in a collapsible group.
@@ -86,12 +94,16 @@ type GridLayoutDisplay struct {
 	Collapse *GridLayoutCollapse `json:"collapse,omitempty" yaml:"collapse,omitempty"`
 }
 
+// GridLayoutSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.GridLayoutSpec
 type GridLayoutSpec struct {
 	Display        *GridLayoutDisplay `json:"display,omitempty" yaml:"display,omitempty"`
 	Items          []GridItem         `json:"items" yaml:"items"`
 	RepeatVariable string             `json:"repeatVariable,omitempty" yaml:"repeatVariable,omitempty"`
 }
 
+// LayoutSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.LayoutSpec
 type LayoutSpec any
 
 type tmpDashboardLayout struct {
@@ -99,6 +111,8 @@ type tmpDashboardLayout struct {
 	Spec map[string]any `json:"spec" yaml:"spec"`
 }
 
+// Layout
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Layout
 type Layout struct {
 	Kind LayoutKind `json:"kind" yaml:"kind"`
 	// +kubebuilder:pruning:PreserveUnknownFields

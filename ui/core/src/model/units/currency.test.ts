@@ -13,12 +13,18 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const CURRENCY_TESTS: UnitTestCase[] = [
   {
     value: 1.23,
     format: { unit: 'eur' },
     expected: '€1.23',
+  },
+  {
+    value: 0.99,
+    format: { unit: 'eur' },
+    expected: '€0.99',
   },
   {
     value: 1.23,
@@ -46,5 +52,17 @@ describe('formatValue', () => {
   it.each(CURRENCY_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
     const { value, format: format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
+  });
+
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('currency')).toBe(5);
+    expect(getKeys('currency')).toStrictEqual([
+      'currency|EUR|symbol|3|eur|en-US',
+      'currency|AUD|symbol|3|aud|en-US',
+      'currency|GBP|symbol|3|gbp|en-US',
+      'currency|JPY|symbol|3|jpy|en-US',
+      'currency|USD|symbol|3|usd|en-US',
+    ]);
   });
 });

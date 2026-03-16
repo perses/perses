@@ -16,7 +16,8 @@ package textvariable
 import (
 	"github.com/perses/perses/go-sdk/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/spec/go/dashboard"
+	variableSpec "github.com/perses/spec/go/dashboard/variable"
 )
 
 type Option func(textVariableSpec *Builder) error
@@ -52,7 +53,7 @@ func Text(value string, options ...Option) variable.Option {
 		if err != nil {
 			return err
 		}
-		builder.Variable.Spec.Kind = "TextVariable"
+		builder.Variable.Spec.Kind = variableSpec.KindText
 		builder.Variable.Spec.Spec = t.TextVariableSpec
 		return nil
 	}

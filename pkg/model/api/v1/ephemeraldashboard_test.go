@@ -19,9 +19,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,13 +47,13 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 					EphemeralDashboardSpecBase{
 						TTL: common.Duration(24 * time.Hour),
 					},
-					DashboardSpec{
+					dashboard.Spec{
 						Variables: nil,
-						Panels: map[string]*Panel{
+						Panels: map[string]*dashboard.Panel{
 							"MyPanel": {
 								Kind: "Panel",
-								Spec: PanelSpec{
-									Display: &PanelDisplay{
+								Spec: dashboard.PanelSpec{
+									Display: &dashboard.PanelDisplay{
 										Name: "simple line chart",
 									},
 									Plugin: common.Plugin{
@@ -159,7 +159,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 					EphemeralDashboardSpecBase{
 						TTL: common.Duration(24 * time.Hour),
 					},
-					DashboardSpec{
+					dashboard.Spec{
 						Variables: []dashboard.Variable{
 							{
 								Kind: variable.KindList,
@@ -195,11 +195,11 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 								},
 							},
 						},
-						Panels: map[string]*Panel{
+						Panels: map[string]*dashboard.Panel{
 							"MyPanel": {
 								Kind: "Panel",
-								Spec: PanelSpec{
-									Display: &PanelDisplay{
+								Spec: dashboard.PanelSpec{
+									Display: &dashboard.PanelDisplay{
 										Name: "simple line chart",
 									},
 									Plugin: common.Plugin{
@@ -417,10 +417,10 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
     "refreshInterval": "30s"
   }
 }`
-	panel := &Panel{
+	panel := &dashboard.Panel{
 		Kind: "Panel",
-		Spec: PanelSpec{
-			Display: &PanelDisplay{
+		Spec: dashboard.PanelSpec{
+			Display: &dashboard.PanelDisplay{
 				Name: "simple line chart",
 			},
 			Plugin: common.Plugin{
@@ -448,7 +448,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 			EphemeralDashboardSpecBase{
 				TTL: common.Duration(24 * time.Hour),
 			},
-			DashboardSpec{
+			dashboard.Spec{
 				Variables: []dashboard.Variable{
 					{
 						Kind: variable.KindList,
@@ -484,7 +484,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 						},
 					},
 				},
-				Panels: map[string]*Panel{"MyPanel": panel},
+				Panels: map[string]*dashboard.Panel{"MyPanel": panel},
 				Layouts: []dashboard.Layout{
 					{
 						Kind: dashboard.KindGridLayout,

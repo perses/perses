@@ -29,7 +29,7 @@ const (
 )
 
 // ValidateAndExtract finds a proxy in the pluginSpec
-// It then unmarshals the corresponding 'spec' field into the config interace{}.
+// It then unmarshals the corresponding 'spec' field into the config interface{}.
 func ValidateAndExtract(pluginSpec any) (any, string, error) {
 	finder := &configFinder{}
 	finder.find(reflect.ValueOf(pluginSpec))

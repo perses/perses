@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.53.1 / 2026-03-11
+
+### Core & UI
+
+- [FEATURE] core: add optional 'name' field to query spec (#3915)
+- [ENHANCEMENT] Improve coverage for CUE data model generation (#3889)
+- [BUGFIX] theme: enforce color-scheme at MUI theme level (#3926)
+- [BUGFIX] read formatters from the cache (#3927)
+- [BUGFIX] Go SDK: fail on invalid dashboard name (#3933)
+- [BUGFIX] Fix scrollbar not following theme mode (#3924)
+- [BUGFIX] Prevent home project list from overflowing into recent dashboards (#3918)
+
+### Plugins improvements
+
+- [FEATURE] Table: add csv export(perses/plugins#597)
+- [ENHANCEMENT] Tempo: rearrange settings controls layout (perses/plugins#587)
+- [BUGFIX] TimeSeriesChart: Empty query results should show "No Data" even with thresholds configured (perses/plugins#588)
+- [BUGFIX] GaugeChart: Fix missing Legend in Go SDK (perses/plugins#589)
+- [BUGFIX] GaugeChart: handle multiple queries + ignore if first query return nothing (perses/plugins#593)
+- [DOC] plugin functional docs: add images & describe main customizations (perses/plugins#595)
+
 ## 0.53.0 / 2026-02-26
 
 Welcome to Perses v0.53.0!

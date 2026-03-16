@@ -13,6 +13,8 @@
 
 package common
 
+// Display
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.Display
 type Display struct {
 	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`

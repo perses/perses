@@ -22,10 +22,11 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/datasource"
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
+func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec) error {
 	path := ctx.Param("*")
 	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
@@ -72,15 +73,15 @@ func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
 	return e.proxyProjectDatasource(ctx, projectName, dtsName, dts)
 }
 
-func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
+func (e *endpoint) getProjectDatasource(projectName string, name string) (datasource.Spec, error) {
 	dts, err := e.dts.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", name, projectName)
-			return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return datasource.Spec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, apiinterface.InternalError
+		return datasource.Spec{}, apiinterface.InternalError
 	}
 	return dts.Spec, nil
 }

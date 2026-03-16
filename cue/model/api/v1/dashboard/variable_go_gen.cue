@@ -8,10 +8,16 @@ import "github.com/perses/perses/cue/model/api/v1/variable"
 
 _#variableSpec: _
 
+// TextVariableSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.TextVariableSpec
 #TextVariableSpec: _
 
+// ListVariableSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.ListVariableSpec
 #ListVariableSpec: _
 
+// Variable
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Variable
 #Variable: _
 
 _#tmpVariable: {

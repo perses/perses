@@ -19,7 +19,8 @@ import (
 	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 )
 
 type EphemeralDashboardSpecBase struct {
@@ -48,7 +49,7 @@ func (edsb *EphemeralDashboardSpecBase) UnmarshalYAML(unmarshal func(any) error)
 
 type EphemeralDashboardSpec struct {
 	EphemeralDashboardSpecBase `json:",inline" yaml:",inline"`
-	DashboardSpec              `json:",inline" yaml:",inline"`
+	dashboard.Spec             `json:",inline" yaml:",inline"`
 }
 
 // NB custom unmarshalling is required, otherwise by default the TTL field
@@ -61,14 +62,14 @@ func (eds *EphemeralDashboardSpec) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var dashboardSpecTmp DashboardSpec
+	var dashboardSpecTmp dashboard.Spec
 	if err := dashboardSpecTmp.UnmarshalJSON(data); err != nil {
 		return err
 	}
 
 	// Copy values to the fields of EphemeralDashboardSpec
 	eds.EphemeralDashboardSpecBase = ephemeralDashboardSpecBaseTmp
-	eds.DashboardSpec = dashboardSpecTmp
+	eds.Spec = dashboardSpecTmp
 
 	return nil
 }
@@ -80,14 +81,14 @@ func (eds *EphemeralDashboardSpec) UnmarshalYAML(unmarshal func(any) error) erro
 		return err
 	}
 
-	var dashboardSpecTmp DashboardSpec
+	var dashboardSpecTmp dashboard.Spec
 	if err := dashboardSpecTmp.UnmarshalYAML(unmarshal); err != nil {
 		return err
 	}
 
 	// Copy values to the fields of EphemeralDashboardSpec
 	eds.EphemeralDashboardSpecBase = ephemeralDashboardSpecBaseTmp
-	eds.DashboardSpec = dashboardSpecTmp
+	eds.Spec = dashboardSpecTmp
 
 	return nil
 }

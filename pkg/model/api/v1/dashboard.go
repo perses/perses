@@ -21,8 +21,12 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	commonSpec "github.com/perses/spec/go/common"
+	dashboardSpec "github.com/perses/spec/go/dashboard"
 )
 
+// Link
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Link
 type Link struct {
 	Name            string `json:"name,omitempty" yaml:"name,omitempty"`
 	URL             string `json:"url" yaml:"url"`
@@ -31,11 +35,14 @@ type Link struct {
 	TargetBlank     bool   `json:"targetBlank,omitempty" yaml:"targetBlank,omitempty"`
 }
 
+// PanelDisplay
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.PanelDisplay
 type PanelDisplay struct {
 	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.PanelSpec
 type PanelSpec struct {
 	Display *PanelDisplay `json:"display,omitempty" yaml:"display,omitempty"`
 	Plugin  common.Plugin `json:"plugin" yaml:"plugin"`
@@ -43,21 +50,29 @@ type PanelSpec struct {
 	Links   []Link        `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
+// Panel
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Panel
 type Panel struct {
 	Kind string    `json:"kind" yaml:"kind"`
 	Spec PanelSpec `json:"spec" yaml:"spec"`
 }
 
+// Query
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Query
 type Query struct {
 	Kind string    `json:"kind" yaml:"kind"`
 	Spec QuerySpec `json:"spec" yaml:"spec"`
 }
 
+// QuerySpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.QuerySpec
 type QuerySpec struct {
 	Name   string        `json:"name,omitempty" yaml:"name,omitempty"`
 	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
+// DashboardSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Spec
 type DashboardSpec struct {
 	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 	// Datasources is an optional list of datasource definition.
@@ -121,9 +136,9 @@ func (d *DashboardSpec) validate() error {
 }
 
 type Dashboard struct {
-	Kind     Kind            `json:"kind" yaml:"kind"`
-	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
-	Spec     DashboardSpec   `json:"spec" yaml:"spec"`
+	Kind     Kind               `json:"kind" yaml:"kind"`
+	Metadata ProjectMetadata    `json:"metadata" yaml:"metadata"`
+	Spec     dashboardSpec.Spec `json:"spec" yaml:"spec"`
 }
 
 func (d *Dashboard) GetMetadata() modelAPI.Metadata {
@@ -168,17 +183,17 @@ func (d *Dashboard) validate() error {
 	if d.Kind != KindDashboard {
 		return fmt.Errorf("invalid kind: %q for a Dashboard type", d.Kind)
 	}
-	if reflect.DeepEqual(d.Spec, DashboardSpec{}) {
+	if reflect.DeepEqual(d.Spec, dashboardSpec.Spec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
 	return verifyAndSetJSONReferences(d.Spec.Layouts, d.Spec.Panels)
 }
 
 // verifyAndSetJSONRef will check that each JSON Reference are pointing to an existing object and will set the related pointer in the JSONRef.Object
-func verifyAndSetJSONReferences(layouts []dashboard.Layout, panels map[string]*Panel) error {
+func verifyAndSetJSONReferences(layouts []dashboardSpec.Layout, panels map[string]*dashboardSpec.Panel) error {
 	for _, layout := range layouts {
 		switch spec := layout.Spec.(type) {
-		case *dashboard.GridLayoutSpec:
+		case *dashboardSpec.GridLayoutSpec:
 			for _, item := range spec.Items {
 				if err := checkAndSetRef(item.Content, panels); err != nil {
 					return err
@@ -190,7 +205,7 @@ func verifyAndSetJSONReferences(layouts []dashboard.Layout, panels map[string]*P
 	return nil
 }
 
-func checkAndSetRef(ref *common.JSONRef, panels map[string]*Panel) error {
+func checkAndSetRef(ref *commonSpec.JSONRef, panels map[string]*dashboardSpec.Panel) error {
 	// ref.Path should be like [ "spec", "panels", <name> ]
 	var panelsRefPath = []string{"spec", "panels"}
 

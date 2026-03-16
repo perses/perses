@@ -11,6 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// DEPRECATED
+// Import statements like:
+// `import "github.com/perses/perses/cue/common/migrate"`
+// should be replaced by:
+// `import "github.com/perses/shared/cue/common/migrate"`
+
 package common
 
 import (

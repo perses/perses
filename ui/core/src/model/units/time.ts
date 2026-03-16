@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
@@ -169,6 +170,14 @@ export function formatTime(value: number, { unit, decimalPlaces }: TimeFormatOpt
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(results.value);
+  const key = [
+    formatterOptions.style,
+    formatterOptions.unit,
+    formatterOptions.unitDisplay,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+    unit ?? 'seconds',
+  ];
+
+  return getFormatterFromCache(key, 'time', formatterOptions, 'en-US')(results.value);
 }

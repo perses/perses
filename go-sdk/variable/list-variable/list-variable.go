@@ -16,8 +16,8 @@ package listvariable
 import (
 	"github.com/perses/perses/go-sdk/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	variable2 "github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/dashboard"
+	variableSpec "github.com/perses/spec/go/dashboard/variable"
 )
 
 type Option func(listVariableSpec *Builder) error
@@ -30,7 +30,7 @@ type Builder struct {
 func create(options ...Option) (Builder, error) {
 	var builder = &Builder{
 		ListVariableSpec: dashboard.ListVariableSpec{
-			ListSpec: variable2.ListSpec{},
+			ListSpec: variableSpec.ListSpec{},
 			//Name: "", TODO: handle conversion
 		},
 	}

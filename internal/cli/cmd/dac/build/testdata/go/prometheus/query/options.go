@@ -16,8 +16,8 @@ package query
 import (
 	"time"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	promDatasource "github.com/perses/plugins/prometheus/sdk/go/datasource"
+	"github.com/perses/spec/go/common"
 )
 
 func Expr(expr string) Option {

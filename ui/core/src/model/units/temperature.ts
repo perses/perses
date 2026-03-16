@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitConfig, UnitGroupConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
@@ -54,5 +55,14 @@ export const formatTemperature = (value: number, { unit, decimalPlaces }: Temper
   }
 
   const locals = unit === 'celsius' ? 'en-GB' : 'en-US';
-  return Intl.NumberFormat(locals, formatterOptions).format(value);
+
+  const key = [
+    formatterOptions.style,
+    formatterOptions.unit,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+    locals,
+  ];
+
+  return getFormatterFromCache(key, 'temperature', formatterOptions, locals)(value);
 };

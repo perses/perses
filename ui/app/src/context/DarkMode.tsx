@@ -58,7 +58,7 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }): R
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme={true} />
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={true}>
         <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
       </ChartsProvider>

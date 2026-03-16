@@ -28,6 +28,8 @@ type variableSpec interface {
 	GetName() string
 }
 
+// TextVariableSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.TextVariableSpec
 type TextVariableSpec struct {
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
@@ -76,6 +78,8 @@ func (v *TextVariableSpec) validate() error {
 	return v.Validate()
 }
 
+// ListVariableSpec
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.ListVariableSpec
 type ListVariableSpec struct {
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
@@ -121,6 +125,8 @@ func (v *ListVariableSpec) validate() error {
 	return v.Validate()
 }
 
+// Variable
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/dashboard.Variable
 type Variable struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind variable.Kind `json:"kind" yaml:"kind"`

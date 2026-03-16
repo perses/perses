@@ -16,9 +16,9 @@ package query
 import (
 	"fmt"
 
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 )
 
 type Option struct {
@@ -27,13 +27,13 @@ type Option struct {
 	Error  error
 }
 
-func New(option Option) (*v1.Query, error) {
+func New(option Option) (*dashboard.Query, error) {
 	if !option.Kind.IsQuery() {
 		return nil, fmt.Errorf("invalid plugin kind for a query: %s", option.Kind)
 	}
-	return &v1.Query{
+	return &dashboard.Query{
 		Kind: string(option.Kind),
-		Spec: v1.QuerySpec{
+		Spec: dashboard.QuerySpec{
 			Plugin: option.Plugin,
 		},
 	}, option.Error

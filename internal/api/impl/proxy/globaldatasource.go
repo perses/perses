@@ -22,10 +22,11 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/datasource"
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec v1.DatasourceSpec) error {
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec datasource.Spec) error {
 	path := ctx.Param("*")
 
 	pr, err := newProxy(datasourceName, "", spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {

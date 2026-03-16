@@ -58,6 +58,7 @@ dockers_v2:
     dockerfile: Dockerfile
     images:
       - "docker.io/persesdev/perses"
+      - "quay.io/persesdev/perses"
     tags:
       - "latest"
       - "{{ .Tag }}"
@@ -90,6 +91,7 @@ dockers_v2:
     dockerfile: distroless-debug.Dockerfile
     images:
       - "docker.io/persesdev/perses"
+      - "quay.io/persesdev/perses"
     tags:
       - "latest-debug"
       - "{{ .Tag }}-debug"

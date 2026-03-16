@@ -58,6 +58,7 @@ dockers_v2:
     dockerfile: Dockerfile
     images:
       - "docker.io/persesdev/perses"
+      - "quay.io/persesdev/perses"
     tags:
       - "main-2024-01-01-abc1234-distroless"
     extra_files:
@@ -86,6 +87,7 @@ dockers_v2:
     dockerfile: distroless-debug.Dockerfile
     images:
       - "docker.io/persesdev/perses"
+      - "quay.io/persesdev/perses"
     tags:
       - "main-2024-01-01-abc1234-distroless-debug"
     extra_files:

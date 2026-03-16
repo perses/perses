@@ -41,6 +41,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
+	commonSpec "github.com/perses/spec/go/common"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
@@ -57,8 +58,8 @@ func DefaultConfig() apiConfig.Config {
 			EnableAuth:    false,
 			Authorization: apiConfig.AuthorizationConfig{},
 			Authentication: apiConfig.AuthenticationConfig{
-				AccessTokenTTL:  common.Duration(apiConfig.DefaultAccessTokenTTL),
-				RefreshTokenTTL: common.Duration(apiConfig.DefaultRefreshTokenTTL),
+				AccessTokenTTL:  commonSpec.Duration(apiConfig.DefaultAccessTokenTTL),
+				RefreshTokenTTL: commonSpec.Duration(apiConfig.DefaultRefreshTokenTTL),
 				Providers:       apiConfig.AuthenticationProviders{EnableNative: true},
 			},
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
@@ -67,8 +68,10 @@ func DefaultConfig() apiConfig.Config {
 			Enable: true,
 		},
 		Plugin: apiConfig.Plugin{
-			Path:        filepath.Join(projectPath, "plugins"),
-			ArchivePath: filepath.Join(projectPath, "plugins-archive"),
+			Path: filepath.Join(projectPath, "plugins"),
+			ArchivePaths: []string{
+				filepath.Join(projectPath, "plugins-archive"),
+			},
 		},
 	}
 }

@@ -13,6 +13,7 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const THROUGHPUT_TESTS: UnitTestCase[] = [
   {
@@ -88,5 +89,22 @@ describe('formatValue', () => {
   it.each(THROUGHPUT_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
     const { value, format: format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
+  });
+
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('throughput')).toBe(10);
+    expect(getKeys('throughput')).toStrictEqual([
+      'decimal|true|compact|3|counts/sec|en-US',
+      'decimal|true|false|ops/sec|en-US',
+      'decimal|true|4|false|requests/sec|en-US',
+      'decimal|true|compact|3|true|reads/sec|en-US',
+      'decimal|true|compact|4|true|writes/sec|en-US',
+      'decimal|true|compact|3|events/sec|en-US',
+      'decimal|true|false|messages/sec|en-US',
+      'decimal|true|4|false|records/sec|en-US',
+      'decimal|true|compact|3|true|rows/sec|en-US',
+      'decimal|true|compact|3|ops/sec|en-US',
+    ]);
   });
 });

@@ -158,7 +158,7 @@ func (s *service) Validate(entity *v1.EphemeralDashboard) error {
 		return apiInterface.HandleError(globalVarsErr)
 	}
 
-	if err := validate.DashboardSpecWithVars(entity.Spec.DashboardSpec, s.sch, projectVars, globalVars); err != nil {
+	if err := validate.DashboardSpecWithVars(entity.Spec.Spec, s.sch, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil

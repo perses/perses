@@ -13,6 +13,7 @@
 
 import { formatValue } from './units';
 import { UnitTestCase } from './types';
+import { getFormatterStats } from './formatterCache';
 
 const DECIMAL_TESTS: UnitTestCase[] = [
   {
@@ -338,5 +339,16 @@ describe('formatValue', () => {
   it.each(DECIMAL_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
     const { value, format: format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
+  });
+  it('should get identical formatters from cache', () => {
+    const { countCacheItems, getKeys } = getFormatterStats();
+    expect(countCacheItems('decimal')).toBe(5);
+    expect(getKeys('decimal')).toStrictEqual([
+      'decimal|true|compact|3|en-US',
+      'decimal|true|en-US',
+      'decimal|true|4|en-US',
+      'decimal|true|compact|4|en-US',
+      'decimal|true|compact|2|en-US',
+    ]);
   });
 });

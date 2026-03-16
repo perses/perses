@@ -30,6 +30,7 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/spf13/cobra"
 )
 
@@ -43,10 +44,10 @@ type kubeMetadata struct {
 }
 
 type kubeCustomResource struct {
-	APIVersion string                `json:"apiVersion" yaml:"apiVersion"`
-	Kind       string                `json:"kind" yaml:"kind"`
-	Metadata   kubeMetadata          `json:"metadata" yaml:"metadata"`
-	Spec       modelV1.DashboardSpec `json:"spec" yaml:"spec"`
+	APIVersion string         `json:"apiVersion" yaml:"apiVersion"`
+	Kind       string         `json:"kind" yaml:"kind"`
+	Metadata   kubeMetadata   `json:"metadata" yaml:"metadata"`
+	Spec       dashboard.Spec `json:"spec" yaml:"spec"`
 }
 
 func createCustomResource(dash *modelV1.Dashboard) *kubeCustomResource {

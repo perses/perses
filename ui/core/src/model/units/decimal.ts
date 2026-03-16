@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
@@ -52,6 +53,13 @@ export function formatDecimal(value: number, { shortValues, decimalPlaces }: Dec
     }
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  const key = [
+    formatterOptions.style,
+    formatterOptions.useGrouping,
+    formatterOptions.notation,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+  ];
+
+  return getFormatterFromCache(key, 'decimal', formatterOptions, 'en-US')(value);
 }

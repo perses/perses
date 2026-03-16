@@ -247,3 +247,14 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		require.JSONEq(t, string(expectedOutput), string(builderOutput))
 	})
 }
+
+func TestDashboardNewWithInvalidMetadataName(t *testing.T) {
+	inputName := "Space in title"
+
+	builder, err := dashboard.New(inputName,
+		dashboard.ProjectName("MyProject"),
+	)
+
+	assert.Error(t, err)
+	assert.Equal(t, inputName, builder.Dashboard.Metadata.Name)
+}

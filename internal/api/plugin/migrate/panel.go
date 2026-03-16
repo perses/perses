@@ -19,9 +19,9 @@ import (
 	"regexp"
 
 	"cuelang.org/go/cue/build"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 )
 
@@ -50,14 +50,14 @@ func hasGrafanaVariables(url string) bool {
 	return grafanaVariablePattern.MatchString(url)
 }
 
-func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
+func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []dashboard.Link {
 	if len(grafanaLinks) == 0 {
 		return nil
 	}
 
-	persesLinks := make([]v1.Link, len(grafanaLinks))
+	persesLinks := make([]dashboard.Link, len(grafanaLinks))
 	for i, grafanaLink := range grafanaLinks {
-		persesLinks[i] = v1.Link{
+		persesLinks[i] = dashboard.Link{
 			Name:            grafanaLink.Title,
 			URL:             grafanaLink.URL,
 			TargetBlank:     grafanaLink.TargetBlank,
@@ -67,8 +67,8 @@ func convertGrafanaLinksToPerses(grafanaLinks []GrafanaLink) []v1.Link {
 	return persesLinks
 }
 
-func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (map[string]*v1.Panel, error) {
-	panels := make(map[string]*v1.Panel)
+func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (map[string]*dashboard.Panel, error) {
+	panels := make(map[string]*dashboard.Panel)
 	for i, p := range grafanaDashboard.Panels {
 		if p.Type == grafanaPanelRowType {
 			for j, innerPanel := range p.Panels {
@@ -89,11 +89,11 @@ func (m *completeMigration) migratePanels(grafanaDashboard *SimplifiedDashboard,
 	return panels, nil
 }
 
-func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasource bool) (*v1.Panel, error) {
-	result := &v1.Panel{
+func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasource bool) (*dashboard.Panel, error) {
+	result := &dashboard.Panel{
 		Kind: string(plugin.KindPanel),
-		Spec: v1.PanelSpec{
-			Display: &v1.PanelDisplay{
+		Spec: dashboard.PanelSpec{
+			Display: &dashboard.PanelDisplay{
 				Name:        "empty",
 				Description: grafanaPanel.Description,
 			},
@@ -140,7 +140,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasourc
 	return result, nil
 }
 
-func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1.Panel) {
+func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *dashboard.Panel) {
 	// As Grafana does not provide a type of their queries, we can only execute every query migration script hoping there is only one that matches the target.
 	for _, target := range targets {
 		// We try first to execute the migration script from the dev migration instance.
@@ -149,9 +149,9 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1
 			// If the migration failed, we tried again with the prod migration instance.
 			isQueryMigrationEmpty = migrateQuery(m.mig.queries, target, result)
 			if isQueryMigrationEmpty {
-				result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+				result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
 					Kind: string(plugin.KindTimeSeriesQuery),
-					Spec: v1.QuerySpec{
+					Spec: dashboard.QuerySpec{
 						Plugin: defaultQueryPlugin,
 					},
 				})
@@ -160,7 +160,7 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *v1
 	}
 }
 
-func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *v1.Panel) bool {
+func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
 	isQueryMigrationEmpty := true
 	for _, query := range queries {
 		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
@@ -169,9 +169,9 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 			continue
 		}
 		if !queryMigrationIsEmpty {
-			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
+			result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
 				Kind: string(query.kind),
-				Spec: v1.QuerySpec{
+				Spec: dashboard.QuerySpec{
 					Plugin: *queryPlugin,
 				},
 			})

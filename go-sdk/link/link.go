@@ -13,13 +13,15 @@
 
 package link
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	"github.com/perses/spec/go/dashboard"
+)
 
 type Option func(link *Builder) error
 
 func New(url string, options ...Option) (Builder, error) {
 	builder := &Builder{
-		Link: v1.Link{},
+		Link: dashboard.Link{},
 	}
 
 	defaults := []Option{
@@ -36,5 +38,5 @@ func New(url string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Link `json:",inline" yaml:",inline"`
+	dashboard.Link `json:",inline" yaml:",inline"`
 }

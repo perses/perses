@@ -18,9 +18,9 @@ import (
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/stretchr/testify/assert"
 )
 

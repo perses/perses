@@ -4,4 +4,6 @@
 
 package common
 
+// JSONRef
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.JSONRef
 #JSONRef: _

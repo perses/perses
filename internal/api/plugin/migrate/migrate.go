@@ -31,9 +31,9 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 )
 
@@ -247,7 +247,7 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 				Tags: set.New(grafanaDashboard.Tags...),
 			},
 		},
-		Spec: v1.DashboardSpec{
+		Spec: dashboard.Spec{
 			Display: &common.Display{
 				Name: grafanaDashboard.Title,
 			},

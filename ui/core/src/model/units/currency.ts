@@ -15,6 +15,7 @@ import { toUpper } from 'lodash';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitConfig, UnitGroupConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
+import { getFormatterFromCache } from './formatterCache';
 
 // See Intl.supportedValuesOf("currency") for valid options, key names will
 // be converted to uppercase to match the expectation of Intl.NumberFormat
@@ -121,6 +122,14 @@ export function formatCurrency(value: number, { unit, decimalPlaces }: CurrencyF
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
-  const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  const key = [
+    formatterOptions.style,
+    formatterOptions.currency,
+    formatterOptions.currencyDisplay,
+    formatterOptions.maximumSignificantDigits,
+    decimalPlaces,
+    unit,
+  ];
+
+  return getFormatterFromCache(key, 'currency', formatterOptions, 'en-US')(value);
 }

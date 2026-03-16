@@ -16,7 +16,7 @@ package migrate
 import (
 	"encoding/json"
 
-	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"github.com/perses/spec/go/dashboard/variable"
 )
 
 const (

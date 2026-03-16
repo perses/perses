@@ -13,15 +13,17 @@
 
 package panel
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	"github.com/perses/spec/go/dashboard"
+)
 
 type Option func(panel *Builder) error
 
 func New(title string, options ...Option) (Builder, error) {
 	builder := &Builder{
-		Panel: v1.Panel{
+		Panel: dashboard.Panel{
 			Kind: "Panel",
-			Spec: v1.PanelSpec{},
+			Spec: dashboard.PanelSpec{},
 		},
 	}
 
@@ -39,5 +41,5 @@ func New(title string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Panel `json:",inline" yaml:",inline"`
+	dashboard.Panel `json:",inline" yaml:",inline"`
 }
