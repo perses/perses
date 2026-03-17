@@ -1,42 +1,63 @@
-import { ReactElement, useState } from 'react';
+import { FormEventHandler, ReactElement, useState } from 'react';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
-import { getZoneOffset } from '../../utils/time';
-import { useCurrentUser } from '../../model/user-client';
+import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
+import { TimeZoneSelector, useSnackbar } from '@perses-dev/components';
 import { ProfileContainer } from './ProfileContainer';
 
-export const Preferences = (): ReactElement => {
-  const { data } = useCurrentUser();
-  const timeZones = Intl.supportedValuesOf('timeZone');
+const USER_PREFERENCE_TIMEZONE_KEY = 'preference_timezone';
 
-  const zonesWithOffsets = timeZones.map((zone) => getZoneOffset(zone));
-  const [timezone, setTimezone] = useState<string | undefined>(data?.spec?.preferences?.timezone);
+export const Preferences = (): ReactElement => {
+  const { successSnackbar, errorSnackbar } = useSnackbar();
+
+  if (!localStorage.getItem(USER_PREFERENCE_TIMEZONE_KEY)) {
+    localStorage.setItem(USER_PREFERENCE_TIMEZONE_KEY, Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }
+
+  const [timezone, setTimezone] = useState<string>(localStorage.getItem(USER_PREFERENCE_TIMEZONE_KEY)!);
+
+  const isTimezoneValid = (tz: string): boolean => {
+    try {
+      if (tz.toLowerCase() === 'local') return true;
+      Intl.DateTimeFormat(undefined, { timeZone: tz });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const submitHandler: FormEventHandler<HTMLFormElement> = (e): void => {
+    e.preventDefault();
+    if (!isTimezoneValid(timezone)) {
+      errorSnackbar(`${timezone} is not a valid timezone`);
+      return;
+    }
+    localStorage.setItem(USER_PREFERENCE_TIMEZONE_KEY, timezone);
+    successSnackbar(`User-level timezone set to ${timezone}`);
+  };
 
   return (
     <ProfileContainer icon={<PreferenceIcon sx={{ fontSize: 24 }} />} title="Preferences" testId="Preferences">
-      <Stack direction="column" spacing={2}>
-        <Box sx={{ p: 2, maxWidth: 400 }}>
-          <FormControl fullWidth>
-            <InputLabel id="timezone-select-label">Timezone</InputLabel>
-            <Select
-              onChange={(e) => setTimezone(e.target.value)}
-              labelId="timezone-select-label"
-              id="timezone-select"
-              value={timezone}
-              label="Timezone"
-            >
-              {zonesWithOffsets.map(({ label, zone }) => (
-                <MenuItem key={zone} value={zone}>
-                  {label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="contained">Save</Button>
-        </Box>
-      </Stack>
+      <form onSubmit={submitHandler}>
+        <Stack direction="column" spacing={2}>
+          <Box sx={{ p: 2, maxWidth: 400 }}>
+            <FormControl fullWidth>
+              <InputLabel id="timezone-label">Timezone</InputLabel>
+              <TimeZoneSelector
+                labelId="timezone-label"
+                label="Timezone"
+                variant="compact"
+                onChange={(tz) => setTimezone(tz.value)}
+                value={timezone ?? ''}
+              />
+            </FormControl>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button type="submit" variant="contained">
+              Save
+            </Button>
+          </Box>
+        </Stack>
+      </form>
     </ProfileContainer>
   );
 };
