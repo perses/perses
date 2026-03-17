@@ -9,15 +9,19 @@ const USER_PREFERENCE_TIMEZONE_KEY = 'preference_timezone';
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
 
-  if (!localStorage.getItem(USER_PREFERENCE_TIMEZONE_KEY)) {
-    localStorage.setItem(USER_PREFERENCE_TIMEZONE_KEY, Intl.DateTimeFormat().resolvedOptions().timeZone);
-  }
+  const [timezone, setTimezone] = useState<string>(() => {
+    const saved = localStorage.getItem(USER_PREFERENCE_TIMEZONE_KEY);
+    if (saved) return saved;
 
-  const [timezone, setTimezone] = useState<string>(localStorage.getItem(USER_PREFERENCE_TIMEZONE_KEY)!);
+    const local = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    localStorage.setItem(USER_PREFERENCE_TIMEZONE_KEY, local);
+    return local;
+  });
 
   const isTimezoneValid = (tz: string): boolean => {
+    if (!tz) return false;
+    if (tz.toLowerCase() === 'local') return true;
     try {
-      if (tz.toLowerCase() === 'local') return true;
       Intl.DateTimeFormat(undefined, { timeZone: tz });
       return true;
     } catch {
