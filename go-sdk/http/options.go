@@ -76,9 +76,16 @@ func Secret(name string) Option {
 	}
 }
 
-func RemoveOriginAndReferer(isRemoved bool) Option {
+func AllowHeaders(headers ...string) Option {
 	return func(builder *Builder) error {
-		builder.Spec.RemoveOriginAndReferer = isRemoved
+		builder.Spec.AllowHeaders = headers
+		return nil
+	}
+}
+
+func DropHeaders(headers ...string) Option {
+	return func(builder *Builder) error {
+		builder.Spec.DropHeaders = headers
 		return nil
 	}
 }

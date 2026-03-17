@@ -282,9 +282,18 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	if h.config.RemoveOriginAndReferer {
-		req.Header.Del("Referer")
-		req.Header.Del("Origin")
+	if len(h.config.DropHeaders) > 0 {
+		for _, headerToDrop := range h.config.DropHeaders {
+			req.Header.Del(headerToDrop)
+		}
+	}
+
+	if len(h.config.AllowHeaders) > 0 {
+		headerKept := make(http.Header)
+		for _, header := range h.config.AllowHeaders {
+			headerKept.Add(header, req.Header.Get(header))
+		}
+		req.Header = headerKept
 	}
 
 	// redirect the request to the datasource
