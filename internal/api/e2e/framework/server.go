@@ -84,7 +84,7 @@ func DefaultAuthConfig() apiConfig.Config {
 		Secure:   true,
 	}
 	conf.Security.Authorization = apiConfig.AuthorizationConfig{
-		ClaimsMappingConfig: apiConfig.ClaimsMappingConfig{
+		ClaimsMappingConfig: *apiConfig.ClaimsMappingConfig{
 			AuthClaimsPath:    "",
 			RoleMapping:       []*apiConfig.RoleAssignment{},
 			GlobalRoleMapping: []*apiConfig.GlobalRoleAssignment{},
