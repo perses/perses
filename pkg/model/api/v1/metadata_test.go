@@ -169,6 +169,35 @@ tags:
 				Tags:      set.New("dup"),
 			},
 		},
+		{
+			title: "special characters and uppercase tags are allowed",
+			jason: `
+{
+"name": "foo",
+"createdAt": "1970-01-01T00:00:00.000000000Z",
+"updatedAt": "1970-01-01T00:00:00.000000000Z",
+"version": 1,
+"tags": ["Dup", "dup", "!@#$crazy_tag-+"]
+}
+`,
+			yamele: `
+name: "foo"
+createdAt: "1970-01-01T00:00:00.000000000Z"
+updatedAt: "1970-01-01T00:00:00.000000000Z"
+version: 1
+tags:
+- "Dup"
+- "dup"
+- "!@#$crazy_tag-+"
+`,
+			result: Metadata{
+				Name:      "foo",
+				CreatedAt: dummyDate,
+				UpdatedAt: dummyDate,
+				Version:   1,
+				Tags:      set.New("Dup", "dup", "!@#$crazy_tag-+"),
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -285,40 +314,6 @@ tags:
   - "  tag  "
 `,
 			err: fmt.Errorf("tag \"  tag  \" cannot start or end with whitespace"),
-		},
-		{
-			title: "tag cannot contain invalid characters",
-			jason: `
-{
-  "name": "foo",
-  "version": 1,
-  "tags": ["tag!"]
-}
-`,
-			yamele: `
-name: "foo"
-version: 1
-tags:
-  - "tag!"
-`,
-			err: fmt.Errorf("tag \"tag!\" contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed"),
-		},
-		{
-			title: "tag cannot contain uppercase letters",
-			jason: `
-{
-  "name": "foo",
-  "version": 1,
-  "tags": ["Tag"]
-}
-`,
-			yamele: `
-name: "foo"
-version: 1
-tags:
-  - "Tag"
-`,
-			err: fmt.Errorf("tag \"Tag\" contains invalid characters; only lowercase letters, numbers, spaces, hyphens, and underscores are allowed"),
 		},
 	}
 	for _, test := range testSuite {
