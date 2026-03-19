@@ -3,7 +3,7 @@ module github.com/perses/perses
 go 1.25.7
 
 require (
-	cuelang.org/go v0.16.0
+	cuelang.org/go v0.17.0-0.dev.0.20260319114053-b546fdd66808
 	github.com/PaesslerAG/gval v1.2.4
 	github.com/PaesslerAG/jsonpath v0.1.2-0.20240726212847-3a740cf7976f
 	github.com/brunoga/deep v1.3.1
