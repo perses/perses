@@ -327,14 +327,22 @@ func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, reques
 	if project != v1.WildcardProject {
 		roles := n.getUserTokenRoles(ctx)
 		for _, r := range roles {
-			if r.CheckPermission(project, requestAction, requestScope) {
+			permList := []*v1Role.Permission{}
+			for _, rolePermission := range r.Spec.Permissions {
+				permList = append(permList, &rolePermission)
+			}
+			if listHasPermission(permList, requestAction, requestScope) {
 				return true
 			}
 		}
 	} else {
 		globalRoles := n.getUserTokenGlobalRoles(ctx)
 		for _, gr := range globalRoles {
-			if gr.CheckPermission(requestAction, requestScope) {
+			permList := []*v1Role.Permission{}
+			for _, rolePermission := range gr.Spec.Permissions {
+				permList = append(permList, &rolePermission)
+			}
+			if listHasPermission(permList, requestAction, requestScope) {
 				return true
 			}
 		}
