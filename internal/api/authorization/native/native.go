@@ -324,30 +324,26 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 }
 
 func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
-	if project != v1.WildcardProject {
-		roles := n.getUserTokenRoles(ctx)
-		for _, r := range roles {
-			permList := []*v1Role.Permission{}
-			for _, rolePermission := range r.Spec.Permissions {
-				permList = append(permList, &rolePermission)
-			}
-			if listHasPermission(permList, requestAction, requestScope) {
-				return true
-			}
-		}
-	} else {
-		globalRoles := n.getUserTokenGlobalRoles(ctx)
-		for _, gr := range globalRoles {
-			permList := []*v1Role.Permission{}
-			for _, rolePermission := range gr.Spec.Permissions {
-				permList = append(permList, &rolePermission)
-			}
-			if listHasPermission(permList, requestAction, requestScope) {
-				return true
-			}
+	// permissions from global roles
+	permList := []*v1Role.Permission{}
+	globalRoles := n.getUserTokenGlobalRoles(ctx)
+	for _, gr := range globalRoles {
+		for _, rolePermission := range gr.Spec.Permissions {
+			permList = append(permList, &rolePermission)
 		}
 	}
-	return false
+
+	// permissions from roles
+	roles := n.getUserTokenRoles(ctx)
+	for _, r := range roles {
+		if r.Metadata.Project != project {
+			continue
+		}
+		for _, rolePermission := range r.Spec.Permissions {
+			permList = append(permList, &rolePermission)
+		}
+	}
+	return listHasPermission(permList, requestAction, requestScope)
 }
 
 // For native auth, creating a project requires a global permission.
