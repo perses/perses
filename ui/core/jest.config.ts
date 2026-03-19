@@ -16,7 +16,11 @@ import shared from '../jest.shared';
 
 const jestConfig: Config.InitialOptions = {
   ...shared,
-
+  moduleNameMapper: {
+    // spec is taken from node modules not from the local dir
+    '^@perses-dev/spec$': '<rootDir>/../node_modules/@perses-dev/spec',
+    ...shared.moduleNameMapper,
+  },
   setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
 };
 

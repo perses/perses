@@ -11,12 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-
-export const pluginSchema = z.object({
-  kind: z.string().min(1, 'Required'),
-  spec: z.record(z.string(), z.any()),
-});
-
-export type PluginSchemaType = z.infer<typeof pluginSchema>;
-export type PluginSchema = typeof pluginSchema;
+export { pluginSchema } from '@perses-dev/spec';
+export type { PluginSchemaType, PluginSchema } from '@perses-dev/spec';
