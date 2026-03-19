@@ -92,37 +92,37 @@ type native struct {
 	mutex sync.RWMutex
 }
 
-func (n *native) buildTokenRoles(ac config.AuthorizationConfig) error {
+func (n *native) buildTokenRoles(conf config.AuthorizationConfig) error {
 	// get all roles
 	roles, err := n.roleDAO.List(&role.Query{})
 	if err != nil {
 		return err
 	}
-	for _, ra := range ac.ClaimsMappingConfig.RoleMapping {
-		foundRole := findRole(roles, ra.Project, ra.Name)
+	for _, mapping := range conf.ClaimsMappingConfig.RoleMapping {
+		foundRole := findRole(roles, mapping.Project, mapping.Name)
 		if foundRole == nil {
-			logrus.Warningf("role %s does not exist", ra.Name)
+			logrus.Warningf("role %s does not exist", mapping.Name)
 		}
-		ra.Role = foundRole
+		mapping.Role = foundRole
 	}
-	n.tokenRolesMap = ac.ClaimsMappingConfig.RoleMapping
+	n.tokenRolesMap = conf.ClaimsMappingConfig.RoleMapping
 	return nil
 }
 
-func (n *native) buildTokenGlobalRoles(ac config.AuthorizationConfig) error {
+func (n *native) buildTokenGlobalRoles(conf config.AuthorizationConfig) error {
 	// get all global roles
 	globalRoles, err := n.globalRoleDAO.List(&globalrole.Query{})
 	if err != nil {
 		return err
 	}
-	for _, gra := range ac.ClaimsMappingConfig.GlobalRoleMapping {
-		foundGlobalRole := findGlobalRole(globalRoles, gra.Name)
+	for _, mapping := range conf.ClaimsMappingConfig.GlobalRoleMapping {
+		foundGlobalRole := findGlobalRole(globalRoles, mapping.Name)
 		if foundGlobalRole == nil {
-			logrus.Warningf("global role %s does not exist", gra.Name)
+			logrus.Warningf("global role %s does not exist", mapping.Name)
 		}
-		gra.GlobalRole = foundGlobalRole
+		mapping.GlobalRole = foundGlobalRole
 	}
-	n.tokenGlobalRoleMap = ac.ClaimsMappingConfig.GlobalRoleMapping
+	n.tokenGlobalRoleMap = conf.ClaimsMappingConfig.GlobalRoleMapping
 	return nil
 }
 
