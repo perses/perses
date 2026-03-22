@@ -79,7 +79,40 @@ You now have a working dashboard with a time series panel showing live data from
 
 Perses is extensible through [plugins](./concepts/plugin.md). Each datasource type and visualization type is implemented as a plugin.
 
-<!-- TODO: Add example of building a more complex dashboard using different panel types and variables -->
+The dashboard you built in the previous section uses a **Time Series Chart**, but Perses supports several other panel types out of the box. Try adding more panels to see different ways to visualize your data.
+
+### More Panel Types
+
+Open your dashboard in edit mode and click **Add Panel**. In the **Type** dropdown you will find options such as:
+
+- **Gauge Chart** — displays a single value as a gauge. Try the query `up` to see a gauge showing 100% when the target is healthy.
+- **Stat Chart** — displays one or more values with an optional sparkline. Try the query `prometheus_target_interval_length_seconds` to see the scrape interval for each target.
+- **Markdown** — renders static Markdown text, useful for adding documentation or notes to a dashboard.
+
+Each panel type is a plugin. For the full list of available plugins and their options, see the [plugin documentation](./concepts/plugin.md).
+
+![dashboard with multiple panel types](images/getting-started/multiple-panels.png)
+
+### Variables
+
+[Variables](./concepts/variable.md) let you create dynamic, reusable dashboards. A variable appears as a dropdown at the top of the dashboard and can be referenced in queries using the `$variable_name` syntax.
+
+To create a variable:
+
+1. Open your dashboard in edit mode.
+2. Click **Variables** in the top toolbar.
+3. Click **+ Add Variable**.
+4. Fill in:
+    - **Name**: `job`
+    - **Source**: select `Prometheus Label Values`.
+    - **Label Name**: `job`
+5. Click **Run Query** to preview the values. You should see the available `job` label values from Prometheus.
+6. Click **Add** to save the variable.
+7. Click **Apply** to return to the dashboard.
+
+A dropdown appears at the top of the dashboard. You can now use `$job` in any panel query to filter by the selected value, for example `up{job="$job"}`.
+
+![dashboard with variable](images/getting-started/dashboard-with-variable.png)
 
 ## Dashboard as Code
 
@@ -88,7 +121,6 @@ Once you are comfortable creating dashboards through the UI, you can manage them
 - [Getting started with Dashboard-as-Code](./dac/getting-started.md)
 - [Dashboard-as-Code concept](./concepts/dashboard-as-code.md)
 
-<!-- TODO: Add a brief DaC example or walkthrough -->
 
 ## Next Steps
 
