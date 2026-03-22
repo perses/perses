@@ -379,8 +379,8 @@ tls_config: <TLS config> # Optional
 #### Authorization config
 
 ```yaml
-# Authorization providers
-providers: <Authorization providers> # Optional
+# Authorization provider
+provider: <Authorization providers> # Optional
 ```
 
 ##### Authorization Providers
