@@ -79,22 +79,22 @@ func TestExtractClaimsFromJWTPayload(t *testing.T) {
 		// too many parts in token
 		{
 			accessToken:    "xyz.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0X2NsYWltXzUiOiJ0ZXN0X2NsYWltXzVfdmFsdWUiLCJ0ZXN0X2NsYWltXzYiOiJ0ZXN0X2NsYWltXzZfdmFsdWUiLCJ0ZXN0X2NsYWltXzciOmZhbHNlfQ.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
-			expectedResult: Claims(nil),
+			expectedResult: Claims{},
 		},
 		// undecoded token
 		{
 			accessToken:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0X2NsYWltXz#UiOiJ0ZXN0X2NsYWltXzVfdmFsdWUiLCJ0ZXN0X2NsYWltXzYiOiJ0ZXN0X2NsYWltXzZfdmFsdWUiLCJ0ZXN0X2NsYWltXzciOmZhbHNlfQ.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
-			expectedResult: Claims(nil),
+			expectedResult: Claims{},
 		},
 		// cannot unmarshal into Claims
 		{
 			accessToken:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.InN0cmluZyI.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
-			expectedResult: Claims(nil),
+			expectedResult: Claims{},
 		},
 		// valid token, no claims found - empty Claims
 		{
 			accessToken:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30",
-			expectedResult: Claims(nil),
+			expectedResult: Claims{},
 		},
 		// valid token, extracted claims
 		{

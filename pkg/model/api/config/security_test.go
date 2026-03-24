@@ -305,6 +305,11 @@ security:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
+						ClaimsMappingConfig: &ClaimsMappingConfig{
+							AuthClaimsPath:    "",
+							RoleMapping:       nil,
+							GlobalRoleMapping: nil,
+						},
 						Provider: AuthorizationProvider{
 							Native: NativeAuthorizationProvider{
 								Enable:                    true,
