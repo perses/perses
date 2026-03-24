@@ -126,14 +126,11 @@ func (n *native) buildTokenGlobalRoles(conf config.AuthorizationConfig) error {
 	return nil
 }
 
-func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
+func (n *native) getUserTokenRoles(username string) []*v1.Role {
 	userRoles := []*v1.Role{}
 
-	claims := n.claimsManager.GetPersistentClaims(ctx)
-	if claims == nil {
-		return nil
-	}
-	roleClaims, ok := claims.(Claims)[n.authJMESPath]
+	claims := n.claimsManager.GetClaims(username)
+	roleClaims, ok := claims[n.authJMESPath]
 	if !ok {
 		return nil
 	}
@@ -147,14 +144,11 @@ func (n *native) getUserTokenRoles(ctx echo.Context) []*v1.Role {
 	return userRoles
 }
 
-func (n *native) getUserTokenGlobalRoles(ctx echo.Context) []*v1.GlobalRole {
+func (n *native) getUserTokenGlobalRoles(username string) []*v1.GlobalRole {
 	userRoles := []*v1.GlobalRole{}
 
-	claims := n.claimsManager.GetPersistentClaims(ctx)
-	if claims == nil {
-		return nil
-	}
-	roleClaims, ok := claims.(Claims)[n.authJMESPath]
+	claims := n.claimsManager.GetClaims(username)
+	roleClaims, ok := claims[n.authJMESPath]
 	if !ok {
 		return nil
 	}
@@ -313,7 +307,7 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	}
 	// Check token permissions; no need to check if JMESPath is not specified
 	if n.authJMESPath != "" {
-		if ok := n.hasPermissionFromClaim(ctx, requestProject, requestAction, requestScope); ok {
+		if ok := n.hasPermissionFromClaim(username, requestProject, requestAction, requestScope); ok {
 			return true
 		}
 	}
@@ -323,10 +317,10 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
-func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
+func (n *native) hasPermissionFromClaim(username string, project string, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
 	// permissions from global roles
 	permList := []*v1Role.Permission{}
-	globalRoles := n.getUserTokenGlobalRoles(ctx)
+	globalRoles := n.getUserTokenGlobalRoles(username)
 	for _, gr := range globalRoles {
 		for _, rolePermission := range gr.Spec.Permissions {
 			permList = append(permList, &rolePermission)
@@ -334,7 +328,7 @@ func (n *native) hasPermissionFromClaim(ctx echo.Context, project string, reques
 	}
 
 	// permissions from roles
-	roles := n.getUserTokenRoles(ctx)
+	roles := n.getUserTokenRoles(username)
 	for _, r := range roles {
 		if r.Metadata.Project != project {
 			continue

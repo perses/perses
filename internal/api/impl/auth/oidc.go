@@ -361,6 +361,15 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Failed to request user info")
 			return err
 		}
+		syncResp, err := e.performUserSync(uInfo, ctx.SetCookie)
+		if err != nil {
+			return err
+		}
+		if len(e.claimsManager.PersistClaims) > 0 {
+			data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
+			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, data)
+		}
+		return ctx.JSON(http.StatusOK, syncResp)
 	case api.GrantTypeClientCredentials:
 		// Extract client_id and client_secret from Authorization header
 		clientID, clientSecret, ok := ctx.Request().BasicAuth()
@@ -383,17 +392,6 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
-	}
-
-	// Persist claims from the provider token
-	// claims are passed down through the `persistedClaims` cookie
-	if e.claimsManager.PersistClaims != nil {
-		// TODO: is resp.AccessToken the right one to use?
-		data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
-		ok := e.claimsManager.SetCookie(ctx, data)
-		if !ok {
-			logrus.Warning("could not set the persistedClaims cookie")
-		}
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }

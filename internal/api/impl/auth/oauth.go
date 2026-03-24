@@ -446,20 +446,18 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 		return err
 	}
 
-	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
+	syncResp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
-	// Persist claims from the provider token
-	// claims are passed down through the `persistedClaims` cookie
-	if e.claimsManager.PersistClaims != nil {
+	// persist claims in cache
+	if len(e.claimsManager.PersistClaims) > 0 {
 		data := e.claimsManager.ExtractClaimsFromJWTPayload(accessToken.AccessToken)
-		ok := e.claimsManager.SetCookie(ctx, data)
-		if !ok {
-			logrus.Warning("could not set the persistedClaims cookie")
-		}
+		// TODO: is uInfo.GetLogin() unique to each user?
+		_ = e.claimsManager.SetClaims(uInfo.GetLogin(), accessToken.AccessToken, data)
+
 	}
-	return ctx.JSON(http.StatusOK, resp)
+	return ctx.JSON(http.StatusOK, syncResp)
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
