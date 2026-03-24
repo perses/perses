@@ -6,7 +6,7 @@
 name: 'perses-dev'
 services:
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.6
     ports:
       - '3100:3100'
     profiles: [loki]
@@ -15,7 +15,7 @@ services:
       - ./extra/loki-data:/loki
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.6
     profiles: [loki]
     volumes:
       - ./extra/promtail.yaml:/etc/promtail/config.yaml
@@ -26,7 +26,7 @@ services:
       - log-generator
 
   log-generator:
-    image: mingrammer/flog
+    image: mingrammer/flog:0.4.3
     profiles: [loki]
     volumes:
       - ./extra/logs:/var/log/output
@@ -39,16 +39,6 @@ services:
       - --output=/var/log/output/fake.log
       - --overwrite
 
-  mariadb:
-    image: mariadb
-    ports:
-      - '3306:3306'
-    environment:
-      MARIADB_ROOT_PASSWORD: root
-      MARIADB_DATABASE: perses
-      MARIADB_USER: user
-      MARIADB_PASSWORD: password
-
   postgres:
     image: postgres:17
     ports:
@@ -60,7 +50,7 @@ services:
     profiles: [postgres]
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3
     command:
       - --config.file=/etc/prometheus.yaml
       - --web.enable-remote-write-receiver
@@ -74,7 +64,7 @@ services:
 
   # Generate fake metrics
   avalanche:
-    image: quay.io/prometheuscommunity/avalanche:latest
+    image: quay.io/prometheuscommunity/avalanche:v0.7.0
     command:
       - '--gauge-metric-count=5'
       - '--counter-metric-count=5'
@@ -100,7 +90,7 @@ services:
     profiles: [tempo]
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.10.3
     command: ['-config.file=/etc/tempo.yaml']
     user: '10001:10001'
     volumes:
