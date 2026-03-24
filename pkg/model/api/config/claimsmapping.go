@@ -36,13 +36,13 @@ func (a *Assignment) CheckRoleClaim(userRoleClaims []string) bool {
 
 type RoleAssignment struct {
 	Assignment
-	Project string `json:"project" yaml:"project"`
-	Role    *v1.Role
+	Project string   `json:"project" yaml:"project"`
+	Role    *v1.Role `json:"-" yaml:"-"`
 }
 
 type GlobalRoleAssignment struct {
 	Assignment
-	GlobalRole *v1.GlobalRole
+	GlobalRole *v1.GlobalRole `json:"-" yaml:"-"`
 }
 
 type ClaimsMappingConfig struct {

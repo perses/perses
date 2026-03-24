@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
@@ -453,8 +454,12 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	// persist claims in cache
 	if len(e.claimsManager.PersistClaims) > 0 {
 		data := e.claimsManager.ExtractClaimsFromJWTPayload(accessToken.AccessToken)
-		// TODO: is uInfo.GetLogin() unique to each user?
-		_ = e.claimsManager.SetClaims(uInfo.GetLogin(), accessToken.AccessToken, data)
+		usr, err := e.svc.syncUser(uInfo)
+		if err != nil {
+			e.logWithError(err).Error("Failed to get user from database.")
+		}
+		username := usr.GetMetadata().GetName()
+		_ = e.claimsManager.SetClaims(username, accessToken.AccessToken, time.Duration(accessToken.ExpiresIn)*time.Second, data)
 
 	}
 	return ctx.JSON(http.StatusOK, syncResp)

@@ -71,13 +71,13 @@ func CreateCache() *Cache {
 	return c
 }
 
-func (c *Cache) Set(username string, value entryValue) {
+func (c *Cache) Set(username string, ttl time.Duration, value entryValue) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.items[username] = entry{
 		value:  value,
-		expiry: time.Now().Add(c.ttl),
+		expiry: time.Now().Add(ttl),
 	}
 }
 
@@ -142,7 +142,7 @@ type JMESPathQuery struct {
 
 // Stores claims in cache; if an entry with the same cookie and username exists, is omitted
 // returns true if cache entry set, otherwise false (not sure if useful?)
-func (cm *ClaimsManager) SetClaims(username string, cookie string, data Claims) bool {
+func (cm *ClaimsManager) SetClaims(username string, cookie string, ttl time.Duration, data Claims) bool {
 	// check if username exists in cache or is cookie updated
 	values, ok := cm.cache.Get(username)
 	// add / update entry
@@ -151,7 +151,7 @@ func (cm *ClaimsManager) SetClaims(username string, cookie string, data Claims) 
 			cookie: cookie,
 			claims: data,
 		}
-		cm.cache.Set(username, newValues)
+		cm.cache.Set(username, ttl, newValues)
 		return true
 	}
 

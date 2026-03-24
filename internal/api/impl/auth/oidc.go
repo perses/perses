@@ -367,7 +367,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 		}
 		if len(e.claimsManager.PersistClaims) > 0 {
 			data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
-			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, data)
+			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, time.Duration(resp.ExpiresIn)*time.Second, data)
 		}
 		return ctx.JSON(http.StatusOK, syncResp)
 	case api.GrantTypeClientCredentials:
