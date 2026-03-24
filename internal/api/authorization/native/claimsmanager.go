@@ -16,13 +16,11 @@ package native
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/jmespath/go-jmespath"
-	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
@@ -111,7 +109,6 @@ func (c *Cache) Remove(username string) {
 // precompiles JMESPath queries for later use
 func NewClaimsManager(persistClaims []string) ClaimsManager {
 	cm := ClaimsManager{
-		cookieName:    CookieName,
 		cache:         CreateCache(),
 		PersistClaims: []JMESPathQuery{},
 	}
@@ -134,7 +131,6 @@ type Claims map[string]any
 // ClaimsManager is a helper struct responsible for extracting extra claims from the provider JWT token
 // and providing helper functions to persist these claims via cookies
 type ClaimsManager struct {
-	cookieName    string
 	cache         *Cache
 	PersistClaims []JMESPathQuery
 }
@@ -168,59 +164,6 @@ func (cm *ClaimsManager) GetClaims(username string) Claims {
 		return Claims{}
 	}
 	return values.claims
-}
-
-// SetCookie creates and sets the cookie with claims persisted from the provider token;
-// returns true if cookie was successfuly created and set; otherwise false
-func (cm *ClaimsManager) SetCookie(ctx echo.Context, data Claims) bool {
-	// marshal & encode data
-	cookie := cm.createCookie(data)
-	if cookie == nil {
-		return false
-	}
-
-	// create cookie
-	ctx.SetCookie(cookie)
-
-	// returns ok if cookie was created successfully
-	return true
-}
-
-func (cm *ClaimsManager) createCookie(data Claims) *http.Cookie {
-	// marshal payload into json
-	jsonPayload, err := json.Marshal(data)
-	if err != nil {
-		return nil
-	}
-	// b64 encode marshaled payload
-	encodedPayload := base64.StdEncoding.EncodeToString(jsonPayload)
-	return &http.Cookie{
-		Name:  cm.cookieName,
-		Value: encodedPayload,
-	}
-}
-
-// GetPersistentClaims returns the claims persisted via the cookie
-func (cm *ClaimsManager) GetPersistentClaims(ctx echo.Context) any {
-	// get cookie
-	cookie := cm.getCookie(ctx)
-	if cookie == nil {
-		return nil
-	}
-
-	// decode & unmarshal cookie
-	data := cm.decodeCookie(cookie.Value)
-
-	// returns Claims or nil; nil handled downstream
-	return data
-}
-
-func (cm *ClaimsManager) getCookie(ctx echo.Context) *http.Cookie {
-	cookie, err := ctx.Cookie(cm.cookieName)
-	if err != nil {
-		return nil
-	}
-	return cookie
 }
 
 func (cm *ClaimsManager) decodeCookie(cookieValue string) interface{} {
