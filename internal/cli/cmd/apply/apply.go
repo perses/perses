@@ -208,6 +208,6 @@ cat ./resources.json | percli apply -f -
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
 	cmd.Flags().BoolVarP(&o.forceCreate, "force", "", false, "If present, the command creates the resource even if the projects are not consistent - it prioritizes the JSON file")
-	cmd.Flags().BoolVar(&o.createProject, "create-project", false, "If present, the command creates the project from metadata.project when a resource apply fails because the project does not exist, then retries once")
+	cmd.Flags().BoolVar(&o.createProject, "create-project", false, "If present, the command creates the resolved target project when a resource apply fails because the project does not exist, then retries once")
 	return cmd
 }
