@@ -19,7 +19,11 @@ import (
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/perses/perses/pkg/client/api"
+	apiv1 "github.com/perses/perses/pkg/client/api/v1"
 	fakeapi "github.com/perses/perses/pkg/client/fake/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func TestApplyCMD(t *testing.T) {
@@ -90,6 +94,76 @@ object "Project" "perses" has been applied
 			IsErrorExpected: true,
 			ExpectedMessage: strings.ReplaceAll(`resource "game" from file "..%s..%stest%ssample_resources%sunknown_resource.json" not supported by the command`, "%s", separator),
 		},
+		{
+			Title:           "apply with --create-project when server returns 400 metadata.project doesn't exist",
+			Args:            []string{"-f", "../../test/sample_resources/single_resource_with_project.json", "--create-project"},
+			APIClient:       newFakeClientWithMissingProject(),
+			IsErrorExpected: false,
+			ExpectedMessage: `object "Folder" "myfolder" has been applied in the project "newproject"
+`,
+		},
+		{
+			Title:                "apply without --create-project when server returns 400 metadata.project doesn't exist",
+			Args:                 []string{"-f", "../../test/sample_resources/single_resource_with_project.json"},
+			APIClient:            newFakeClientWithMissingProject(),
+			IsErrorExpected:      true,
+			ExpectedRegexMessage: `metadata\.project .* doesn't exist`,
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+}
+
+// fakeClientWithMissingProject wraps the standard fake client but makes the first folder Create
+// call return a 400 metadata.project doesn't exist error, allowing the remaining calls to succeed. This simulates a server
+// that has no project yet at the time the resource is first applied.
+type fakeClientWithMissingProject struct {
+	api.ClientInterface
+	callCount *int
+}
+
+func newFakeClientWithMissingProject() api.ClientInterface {
+	callCount := new(int)
+	return &fakeClientWithMissingProject{
+		ClientInterface: fakeapi.New(),
+		callCount:       callCount,
+	}
+}
+
+func (c *fakeClientWithMissingProject) V1() apiv1.ClientInterface {
+	return &fakeV1WithFailingFolder{
+		ClientInterface: c.ClientInterface.V1(),
+		callCount:       c.callCount,
+	}
+}
+
+type fakeV1WithFailingFolder struct {
+	apiv1.ClientInterface
+	callCount *int
+}
+
+func (c *fakeV1WithFailingFolder) Folder(project string) apiv1.FolderInterface {
+	return &fakeFailingFolder{
+		FolderInterface: c.ClientInterface.Folder(project),
+		callCount:       c.callCount,
+	}
+}
+
+type fakeFailingFolder struct {
+	apiv1.FolderInterface
+	callCount *int
+}
+
+func badRequestProjectDoesNotExistError(projectName string) error {
+	return &perseshttp.RequestError{
+		StatusCode: 400,
+		Message:    "bad request: " + modelV1.ProjectDoesNotExistErrorMessage(projectName),
+	}
+}
+
+func (f *fakeFailingFolder) Create(entity *modelV1.Folder) (*modelV1.Folder, error) {
+	*f.callCount++
+	if *f.callCount == 1 {
+		return nil, badRequestProjectDoesNotExistError("newproject")
+	}
+	return entity, nil
 }

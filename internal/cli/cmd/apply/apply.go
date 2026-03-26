@@ -14,6 +14,7 @@
 package apply
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
@@ -35,11 +37,12 @@ type option struct {
 	opt.ProjectOption
 	opt.FileOption
 	opt.DirectoryOption
-	forceCreate bool
-	writer      io.Writer
-	errWriter   io.Writer
-	apiClient   api.ClientInterface
-	entities    []modelAPI.Entity
+	forceCreate   bool
+	createProject bool
+	writer        io.Writer
+	errWriter     io.Writer
+	apiClient     api.ClientInterface
+	entities      []modelAPI.Entity
 }
 
 func (o *option) Complete(args []string) error {
@@ -108,13 +111,16 @@ func (o *option) applyEntity() error {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
-		svc, svcErr := service.New(kind, project, o.apiClient)
-		if svcErr != nil {
-			return svcErr
-		}
-
-		if upsertError := service.Upsert(svc, entity); upsertError != nil {
-			return upsertError
+		if upsertError := o.upsertEntity(kind, project, entity); upsertError != nil {
+			// If the apply failed because the project doesn't exist, and the user has asked to auto-create the project
+			// then we will try to create the project and re-apply the resource.
+			if isProjectDoesNotExistError(upsertError) && o.createProject && !modelV1.IsGlobal(kind) {
+				if upsertError = o.applyEntityWithProjectCreation(kind, project, entity); upsertError != nil {
+					return upsertError
+				}
+			} else {
+				return upsertError
+			}
 		}
 
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
@@ -122,6 +128,52 @@ func (o *option) applyEntity() error {
 		}
 	}
 	return nil
+}
+
+func (o *option) applyEntityWithProjectCreation(kind modelV1.Kind, project string, entity modelAPI.Entity) error {
+	if len(project) == 0 {
+		return fmt.Errorf("unable to create missing project: project is not set")
+	}
+
+	projectService, projectServiceErr := service.New(modelV1.KindProject, "", o.apiClient)
+	if projectServiceErr != nil {
+		return projectServiceErr
+	}
+
+	projectEntity := &modelV1.Project{
+		Kind: modelV1.KindProject,
+		Metadata: modelV1.Metadata{
+			Name: project,
+		},
+	}
+	if _, projectCreationErr := projectService.CreateResource(projectEntity); projectCreationErr != nil && !errors.Is(projectCreationErr, perseshttp.ConflictError) {
+		return projectCreationErr
+	}
+
+	// Retry once the original request against the newly created project.
+	if retryErr := o.upsertEntity(kind, project, entity); retryErr != nil {
+		return retryErr
+	}
+
+	return nil
+}
+
+func (o *option) upsertEntity(kind modelV1.Kind, project string, entity modelAPI.Entity) error {
+	svc, svcErr := service.New(kind, project, o.apiClient)
+	if svcErr != nil {
+		return svcErr
+	}
+
+	return service.Upsert(svc, entity)
+}
+
+func isProjectDoesNotExistError(err error) bool {
+	var requestErr *perseshttp.RequestError
+	if !errors.As(err, &requestErr) {
+		return false
+	}
+
+	return modelV1.IsProjectDoesNotExistErrorMessage(requestErr.Message)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -155,6 +207,7 @@ cat ./resources.json | percli apply -f -
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
-	cmd.Flags().BoolVarP(&o.forceCreate, "force", "", false, "If present, the command will create the resource even if the projects are not consistent, it prioritize the json file")
+	cmd.Flags().BoolVarP(&o.forceCreate, "force", "", false, "If present, the command creates the resource even if the projects are not consistent - it prioritizes the JSON file")
+	cmd.Flags().BoolVar(&o.createProject, "create-project", false, "If present, the command creates the project from metadata.project when a resource apply fails because the project does not exist, then retries once")
 	return cmd
 }

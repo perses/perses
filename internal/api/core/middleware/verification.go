@@ -27,6 +27,7 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/utils"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type partialMetadata struct {
@@ -85,7 +86,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			if len(projectName) > 0 {
 				if _, err := svc.Get(apiInterface.Parameters{Name: projectName}); err != nil {
 					if databaseModel.IsKeyNotFound(err) {
-						return apiInterface.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
+						return apiInterface.HandleBadRequestError(modelV1.ProjectDoesNotExistErrorMessage(projectName))
 					}
 					return err
 				}
