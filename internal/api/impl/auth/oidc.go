@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"time"
@@ -367,7 +368,13 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 		}
 		if len(e.claimsManager.PersistClaims) > 0 {
 			data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
-			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, time.Duration(int64(resp.ExpiresIn))*time.Second, data)
+			var expiresInSeconds int64
+			if resp.ExpiresIn > math.MaxInt64 {
+				expiresInSeconds = math.MaxInt64
+			} else {
+				expiresInSeconds = int64(resp.ExpiresIn)
+			}
+			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, time.Duration(expiresInSeconds)*time.Second, data)
 		}
 		return ctx.JSON(http.StatusOK, syncResp)
 	case api.GrantTypeClientCredentials:
