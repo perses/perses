@@ -202,13 +202,13 @@ func (cm *ClaimsManager) ExtractClaimsFromJWTPayload(accessToken string) Claims 
 	// check if the token is generally resembling a JWT token ; return nil otherwise
 	tokenPayload := strings.Split(accessToken, ".")
 	if len(tokenPayload) != 3 {
-		return nil
+		return Claims{}
 	}
 
 	// decode & unmarshal token payload
 	decoded := cm.decodeCookie(tokenPayload[1])
 	if decoded == nil {
-		return nil
+		return Claims{}
 	}
 
 	// extract wanted claims from the decoded token payload
