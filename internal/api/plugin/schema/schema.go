@@ -162,21 +162,23 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 	if len(s.devSch.panels) == 0 && len(s.sch.panels) == 0 {
 		return fmt.Errorf("panel schemas are not loaded")
 	}
-	// go through the panels list
-	// the processing stops as soon as it detects an invalid panel -> TODO: improve this to return a list of all the errors encountered ?
+	var errs []error
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
 		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
-			return err
+			errs = append(errs, err)
+			continue
 		}
 		for i, query := range panel.Spec.Queries {
 			if err := s.validateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
-				return err
+				errs = append(errs, fmt.Errorf("panel %q: %w", panelName, err))
 			}
 		}
 	}
-	logrus.Debug("All panels are valid")
-	return nil
+	if len(errs) == 0 {
+		logrus.Debug("All panels are valid")
+	}
+	return errors.Join(errs...)
 }
 
 func (s *completeSchema) ValidatePanel(plugin common.Plugin, panelName string) error {
@@ -208,8 +210,7 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 	if len(s.devSch.variables) == 0 && len(s.sch.variables) == 0 {
 		return fmt.Errorf("variable schemas are not loaded")
 	}
-	// go through the variables list
-	// the processing stops as soon as it detects an invalid variable  -> TODO: improve this to return a list of all the errors encountered ?
+	var errs []error
 	for _, v := range variables {
 		// skip if this is not a ListVariable (no validation needed in this case)
 		if v.Kind != variable.KindList {
@@ -218,16 +219,19 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 		// convert the variable's spec to ListVariableSpec
 		listVariableSpec, ok := v.Spec.(*dashboard.ListVariableSpec)
 		if !ok {
-			return errors.New("error converting Variable to ListVariable")
+			errs = append(errs, errors.New("error converting Variable to ListVariable"))
+			continue
 		}
 		variableName := listVariableSpec.GetName()
 		logrus.Tracef("Variable to validate: %s", variableName)
 		if err := s.ValidateVariable(listVariableSpec.Plugin, variableName); err != nil {
-			return err
+			errs = append(errs, err)
 		}
 	}
-	logrus.Debug("All variables are valid")
-	return nil
+	if len(errs) == 0 {
+		logrus.Debug("All variables are valid")
+	}
+	return errors.Join(errs...)
 }
 
 func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) error {
