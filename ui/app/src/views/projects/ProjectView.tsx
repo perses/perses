@@ -47,7 +47,7 @@ function ProjectView(): ReactElement {
 
   function handleProjectRename(project: ProjectResource, projectName: string): void {
     updateProjectMutation.mutate(
-      { ...project, spec: { display: { ...project.spec.display, name: projectName } } },
+      { ...project, spec: { display: { ...project.spec?.display, name: projectName } } },
       {
         onSuccess: (updatedProject: ProjectResource) => {
           successSnackbar(`Project ${updatedProject.metadata.name} has been successfully updated`);

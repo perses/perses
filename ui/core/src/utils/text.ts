@@ -19,12 +19,12 @@ import { Resource } from '../model';
  */
 export function getResourceDisplayName<T extends Resource>(resource: T): string {
   // Variables
-  if (resource.spec.spec?.display?.name) {
+  if (resource.spec?.spec?.display?.name) {
     return resource.spec.spec.display.name;
   }
 
   // Other resources with display
-  if (resource.spec.display?.name) {
+  if (resource.spec?.display?.name) {
     return resource.spec.display.name;
   }
 
@@ -37,12 +37,12 @@ export function getResourceDisplayName<T extends Resource>(resource: T): string 
  */
 export function getResourceExtendedDisplayName<T extends Resource>(resource: T): string {
   // Variables
-  if (resource.spec.spec?.display?.name) {
+  if (resource.spec?.spec?.display?.name) {
     return `${resource.spec.spec.display.name} (ID: ${resource.metadata.name})`;
   }
 
   // Other resources with display
-  if (resource.spec.display?.name) {
+  if (resource.spec?.display?.name) {
     return `${resource.spec.display.name} (ID: ${resource.metadata.name})`;
   }
 

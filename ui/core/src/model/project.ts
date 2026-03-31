@@ -17,7 +17,7 @@ import { Display } from './display';
 export interface ProjectResource {
   kind: 'Project';
   metadata: Metadata;
-  spec: ProjectSpec;
+  spec?: ProjectSpec;
 }
 
 export interface ProjectSpec {
