@@ -268,7 +268,7 @@ func TestAddCustomPanelGroup(t *testing.T) {
 		spec, ok := layout.Spec.(dashboardSpec.GridLayoutSpec)
 		require.True(t, ok)
 		assert.Equal(t, "My Group", spec.Display.Title)
-		assert.True(t, spec.Display.Collapse.Open)
+		assert.Nil(t, spec.Display.Collapse)
 
 		require.Len(t, spec.Items, 1)
 		assert.Equal(t, 0, spec.Items[0].X)
