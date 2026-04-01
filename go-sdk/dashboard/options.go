@@ -156,6 +156,14 @@ func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgro
 			return err
 		}
 
+		if len(positions) != len(r.Panels) {
+			return fmt.Errorf("number of positions (%d) must match number of panels (%d)", len(positions), len(r.Panels))
+		}
+
+		if builder.Dashboard.Spec.Layouts == nil {
+			builder.Dashboard.Spec.Layouts = []dashboard.Layout{}
+		}
+
 		if builder.Dashboard.Spec.Panels == nil {
 			builder.Dashboard.Spec.Panels = make(map[string]*dashboard.Panel)
 		}
@@ -179,15 +187,21 @@ func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgro
 			})
 		}
 
+		gridLayoutSpec := dashboard.GridLayoutSpec{
+			Display: &dashboard.GridLayoutDisplay{
+				Title: r.Title,
+			},
+			Items:          gridItems,
+			RepeatVariable: r.RepeatVariable,
+		}
+
+		if !r.IsCollapsed {
+			gridLayoutSpec.Display.Collapse = &dashboard.GridLayoutCollapse{Open: true}
+		}
+
 		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{
 			Kind: "Grid",
-			Spec: dashboard.GridLayoutSpec{
-				Display: &dashboard.GridLayoutDisplay{
-					Title:    title,
-					Collapse: &dashboard.GridLayoutCollapse{Open: true},
-				},
-				Items: gridItems,
-			},
+			Spec: gridLayoutSpec,
 		})
 
 		return nil
