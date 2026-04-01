@@ -25,6 +25,7 @@ export const querySpecSchema: z.ZodSchema<QueryDefinition> = z.object({
   spec: z.object({
     name: z.string().optional(),
     plugin: pluginSchema,
+    hidden: z.boolean().optional(),
   }),
 });
 
