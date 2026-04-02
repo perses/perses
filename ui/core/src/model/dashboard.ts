@@ -11,33 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec } from './datasource';
-import { LayoutDefinition } from './layout';
-import { Link, PanelDefinition } from './panels';
+import { DashboardSpec, DashboardSelector } from '@perses-dev/spec';
 import { ProjectMetadata } from './resource';
-import { DurationString } from './time';
-import { VariableDefinition } from './variables';
-import { Display } from './display';
+
+export type { DashboardSelector, DashboardSpec };
 
 export interface DashboardResource {
   kind: 'Dashboard';
   metadata: ProjectMetadata;
   spec: DashboardSpec;
-}
-
-export interface DashboardSpec {
-  display?: Display;
-  datasources?: Record<string, DatasourceSpec>;
-  duration: DurationString;
-  refreshInterval?: DurationString;
-  variables: VariableDefinition[];
-  layouts: LayoutDefinition[];
-  panels: Record<string, PanelDefinition>;
-  links?: Link[];
-}
-
-export interface DashboardSelector {
-  project: string;
-  dashboard: string;
-  tags?: string[];
 }

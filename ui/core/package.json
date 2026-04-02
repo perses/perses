@@ -33,7 +33,8 @@
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "numbro": "^2.3.6",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "@perses-dev/spec": "0.2.0-beta.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16"

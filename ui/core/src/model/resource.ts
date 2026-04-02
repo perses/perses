@@ -33,7 +33,7 @@ export interface Resource {
   kind: Kind;
   metadata: Metadata | ProjectMetadata;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  spec: any;
+  spec?: any;
 }
 
 export function getMetadataProject(metadata: ProjectMetadata | Metadata): string | undefined {

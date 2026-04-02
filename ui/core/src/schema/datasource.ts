@@ -11,25 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { datasourceSpecSchema, buildDatasourceSpecSchema } from '@perses-dev/spec';
 import { z } from 'zod';
-import { Datasource, DatasourceDefinition, DatasourceSpec } from '../model';
+import { Datasource, DatasourceDefinition } from '../model';
 import { metadataSchema, projectMetadataSchema } from './metadata';
-import { PluginSchema, pluginSchema } from './plugin';
-import { displaySchema } from './display';
-
-export const datasourceSpecSchema: z.ZodSchema<DatasourceSpec> = z.object({
-  display: displaySchema.optional(),
-  default: z.boolean(),
-  plugin: pluginSchema,
-});
-
-export function buildDatasourceSpecSchema(pluginSchema: PluginSchema): z.ZodSchema<DatasourceSpec> {
-  return z.object({
-    display: displaySchema.optional(),
-    default: z.boolean(),
-    plugin: pluginSchema,
-  });
-}
+import { PluginSchema } from './plugin';
+export type { datasourceSpecSchema };
+export { buildDatasourceSpecSchema };
 
 export const datasourceSchema = z.object({
   kind: z.literal('Datasource'),
