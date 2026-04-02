@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
@@ -35,8 +35,8 @@ import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDBut
 import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useCreateDatasourceMutation } from '../../model/datasource-client';
-import { useCreateVariableMutation } from '../../model/variable-client';
+import { useCreateDatasourceMutation, useDatasourceList } from '../../model/datasource-client';
+import { useCreateVariableMutation, useVariableList } from '../../model/variable-client';
 import {
   useIsAuthEnabled,
   useIsEphemeralDashboardEnabled,
@@ -44,16 +44,17 @@ import {
   useIsProjectVariableEnabled,
   useIsReadonly,
 } from '../../context/Config';
-import { MenuTab, MenuTabs } from '../../components/tabs';
-import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
+import { MenuTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
+import { useCreateRoleBindingMutation, useRoleBindingList } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
-import { useCreateSecretMutation } from '../../model/secret-client';
+import { useCreateSecretMutation, useSecretList } from '../../model/secret-client';
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { useHasPermission } from '../../context/Authorization';
+import { useDashboardList } from '../../model/dashboard-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectEphemeralDashboards } from './tabs/ProjectEphemeralDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
@@ -384,25 +385,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   }
 }
 
-interface TabPanelProps extends BoxProps {
-  index: string;
-  value: string;
-}
-
-function TabPanel({ children, value, index, ...props }: TabPanelProps): ReactElement {
-  return (
-    <Box
-      role="tabpanel"
-      hidden={value !== index}
-      id={`project-tabpanel-${index}`}
-      aria-labelledby={`project-tab-${index}`}
-      {...props}
-    >
-      {value === index && children}
-    </Box>
-  );
-}
-
 function a11yProps(index: string): Record<string, unknown> {
   return {
     id: `project-tab-${index}`,
@@ -428,6 +410,14 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const { data } = useEphemeralDashboardList(projectName);
   const hasEphemeralDashboards = (data ?? []).length > 0;
 
+  // Fetch counts for tab badges
+  const { data: dashboards } = useDashboardList({ project: projectName, metadataOnly: true });
+  const { data: variables } = useVariableList(projectName);
+  const { data: datasources } = useDatasourceList({ project: projectName });
+  const { data: secrets } = useSecretList(projectName);
+  const { data: roles } = useRoleList(projectName);
+  const { data: roleBindings } = useRoleBindingList(projectName);
+
   const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
   const hasDashboardReadPermission = useHasPermission('read', projectName, 'Dashboard');
@@ -449,7 +439,14 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ borderBottom: 1, borderColor: 'divider' }}
+        sx={{
+          bgcolor: 'background.paper',
+          borderRadius: '8px 8px 0 0',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderBottom: 'none',
+          px: 1,
+        }}
       >
         <MenuTabs
           value={value}
@@ -460,7 +457,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           aria-label="Project tabs"
         >
           <MenuTab
-            label="Dashboards"
+            label={<TabLabel label="Dashboards" count={dashboards?.length} />}
             icon={<ViewDashboardIcon />}
             iconPosition="start"
             {...a11yProps(dashboardsTabIndex)}
@@ -479,7 +476,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           )}
           {isProjectVariableEnabled && (
             <MenuTab
-              label="Variables"
+              label={<TabLabel label="Variables" count={variables?.length} />}
               icon={<CodeJsonIcon />}
               iconPosition="start"
               {...a11yProps(variablesTabIndex)}
@@ -489,7 +486,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           )}
           {isProjectDatasourceEnabled && (
             <MenuTab
-              label="Datasources"
+              label={<TabLabel label="Datasources" count={datasources?.length} />}
               icon={<DatabaseIcon />}
               iconPosition="start"
               {...a11yProps(datasourcesTabIndex)}
@@ -498,7 +495,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
             />
           )}
           <MenuTab
-            label="Secrets"
+            label={<TabLabel label="Secrets" count={secrets?.length} />}
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
@@ -507,7 +504,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           />
           {isAuthEnabled && (
             <MenuTab
-              label="Roles"
+              label={<TabLabel label="Roles" count={roles?.length} />}
               icon={<ShieldIcon />}
               iconPosition="start"
               {...a11yProps(rolesTabIndex)}
@@ -517,7 +514,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
           )}
           {isAuthEnabled && (
             <MenuTab
-              label="Role Bindings"
+              label={<TabLabel label="Role Bindings" count={roleBindings?.length} />}
               icon={<ShieldAccountIcon />}
               iconPosition="start"
               {...a11yProps(roleBindingsTabIndex)}
@@ -529,33 +526,33 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
         {!isMobileSize && <TabButton index={value} projectName={projectName} />}
       </Stack>
       {isMobileSize && <TabButton index={value} projectName={projectName} fullWidth sx={{ marginTop: 0.5 }} />}
-      <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+      <TabPanel value={value} idPrefix="project" index={dashboardsTabIndex} sx={{ marginTop: 0 }}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
       {isEphemeralDashboardEnabled && hasEphemeralDashboards && (
-        <TabPanel value={value} index={ephemeralDashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+        <TabPanel value={value} idPrefix="project" index={ephemeralDashboardsTabIndex} sx={{ marginTop: 0 }}>
           <ProjectEphemeralDashboards projectName={projectName} id="project-ephemeral-dashboard-list" />
         </TabPanel>
       )}
       {isProjectVariableEnabled && (
-        <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+        <TabPanel value={value} idPrefix="project" index={variablesTabIndex} sx={{ marginTop: 0 }}>
           <ProjectVariables projectName={projectName} id="project-variable-list" />
         </TabPanel>
       )}
       {isProjectDatasourceEnabled && (
-        <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+        <TabPanel value={value} idPrefix="project" index={datasourcesTabIndex} sx={{ marginTop: 0 }}>
           <ProjectDatasources projectName={projectName} id="project-datasource-list" />
         </TabPanel>
       )}
-      <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+      <TabPanel value={value} idPrefix="project" index={secretsTabIndex} sx={{ marginTop: 0 }}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
       {isAuthEnabled && (
         <>
-          <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <TabPanel value={value} idPrefix="project" index={rolesTabIndex} sx={{ marginTop: 0 }}>
             <ProjectRoles projectName={projectName} id="project-role-list" />
           </TabPanel>
-          <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <TabPanel value={value} idPrefix="project" index={roleBindingsTabIndex} sx={{ marginTop: 0 }}>
             <ProjectRoleBindings projectName={projectName} id="project-rolebinding-list" />
           </TabPanel>
         </>
