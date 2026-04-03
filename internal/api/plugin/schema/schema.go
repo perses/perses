@@ -110,6 +110,8 @@ type Schema interface {
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetDatasourceSchema(pluginName string) (*build.Instance, error)
+	GetAllSchemas() []LoadSchema
+	GetSchema(kind plugin.Kind, name string) (*build.Instance, error)
 }
 
 func New() Schema {
@@ -253,6 +255,99 @@ func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance
 	return s.sch.getDatasourceSchema(pluginName, nil)
 }
 
+func (s *completeSchema) GetAllSchemas() []LoadSchema {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	schemas := collectFromSch(*s.sch)
+	devSchemas := collectFromSch(*s.devSch)
+
+	return append(schemas, devSchemas...)
+}
+
+func collectFromSch(sch sch) []LoadSchema {
+	var schemas []LoadSchema
+	// iterate through all datasources
+	for node, versions := range sch.datasources {
+		for version, instance := range versions {
+			if version == plugin.LatestVersion {
+				continue
+			}
+			schemas = append(schemas, LoadSchema{
+				Kind:     plugin.KindDatasource,
+				Name:     node.Name,
+				Instance: instance,
+			})
+		}
+	}
+	// all panels
+	for node, versions := range sch.panels {
+		for version, instance := range versions {
+			if version == plugin.LatestVersion {
+				continue
+			}
+			schemas = append(schemas, LoadSchema{
+				Kind:     plugin.KindPanel,
+				Name:     node.Name,
+				Instance: instance,
+			})
+		}
+	}
+	// all variables
+	for node, versions := range sch.variables {
+		for version, instance := range versions {
+			if version == plugin.LatestVersion {
+				continue
+			}
+			schemas = append(schemas, LoadSchema{
+				Kind:     plugin.KindVariable,
+				Name:     node.Name,
+				Instance: instance,
+			})
+		}
+	}
+	// all queries
+	for node, versions := range sch.queries {
+		for version, instance := range versions {
+			if version == plugin.LatestVersion {
+				continue
+			}
+			schemas = append(schemas, LoadSchema{
+				Kind:     plugin.KindQuery,
+				Name:     node.Name,
+				Instance: instance,
+			})
+		}
+	}
+	return schemas
+}
+
+func (s *completeSchema) GetSchema(kind plugin.Kind, name string) (*build.Instance, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	switch kind {
+	case plugin.KindDatasource:
+		if _, ok := s.devSch.datasources.GetWithPluginMetadata(name, nil); ok {
+			return s.devSch.getDatasourceSchema(name, nil)
+		}
+	case plugin.KindPanel:
+		if _, ok := s.devSch.panels.GetWithPluginMetadata(name, nil); ok {
+			return s.devSch.getPanelSchema(name, nil)
+		}
+	case plugin.KindVariable:
+		if _, ok := s.devSch.variables.GetWithPluginMetadata(name, nil); ok {
+			return s.devSch.getVariableSchema(name, nil)
+		}
+	case plugin.KindQuery:
+		if _, ok := s.devSch.queries.GetWithPluginMetadata(name, nil); ok {
+			return s.devSch.getQuerySchema(name, nil)
+		}
+	}
+
+	return nil, fmt.Errorf("schema not found for plugin %s of kind %s", name, kind)
+}
+
 func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -349,13 +444,46 @@ func (s *sch) validateVariable(plugin common.Plugin, variableName string) error 
 	return validatePlugin(plugin, instance, "variable", variableName)
 }
 
-func (s *sch) getDatasourceSchema(datasourceName string, metadata *common.PluginMetadata) (*build.Instance, error) {
+func (s *sch) getDatasourceSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
 		return nil, fmt.Errorf("datasource schemas are not loaded")
 	}
-	instance, ok := s.datasources.GetWithPluginMetadata(datasourceName, metadata)
+	instance, ok := s.datasources.GetWithPluginMetadata(name, metadata)
 	if !ok {
-		return nil, fmt.Errorf("datasource schema not found for plugin %s", datasourceName)
+		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+	}
+	return instance, nil
+}
+
+func (s *sch) getPanelSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
+	if len(s.datasources) == 0 {
+		return nil, fmt.Errorf("datasource schemas are not loaded")
+	}
+	instance, ok := s.panels.GetWithPluginMetadata(name, metadata)
+	if !ok {
+		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+	}
+	return instance, nil
+}
+
+func (s *sch) getVariableSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
+	if len(s.datasources) == 0 {
+		return nil, fmt.Errorf("datasource schemas are not loaded")
+	}
+	instance, ok := s.variables.GetWithPluginMetadata(name, metadata)
+	if !ok {
+		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+	}
+	return instance, nil
+}
+
+func (s *sch) getQuerySchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
+	if len(s.datasources) == 0 {
+		return nil, fmt.Errorf("datasource schemas are not loaded")
+	}
+	instance, ok := s.queries.GetWithPluginMetadata(name, metadata)
+	if !ok {
+		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
 	}
 	return instance, nil
 }
