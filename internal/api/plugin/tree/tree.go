@@ -19,16 +19,16 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-type node struct {
-	name     string
+type Node struct {
+	Name     string
 	registry string
 }
 
-func newNode(name, registry string) node {
+func newNode(name, registry string) Node {
 	if registry == "" {
 		registry = plugin.DefaultRegistry
 	}
-	return node{name: name, registry: registry}
+	return Node{Name: name, registry: registry}
 }
 
 func Merge[T any](a, b Tree[T]) Tree[T] {
@@ -47,7 +47,7 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 				continue
 			}
 			// Here we are adding manually to ensure the latest version pointer is correctly set.
-			result.Add(key.name, plugin.ModuleMetadata{Registry: key.registry, Version: version}, instance)
+			result.Add(key.Name, plugin.ModuleMetadata{Registry: key.registry, Version: version}, instance)
 		}
 	}
 	return result
@@ -57,7 +57,7 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 // This struct is here to allow to manage multiple versions of the same plugin and the latest version of the plugin.
 // The first map key is the node (name + registry).
 // The second map key is the version of the plugin.
-type Tree[T any] map[node]map[string]T
+type Tree[T any] map[Node]map[string]T
 
 func (t Tree[T]) Add(name string, moduleMetadata plugin.ModuleMetadata, instance T) {
 	key := newNode(name, moduleMetadata.Registry)
@@ -122,7 +122,7 @@ func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *common.Plugi
 }
 
 // isLatest is checking if the given version is the latest one for the given schemaNameKind
-func (t Tree[T]) isLatest(key node, version string) bool {
+func (t Tree[T]) isLatest(key Node, version string) bool {
 	for v := range t[key] {
 		if v == plugin.LatestVersion {
 			continue
@@ -134,7 +134,7 @@ func (t Tree[T]) isLatest(key node, version string) bool {
 	return true
 }
 
-func (t Tree[T]) getLatestVersion(key node) string {
+func (t Tree[T]) getLatestVersion(key Node) string {
 	var currentVersion string
 	for v := range t[key] {
 		if v == plugin.LatestVersion {
