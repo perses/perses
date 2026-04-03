@@ -65,7 +65,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 		currentDir, _ := filepath.Split(currentPath)
 		logrus.Tracef("Loading model package from %s", currentDir)
 		// Name is the lowest type level of the plugin. For example, for the Prometheus module, it can return PrometheusTimeseriesQuery.
-		// It is called named because in the plugin definition located in package.json, this value is present in the field name.
+		// It is called "name" because in the plugin definition located in package.json, this value is present in the `name` field.
 		// Example - extract from package.json:
 		//       {
 		//        "kind": "TimeSeriesQuery",
@@ -77,7 +77,7 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 		//        }
 		//      },
 		//
-		// Then in the schema PrometheusTimeSeriesQuery is defined in the field `kind`
+		// Besides in the plugin schema, "PrometheusTimeSeriesQuery" is the value of the `kind` field
 		// Example - extract from query.cue:
 		//
 		// kind: "PrometheusTimeSeriesQuery"
@@ -317,8 +317,9 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	}
 	for _, schema := range schemas {
 		if schema.Kind.IsQuery() {
-			// Here the information about the super type of the query (aka is a TimeSeriesQuery for example) disappear.
-			// This is not good because then you might be able to associate the super type `LogQuery` with the plugin implementation `PrometheusTimeSeriesQuery`
+			// Here the information about the "super type" of the query (aka TimeSeriesQuery for PrometheusTimeSeriesQuery) disappears.
+			// This is a known validation gap yet to be solved: because of this you can currently wrongly pass the validation
+			// with e.g the super type `LogQuery` & the plugin implementation `PrometheusTimeSeriesQuery`.
 			s.queries.Add(schema.Name, module.Metadata, schema.Instance)
 		} else {
 			switch schema.Kind {
