@@ -457,33 +457,33 @@ func (s *sch) getDatasourceSchema(name string, metadata *common.PluginMetadata) 
 
 func (s *sch) getPanelSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
-		return nil, fmt.Errorf("datasource schemas are not loaded")
+		return nil, fmt.Errorf("panel schemas are not loaded")
 	}
 	instance, ok := s.panels.GetWithPluginMetadata(name, metadata)
 	if !ok {
-		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+		return nil, fmt.Errorf("panel schema not found for plugin %s", name)
 	}
 	return instance, nil
 }
 
 func (s *sch) getVariableSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
-		return nil, fmt.Errorf("datasource schemas are not loaded")
+		return nil, fmt.Errorf("variable schemas are not loaded")
 	}
 	instance, ok := s.variables.GetWithPluginMetadata(name, metadata)
 	if !ok {
-		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+		return nil, fmt.Errorf("variable schema not found for plugin %s", name)
 	}
 	return instance, nil
 }
 
 func (s *sch) getQuerySchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
-		return nil, fmt.Errorf("datasource schemas are not loaded")
+		return nil, fmt.Errorf("query schemas are not loaded")
 	}
 	instance, ok := s.queries.GetWithPluginMetadata(name, metadata)
 	if !ok {
-		return nil, fmt.Errorf("datasource schema not found for plugin %s", name)
+		return nil, fmt.Errorf("query schema not found for plugin %s", name)
 	}
 	return instance, nil
 }
