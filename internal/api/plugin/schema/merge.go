@@ -44,6 +44,7 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 		}
 	}
 	// OR join all expressions
+	// start with the first expr, and OR join all the next ones
 	complete := expr[0]
 	for _, e := range expr[1:] {
 		complete = &ast.BinaryExpr{

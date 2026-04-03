@@ -14,6 +14,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -22,7 +23,9 @@ import (
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
+	"cuelang.org/go/cue/format"
 	"cuelang.org/go/cue/load"
+	"cuelang.org/go/encoding/jsonschema"
 	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
@@ -110,4 +113,33 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 		return fmt.Errorf("invalid %s %s: %s", pluginType, pluginName, fullErrStr)
 	}
 	return nil
+}
+
+func ExportToCUE(v cue.Value) ([]byte, error) {
+	// generate expr
+	node := v.Syntax(
+		cue.Docs(true),
+		cue.Definitions(true),
+		cue.All(),
+	)
+	// format CUE expr
+	data, err := format.Node(node, format.Simplify())
+	if err != nil {
+		return nil, fmt.Errorf("could not format CUE value: %w", err)
+	}
+	return data, nil
+}
+
+func ExportToJSONSchema(v cue.Value) ([]byte, error) {
+	// generate expr
+	expr, err := jsonschema.Generate(v, nil)
+	if err != nil {
+		return nil, fmt.Errorf("generating JSON Schema: %w", err)
+	}
+	// marshal JSON response
+	data, err := json.Marshal(expr)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling JSON Schema: %w", err)
+	}
+	return data, nil
 }
