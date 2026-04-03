@@ -109,7 +109,6 @@ type Schema interface {
 	ValidateGlobalVariable(v v1.VariableSpec) error
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
-	GetDatasourceSchema(pluginName string) (*build.Instance, error)
 	GetAllSchemas() []LoadSchema
 	GetSchema(kind plugin.Kind, name string) (*build.Instance, error)
 }
@@ -239,20 +238,6 @@ func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) 
 		return s.devSch.validateVariable(plugin, varName)
 	}
 	return s.sch.validateVariable(plugin, varName)
-}
-
-func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
-	// For the moment, we are only supporting the plugin datasource from the perses registry for the datasource discovery.
-	// The discovery is not really well used and having multiple registries for datasources is not a common use case currently.
-	// This hack should be fine for a while.
-
-	if _, ok := s.devSch.datasources.GetWithPluginMetadata(pluginName, nil); ok {
-		return s.devSch.getDatasourceSchema(pluginName, nil)
-	}
-	return s.sch.getDatasourceSchema(pluginName, nil)
 }
 
 func (s *completeSchema) GetAllSchemas() []LoadSchema {
