@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"mime"
 	"net/http"
 	"net/http/httputil"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -174,6 +176,10 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 		if strings.Contains(fileName, ".js") {
 			data = bytes.ReplaceAll(data, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
 		}
+		if ct := mime.TypeByExtension(filepath.Ext(fileName)); ct != "" {
+			c.Response().Header().Set("Content-Type", ct)
+		}
+		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		_, err = c.Response().Write(data)
 		return apiinterface.HandleError(err)
 	}
@@ -231,6 +237,8 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		return apiinterface.HandleError(err)
 	}
 	idx = bytes.ReplaceAll(idx, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
+	c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 	_, err = c.Response().Write(idx)
 	return apiinterface.HandleError(err)
 }
