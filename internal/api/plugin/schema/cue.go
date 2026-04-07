@@ -140,6 +140,9 @@ func ExportToJSONSchema(v cue.Value) ([]byte, error) {
 	// build expr
 	ctx := cuecontext.New()
 	jsonSchema := ctx.BuildExpr(jsonExpr)
+	if jsonSchema.Err() != nil {
+		return nil, jsonSchema.Err()
+	}
 
 	// marshal JSON response
 	data, err := json.Marshal(jsonSchema)
