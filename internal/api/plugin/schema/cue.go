@@ -134,20 +134,20 @@ func ExportToJSONSchema(v cue.Value) ([]byte, error) {
 	// generate expr
 	jsonExpr, err := jsonschema.Generate(v, nil)
 	if err != nil {
-		return nil, fmt.Errorf("generating JSON Schema: %w", err)
+		return nil, fmt.Errorf("error while generating JSON schema: %w", err)
 	}
 
 	// build expr
 	ctx := cuecontext.New()
 	jsonSchema := ctx.BuildExpr(jsonExpr)
 	if jsonSchema.Err() != nil {
-		return nil, jsonSchema.Err()
+		return nil, fmt.Errorf("error while building expression: %w", jsonSchema.Err())
 	}
 
 	// marshal JSON response
 	data, err := json.Marshal(jsonSchema)
 	if err != nil {
-		return nil, fmt.Errorf("marshaling JSON Schema: %w", err)
+		return nil, fmt.Errorf("error while marshaling JSON schema: %w", err)
 	}
 	return data, nil
 }
