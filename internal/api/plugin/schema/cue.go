@@ -132,12 +132,17 @@ func ExportToCUE(v cue.Value) ([]byte, error) {
 
 func ExportToJSONSchema(v cue.Value) ([]byte, error) {
 	// generate expr
-	expr, err := jsonschema.Generate(v, nil)
+	jsonExpr, err := jsonschema.Generate(v, nil)
 	if err != nil {
 		return nil, fmt.Errorf("generating JSON Schema: %w", err)
 	}
+
+	// build expr
+	ctx := cuecontext.New()
+	jsonSchema := ctx.BuildExpr(jsonExpr)
+
 	// marshal JSON response
-	data, err := json.Marshal(expr)
+	data, err := json.Marshal(jsonSchema)
 	if err != nil {
 		return nil, fmt.Errorf("marshaling JSON Schema: %w", err)
 	}
