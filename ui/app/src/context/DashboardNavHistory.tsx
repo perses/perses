@@ -22,7 +22,11 @@ export interface DashboardNavHistoryItem {
 }
 
 const NavHistoryContext = createContext<DashboardNavHistoryItem[] | undefined>(undefined);
-const NavHistoryDispatchContext = createContext<Dispatch<{ project: string; name: string }>>(() => undefined);
+const NavHistoryDispatchContext = createContext<
+  Dispatch<{ project: string; name: string } | { type: 'remove'; project: string; name: string }>
+>(() => undefined);
+
+export type NavHistoryAction = { type: 'remove'; project: string; name: string };
 
 export function NavHistoryProvider(props: { children: React.ReactNode }): ReactElement {
   const initial = useMemo(() => {
@@ -43,8 +47,16 @@ export function NavHistoryProvider(props: { children: React.ReactNode }): ReactE
 
 function historyReducer(
   history: DashboardNavHistoryItem[],
-  resource: { project: string; name: string }
+  resource: { project: string; name: string } | { type: 'remove'; project: string; name: string }
 ): DashboardNavHistoryItem[] {
+  // Handle remove action
+  if ('type' in resource && resource.type === 'remove') {
+    const newHistory = history.filter((item) => !(item.project === resource.project && item.name === resource.name));
+    window.localStorage.setItem(PERSES_DASHBOARD_NAV_HISTORY_KEY, JSON.stringify(newHistory));
+    return newHistory;
+  }
+
+  // Handle add/update action
   const index = history.findIndex((item) => item.project === resource.project && item.name === resource.name);
   if (index > -1) {
     // If the history already contains the dashboard, remove it
@@ -76,7 +88,7 @@ export function useNavHistory(): DashboardNavHistoryItem[] {
   return ctx;
 }
 
-export function useNavHistoryDispatch(): Dispatch<{ project: string; name: string }> {
+export function useNavHistoryDispatch(): Dispatch<{ project: string; name: string } | NavHistoryAction> {
   const ctx = useContext(NavHistoryDispatchContext);
   if (ctx === undefined) {
     throw new Error('No NavHistoryDispatchContext found. Did you forget a Provider?');

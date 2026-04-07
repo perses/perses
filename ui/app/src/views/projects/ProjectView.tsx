@@ -12,28 +12,16 @@
 // limitations under the License.
 
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Stack,
-  CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Tooltip,
-} from '@mui/material';
+import { Box, Stack, CircularProgress } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import DotsVertical from 'mdi-material-ui/DotsVertical';
 import { ProjectResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { DeleteResourceDialog, RenameResourceDialog } from '../../components/dialogs';
 import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { useIsMobileSize } from '../../utils/browser-size';
-import { useIsReadonly } from '../../context/Config';
-import { useHasPermission } from '../../context/Authorization';
 import { useDeleteProjectMutation, useProject, useUpdateProjectMutation } from '../../model/project-client';
 import { ProjectTabs } from './ProjectTabs';
 
@@ -47,17 +35,12 @@ function ProjectView(): ReactElement {
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const isReadonly = useIsReadonly();
-  const canUpdate = useHasPermission('update', projectName, 'Project');
-  const canDelete = useHasPermission('delete', projectName, 'Project');
 
   const updateProjectMutation = useUpdateProjectMutation();
   const deleteProjectMutation = useDeleteProjectMutation();
 
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
   const [isRenameProjectDialogOpen, setIsRenameProjectDialogOpen] = useState<boolean>(false);
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const isMenuOpen = Boolean(menuAnchorEl);
 
   function handleProjectRename(project: ProjectResource, newName: string): void {
     updateProjectMutation.mutate(
@@ -100,91 +83,63 @@ function ProjectView(): ReactElement {
     );
   }
 
-  const hasAnyAction = !isReadonly && (canUpdate || canDelete);
-
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
-      {/* Header: breadcrumbs + actions */}
-      <Stack
-        direction={isMobileSize ? 'column' : 'row'}
-        alignItems={isMobileSize ? 'flex-start' : 'center'}
-        justifyContent="space-between"
-        gap={isMobileSize ? 1 : 0}
-      >
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2.5}>
+      <Stack gap={1.5}>
         <ProjectBreadcrumbs project={project} />
-        {hasAnyAction && (
-          <>
-            <Tooltip title="Project actions">
-              <IconButton
-                size="small"
-                onClick={(e) => setMenuAnchorEl(e.currentTarget)}
-                aria-label="Project actions"
-                sx={{
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 1.5,
-                  width: 36,
-                  height: 36,
-                }}
-              >
-                <DotsVertical sx={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              anchorEl={menuAnchorEl}
-              open={isMenuOpen}
-              onClose={() => setMenuAnchorEl(null)}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              slotProps={{ paper: { sx: { minWidth: 180, mt: 0.5 } } }}
-            >
-              <MenuItem
-                disabled={!canUpdate}
-                onClick={() => {
-                  setMenuAnchorEl(null);
-                  setIsRenameProjectDialogOpen(true);
-                }}
-              >
-                <ListItemIcon>
-                  <PencilIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Rename project</ListItemText>
-              </MenuItem>
-              <Divider />
-              <MenuItem
-                disabled={!canDelete}
-                onClick={() => {
-                  setMenuAnchorEl(null);
-                  setIsDeleteProjectDialogOpen(true);
-                }}
-                sx={{ color: 'error.main' }}
-              >
-                <ListItemIcon>
-                  <DeleteOutline fontSize="small" sx={{ color: 'error.main' }} />
-                </ListItemIcon>
-                <ListItemText>Delete project</ListItemText>
-              </MenuItem>
-            </Menu>
-          </>
-        )}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          gap={1}
+          sx={{ alignSelf: { xs: 'stretch', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}
+        >
+          <CRUDButton
+            action="update"
+            scope="Project"
+            project={projectName}
+            variant="contained"
+            onClick={() => setIsRenameProjectDialogOpen(true)}
+          >
+            {isMobileSize ? <PencilIcon /> : 'Rename project'}
+          </CRUDButton>
+          <CRUDButton
+            action="delete"
+            scope="Project"
+            project={projectName}
+            variant="outlined"
+            color="error"
+            onClick={() => setIsDeleteProjectDialogOpen(true)}
+          >
+            {isMobileSize ? <DeleteOutline /> : 'Delete project'}
+          </CRUDButton>
+        </Stack>
       </Stack>
-
-      {/* Main content */}
-      <ProjectTabs projectName={projectName} initialTab={tab} />
-
-      {/* Dialogs */}
-      <RenameResourceDialog
-        resource={project}
-        open={isRenameProjectDialogOpen}
-        onSubmit={(name) => handleProjectRename(project, name)}
-        onClose={() => setIsRenameProjectDialogOpen(false)}
-      />
-      <DeleteResourceDialog
-        resource={project}
-        open={isDeleteProjectDialogOpen}
-        onSubmit={() => handleProjectDelete(projectName)}
-        onClose={() => setIsDeleteProjectDialogOpen(false)}
-      />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'minmax(0, 1fr)',
+            xl: 'minmax(0, 1fr)',
+          },
+          gap: 3,
+          alignItems: 'start',
+        }}
+      >
+        <Box sx={{ minWidth: 0 }}>
+          <ProjectTabs projectName={projectName} initialTab={tab} />
+        </Box>
+        <RenameResourceDialog
+          resource={project}
+          open={isRenameProjectDialogOpen}
+          onSubmit={(projectName) => handleProjectRename(project, projectName)}
+          onClose={() => setIsRenameProjectDialogOpen(false)}
+        />
+        <DeleteResourceDialog
+          resource={project}
+          open={isDeleteProjectDialogOpen}
+          onSubmit={() => handleProjectDelete(projectName)}
+          onClose={() => setIsDeleteProjectDialogOpen(false)}
+        />
+      </Box>
     </Stack>
   );
 }
