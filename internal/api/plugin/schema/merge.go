@@ -20,7 +20,6 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/token"
-	"github.com/sirupsen/logrus"
 )
 
 func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
@@ -28,19 +27,41 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 
 	for _, ls := range schemas {
 		// build instance for all schemas
-		inst := ctx.BuildInstance(ls.Instance)
+		inst := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if inst.Err() != nil {
 			return cue.Value{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
-		// cast all schemas to ast.Expr
+		// cast all schemas to ast.Expr or ast.File
 		node := inst.Syntax(
 			cue.Final(),
+			cue.All(),
+			cue.Definitions(true),
 		)
-		if e, ok := node.(ast.Expr); ok {
-			expr = append(expr, e)
-		} else {
-			logrus.Warningf("failed to cast %s to ast.Expr", ls.Name)
+
+		// casting into ast.Expr
+		// cannot simply use node.(ast.Expr) as it can fail for plugins with package declarations and/or import statements in their schema
+		// in such cases inst.Syntax() returns *ast.File that is not directly castable into ast.Expr
+		var tmpExpr ast.Expr
+		switch n := node.(type) {
+		case ast.Expr:
+			tmpExpr = n
+		// handling *ast.File
+		case *ast.File:
+			var elts []ast.Decl
+			for _, declr := range n.Decls {
+				switch declr.(type) {
+				case *ast.Package, *ast.ImportDecl:
+					continue
+				default:
+					elts = append(elts, declr)
+				}
+			}
+			tmpExpr = &ast.StructLit{Elts: elts}
+		default:
+			// TODO: return with just an empty cue.Value, or just skip the failing plugin?
+			return cue.Value{}, fmt.Errorf("unexpected ast.Node type %T for schema %s", node, ls.Name)
 		}
+		expr = append(expr, tmpExpr)
 	}
 	// OR join all expressions
 	// start with the first expr, and OR join all the next ones'
