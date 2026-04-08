@@ -14,6 +14,7 @@
 package schema
 
 import (
+	"errors"
 	"fmt"
 
 	"cuelang.org/go/cue"
@@ -33,9 +34,7 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 		}
 		// cast all schemas to ast.Expr
 		node := inst.Syntax(
-			cue.Docs(true),
-			cue.All(),
-			cue.Definitions(true),
+			cue.Final(),
 		)
 		if e, ok := node.(ast.Expr); ok {
 			expr = append(expr, e)
@@ -44,19 +43,22 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 		}
 	}
 	// OR join all expressions
-	// start with the first expr, and OR join all the next ones
-	complete := expr[0]
-	for _, e := range expr[1:] {
-		complete = &ast.BinaryExpr{
-			Op: token.OR,
-			X:  complete,
-			Y:  e,
+	// start with the first expr, and OR join all the next ones'
+	if len(expr) > 0 {
+		complete := expr[0]
+		for _, e := range expr[1:] {
+			complete = &ast.BinaryExpr{
+				Op: token.OR,
+				X:  complete,
+				Y:  e,
+			}
 		}
+		// build the final expression value
+		value := ctx.BuildExpr(complete)
+		if value.Err() != nil {
+			return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
+		}
+		return value, nil
 	}
-	// build the final expression value
-	value := ctx.BuildExpr(complete)
-	if value.Err() != nil {
-		return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
-	}
-	return value, nil
+	return cue.Value{}, errors.New("no plugin schemas returned")
 }
