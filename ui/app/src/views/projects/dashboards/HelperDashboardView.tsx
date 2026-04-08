@@ -55,6 +55,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     isCreating,
     isLeavingConfirmDialogEnabled = true,
   } = props;
+  const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
@@ -114,7 +115,11 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={
-                    <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
+                    <ProjectBreadcrumbs
+                      dashboardName={getResourceDisplayName(dashboardResource)}
+                      project={project}
+                      variant={breadcrumbVariant}
+                    />
                   }
                   onSave={onSave}
                   onDiscard={onDiscard}

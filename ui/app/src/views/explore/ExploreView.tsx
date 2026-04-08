@@ -25,11 +25,7 @@ import { useGlobalVariableList } from '../../model/global-variable-client';
 import { buildGlobalVariableDefinition } from '../../utils/variables';
 
 function ExploreView(): ReactElement {
-  return (
-    <HelperExploreView
-      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize="large" />} />}
-    />
-  );
+  return <HelperExploreView exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass />} />} />;
 }
 
 export interface HelperExploreViewProps {

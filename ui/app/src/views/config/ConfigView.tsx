@@ -19,6 +19,7 @@ import { JSONEditor } from '@perses-dev/components';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import PageHeader from '../../components/page-header/PageHeader';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { PluginsList } from './PluginsList';
@@ -48,8 +49,8 @@ function ConfigView(): ReactElement {
   };
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
-      <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1.5}>
+      <PageHeader breadcrumb={<AppBreadcrumbs rootPageName="Configuration" icon={<Cog />} />} title="Configuration" />
       <Stack>
         <Stack
           direction="row"

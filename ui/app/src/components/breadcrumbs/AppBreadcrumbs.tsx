@@ -13,34 +13,35 @@
 
 import { ReactElement, ReactNode } from 'react';
 import { useIsMobileSize } from '../../utils/browser-size';
-import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
+import { BreadcrumbVariant, Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface AppBreadcrumbsProps {
   rootPageName: string;
   icon: ReactNode;
+  variant?: BreadcrumbVariant;
 }
 
 function AppBreadcrumbs(props: AppBreadcrumbsProps): ReactElement {
-  const { rootPageName, icon } = props;
+  const { rootPageName, icon, variant } = props;
 
   const isMobileSize = useIsMobileSize();
   if (isMobileSize) {
     return (
-      <Breadcrumbs>
-        <StackCrumb>
+      <Breadcrumbs variant={variant}>
+        <StackCrumb variant={variant}>
           {icon}
-          <TitleCrumb>{rootPageName}</TitleCrumb>
+          <TitleCrumb variant={variant}>{rootPageName}</TitleCrumb>
         </StackCrumb>
       </Breadcrumbs>
     );
   }
 
   return (
-    <Breadcrumbs>
-      <HomeLinkCrumb />
-      <StackCrumb>
+    <Breadcrumbs variant={variant}>
+      <HomeLinkCrumb variant={variant} />
+      <StackCrumb variant={variant}>
         {icon}
-        <TitleCrumb>{rootPageName}</TitleCrumb>
+        <TitleCrumb variant={variant}>{rootPageName}</TitleCrumb>
       </StackCrumb>
     </Breadcrumbs>
   );

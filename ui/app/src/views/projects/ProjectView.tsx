@@ -16,11 +16,12 @@ import { Box, Stack, CircularProgress } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ProjectResource } from '@perses-dev/core';
+import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { DeleteResourceDialog, RenameResourceDialog } from '../../components/dialogs';
 import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import PageHeader from '../../components/page-header/PageHeader';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useDeleteProjectMutation, useProject, useUpdateProjectMutation } from '../../model/project-client';
 import { ProjectTabs } from './ProjectTabs';
@@ -85,34 +86,33 @@ function ProjectView(): ReactElement {
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2.5}>
-      <Stack gap={1.5}>
-        <ProjectBreadcrumbs project={project} />
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          gap={1}
-          sx={{ alignSelf: { xs: 'stretch', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}
-        >
-          <CRUDButton
-            action="update"
-            scope="Project"
-            project={projectName}
-            variant="contained"
-            onClick={() => setIsRenameProjectDialogOpen(true)}
-          >
-            {isMobileSize ? <PencilIcon /> : 'Rename project'}
-          </CRUDButton>
-          <CRUDButton
-            action="delete"
-            scope="Project"
-            project={projectName}
-            variant="outlined"
-            color="error"
-            onClick={() => setIsDeleteProjectDialogOpen(true)}
-          >
-            {isMobileSize ? <DeleteOutline /> : 'Delete project'}
-          </CRUDButton>
-        </Stack>
-      </Stack>
+      <PageHeader
+        breadcrumb={<ProjectBreadcrumbs project={project} />}
+        title={getResourceDisplayName(project)}
+        actions={
+          <>
+            <CRUDButton
+              action="update"
+              scope="Project"
+              project={projectName}
+              variant="contained"
+              onClick={() => setIsRenameProjectDialogOpen(true)}
+            >
+              {isMobileSize ? <PencilIcon /> : 'Rename project'}
+            </CRUDButton>
+            <CRUDButton
+              action="delete"
+              scope="Project"
+              project={projectName}
+              variant="outlined"
+              color="error"
+              onClick={() => setIsDeleteProjectDialogOpen(true)}
+            >
+              {isMobileSize ? <DeleteOutline /> : 'Delete project'}
+            </CRUDButton>
+          </>
+        }
+      />
       <Box
         sx={{
           display: 'grid',
