@@ -316,18 +316,22 @@ func (s *completeSchema) GetSchema(kind plugin.Kind, name string) (*build.Instan
 		if _, ok := s.devSch.datasources.GetWithPluginMetadata(name, nil); ok {
 			return s.devSch.getDatasourceSchema(name, nil)
 		}
+		return s.sch.getDatasourceSchema(name, nil)
 	case plugin.KindPanel:
 		if _, ok := s.devSch.panels.GetWithPluginMetadata(name, nil); ok {
 			return s.devSch.getPanelSchema(name, nil)
 		}
+		return s.sch.getPanelSchema(name, nil)
 	case plugin.KindVariable:
 		if _, ok := s.devSch.variables.GetWithPluginMetadata(name, nil); ok {
 			return s.devSch.getVariableSchema(name, nil)
 		}
+		return s.sch.getVariableSchema(name, nil)
 	case plugin.KindQuery:
 		if _, ok := s.devSch.queries.GetWithPluginMetadata(name, nil); ok {
 			return s.devSch.getQuerySchema(name, nil)
 		}
+		return s.sch.getQuerySchema(name, nil)
 	}
 
 	return nil, fmt.Errorf("schema not found for plugin %s of kind %s", name, kind)
