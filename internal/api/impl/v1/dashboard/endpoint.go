@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
@@ -30,6 +31,7 @@ import (
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -85,15 +87,14 @@ func (e *endpoint) List(ctx echo.Context) error {
 	return e.toolbox.List(ctx, q)
 }
 
+// TODO: move this to plugin endpoints, add /plugins/schema to middleware exceptions so that it won't be treated as file call
 func (e *endpoint) Schema(ctx echo.Context) error {
-	// TODO: generate dashboard cue values?
 	// generate plugin cue values - done
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
 		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
 	}
-	// merge? (inject merged plugin cue values into proper places in the dashboard cue value
-	// i.e. datasources into spec.datasources etc?)
+	// merge
 	cueCtx := cuecontext.New()
 	merged, err := schema.MergeSchemas(cueCtx, schemas)
 	if err != nil {
@@ -110,14 +111,36 @@ func (e *endpoint) Schema(ctx echo.Context) error {
 			return apiinterface.InternalError
 		}
 		return ctx.Blob(http.StatusOK, "text/x-cue", data)
-	case "json":
-		data, exportErr := schema.ExportToJSONSchema(merged)
-		if exportErr != nil {
-			logrus.WithError(exportErr).Error("unable to export plugin schemas as JSON Schema")
+	// commenting out, as JSON export still doesn't work
+	// case "json":
+	// 	data, exportErr := schema.ExportToJSONSchema(merged)
+	// 	if exportErr != nil {
+	// 		logrus.WithError(exportErr).Error("unable to export plugin schemas as JSON Schema")
+	// 		return apiinterface.InternalError
+	// 	}
+	// 	return ctx.Blob(http.StatusOK, "application/schema+json", data)
+	default:
+		return apiinterface.HandleBadRequestError("unsupported format: leave empty or use 'cue'")
+	}
+}
+
+func (e *endpoint) DashboardSchema(ctx echo.Context) error {
+	// grab general dashboard schema
+
+	// grab plugin schemas & aggregate them into single cue value per plugin kind
+	plugins := map[v1plugin.Kind]cue.Value{}
+	cueCtx := cuecontext.New()
+	for _, kind := range []v1plugin.Kind{v1plugin.KindDatasource, v1plugin.KindPanel, v1plugin.KindVariable, v1plugin.KindQuery} {
+		schemas := e.pluginSvc.Schema().GetAllSchemasOfKind(kind)
+		merged, err := schema.MergeSchemas(cueCtx, schemas)
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to merge %s plugin schemas", kind)
 			return apiinterface.InternalError
 		}
-		return ctx.Blob(http.StatusOK, "application/schema+json", data)
-	default:
-		return apiinterface.HandleBadRequestError("unsupported format: use 'json' or 'cue'")
+		plugins[kind] = merged
 	}
+	// inject plugin schemas into dashboard schema
+	// return ctx.Blob(http.StatusOK, "text/x-cue", data)
+
+	return nil
 }
