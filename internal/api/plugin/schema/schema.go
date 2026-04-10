@@ -110,6 +110,7 @@ type Schema interface {
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetAllSchemas() []LoadSchema
+	GetAllSchemasOfKind(kind plugin.Kind) []LoadSchema
 	GetSchema(kind plugin.Kind, name string) (*build.Instance, error)
 }
 
@@ -248,6 +249,54 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	devSchemas := collectFromSch(*s.devSch)
 
 	return append(schemas, devSchemas...)
+}
+
+func (s *completeSchema) GetAllSchemasOfKind(kind plugin.Kind) []LoadSchema {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	schemas := collectFromSchOfKind(*s.sch, kind)
+	devSchemas := collectFromSchOfKind(*s.devSch, kind)
+
+	return append(schemas, devSchemas...)
+}
+
+func collectFromSchOfKind(sch sch, kind plugin.Kind) []LoadSchema {
+	var schemas []LoadSchema
+
+	switch kind {
+	case plugin.KindDatasource:
+		for node, versions := range sch.datasources {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindPanel:
+		for node, versions := range sch.panels {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindVariable:
+		for node, versions := range sch.variables {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindQuery:
+		for node, versions := range sch.queries {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	}
+	return schemas
+}
+
+func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v map[string]*build.Instance) []LoadSchema {
+	for version, instance := range v {
+		if version == plugin.LatestVersion {
+			continue
+		}
+		schemas = append(schemas, LoadSchema{
+			Kind:     kind,
+			Name:     n.Name,
+			Instance: instance,
+		})
+	}
+	return schemas
 }
 
 func collectFromSch(sch sch) []LoadSchema {
