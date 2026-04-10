@@ -130,6 +130,8 @@ func ExportToCUE(v cue.Value) ([]byte, error) {
 	return data, nil
 }
 
+// TODO: still not working with the existing plugin schemas, errors out
+// probably due to import statements in schemas?
 func ExportToJSONSchema(v cue.Value) ([]byte, error) {
 	// generate expr
 	jsonExpr, err := jsonschema.Generate(v, nil)
