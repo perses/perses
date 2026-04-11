@@ -12,6 +12,16 @@
 // limitations under the License.
 
 import shared from '../jest.shared';
+import { resolve } from 'path';
 
-// Just use shared config as-is for now
-export default shared;
+// Extend shared config with mappings for cross-workspace packages
+export default {
+  ...shared,
+  moduleNameMapper: {
+    // Map @perses-dev/dashboards to the shared workspace (not in perses/ui)
+    '^@perses-dev/dashboards$': resolve(__dirname, '../../../shared/dashboards/src'),
+
+    // Inherit all other mappings from shared config
+    ...shared.moduleNameMapper,
+  },
+};

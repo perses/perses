@@ -21,8 +21,8 @@ import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } f
 import { isProjectMetadata, Resource } from '@perses-dev/core';
 import IconButton from '@mui/material/IconButton';
 import Close from 'mdi-material-ui/Close';
+import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
 import { useIsMobileSize } from '../../../utils/browser-size';
-import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useProjectList } from '../../../model/project-client';
 import { AdminRoute, ProjectRoute } from '../../../model/route';
@@ -30,8 +30,8 @@ import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { SearchList } from './SearchList';
 
-function shortcutCTRL(): string {
-  return isAppleDevice() ? '⌘' : 'ctrl';
+function shortcutDisplay(): string {
+  return formatForDisplay('Mod+K');
 }
 
 type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
@@ -145,27 +145,15 @@ function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
-  // handle what happens on key press
-  const handleKeyPress = useCallback(
-    (event: KeyboardEvent) => {
-      const ctrlKey = isAppleDevice() ? event.metaKey : event.ctrlKey;
-      if (ctrlKey && event.key === 'k') {
-        event.preventDefault();
-        handleOpen();
-      }
-    },
-    [handleOpen]
-  );
-
   useEffect(() => {
-    // attach the event listener
-    document.addEventListener('keydown', handleKeyPress);
-
-    // remove the event listener
-    return (): void => {
-      document.removeEventListener('keydown', handleKeyPress);
+    const handler = (): void => {
+      handleOpen();
     };
-  }, [handleKeyPress]);
+    window.addEventListener(OPEN_SEARCH_EVENT, handler);
+    return (): void => {
+      window.removeEventListener(OPEN_SEARCH_EVENT, handler);
+    };
+  }, [handleOpen]);
 }
 
 export function SearchBar(): ReactElement {
@@ -207,7 +195,7 @@ export function SearchBar(): ReactElement {
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
           <Typography>Search...</Typography>
         </Box>
-        {!isMobileSize && <Chip label={`${shortcutCTRL()}+k`} size="small" />}
+        {!isMobileSize && <Chip label={shortcutDisplay()} size="small" />}
       </Button>
       <Modal
         open={open}
