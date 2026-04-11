@@ -21,6 +21,7 @@ import { GlobalShortcuts } from './components/GlobalShortcuts';
 import { ShortcutHelpModal } from './components/ShortcutHelpModal';
 import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
 import { PersesLoader } from './components/PersesLoader';
+import { useIsKeyboardShortcutsEnabled } from './context/Config';
 import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {
@@ -29,6 +30,7 @@ function isDashboardViewRoute(pathname: string): boolean {
 
 function App(): ReactElement {
   const location = useLocation();
+  const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
 
   return (
     <Box
@@ -39,8 +41,8 @@ function App(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      <GlobalShortcuts />
-      <ShortcutHelpModal />
+      {isKeyboardShortcutsEnabled && <GlobalShortcuts />}
+      {isKeyboardShortcutsEnabled && <ShortcutHelpModal />}
       {location.pathname !== SignInRoute &&
         location.pathname !== SignUpRoute &&
         location.pathname !== DelegatedAuthnErrorRoute && <Header />}

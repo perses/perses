@@ -28,7 +28,11 @@ import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
-import { useIsLocalDatasourceEnabled, useIsLocalVariableEnabled } from '../../../context/Config';
+import {
+  useIsKeyboardShortcutsEnabled,
+  useIsLocalDatasourceEnabled,
+  useIsLocalVariableEnabled,
+} from '../../../context/Config';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
 
@@ -58,6 +62,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
 
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
+  const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -122,6 +127,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isReadonly={isReadonly}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
+                  disableShortcuts={!isKeyboardShortcutsEnabled}
                   isEditing={isEditing}
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
