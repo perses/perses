@@ -21,6 +21,15 @@
           },
           "name": "ExoticQuery"
         }
+      },
+      {
+        "kind": "TimeSeriesQuery",
+        "spec": {
+          "display": {
+            "name": "Z Exotic Query"
+          },
+          "name": "ZExoticQuery"
+        }
       }
     ]
   }

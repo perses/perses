@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 
 	"cuelang.org/go/cue/build"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -162,7 +163,13 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *da
 
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
 	isQueryMigrationEmpty := true
-	for _, query := range queries {
+	keys := make([]string, 0, len(queries))
+	for k := range queries {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		query := queries[k]
 		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
 		if pluginErr != nil {
 			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
