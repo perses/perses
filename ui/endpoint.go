@@ -19,8 +19,10 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"mime"
 	"net/http"
 	"net/http/httputil"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -103,6 +105,11 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		// The First thing to do is to replace the URL path with the local path of the plugin.
 		localPath := strings.Replace(req.URL.Path, fmt.Sprintf("%s/plugins/%s", f.apiPrefix, pluginName), loaded.LocalPath, 1)
 		// Then we just need to rely on the echo router to serve the file.
+
+		// X-Content-Type-Options: nosniff is an HTTP response header that tells browsers: "Do not try to guess the content type — trust the Content-Type header I sent you."
+		// Without it, browsers perform "MIME sniffing". For example, a file served as text/plain could be sniffed as text/html and executed as HTML, which could open the door to XSS attacks.
+		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options
+		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		return c.File(localPath)
 	}
 	// Otherwise, it means we are in a dev environment, and we need to proxy the request to the dev server.
@@ -174,6 +181,12 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 		if strings.Contains(fileName, ".js") {
 			data = bytes.ReplaceAll(data, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
 		}
+		contentType := mime.TypeByExtension(filepath.Ext(fileName))
+		if contentType == "" {
+			contentType = http.DetectContentType(data)
+		}
+		c.Response().Header().Set("Content-Type", contentType)
+		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		_, err = c.Response().Write(data)
 		return apiinterface.HandleError(err)
 	}
@@ -231,6 +244,8 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		return apiinterface.HandleError(err)
 	}
 	idx = bytes.ReplaceAll(idx, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
+	c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
+	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 	_, err = c.Response().Write(idx)
 	return apiinterface.HandleError(err)
 }

@@ -11,15 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, UnknownSpec } from './definitions';
+import { DatasourceSpec, DatasourceSelector } from '@perses-dev/spec';
 import { Metadata, ProjectMetadata } from './resource';
-import { Display } from './display';
-
-export interface DatasourceSpec<PluginSpec = UnknownSpec> {
-  display?: Display;
-  default: boolean;
-  plugin: Definition<PluginSpec>;
-}
+export type { DatasourceSelector, DatasourceSpec };
 
 /**
  * A Datasource that's available across all projects.
@@ -39,24 +33,6 @@ export interface DatasourceResource {
   spec: DatasourceSpec;
 }
 
-export type Datasource = DatasourceResource | GlobalDatasourceResource;
-
-/**
- * A selector for pointing at a specific Datasource.
- */
-export interface DatasourceSelector {
-  /**
-   * Kind of the datasource.
-   */
-  kind: string;
-
-  /**
-   * Name of the datasource.
-   * If omitted, it's assumed that you target the default datasource for the specified kind (and group, if set)
-   */
-  name?: string;
-}
-
 /**
  * An intermediary type to regroup the name and the spec of a datasource.
  */
@@ -64,3 +40,5 @@ export interface DatasourceDefinition {
   name: string;
   spec: DatasourceSpec;
 }
+
+export type Datasource = DatasourceResource | GlobalDatasourceResource;

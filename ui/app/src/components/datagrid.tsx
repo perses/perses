@@ -48,17 +48,43 @@ export const DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME = {
 };
 
 export const DATA_GRID_STYLES = {
-  // disable cell selection style
+  border: 'none',
+  // Disable cell focus outline
   '.MuiDataGrid-columnHeader:focus': {
     outline: 'none',
   },
-  // disable cell selection style
   '.MuiDataGrid-cell:focus': {
     outline: 'none',
   },
-  // pointer cursor on ALL rows
+  '.MuiDataGrid-cell:focus-within': {
+    outline: 'none',
+  },
+  // Pointer cursor on rows
   '& .MuiDataGrid-row:hover': {
     cursor: 'pointer',
+  },
+  // Lighter column headers
+  '& .MuiDataGrid-columnHeaders': {
+    borderBottom: '1px solid',
+    borderColor: 'divider',
+  },
+  '& .MuiDataGrid-columnHeaderTitle': {
+    fontWeight: 600,
+    fontSize: '0.75rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: 'text.secondary',
+  },
+  // Subtle row borders
+  '& .MuiDataGrid-row': {
+    '&:last-of-type .MuiDataGrid-cell': {
+      borderBottom: 'none',
+    },
+  },
+  // Clean footer
+  '& .MuiDataGrid-footerContainer': {
+    borderTop: '1px solid',
+    borderColor: 'divider',
   },
 };
 
@@ -72,15 +98,19 @@ export const DATA_GRID_SLOT_PROPS = {
 
 export function GridToolbar(): ReactElement {
   return (
-    <GridToolbarContainer>
-      <Stack direction="row" width="100%" gap={4} m={2}>
-        <Stack sx={{ flexShrink: 1 }} width="100%">
-          <GridToolbarQuickFilter sx={{ width: '100%' }} />
-        </Stack>
-        <Stack direction="row" sx={{ flexShrink: 3 }} width="100%">
-          <GridToolbarColumnsButton slotProps={{ button: { sx: { width: '100%' } } }} />
-          <GridToolbarFilterButton slotProps={{ button: { sx: { width: '100%' } } }} />
-        </Stack>
+    <GridToolbarContainer sx={{ px: 2, py: 1.5, gap: 1 }}>
+      <GridToolbarQuickFilter
+        sx={{
+          flex: 1,
+          maxWidth: 360,
+          '& .MuiInputBase-root': {
+            fontSize: '0.875rem',
+          },
+        }}
+      />
+      <Stack direction="row" sx={{ ml: 'auto' }}>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
       </Stack>
     </GridToolbarContainer>
   );

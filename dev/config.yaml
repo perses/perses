@@ -33,6 +33,7 @@ ephemeral_dashboard:
   cleanup_interval: 1h
 
 frontend:
+  disable_keyboard_shortcuts: false
   explorer:
     enable: true
 

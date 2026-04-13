@@ -28,8 +28,8 @@ const config: Config.InitialOptions = {
     // Use polyfill for jsdom environment
     '^use-resize-observer$': 'use-resize-observer/polyfilled',
 
-    // Tell Jest where other Perses packages live since it doesn't know about project references
-    '^@perses-dev/(.*)$': '<rootDir>/../$1/src',
+    // Tell Jest where other Perses packages live since it doesn't know about project references, (not spec)
+    '^@perses-dev/(?!spec)(.*)$': '<rootDir>/../$1/src',
 
     // Configure Jest to handle stylesheets
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',

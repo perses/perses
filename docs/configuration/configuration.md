@@ -160,6 +160,8 @@ enable_auth: <boolean> | default = false # Optional
 # Note that if it is not provided, it will use a default value.
 # On a production instance, you should set this key.
 # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
+# One way to generate a valid key could be the following command (using only visible characters):
+# LC_ALL=C tr -dc '[:graph:]' < /dev/urandom | head -c 32
 encryption_key: <secret> # Optional
 
 # The path to the file containing the secret key.

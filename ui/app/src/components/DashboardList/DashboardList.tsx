@@ -36,8 +36,10 @@ import {
   TAGS_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
+  VIEWED_AT_COL_DEF,
 } from '../list';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
+import { useNavHistory } from '../../context/DashboardNavHistory';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties extends ListProperties {
@@ -58,6 +60,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const { dashboardList, hideToolbar, isLoading, initialState, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
+  const navHistory = useNavHistory();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -69,17 +72,22 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const rows = useMemo(() => {
-    return dashboardList.map<Row>((dashboard, index) => ({
-      index,
-      project: dashboard.metadata.project,
-      name: dashboard.metadata.name,
-      displayName: getResourceDisplayName(dashboard),
-      version: dashboard.metadata.version ?? 0,
-      createdAt: dashboard.metadata.createdAt ?? '',
-      updatedAt: dashboard.metadata.updatedAt ?? '',
-      tags: dashboard.metadata.tags ?? [],
-    }));
-  }, [dashboardList]);
+    const historyMap = new Map(navHistory.map((h) => [`${h.project}/${h.name}`, h.date]));
+    return dashboardList.map<Row>((dashboard, index) => {
+      const viewedAt = historyMap.get(`${dashboard.metadata.project}/${dashboard.metadata.name}`);
+      return {
+        index,
+        project: dashboard.metadata.project,
+        name: dashboard.metadata.name,
+        displayName: getResourceDisplayName(dashboard),
+        version: dashboard.metadata.version ?? 0,
+        createdAt: dashboard.metadata.createdAt ?? '',
+        updatedAt: dashboard.metadata.updatedAt ?? '',
+        viewedAt: viewedAt,
+        tags: dashboard.metadata.tags ?? [],
+      };
+    });
+  }, [dashboardList, navHistory]);
 
   const [targetedDashboard, setTargetedDashboard] = useState<DashboardResource>();
   const [isDuplicateDashboardDialogStateOpened, setDuplicateDashboardDialogStateOpened] = useState<boolean>(false);
@@ -174,6 +182,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       VERSION_COL_DEF,
       CREATED_AT_COL_DEF,
       UPDATED_AT_COL_DEF,
+      VIEWED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',

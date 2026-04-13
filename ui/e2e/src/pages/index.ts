@@ -14,3 +14,4 @@
 export * from './AppHomePage';
 export * from './AppProjectPage';
 export * from './DashboardPage';
+export * from './SearchBar';

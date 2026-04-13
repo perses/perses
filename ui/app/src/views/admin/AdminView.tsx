@@ -16,6 +16,7 @@ import ShieldStar from 'mdi-material-ui/ShieldStar';
 import { useParams } from 'react-router-dom';
 import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import PageHeader from '../../components/page-header/PageHeader';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { AdminTabs } from './AdminTabs';
 
@@ -24,8 +25,11 @@ function AdminView(): ReactElement {
   const isMobileSize = useIsMobileSize();
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
-      <AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar fontSize="large" />} />
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1.5}>
+      <PageHeader
+        breadcrumb={<AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar />} />}
+        title="Administration"
+      />
       <AdminTabs initialTab={tab} />
     </Stack>
   );

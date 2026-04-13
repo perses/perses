@@ -11,16 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Base type for definitions in JSON config resources.
- */
-export interface Definition<Spec> {
-  kind: string;
-  spec: Spec;
-}
-
-/**
- * Type to represent specs at runtime in framework code where we don't know the spec's real type, probably because it's
- * part of a plugin.
- */
-export type UnknownSpec = Record<string, unknown>;
+export type { Definition, UnknownSpec } from '@perses-dev/spec';

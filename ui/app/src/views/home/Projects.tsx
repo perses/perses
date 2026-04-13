@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import {
+  alpha,
   Box,
+  Card,
+  CardContent,
   CircularProgress,
-  IconButton,
   InputAdornment,
   Paper,
   Stack,
@@ -28,7 +30,6 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
 import Magnify from 'mdi-material-ui/Magnify';
 import { Link as RouterLink } from 'react-router-dom';
-import { KVSearch } from '@nexucis/kvsearch';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
@@ -76,70 +77,92 @@ function ProjectCard({ row }: ProjectCardProps): ReactElement {
   const dashboardsCount = row.dashboards.length;
   const projectName = getResourceDisplayName(row.project);
   const projectColor = getProjectColor(row.project.metadata.name ?? 'default');
+  const projectDescription = dashboardsCount === 0 ? 'Ready for a first dashboard' : 'Browse dashboards and settings';
 
   return (
     <Paper
-      elevation={1}
+      elevation={0}
       component={RouterLink}
       to={`/projects/${row.project.metadata.name}`}
       aria-label={projectName}
       sx={{
         p: 2,
         borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
         cursor: 'pointer',
         textDecoration: 'none',
         color: 'inherit',
-        transition: 'all 0.2s',
+        backgroundColor: 'background.paper',
+        transition: 'border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease',
         '&:hover': {
-          boxShadow: (theme) => theme.shadows[2],
-          transform: 'translateY(-4px)',
+          borderColor: alpha(projectColor, 0.55),
+          bgcolor: 'action.hover',
+          boxShadow: (theme) => theme.shadows[1],
+          transform: 'translateY(-2px)',
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
+      <Stack spacing={1.5}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: alpha(projectColor, theme.palette.mode === 'dark' ? 0.2 : 0.12),
+                border: '1px solid',
+                borderColor: alpha(projectColor, 0.3),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Archive sx={{ color: projectColor, fontSize: 18 }} />
+            </Box>
+
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {projectName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                {projectDescription}
+              </Typography>
+            </Box>
+          </Box>
+
           <Box
             sx={{
-              width: 32,
-              height: 32,
-              borderRadius: 1,
-              bgcolor: projectColor,
+              px: 1,
+              py: 0.5,
+              borderRadius: 999,
+              bgcolor: 'action.hover',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Archive sx={{ color: theme.palette.common.white, fontSize: 18 }} />
-          </Box>
-
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-            >
-              {projectName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
               {dashboardsCount} dashboard{dashboardsCount !== 1 ? 's' : ''}
             </Typography>
           </Box>
         </Box>
 
-        <IconButton
-          size="small"
-          sx={{
-            flexShrink: 0,
-            transition: 'all 0.2s',
-            '&:hover': {
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-            },
-          }}
-        >
-          <ChevronRight fontSize="small" />
-        </IconButton>
-      </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            Open project workspace
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary' }}>
+            <ChevronRight fontSize="small" />
+          </Box>
+        </Box>
+      </Stack>
     </Paper>
   );
 }
@@ -154,12 +177,26 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
 
   if (projectRows.length === 0) {
     return (
-      <EmptyState
-        icon={<Archive sx={{ fontSize: 32, color: 'text.secondary' }} />}
-        message={searchQuery ? `No projects found matching "${searchQuery}"` : 'No projects found'}
-        hint={searchQuery ? 'Try adjusting your search query.' : 'Create a new project to get started.'}
-        sx={{ py: 8 }}
-      />
+      <Paper
+        elevation={0}
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 200,
+        }}
+      >
+        <EmptyState
+          icon={<Archive sx={{ fontSize: 32, color: 'text.secondary' }} />}
+          message={searchQuery ? `No projects found matching "${searchQuery}"` : 'No projects found'}
+          hint={
+            searchQuery ? 'Try a broader search or sort by dashboard count.' : 'Create a new project to get started.'
+          }
+        />
+      </Paper>
     );
   }
 
@@ -170,11 +207,10 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
         gridTemplateColumns: {
           xs: 'minmax(0, 1fr)',
           sm: 'repeat(2, minmax(0, 1fr))',
-          md: 'repeat(3, minmax(0, 1fr))',
-          lg: 'repeat(4, minmax(0, 1fr))',
-          xl: 'repeat(5, minmax(0, 1fr))',
+          lg: 'repeat(3, minmax(0, 1fr))',
+          xl: 'repeat(4, minmax(0, 1fr))',
         },
-        gap: 1.5,
+        gap: 2,
       }}
     >
       {projectRows.map((row) => (
@@ -185,88 +221,131 @@ function RenderProjectGrid(props: RenderProjectGridProps): ReactElement {
 }
 
 export function Projects(): ReactElement {
-  const kvSearch = useMemo(
-    () =>
-      new KVSearch<ProjectWithDashboards>({
-        indexedKeys: [
-          ['dashboards', 'metadata', 'project'], // Matching on the dashboard project name
-          ['dashboards', 'metadata', 'name'], // Matching on the dashboard name
-          ['dashboards', 'spec', 'display', 'name'], // Matching on the dashboard display name
-          ['project', 'metadata', 'name'], // Matching on the project name
-          ['project', 'metadata', 'display', 'name'], // Matching on the project display name
-        ],
-      }),
-    []
-  );
-
   const { data: projectRows, isLoading } = useProjectsWithDashboards();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const allProjectRows = useMemo(() => projectRows ?? [], [projectRows]);
+
   const filteredProjectRows: ProjectWithDashboards[] = useMemo(() => {
     if (searchQuery) {
-      return kvSearch.filter(searchQuery, projectRows ?? []).map((res) => res.original);
+      const query = searchQuery.toLowerCase();
+      return allProjectRows
+        .map((row) => ({
+          ...row,
+          dashboards: row.dashboards.filter(
+            (dashboard) =>
+              dashboard.metadata.name.toLowerCase().includes(query) ||
+              dashboard.spec.display?.name?.toLowerCase().includes(query)
+          ),
+        }))
+        .filter(
+          (row) =>
+            row.project.metadata.name?.toLowerCase().includes(query) ||
+            row.project.spec?.display?.name?.toLowerCase().includes(query) ||
+            row.dashboards.length > 0
+        );
     } else {
-      return projectRows ?? [];
+      return allProjectRows;
     }
-  }, [kvSearch, projectRows, searchQuery]);
+  }, [allProjectRows, searchQuery]);
+
+  const sortedProjectRows = useMemo(() => {
+    const rows = [...filteredProjectRows];
+
+    rows.sort((a, b) => {
+      const nameA = getResourceDisplayName(a.project).toLocaleLowerCase();
+      const nameB = getResourceDisplayName(b.project).toLocaleLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    return rows;
+  }, [filteredProjectRows]);
 
   const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
   return (
-    <Box component="section">
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Archive sx={{ color: 'primary.main' }} />
-          <Typography variant="h2">Projects</Typography>
-        </Box>
+    <Card
+      elevation={0}
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: (theme) => theme.shadows[1],
+      }}
+    >
+      <CardContent sx={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', p: 3, minHeight: 0 }}>
+        <Stack spacing={2.5} sx={{ mb: 3 }}>
+          <Stack
+            direction={{ xs: 'column', lg: 'row' }}
+            spacing={2}
+            justifyContent="space-between"
+            alignItems={{ xs: 'stretch', lg: 'flex-end' }}
+          >
+            <Stack spacing={0.75}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Archive sx={{ color: 'primary.main' }} />
+                <Typography variant="h2">Projects</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                Browse project workspaces and jump into the dashboards you manage most.
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Showing {sortedProjectRows.length} of {allProjectRows.length} project
+                {allProjectRows.length !== 1 ? 's' : ''}
+              </Typography>
+            </Stack>
 
-        <Box
-          sx={{
-            width: { xs: '100%', lg: 'calc((100% - 48px) / 3)' },
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <TextField
-            placeholder="Search projects..."
-            value={searchQuery}
-            onChange={handleSearch}
-            size="small"
-            fullWidth
-            aria-label="Search a Project or a Dashboard"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'action.hover',
-                height: 36,
-                '& fieldset': { border: 'none' },
-                '& input': {
-                  padding: '8px 0',
-                },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Magnify fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-      </Box>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ xs: 'stretch', sm: 'center' }}>
+              <Box sx={{ width: { xs: '100%', sm: 280, lg: 320 } }}>
+                <TextField
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  size="small"
+                  fullWidth
+                  aria-label="Search a Project or a Dashboard"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      bgcolor: 'action.hover',
+                      '& input': {
+                        py: 1.1,
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Magnify fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+            </Stack>
+          </Stack>
 
-      {isLoading ? (
-        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress />
+          {searchQuery && (
+            <Typography variant="caption" color="text.secondary">
+              Filtered by &quot;{searchQuery}&quot;
+            </Typography>
+          )}
         </Stack>
-      ) : (
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <RenderProjectGrid projectRows={filteredProjectRows} searchQuery={searchQuery} />
-        </ErrorBoundary>
-      )}
-    </Box>
+
+        {isLoading ? (
+          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress />
+          </Stack>
+        ) : (
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <RenderProjectGrid projectRows={sortedProjectRows} searchQuery={searchQuery} />
+          </ErrorBoundary>
+        )}
+      </CardContent>
+    </Card>
   );
 }

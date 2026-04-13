@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Card, CardContent, CircularProgress, Paper, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import { intlFormatDistance } from 'date-fns';
@@ -35,29 +35,32 @@ export function ImportantDashboards(): ReactElement {
 
   return (
     <Card
-      elevation={1}
+      elevation={0}
       sx={{
         border: '1px solid',
         borderColor: 'divider',
         height: '100%',
-        maxHeight: 600,
         display: 'flex',
         flexDirection: 'column',
       }}
       data-testid="important-dashboards-card"
     >
       <CardContent sx={{ flex: '0 0 auto' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-          <StarFourPointsOutline sx={{ color: 'primary.main' }} />
-          <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
-            Important Dashboards
+        <Stack spacing={0.75}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <StarFourPointsOutline sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontSize: '1.125rem', fontWeight: 600 }}>
+              Important Dashboards
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Curated dashboards configured for quick access.
           </Typography>
-        </Box>
+        </Stack>
       </CardContent>
       <CardContent
         sx={{
           flex: '1 1 auto',
-          overflowY: 'auto',
           pt: 0,
           minHeight: 0,
           ...(dashboardList.length === 0 && !isLoading
@@ -82,64 +85,70 @@ export function ImportantDashboards(): ReactElement {
           />
         )}
         {!isLoading && dashboardList.length > 0 && (
-          <Box data-testid="important-dashboards-mosaic" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {dashboardList.map((dashboard) => {
+          <Box
+            data-testid="important-dashboards-mosaic"
+            sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
+          >
+            {dashboardList.map((dashboard, index) => {
               const metricsCount = Object.keys(dashboard.spec.panels ?? {}).length;
               const updatedAt = dashboard.metadata.updatedAt ?? dashboard.metadata.createdAt;
               const relativeTime = updatedAt ? intlFormatDistance(new Date(updatedAt), new Date()) : 'Recently updated';
               const displayName = dashboard.spec.display?.name ?? dashboard.metadata.name;
+              const dashboardKey = `${dashboard.metadata.project}-${dashboard.metadata.name}`;
 
               return (
-                <Paper
-                  key={`${dashboard.metadata.project}-${dashboard.metadata.name}`}
-                  elevation={0}
-                  variant="outlined"
-                  component={RouterLink}
-                  to={`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    cursor: 'pointer',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      boxShadow: (theme) => theme.shadows[2],
-                      bgcolor: 'action.hover',
-                    },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box key={dashboardKey}>
+                  <Box
+                    component={RouterLink}
+                    to={`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`}
+                    role="row"
+                    aria-label={`${dashboard.metadata.project} ${dashboard.metadata.name}`}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      py: 2,
+                      px: 1,
+                      borderRadius: 1.5,
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
                     <Box
                       sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        bgcolor: 'action.hover',
-                        height: 'fit-content',
-                        transition: 'all 0.2s',
+                        p: 1.25,
+                        borderRadius: 1.5,
+                        bgcolor: 'primary.main',
                         display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      <ViewDashboardOutline sx={{ fontSize: 20, color: 'primary.main' }} />
+                      <ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />
                     </Box>
 
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography
                         variant="body1"
-                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', mb: 0.5 }}
+                        sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
                       >
                         {displayName}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {dashboard.metadata.project} • {metricsCount} {metricsCount === 1 ? 'metric' : 'metrics'}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          {dashboard.metadata.project} • {metricsCount} {metricsCount === 1 ? 'metric' : 'metrics'} •{' '}
+                          {relativeTime}
+                        </Typography>
+                      </Box>
                     </Box>
-
-                    <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'flex-start' }}>
-                      {relativeTime}
-                    </Typography>
                   </Box>
-                </Paper>
+                  {index < dashboardList.length - 1 && <Divider />}
+                </Box>
               );
             })}
           </Box>

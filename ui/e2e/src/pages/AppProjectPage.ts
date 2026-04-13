@@ -17,7 +17,6 @@ import { VariableEditor } from './VariableEditor';
 import { SecretEditor } from './SecretEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
-const recentDashboardListId = 'recent-dashboard-list';
 
 /**
  * The Perses App project page.
@@ -110,19 +109,6 @@ export class AppProjectPage {
 
     const navigationPromise = this.page.waitForURL(`/projects/${projectName}`, { waitUntil: 'domcontentloaded' });
     await this.clickDashboardItemInList(dashboardName, mainDashboardListId);
-    await navigationPromise;
-  }
-
-  /**
-   * Navigates to the specified project dashboard using the project page
-   * @param projectName - Name of the project.
-   * @param dashboardName - Name of the dashboard.
-   */
-  async navigateToDashboardFromRecentDashboards(projectName: string, dashboardName: string): Promise<void> {
-    await this.goto(projectName);
-
-    const navigationPromise = this.page.waitForURL(`/projects/${projectName}`);
-    await this.clickDashboardItemInList(dashboardName, recentDashboardListId);
     await navigationPromise;
   }
 

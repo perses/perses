@@ -56,46 +56,49 @@ function HomeView(): ReactElement {
   };
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={4}>
-      <Stack gap={3}>
-        <HomeViewHeroSection
-          userProjects={userProjects}
-          onAddProjectClick={handleAddProjectDialogOpen}
-          onAddDashboardClick={handleAddDashboardDialogOpen}
-        />
-        <CreateProjectDialog
-          open={isAddProjectDialogOpen}
-          onClose={handleAddProjectDialogClose}
-          onSuccess={handleAddProjectDialogSubmit}
-        />
-        <CreateDashboardDialog
-          open={isAddDashboardDialogOpen}
-          projects={userProjects}
-          onClose={handleAddDashboardDialogClose}
-          onSuccess={handleAddDashboardDialogSubmit}
-          isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
-        />
-      </Stack>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={3}>
+      <HomeViewHeroSection
+        userProjects={userProjects}
+        onAddProjectClick={handleAddProjectDialogOpen}
+        onAddDashboardClick={handleAddDashboardDialogOpen}
+      />
+      <CreateProjectDialog
+        open={isAddProjectDialogOpen}
+        onClose={handleAddProjectDialogClose}
+        onSuccess={handleAddProjectDialogSubmit}
+      />
+      <CreateDashboardDialog
+        open={isAddDashboardDialogOpen}
+        projects={userProjects}
+        onClose={handleAddDashboardDialogClose}
+        onSuccess={handleAddDashboardDialogSubmit}
+        isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+      />
+
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' },
+          gridTemplateColumns: {
+            xs: 'minmax(0, 1fr)',
+            lg: hasImportantDashboards ? 'minmax(0, 1.35fr) minmax(0, 1fr)' : 'minmax(0, 1fr)',
+          },
           gap: 3,
+          alignItems: 'start',
         }}
       >
-        {/* Left section - Spans 2 columns: ImportantDashboards when configured, otherwise Projects */}
-        <Box sx={{ minWidth: 0 }}>{hasImportantDashboards ? <ImportantDashboards /> : <Projects />}</Box>
-
-        {/* Recent Dashboards - 1 column */}
         <Box sx={{ minWidth: 0 }}>
           <RecentDashboards />
         </Box>
+        {hasImportantDashboards && (
+          <Box sx={{ minWidth: 0 }}>
+            <ImportantDashboards />
+          </Box>
+        )}
       </Box>
-      {hasImportantDashboards && (
-        <Box mt={3} mb={3}>
-          <Projects />
-        </Box>
-      )}
+
+      <Box>
+        <Projects />
+      </Box>
     </Stack>
   );
 }
