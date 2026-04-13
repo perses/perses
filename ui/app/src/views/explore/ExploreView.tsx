@@ -12,17 +12,20 @@
 // limitations under the License.
 
 import Compass from 'mdi-material-ui/Compass';
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { ExternalVariableDefinition } from '@perses-dev/core';
-import { CircularProgress, Stack } from '@mui/material';
+import { ExternalVariableDefinition, getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { Autocomplete, CircularProgress, Stack, TextField } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ViewExplore } from '@perses-dev/explore';
+import { useQueryClient } from '@tanstack/react-query';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useDatasourceApi } from '../../model/datasource-api';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useGlobalVariableList } from '../../model/global-variable-client';
+import { useProjectList } from '../../model/project-client';
 import { buildGlobalVariableDefinition } from '../../utils/variables';
+import { useIsProjectDatasourceEnabled } from '../../context/Config';
 
 function ExploreView(): ReactElement {
   return <HelperExploreView exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass />} />} />;
@@ -35,10 +38,24 @@ export interface HelperExploreViewProps {
 function HelperExploreView(props: HelperExploreViewProps): ReactElement {
   const { exploreTitleComponent } = props;
 
+  const [selectedProject, setSelectedProject] = useState<ProjectResource | null>(null);
+  const projectName = selectedProject?.metadata.name;
+
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
+  const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
+  const queryClient = useQueryClient();
 
-  // Collect the Project variables and setup external variables from it
+  // Invalidate datasource select item cache when project changes so
+  // DatasourceStoreProvider re-fetches with the new project scope
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['listDatasourceSelectItems'] });
+  }, [projectName, queryClient]);
+
+  // Fetch the list of projects the user has access to
+  const { data: projects } = useProjectList({ enabled: isProjectDatasourceEnabled });
+
+  // Collect global variables
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [buildGlobalVariableDefinition(globalVars ?? [])],
@@ -59,8 +76,24 @@ function HelperExploreView(props: HelperExploreViewProps): ReactElement {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}
+            projectName={projectName}
             externalVariableDefinitions={externalVariableDefinitions}
-            exploreTitleComponent={exploreTitleComponent}
+            exploreTitleComponent={
+              <Stack direction="row" alignItems="center" gap={2}>
+                {exploreTitleComponent}
+                {isProjectDatasourceEnabled && (
+                  <Autocomplete<ProjectResource>
+                    size="small"
+                    options={projects ?? []}
+                    getOptionLabel={(option) => getResourceDisplayName(option)}
+                    value={selectedProject}
+                    onChange={(_, value) => setSelectedProject(value)}
+                    renderInput={(params) => <TextField {...params} label="Project" placeholder="Global" />}
+                    sx={{ minWidth: 200 }}
+                  />
+                )}
+              </Stack>
+            }
           />
         </ErrorBoundary>
       </PluginRegistry>
