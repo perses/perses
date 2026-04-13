@@ -90,7 +90,7 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeVisible({ timeout: 5000 });
 
     await page.keyboard.press('e');
-    await expect(page.getByRole('heading', { name: /Edit Panel/i })).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeHidden({ timeout: 5000 });
   });
 
   test('Mod+K opens the search dialog', async ({ dashboardPage, page }) => {
@@ -105,16 +105,28 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 
-  test('Mod+S triggers save on a dashboard in edit mode', async ({ dashboardPage, page }) => {
-    // Enter edit mode first
-    await dashboardPage.startEditing();
+  test.describe('Save shortcuts', () => {
+    test.use({ modifiesDashboard: true });
 
-    // Use the platform-appropriate modifier key
+    test('Mod+S triggers save on a dashboard in edit mode', async ({ dashboardPage, page }) => {
+      // Enter edit mode first
+      await dashboardPage.startEditing();
+
+      // Use the platform-appropriate modifier key
+      await page.keyboard.press(`${MODIFIER}+s`);
+
+      // After Mod+S, the save action should trigger and return to view mode.
+      await expect(dashboardPage.editButton).toBeVisible({ timeout: 5000 });
+      await expect(dashboardPage.alert).toContainText(/successfully updated/i);
+    });
+  });
+
+  test('Mod+S in view mode shows a hint and does not save', async ({ dashboardPage, page }) => {
+    await expect(dashboardPage.editButton).toBeVisible();
+
     await page.keyboard.press(`${MODIFIER}+s`);
 
-    // After Mod+S, the save action should trigger.
-    // Since the dashboard hasn't been modified, it may show a success alert
-    // or attempt to save. Verify the save button is still visible (edit mode persists).
-    await expect(dashboardPage.saveButton).toBeVisible();
+    await expect(dashboardPage.editButton).toBeVisible();
+    await expect(dashboardPage.alert).toContainText('Enter edit mode to save this dashboard.');
   });
 });

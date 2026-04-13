@@ -17,8 +17,11 @@ import {
   useActiveScopes,
   useHotkeys,
   useHotkeySequences,
-  buildMeta,
+  buildShortcutOptions,
   dispatchShortcutEvent,
+  requireShortcutEvent,
+  requireShortcutHotkey,
+  requireShortcutSequence,
   GO_HOME_SHORTCUT,
   GO_EXPLORE_SHORTCUT,
   GO_PROFILE_SHORTCUT,
@@ -37,45 +40,38 @@ export function GlobalShortcuts(): ReactElement | null {
   const activeScopes = useActiveScopes();
   const globalEnabled = activeScopes.has('global');
 
-  // --- Sequence shortcuts (navigation + theme toggle) ---
+  useHotkeySequences(
+    [
+      {
+        def: GO_HOME_SHORTCUT,
+        callback: (): void => navigate('/'),
+      },
+      {
+        def: GO_EXPLORE_SHORTCUT,
+        callback: (): void => navigate(ExploreRoute),
+      },
+      {
+        def: GO_PROFILE_SHORTCUT,
+        callback: (): void => navigate(ProfileRoute),
+      },
+      {
+        def: TOGGLE_THEME_SHORTCUT,
+        callback: (): void => dispatchShortcutEvent(requireShortcutEvent(TOGGLE_THEME_SHORTCUT)),
+      },
+    ].map(({ def, callback }) => ({
+      sequence: requireShortcutSequence(def),
+      callback,
+      options: buildShortcutOptions(def, globalEnabled),
+    }))
+  );
 
-  useHotkeySequences([
-    {
-      sequence: GO_HOME_SHORTCUT.sequence!,
-      callback: (): void => navigate('/'),
-      options: { enabled: globalEnabled, meta: buildMeta(GO_HOME_SHORTCUT) },
-    },
-    {
-      sequence: GO_EXPLORE_SHORTCUT.sequence!,
-      callback: (): void => navigate(ExploreRoute),
-      options: { enabled: globalEnabled, meta: buildMeta(GO_EXPLORE_SHORTCUT) },
-    },
-    {
-      sequence: GO_PROFILE_SHORTCUT.sequence!,
-      callback: (): void => navigate(ProfileRoute),
-      options: { enabled: globalEnabled, meta: buildMeta(GO_PROFILE_SHORTCUT) },
-    },
-    {
-      sequence: TOGGLE_THEME_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TOGGLE_THEME_SHORTCUT.event!),
-      options: { enabled: globalEnabled, meta: buildMeta(TOGGLE_THEME_SHORTCUT) },
-    },
-  ]);
-
-  // --- Single hotkey shortcuts (search + help modal) ---
-
-  useHotkeys([
-    {
-      hotkey: OPEN_SEARCH_SHORTCUT.hotkey!,
-      callback: (): void => dispatchShortcutEvent(OPEN_SEARCH_SHORTCUT.event!),
-      options: { enabled: globalEnabled, meta: buildMeta(OPEN_SEARCH_SHORTCUT) },
-    },
-    {
-      hotkey: SHOW_SHORTCUTS_SHORTCUT.hotkey!,
-      callback: (): void => dispatchShortcutEvent(SHOW_SHORTCUTS_SHORTCUT.event!),
-      options: { enabled: globalEnabled, meta: buildMeta(SHOW_SHORTCUTS_SHORTCUT) },
-    },
-  ]);
+  useHotkeys(
+    [OPEN_SEARCH_SHORTCUT, SHOW_SHORTCUTS_SHORTCUT].map((shortcutDef) => ({
+      hotkey: requireShortcutHotkey(shortcutDef),
+      callback: (): void => dispatchShortcutEvent(requireShortcutEvent(shortcutDef)),
+      options: buildShortcutOptions(shortcutDef, globalEnabled),
+    }))
+  );
 
   return null;
 }
