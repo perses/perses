@@ -15,37 +15,18 @@ import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   useActiveScopes,
-  useShortcutPreferences,
-  useHotkey,
-  useHotkeySequence,
-  HotkeyMeta,
-  HotkeySequence,
+  useHotkeys,
+  useHotkeySequences,
+  buildMeta,
+  dispatchShortcutEvent,
   GO_HOME_SHORTCUT,
   GO_EXPLORE_SHORTCUT,
   GO_PROFILE_SHORTCUT,
   OPEN_SEARCH_SHORTCUT,
   SHOW_SHORTCUTS_SHORTCUT,
   TOGGLE_THEME_SHORTCUT,
-  OPEN_SEARCH_EVENT,
-  SHOW_SHORTCUTS_EVENT,
-  TOGGLE_THEME_EVENT,
-  PersesShortcutDef,
 } from '@perses-dev/dashboards';
 import { ExploreRoute, ProfileRoute } from '../model/route';
-
-function buildMeta(def: PersesShortcutDef): HotkeyMeta {
-  return {
-    id: def.id,
-    name: def.name,
-    description: def.description,
-    category: def.category,
-    scope: def.scope,
-  };
-}
-
-function dispatchShortcutEvent(eventName: string): void {
-  window.dispatchEvent(new CustomEvent(eventName));
-}
 
 /**
  * Non-visual component that registers all global keyboard shortcuts.
@@ -54,48 +35,47 @@ function dispatchShortcutEvent(eventName: string): void {
 export function GlobalShortcuts(): ReactElement | null {
   const navigate = useNavigate();
   const activeScopes = useActiveScopes();
-  const { overrides } = useShortcutPreferences();
   const globalEnabled = activeScopes.has('global');
 
-  // Helper: resolve override for a shortcut, returns null if disabled
-  function isDisabled(id: string): boolean {
-    return overrides.overrides[id] === null;
-  }
+  // --- Sequence shortcuts (navigation + theme toggle) ---
 
-  // --- Sequence shortcuts ---
+  useHotkeySequences([
+    {
+      sequence: GO_HOME_SHORTCUT.sequence!,
+      callback: (): void => navigate('/'),
+      options: { enabled: globalEnabled, meta: buildMeta(GO_HOME_SHORTCUT) },
+    },
+    {
+      sequence: GO_EXPLORE_SHORTCUT.sequence!,
+      callback: (): void => navigate(ExploreRoute),
+      options: { enabled: globalEnabled, meta: buildMeta(GO_EXPLORE_SHORTCUT) },
+    },
+    {
+      sequence: GO_PROFILE_SHORTCUT.sequence!,
+      callback: (): void => navigate(ProfileRoute),
+      options: { enabled: globalEnabled, meta: buildMeta(GO_PROFILE_SHORTCUT) },
+    },
+    {
+      sequence: TOGGLE_THEME_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TOGGLE_THEME_SHORTCUT.event!),
+      options: { enabled: globalEnabled, meta: buildMeta(TOGGLE_THEME_SHORTCUT) },
+    },
+  ]);
 
-  useHotkeySequence((GO_HOME_SHORTCUT.sequence ?? []) as HotkeySequence, () => navigate('/'), {
-    enabled: globalEnabled && !isDisabled(GO_HOME_SHORTCUT.id),
-    meta: buildMeta(GO_HOME_SHORTCUT),
-  });
+  // --- Single hotkey shortcuts (search + help modal) ---
 
-  useHotkeySequence((GO_EXPLORE_SHORTCUT.sequence ?? []) as HotkeySequence, () => navigate(ExploreRoute), {
-    enabled: globalEnabled && !isDisabled(GO_EXPLORE_SHORTCUT.id),
-    meta: buildMeta(GO_EXPLORE_SHORTCUT),
-  });
-
-  useHotkeySequence((GO_PROFILE_SHORTCUT.sequence ?? []) as HotkeySequence, () => navigate(ProfileRoute), {
-    enabled: globalEnabled && !isDisabled(GO_PROFILE_SHORTCUT.id),
-    meta: buildMeta(GO_PROFILE_SHORTCUT),
-  });
-
-  useHotkeySequence(
-    (TOGGLE_THEME_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TOGGLE_THEME_EVENT),
-    { enabled: globalEnabled && !isDisabled(TOGGLE_THEME_SHORTCUT.id), meta: buildMeta(TOGGLE_THEME_SHORTCUT) }
-  );
-
-  // --- Single hotkey shortcuts ---
-
-  useHotkey(OPEN_SEARCH_SHORTCUT.hotkey!, () => dispatchShortcutEvent(OPEN_SEARCH_EVENT), {
-    enabled: globalEnabled && !isDisabled(OPEN_SEARCH_SHORTCUT.id),
-    meta: buildMeta(OPEN_SEARCH_SHORTCUT),
-  });
-
-  useHotkey(SHOW_SHORTCUTS_SHORTCUT.hotkey!, () => dispatchShortcutEvent(SHOW_SHORTCUTS_EVENT), {
-    enabled: globalEnabled && !isDisabled(SHOW_SHORTCUTS_SHORTCUT.id),
-    meta: buildMeta(SHOW_SHORTCUTS_SHORTCUT),
-  });
+  useHotkeys([
+    {
+      hotkey: OPEN_SEARCH_SHORTCUT.hotkey!,
+      callback: (): void => dispatchShortcutEvent(OPEN_SEARCH_SHORTCUT.event!),
+      options: { enabled: globalEnabled, meta: buildMeta(OPEN_SEARCH_SHORTCUT) },
+    },
+    {
+      hotkey: SHOW_SHORTCUTS_SHORTCUT.hotkey!,
+      callback: (): void => dispatchShortcutEvent(SHOW_SHORTCUTS_SHORTCUT.event!),
+      options: { enabled: globalEnabled, meta: buildMeta(SHOW_SHORTCUTS_SHORTCUT) },
+    },
+  ]);
 
   return null;
 }

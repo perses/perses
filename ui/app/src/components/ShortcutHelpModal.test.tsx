@@ -185,6 +185,7 @@ describe('ShortcutHelpModal', () => {
           description: 'Show the keyboard shortcuts help modal',
           category: 'global',
           scope: 'global',
+          displayOverride: '?',
         },
       },
     });

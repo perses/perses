@@ -32,13 +32,6 @@ export function ShortcutHelpModal(): ReactElement {
   const [open, setOpen] = useState(false);
   const { hotkeys, sequences } = useHotkeyRegistrations();
 
-  function getHotkeyDisplay(display: string, shortcutId?: string): string {
-    if (shortcutId === 'show-shortcuts') {
-      return '?';
-    }
-    return display;
-  }
-
   // Listen for the show-shortcuts event
   const handleShowShortcuts = useCallback(() => {
     setOpen(true);
@@ -73,7 +66,7 @@ export function ShortcutHelpModal(): ReactElement {
           groups[category].push({
             name: meta.name ?? meta.id ?? reg.hotkey,
             description: meta.description ?? '',
-            displayParts: [getHotkeyDisplay(formatForDisplay(reg.hotkey), meta.id)],
+            displayParts: [meta.displayOverride ?? formatForDisplay(reg.hotkey)],
           });
         }
       }
