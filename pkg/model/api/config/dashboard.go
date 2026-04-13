@@ -24,6 +24,12 @@ import (
 	"github.com/google/cel-go/cel"
 )
 
+// These variables can be overridden at build time using -ldflags, consistent with other path defaults.
+var (
+	DefaultSchemasPath              = "cue"
+	DefaultSchemasPathInContainer   = "/etc/perses/cue"
+)
+
 type CustomLintRule struct {
 	// Name of the rule
 	Name string `json:"name" yaml:"name"`
@@ -116,6 +122,10 @@ func (c *CustomLintRule) evaluateAndLoadCELExpression() error {
 
 type DashboardConfig struct {
 	CustomLintRules []*CustomLintRule `json:"custom_lint_rules,omitempty" yaml:"custom_lint_rules,omitempty"`
+	// SchemasPath is the path to the CUE module root (the directory containing cue.mod/).
+	// It is used to load the built-in dashboard schema for the GET /api/v1/dashboards/dashboard-schema endpoint.
+	// Defaults to "cue" relative to the working directory, or /etc/perses/cue in containers.
+	SchemasPath string `json:"schemas_path,omitempty" yaml:"schemas_path,omitempty"`
 }
 
 func (c *DashboardConfig) Verify() error {
@@ -130,6 +140,13 @@ func (c *DashboardConfig) Verify() error {
 		}
 		if err := rule.evaluateAndLoadJSONExpression(); err != nil {
 			return err
+		}
+	}
+	if len(c.SchemasPath) == 0 {
+		if isFileExists(DefaultSchemasPathInContainer) {
+			c.SchemasPath = DefaultSchemasPathInContainer
+		} else {
+			c.SchemasPath = DefaultSchemasPath
 		}
 	}
 	return nil
