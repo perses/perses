@@ -23,16 +23,11 @@ import {
   SHOW_SHORTCUTS_EVENT,
 } from '@perses-dev/dashboards';
 
-/**
- * Modal that displays all registered keyboard shortcuts, grouped by category.
- * Uses TanStack's useHotkeyRegistrations() for live enumeration and
- * formatForDisplay() for platform-aware key rendering.
- */
+/** Modal displaying all registered keyboard shortcuts, grouped by category. */
 export function ShortcutHelpModal(): ReactElement {
   const [open, setOpen] = useState(false);
   const { hotkeys, sequences } = useHotkeyRegistrations();
 
-  // Listen for the show-shortcuts event
   const handleShowShortcuts = useCallback(() => {
     setOpen(true);
   }, []);
@@ -48,7 +43,6 @@ export function ShortcutHelpModal(): ReactElement {
     setOpen(false);
   }, []);
 
-  // Build grouped shortcuts from registrations
   const groupedShortcuts = useMemo(() => {
     const groups: Record<ShortcutCategory, Array<{ name: string; description: string; displayParts: string[] }>> = {
       global: [],

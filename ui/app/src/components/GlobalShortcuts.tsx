@@ -31,10 +31,7 @@ import {
 } from '@perses-dev/dashboards';
 import { ExploreRoute, ProfileRoute } from '../model/route';
 
-/**
- * Non-visual component that registers all global keyboard shortcuts.
- * Must be rendered within HotkeysProvider and ScopeProvider.
- */
+/** Registers all global keyboard shortcuts. Requires HotkeysProvider and ScopeProvider. */
 export function GlobalShortcuts(): ReactElement | null {
   const navigate = useNavigate();
   const activeScopes = useActiveScopes();
