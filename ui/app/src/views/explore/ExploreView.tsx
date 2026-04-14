@@ -22,12 +22,7 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ViewExplore } from '@perses-dev/explore';
 import { useQueryClient } from '@tanstack/react-query';
 import { StringParam, useQueryParam } from 'use-query-params';
-import {
-  Breadcrumbs,
-  HomeLinkCrumb,
-  StackCrumb,
-  TitleCrumb,
-} from '../../components/breadcrumbs/breadcrumbs';
+import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
 import { useDatasourceApi } from '../../model/datasource-api';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useGlobalVariableList } from '../../model/global-variable-client';
@@ -69,9 +64,7 @@ function ProjectScopeCrumb(props: ProjectScopeCrumbProps): ReactElement {
     <>
       <StackCrumb>
         <Archive />
-        <TitleCrumb
-          inheritTypography={true}
-        >
+        <TitleCrumb inheritTypography={true}>
           <Stack
             direction="row"
             alignItems="center"
@@ -105,10 +98,7 @@ function ProjectScopeCrumb(props: ProjectScopeCrumbProps): ReactElement {
         onClose={handleClose}
         slotProps={{ paper: { sx: { maxHeight: 300 } } }}
       >
-        <MenuItem
-          selected={!projectName}
-          onClick={() => handleSelect(undefined)}
-        >
+        <MenuItem selected={!projectName} onClick={() => handleSelect(undefined)}>
           <ListItemText>Global only</ListItemText>
         </MenuItem>
         {projects.map((project) => (
