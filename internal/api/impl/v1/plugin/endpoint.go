@@ -16,9 +16,11 @@ package plugin
 import (
 	"net/http"
 
+	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -46,6 +48,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 		devGroup.DELETE("", e.DeleteDevPlugin, true)
 		devGroup.POST("/refresh", e.RefreshDevPlugin, true)
 	}
+	group.GET("/schema", e.Schema, true)
 }
 
 func (e *endpoint) List(ctx echo.Context) error {
@@ -87,4 +90,41 @@ func (e *endpoint) DeleteDevPlugin(ctx echo.Context) error {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
+}
+
+// TODO: move this to plugin endpoints, add /plugins/schema to middleware exceptions so that it won't be treated as file call
+func (e *endpoint) Schema(ctx echo.Context) error {
+	// generate plugin cue values - done
+	schemas := e.svc.Schema().GetAllSchemas()
+	if len(schemas) == 0 {
+		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
+	}
+	// merge
+	cueCtx := cuecontext.New()
+	merged, err := schema.MergeSchemas(cueCtx, schemas)
+	if err != nil {
+		logrus.WithError(err).Error("unable to merge plugin schemas")
+		return apiinterface.InternalError
+	}
+	// return ExportToCUE or ExportToJSONSchema
+	format := ctx.QueryParam("format")
+	switch format {
+	case "", "cue":
+		data, exportErr := schema.ExportToCUE(merged)
+		if exportErr != nil {
+			logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
+			return apiinterface.InternalError
+		}
+		return ctx.Blob(http.StatusOK, "text/x-cue", data)
+	// commenting out, as JSON export still doesn't work
+	// case "json":
+	// 	data, exportErr := schema.ExportToJSONSchema(merged)
+	// 	if exportErr != nil {
+	// 		logrus.WithError(exportErr).Error("unable to export plugin schemas as JSON Schema")
+	// 		return apiinterface.InternalError
+	// 	}
+	// 	return ctx.Blob(http.StatusOK, "application/schema+json", data)
+	default:
+		return apiinterface.HandleBadRequestError("unsupported format: leave empty or use 'cue'")
+	}
 }
