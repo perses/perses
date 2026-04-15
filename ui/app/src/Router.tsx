@@ -87,18 +87,18 @@ function AppProviders(): ReactElement {
           }}
         >
           <DarkModeContextProvider>
-              <ConfigContextProvider>
-                <QueryParamProvider adapter={ReactRouter6Adapter}>
-                  <NavHistoryProvider>
-                    <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                      <AuthorizationProvider>
-                        <App />
-                      </AuthorizationProvider>
-                    </SnackbarProvider>
-                  </NavHistoryProvider>
-                </QueryParamProvider>
-              </ConfigContextProvider>
-            </DarkModeContextProvider>
+            <ConfigContextProvider>
+              <QueryParamProvider adapter={ReactRouter6Adapter}>
+                <NavHistoryProvider>
+                  <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    <AuthorizationProvider>
+                      <App />
+                    </AuthorizationProvider>
+                  </SnackbarProvider>
+                </NavHistoryProvider>
+              </QueryParamProvider>
+            </ConfigContextProvider>
+          </DarkModeContextProvider>
         </HotkeysProvider>
       </QueryClientProvider>
     </CookiesProvider>
