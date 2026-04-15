@@ -18,7 +18,7 @@ import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
-import { HotkeysProvider, ScopeProvider } from '@perses-dev/dashboards';
+import { HotkeysProvider } from '@perses-dev/dashboards';
 import { PersesLoader } from './components/PersesLoader';
 import { AuthorizationProvider } from './context/Authorization';
 import {
@@ -86,8 +86,7 @@ function AppProviders(): ReactElement {
             hotkeySequence: { timeout: 1000 },
           }}
         >
-          <ScopeProvider>
-            <DarkModeContextProvider>
+          <DarkModeContextProvider>
               <ConfigContextProvider>
                 <QueryParamProvider adapter={ReactRouter6Adapter}>
                   <NavHistoryProvider>
@@ -100,7 +99,6 @@ function AppProviders(): ReactElement {
                 </QueryParamProvider>
               </ConfigContextProvider>
             </DarkModeContextProvider>
-          </ScopeProvider>
         </HotkeysProvider>
       </QueryClientProvider>
     </CookiesProvider>

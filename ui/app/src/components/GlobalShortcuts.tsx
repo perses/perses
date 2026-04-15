@@ -14,7 +14,6 @@
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  useActiveScopes,
   useHotkeys,
   useHotkeySequences,
   buildShortcutOptions,
@@ -34,8 +33,6 @@ import { ExploreRoute, ProfileRoute } from '../model/route';
 /** Registers all global keyboard shortcuts. Requires HotkeysProvider and ScopeProvider. */
 export function GlobalShortcuts(): ReactElement | null {
   const navigate = useNavigate();
-  const activeScopes = useActiveScopes();
-  const globalEnabled = activeScopes.has('global');
 
   useHotkeySequences(
     [
@@ -58,7 +55,7 @@ export function GlobalShortcuts(): ReactElement | null {
     ].map(({ def, callback }) => ({
       sequence: requireShortcutSequence(def),
       callback,
-      options: buildShortcutOptions(def, globalEnabled),
+      options: buildShortcutOptions(def, true),
     }))
   );
 
@@ -66,7 +63,7 @@ export function GlobalShortcuts(): ReactElement | null {
     [OPEN_SEARCH_SHORTCUT, SHOW_SHORTCUTS_SHORTCUT].map((shortcutDef) => ({
       hotkey: requireShortcutHotkey(shortcutDef),
       callback: (): void => dispatchShortcutEvent(requireShortcutEvent(shortcutDef)),
-      options: buildShortcutOptions(shortcutDef, globalEnabled),
+      options: buildShortcutOptions(shortcutDef, true),
     }))
   );
 
