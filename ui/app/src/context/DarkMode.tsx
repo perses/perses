@@ -49,7 +49,7 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }): R
     };
 
     window.addEventListener(TOGGLE_THEME_EVENT, handleToggleTheme);
-    return () => {
+    return (): void => {
       window.removeEventListener(TOGGLE_THEME_EVENT, handleToggleTheme);
     };
   }, [isDarkModeEnabled, setDarkMode]);
