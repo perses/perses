@@ -136,7 +136,7 @@ type Schema interface {
 	ValidatePanel(plugin common.Plugin, panelName string) error
 	ValidateGlobalVariable(v v1.VariableSpec) error
 	ValidateDashboardVariables([]dashboard.Variable) error
-	ValidateDashboardAnnotations([]v1.AnnotationSpec) error
+	ValidateDashboardAnnotations([]dashboard.AnnotationSpec) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetDatasourceSchema(pluginName string) (*build.Instance, error)
 }
@@ -272,14 +272,11 @@ func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) 
 	return s.sch.validateVariable(plugin, varName)
 }
 
-func (s *completeSchema) ValidateDashboardAnnotations(annotations []v1.AnnotationSpec) error {
+func (s *completeSchema) ValidateDashboardAnnotations(annotations []dashboard.AnnotationSpec) error {
 	if len(s.devSch.annotations) == 0 && len(s.sch.annotations) == 0 {
 		return fmt.Errorf("annotations schemas are not loaded")
 	}
 	var errs []error
-
-	// go through the annotations list
-	// the processing stops as soon as it detects an invalid annotations  -> TODO: improve this to return a list of all the errors encountered ?
 	for _, a := range annotations {
 		name := a.Display.Name
 		logrus.Tracef("Annotations to validate: %s", name)
@@ -288,7 +285,7 @@ func (s *completeSchema) ValidateDashboardAnnotations(annotations []v1.Annotatio
 		}
 	}
 	if len(errs) == 0 {
-		logrus.Debug("All variables are valid")
+		logrus.Debug("All annotations are valid")
 	}
 	return errors.Join(errs...)
 }
@@ -296,7 +293,7 @@ func (s *completeSchema) ValidateDashboardAnnotations(annotations []v1.Annotatio
 func (s *completeSchema) ValidateAnnotations(plugin common.Plugin, annoName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
+	if _, ok := s.devSch.annotations.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateAnnotation(plugin, annoName)
 	}
 	return s.sch.validateAnnotation(plugin, annoName)
@@ -329,7 +326,7 @@ type sch struct {
 	datasources tree.Tree[*build.Instance]
 	queries     tree.Tree[*build.Instance]
 	variables   tree.Tree[*build.Instance]
-	annotations   tree.Tree[*build.Instance]
+	annotations tree.Tree[*build.Instance]
 	panels      tree.Tree[*build.Instance]
 }
 
@@ -338,7 +335,7 @@ func newSch() *sch {
 		datasources: make(tree.Tree[*build.Instance]),
 		queries:     make(tree.Tree[*build.Instance]),
 		variables:   make(tree.Tree[*build.Instance]),
-		annotations:   make(tree.Tree[*build.Instance]),
+		annotations: make(tree.Tree[*build.Instance]),
 		panels:      make(tree.Tree[*build.Instance]),
 	}
 }
@@ -425,7 +422,7 @@ func (s *sch) validateAnnotation(plugin common.Plugin, annotationName string) er
 	if len(s.annotations) == 0 {
 		return fmt.Errorf("annotation schemas are not loaded")
 	}
-	instance, _ := s.variables.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	instance, _ := s.annotations.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
 	return validatePlugin(plugin, instance, "annotation", annotationName)
 }
 
