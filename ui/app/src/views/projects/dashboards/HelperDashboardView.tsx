@@ -26,6 +26,7 @@ import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import {
   useIsKeyboardShortcutsEnabled,
+  useIsLocalAnnoltationEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
 } from '../../../context/Config';

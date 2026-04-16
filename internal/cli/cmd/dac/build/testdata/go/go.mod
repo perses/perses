@@ -10,6 +10,7 @@ require (
 	github.com/perses/perses v0.53.1
 	github.com/perses/plugins/prometheus v0.57.1
 	github.com/perses/plugins/timeserieschart v0.12.1
+	github.com/perses/spec v0.2.0-beta.0
 )
 
 require (
