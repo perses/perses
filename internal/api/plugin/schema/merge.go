@@ -33,7 +33,7 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 		}
 		// cast all schemas to ast.Expr or ast.File
 		node := inst.Syntax(
-			cue.Final(),
+			cue.InlineImports(true),
 			cue.All(),
 			cue.Definitions(true),
 		)
