@@ -25,7 +25,7 @@ import (
 
 const dashboardPkg = "github.com/perses/perses/cue/model/api/v1"
 
-// Load loads the #Dashboard definition from github.com/perses/perses/cue/model/api/v1.
+// Load loads the full github.com/perses/perses/cue/model/api/v1 package value.
 // schemasPath must be the CUE module root of the perses repo (the directory containing cue.mod/).
 func Load(ctx *cue.Context, schemasPath string) (cue.Value, error) {
 	instances := load.Instances([]string{dashboardPkg}, &load.Config{
@@ -43,71 +43,23 @@ func Load(ctx *cue.Context, schemasPath string) (cue.Value, error) {
 	if v.Err() != nil {
 		return cue.Value{}, fmt.Errorf("failed to build %s: %w", dashboardPkg, v.Err())
 	}
-
-	dashboard := v.LookupPath(cue.MakePath(cue.Def("#Dashboard")))
-	if dashboard.Err() != nil {
-		return cue.Value{}, fmt.Errorf("failed to look up #Dashboard in %s: %w", dashboardPkg, dashboard.Err())
-	}
-	return dashboard, nil
+	return v, nil
 }
-
-// MergeWithPlugins unifies the dashboard #Spec with per-kind plugin disjunctions,
-// constraining the open plugin.spec slots to only the loaded plugin schemas.
-//
-// plugins must be a map from plugin.Kind to a merged disjunction cue.Value produced
-// by pluginSchema.MergeSchemas for that kind.
-// func MergeWithPluginsV2(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
-// 	result := dashSpec
-
-// 	// get panels schema
-// 	if panels, ok := plugins[v1plugin.KindPanel]; !ok {
-// 		return cue.Value{}, errors.New("failed to get panels schema")
-// 	}
-
-// 	panelsNode := panels.Syntax(
-// 		cue.Final(),
-// 		cue.All(),
-// 		cue.Definitions(true),
-// 	)
-
-// 	// panel value to ast.Expr
-// 	var panelsExpr ast.Expr
-// 	switch n := panelsNode.(type) {
-// 	case ast.Expr:
-// 		panelsExpr = n
-// 	// handling *ast.File
-// 	case *ast.File:
-// 		var elts []ast.Decl
-// 		for _, declr := range n.Decls {
-// 			switch declr.(type) {
-// 			case *ast.Package, *ast.ImportDecl:
-// 				continue
-// 			default:
-// 				elts = append(elts, declr)
-// 			}
-// 		}
-// 		panelsExpr = &ast.StructLit{Elts: elts}
-
-// 		// get #datasource.#Spec ast.Expr
-// 		x := datasource.Spec
-// 		// inject into panels
-// 		dashSpec.FillPath("data")
-
-// 	return result, nil
-// }
 
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
-	// spec: panels: {[_]: spec: plugin: spec: <panelDisj>}
+	// #Dashboard: spec: panels: {[_]: spec: plugin: spec: <panelDisj>}
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {
 		overlay, err := buildOverlay(ctx, panels, func(inner ast.Expr) ast.Expr {
 			return structLit(
-				fieldExpr("spec", structConstraint(
-					"panels", structWildcard(structLit(
-						fieldExpr("spec", structLit(
-							fieldExpr("plugin", structLit(
-								fieldExpr("spec", inner),
+				fieldExpr("#Dashboard", structLit(
+					fieldExpr("spec", structConstraint(
+						"panels", structWildcard(structLit(
+							fieldExpr("spec", structLit(
+								fieldExpr("plugin", structLit(
+									fieldExpr("spec", inner),
+								)),
 							)),
 						)),
 					)),
@@ -123,22 +75,24 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queryDisj>}]}
+	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queryDisj>}]}
 	if queries, ok := plugins[v1plugin.KindQuery]; ok {
 		overlay, err := buildOverlay(ctx, queries, func(inner ast.Expr) ast.Expr {
 			return structLit(
-				fieldExpr("spec", structConstraint(
-					"panels", structWildcard(structLit(
-						fieldExpr("spec", structLit(
-							fieldExpr("queries",
-								listEllipsis(structLit(
-									fieldExpr("spec", structLit(
-										fieldExpr("plugin", structLit(
-											fieldExpr("spec", inner),
+				fieldExpr("#Dashboard", structLit(
+					fieldExpr("spec", structConstraint(
+						"panels", structWildcard(structLit(
+							fieldExpr("spec", structLit(
+								fieldExpr("queries",
+									listEllipsis(structLit(
+										fieldExpr("spec", structLit(
+											fieldExpr("plugin", structLit(
+												fieldExpr("spec", inner),
+											)),
 										)),
 									)),
-								)),
-							),
+								),
+							)),
 						)),
 					)),
 				)),
@@ -153,13 +107,15 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// spec: datasources: {[_]: spec: <datasourceDisj>}
+	// #Dashboard: spec: datasources: {[_]: spec: <datasourceDisj>}
 	if datasources, ok := plugins[v1plugin.KindDatasource]; ok {
 		overlay, err := buildOverlay(ctx, datasources, func(inner ast.Expr) ast.Expr {
 			return structLit(
-				fieldExpr("spec", structConstraint(
-					"datasources", structWildcard(structLit(
-						fieldExpr("spec", inner),
+				fieldExpr("#Dashboard", structLit(
+					fieldExpr("spec", structConstraint(
+						"datasources", structWildcard(structLit(
+							fieldExpr("spec", inner),
+						)),
 					)),
 				)),
 			)
@@ -173,21 +129,23 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// spec: variables: [...{spec: plugin?: spec: <variableDisj>}]
+	// #Dashboard: spec: variables: [...{spec: plugin?: spec: <variableDisj>}]
 	// plugin is optional: TextVariable has no plugin field
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
 		overlay, err := buildOverlay(ctx, variables, func(inner ast.Expr) ast.Expr {
 			return structLit(
-				fieldExpr("spec", structLit(
-					fieldExpr("variables",
-						listEllipsis(structLit(
-							fieldExpr("spec", structLit(
-								optionalFieldExpr("plugin", structLit(
-									fieldExpr("spec", inner),
+				fieldExpr("#Dashboard", structLit(
+					fieldExpr("spec", structLit(
+						fieldExpr("variables",
+							listEllipsis(structLit(
+								fieldExpr("spec", structLit(
+									optionalFieldExpr("plugin", structLit(
+										fieldExpr("spec", inner),
+									)),
 								)),
 							)),
-						)),
-					),
+						),
+					)),
 				)),
 			)
 		})
@@ -207,7 +165,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 // using the provided layout function, and builds it into a cue.Value for unification.
 func buildOverlay(ctx *cue.Context, v cue.Value, layout func(ast.Expr) ast.Expr) (cue.Value, error) {
 	node := v.Syntax(
-		cue.Final(),
+		cue.InlineImports(true),
 		cue.All(),
 		cue.Definitions(true),
 	)
