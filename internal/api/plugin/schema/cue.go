@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/ast"
+	"cuelang.org/go/cue/ast/astutil"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
@@ -122,6 +124,8 @@ func ExportToCUE(v cue.Value) ([]byte, error) {
 		cue.Definitions(true),
 		cue.All(),
 	)
+	// postprocess node to remove comments that break the file
+	postprocessSchemaASTNode(node)
 	// format CUE expr
 	data, err := format.Node(node, format.Simplify())
 	if err != nil {
@@ -152,4 +156,30 @@ func ExportToJSONSchema(v cue.Value) ([]byte, error) {
 		return nil, fmt.Errorf("error while marshaling JSON schema: %w", err)
 	}
 	return data, nil
+}
+
+func postprocessSchemaASTNode(n ast.Node) {
+	astutil.Apply(n, removeExplicitErrorComments, nil)
+}
+
+// removes the "// explicit error (_|_ literal) in source" along with any new lines / whitespaces left after the cleanup
+func removeExplicitErrorComments(c astutil.Cursor) bool {
+	node := c.Node()
+	groups := ast.Comments(node)
+	filtered := groups[:0]
+	for _, cg := range groups {
+		newList := cg.List[:0]
+		for _, c := range cg.List {
+			if c.Text != "// explicit error (_|_ literal) in source" {
+				newList = append(newList, c)
+			}
+		}
+		cg.List = newList
+		// Only keep the group if it still has comments
+		if len(cg.List) > 0 {
+			filtered = append(filtered, cg)
+		}
+	}
+	ast.SetComments(node, filtered)
+	return true
 }
