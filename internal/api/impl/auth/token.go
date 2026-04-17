@@ -17,7 +17,7 @@ import (
 	"net/http"
 
 	"github.com/perses/perses/internal/api/crypto"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/sirupsen/logrus"
 )
 

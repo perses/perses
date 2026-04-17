@@ -22,10 +22,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -139,6 +141,7 @@ type oAuthEndpoint struct {
 	svc             service
 	loginProps      []string
 	apiPrefix       string
+	claimsManager   native.ClaimsManager
 }
 
 func (e *oAuthEndpoint) GetExtraProviderLogoutHandler() echo.HandlerFunc {
@@ -153,7 +156,7 @@ func (e *oAuthEndpoint) GetSlugID() string {
 	return e.slugID
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr native.ClaimsManager) (authEndpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -193,6 +196,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
 		apiPrefix:       apiPrefix,
+		claimsManager:   claimsMngr,
 	}, nil
 }
 
@@ -443,11 +447,22 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 		return err
 	}
 
-	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
+	syncResp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusOK, resp)
+	// persist claims in cache
+	if len(e.claimsManager.PersistClaims) > 0 {
+		data := e.claimsManager.ExtractClaimsFromJWTPayload(accessToken.AccessToken)
+		usr, err := e.svc.syncUser(uInfo)
+		if err != nil {
+			e.logWithError(err).Error("Failed to get user from database.")
+		}
+		username := usr.GetMetadata().GetName()
+		_ = e.claimsManager.SetClaims(username, accessToken.AccessToken, time.Duration(accessToken.ExpiresIn)*time.Second, data)
+
+	}
+	return ctx.JSON(http.StatusOK, syncResp)
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.

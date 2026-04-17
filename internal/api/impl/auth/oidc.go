@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"time"
@@ -24,6 +25,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/authorization/native"
 	"github.com/perses/perses/internal/api/crypto"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -154,6 +156,7 @@ type oIDCEndpoint struct {
 	svc                    service
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
+	claimsManager          native.ClaimsManager
 }
 
 func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWithTokenEndpoint, apiPrefix string) (echo.HandlerFunc, error) {
@@ -184,7 +187,7 @@ func newOIDCExtraLogoutHandler(provider config.OIDCProvider, rp *RelyingPartyWit
 	}, nil
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string) (authEndpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO, authz authorization.Authorization, apiPrefix string, claimsMngr native.ClaimsManager) (authEndpoint, error) {
 	relyingParty, err := newRelyingParty(provider, nil)
 	if err != nil {
 		return nil, err
@@ -221,6 +224,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		svc:                    service{dao: dao, authz: authz},
 		extraLogoutHandler:     extraLogoutHandler,
 		apiPrefix:              apiPrefix,
+		claimsManager:          claimsMngr,
 	}, nil
 }
 
@@ -358,6 +362,21 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Failed to request user info")
 			return err
 		}
+		syncResp, err := e.performUserSync(uInfo, ctx.SetCookie)
+		if err != nil {
+			return err
+		}
+		if len(e.claimsManager.PersistClaims) > 0 {
+			data := e.claimsManager.ExtractClaimsFromJWTPayload(resp.AccessToken)
+			var expiresInSeconds int64
+			if resp.ExpiresIn > math.MaxInt64 {
+				expiresInSeconds = math.MaxInt64
+			} else {
+				expiresInSeconds = int64(resp.ExpiresIn)
+			}
+			_ = e.claimsManager.SetClaims(uInfo.Subject, resp.AccessToken, time.Duration(expiresInSeconds)*time.Second, data)
+		}
+		return ctx.JSON(http.StatusOK, syncResp)
 	case api.GrantTypeClientCredentials:
 		// Extract client_id and client_secret from Authorization header
 		clientID, clientSecret, ok := ctx.Request().BasicAuth()

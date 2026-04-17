@@ -20,6 +20,7 @@ require (
 	github.com/goreleaser/goreleaser/v2 v2.13.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/huandu/go-sqlbuilder v1.40.0
+  github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
