@@ -49,7 +49,7 @@ func Load(ctx *cue.Context, schemasPath string) (cue.Value, error) {
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
-	// #Dashboard: spec: panels: {[_]: spec: plugin: spec: <panelDisj>}
+	// #Dashboard: spec: panels: {[_]: spec: plugin: spec: <panels>}
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {
 		overlay, err := buildOverlay(ctx, panels, func(inner ast.Expr) ast.Expr {
 			return structLit(
@@ -57,9 +57,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 					fieldExpr("spec", structConstraint(
 						"panels", structWildcard(structLit(
 							fieldExpr("spec", structLit(
-								fieldExpr("plugin", structLit(
-									fieldExpr("spec", inner),
-								)),
+								fieldExpr("plugin", inner),
 							)),
 						)),
 					)),
@@ -76,6 +74,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 	}
 
 	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queryDisj>}]}
+	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queries>}]}
 	if queries, ok := plugins[v1plugin.KindQuery]; ok {
 		overlay, err := buildOverlay(ctx, queries, func(inner ast.Expr) ast.Expr {
 			return structLit(
@@ -86,9 +85,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 								fieldExpr("queries",
 									listEllipsis(structLit(
 										fieldExpr("spec", structLit(
-											fieldExpr("plugin", structLit(
-												fieldExpr("spec", inner),
-											)),
+											fieldExpr("plugin", inner),
 										)),
 									)),
 								),
@@ -107,7 +104,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// #Dashboard: spec: datasources: {[_]: spec: <datasourceDisj>}
+	// #Dashboard: spec: datasources: {[_]: spec: <datasources>}
 	if datasources, ok := plugins[v1plugin.KindDatasource]; ok {
 		overlay, err := buildOverlay(ctx, datasources, func(inner ast.Expr) ast.Expr {
 			return structLit(
@@ -139,9 +136,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 						fieldExpr("variables",
 							listEllipsis(structLit(
 								fieldExpr("spec", structLit(
-									optionalFieldExpr("plugin", structLit(
-										fieldExpr("spec", inner),
-									)),
+									optionalFieldExpr("plugin", inner),
 								)),
 							)),
 						),
