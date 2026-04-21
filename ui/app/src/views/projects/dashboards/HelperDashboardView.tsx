@@ -13,13 +13,9 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import {
-  DashboardResource,
-  EphemeralDashboardResource,
-  getResourceDisplayName,
-  ExternalVariableDefinition,
-} from '@perses-dev/core';
-import { OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { getResourceDisplayName, ExternalVariableDefinition } from '@perses-dev/core';
+import { DashboardSpec } from '@perses-dev/spec';
+import { DashboardResource, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
@@ -37,9 +33,9 @@ import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
 
 export interface GenericDashboardViewProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  dashboardResource: DashboardResource;
   onSave?: OnSaveDashboard;
-  onDiscard?: (entity: DashboardResource) => void;
+  onDiscard?: (name: string, spec: DashboardSpec) => void;
   isReadonly: boolean;
   isEditing: boolean;
   isCreating?: boolean;

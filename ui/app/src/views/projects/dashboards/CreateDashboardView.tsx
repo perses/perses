@@ -14,13 +14,13 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import {
-  DashboardResource,
+  DashboardResource as CoreDashboardResource,
   getResourceExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
   DashboardSpec,
-  EphemeralDashboardResource,
 } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useState } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
@@ -49,7 +49,7 @@ function CreateDashboardView(): ReactElement | null {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createDashboardMutation = useCreateDashboardMutation();
 
-  const data: DashboardResource = {
+  const data: CoreDashboardResource = {
     kind: 'Dashboard',
     metadata: {
       name: generateMetadataName(dashboardName),
@@ -72,14 +72,14 @@ function CreateDashboardView(): ReactElement | null {
   const [isLeavingConfirmDialogEnabled, setIsLeavingConfirmDialogEnabled] = useState(true);
 
   const handleDashboardSave = useCallback(
-    (data: DashboardResource | EphemeralDashboardResource) => {
+    (data: DashboardResource) => {
       if (data.kind !== 'Dashboard') {
         throw new Error('Invalid kind');
       }
       setIsLeavingConfirmDialogEnabled(false); // Disable the leaving dialog before navigating
 
-      return createDashboardMutation.mutateAsync(data, {
-        onSuccess: (createdDashboard: DashboardResource) => {
+      return createDashboardMutation.mutateAsync(data as CoreDashboardResource, {
+        onSuccess: (createdDashboard: CoreDashboardResource) => {
           successSnackbar(
             `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
           );
