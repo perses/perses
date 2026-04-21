@@ -98,7 +98,7 @@ func (e *endpoint) Schema(ctx echo.Context) error {
 
 	cueCtx := cuecontext.New()
 
-	// grab plugin schemas & aggregate them into single cue value per plugin kind
+	// grab plugin schemas & aggregate them into a single cue value per plugin kind
 	plugins := map[v1plugin.Kind]cue.Value{}
 	for _, kind := range []v1plugin.Kind{v1plugin.KindDatasource, v1plugin.KindPanel, v1plugin.KindVariable, v1plugin.KindQuery} {
 		schemas := e.pluginSvc.Schema().GetAllSchemasOfKind(kind)
@@ -113,14 +113,14 @@ func (e *endpoint) Schema(ctx echo.Context) error {
 		plugins[kind] = merged
 	}
 
-	// load the dashboard #Spec
+	// load the dashboard schema
 	spec, err := dashboardSchema.Load(cueCtx, e.schemasPath)
 	if err != nil {
 		logrus.WithError(err).Error("unable to load dashboard schema")
 		return apiinterface.InternalError
 	}
 
-	// inject plugin disjunctions into the dashboard schema
+	// inject plugin cue values into the dashboard schema
 	result, err := dashboardSchema.MergeWithPlugins(cueCtx, spec, plugins)
 	if err != nil {
 		logrus.WithError(err).Error("unable to merge dashboard schema with plugin schemas")
