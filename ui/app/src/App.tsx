@@ -41,8 +41,12 @@ function App(): ReactElement {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      {isKeyboardShortcutsEnabled && <GlobalShortcuts />}
-      {isKeyboardShortcutsEnabled && <ShortcutHelpModal />}
+      {isKeyboardShortcutsEnabled && (
+        <>
+          <GlobalShortcuts />
+          <ShortcutHelpModal />
+        </>
+      )}
       {location.pathname !== SignInRoute &&
         location.pathname !== SignUpRoute &&
         location.pathname !== DelegatedAuthnErrorRoute && <Header />}

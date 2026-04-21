@@ -71,8 +71,8 @@ func (t *TimeRange) Verify() error {
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
 	Disable bool `json:"disable" yaml:"disable"`
-	// DisableKeyboardShortcuts disables keyboard shortcuts in the UI.
-	DisableKeyboardShortcuts bool `json:"disable_keyboard_shortcuts,omitempty" yaml:"disable_keyboard_shortcuts,omitempty"`
+	// EnableKeyboardShortcuts enables keyboard shortcuts in the UI. Defaults to true when omitted.
+	EnableKeyboardShortcuts *bool `json:"enable_keyboard_shortcuts,omitempty" yaml:"enable_keyboard_shortcuts,omitempty"`
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
