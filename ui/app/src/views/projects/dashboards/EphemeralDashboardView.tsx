@@ -14,12 +14,7 @@
 import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import {
-  DashboardResource,
-  EphemeralDashboardResource,
-  EphemeralDashboardSpec,
-  getResourceExtendedDisplayName,
-} from '@perses-dev/core';
+import { EphemeralDashboardResource, EphemeralDashboardSpec, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { DashboardResource as DashboardResourceModel } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useEffect } from 'react';
 import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';

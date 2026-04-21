@@ -18,7 +18,6 @@ import {
   getResourceExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
-  DashboardResource as CoreDashboardResource,
   EphemeralDashboardSpec,
   DurationString,
 } from '@perses-dev/core';
