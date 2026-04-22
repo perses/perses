@@ -95,7 +95,7 @@ export function ShortcutHelpModal(): ReactElement {
       <DialogContent>
         {SHORTCUT_CATEGORY_ORDER.map((category) => {
           const shortcuts = groupedShortcuts[category];
-          if (!shortcuts || shortcuts.length === 0) return null;
+          if (!shortcuts?.length) return null;
 
           return (
             <Box key={category} sx={{ mb: 2 }}>

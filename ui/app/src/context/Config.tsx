@@ -89,7 +89,7 @@ export function useIsExplorerEnabled(): boolean {
 
 export function useIsKeyboardShortcutsEnabled(): boolean {
   const { config } = useConfigContext();
-  return config.frontend.enable_keyboard_shortcuts !== false;
+  return config.frontend.enable_keyboard_shortcuts ?? true;
 }
 
 export function useIsEphemeralDashboardEnabled(): boolean {
