@@ -38,18 +38,16 @@ import (
 )
 
 type endpoint struct {
-	toolbox     toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
-	pluginSvc   plugin.Plugin
-	schemasPath string
-	readonly    bool
+	toolbox   toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
+	pluginSvc plugin.Plugin
+	readonly  bool
 }
 
-func NewEndpoint(service dashboard.Service, pluginService plugin.Plugin, authz authorization.Authorization, readonly bool, caseSensitive bool, schemasPath string) route.Endpoint {
+func NewEndpoint(service dashboard.Service, pluginService plugin.Plugin, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:     toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, v1.KindDashboard, caseSensitive),
-		pluginSvc:   pluginService,
-		schemasPath: schemasPath,
-		readonly:    readonly,
+		toolbox:   toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, v1.KindDashboard, caseSensitive),
+		pluginSvc: pluginService,
+		readonly:  readonly,
 	}
 }
 
@@ -92,10 +90,6 @@ func (e *endpoint) List(ctx echo.Context) error {
 }
 
 func (e *endpoint) Schema(ctx echo.Context) error {
-	if e.schemasPath == "" {
-		return ctx.JSON(http.StatusServiceUnavailable, map[string]string{"message": "dashboard schemas path is not configured"})
-	}
-
 	cueCtx := cuecontext.New()
 
 	// grab plugin schemas & aggregate them into a single cue value per plugin kind
@@ -114,7 +108,7 @@ func (e *endpoint) Schema(ctx echo.Context) error {
 	}
 
 	// load the dashboard schema
-	spec, err := dashboardSchema.Load(cueCtx, e.schemasPath)
+	spec, err := dashboardSchema.LoadFromSpec(cueCtx)
 	if err != nil {
 		logrus.WithError(err).Error("unable to load dashboard schema")
 		return apiinterface.InternalError
