@@ -20,6 +20,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/token"
+	"github.com/perses/perses/internal/api/utils"
 )
 
 func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
@@ -31,37 +32,19 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 		if inst.Err() != nil {
 			return cue.Value{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
-		// cast all schemas to ast.Expr or ast.File
+
 		node := inst.Syntax(
 			cue.InlineImports(true),
 			cue.All(),
 			cue.Definitions(true),
 		)
 
-		// casting into ast.Expr
-		// cannot simply use node.(ast.Expr) as it can fail for plugins with package declarations and/or import statements in their schema
-		// in such cases inst.Syntax() returns *ast.File that is not directly castable into ast.Expr
-		var tmpExpr ast.Expr
-		switch n := node.(type) {
-		case ast.Expr:
-			tmpExpr = n
-		// handling *ast.File
-		case *ast.File:
-			var elts []ast.Decl
-			for _, declr := range n.Decls {
-				switch declr.(type) {
-				case *ast.Package, *ast.ImportDecl:
-					continue
-				default:
-					elts = append(elts, declr)
-				}
-			}
-			tmpExpr = &ast.StructLit{Elts: elts}
-		default:
-			// TODO: return with just an empty cue.Value, or just skip the failing plugin?
-			return cue.Value{}, fmt.Errorf("unexpected ast.Node type %T for schema %s", node, ls.Name)
+		castExpr, err := utils.CastASTNodeToExpr(node)
+		if err != nil {
+			// TODO: should this return error, or just log it and skip?
+			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
-		expr = append(expr, tmpExpr)
+		expr = append(expr, castExpr)
 	}
 	// OR join all expressions
 	// start with the first expr, and OR join all the next ones'

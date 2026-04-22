@@ -22,6 +22,7 @@ import (
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/token"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
@@ -78,7 +79,7 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
-	// #Dashboard: spec: panels: {[_]: spec: plugin: spec: <panels>}
+	// #Dashboard: spec: panels: {[_]: spec: plugin: <panels>}
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {
 		overlay, err := buildOverlay(ctx, panels, func(inner ast.Expr) ast.Expr {
 			return structLit(
@@ -102,8 +103,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queryDisj>}]}
-	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: spec: <queries>}]}
+	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: <queries>}]}
 	if queries, ok := plugins[v1plugin.KindQuery]; ok {
 		overlay, err := buildOverlay(ctx, queries, func(inner ast.Expr) ast.Expr {
 			return structLit(
@@ -155,7 +155,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 	}
 
-	// #Dashboard: spec: variables: [...{spec: plugin?: spec: <variableDisj>}]
+	// #Dashboard: spec: variables: [...{spec: plugin?: <variables>}]
 	// plugin is optional: TextVariable has no plugin field
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
 		overlay, err := buildOverlay(ctx, variables, func(inner ast.Expr) ast.Expr {
@@ -194,27 +194,12 @@ func buildOverlay(ctx *cue.Context, v cue.Value, layout func(ast.Expr) ast.Expr)
 		cue.Definitions(true),
 	)
 
-	var tmpExpr ast.Expr
-	switch n := node.(type) {
-	case ast.Expr:
-		tmpExpr = n
-	// handling *ast.File
-	case *ast.File:
-		var elts []ast.Decl
-		for _, declr := range n.Decls {
-			switch declr.(type) {
-			case *ast.Package, *ast.ImportDecl:
-				continue
-			default:
-				elts = append(elts, declr)
-			}
-		}
-		tmpExpr = &ast.StructLit{Elts: elts}
-	default:
-		return cue.Value{}, fmt.Errorf("unexpected AST node type %T", node)
+	castExpr, err := utils.CastASTNodeToExpr(node)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("could not build dashboard schema overlay: %w", err)
 	}
 
-	wrapped := ctx.BuildExpr(layout(tmpExpr))
+	wrapped := ctx.BuildExpr(layout(castExpr))
 	if wrapped.Err() != nil {
 		return cue.Value{}, wrapped.Err()
 	}

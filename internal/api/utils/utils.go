@@ -14,6 +14,9 @@
 package utils
 
 import (
+	"fmt"
+
+	"cuelang.org/go/cue/ast"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -90,4 +93,30 @@ func GetMetadataProject(metadata api.Metadata) string {
 		return projectMetadata.Project
 	}
 	return ""
+}
+
+func CastASTNodeToExpr(node ast.Node) (ast.Expr, error) {
+	// casting into ast.Expr
+	// cannot simply use node.(ast.Expr) as it can fail for plugins with package declarations and/or import statements in their schema
+	// in such cases inst.Syntax() returns *ast.File that is not directly castable into ast.Expr
+	var tmpExpr ast.Expr
+	switch n := node.(type) {
+	case ast.Expr:
+		tmpExpr = n
+	// handling *ast.File
+	case *ast.File:
+		var elts []ast.Decl
+		for _, declr := range n.Decls {
+			switch declr.(type) {
+			case *ast.Package, *ast.ImportDecl:
+				continue
+			default:
+				elts = append(elts, declr)
+			}
+		}
+		tmpExpr = &ast.StructLit{Elts: elts}
+	default:
+		return tmpExpr, fmt.Errorf("unexpected ast.Node type %T", node)
+	}
+	return tmpExpr, nil
 }
