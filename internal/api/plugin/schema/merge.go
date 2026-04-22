@@ -39,17 +39,22 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 			cue.Definitions(true),
 		)
 
-		castExpr, err := utils.CastASTNodeToExpr(node)
+		castExpr, err := utils.CastASTNodeToASTExpr(node)
 		if err != nil {
 			// TODO: should this return error, or just log it and skip?
 			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
 		expr = append(expr, castExpr)
 	}
+
+	if len(expr) == 0 {
+		return cue.Value{}, errors.New("no plugin schemas returned")
+	}
+
 	// OR join all expressions
 	// start with the first expr, and OR join all the next ones'
-	if len(expr) > 0 {
-		complete := expr[0]
+	complete := expr[0]
+	if len(expr) > 1 {
 		for _, e := range expr[1:] {
 			complete = &ast.BinaryExpr{
 				Op: token.OR,
@@ -57,12 +62,11 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 				Y:  e,
 			}
 		}
-		// build the final expression value
-		value := ctx.BuildExpr(complete)
-		if value.Err() != nil {
-			return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
-		}
-		return value, nil
 	}
-	return cue.Value{}, errors.New("no plugin schemas returned")
+	// build the final expression value
+	value := ctx.BuildExpr(complete)
+	if value.Err() != nil {
+		return cue.Value{}, fmt.Errorf("unable to merge schemas: %w", value.Err())
+	}
+	return value, nil
 }
