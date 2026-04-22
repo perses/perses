@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Tab, Tabs, styled } from '@mui/material';
+import { Box, BoxProps, Chip, Stack, Tab, Tabs, styled } from '@mui/material';
+import { ReactElement } from 'react';
 
 export const MENU_TABS_HEIGHT = '54px';
 
@@ -22,3 +23,57 @@ export const MenuTabs = styled(Tabs)({
 export const MenuTab = styled(Tab)({
   minHeight: MENU_TABS_HEIGHT,
 });
+
+interface TabPanelProperties extends BoxProps {
+  index: string;
+  value: string;
+  idPrefix: string;
+}
+
+export function TabPanel({ children, value, index, idPrefix, sx, ...props }: TabPanelProperties): ReactElement {
+  return (
+    <Box
+      role="tabpanel"
+      hidden={value !== index}
+      id={`${idPrefix}-tabpanel-${index}`}
+      aria-labelledby={`${idPrefix}-tab-${index}`}
+      sx={[
+        {
+          '& > .MuiCard-root': {
+            border: '1px solid',
+            borderColor: 'divider',
+            borderTop: 'none',
+            borderRadius: '0 0 8px 8px',
+            overflow: 'hidden',
+          },
+        },
+        ...((Array.isArray(sx) ? sx : [sx].filter(Boolean)) as Array<Record<string, unknown>>),
+      ]}
+      {...props}
+    >
+      {value === index && children}
+    </Box>
+  );
+}
+
+export function TabLabel({ label, count }: { label: string; count?: number }): ReactElement {
+  return (
+    <Stack direction="row" alignItems="center" gap={0.75}>
+      <span>{label}</span>
+      {count !== undefined && count > 0 && (
+        <Chip
+          label={count}
+          size="small"
+          sx={{
+            height: 20,
+            minWidth: 20,
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            bgcolor: 'action.selected',
+            '& .MuiChip-label': { px: 0.75 },
+          }}
+        />
+      )}
+    </Stack>
+  );
+}

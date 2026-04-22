@@ -26,6 +26,10 @@ import (
 	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
+type GridItem struct {
+	X, Y, W, H int
+}
+
 func Name(name string) Option {
 	return func(builder *Builder) error {
 		if err := common.ValidateID(name); err != nil {
@@ -134,6 +138,65 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 				},
 			})
 			builder.Dashboard.Spec.Panels[panelRef] = &r.Panels[i]
+		}
+
+		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{
+			Kind: "Grid",
+			Spec: gridLayoutSpec,
+		})
+
+		return nil
+	}
+}
+
+func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgroup.Option) Option {
+	return func(builder *Builder) error {
+		r, err := panelgroup.New(title, options...)
+		if err != nil {
+			return err
+		}
+
+		if len(positions) != len(r.Panels) {
+			return fmt.Errorf("number of positions (%d) must match number of panels (%d)", len(positions), len(r.Panels))
+		}
+
+		if builder.Dashboard.Spec.Layouts == nil {
+			builder.Dashboard.Spec.Layouts = []dashboard.Layout{}
+		}
+
+		if builder.Dashboard.Spec.Panels == nil {
+			builder.Dashboard.Spec.Panels = make(map[string]*dashboard.Panel)
+		}
+
+		layoutIdx := len(builder.Dashboard.Spec.Layouts)
+		gridItems := make([]dashboard.GridItem, 0, len(r.Panels))
+
+		for i := range r.Panels {
+			panelRef := fmt.Sprintf("%d_%d", layoutIdx, i)
+			builder.Dashboard.Spec.Panels[panelRef] = &r.Panels[i]
+
+			gi := positions[i]
+			gridItems = append(gridItems, dashboard.GridItem{
+				X:      gi.X,
+				Y:      gi.Y,
+				Width:  gi.W,
+				Height: gi.H,
+				Content: &common.JSONRef{
+					Ref: fmt.Sprintf("#/spec/panels/%s", panelRef),
+				},
+			})
+		}
+
+		gridLayoutSpec := dashboard.GridLayoutSpec{
+			Display: &dashboard.GridLayoutDisplay{
+				Title: r.Title,
+			},
+			Items:          gridItems,
+			RepeatVariable: r.RepeatVariable,
+		}
+
+		if !r.IsCollapsed {
+			gridLayoutSpec.Display.Collapse = &dashboard.GridLayoutCollapse{Open: true}
 		}
 
 		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{

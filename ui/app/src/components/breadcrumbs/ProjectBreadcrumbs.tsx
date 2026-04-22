@@ -11,70 +11,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import { ReactElement } from 'react';
-import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
+import { BreadcrumbVariant, HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {
   project: ProjectResource;
   dashboardName?: string;
+  variant?: BreadcrumbVariant;
 }
 
 function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps): ReactElement {
-  const { project, dashboardName } = props;
+  const { project, dashboardName, variant } = props;
 
   if (dashboardName) {
     return (
-      <Breadcrumbs
-        id="breadcrumbs"
-        sx={{
-          overflowX: 'scroll',
-          scrollbarWidth: 'none' /* Firefox */,
-          '& .MuiBreadcrumbs-ol': {
-            flexWrap: 'nowrap',
-            whiteSpace: 'nowrap',
-          },
-          '&::-webkit-scrollbar': {
-            display: 'none' /* Safari and Chrome */,
-          },
-        }}
-      >
-        <HomeLinkCrumb />
-        <LinkCrumb to={`/projects/${project.metadata.name}`}>
-          <StackCrumb>
-            <Archive fontSize="small" /> {getResourceDisplayName(project)}
+      <Breadcrumbs id="breadcrumbs" variant={variant}>
+        <HomeLinkCrumb variant={variant} />
+        <LinkCrumb to={`/projects/${project.metadata.name}`} variant={variant}>
+          <StackCrumb variant={variant}>
+            <Archive />
+            <TitleCrumb variant={variant} inheritTypography={true}>
+              {getResourceDisplayName(project)}
+            </TitleCrumb>
           </StackCrumb>
         </LinkCrumb>
-        <StackCrumb>
-          <ViewDashboardIcon fontSize="small" />
-          <Typography variant="h3">{dashboardName}</Typography>
+        <StackCrumb variant={variant}>
+          <ViewDashboardIcon />
+          <TitleCrumb variant={variant}>{dashboardName}</TitleCrumb>
         </StackCrumb>
       </Breadcrumbs>
     );
   }
 
   return (
-    <Breadcrumbs
-      id="breadcrumbs"
-      sx={{
-        overflowX: 'scroll',
-        scrollbarWidth: 'none' /* Firefox */,
-        '& .MuiBreadcrumbs-ol': {
-          flexWrap: 'nowrap',
-          whiteSpace: 'nowrap',
-        },
-        '&::-webkit-scrollbar': {
-          display: 'none' /* Safari and Chrome */,
-        },
-      }}
-    >
-      <HomeLinkCrumb />
-      <StackCrumb>
-        <Archive fontSize="large" />
-        <TitleCrumb>{getResourceDisplayName(project)}</TitleCrumb>
+    <Breadcrumbs id="breadcrumbs" variant={variant}>
+      <HomeLinkCrumb variant={variant} />
+      <StackCrumb variant={variant}>
+        <Archive />
+        <TitleCrumb variant={variant}>{getResourceDisplayName(project)}</TitleCrumb>
       </StackCrumb>
     </Breadcrumbs>
   );

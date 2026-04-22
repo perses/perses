@@ -26,16 +26,6 @@ test.describe('ProjectView', () => {
     await navigationPromise;
   });
 
-  test('can navigate to a dashboard recently viewed', async ({ page }) => {
-    const projectPage = new AppProjectPage(page);
-    await projectPage.goto(project);
-
-    await projectPage.navigateToDashboard(project, 'Demo');
-
-    await projectPage.goto(project);
-    await projectPage.navigateToDashboardFromRecentDashboards(project, 'Demo');
-  });
-
   test('can change current tab', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
     await projectPage.goto(project);

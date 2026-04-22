@@ -11,46 +11,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import Archive from 'mdi-material-ui/Archive';
+import Close from 'mdi-material-ui/Close';
 import { ReactElement, useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
 import { useRecentDashboardList } from '../../model/dashboard-client';
+import { useNavHistoryDispatch } from '../../context/DashboardNavHistory';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
+  const navHistoryDispatch = useNavHistoryDispatch();
 
   const dashboards = useMemo(() => data ?? [], [data]);
 
+  const handleRemove = (project: string, name: string, event: React.MouseEvent): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    navHistoryDispatch({ type: 'remove', project, name });
+  };
+
   return (
     <Card
-      elevation={1}
+      elevation={0}
       sx={{
         border: '1px solid',
         borderColor: 'divider',
         height: '100%',
-        maxHeight: 600,
         display: 'flex',
         flexDirection: 'column',
+        boxShadow: (theme) => theme.shadows[1],
       }}
     >
       <CardContent sx={{ flex: '0 0 auto' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-          <HistoryIcon sx={{ color: 'primary.main' }} />
-          <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
-            Recently Viewed Dashboards
+        <Stack spacing={0.75}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <HistoryIcon sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontSize: '1.25rem', fontWeight: 700 }}>
+              Recently Viewed Dashboards
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Jump back into the dashboards you opened most recently.
           </Typography>
-        </Box>
+        </Stack>
       </CardContent>
       <CardContent
         sx={{
           flex: '1 1 auto',
-          overflowY: 'auto',
           pt: 0,
           minHeight: 0,
           ...(dashboards.length === 0 && !isLoading
@@ -76,7 +89,10 @@ export function RecentDashboards(): ReactElement {
             />
           )}
           {!isLoading && dashboards.length > 0 && (
-            <Box id="recent-dashboard-list" sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Box
+              id="recent-dashboard-list"
+              sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
+            >
               {dashboards.map((item, index) => {
                 const updatedAt = item.date ?? item.dashboard.metadata.updatedAt;
                 const relativeTime = updatedAt ? intlFormatDistance(new Date(updatedAt), new Date()) : 'moments ago';
@@ -95,7 +111,8 @@ export function RecentDashboards(): ReactElement {
                         alignItems: 'center',
                         gap: 1.5,
                         py: 2,
-                        pl: 1,
+                        px: 1,
+                        borderRadius: 1.5,
                         textDecoration: 'none',
                         color: 'inherit',
                         cursor: 'pointer',
@@ -107,7 +124,7 @@ export function RecentDashboards(): ReactElement {
                     >
                       <Box
                         sx={{
-                          p: 1,
+                          p: 1.25,
                           borderRadius: 1.5,
                           bgcolor: 'primary.main',
                           display: 'flex',
@@ -120,8 +137,8 @@ export function RecentDashboards(): ReactElement {
 
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          variant="body1"
+                          sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
                         >
                           {displayName}
                         </Typography>
@@ -132,6 +149,14 @@ export function RecentDashboards(): ReactElement {
                           </Typography>
                         </Box>
                       </Box>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleRemove(item.dashboard.metadata.project, item.dashboard.metadata.name, e)}
+                        aria-label={`Remove ${displayName} from recent list`}
+                        sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+                      >
+                        <Close fontSize="small" />
+                      </IconButton>
                     </Box>
                     {index < dashboards.length - 1 && <Divider />}
                   </Box>

@@ -19,6 +19,7 @@ import { JSONEditor } from '@perses-dev/components';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import PageHeader from '../../components/page-header/PageHeader';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { PluginsList } from './PluginsList';
@@ -33,7 +34,7 @@ function TabPanel(props: TabPanelProps): ReactElement | null {
   const { children, value, index, ...other } = props;
   return (
     <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} {...other}>
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
+      {value === index && children}
     </div>
   );
 }
@@ -48,14 +49,20 @@ function ConfigView(): ReactElement {
   };
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
-      <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
-      <Stack>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1.5}>
+      <PageHeader breadcrumb={<AppBreadcrumbs rootPageName="Configuration" icon={<Cog />} />} title="Configuration" />
+      <Stack gap={0}>
         <Stack
           direction="row"
           alignItems="center"
-          justifyContent="space-between"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{
+            bgcolor: 'background.paper',
+            borderRadius: '8px 8px 0 0',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderBottom: 'none',
+            px: 1,
+          }}
         >
           <MenuTabs value={tabIndex} onChange={handleTabChange} aria-label="configuration tabs">
             <MenuTab
@@ -75,10 +82,34 @@ function ConfigView(): ReactElement {
           </MenuTabs>
         </Stack>
         <TabPanel value={tabIndex} index={0}>
-          <JSONEditor value={config} readOnly />
+          <Box
+            sx={{
+              overflow: 'hidden',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderTop: 'none',
+              borderRadius: '0 0 8px 8px',
+              bgcolor: 'background.default',
+              boxShadow: (theme) => theme.shadows[1],
+            }}
+          >
+            <JSONEditor value={config} readOnly />
+          </Box>
         </TabPanel>
         <TabPanel value={tabIndex} index={1}>
-          <PluginsList />
+          <Box
+            sx={{
+              overflow: 'hidden',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderTop: 'none',
+              borderRadius: '0 0 8px 8px',
+              bgcolor: 'background.paper',
+              boxShadow: (theme) => theme.shadows[1],
+            }}
+          >
+            <PluginsList />
+          </Box>
         </TabPanel>
       </Stack>
     </Stack>

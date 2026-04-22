@@ -11,14 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Card, CardContent, Typography, Divider, Button } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { ReactElement, useMemo, useState } from 'react';
-import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { useSnackbar } from '@perses-dev/components';
-import { usePlugins } from '../../model/plugin-client';
+import { Box, Button, Chip, Stack, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { NoDataOverlay, useSnackbar } from '@perses-dev/components';
+import { useMemo, useState } from 'react';
+import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { DATA_GRID_SLOT_PROPS, DATA_GRID_STYLES, GridToolbar, PAGE_SIZE_OPTIONS } from '../../components/datagrid';
 import { PersesLoader } from '../../components/PersesLoader';
+import { usePlugins } from '../../model/plugin-client';
 import { PluginDetailsDialog } from './PluginDetailsDialog';
+
+interface PluginRow {
+  id: string;
+  name: string;
+  version: string;
+  pluginCount: number;
+  kinds: string[];
+  pluginModule: PluginModuleResource;
+}
+
+function NoPluginRowOverlay(): ReactElement {
+  return <NoDataOverlay resource="plugins" />;
+}
 
 export function PluginsList(): ReactElement {
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
@@ -26,9 +42,89 @@ export function PluginsList(): ReactElement {
 
   const { data: pluginModules, isLoading, error } = usePlugins();
 
-  const sortedPluginModules = useMemo(() => {
-    return (pluginModules ?? []).toSorted((a, b) => a.metadata.name.localeCompare(b.metadata.name));
+  const rows = useMemo<PluginRow[]>(() => {
+    return (pluginModules ?? [])
+      .toSorted((a, b) => a.metadata.name.localeCompare(b.metadata.name))
+      .map((pluginModule) => ({
+        id: `${pluginModule.metadata.name}-${pluginModule.metadata.version}`,
+        name: pluginModule.metadata.name,
+        version: pluginModule.metadata.version,
+        pluginCount: pluginModule.spec.plugins.length,
+        kinds: [...new Set(pluginModule.spec.plugins.map((plugin) => plugin.kind))],
+        pluginModule,
+      }));
   }, [pluginModules]);
+
+  const columns = useMemo<Array<GridColDef<PluginRow>>>(
+    () => [
+      {
+        field: 'name',
+        headerName: 'Module',
+        flex: 1.2,
+        minWidth: 220,
+        renderCell: ({ row }: GridRenderCellParams<PluginRow, string>): ReactElement => (
+          <Stack spacing={0.5} sx={{ justifyContent: 'center', height: '100%', py: 1 }}>
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              {row.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Version {row.version}
+            </Typography>
+          </Stack>
+        ),
+      },
+      {
+        field: 'pluginCount',
+        headerName: 'Plugins',
+        width: 120,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'kinds',
+        headerName: 'Kinds',
+        flex: 1,
+        minWidth: 220,
+        sortable: false,
+        renderCell: ({ row }: GridRenderCellParams<PluginRow, string[]>): ReactElement => (
+          <Stack direction="row" gap={0.75} sx={{ alignItems: 'center', flexWrap: 'wrap', height: '100%', py: 1 }}>
+            {row.kinds.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                None
+              </Typography>
+            ) : (
+              row.kinds.map((kind) => <Chip key={kind} label={kind} size="small" variant="outlined" />)
+            )}
+          </Stack>
+        ),
+      },
+      {
+        field: 'actions',
+        headerName: 'Details',
+        width: 140,
+        sortable: false,
+        filterable: false,
+        align: 'right',
+        headerAlign: 'right',
+        renderCell: ({ row }: GridRenderCellParams<PluginRow>): ReactElement => (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            <Button size="small" onClick={() => setSelectedPluginModule(row.pluginModule)}>
+              Inspect
+            </Button>
+          </Box>
+        ),
+      },
+    ],
+    []
+  );
 
   if (isLoading || pluginModules === undefined) {
     return <PersesLoader />;
@@ -38,60 +134,30 @@ export function PluginsList(): ReactElement {
     exceptionSnackbar(error);
   }
 
-  const handleOpenPluginDetails = (pluginModule: PluginModuleResource): void => {
-    setSelectedPluginModule(pluginModule);
-  };
-
-  const handleClosePluginDetails = (): void => {
-    setSelectedPluginModule(null);
-  };
-
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
-        {sortedPluginModules.map((pluginModule) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={pluginModule.metadata.name}>
-            <Card elevation={2} sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="h3" gutterBottom>
-                  {pluginModule?.metadata?.name}
-                </Typography>
-                <Typography>Version {pluginModule.metadata.version}</Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Box>
-                  {
-                    // Case 1: No plugins available
-                    (!pluginModule?.spec?.plugins || pluginModule?.spec?.plugins.length === 0) && (
-                      <Typography variant="body2">No plugins available 😢</Typography>
-                    )
-                  }
-                  {
-                    // Case 2: Single plugin
-                    pluginModule?.spec?.plugins.length === 1 && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body1" color="text.secondary">
-                          <strong>Kind:</strong> {pluginModule?.spec?.plugins[0]?.kind}
-                        </Typography>
-                      </Box>
-                    )
-                  }
-                  {
-                    // Case 3: Multiple plugins
-                    pluginModule?.spec?.plugins.length > 1 && (
-                      <Box>
-                        <Button color="info" size="small" onClick={() => handleOpenPluginDetails(pluginModule)}>
-                          View {pluginModule.spec.plugins.length} Plugins
-                        </Button>
-                      </Box>
-                    )
-                  }
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      <PluginDetailsDialog selectedPluginModule={selectedPluginModule} onClose={handleClosePluginDetails} />
+    <Box sx={{ overflow: 'hidden' }}>
+      <DataGrid
+        autoHeight
+        disableRowSelectionOnClick
+        getRowHeight={() => 'auto'}
+        rows={rows}
+        columns={columns}
+        slots={{ toolbar: GridToolbar, noRowsOverlay: NoPluginRowOverlay }}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
+        slotProps={DATA_GRID_SLOT_PROPS}
+        sx={{
+          ...DATA_GRID_STYLES,
+          '& .MuiDataGrid-cell': {
+            display: 'flex',
+            alignItems: 'center',
+          },
+          '& .MuiDataGrid-cell--withRenderer': {
+            py: 0.5,
+          },
+        }}
+      />
+      <PluginDetailsDialog selectedPluginModule={selectedPluginModule} onClose={() => setSelectedPluginModule(null)} />
     </Box>
   );
 }

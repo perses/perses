@@ -11,10 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { DialogContent, DialogTitle, Divider, List, ListItem, ListItemText, Stack, Typography } from '@mui/material';
+import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import {
+  Chip,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { Fragment, ReactElement } from 'react';
+import { Fragment } from 'react';
+import type { ReactElement } from 'react';
 
 interface PluginDetailsDialogProps {
   selectedPluginModule: PluginModuleResource | null;
@@ -28,7 +39,18 @@ export function PluginDetailsDialog({ selectedPluginModule, onClose }: PluginDet
 
   return (
     <Dialog open={!!selectedPluginModule} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Plugins for {selectedPluginModule.metadata.name} Module</DialogTitle>
+      <DialogTitle>
+        <Stack spacing={1}>
+          <Typography variant="h2">{selectedPluginModule.metadata.name}</Typography>
+          <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'wrap' }}>
+            <Chip label={`Version ${selectedPluginModule.metadata.version}`} size="small" variant="outlined" />
+            <Typography variant="body2" color="text.secondary">
+              {selectedPluginModule.spec.plugins.length} plugin
+              {selectedPluginModule.spec.plugins.length !== 1 ? 's' : ''}
+            </Typography>
+          </Stack>
+        </Stack>
+      </DialogTitle>
       <DialogContent dividers sx={{ maxHeight: 400 }}>
         <List>
           <Stack divider={<Divider flexItem orientation="horizontal" />}>
@@ -36,11 +58,7 @@ export function PluginDetailsDialog({ selectedPluginModule, onClose }: PluginDet
               <Fragment key={index}>
                 <ListItem>
                   <ListItemText
-                    primary={
-                      <Typography>
-                        <strong>{pluginItem.spec.name}</strong>
-                      </Typography>
-                    }
+                    primary={<Typography sx={{ fontWeight: 600 }}>{pluginItem.spec.name}</Typography>}
                     secondary={<Typography color="text.secondary">Kind: {pluginItem.kind}</Typography>}
                   />
                 </ListItem>

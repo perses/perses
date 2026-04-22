@@ -180,7 +180,7 @@ func (s *Security) Verify() error {
 		s.EncryptionKey = secret.Hidden(data)
 	}
 	if len(s.EncryptionKey) != 32 {
-		return fmt.Errorf("encryption_key size must be 32 bytes")
+		return fmt.Errorf("encryption_key size must be 32 bytes, got %d bytes", len(s.EncryptionKey))
 	}
 	s.EncryptionKey = secret.Hidden(hex.EncodeToString([]byte(s.EncryptionKey)))
 

@@ -31,6 +31,7 @@ import (
 	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
 	staticlist "github.com/perses/plugins/staticlistvariable/sdk/go"
+	dashboardSpec "github.com/perses/spec/go/dashboard"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -245,6 +246,115 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		assert.NoError(t, marshErr)
 		assert.NoError(t, readErr)
 		require.JSONEq(t, string(expectedOutput), string(builderOutput))
+	})
+}
+
+func TestAddCustomPanelGroup(t *testing.T) {
+	t.Run("single panel with custom position", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddCustomPanelGroup("My Group",
+				[]dashboard.GridItem{{X: 0, Y: 0, W: 24, H: 6}},
+				panelgroup.AddPanel("Panel A"),
+			),
+		)
+
+		require.NoError(t, err)
+
+		require.Len(t, builder.Dashboard.Spec.Layouts, 1)
+		layout := builder.Dashboard.Spec.Layouts[0]
+		assert.Equal(t, dashboardSpec.LayoutKind("Grid"), layout.Kind)
+
+		spec, ok := layout.Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Equal(t, "My Group", spec.Display.Title)
+		assert.Nil(t, spec.Display.Collapse)
+
+		require.Len(t, spec.Items, 1)
+		assert.Equal(t, 0, spec.Items[0].X)
+		assert.Equal(t, 0, spec.Items[0].Y)
+		assert.Equal(t, 24, spec.Items[0].Width)
+		assert.Equal(t, 6, spec.Items[0].Height)
+		assert.Equal(t, "#/spec/panels/0_0", spec.Items[0].Content.Ref)
+
+		require.Len(t, builder.Dashboard.Spec.Panels, 1)
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "0_0")
+	})
+
+	t.Run("multiple panels with different positions", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddCustomPanelGroup("Multi Panel Group",
+				[]dashboard.GridItem{
+					{X: 0, Y: 0, W: 12, H: 8},
+					{X: 12, Y: 0, W: 12, H: 8},
+					{X: 0, Y: 8, W: 24, H: 4},
+				},
+				panelgroup.AddPanel("Panel A"),
+				panelgroup.AddPanel("Panel B"),
+				panelgroup.AddPanel("Panel C"),
+			),
+		)
+
+		require.NoError(t, err)
+		require.Len(t, builder.Dashboard.Spec.Layouts, 1)
+
+		spec, ok := builder.Dashboard.Spec.Layouts[0].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		require.Len(t, spec.Items, 3)
+
+		// First panel: top-left half
+		assert.Equal(t, 0, spec.Items[0].X)
+		assert.Equal(t, 0, spec.Items[0].Y)
+		assert.Equal(t, 12, spec.Items[0].Width)
+		assert.Equal(t, 8, spec.Items[0].Height)
+
+		// Second panel: top-right half
+		assert.Equal(t, 12, spec.Items[1].X)
+		assert.Equal(t, 0, spec.Items[1].Y)
+		assert.Equal(t, 12, spec.Items[1].Width)
+		assert.Equal(t, 8, spec.Items[1].Height)
+
+		// Third panel: full width below
+		assert.Equal(t, 0, spec.Items[2].X)
+		assert.Equal(t, 8, spec.Items[2].Y)
+		assert.Equal(t, 24, spec.Items[2].Width)
+		assert.Equal(t, 4, spec.Items[2].Height)
+
+		// Verify all panels stored
+		require.Len(t, builder.Dashboard.Spec.Panels, 3)
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "0_0")
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "0_1")
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "0_2")
+	})
+
+	t.Run("panel refs use correct layout index with multiple groups", func(t *testing.T) {
+		builder, err := dashboard.New("test-dashboard",
+			dashboard.ProjectName("test"),
+			dashboard.AddCustomPanelGroup("Group 1",
+				[]dashboard.GridItem{{X: 0, Y: 0, W: 24, H: 6}},
+				panelgroup.AddPanel("Panel 1"),
+			),
+			dashboard.AddCustomPanelGroup("Group 2",
+				[]dashboard.GridItem{{X: 0, Y: 0, W: 24, H: 6}},
+				panelgroup.AddPanel("Panel 2"),
+			),
+		)
+
+		require.NoError(t, err)
+		require.Len(t, builder.Dashboard.Spec.Layouts, 2)
+
+		// First group panels keyed as "0_0"
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "0_0")
+		spec0, ok := builder.Dashboard.Spec.Layouts[0].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Equal(t, "#/spec/panels/0_0", spec0.Items[0].Content.Ref)
+
+		// Second group panels keyed as "1_0"
+		assert.Contains(t, builder.Dashboard.Spec.Panels, "1_0")
+		spec1, ok := builder.Dashboard.Spec.Layouts[1].Spec.(dashboardSpec.GridLayoutSpec)
+		require.True(t, ok)
+		assert.Equal(t, "#/spec/panels/1_0", spec1.Items[0].Content.Ref)
 	})
 }
 

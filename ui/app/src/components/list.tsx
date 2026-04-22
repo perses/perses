@@ -87,6 +87,23 @@ export const UPDATED_AT_COL_DEF: GridColDef = {
   ),
 };
 
+export const VIEWED_AT_COL_DEF: GridColDef = {
+  field: 'viewedAt',
+  headerName: 'Last Seen',
+  type: 'dateTime',
+  flex: 1,
+  minWidth: 125,
+  valueGetter: (_, row) => (row.viewedAt ? new Date(row.viewedAt) : null),
+  renderCell: (params) =>
+    params.value ? (
+      <Tooltip title={params.value.toUTCString()} placement="top">
+        <span>{intlFormatDistance(params.value, new Date())}</span>
+      </Tooltip>
+    ) : (
+      <span>—</span>
+    ),
+};
+
 // MUI DataGrid does not provide built-in filter operators for array column types,
 // so we define custom operators for the tags field.
 const tagsFilterOperators: Array<GridFilterOperator<{ tags?: string[] }, string[]>> = [
