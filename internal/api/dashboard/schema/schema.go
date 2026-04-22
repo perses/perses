@@ -48,9 +48,9 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
 	node := encoded.Syntax(cueSyntaxOptions...)
-	expr, ok := node.(ast.Expr)
-	if !ok {
-		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s", node, dashboardDefinitionName)
+	expr, err := utils.CastASTNodeToASTExpr(node)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s: %w", node, dashboardDefinitionName, err)
 	}
 
 	decls := &ast.Field{
@@ -194,7 +194,7 @@ func buildOverlay(ctx *cue.Context, v cue.Value, layout func(ast.Expr) ast.Expr)
 		cue.Definitions(true),
 	)
 
-	castExpr, err := utils.CastASTNodeToExpr(node)
+	castExpr, err := utils.CastASTNodeToASTExpr(node)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("could not build dashboard schema overlay: %w", err)
 	}
