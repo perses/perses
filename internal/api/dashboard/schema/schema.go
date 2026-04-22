@@ -15,15 +15,67 @@ package schema
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
+	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/load"
 	"cuelang.org/go/cue/token"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/sirupsen/logrus"
 )
 
 const dashboardPkg = "github.com/perses/perses/cue/model/api/v1"
+const dashboardDefinitionName = "#Dashboard"
+
+var cueSyntaxOptions = []cue.Option{
+	cue.InlineImports(true),
+	cue.All(),
+}
+
+var cueValidationOptions = []cue.Option{
+	cue.InlineImports(true),
+	cue.Attributes(true),
+	cue.Definitions(true),
+	cue.Hidden(true),
+}
+
+func LoadFromSpec(ctx *cue.Context) (cue.Value, error) {
+	encoded := ctx.EncodeType(v1.Dashboard{})
+	if encoded.Err() != nil {
+		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
+	}
+	node := encoded.Syntax(cueSyntaxOptions...)
+	expr, ok := node.(ast.Expr)
+	if !ok {
+		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s", node, dashboardDefinitionName)
+	}
+
+	decls := &ast.Field{
+		Label: ast.NewIdent(dashboardDefinitionName),
+		Value: expr,
+	}
+
+	final := ctx.BuildExpr(&ast.StructLit{Elts: []ast.Decl{decls}})
+	if final.Err() != nil {
+		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
+	}
+	if validateErr := final.Validate(cueValidationOptions...); validateErr != nil {
+		// retrieve the full error detail to provide better insights to the end user:
+		ex, errOs := os.Executable()
+		if errOs != nil {
+			logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
+		}
+		fullErrStr := errors.Details(validateErr, &errors.Config{Cwd: filepath.Dir(ex)})
+		logrus.Debug(fullErrStr)
+
+		return cue.Value{}, fmt.Errorf("failed to validate dashboard schema: %w", fullErrStr)
+	}
+	return final, nil
+}
 
 // Load loads the full github.com/perses/perses/cue/model/api/v1 package value.
 // schemasPath must be the CUE module root of the perses repo (the directory containing cue.mod/).
