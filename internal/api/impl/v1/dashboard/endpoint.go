@@ -108,7 +108,7 @@ func (e *endpoint) Schema(ctx echo.Context) error {
 	}
 
 	// load the dashboard schema
-	spec, err := dashboardSchema.LoadFromSpec(cueCtx)
+	spec, err := dashboardSchema.Load(cueCtx)
 	if err != nil {
 		logrus.WithError(err).Error("unable to load dashboard schema")
 		return apiinterface.InternalError

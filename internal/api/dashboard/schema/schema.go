@@ -21,14 +21,12 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/errors"
-	"cuelang.org/go/cue/load"
 	"cuelang.org/go/cue/token"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-const dashboardPkg = "github.com/perses/perses/cue/model/api/v1"
 const dashboardDefinitionName = "#Dashboard"
 
 var cueSyntaxOptions = []cue.Option{
@@ -43,7 +41,7 @@ var cueValidationOptions = []cue.Option{
 	cue.Hidden(true),
 }
 
-func LoadFromSpec(ctx *cue.Context) (cue.Value, error) {
+func Load(ctx *cue.Context) (cue.Value, error) {
 	encoded := ctx.EncodeType(v1.Dashboard{})
 	if encoded.Err() != nil {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
@@ -75,27 +73,6 @@ func LoadFromSpec(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("failed to validate dashboard schema: %w", fullErrStr)
 	}
 	return final, nil
-}
-
-// Load loads the full github.com/perses/perses/cue/model/api/v1 package value.
-// schemasPath must be the CUE module root of the perses repo (the directory containing cue.mod/).
-func Load(ctx *cue.Context, schemasPath string) (cue.Value, error) {
-	instances := load.Instances([]string{dashboardPkg}, &load.Config{
-		Dir: schemasPath,
-	})
-	if len(instances) != 1 {
-		return cue.Value{}, fmt.Errorf("expected 1 build instance for %s, got %d", dashboardPkg, len(instances))
-	}
-	inst := instances[0]
-	if inst.Err != nil {
-		return cue.Value{}, fmt.Errorf("failed to load %s: %w", dashboardPkg, inst.Err)
-	}
-
-	v := ctx.BuildInstance(inst)
-	if v.Err() != nil {
-		return cue.Value{}, fmt.Errorf("failed to build %s: %w", dashboardPkg, v.Err())
-	}
-	return v, nil
 }
 
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
