@@ -1,0 +1,29 @@
+// Base config for all typescript packages
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "declarationMap": true,
+    "pretty": true
+  },
+  // For builds that use ts-node to compile the configs (e.g. webpack, jest)
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es2022",
+      "esModuleInterop": true
+    }
+  }
+}

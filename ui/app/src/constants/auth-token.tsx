@@ -1,0 +1,1 @@
+export const activeOrganization = 'activeOrganization';

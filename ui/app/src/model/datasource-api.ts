@@ -1,0 +1,125 @@
+// Copyright 2025 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { DatasourceApi, DatasourceSelector } from '@perses-dev/core';
+import { useCallback } from 'react';
+import { PERSES_APP_CONFIG } from '../config';
+import { useDatasourceList } from './datasource-client';
+import { useGlobalDatasourceList } from './global-datasource-client';
+
+export function buildProxyUrl({
+  project,
+  dashboard,
+  owner,
+  name,
+}: {
+  project?: string;
+  owner?: string | undefined;
+  dashboard?: string;
+  name: string;
+}): string {
+  const basePath = PERSES_APP_CONFIG.api_prefix;
+  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
+  if (dashboard) {
+    url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
+  }
+  if (project) {
+    url = `projects/${encodeURIComponent(project)}/${url}`;
+  }
+  return `${basePath}/proxy/owners/${owner}/${url}`;
+}
+
+export function useDatasourceApi(project?: string): DatasourceApi {
+  const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
+  const { data: datasources, isLoading: isDatasourcesPending } = useDatasourceList({ project });
+
+  const getDatasource = useCallback(
+    async (project: string, selector: DatasourceSelector) => {
+      if (isDatasourcesPending || !datasources) {
+        return undefined;
+      }
+      return datasources.find((datasource) => {
+        if (datasource.metadata.project !== project) {
+          return false;
+        }
+        if (selector.kind !== datasource.spec.plugin.kind) {
+          return false;
+        }
+        if (!selector.name) {
+          return datasource.spec.default;
+        }
+        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
+      });
+    },
+    [datasources, isDatasourcesPending]
+  );
+
+  const getGlobalDatasource = useCallback(
+    async (selector: DatasourceSelector) => {
+      if (isGlobalDatasourcesPending || !globalDatasources) {
+        return undefined;
+      }
+      return globalDatasources.find((datasource) => {
+        if (selector.kind !== datasource.spec.plugin.kind) {
+          return false;
+        }
+        if (!selector.name) {
+          return datasource.spec.default;
+        }
+        return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
+      });
+    },
+    [globalDatasources, isGlobalDatasourcesPending]
+  );
+
+  const listDatasources = useCallback(
+    async (project: string, pluginKind?: string) => {
+      if (isDatasourcesPending || !datasources) {
+        return [];
+      }
+      return datasources.filter((datasource) => {
+        if (datasource.metadata.project !== project) {
+          return false;
+        }
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
+          return false;
+        }
+        return true;
+      });
+    },
+    [datasources, isDatasourcesPending]
+  );
+
+  const listGlobalDatasources = useCallback(
+    async (pluginKind?: string) => {
+      if (isGlobalDatasourcesPending || !globalDatasources) {
+        return [];
+      }
+      return globalDatasources.filter((datasource) => {
+        if (pluginKind && datasource.spec.plugin.kind !== pluginKind) {
+          return false;
+        }
+        return true;
+      });
+    },
+    [globalDatasources, isGlobalDatasourcesPending]
+  );
+
+  return {
+    getDatasource,
+    getGlobalDatasource,
+    listDatasources,
+    listGlobalDatasources,
+    buildProxyUrl: buildProxyUrl,
+  };
+}

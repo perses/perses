@@ -1,0 +1,138 @@
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import {
+  mockTimeSeriesResponseWithStableValue,
+  mockTimeSeriesResponseWithNullValues,
+} from '@perses-dev/internal-utils';
+import { test } from '../fixtures/dashboardTest';
+import { waitForStableCanvas } from '../utils';
+
+test.use({
+  dashboardName: 'TimeSeriesChartPanel',
+  mockNow: 1673805600000,
+  ignoresConsoleErrors: ['MUI: A component is changing the controlled value state of Autocomplete to be uncontrolled.'], // TODO (gladorme): find the input that causes this error
+});
+
+test.describe('Dashboard: Time Series Chart Panel', () => {
+  [
+    'Single Line',
+    'Custom Visual Options',
+    'Connected Nulls',
+    'Legend Position Bottom',
+    'Legend Position Right',
+    'Legend Tall Formatted',
+  ].forEach((panelName) => {
+    test(`displays ${panelName} as expected`, async ({ dashboardPage, mockNow }) => {
+      // Mock data response, so we can make assertions on consistent response data.
+      await dashboardPage.mockQueryRangeRequests({
+        queries: [
+          {
+            query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+            response: {
+              status: 200,
+              body: JSON.stringify(
+                mockTimeSeriesResponseWithStableValue({
+                  metrics: [
+                    {
+                      metric: {
+                        __name__: 'up',
+                        instance: 'demo.do.prometheus.io:3000',
+                        job: 'grafana',
+                      },
+                      value: '1',
+                    },
+                  ],
+                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                  endTimeMs: mockNow,
+                })
+              ),
+            },
+          },
+          {
+            query: 'fake_graphite_query_with_nulls',
+            response: {
+              status: 200,
+              body: JSON.stringify(
+                mockTimeSeriesResponseWithNullValues({
+                  startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                  endTimeMs: mockNow,
+                })
+              ),
+            },
+          },
+        ],
+      });
+
+      await dashboardPage.forEachTheme(async () => {
+        const timeSeriesPanel = dashboardPage.getPanelByName(panelName);
+        await timeSeriesPanel.isLoaded();
+        await waitForStableCanvas(timeSeriesPanel.canvas);
+      });
+    });
+  });
+
+  test('should be able to add and edit thresholds', async ({ page, dashboardPage, mockNow }) => {
+    // Mock data response, so we can make assertions on consistent response data.
+    await dashboardPage.mockQueryRangeRequests({
+      queries: [
+        {
+          query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
+          response: {
+            status: 200,
+            body: JSON.stringify(
+              mockTimeSeriesResponseWithStableValue({
+                metrics: [
+                  {
+                    metric: {
+                      __name__: 'up',
+                      instance: 'demo.do.prometheus.io:3000',
+                      job: 'grafana',
+                    },
+                    value: '1',
+                  },
+                ],
+                startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+                endTimeMs: mockNow,
+              })
+            ),
+          },
+        },
+      ],
+    });
+
+    await dashboardPage.startEditing();
+    await dashboardPage.editPanel('Single Line', async (panelEditor) => {
+      await panelEditor.selectTab('General Settings');
+      await panelEditor.addThreshold();
+      await panelEditor.addThreshold();
+      await panelEditor.editThreshold('T1', '50');
+      await panelEditor.toggleThresholdModes('percent');
+      await panelEditor.container
+        .getByRole('spinbutton', {
+          name: 'Max',
+        })
+        .fill('5');
+      await panelEditor.openThresholdColorPicker('T2');
+      const colorPicker = dashboardPage.page.getByTestId('options color picker');
+      await colorPicker.isVisible();
+      const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
+      await colorInput.clear();
+      await colorInput.type('EE6C6C', { delay: 100 });
+      await page.keyboard.press('Escape');
+    });
+    const panel = dashboardPage.getPanelByName('Single Line');
+    await panel.isLoaded();
+    await waitForStableCanvas(panel.canvas);
+  });
+});

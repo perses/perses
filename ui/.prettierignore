@@ -1,0 +1,5 @@
+# Build output
+dist
+
+*.md
+*.mdx

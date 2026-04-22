@@ -1,0 +1,27 @@
+{
+  "name": "@perses-dev/e2e",
+  "version": "0.53.0-beta.3",
+  "private": true,
+  "scripts": {
+    "e2e": "npm run e2e:local",
+    "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
+    "e2e:headed": "npm run e2e:local -- --headed",
+    "e2e:debug": "npm run e2e:local -- --debug",
+    "e2e:report": "playwright show-report",
+    "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
+    "e2e:ci": "playwright test --config=src/config/ci.playwright.config.ts",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "@perses-dev/core": "0.53.0-beta.3",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0"
+  },
+  "devDependencies": {
+    "@perses-dev/internal-utils": "0.53.0-beta.3",
+    "@playwright/test": "^1.54.2",
+    "chokidar-cli": "^3.0.0",
+    "eslint-plugin-playwright": "^0.11.2"
+  }
+}
