@@ -95,10 +95,9 @@ func GetMetadataProject(metadata api.Metadata) string {
 	return ""
 }
 
-func CastASTNodeToExpr(node ast.Node) (ast.Expr, error) {
-	// casting into ast.Expr
-	// cannot simply use node.(ast.Expr) as it can fail for plugins with package declarations and/or import statements in their schema
-	// in such cases inst.Syntax() returns *ast.File that is not directly castable into ast.Expr
+// Helper function to cast ast.Node into ast.Expr
+// Needed because ast.Node does not have to strictly implement ast.Expr interface
+func CastASTNodeToASTExpr(node ast.Node) (ast.Expr, error) {
 	var tmpExpr ast.Expr
 	switch n := node.(type) {
 	case ast.Expr:
