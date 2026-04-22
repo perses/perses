@@ -62,7 +62,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 	serviceManager := dependencyManager.Service()
 	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetPlugin(), serviceManager.GetAuthorization(), readonly, caseSensitive, cfg.Dashboard.SchemasPath),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetPlugin(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		datasource.NewEndpoint(cfg.Datasource, serviceManager.GetDatasource(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetAuthorization(), readonly, caseSensitive, cfg.EphemeralDashboard.Enable),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetAuthorization(), readonly, caseSensitive),
