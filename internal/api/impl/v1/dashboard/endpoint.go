@@ -17,37 +17,26 @@ package dashboard
 
 import (
 	"fmt"
-	"net/http"
 
-	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 
 	"github.com/perses/perses/internal/api/authorization"
-	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
-	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
-	"github.com/perses/perses/internal/api/plugin"
-	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
 type endpoint struct {
-	toolbox   toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
-	pluginSvc plugin.Plugin
-	readonly  bool
+	toolbox  toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
+	readonly bool
 }
 
-func NewEndpoint(service dashboard.Service, pluginService plugin.Plugin, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(service dashboard.Service, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:   toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, v1.KindDashboard, caseSensitive),
-		pluginSvc: pluginService,
-		readonly:  readonly,
+		toolbox:  toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, v1.KindDashboard, caseSensitive),
+		readonly: readonly,
 	}
 }
 
@@ -63,7 +52,6 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET("", e.List, false)
 	subGroup.GET("", e.List, false)
 	subGroup.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
-	group.GET("/schema", e.Schema, true)
 }
 
 func (e *endpoint) Create(ctx echo.Context) error {
@@ -87,44 +75,4 @@ func (e *endpoint) Get(ctx echo.Context) error {
 func (e *endpoint) List(ctx echo.Context) error {
 	q := &dashboard.Query{}
 	return e.toolbox.List(ctx, q)
-}
-
-func (e *endpoint) Schema(ctx echo.Context) error {
-	cueCtx := cuecontext.New()
-
-	// grab plugin schemas & aggregate them into a single cue value per plugin kind
-	plugins := map[v1plugin.Kind]cue.Value{}
-	for _, kind := range []v1plugin.Kind{v1plugin.KindDatasource, v1plugin.KindPanel, v1plugin.KindVariable, v1plugin.KindQuery} {
-		schemas := e.pluginSvc.Schema().GetAllSchemasOfKind(kind)
-		if len(schemas) == 0 {
-			continue
-		}
-		merged, err := schema.MergeSchemas(cueCtx, schemas)
-		if err != nil {
-			logrus.WithError(err).Errorf("unable to merge %s plugin schemas", kind)
-			return apiinterface.InternalError
-		}
-		plugins[kind] = merged
-	}
-
-	// load the dashboard schema
-	spec, err := dashboardSchema.Load(cueCtx)
-	if err != nil {
-		logrus.WithError(err).Error("unable to load dashboard schema")
-		return apiinterface.InternalError
-	}
-
-	// inject plugin cue values into the dashboard schema
-	result, err := dashboardSchema.MergeWithPlugins(cueCtx, spec, plugins)
-	if err != nil {
-		logrus.WithError(err).Error("unable to merge dashboard schema with plugin schemas")
-		return apiinterface.InternalError
-	}
-
-	data, err := schema.ExportToCUE(result)
-	if err != nil {
-		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
-		return apiinterface.InternalError
-	}
-	return ctx.Blob(http.StatusOK, "text/x-cue", data)
 }
