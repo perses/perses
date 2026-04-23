@@ -71,7 +71,7 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 		fullErrStr := errors.Details(validateErr, &errors.Config{Cwd: filepath.Dir(ex)})
 		logrus.Debug(fullErrStr)
 
-		return cue.Value{}, fmt.Errorf("failed to validate dashboard schema: %w", fullErrStr)
+		return cue.Value{}, fmt.Errorf("failed to validate dashboard schema: %s", fullErrStr)
 	}
 	return final, nil
 }
