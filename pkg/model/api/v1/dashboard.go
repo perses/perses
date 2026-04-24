@@ -17,7 +17,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"time"
 
+	"github.com/perses/common/set"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -133,6 +135,31 @@ func (d *DashboardSpec) validate() error {
 		d.Duration = "1h"
 	}
 	return nil
+}
+
+type MetadataSchema struct {
+	Project string `json:"project" yaml:"project"`
+	Name    string `json:"name" yaml:"name"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	CreatedAt time.Time `json:"createdAt" yaml:"createdAt"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
+	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
+	Version   uint64    `json:"version" yaml:"version"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxItems=20
+	Tags set.Set[string] `json:"tags,omitempty" yaml:"tags,omitempty"`
+}
+
+type GeneralDashboardSchema struct {
+	Kind     Kind               `json:"kind" yaml:"kind"`
+	Metadata MetadataSchema     `json:"metadata" yaml:"metadata"`
+	Spec     dashboardSpec.Spec `json:"spec" yaml:"spec"`
 }
 
 type Dashboard struct {
