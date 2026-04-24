@@ -14,7 +14,8 @@
 import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { EphemeralDashboardResource, EphemeralDashboardSpec, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { DashboardResource as DashboardResourceModel } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useEffect } from 'react';
 import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
@@ -48,11 +49,16 @@ function EphemeralDashboardView(): ReactElement | null {
   );
 
   const handleEphemeralDashboardSave = useCallback(
-    (data: DashboardResource | EphemeralDashboardResource) => {
+    (data: DashboardResourceModel) => {
       if (data.kind !== 'EphemeralDashboard') {
         throw new Error('Invalid kind');
       }
-      return updateEphemeralDashboardMutation.mutateAsync(data, {
+      const ephemeralDashboard: EphemeralDashboardResource = {
+        kind: data.kind,
+        metadata: data.metadata,
+        spec: data.spec as EphemeralDashboardSpec,
+      };
+      return updateEphemeralDashboardMutation.mutateAsync(ephemeralDashboard, {
         onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(

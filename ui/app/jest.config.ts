@@ -13,5 +13,4 @@
 
 import shared from '../jest.shared';
 
-// Just use shared config as-is for now
 export default shared;

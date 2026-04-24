@@ -9,7 +9,7 @@ var options []variable.Option
 variable.New("My Super Variable", options...)
 ```
 
-Need to provide the name of the varaible and a list of options.
+Need to provide the name of the variable and a list of options.
 
 ## Default options
 

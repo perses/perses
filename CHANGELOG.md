@@ -134,7 +134,7 @@ monitoring needs. And it will help us to grow the community and make Perses even
 - [BUGFIX] PluginEditor - Fix createInitialOptions for plugins (#3613)
 - [BUGFIX] PanelEditor + VariableEditor: queries changes are not saved (#3590)
 - [BUGFIX] Fix embedding markdown panels in tables (#3588)
-- [BUGFIX] Add bits/sec convertion to human-readable sizes, add bits units(#3441) (#3583)
+- [BUGFIX] Add bits/sec conversion to human-readable sizes, add bits units(#3441) (#3583)
 - [BUGFIX] Fix navigation after creating a new ephemeral dashboard (#3584)
 - [BUGFIX] CLI/PLUGIN: Avoid re-building dev server tasks to shut down correctly the start plugin command (#3579)
 - [BUGFIX] Add back piechart removed by mistake (#3552)
@@ -362,7 +362,7 @@ usability improvements, and upgraded CLI commands to streamline plugin developme
 - [BREAKINGCHANGE] Watch the changes of the unknown specs in all Editor Plugins (#3203)
 - [BUGFIX] fix merge indexed columns regex (#3341)
 - [BUGFIX] Simplify the panels management (#3332)
-- [BUGFIX] Readd ReactRouterProvider (#3327)
+- [BUGFIX] Re-add ReactRouterProvider (#3327)
 - [BUGFIX] Grafana migration: fix invisible group generated for orphan panels (#3271)
 - [BUGFIX] Remove Variable Preview refresh button (#3298)
 - [BUGFIX] Force a refresh time range when the Run Query Button is clicked every time (#3287)
@@ -497,7 +497,7 @@ We have also improved the documentation, highlighting features that were impleme
 - [BREAKINGCHANGE] Rename field in the service discovery config and add a concept doc about SD (#2665)
 - [DOC] Update embedding panels guide with the latest recommendations (#2899)
 - [DOC] Document some of the not-resource-related API endpoints (#2874)
-- [DOC] Add kubecon pres to the list of materials (#2872)
+- [DOC] Add kubecon presentation to the list of materials (#2872)
 - [DOC] Remove duplicated section (#2837)
 - [DOC] Add top key 'security' required for the oidc/oauth2 config (#2815)
 - [DOC] Fix the markdown syntax in docs/configuration/configuration.md (#2847)
@@ -750,7 +750,7 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [FEATURE] Instant query table view (#1982)
 - [FEATURE] Explorer: Add tracing support and introduce Graph tab (#1974)
 - [ENHANCEMENT] DaC SDKs: showcase custom configurable grouping capabilities in example files (#2042)
-- [ENHANCEMENT] Add formating to series name in explorer and use MUI Table (#2013)
+- [ENHANCEMENT] Add formatting to series name in explorer and use MUI Table (#2013)
 - [ENHANCEMENT] Make gauge chart background color close to theme color (#2018)
 - [ENHANCEMENT] Add `bytes/sec` format (#2009)
 - [ENHANCEMENT] Keep data when switching explorer tabs (#2008)
@@ -803,7 +803,7 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [BUGFIX] Grafana migration: best-effort solution to not migrate irrelevant regexps (#1929)
 - [BUGFIX] Fix grafana migration failing for "custom" template variables (#1927)
 - [BUGFIX] Fix dashboard list with empty project on home page (#1928)
-- [BUGFIX] Fix no project permssion after creating project (#1926)
+- [BUGFIX] Fix no project permission after creating project (#1926)
 - [BUGFIX] Fix `percli dac setup` failing for CUE (#1918)
 - [BUGFIX] Fix how we get a list of resources based on the permission (#1912) (#1932)
 - [BUGFIX] Fix HTTP error returned when access permission is missing (#1913)
@@ -1005,7 +1005,7 @@ It only contains a fix in the CI to release Perses.
 - [BUGFIX] Align camelCase json value in secret (#1422)
 - [BUGFIX] Fix panel preview unresponsive after query error (#1418)
 - [BUGFIX] Fix saved changes to refresh interval not preserved (#1407)
-- [BUGFIX] Fix BE/FE misalignement on threshold datamodel #1389 (#1404)
+- [BUGFIX] Fix BE/FE misalignment on threshold datamodel #1389 (#1404)
 - [BUGFIX] Fix dashboard save button staying disabled after failing to save dashboard #1357 (#1398)
 - [BUGFIX] Fix reloading /admin route in react (#1386)
 - [BUGFIX] datasource form: make name readonly after creation + fix wrong titles/names in readonly mode (#1374)
@@ -1559,7 +1559,7 @@ It only contains a fix in the CI to release Perses.
 - [ENHANCEMENT] QueryStringProvider allows apps to pass their own utils to update the URL #530
 - [ENHANCEMENT] DashboardProvider improvements #540
 - [ENHANCEMENT] Governance process changes #431 #522 #523
-- [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatability #533
+- [ENHANCEMENT] Use React 18 for development, allow React 17 backward compatibility #533
 - [ENHANCEMENT] upgrade go to 1.19 #543
 - [ENHANCEMENT] build process improvements #489, #490, #491 #515
 - [ENHANCEMENT] add datasource documentation #404

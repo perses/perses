@@ -18,10 +18,10 @@ import {
   getResourceExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
-  DashboardResource,
   EphemeralDashboardSpec,
   DurationString,
 } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useState } from 'react';
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
@@ -72,13 +72,19 @@ function CreateEphemeralDashboardView(): ReactElement | null {
   const [isLeavingConfirmDialogEnabled, setIsLeavingConfirmDialogEnabled] = useState(true);
 
   const handleEphemeralDashboardSave = useCallback(
-    (data: DashboardResource | EphemeralDashboardResource) => {
+    (data: DashboardResource) => {
       if (data.kind !== 'EphemeralDashboard') {
         throw new Error('Invalid kind');
       }
       setIsLeavingConfirmDialogEnabled(false); // Disable the leaving dialog before navigating
 
-      return createEphemeralDashboardMutation.mutateAsync(data, {
+      const ephemeralDashboard: EphemeralDashboardResource = {
+        kind: data.kind,
+        metadata: data.metadata,
+        spec: data.spec as EphemeralDashboardSpec,
+      };
+
+      return createEphemeralDashboardMutation.mutateAsync(ephemeralDashboard, {
         onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(
@@ -107,7 +113,7 @@ function CreateEphemeralDashboardView(): ReactElement | null {
 
   return (
     <HelperDashboardView
-      dashboardResource={data as unknown as DashboardResource}
+      dashboardResource={data}
       onSave={handleEphemeralDashboardSave}
       onDiscard={handleEphemeralDashboardDiscard}
       isReadonly={false}

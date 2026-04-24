@@ -1,6 +1,6 @@
 # Datasource
 
-A **datasource** in Perses represents a connection configuration to an external system that provides observability data, such as metrics or traces. Datasources are there to allow retrieving data from different backends without hardcoding connection details everytime. They are thus reusable configuration objects that encapsulate how to query a specific data provider.
+A **datasource** in Perses represents a connection configuration to an external system that provides observability data, such as metrics or traces. Datasources are there to allow retrieving data from different backends without hardcoding connection details every time. They are thus reusable configuration objects that encapsulate how to query a specific data provider.
 
 Datasources are implemented as [plugins](./plugin.md).
 

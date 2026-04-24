@@ -36,7 +36,7 @@ Check the helper of that command to see the different flags available (e.g to de
 
 ### Develop dashboards
 
-You are now fully ready to start developping dashboards as code with CUE!
+You are now fully ready to start developing dashboards as code with CUE!
 
 It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. For this have a look at:
 

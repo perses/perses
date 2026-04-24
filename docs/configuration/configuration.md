@@ -215,7 +215,7 @@ oidc:
 oauth:
   - <OAuth provider> # Optional
 # Kubernetes authentication provider
-kubernetes: <Kubernetes provider> # Optionall
+kubernetes: <Kubernetes provider> # Optional
 ```
 
 ##### OIDC provider
@@ -472,7 +472,7 @@ allow_credentials: <boolean> | default = false # Optional
 expose_headers: <string[]> | default = [] # Optional
 
 # Configure how long (in seconds) the results of a preflight request can be cached.
-max_age: <intger> | default = 0 # Optional
+max_age: <integer> | default = 0 # Optional
 ```
 
 ### Database config

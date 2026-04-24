@@ -18,6 +18,7 @@ import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import { HotkeysProvider } from '@perses-dev/dashboards';
 import { PersesLoader } from './components/PersesLoader';
 import { AuthorizationProvider } from './context/Authorization';
 import {
@@ -79,19 +80,26 @@ function AppProviders(): ReactElement {
   return (
     <CookiesProvider>
       <QueryClientProvider client={queryClient}>
-        <DarkModeContextProvider>
-          <ConfigContextProvider>
-            <QueryParamProvider adapter={ReactRouter6Adapter}>
-              <NavHistoryProvider>
-                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                  <AuthorizationProvider>
-                    <App />
-                  </AuthorizationProvider>
-                </SnackbarProvider>
-              </NavHistoryProvider>
-            </QueryParamProvider>
-          </ConfigContextProvider>
-        </DarkModeContextProvider>
+        <HotkeysProvider
+          defaultOptions={{
+            hotkey: { preventDefault: true, stopPropagation: true },
+            hotkeySequence: { timeout: 1000 },
+          }}
+        >
+          <DarkModeContextProvider>
+            <ConfigContextProvider>
+              <QueryParamProvider adapter={ReactRouter6Adapter}>
+                <NavHistoryProvider>
+                  <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    <AuthorizationProvider>
+                      <App />
+                    </AuthorizationProvider>
+                  </SnackbarProvider>
+                </NavHistoryProvider>
+              </QueryParamProvider>
+            </ConfigContextProvider>
+          </DarkModeContextProvider>
+        </HotkeysProvider>
       </QueryClientProvider>
     </CookiesProvider>
   );

@@ -182,6 +182,7 @@ export interface TimeRangeConfig {
 }
 
 export interface FrontendConfig {
+  enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;

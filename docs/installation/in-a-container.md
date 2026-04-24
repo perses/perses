@@ -20,7 +20,7 @@ $ podman run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses
 $ docker run --name perses --rm -p 127.0.0.1:8080:8080 persesdev/perses
 ```
 
-The details in this command are that we give the container a referencable name (--name perses), automatically remove
+The details in this command are that we give the container a referenceable name (--name perses), automatically remove
 the container when it stops (--rm), map the local machine port 8080 to the container port 8080 (-p 127.0.0.1:8080:8080),
 and use the image version supported in these instructions (latest). Note: you can use any local port you have available,
 but you need to map to container port 8080.

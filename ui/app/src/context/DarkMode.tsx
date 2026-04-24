@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
+import React, { createContext, ReactElement, useContext, useEffect, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import {
   ChartsProvider,
@@ -20,6 +20,7 @@ import {
   getTheme,
   useLocalStorage,
 } from '@perses-dev/components';
+import { TOGGLE_THEME_EVENT } from '@perses-dev/dashboards';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
@@ -41,6 +42,17 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }): R
   const browserPrefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const [isDarkModeEnabled, setDarkMode] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
+
+  useEffect(() => {
+    const handleToggleTheme = (): void => {
+      setDarkMode(!isDarkModeEnabled);
+    };
+
+    window.addEventListener(TOGGLE_THEME_EVENT, handleToggleTheme);
+    return (): void => {
+      window.removeEventListener(TOGGLE_THEME_EVENT, handleToggleTheme);
+    };
+  }, [isDarkModeEnabled, setDarkMode]);
 
   // store the dark mode preference in local storage
   const darkModeContext: DarkModeContext = useMemo(

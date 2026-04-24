@@ -22,7 +22,7 @@ This open specification is currently implemented in the following languages:
 This section is here to explain what means for a software or a tool to be compatible with Perses.
 
 !!! warning
-    This documentation can change over the time. Therefor a software that said it is compatible with Perses today may not be compatible anymore in the future if Perses changes its specifications or APIs. 
+    This documentation can change over the time. Therefore a software that said it is compatible with Perses today may not be compatible anymore in the future if Perses changes its specifications or APIs. 
     Always check the latest documentation to ensure compatibility.
 
 ### What does "compatible with Perses" mean?

@@ -99,7 +99,7 @@ This restriction is in place for the following reasons:
 
 - If you are unable to update the role in a binding's spec, then you will not grant by accident a user more permissions
   than they should have.
-- We consider that a binding to a different role is fundamentally differen
+- We consider that a binding to a different role is fundamentally different
 
 ## Referring to resources
 
