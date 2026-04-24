@@ -22,32 +22,31 @@ import (
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/token"
+
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-const dashboardDefinitionName = "#Dashboard"
-
-var cueSyntaxOptions = []cue.Option{
-	cue.InlineImports(true),
-	cue.All(),
-}
+const (
+	dashboardDefinitionName = "#Dashboard"
+)
 
 var cueValidationOptions = []cue.Option{
 	cue.InlineImports(true),
 	cue.Attributes(true),
 	cue.Definitions(true),
-	cue.Hidden(true),
+	cue.Hidden(false),
 }
 
 func Load(ctx *cue.Context) (cue.Value, error) {
-	encoded := ctx.EncodeType(v1.Dashboard{})
+
+	encoded := ctx.EncodeType(v1.GeneralDashboardSchema{})
 	if encoded.Err() != nil {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
-	node := encoded.Syntax(cueSyntaxOptions...)
+	node := encoded.Syntax(utils.CueSyntaxOptions...)
 	expr, err := utils.CastASTNodeToASTExpr(node)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s: %w", node, dashboardDefinitionName, err)

@@ -14,20 +14,15 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/ast"
-	"cuelang.org/go/cue/ast/astutil"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
-	"cuelang.org/go/cue/format"
 	"cuelang.org/go/cue/load"
-	"cuelang.org/go/encoding/jsonschema"
 	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
@@ -115,71 +110,4 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 		return fmt.Errorf("invalid %s %s: %s", pluginType, pluginName, fullErrStr)
 	}
 	return nil
-}
-
-func ExportToCUE(v cue.Value) ([]byte, error) {
-	// generate expr
-	node := v.Syntax(
-		cue.Docs(true),
-		cue.Definitions(true),
-		cue.All(),
-	)
-	// postprocess node to remove comments that break the file
-	postprocessSchemaASTNode(node)
-	// format CUE expr
-	data, err := format.Node(node, format.Simplify())
-	if err != nil {
-		return nil, fmt.Errorf("could not format CUE value: %w", err)
-	}
-	return data, nil
-}
-
-// TODO: still not working with the existing plugin schemas, errors out
-// probably due to import statements in schemas?
-func ExportToJSONSchema(v cue.Value) ([]byte, error) {
-	// generate expr
-	jsonExpr, err := jsonschema.Generate(v, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error while generating JSON schema: %w", err)
-	}
-
-	// build expr
-	ctx := cuecontext.New()
-	jsonSchema := ctx.BuildExpr(jsonExpr)
-	if jsonSchema.Err() != nil {
-		return nil, fmt.Errorf("error while building expression: %w", jsonSchema.Err())
-	}
-
-	// marshal JSON response
-	data, err := json.Marshal(jsonSchema)
-	if err != nil {
-		return nil, fmt.Errorf("error while marshaling JSON schema: %w", err)
-	}
-	return data, nil
-}
-
-func postprocessSchemaASTNode(n ast.Node) {
-	astutil.Apply(n, removeExplicitErrorComments, nil)
-}
-
-// removes the "// explicit error (_|_ literal) in source" along with any new lines / whitespaces left after the cleanup
-func removeExplicitErrorComments(c astutil.Cursor) bool {
-	node := c.Node()
-	groups := ast.Comments(node)
-	filtered := groups[:0]
-	for _, cg := range groups {
-		newList := cg.List[:0]
-		for _, c := range cg.List {
-			if c.Text != "// explicit error (_|_ literal) in source" {
-				newList = append(newList, c)
-			}
-		}
-		cg.List = newList
-		// Only keep the group if it still has comments
-		if len(cg.List) > 0 {
-			filtered = append(filtered, cg)
-		}
-	}
-	ast.SetComments(node, filtered)
-	return true
 }

@@ -85,7 +85,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	data, err := schema.ExportToCUE(result)
+	data, err := utils.ExportToCUE(result)
 	if err != nil {
 		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
 		return apiinterface.InternalError
@@ -106,7 +106,7 @@ func (e *endpoint) PluginSchema(ctx echo.Context) error {
 		logrus.WithError(err).Error("unable to merge plugin schemas")
 		return apiinterface.InternalError
 	}
-	data, exportErr := schema.ExportToCUE(merged)
+	data, exportErr := utils.ExportToCUE(merged)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return apiinterface.InternalError
