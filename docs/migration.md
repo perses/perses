@@ -31,12 +31,18 @@ older version of Grafana. But we can't guarantee it.
 
 ### Using the UI
 
-- On the home page, click on the right of the button `add dashboard` and select `import dashboard`.
+- On the home page, click on the `Import Dashboard` in the top right corner.
+
 - Then, you can either paste the JSON of your Grafana dashboard or upload the JSON file.
-- Click on the `import` button.
+!!! tip
+    If you want the migrated dashboard to use the default Perses datasource, check the
+    `Use default datasource in Perses` checkbox. This will remove any reference to a specific
+    datasource in the migrated dashboard.
+
+- Click on the `Migrate` button.
 - If the migration is successful, then you will have in return the Perses dashboard as a JSON.
 - You can save the JSON or continue on the same page to save this migrated dashboard into the project you would like.
-  You need to select the project and click on the `import` button.
+  You need to select the project and click on the `Import` button.
 
 ### Using the CLI
 
@@ -56,29 +62,13 @@ percli migrate -f grafana-dashboard.json --online -o json > perses-dashboard.jso
 
 Note: In case you would like to have the result as a K8s CustomResource, you can use the `--format` flag with the value `cr`.
 
-- As a tip, you may want to open the file and remove any reference to the previous datasource used in Grafana. This
-  will allow the dashboard to use the default datasource. Do that only if you want to use the default datasource.
+!!! tip
+    If you want the migrated dashboard to use the default Perses datasource, you can use the
+    `--use-default-datasource` flag. This will remove any reference to a specific datasource in the migrated dashboard.
 
-For example:
-
-```json
-{
-  "datasource": {
-    "kind": "PrometheusDatasource",
-    "name": "$datasource"
-  }
-}
-```
-
-You can transform it like this:
-
-```json
-{
-  "datasource": {
-    "kind": "PrometheusDatasource"
-  }
-}
-```
+    ```bash
+    percli migrate -f grafana-dashboard.json --online --use-default-datasource -o json > perses-dashboard.json
+    ```
 
 - You should check the unsupported migrations. For example, in case of a variable, you will get a static variable like this:
 
