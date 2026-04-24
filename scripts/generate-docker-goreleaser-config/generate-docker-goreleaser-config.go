@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const dockerOrg = "docker.io/persesdev"
+const dockerOrg = "ghcr.io/opnpulse"
 
 var date = time.Now().Format("2006-01-02")
 
