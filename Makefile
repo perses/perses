@@ -143,8 +143,8 @@ cross-build: generate-goreleaser ## Cross build binaries for all platforms (Use 
 	goreleaser release --snapshot --clean --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: cross-release
-cross-release: generate-goreleaser
-	goreleaser release --clean --parallelism ${GORELEASER_PARALLEL} --release-notes EXTRACTED_CHANGELOG.md
+cross-release: build-ui generate generate-goreleaser
+	goreleaser release --clean --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: build
 build: build-ui build-api build-cli

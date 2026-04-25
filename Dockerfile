@@ -9,12 +9,11 @@ LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 
 USER nobody
 
-COPY --chown=nobody:nobody /bin/perses                            /bin/perses
-COPY --chown=nobody:nobody /bin/percli                            /bin/percli
+COPY --chown=nobody:nobody perses                            /bin/perses
+COPY --chown=nobody:nobody percli                            /bin/percli
 COPY --chown=nobody:nobody LICENSE                           /LICENSE
 COPY --chown=nobody:nobody plugins-archive/                  /etc/perses/plugins-archive/
-#COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
-COPY --chown=nobody:nobody dev/config.yaml  /etc/perses/config.yaml
+COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
 COPY --from=build-env --chown=nobody:nobody                  /perses         /perses
 COPY --from=build-env --chown=nobody:nobody                  /plugins        /etc/perses/plugins
 COPY --from=build-env --chown=nobody:nobody                  /etc/mime.types /etc/mime.types
