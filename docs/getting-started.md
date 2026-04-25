@@ -11,7 +11,29 @@ Before you begin, you need a running Perses server. Choose the installation meth
 - [Build from source](./installation/from-source.md)
 - [Third-party installations](./installation/third-party.md)
 
-You will also need a running Prometheus instance that Perses can connect to. If you are running Perses in a container, make sure both containers share the same network so Perses can reach Prometheus by container name.
+You will also need a running Prometheus instance that Perses can connect to.
+
+For this tutorial, the quickest way to get both Perses and Prometheus running together is with Docker Compose. Save the following as `docker-compose.yml`:
+
+```yaml
+services:
+  perses:
+    image: persesdev/perses
+    ports:
+      - "8080:8080"
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+```
+
+Then start both services:
+
+```bash
+docker compose up -d
+```
+
+Perses is now available at [http://localhost:8080](http://localhost:8080) and Prometheus at [http://localhost:9090](http://localhost:9090). Because both containers run on the same Compose network, Perses can reach Prometheus at `http://prometheus:9090`.
 
 ## Your First Dashboard
 
@@ -120,7 +142,6 @@ Once you are comfortable creating dashboards through the UI, you can manage them
 
 - [Getting started with Dashboard-as-Code](./dac/getting-started.md)
 - [Dashboard-as-Code concept](./concepts/dashboard-as-code.md)
-
 
 ## Next Steps
 
