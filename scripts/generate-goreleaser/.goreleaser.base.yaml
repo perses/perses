@@ -46,7 +46,7 @@ archives:
         dst: "./config.yaml"
 release:
   github:
-    owner: "perses"
+    owner: "opnpulse"
     name: "perses"
   ids:
     - "default"
