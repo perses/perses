@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -40,6 +41,13 @@ var (
 	ForbiddenError       = &PersesError{message: "forbidden access"}
 	UnsupportedMediaType = &PersesError{message: "unsupported media type"}
 )
+
+const (
+	projectDoesNotExistPrefix = "metadata.project \""
+	projectDoesNotExistSuffix = "\" doesn't exist"
+)
+
+var projectDoesNotExistPattern = regexp.MustCompile(regexp.QuoteMeta(projectDoesNotExistPrefix) + `.*` + regexp.QuoteMeta(projectDoesNotExistSuffix) + `$`)
 
 // HandleError is translating the given error to the echo.HTTPError
 func HandleError(err error) error {
@@ -100,6 +108,14 @@ func HandleUnauthorizedError(msg string) error {
 
 func HandleForbiddenError(msg string) error {
 	return handleErrorMsg(msg, ForbiddenError)
+}
+
+func ProjectDoesNotExistErrorMessage(projectName string) string {
+	return projectDoesNotExistPrefix + projectName + projectDoesNotExistSuffix
+}
+
+func IsProjectDoesNotExistErrorMessage(message string) bool {
+	return projectDoesNotExistPattern.MatchString(message)
 }
 
 func handleErrorMsg(msg string, err *PersesError) error {

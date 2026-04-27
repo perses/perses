@@ -18,6 +18,7 @@ import (
 	"strings"
 	"testing"
 
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	"github.com/perses/perses/pkg/client/api"
 	apiv1 "github.com/perses/perses/pkg/client/api/v1"
@@ -156,7 +157,7 @@ type fakeFailingFolder struct {
 func badRequestProjectDoesNotExistError(projectName string) error {
 	return &perseshttp.RequestError{
 		StatusCode: 400,
-		Message:    "bad request: " + modelV1.ProjectDoesNotExistErrorMessage(projectName),
+		Message:    apiInterface.ProjectDoesNotExistErrorMessage(projectName),
 	}
 }
 

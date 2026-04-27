@@ -19,6 +19,7 @@ import (
 	"io"
 
 	"github.com/efficientgo/core/merrors"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -169,7 +170,7 @@ func isProjectDoesNotExistError(err error) bool {
 		return false
 	}
 
-	return modelV1.IsProjectDoesNotExistErrorMessage(requestErr.Message)
+	return apiInterface.IsProjectDoesNotExistErrorMessage(requestErr.Message)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
