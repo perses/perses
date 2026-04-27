@@ -151,11 +151,7 @@ func (o *option) applyEntityWithProjectCreation(kind modelV1.Kind, project strin
 	}
 
 	// Retry once the original request against the newly created project.
-	if retryErr := o.upsertEntity(kind, project, entity); retryErr != nil {
-		return retryErr
-	}
-
-	return nil
+	return o.upsertEntity(kind, project, entity)
 }
 
 func (o *option) upsertEntity(kind modelV1.Kind, project string, entity modelAPI.Entity) error {
