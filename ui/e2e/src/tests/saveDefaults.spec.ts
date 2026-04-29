@@ -41,8 +41,7 @@ test.describe('Dashboard: Defaults', () => {
 
     // Change text variable
     const textVariableInput = await page.getByRole('textbox', { name: 'Text variable' });
-    await textVariableInput.clear();
-    await textVariableInput.type(TEXT_VARIABLE_UPDATED_VALUE, { delay: 100 });
+    await textVariableInput.fill(TEXT_VARIABLE_UPDATED_VALUE);
 
     // Switch to edit mode and click save
     await dashboardPage.startEditing();
