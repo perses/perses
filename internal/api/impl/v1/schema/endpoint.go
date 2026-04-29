@@ -22,10 +22,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
-	"github.com/perses/perses/internal/api/authorization"
 	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	apiinterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
@@ -38,7 +36,7 @@ type endpoint struct {
 	readonly  bool
 }
 
-func NewEndpoint(service dashboard.Service, pluginService plugin.Plugin, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(pluginService plugin.Plugin, readonly bool) route.Endpoint {
 	return &endpoint{
 		pluginSvc: pluginService,
 		readonly:  readonly,
