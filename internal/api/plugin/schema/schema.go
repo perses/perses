@@ -305,58 +305,12 @@ func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v 
 
 func collectFromSch(sch sch) []LoadSchema {
 	var schemas []LoadSchema
-	// iterate through all datasources
-	for node, versions := range sch.datasources {
-		for version, instance := range versions {
-			if version == plugin.LatestVersion {
-				continue
-			}
-			schemas = append(schemas, LoadSchema{
-				Kind:     plugin.KindDatasource,
-				Name:     node.Name,
-				Instance: instance,
-			})
-		}
+
+	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery} {
+		schemaGroup := collectFromSchOfKind(sch, kind)
+		schemas = append(schemas, schemaGroup...)
 	}
-	// all panels
-	for node, versions := range sch.panels {
-		for version, instance := range versions {
-			if version == plugin.LatestVersion {
-				continue
-			}
-			schemas = append(schemas, LoadSchema{
-				Kind:     plugin.KindPanel,
-				Name:     node.Name,
-				Instance: instance,
-			})
-		}
-	}
-	// all variables
-	for node, versions := range sch.variables {
-		for version, instance := range versions {
-			if version == plugin.LatestVersion {
-				continue
-			}
-			schemas = append(schemas, LoadSchema{
-				Kind:     plugin.KindVariable,
-				Name:     node.Name,
-				Instance: instance,
-			})
-		}
-	}
-	// all queries
-	for node, versions := range sch.queries {
-		for version, instance := range versions {
-			if version == plugin.LatestVersion {
-				continue
-			}
-			schemas = append(schemas, LoadSchema{
-				Kind:     plugin.KindQuery,
-				Name:     node.Name,
-				Instance: instance,
-			})
-		}
-	}
+
 	return schemas
 }
 
