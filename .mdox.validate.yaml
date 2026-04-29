@@ -55,3 +55,6 @@ validators:
     type: 'ignore'
   - regex: 'medium\.com'
     type: 'ignore'
+  # localhost URLs are used in documentation examples
+  - regex: 'localhost'
+    type: 'ignore'
