@@ -30,30 +30,33 @@ func TestAssetHandlerContentType(t *testing.T) {
 	t.Cleanup(func() { asts = originalAsts })
 
 	testFS := fstest.MapFS{
-		"app/dist/main.abc123.css": &fstest.MapFile{Data: []byte("body { color: red; }")},
-		"app/dist/main.abc123.js":  &fstest.MapFile{Data: []byte("console.log('hello')")},
+		"app/dist/main.abc123.css": &fstest.MapFile{Data: []byte("body { background: url(PREFIX_PATH_PLACEHOLDER/font.woff2); }")},
+		"app/dist/main.abc123.js":  &fstest.MapFile{Data: []byte("console.log('PREFIX_PATH_PLACEHOLDER')")},
 		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
 		"app/dist/index.html":      &fstest.MapFile{Data: []byte("<html></html>")},
 	}
 	asts = http.FS(testFS)
 
-	f := &frontend{apiPrefix: ""}
+	f := &frontend{apiPrefix: "/custom"}
 
 	tests := []struct {
 		name                 string
 		path                 string
 		expectedContentTypes []string
+		expectedBody         string
 	}{
 		{
-			name:                 "CSS file",
+			name:                 "CSS file with placeholder substitution",
 			path:                 "/app/dist/main.abc123.css",
 			expectedContentTypes: []string{"text/css; charset=utf-8"},
+			expectedBody:         "body { background: url(/custom/font.woff2); }",
 		},
 		{
-			name: "JavaScript file",
+			name: "JavaScript file with placeholder substitution",
 			path: "/app/dist/main.abc123.js",
 			// Windows registers the obsolete application/javascript MIME type.
 			expectedContentTypes: []string{"text/javascript; charset=utf-8", "application/javascript"},
+			expectedBody:         "console.log('/custom')",
 		},
 		{
 			name:                 "HTML file",
@@ -73,6 +76,10 @@ func TestAssetHandlerContentType(t *testing.T) {
 			require.NoError(t, err)
 			assert.Contains(t, tt.expectedContentTypes, rec.Header().Get("Content-Type"))
 			assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
+			if tt.expectedBody != "" {
+				assert.Equal(t, tt.expectedBody, rec.Body.String())
+				assert.NotContains(t, rec.Body.String(), prefixPathPlaceholder)
+			}
 		})
 	}
 }

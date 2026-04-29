@@ -178,7 +178,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 			logrus.WithError(err).Error("Error reading React index.html")
 			return apiinterface.HandleError(err)
 		}
-		if strings.Contains(fileName, ".js") {
+		if strings.Contains(fileName, ".js") || strings.Contains(fileName, ".css") {
 			data = bytes.ReplaceAll(data, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
 		}
 		contentType := mime.TypeByExtension(filepath.Ext(fileName))
