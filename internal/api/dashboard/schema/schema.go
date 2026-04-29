@@ -21,7 +21,6 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/errors"
-	"cuelang.org/go/cue/token"
 
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -33,6 +32,23 @@ const (
 	dashboardDefinitionName = "#Dashboard"
 )
 
+var (
+	// cue Selectors
+	// definitions
+	dashboardDefSelector = cue.Def("#Dashboard")
+	// hidden
+	metadataHidSelector         = cue.Hid("_Metadata_0", "_")
+	querySpecHidSelector        = cue.Hid("_QuerySpec_0", "_")
+	datasourceSpecHidSelector   = cue.Hid("_Spec_1", "_")
+	panelSpecHidSelector        = cue.Hid("_PanelSpec_0", "_")
+	variableSpecHidSelector     = cue.Hid("_Variable_0", "_")
+	projMetadataHidSelector     = cue.Hid("_ProjectMetadata_0", "_")
+	projMetadataWrapHidSelector = cue.Hid("_ProjectMetadataWrapper_0", "_")
+	// string
+	specSelector   = cue.Str("spec")
+	pluginSelector = cue.Str("plugin")
+)
+
 var cueValidationOptions = []cue.Option{
 	cue.InlineImports(true),
 	cue.Attributes(true),
@@ -41,8 +57,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 func Load(ctx *cue.Context) (cue.Value, error) {
-
-	encoded := ctx.EncodeType(v1.GeneralDashboardSchema{})
+	encoded := ctx.EncodeType(v1.Dashboard{})
 	if encoded.Err() != nil {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
@@ -78,178 +93,28 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
-	// #Dashboard: spec: panels: {[_]: spec: plugin: <panels>}
+	// plugin := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, pluginHidSelector))
+	metadata := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
+	projMetadataWrapper := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, projMetadataWrapHidSelector))
+
+	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), metadata)
+	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), projMetadataWrapper)
+
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {
-		overlay, err := buildOverlay(ctx, panels, func(inner ast.Expr) ast.Expr {
-			return structLit(
-				fieldExpr("#Dashboard", structLit(
-					fieldExpr("spec", structConstraint(
-						"panels", structWildcard(structLit(
-							fieldExpr("spec", structLit(
-								fieldExpr("plugin", inner),
-							)),
-						)),
-					)),
-				)),
-			)
-		})
-		if err != nil {
-			return cue.Value{}, fmt.Errorf("building panel overlay: %w", err)
-		}
-		result = result.Unify(overlay)
-		if result.Err() != nil {
-			return cue.Value{}, fmt.Errorf("unifying panel schemas: %w", result.Err())
-		}
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels)
 	}
 
-	// #Dashboard: spec: panels: {[_]: spec: queries: [...{spec: plugin: <queries>}]}
-	if queries, ok := plugins[v1plugin.KindQuery]; ok {
-		overlay, err := buildOverlay(ctx, queries, func(inner ast.Expr) ast.Expr {
-			return structLit(
-				fieldExpr("#Dashboard", structLit(
-					fieldExpr("spec", structConstraint(
-						"panels", structWildcard(structLit(
-							fieldExpr("spec", structLit(
-								fieldExpr("queries",
-									listEllipsis(structLit(
-										fieldExpr("spec", structLit(
-											fieldExpr("plugin", inner),
-										)),
-									)),
-								),
-							)),
-						)),
-					)),
-				)),
-			)
-		})
-		if err != nil {
-			return cue.Value{}, fmt.Errorf("building query overlay: %w", err)
-		}
-		result = result.Unify(overlay)
-		if result.Err() != nil {
-			return cue.Value{}, fmt.Errorf("unifying query schemas: %w", result.Err())
-		}
-	}
-
-	// #Dashboard: spec: datasources: {[_]: spec: <datasources>}
 	if datasources, ok := plugins[v1plugin.KindDatasource]; ok {
-		overlay, err := buildOverlay(ctx, datasources, func(inner ast.Expr) ast.Expr {
-			return structLit(
-				fieldExpr("#Dashboard", structLit(
-					fieldExpr("spec", structConstraint(
-						"datasources", structWildcard(structLit(
-							fieldExpr("spec", inner),
-						)),
-					)),
-				)),
-			)
-		})
-		if err != nil {
-			return cue.Value{}, fmt.Errorf("building datasource overlay: %w", err)
-		}
-		result = result.Unify(overlay)
-		if result.Err() != nil {
-			return cue.Value{}, fmt.Errorf("unifying datasource schemas: %w", result.Err())
-		}
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources)
 	}
 
-	// #Dashboard: spec: variables: [...{spec: plugin?: <variables>}]
-	// plugin is optional: TextVariable has no plugin field
+	if queries, ok := plugins[v1plugin.KindQuery]; ok {
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
+	}
+
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
-		overlay, err := buildOverlay(ctx, variables, func(inner ast.Expr) ast.Expr {
-			return structLit(
-				fieldExpr("#Dashboard", structLit(
-					fieldExpr("spec", structLit(
-						fieldExpr("variables",
-							listEllipsis(structLit(
-								fieldExpr("spec", structLit(
-									optionalFieldExpr("plugin", inner),
-								)),
-							)),
-						),
-					)),
-				)),
-			)
-		})
-		if err != nil {
-			return cue.Value{}, fmt.Errorf("building variable overlay: %w", err)
-		}
-		result = result.Unify(overlay)
-		if result.Err() != nil {
-			return cue.Value{}, fmt.Errorf("unifying variable schemas: %w", result.Err())
-		}
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector, pluginSelector), variables)
 	}
 
 	return result, nil
-}
-
-// buildOverlay extracts the AST expression from a merged plugin cue.Value, wraps it
-// using the provided layout function, and builds it into a cue.Value for unification.
-func buildOverlay(ctx *cue.Context, v cue.Value, layout func(ast.Expr) ast.Expr) (cue.Value, error) {
-	node := v.Syntax(
-		cue.InlineImports(true),
-		cue.All(),
-		cue.Definitions(true),
-	)
-
-	castExpr, err := utils.CastASTNodeToASTExpr(node)
-	if err != nil {
-		return cue.Value{}, fmt.Errorf("could not build dashboard schema overlay: %w", err)
-	}
-
-	wrapped := ctx.BuildExpr(layout(castExpr))
-	if wrapped.Err() != nil {
-		return cue.Value{}, wrapped.Err()
-	}
-	return wrapped, nil
-}
-
-// structConstraint builds: {[_]: <value>} as a field named <name>.
-// i.e.  name: {[_]: value}
-func structConstraint(name string, value ast.Expr) ast.Expr {
-	return structLit(fieldExpr(name, value))
-}
-
-// structWildcard builds: {[_]: <value>}
-func structWildcard(value ast.Expr) ast.Expr {
-	return &ast.StructLit{
-		Elts: []ast.Decl{
-			&ast.Field{
-				Label: &ast.ListLit{Elts: []ast.Expr{ast.NewIdent("_")}},
-				Value: value,
-			},
-		},
-	}
-}
-
-// listEllipsis builds: [...<elem>]
-func listEllipsis(elem ast.Expr) ast.Expr {
-	return &ast.ListLit{
-		Elts: []ast.Expr{
-			&ast.Ellipsis{Type: elem},
-		},
-	}
-}
-
-// structLit wraps declarations into a struct literal.
-func structLit(decls ...ast.Decl) ast.Expr {
-	return &ast.StructLit{Elts: decls}
-}
-
-// fieldExpr builds a regular field: <name>: <value>
-func fieldExpr(name string, value ast.Expr) ast.Decl {
-	return &ast.Field{
-		Label: ast.NewIdent(name),
-		Value: value,
-	}
-}
-
-// optionalFieldExpr builds an optional field: <name>?: <value>
-func optionalFieldExpr(name string, value ast.Expr) ast.Decl {
-	return &ast.Field{
-		Label:      ast.NewIdent(name),
-		Constraint: token.OPTION,
-		Value:      value,
-	}
 }
