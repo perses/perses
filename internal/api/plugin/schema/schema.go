@@ -498,7 +498,7 @@ func (s *sch) getDatasourceSchema(name string, metadata *common.PluginMetadata) 
 }
 
 func (s *sch) getPanelSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
-	if len(s.datasources) == 0 {
+	if len(s.panels) == 0 {
 		return nil, fmt.Errorf("panel schemas are not loaded")
 	}
 	instance, ok := s.panels.GetWithPluginMetadata(name, metadata)
@@ -509,7 +509,7 @@ func (s *sch) getPanelSchema(name string, metadata *common.PluginMetadata) (*bui
 }
 
 func (s *sch) getVariableSchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
-	if len(s.datasources) == 0 {
+	if len(s.variables) == 0 {
 		return nil, fmt.Errorf("variable schemas are not loaded")
 	}
 	instance, ok := s.variables.GetWithPluginMetadata(name, metadata)
@@ -520,7 +520,7 @@ func (s *sch) getVariableSchema(name string, metadata *common.PluginMetadata) (*
 }
 
 func (s *sch) getQuerySchema(name string, metadata *common.PluginMetadata) (*build.Instance, error) {
-	if len(s.datasources) == 0 {
+	if len(s.queries) == 0 {
 		return nil, fmt.Errorf("query schemas are not loaded")
 	}
 	instance, ok := s.queries.GetWithPluginMetadata(name, metadata)
