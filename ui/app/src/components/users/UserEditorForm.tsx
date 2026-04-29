@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
+import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { Fragment, ReactElement, useMemo, useState } from 'react';
+import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import { FormEditorProps } from '../form-drawers';
 
