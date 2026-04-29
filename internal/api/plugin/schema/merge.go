@@ -41,7 +41,6 @@ func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 
 		castExpr, err := utils.CastASTNodeToASTExpr(node)
 		if err != nil {
-			// TODO: should this return error, or just log it and skip?
 			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
 		expr = append(expr, castExpr)
