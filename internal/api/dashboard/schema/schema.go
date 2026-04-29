@@ -93,25 +93,31 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
-	// plugin := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, pluginHidSelector))
+	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
 	metadata := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
 	projMetadataWrapper := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, projMetadataWrapHidSelector))
 
+	// injecting the _Metadata_0 and _ProjectMetadataWrapper_0 directly into _ProjectMetadata_0
+	// this is done to avoid the inline union issue during `cue vet`
 	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), metadata)
 	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), projMetadataWrapper)
 
+	// unify with panel plugins
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels)
 	}
 
+	// unify with datasource plugins
 	if datasources, ok := plugins[v1plugin.KindDatasource]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources)
 	}
 
+	// unify with query plugins
 	if queries, ok := plugins[v1plugin.KindQuery]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
 	}
 
+	// unify with variable plugins
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector, pluginSelector), variables)
 	}
