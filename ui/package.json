@@ -16,6 +16,7 @@
     "e2e": "turbo run e2e:local",
     "e2e:debug": "turbo run e2e -- --debug",
     "e2e:ci": "turbo run e2e:ci",
+    "e2e:ci:stream": "npm run e2e:ci --workspace=@perses-dev/e2e",
     "typedoc": "typedoc"
   },
   "workspaces": [

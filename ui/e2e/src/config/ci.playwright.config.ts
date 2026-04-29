@@ -22,6 +22,8 @@ import baseConfig from './base.playwright.config';
 const config: PlaywrightTestConfig = {
   ...baseConfig,
 
+  reporter: [['html'], ['list', { printSteps: true }], ['github']],
+
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: true,
 
@@ -35,7 +37,7 @@ const config: PlaywrightTestConfig = {
   webServer: [
     // Start the binary
     {
-      command: './scripts/api_backend_dev.sh --e2e',
+      command: './scripts/api_backend_dev.sh --e2e --ci',
       port: 8080,
       cwd: path.resolve(__dirname, '../../../..'),
       reuseExistingServer: true,
