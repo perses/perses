@@ -26,7 +26,6 @@ import {
 /** Modal displaying all registered keyboard shortcuts, grouped by category. */
 export function ShortcutHelpModal(): ReactElement {
   const [open, setOpen] = useState(false);
-  const { hotkeys, sequences } = useHotkeyRegistrations();
 
   const handleShowShortcuts = useCallback(() => {
     setOpen(true);
@@ -42,6 +41,22 @@ export function ShortcutHelpModal(): ReactElement {
   const handleClose = useCallback(() => {
     setOpen(false);
   }, []);
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle component="h3" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        Keyboard Shortcuts
+        <IconButton onClick={handleClose} size="small">
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      {open && <ShortcutHelpContent />}
+    </Dialog>
+  );
+}
+/** This wrapper component is required as a workaround till https://github.com/TanStack/hotkeys/issues/113 upstream issue is fixed */
+function ShortcutHelpContent(): ReactElement {
+  const { hotkeys, sequences } = useHotkeyRegistrations();
 
   const groupedShortcuts = useMemo(() => {
     const groups: Record<ShortcutCategory, Array<{ name: string; description: string; displayParts: string[] }>> = {
@@ -85,64 +100,56 @@ export function ShortcutHelpModal(): ReactElement {
   }, [hotkeys, sequences]);
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Keyboard Shortcuts</Typography>
-        <IconButton onClick={handleClose} size="small">
-          <Close />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {SHORTCUT_CATEGORY_ORDER.map((category) => {
-          const shortcuts = groupedShortcuts[category];
-          if (!shortcuts?.length) return null;
+    <DialogContent>
+      {SHORTCUT_CATEGORY_ORDER.map((category) => {
+        const shortcuts = groupedShortcuts[category];
+        if (!shortcuts?.length) return null;
 
-          return (
-            <Box key={category} sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', textTransform: 'uppercase' }}>
-                {SHORTCUT_CATEGORY_LABELS[category]}
-              </Typography>
-              {shortcuts.map((shortcut) => (
-                <Box
-                  key={shortcut.name}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    py: 0.5,
-                  }}
-                >
-                  <Typography variant="body2">{shortcut.description || shortcut.name}</Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {shortcut.displayParts.map((part, i) => (
-                      <Box key={i} sx={{ display: 'flex', gap: 0.25 }}>
-                        <Typography
-                          component="kbd"
-                          variant="caption"
-                          sx={{
-                            px: 0.75,
-                            py: 0.25,
-                            borderRadius: 0.5,
-                            border: 1,
-                            borderColor: 'divider',
-                            backgroundColor: 'action.hover',
-                            fontFamily: 'monospace',
-                            fontSize: '0.75rem',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {part}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
+        return (
+          <Box key={category} sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', textTransform: 'uppercase' }}>
+              {SHORTCUT_CATEGORY_LABELS[category]}
+            </Typography>
+            {shortcuts.map((shortcut) => (
+              <Box
+                key={shortcut.name}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 0.5,
+                }}
+              >
+                <Typography variant="body2">{shortcut.description || shortcut.name}</Typography>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  {shortcut.displayParts.map((part, i) => (
+                    <Box key={i} sx={{ display: 'flex', gap: 0.25 }}>
+                      <Typography
+                        component="kbd"
+                        variant="caption"
+                        sx={{
+                          px: 0.75,
+                          py: 0.25,
+                          borderRadius: 0.5,
+                          border: 1,
+                          borderColor: 'divider',
+                          backgroundColor: 'action.hover',
+                          fontFamily: 'monospace',
+                          fontSize: '0.75rem',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {part}
+                      </Typography>
+                    </Box>
+                  ))}
                 </Box>
-              ))}
-              <Divider sx={{ mt: 1 }} />
-            </Box>
-          );
-        })}
-      </DialogContent>
-    </Dialog>
+              </Box>
+            ))}
+            <Divider sx={{ mt: 1 }} />
+          </Box>
+        );
+      })}
+    </DialogContent>
   );
 }

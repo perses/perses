@@ -37,7 +37,7 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(dashboardPage.toolbar).toBeVisible();
 
     // Press Shift+? to open the shortcuts help modal
-    await page.keyboard.press('Shift+/');
+    await page.keyboard.press('Shift+?');
 
     // The help modal should appear with the title "Keyboard Shortcuts"
     const dialog = page.getByRole('dialog');
@@ -45,10 +45,10 @@ test.describe('Keyboard Shortcuts', () => {
     await expect(dialog).toContainText('Keyboard Shortcuts');
 
     // Verify some expected category headings are present
-    await expect(dialog).toContainText('GLOBAL');
-    await expect(dialog).toContainText('TIME RANGE');
-    await expect(dialog).toContainText('DASHBOARD');
-    await expect(dialog).toContainText('FOCUSED PANEL');
+    await expect(dialog).toContainText('Global');
+    await expect(dialog).toContainText('Time Range');
+    await expect(dialog).toContainText('Dashboard');
+    await expect(dialog).toContainText('Focused Panel');
   });
 
   test('d then m toggles dashboard edit mode', async ({ dashboardPage, page }) => {
@@ -101,7 +101,9 @@ test.describe('Keyboard Shortcuts', () => {
 
     // The search dialog/bar should open
     // Look for the search input or dialog
-    const searchInput = page.getByRole('combobox', { name: /search/i }).or(page.getByPlaceholder(/search/i));
+    const searchInput = page
+      .getByRole('combobox', { name: /search/i })
+      .or(page.getByPlaceholder(/What are you looking for\?/i));
     await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 
