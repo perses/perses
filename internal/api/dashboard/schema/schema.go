@@ -100,7 +100,13 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
 	metadata := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
+	if metadata.Err() != nil {
+		return cue.Value{}, fmt.Errorf("could not lookup Metadata schema: %w", metadata.Err())
+	}
 	projMetadataWrapper := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, projMetadataWrapHidSelector))
+	if projMetadataWrapper.Err() != nil {
+		return cue.Value{}, fmt.Errorf("could not lookup ProjectMetadataWrapper schema: %w", projMetadataWrapper.Err())
+	}
 
 	// injecting the _Metadata_0 and _ProjectMetadataWrapper_0 directly into _ProjectMetadata_0
 	// this is done to avoid the inline union issue during `cue vet`
@@ -125,7 +131,13 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
 		// load TextVariableSpec and ListVariableSpec
 		textSpec := ctx.EncodeType(dashboard.TextVariableSpec{})
+		if textSpec.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not encode TextVariableSpec: %w", textSpec.Err())
+		}
 		listSpec := ctx.EncodeType(dashboard.ListVariableSpec{})
+		if listSpec.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not encode ListVariableSpec: %w", listSpec.Err())
+		}
 
 		// plugins only present in ListVariable
 		listSpec = listSpec.FillPath(cue.MakePath(listSpecHidSelector, specSelector), variables)
