@@ -140,7 +140,7 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		}
 
 		// plugins only present in ListVariable
-		listSpec = listSpec.FillPath(cue.MakePath(listSpecHidSelector, specSelector), variables)
+		listSpec = listSpec.FillPath(cue.MakePath(listSpecHidSelector, pluginSelector), variables)
 
 		// OR join variable type specs
 		var variableSpec []ast.Expr
