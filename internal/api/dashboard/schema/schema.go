@@ -21,10 +21,12 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/errors"
+	"cuelang.org/go/cue/token"
 
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,6 +46,7 @@ var (
 	variableSpecHidSelector     = cue.Hid("_Variable_0", "_")
 	projMetadataHidSelector     = cue.Hid("_ProjectMetadata_0", "_")
 	projMetadataWrapHidSelector = cue.Hid("_ProjectMetadataWrapper_0", "_")
+	listSpecHidSelector         = cue.Hid("_ListSpec_0", "_")
 	// string
 	specSelector   = cue.Str("spec")
 	pluginSelector = cue.Str("plugin")
@@ -57,6 +60,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 func Load(ctx *cue.Context) (cue.Value, error) {
+	// load dashboard
 	encoded := ctx.EncodeType(v1.Dashboard{})
 	if encoded.Err() != nil {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
@@ -67,6 +71,7 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s: %w", node, dashboardDefinitionName, err)
 	}
 
+	// only doing this so that the entire CUE will be wrapped in a #Dashboard definition
 	decls := &ast.Field{
 		Label: ast.NewIdent(dashboardDefinitionName),
 		Value: expr,
@@ -117,9 +122,44 @@ func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
 	}
 
-	// unify with variable plugins
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector, pluginSelector), variables)
+		// load TextVariableSpec and ListVariableSpec
+		textSpec := ctx.EncodeType(dashboard.TextVariableSpec{})
+		listSpec := ctx.EncodeType(dashboard.ListVariableSpec{})
+
+		// plugins only present in ListVariable
+		listSpec = listSpec.FillPath(cue.MakePath(listSpecHidSelector, specSelector), variables)
+
+		// OR join variable type specs
+		var variableSpec []ast.Expr
+		for _, value := range []cue.Value{textSpec, listSpec} {
+			node := value.Syntax(
+				cue.InlineImports(true),
+				cue.All(),
+				cue.Definitions(true),
+			)
+
+			castExpr, err := utils.CastASTNodeToASTExpr(node)
+			if err != nil {
+				return cue.Value{}, fmt.Errorf("could not process variable spec schema: %w", err)
+			}
+			variableSpec = append(variableSpec, castExpr)
+		}
+
+		if len(variableSpec) != 2 {
+			return cue.Value{}, fmt.Errorf("invalid number of variable spec schemas, expected 2, got %d", len(variableSpec))
+		}
+
+		completeVarSpecExpr := &ast.BinaryExpr{
+			Op: token.OR,
+			X:  variableSpec[0],
+			Y:  variableSpec[1],
+		}
+
+		completeVarSpecValue := ctx.BuildExpr(completeVarSpecExpr)
+
+		// unify the variable spec with the dashboard schema
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector), completeVarSpecValue)
 	}
 
 	return result, nil
