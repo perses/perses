@@ -20,6 +20,8 @@ import "github.com/perses/spec/cue/common"
 	#KindProfileQuery |
 	#KindLogQuery |
 	#KindQuery |
+	#KindAlertsQuery |
+	#KindSilencesQuery |
 	#KindExplore
 
 #KindVariable:        #Kind & "Variable"
@@ -30,6 +32,8 @@ import "github.com/perses/spec/cue/common"
 #KindProfileQuery:    #Kind & "ProfileQuery"
 #KindLogQuery:        #Kind & "LogQuery"
 #KindQuery:           #Kind & "Query"
+#KindAlertsQuery:     #Kind & "AlertsQuery"
+#KindSilencesQuery:   #Kind & "SilencesQuery"
 #KindExplore:         #Kind & "Explore"
 
 #Spec: {
