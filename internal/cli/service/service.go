@@ -23,6 +23,12 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+const (
+	nameColumnHeader    = "NAME"
+	ageColumnHeader     = "AGE"
+	projectColumnHeader = "PROJECT"
+)
+
 func convertToEntityIfNoError[T modelAPI.Entity](entities []T, err error) ([]modelAPI.Entity, error) {
 	if err != nil {
 		return nil, err

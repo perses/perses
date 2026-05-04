@@ -61,8 +61,8 @@ func (d *globalDatasource) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (d *globalDatasource) GetColumHeader() []string {
 	return []string{
-		"NAME",
+		nameColumnHeader,
 		"DATASOURCE_TYPE",
-		"AGE",
+		ageColumnHeader,
 	}
 }

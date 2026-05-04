@@ -216,7 +216,7 @@ func Write(cfg *Config) error {
 		previousConf = cfg
 	}
 
-	data, err := json.Marshal(previousConf)
+	data, err := json.Marshal(previousConf) //nolint:gosec
 
 	if err != nil {
 		return err
@@ -239,7 +239,7 @@ func WriteFromScratch(cfg *Config) error {
 		return err
 	}
 
-	data, err := json.Marshal(cfg)
+	data, err := json.Marshal(cfg) //nolint:gosec
 
 	if err != nil {
 		return err

@@ -32,7 +32,7 @@ func TestSecret_YAML(t *testing.T) {
 	err := yaml.Unmarshal([]byte(`secret: something`), c)
 	assert.NoError(t, err)
 	assert.Equal(t, c, &testSecretStruct{Secret: "something"})
-	res, err := yaml.Marshal(c)
+	res, err := yaml.Marshal(c) //nolint:gosec
 	assert.NoError(t, err)
 	assert.Contains(t, string(res), `secret: <secret>`)
 
@@ -42,7 +42,7 @@ func TestSecret_JSON(t *testing.T) {
 	err := json.Unmarshal([]byte(`{"secret": "something"}`), c)
 	assert.NoError(t, err)
 	assert.Equal(t, c, &testSecretStruct{Secret: "something"})
-	res, err := json.Marshal(c)
+	res, err := json.Marshal(c) //nolint:gosec
 	assert.NoError(t, err)
 	assert.Equal(t, string(res), `{"secret":"\u003csecret\u003e"}`)
 }
