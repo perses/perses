@@ -191,6 +191,9 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	return server, httpexpect.WithConfig(httpexpect.Config{
 		BaseURL:  server.URL,
 		Reporter: httpexpect.NewAssertReporter(t),
+		// Keep e2e requests stateless: do not persist cookies between requests.
+		// This is explicit and avoids Go runtime cookiejar behavior changes (e.g. localhost Secure cookies).
+		Client: &http.Client{Jar: nil},
 	}), dependencyManager
 }
 
