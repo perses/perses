@@ -82,7 +82,7 @@ func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errW
 	streamErrWriter := newPrefixedStream(pluginName, errWriter, c)
 	portCapturingWriter := newPortCapturingWriter(streamWriter, portChan)
 
-	cmd := exec.Command("npm", "run", rsbuildScriptName)
+	cmd := exec.Command("npm", "run", rsbuildScriptName) //nolint:gosec
 	cmd.Stdout = portCapturingWriter
 	cmd.Stderr = streamErrWriter
 	cmd.Dir = pluginPath

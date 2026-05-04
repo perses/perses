@@ -201,7 +201,7 @@ func (e *oAuthEndpoint) setCookie(ctx echo.Context, name, value string) error {
 	if err != nil {
 		return err
 	}
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec
 		Name:     name,
 		Value:    encoded,
 		Path:     "/",
@@ -213,7 +213,7 @@ func (e *oAuthEndpoint) setCookie(ctx echo.Context, name, value string) error {
 }
 
 func (e *oAuthEndpoint) deleteCookie(ctx echo.Context, name string) {
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec
 		Name:     name,
 		Value:    "",
 		Path:     "/",

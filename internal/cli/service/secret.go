@@ -61,8 +61,8 @@ func (d *secret) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (d *secret) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"PROJECT",
-		"AGE",
+		nameColumnHeader,
+		projectColumnHeader,
+		ageColumnHeader,
 	}
 }

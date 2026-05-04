@@ -60,7 +60,7 @@ func (d *globalSecret) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (d *globalSecret) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"AGE",
+		nameColumnHeader,
+		ageColumnHeader,
 	}
 }

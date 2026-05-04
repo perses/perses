@@ -16,7 +16,7 @@ package common
 import "reflect"
 
 func GetReflectNextElem(v reflect.Value) reflect.Value {
-	if v.Kind() == reflect.Interface || (v.Kind() == reflect.Ptr && !v.IsNil()) {
+	if v.Kind() == reflect.Interface || (v.Kind() == reflect.Pointer && !v.IsNil()) {
 		return v.Elem()
 	}
 	return v

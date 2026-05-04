@@ -228,23 +228,23 @@ func (r *Request) buildPath() string {
 
 	// API version
 	if len(r.apiVersion) > 0 {
-		path.WriteString(fmt.Sprintf("/%s", r.apiVersion))
+		_, _ = fmt.Fprintf(&path, "/%s", r.apiVersion)
 	}
 
 	// Address of the resource
 	if len(r.project) > 0 {
 		// Project address
-		path.WriteString(fmt.Sprintf("/projects/%s", r.project))
+		_, _ = fmt.Fprintf(&path, "/projects/%s", r.project)
 	}
 
 	// Resource type (mandatory)
 	if len(r.resource) > 0 {
-		path.WriteString(fmt.Sprintf("/%s", r.resource))
+		_, _ = fmt.Fprintf(&path, "/%s", r.resource)
 	}
 
 	// Resource name
 	if len(r.name) > 0 {
-		path.WriteString(fmt.Sprintf("/%s", r.name))
+		_, _ = fmt.Fprintf(&path, "/%s", r.name)
 	}
 
 	return path.String()

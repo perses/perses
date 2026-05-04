@@ -80,7 +80,7 @@ func FormatArrayMessage(message string, list []string) string {
 	var builder strings.Builder
 	builder.WriteString(message + "\n")
 	for _, e := range list {
-		builder.WriteString(fmt.Sprintf("  * %s\n", e))
+		_, _ = fmt.Fprintf(&builder, "  * %s\n", e)
 	}
 	return builder.String()
 }

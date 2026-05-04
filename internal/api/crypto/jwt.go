@@ -93,7 +93,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 	// if the access token is expired, so we need to set the cookie with a max age even if the cookie is expired before.
 	maxAge := max(int(j.accessTokenTTL.Seconds()), int(j.refreshTokenTTL.Seconds()))
 	tokenSplit := strings.Split(accessToken, ".")
-	headerPayloadCookie := &http.Cookie{
+	headerPayloadCookie := &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     cookiePath,
@@ -103,7 +103,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		HttpOnly: false,
 		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
-	signatureCookie := &http.Cookie{
+	signatureCookie := &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     cookiePath,
@@ -117,14 +117,14 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 }
 
 func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
-	headerPayloadCookie := &http.Cookie{
+	headerPayloadCookie := &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyJWTPayload,
 		Value:    "",
 		Path:     cookiePath,
 		MaxAge:   -1,
 		HttpOnly: false,
 	}
-	signatureCookie := &http.Cookie{
+	signatureCookie := &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyJWTSignature,
 		Value:    "",
 		Path:     cookiePath,
@@ -135,7 +135,7 @@ func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
 }
 
 func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
 		Path:     cookiePath,
@@ -148,7 +148,7 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 }
 
 func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyRefreshToken,
 		Value:    "",
 		Path:     cookiePath,

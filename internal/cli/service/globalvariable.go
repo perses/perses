@@ -61,8 +61,8 @@ func (d *globalVariable) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (d *globalVariable) GetColumHeader() []string {
 	return []string{
-		"NAME",
+		nameColumnHeader,
 		"VARIABLE_TYPE",
-		"AGE",
+		ageColumnHeader,
 	}
 }

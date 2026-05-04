@@ -60,7 +60,7 @@ func (u *user) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (u *user) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"AGE",
+		nameColumnHeader,
+		ageColumnHeader,
 	}
 }
