@@ -10,7 +10,7 @@ require (
 	github.com/charmbracelet/huh v1.0.0
 	github.com/efficientgo/core v1.0.0-rc.3
 	github.com/fatih/color v1.19.0
-	github.com/fsnotify/fsnotify v1.10.0
+	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/go-sql-driver/mysql v1.10.0
@@ -23,7 +23,7 @@ require (
 	github.com/jackc/pgx/v5 v5.9.2
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
-	github.com/labstack/echo/v4 v4.15.2
+	github.com/labstack/echo/v4 v4.15.1
 	github.com/mholt/archives v0.1.5
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.4
