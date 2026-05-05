@@ -13,7 +13,7 @@
 
 import { resolve } from 'node:path';
 import rspack from '@rspack/core';
-import refreshPlugin from '@rspack/plugin-react-refresh';
+import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
 import TerserPlugin from 'terser-webpack-plugin';
 import { defineConfig } from '@rspack/cli';
 
@@ -166,6 +166,6 @@ export default defineConfig({
         },
       ],
     }),
-    isDev ? new refreshPlugin() : null,
+    isDev ? new ReactRefreshRspackPlugin() : null,
   ].filter(Boolean),
 });

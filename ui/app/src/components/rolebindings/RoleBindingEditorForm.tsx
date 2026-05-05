@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
