@@ -1,6 +1,6 @@
 module github.com/perses/perses
 
-go 1.26.0
+go 1.26.2
 
 require (
 	cuelang.org/go v0.17.0-0.dev.0.20260319114053-b546fdd66808

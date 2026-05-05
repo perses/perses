@@ -295,7 +295,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
-	h.logWithDefaultEntry().Debug("request will be redirected to datasource")
+	h.logWithDefaultEntry().WithField("path", h.path).Debug("request will be redirected to datasource")
 
 	// Set up the proxy
 	var proxyErr error
