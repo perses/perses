@@ -48,7 +48,6 @@ var (
 	projMetadataWrapHidSelector = cue.Hid("_ProjectMetadataWrapper_0", "_")
 	listSpecHidSelector         = cue.Hid("_ListSpec_0", "_")
 	// string
-	specSelector   = cue.Str("spec")
 	pluginSelector = cue.Str("plugin")
 )
 
