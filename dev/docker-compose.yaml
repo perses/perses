@@ -2,13 +2,14 @@
 # TO RUN WITH POSTGRES AND PROMETHEUS: docker-compose --file dev/docker-compose.yaml --profile postgres --profile prometheus up --detach
 # TO RUN WITH PROMETHEUS AND TEMPO: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile tempo up --detach
 # TO RUN WITH LOKI: docker-compose --file dev/docker-compose.yaml --profile loki up --detach
+# TO RUN WITH ALERTMANAGER: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile alertmanager up --detach
 
-name: 'perses-dev'
+name: "perses-dev"
 services:
   loki:
     image: grafana/loki:3.6
     ports:
-      - '3100:3100'
+      - "3100:3100"
     profiles: [loki]
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
@@ -42,7 +43,7 @@ services:
   postgres:
     image: postgres:17
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_DB: perses
       POSTGRES_USER: user
@@ -58,32 +59,72 @@ services:
       - --enable-feature=native-histograms
     volumes:
       - ./extra/prometheus.yaml:/etc/prometheus.yaml
+      - ./extra/alerting-rules.yaml:/etc/alerting-rules.yaml
     ports:
-      - '9090:9090'
+      - "9090:9090"
     profiles: [prometheus]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yaml
+    volumes:
+      - ./extra/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
+    ports:
+      - "9093:9093"
+    profiles: [alertmanager]
+
+  alertmanager-init:
+    image: curlimages/curl:8.13.0
+    profiles: [alertmanager]
+    depends_on:
+      - alertmanager
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 5
+        NOW=$$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+        FUTURE_EPOCH=$$(( $$(date +%s) + 2592000 ))
+        FUTURE=$$(date -u -d @$$FUTURE_EPOCH +%Y-%m-%dT%H:%M:%S.000Z 2>/dev/null || date -u -r $$FUTURE_EPOCH +%Y-%m-%dT%H:%M:%S.000Z 2>/dev/null)
+        echo "NOW=$$NOW FUTURE=$$FUTURE"
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d "{\"matchers\":[{\"name\":\"alertname\",\"value\":\"ServiceErrorRate\",\"isRegex\":false,\"isEqual\":true}],\"startsAt\":\"$$NOW\",\"endsAt\":\"$$FUTURE\",\"createdBy\":\"dev-setup\",\"comment\":\"Silenced for dev testing\"}"
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d "{\"matchers\":[{\"name\":\"alertname\",\"value\":\"AvalancheCounterGrowing\",\"isRegex\":false,\"isEqual\":true}],\"startsAt\":\"$$NOW\",\"endsAt\":\"$$FUTURE\",\"createdBy\":\"dev-setup\",\"comment\":\"Silenced for dev testing — counter growth is expected\"}"
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d "{\"matchers\":[{\"name\":\"team\",\"value\":\"app-backend\",\"isRegex\":false,\"isEqual\":true},{\"name\":\"severity\",\"value\":\"info\",\"isRegex\":false,\"isEqual\":true}],\"startsAt\":\"$$NOW\",\"endsAt\":\"$$FUTURE\",\"createdBy\":\"oncall-bot\",\"comment\":\"Suppress low-priority app-backend alerts during dev\"}"
+
+        echo "Silences created successfully"
 
   # Generate fake metrics
   avalanche:
     image: quay.io/prometheuscommunity/avalanche:v0.7.0
     command:
-      - '--gauge-metric-count=5'
-      - '--counter-metric-count=5'
-      - '--histogram-metric-count=5'
-      - '--histogram-metric-bucket-count=5'
-      - '--native-histogram-metric-count=5'
-      - '--summary-metric-count=5'
-      - '--summary-metric-objective-count=5'
-      - '--label-count=5'
-      - '--series-count=100'
+      - "--gauge-metric-count=5"
+      - "--counter-metric-count=5"
+      - "--histogram-metric-count=5"
+      - "--histogram-metric-bucket-count=5"
+      - "--native-histogram-metric-count=5"
+      - "--summary-metric-count=5"
+      - "--summary-metric-objective-count=5"
+      - "--label-count=5"
+      - "--series-count=100"
     ports:
-      - '9001:9001'
+      - "9001:9001"
     profiles: [avalanche]
 
   memcached:
     image: memcached:1.6.29
     container_name: memcached
     ports:
-      - '11211:11211'
+      - "11211:11211"
     environment:
       - MEMCACHED_MAX_MEMORY=64m # Set the maximum memory usage
       - MEMCACHED_THREADS=4 # Number of threads to use
@@ -91,18 +132,18 @@ services:
 
   tempo:
     image: grafana/tempo:2.10.3
-    command: ['-config.file=/etc/tempo.yaml']
-    user: '10001:10001'
+    command: ["-config.file=/etc/tempo.yaml"]
+    user: "10001:10001"
     volumes:
       - ./extra/tempo.yaml:/etc/tempo.yaml
       - tempo-data:/var/tempo
     ports:
-      - '14268:14268' # jaeger ingest
-      - '3200:3200' # tempo
-      - '9095:9095' # tempo grpc
-      - '4317:4317' # otlp grpc
-      - '4318:4318' # otlp http
-      - '9411:9411' # zipkin
+      - "14268:14268" # jaeger ingest
+      - "3200:3200" # tempo
+      - "9095:9095" # tempo grpc
+      - "4317:4317" # otlp grpc
+      - "4318:4318" # otlp http
+      - "9411:9411" # zipkin
     depends_on:
       - memcached
     profiles: [tempo]
