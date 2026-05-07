@@ -60,7 +60,7 @@ var cueValidationOptions = []cue.Option{
 
 // Helper function designed specifically to remove the "": _Metadata_0 & _ProjectMetadataWrapper_0 field from _ProjectMetadata_0
 // this is a workaround to mitigate issues with cue vet
-func removeEmptyStringField(ctx *cue.Context, val cue.Value) cue.Value {
+func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) {
 	// get the ast.Node
 	node := val.Syntax()
 
@@ -83,7 +83,11 @@ func removeEmptyStringField(ctx *cue.Context, val cue.Value) cue.Value {
 	}, nil)
 
 	// build the new value
-	return ctx.BuildExpr(node.(ast.Expr))
+	expr, err := utils.CastASTNodeToASTExpr(node)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("unexpected AST node type %T: %w", node, err)
+	}
+	return ctx.BuildExpr(expr), nil
 }
 
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
@@ -109,7 +113,10 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
 	}
 
-	final = removeEmptyStringField(ctx, final)
+	final, err = removeEmptyStringField(ctx, final)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("failed to remove empty fields from dashboard schema: %w", err)
+	}
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
 	metadata := final.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
