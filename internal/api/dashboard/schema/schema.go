@@ -94,7 +94,7 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func MergeWithPlugins(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
+func GenerateDashboardCueValue(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
 	result := dashSpec
 
 	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
