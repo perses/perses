@@ -58,7 +58,35 @@ var cueValidationOptions = []cue.Option{
 	cue.Hidden(false),
 }
 
-func Load(ctx *cue.Context) (cue.Value, error) {
+// Helper function designed specifically to remove the "": _Metadata_0 & _ProjectMetadataWrapper_0 field from _ProjectMetadata_0
+// this is a workaround to mitigate issues with cue vet
+func removeEmptyStringField(ctx *cue.Context, val cue.Value) cue.Value {
+	// get the ast.Node
+	node := val.Syntax()
+
+	// walk the dashboard ast.Node and prepare a new list of fields newDecls
+	ast.Walk(node, func(n ast.Node) bool {
+		if st, ok := n.(*ast.StructLit); ok {
+			var newDecls []ast.Decl
+			for _, decl := range st.Elts {
+				if f, ok := decl.(*ast.Field); ok {
+					// identify the empty string label and skip it
+					if lit, ok := f.Label.(*ast.BasicLit); ok && lit.Value == `""` {
+						continue
+					}
+				}
+				newDecls = append(newDecls, decl)
+			}
+			st.Elts = newDecls
+		}
+		return true
+	}, nil)
+
+	// build the new value
+	return ctx.BuildExpr(node.(ast.Expr))
+}
+
+func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// load dashboard
 	encoded := ctx.EncodeType(v1.Dashboard{})
 	if encoded.Err() != nil {
@@ -80,6 +108,24 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 	if final.Err() != nil {
 		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
 	}
+
+	final = removeEmptyStringField(ctx, final)
+
+	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
+	metadata := final.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
+	if metadata.Err() != nil {
+		return cue.Value{}, fmt.Errorf("could not lookup Metadata schema: %w", metadata.Err())
+	}
+	projMetadataWrapper := final.LookupPath(cue.MakePath(dashboardDefSelector, projMetadataWrapHidSelector))
+	if projMetadataWrapper.Err() != nil {
+		return cue.Value{}, fmt.Errorf("could not lookup ProjectMetadataWrapper schema: %w", projMetadataWrapper.Err())
+	}
+
+	// injecting the _Metadata_0 and _ProjectMetadataWrapper_0 directly into _ProjectMetadata_0
+	// this is done to avoid the inline union issue during `cue vet`
+	final = final.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), metadata)
+	final = final.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), projMetadataWrapper)
+
 	if validateErr := final.Validate(cueValidationOptions...); validateErr != nil {
 		// retrieve the full error detail to provide better insights to the end user:
 		ex, errOs := os.Executable()
@@ -94,23 +140,13 @@ func Load(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func GenerateDashboardCueValue(ctx *cue.Context, dashSpec cue.Value, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
+func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
+	dashSpec, err := dashboardToCue(ctx)
+	if err != nil {
+		return cue.Value{}, fmt.Errorf("unable to load dashboard schema: %w", err)
+	}
+
 	result := dashSpec
-
-	// grab _Metadata_0 and _ProjectMetadataWrapper_0 from #Dashboard
-	metadata := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, metadataHidSelector))
-	if metadata.Err() != nil {
-		return cue.Value{}, fmt.Errorf("could not lookup Metadata schema: %w", metadata.Err())
-	}
-	projMetadataWrapper := dashSpec.LookupPath(cue.MakePath(dashboardDefSelector, projMetadataWrapHidSelector))
-	if projMetadataWrapper.Err() != nil {
-		return cue.Value{}, fmt.Errorf("could not lookup ProjectMetadataWrapper schema: %w", projMetadataWrapper.Err())
-	}
-
-	// injecting the _Metadata_0 and _ProjectMetadataWrapper_0 directly into _ProjectMetadata_0
-	// this is done to avoid the inline union issue during `cue vet`
-	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), metadata)
-	result = result.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), projMetadataWrapper)
 
 	// unify with panel plugins
 	if panels, ok := plugins[v1plugin.KindPanel]; ok {

@@ -67,15 +67,8 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		plugins[kind] = merged
 	}
 
-	// load the dashboard schema
-	spec, err := dashboardSchema.Load(cueCtx)
-	if err != nil {
-		logrus.WithError(err).Error("unable to load dashboard schema")
-		return apiinterface.InternalError
-	}
-
 	// inject plugin cue values into the dashboard schema
-	result, err := dashboardSchema.GenerateDashboardCueValue(cueCtx, spec, plugins)
+	result, err := dashboardSchema.GenerateDashboardCueValue(cueCtx, plugins)
 	if err != nil {
 		logrus.WithError(err).Error("unable to merge dashboard schema with plugin schemas")
 		return apiinterface.InternalError
