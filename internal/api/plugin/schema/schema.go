@@ -110,8 +110,8 @@ type Schema interface {
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetAllSchemas() []LoadSchema
-	GetAllSchemasOfKind(kind plugin.Kind) []LoadSchema
-	GetSchema(kind plugin.Kind, name string) (*build.Instance, error)
+	GetSchemas(kind plugin.Kind) []LoadSchema
+	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 }
 
 func New() Schema {
@@ -249,44 +249,47 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	schemas := collectFromSch(*s.sch)
-	devSchemas := collectFromSch(*s.devSch)
+	var allSchemas []LoadSchema
+
+	schemas := s.sch.getAllSchemas()
+	devSchemas := s.devSch.getAllSchemas()
+
+	allSchemas = devSchemas
+	for _, s := range schemas {
+		if !loadSchemaPresent(s, allSchemas) {
+			allSchemas = append(allSchemas, s)
+		}
+	}
 
 	return append(schemas, devSchemas...)
 }
 
-func (s *completeSchema) GetAllSchemasOfKind(kind plugin.Kind) []LoadSchema {
+func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	schemas := collectFromSchOfKind(*s.sch, kind)
-	devSchemas := collectFromSchOfKind(*s.devSch, kind)
+	var allSchemas []LoadSchema
 
-	return append(schemas, devSchemas...)
-}
+	schemas := s.sch.getSchemas(kind)
+	devSchemas := s.devSch.getSchemas(kind)
 
-func collectFromSchOfKind(sch sch, kind plugin.Kind) []LoadSchema {
-	var schemas []LoadSchema
-
-	switch kind {
-	case plugin.KindDatasource:
-		for node, versions := range sch.datasources {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
-	case plugin.KindPanel:
-		for node, versions := range sch.panels {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
-	case plugin.KindVariable:
-		for node, versions := range sch.variables {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
-	case plugin.KindQuery:
-		for node, versions := range sch.queries {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+	allSchemas = devSchemas
+	for _, s := range schemas {
+		if !loadSchemaPresent(s, allSchemas) {
+			allSchemas = append(allSchemas, s)
 		}
 	}
-	return schemas
+
+	return allSchemas
+}
+
+func loadSchemaPresent(ls LoadSchema, presentSchemas []LoadSchema) bool {
+	for _, sch := range presentSchemas {
+		if ls.Name == sch.Name {
+			return true
+		}
+	}
+	return false
 }
 
 func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v map[string]*build.Instance) []LoadSchema {
@@ -303,18 +306,7 @@ func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v 
 	return schemas
 }
 
-func collectFromSch(sch sch) []LoadSchema {
-	var schemas []LoadSchema
-
-	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery} {
-		schemaGroup := collectFromSchOfKind(sch, kind)
-		schemas = append(schemas, schemaGroup...)
-	}
-
-	return schemas
-}
-
-func (s *completeSchema) GetSchema(kind plugin.Kind, name string) (*build.Instance, error) {
+func (s *completeSchema) GetInstance(kind plugin.Kind, name string) (*build.Instance, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
@@ -482,4 +474,39 @@ func (s *sch) getQuerySchema(name string, metadata *common.PluginMetadata) (*bui
 		return nil, fmt.Errorf("query schema not found for plugin %s", name)
 	}
 	return instance, nil
+}
+
+func (sch sch) getAllSchemas() []LoadSchema {
+	var schemas []LoadSchema
+
+	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery} {
+		schemaGroup := sch.getSchemas(kind)
+		schemas = append(schemas, schemaGroup...)
+	}
+
+	return schemas
+}
+
+func (s *sch) getSchemas(kind plugin.Kind) []LoadSchema {
+	var schemas []LoadSchema
+
+	switch kind {
+	case plugin.KindDatasource:
+		for node, versions := range s.datasources {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindPanel:
+		for node, versions := range s.panels {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindVariable:
+		for node, versions := range s.variables {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindQuery:
+		for node, versions := range s.queries {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	}
+	return schemas
 }
