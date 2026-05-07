@@ -118,7 +118,7 @@ func (d *discovery) String() string {
 }
 
 func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
-	sch, err := d.schema.GetSchema(v1plugin.KindDatasource, d.cfg.DatasourcePluginKind)
+	sch, err := d.schema.GetInstance(v1plugin.KindDatasource, d.cfg.DatasourcePluginKind)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get datasource schema")
 		return nil, nil

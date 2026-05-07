@@ -122,7 +122,7 @@ func TestNewFromSchema(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetSchema(v1plugin.KindDatasource, tt.schema)
+			instance, err := sch.GetInstance(v1plugin.KindDatasource, tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -162,7 +162,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetSchema(v1plugin.KindDatasource, tt.schema)
+			instance, err := sch.GetInstance(v1plugin.KindDatasource, tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
