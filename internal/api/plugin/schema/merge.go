@@ -23,6 +23,10 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 )
 
+const (
+	definitionPrefix = "#"
+)
+
 // Function generates a disjunction (OR join) of a list of LoadSchemas
 // and returns it in a single cue.Value
 func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
@@ -71,3 +75,34 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 	}
 	return value, nil
 }
+
+func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
+	definitions := make(map[string]cue.Value)
+	for _, ls := range schemas {
+		value := ctx.BuildInstance(ls.Instance)
+		if value.Err() != nil {
+			return cue.Value{}, fmt.Errorf("unable to build instance %s: %w", ls.Name, value.Err())
+		}
+		definitions[ls.Name] = value
+	}
+
+	var declsList []ast.Decl
+	for name, value := range definitions {
+		expr, err := utils.CastASTNodeToASTExpr(value.Syntax(utils.CueSyntaxOptions...))
+		if err != nil {
+			return cue.Value{}, err
+		}
+		decls := &ast.Field{
+			Label: ast.NewIdent(fmt.Sprintf("%s%s", definitionPrefix, name)),
+			Value: expr,
+		}
+		declsList = append(declsList, decls)
+	}
+	final := ctx.BuildExpr(&ast.StructLit{Elts: declsList})
+	if final.Err() != nil {
+		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
+	}
+	return final, nil
+}
+
+func Placeholder(ctx *cue.Context, ls LoadSchema) cue.Value { return cue.Value{} }
