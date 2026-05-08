@@ -23,7 +23,9 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 )
 
-func MergeSchemas(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
+// Function generates a disjunction (OR join) of a list of LoadSchemas
+// and returns it in a single cue.Value
+func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 	var expr []ast.Expr
 
 	for _, ls := range schemas {

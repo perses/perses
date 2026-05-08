@@ -59,7 +59,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		if len(schemas) == 0 {
 			continue
 		}
-		merged, err := schema.MergeSchemas(cueCtx, schemas)
+		merged, err := schema.GenerateSchemaDisjunction(cueCtx, schemas)
 		if err != nil {
 			logrus.WithError(err).Errorf("unable to merge %s plugin schemas", kind)
 			return apiinterface.InternalError
@@ -90,7 +90,7 @@ func (e *endpoint) PluginSchema(ctx echo.Context) error {
 	}
 	// merge
 	cueCtx := cuecontext.New()
-	merged, err := schema.MergeSchemas(cueCtx, schemas)
+	merged, err := schema.GenerateSchemaDisjunction(cueCtx, schemas)
 	if err != nil {
 		logrus.WithError(err).Error("unable to merge plugin schemas")
 		return apiinterface.InternalError
