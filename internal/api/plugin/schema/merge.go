@@ -76,6 +76,7 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 	return value, nil
 }
 
+// Generates a single cue.Value composed of a list of cue definitions (prefixed by #)
 func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 	definitions := make(map[string]cue.Value)
 	for _, ls := range schemas {
