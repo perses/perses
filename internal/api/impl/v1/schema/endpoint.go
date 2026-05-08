@@ -46,7 +46,8 @@ func NewEndpoint(pluginService plugin.Plugin, readonly bool) route.Endpoint {
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathSchemas))
 	group.GET("/dashboard", e.DashboardSchema, true)
-	group.GET("/plugin", e.PluginSchema, true)
+	group.GET("/plugin", e.PluginList, true)
+	group.GET("/plugin/:pluginName", e.PluginDefinition, true)
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
@@ -74,9 +75,41 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	data, err := utils.ExportToCUE(result)
+	data, err := utils.CueValueToHTTPData(result)
 	if err != nil {
 		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
+		return apiinterface.InternalError
+	}
+	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+}
+
+func (e *endpoint) PluginDefinition(ctx echo.Context) error {
+	pluginName := ctx.Param("pluginName")
+	var plugins []schema.LoadSchema
+
+	schemas := e.pluginSvc.Schema().GetAllSchemas()
+	if len(schemas) == 0 {
+		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
+	}
+	for _, ls := range schemas {
+		if ls.Name == pluginName {
+			plugins = append(plugins, ls)
+		}
+	}
+	if len(plugins) == 0 {
+		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "plugin not found"})
+	}
+
+	cueCtx := cuecontext.New()
+	list, err := schema.GenerateSchemaDefinitions(cueCtx, plugins)
+	if err != nil {
+		logrus.WithError(err).Error("unable to generate plugin definition list")
+		return apiinterface.InternalError
+	}
+
+	data, exportErr := utils.CueValueToHTTPData(list)
+	if exportErr != nil {
+		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return apiinterface.InternalError
 	}
 	return ctx.Blob(http.StatusOK, "text/x-cue", data)
@@ -92,10 +125,30 @@ func (e *endpoint) PluginSchema(ctx echo.Context) error {
 	cueCtx := cuecontext.New()
 	merged, err := schema.GenerateSchemaDisjunction(cueCtx, schemas)
 	if err != nil {
-		logrus.WithError(err).Error("unable to merge plugin schemas")
+		logrus.WithError(err).Error("unable to generate plugin schema disjunction")
 		return apiinterface.InternalError
 	}
-	data, exportErr := utils.ExportToCUE(merged)
+	data, exportErr := utils.CueValueToHTTPData(merged)
+	if exportErr != nil {
+		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
+		return apiinterface.InternalError
+	}
+	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+}
+
+func (e *endpoint) PluginList(ctx echo.Context) error {
+	schemas := e.pluginSvc.Schema().GetAllSchemas()
+	if len(schemas) == 0 {
+		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
+	}
+	cueCtx := cuecontext.New()
+	list, err := schema.GenerateSchemaDefinitions(cueCtx, schemas)
+	if err != nil {
+		logrus.WithError(err).Error("unable to generate plugin definition list")
+		return apiinterface.InternalError
+	}
+
+	data, exportErr := utils.CueValueToHTTPData(list)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return apiinterface.InternalError
