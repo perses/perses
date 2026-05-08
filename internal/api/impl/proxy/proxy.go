@@ -217,7 +217,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			if err != nil {
 				return nil, err
 			}
-			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 					datasourceFieldLog: datasourceName,
 					projectFieldLog:    projectForLog(projectName),
@@ -238,7 +238,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			if err != nil {
 				return nil, err
 			}
-			if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 					datasourceFieldLog: datasourceName,
 					projectFieldLog:    projectForLog(projectName),
