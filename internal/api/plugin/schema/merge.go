@@ -104,5 +104,3 @@ func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 	}
 	return final, nil
 }
-
-func Placeholder(ctx *cue.Context, ls LoadSchema) cue.Value { return cue.Value{} }
