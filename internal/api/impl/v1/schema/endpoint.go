@@ -16,6 +16,7 @@ package schema
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -92,7 +93,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
 	}
 	for _, ls := range schemas {
-		if ls.Name == pluginName {
+		if strings.EqualFold(ls.Name, pluginName) {
 			plugins = append(plugins, ls)
 		}
 	}
