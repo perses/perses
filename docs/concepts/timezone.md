@@ -215,10 +215,106 @@ const getBrowserLocale = (): string => {
 - [Panel Configuration](./plugin.md)
 - [Date & Time Units](../api/plugins.md#date-time-units)
 
-## Contributing
+## Configuration Examples (Planned)
 
-As the timezone feature evolves, contributions to this documentation are welcome. Please ensure any updates reflect the actual implementation and include code examples where appropriate.
+Once the multi-level timezone configuration is implemented, the configuration will look like this:
 
----
+### Global Configuration (Server)
 
-**Last Updated**: This documentation reflects the timezone behavior as of the current codebase state. The `TimeZoneProvider` feature mentioned in the changelog is planned but not yet fully implemented in the configuration system.
+```yaml
+# In perses configuration file
+frontend:
+  timezone: "UTC"  # Default timezone for the entire Perses instance
+```
+
+### Project-Level Configuration
+
+```json
+{
+  "kind": "Project",
+  "metadata": {
+    "name": "my-project"
+  },
+  "spec": {
+    "timezone": "America/New_York"
+  }
+}
+```
+
+### Dashboard-Level Configuration
+
+```json
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "my-dashboard",
+    "project": "my-project"
+  },
+  "spec": {
+    "timezone": "Europe/London",
+    "panels": [...]
+  }
+}
+```
+
+### Panel-Level Configuration
+
+```json
+{
+  "kind": "Panel",
+  "spec": {
+    "display": {
+      "name": "My Panel",
+      "timezone": "Asia/Tokyo"
+    },
+    "plugin": {...}
+  }
+}
+```
+
+### User Preference (UI)
+
+Users will be able to set their timezone preference in their profile settings, which will apply across all dashboards unless overridden.
+
+> **Note**: These configuration examples represent the planned implementation. The actual configuration structure may differ when implemented.
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Timestamps are displayed in an unexpected timezone
+
+**Solution**: Check the timezone resolution hierarchy:
+1. Verify if the panel has a timezone configured
+2. Check the dashboard timezone setting
+3. Review your user timezone preference
+4. Check the project default timezone
+5. Verify the global server configuration
+6. Confirm your browser's timezone detection
+
+**Issue**: Date format unit doesn't respect timezone setting
+
+**Solution**: Some date format units have fixed timezones:
+- `datetime-iso`, `date-iso`, `time-iso` always use UTC
+- `datetime-us`, `date-us`, `time-us` always use US Eastern time
+- Use `datetime-local`, `date-local`, or `time-local` for timezone-aware formatting
+
+## Guidelines
+
+### For Contributors
+
+When implementing timezone configuration at any level:
+
+1. **Follow the resolution hierarchy**: Ensure your implementation respects the precedence order defined in this document
+2. **Use IANA timezone identifiers**: Always use standard IANA timezone names (e.g., "America/New_York", not "EST")
+3. **Provide fallbacks**: Ensure graceful degradation when timezone configuration is invalid or missing
+4. **Add tests**: Include tests that verify timezone resolution across multiple configuration levels
+
+### For Users
+
+When configuring timezones:
+
+1. **Be explicit**: Clearly document which timezone is being used in dashboard descriptions
+2. **Consider your audience**: Use appropriate timezones for your users' locations
+3. **Test thoroughly**: Verify timezone behavior across different user profiles and configurations
+4. **Use consistent formats**: Choose date format units that match your timezone strategy
