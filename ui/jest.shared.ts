@@ -21,6 +21,7 @@ const swcrc = JSON.parse(readFileSync(swcrcPath, 'utf-8'));
 // Common Jest configuration shared across packages
 const config: Config.InitialOptions = {
   testEnvironment: 'jsdom',
+  setupFiles: [resolve(__dirname, './jest.setup.ts')],
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
     '^echarts/(.*)$': 'echarts',

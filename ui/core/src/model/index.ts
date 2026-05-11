@@ -19,6 +19,7 @@ export * from './definitions';
 export * from './display';
 export * from './ephemeraldashboard';
 export * from './external-variable';
+export * from './folder';
 export * from './http';
 export * from './http-proxy';
 export * from './kind';

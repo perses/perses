@@ -1,0 +1,136 @@
+[
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "demos",
+      "project": "perses",
+      "createdAt": "2026-03-10T10:51:50.895148219Z",
+      "updatedAt": "2026-03-18T00:00:00Z",
+      "version": 0
+    },
+    "spec": [
+      {
+        "kind": "Dashboard",
+        "name": "demo"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "benchmark"
+      },
+      {
+        "kind": "Folder",
+        "name": "infrastructure",
+        "spec": [
+          {
+            "kind": "Dashboard",
+            "name": "nodeexporter"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "infrastructure",
+      "project": "perses",
+      "createdAt": "2026-03-10T10:51:50.895148219Z",
+      "updatedAt": "2026-03-18T00:00:00Z",
+      "version": 0
+    },
+    "spec": [
+      {
+        "kind": "Dashboard",
+        "name": "nodeexporter"
+      }
+    ]
+  },
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "panels",
+      "project": "testing",
+      "createdAt": "2026-03-10T10:51:50.895148219Z",
+      "updatedAt": "2026-03-18T00:00:00Z",
+      "version": 0
+    },
+    "spec": [
+      {
+        "kind": "Dashboard",
+        "name": "panels"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "panelgroups"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "duplicatepanels"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "defaults"
+      }
+    ]
+  },
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "charts",
+      "project": "testing",
+      "createdAt": "2026-03-10T10:51:50.895148219Z",
+      "updatedAt": "2026-03-18T00:00:00Z",
+      "version": 0
+    },
+    "spec": [
+      {
+        "kind": "Dashboard",
+        "name": "timeserieschartpanel"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "timeserieschartlegends"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "gaugechartpanel"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "statchartpanel"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "table"
+      }
+    ]
+  },
+  {
+    "kind": "Folder",
+    "metadata": {
+      "name": "features",
+      "project": "testing",
+      "createdAt": "2026-03-10T10:51:50.895148219Z",
+      "updatedAt": "2026-03-18T00:00:00Z",
+      "version": 0
+    },
+    "spec": [
+      {
+        "kind": "Dashboard",
+        "name": "variables"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "editjson"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "markdownpanel"
+      },
+      {
+        "kind": "Dashboard",
+        "name": "tracing"
+      }
+    ]
+  }
+]

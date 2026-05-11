@@ -11,7 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './ephemeraldashboard';
-export * from './folder';
-export * from './project';
+import { ProjectMetadata } from './resource';
+
+export interface FolderResource {
+  kind: 'Folder';
+  metadata: ProjectMetadata;
+  spec: FolderSpec[];
+}
+
+export interface FolderSpec {
+  kind: 'Folder' | 'Dashboard';
+  name: string;
+  spec?: FolderSpec[];
+}

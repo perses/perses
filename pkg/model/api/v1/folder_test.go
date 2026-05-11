@@ -28,19 +28,6 @@ func TestUnmarshalFolderError(t *testing.T) {
 		err   error
 	}{
 		{
-			title: "spec cannot be empty",
-			jason: `
-{
-  "kind": "Folder",
-  "metadata": {
-    "name": "test",
-    "project": "perses"
-  }
-}
-`,
-			err: fmt.Errorf("spec cannot be empty"),
-		},
-		{
 			title: "multiple dashboard references",
 			jason: `
 
@@ -94,10 +81,36 @@ func TestUnmarshalFolderError(t *testing.T) {
 `,
 			err: fmt.Errorf("when kind is equal to \"Dashboard\", then spec must be empty"),
 		},
-		{
-			title: "folder must have a list of specFolder",
-			jason: `
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := Folder{}
+			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
+		})
+	}
+}
 
+func TestUnmarshalFolderSuccess(t *testing.T) {
+	testSuite := []struct {
+		title string
+		jason string
+	}{
+		{
+			title: "empty folder is allowed",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": []
+}
+`,
+		},
+		{
+			title: "folder with empty sub-folder is allowed",
+			jason: `
 {
   "kind": "Folder",
   "metadata": {
@@ -106,19 +119,18 @@ func TestUnmarshalFolderError(t *testing.T) {
   },
   "spec": [
     {
-       "kind": "Folder",
-       "name": "mySubFolder"
+      "kind": "Folder",
+      "name": "emptySubFolder"
     }
   ]
 }
 `,
-			err: fmt.Errorf("when kind is equal to \"Folder\", then spec cannot be empty"),
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result := Folder{}
-			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
 		})
 	}
 }

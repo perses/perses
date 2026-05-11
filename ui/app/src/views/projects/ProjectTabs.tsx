@@ -32,7 +32,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
-import { CreateDashboardDialog } from '../../components/dialogs';
+import { CreateDashboardDialog, CreateFolderDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation, useDatasourceList } from '../../model/datasource-client';
@@ -87,6 +87,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
   const createVariableMutation = useCreateVariableMutation(projectName);
 
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
+  const [isCreateFolderDialogOpened, setCreateFolderDialogOpen] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
@@ -191,16 +192,28 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
     case dashboardsTabIndex:
       return (
         <>
-          <CRUDButton
-            action="create"
-            scope="Dashboard"
-            project={projectName}
-            variant="contained"
-            onClick={() => setCreateDashboardDialogOpened(true)}
-            {...props}
-          >
-            Add Dashboard
-          </CRUDButton>
+          <Box sx={{ gap: 1, display: 'flex' }}>
+            <CRUDButton
+              action="create"
+              scope="Folder"
+              project={projectName}
+              variant="contained"
+              onClick={() => setCreateFolderDialogOpen(true)}
+              {...props}
+            >
+              Add Folder
+            </CRUDButton>
+            <CRUDButton
+              action="create"
+              scope="Dashboard"
+              project={projectName}
+              variant="contained"
+              onClick={() => setCreateDashboardDialogOpened(true)}
+              {...props}
+            >
+              Add Dashboard
+            </CRUDButton>
+          </Box>
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
             projects={[{ kind: 'Project', metadata: { name: projectName }, spec: {} }]}
@@ -208,6 +221,11 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
             isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
+          />
+          <CreateFolderDialog
+            projectName={projectName}
+            open={isCreateFolderDialogOpened}
+            onClose={() => setCreateFolderDialogOpen(false)}
           />
         </>
       );

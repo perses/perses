@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard';
-export * from './ephemeraldashboard';
-export * from './folder';
-export * from './project';
+// jsdom does not implement structuredClone; polyfill it with the Node.js built-in.
+if (typeof globalThis.structuredClone === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const v8 = require('v8') as typeof import('v8');
+  globalThis.structuredClone = <T>(val: T): T => v8.deserialize(v8.serialize(val)) as T;
+}
+

@@ -15,8 +15,7 @@ import { Tooltip } from '@mui/material';
 import { Action, Scope } from '@perses-dev/core';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import { ReactElement } from 'react';
-import { useIsReadonly } from '../../context/Config';
-import { GlobalProject, useHasPermission } from '../../context/Authorization';
+import { CRUDAction } from './CRUDAction';
 
 interface CRUDGridActionsCellItemProps {
   icon: JSX.Element;
@@ -27,7 +26,7 @@ interface CRUDGridActionsCellItemProps {
   onClick: () => void;
 }
 
-/*
+/**
  * CRUDGridActionsCellItem is an alias of MUI GridActionsCellItem, that will add a Tooltip with a reason if the button need to be disabled.
  * If action, scope and project are provided, it will check if the user has the permission to execute the action.
  */
@@ -39,39 +38,20 @@ export function CRUDGridActionsCellItem({
   project,
   onClick,
 }: CRUDGridActionsCellItemProps): ReactElement {
-  const isReadonly = useIsReadonly();
-  const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
-
-  if (isReadonly) {
-    return (
-      <Tooltip title="Resource managed via code only" placement="top">
-        <span>
-          <GridActionsCellItem icon={icon} label={label} disabled />
-        </span>
-      </Tooltip>
-    );
-  }
-
-  if (!hasPermission && action && scope && project) {
-    const errorMessage =
-      project === GlobalProject
-        ? `Missing '${action}' global permission for '${scope}' kind`
-        : `Missing '${action}' permission in '${project}' project for '${scope}' kind`;
-
-    return (
-      <Tooltip title={errorMessage} placement="top">
-        <span>
-          <GridActionsCellItem icon={icon} label={label} disabled />
-        </span>
-      </Tooltip>
-    );
-  }
-
   return (
-    <Tooltip title={label} placement="top">
-      <span>
-        <GridActionsCellItem icon={icon} label={label} onClick={onClick} />
-      </span>
-    </Tooltip>
+    <CRUDAction
+      action={action}
+      scope={scope}
+      project={project}
+      render={(actionDisabled) =>
+        actionDisabled ? (
+          <GridActionsCellItem icon={icon} label={label} disabled />
+        ) : (
+          <Tooltip title={label} placement="top">
+            <GridActionsCellItem icon={icon} label={label} onClick={onClick} />
+          </Tooltip>
+        )
+      }
+    />
   );
 }
