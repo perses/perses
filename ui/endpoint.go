@@ -16,14 +16,13 @@ package ui
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"mime"
 	"net/http"
 	"net/http/httputil"
+	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -53,7 +52,6 @@ var (
 		"/profile",
 		"/delegated-auth-error",
 	}
-	capturingPluginName = regexp.MustCompile(`/plugins/([a-zA-Z0-9_-]+)/?.*`)
 )
 
 type frontend struct {
@@ -85,16 +83,20 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 func (f *frontend) servePluginFiles(c echo.Context) error {
 	// We are going to serve a plugin from a dev environment, let's set up the proxy to redirect the traffic.
 	req := c.Request()
-	res := c.Response()
-	pluginName := catchPluginName(req.URL.Path)
-	if len(pluginName) == 0 {
+
+	// Strip the apiPrefix so parsePluginPath sees a path starting with "/plugins/".
+	urlPath := req.URL.Path
+	if f.apiPrefix != "" {
+		urlPath = strings.TrimPrefix(urlPath, f.apiPrefix)
+	}
+
+	pluginName, pluginVersion, pluginRegistry, relPath, ok := parsePluginPath(urlPath)
+	if !ok {
 		logrus.Errorf("unable to find the plugin name in the URL path: %s", req.URL.Path)
 		return apiinterface.NotFoundError
 	}
-	// TODO: These hardcoded values should be replaced once the frontend is able to manage multiple registries and plugin versions.
-	// This suppose to update the plugin system first.
-	// These hardocded values are matching the default behavior of the plugin system and it helps to keep backward compatibility.
-	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName, pluginModel.LatestVersion, pluginModel.DefaultRegistry)
+	loaded, isLoaded := f.pluginService.GetLoadedPlugin(pluginName, pluginVersion, pluginRegistry)
+
 	if !isLoaded || !loaded.Module.Status.IsLoaded {
 		logrus.Errorf("unable to find the plugin %s", pluginName)
 		return apiinterface.NotFoundError
@@ -102,18 +104,24 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	devEnvironment := loaded.DevEnvironment
 	if devEnvironment == nil {
 		// In that case, we need to read the requested files from the file system.
-		// The First thing to do is to replace the URL path with the local path of the plugin.
-		localPath := strings.Replace(req.URL.Path, fmt.Sprintf("%s/plugins/%s", f.apiPrefix, pluginName), loaded.LocalPath, 1)
-		// Then we just need to rely on the echo router to serve the file.
+		// The first thing to do is to replace the URL path with the local path of the plugin.
+		localPath := filepath.Join(loaded.LocalPath, filepath.FromSlash(relPath))
 
-		// X-Content-Type-Options: nosniff is an HTTP response header that tells browsers: "Do not try to guess the content type — trust the Content-Type header I sent you."
-		// Without it, browsers perform "MIME sniffing". For example, a file served as text/plain could be sniffed as text/html and executed as HTML, which could open the door to XSS attacks.
-		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options
+		// Ensure the resolved path is contained within the plugin's directory
+		// to prevent path traversal attacks.
+		// loaded.LocalPath is cleaned separately because it comes from plugin config, not the URL.
+		cleanedPluginDir := filepath.Clean(loaded.LocalPath)
+		if localPath != cleanedPluginDir && !strings.HasPrefix(localPath, cleanedPluginDir+string(filepath.Separator)) {
+			logrus.Errorf("path traversal attempt detected: resolved path %s escapes plugin directory %s", localPath, loaded.LocalPath)
+			return apiinterface.BadRequestError
+		}
+
 		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		return c.File(localPath)
 	}
 	// Otherwise, it means we are in a dev environment, and we need to proxy the request to the dev server.
 	// When developing a plugin, you will be able to serve the files of the plugin using a dev server (with rsbuild).
+	res := c.Response()
 	var proxyErr error
 	reverseProxy := httputil.NewSingleHostReverseProxy(devEnvironment.URL.URL)
 	reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
@@ -250,10 +258,44 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 	return apiinterface.HandleError(err)
 }
 
-func catchPluginName(path string) string {
-	c := capturingPluginName.FindStringSubmatch(path)
-	if len(c) != 2 {
-		return ""
+// parsePluginPath parses a URL path of the form:
+//
+//	/plugins/<name>[~<version>[~<registry>]][/<relPath>]
+//
+// where <name> is the plugin name, <version> defaults to "latest", <registry> defaults to "perses.dev",
+// and <relPath> is the remaining file path after the identity segment.
+// The "~" character is used as a separator for embedding version and registry in a single URL segment.
+func parsePluginPath(urlPath string) (name, version, registry, relPath string, ok bool) {
+	urlPath = path.Clean(urlPath)
+	if !strings.HasPrefix(urlPath, "/plugins/") {
+		return "", "", "", "", false
 	}
-	return c[1]
+
+	trimmed := strings.TrimPrefix(urlPath, "/plugins/")
+	parts := strings.Split(trimmed, "/")
+	if len(parts) == 0 || parts[0] == "" {
+		return "", "", "", "", false
+	}
+
+	identitySegment := parts[0]
+
+	if len(parts) > 1 {
+		relPath = path.Join(parts[1:]...)
+	}
+
+	meta := strings.Split(identitySegment, "~")
+
+	name = meta[0]
+
+	version = pluginModel.LatestVersion
+	if len(meta) > 1 && meta[1] != "" {
+		version = meta[1]
+	}
+
+	registry = pluginModel.DefaultRegistry
+	if len(meta) > 2 && meta[2] != "" {
+		registry = meta[2]
+	}
+
+	return name, version, registry, relPath, true
 }
