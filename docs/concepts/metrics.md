@@ -172,7 +172,7 @@ scrape_configs:
 
 ### Monitoring Dashboard Usage
 
-Create a dashboard in Perses (or Grafana) to monitor your Perses instance:
+Create a dashboard in Perses to monitor your Perses instance:
 
 **Most Viewed Dashboards (Last 24h):**
 ```promql
