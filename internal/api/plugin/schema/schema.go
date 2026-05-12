@@ -54,14 +54,14 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 		if filepath.Ext(currentPath) != ".cue" {
 			return nil
 		}
-		if isModel, openFileErr := isPackageModel(currentPath); openFileErr != nil {
-			if openFileErr != nil {
-				return openFileErr
-			}
-			if !isModel {
-				return nil
-			}
+		isModel, openFileErr := isPackageModel(currentPath)
+		if openFileErr != nil {
+			return openFileErr
 		}
+		if !isModel {
+			return nil
+		}
+
 		currentDir, _ := filepath.Split(currentPath)
 		logrus.Tracef("Loading model package from %s", currentDir)
 		name, instance, schemaErr := LoadModelSchema(currentDir)
