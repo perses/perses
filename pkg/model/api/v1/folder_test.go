@@ -37,49 +37,54 @@ func TestUnmarshalFolderError(t *testing.T) {
     "name": "test",
     "project": "perses"
   },
-  "spec": [
-    {
-       "kind": "Dashboard",
-       "name": "myDashboard"
-    },
-    {
-      "kind": "Folder",
-      "name": "Test",
-      "spec": [
-        {
-          "kind": "Dashboard",
-          "name": "myDashboard"
-        }
-      ]
-    }
-  ]
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "myDashboard"
+      },
+      {
+        "kind": "Folder",
+        "name": "Test",
+        "items": [
+          {
+            "kind": "Dashboard",
+            "name": "myDashboard"
+          }
+        ]
+      }
+    ]
+  }
 }
 `,
 			err: fmt.Errorf("dashboard \"myDashboard\" is referenced multiple times in the folder \"test\""),
 		},
 		{
-			title: "dashboard cannot have a list of sub-folder",
+			title: "dashboard cannot have a list of sub-items",
 			jason: `
-
 {
   "kind": "Folder",
   "metadata": {
     "name": "test",
     "project": "perses"
   },
-  "spec": [
-    {
-       "kind": "Dashboard",
-       "name": "myDashboard",
-       "spec": [{
-         "kind": "Dashboard",
-         "name": "myDashboard"
-       }]
-    }
-  ]
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "myDashboard",
+        "items": [
+          {
+            "kind": "Dashboard",
+            "name": "myDashboard"
+          }
+        ]
+      }
+    ]
+  }
 }
 `,
-			err: fmt.Errorf("when kind is equal to \"Dashboard\", then spec must be empty"),
+			err: fmt.Errorf("when kind is equal to \"Dashboard\", then items must be empty"),
 		},
 	}
 	for _, test := range testSuite {
@@ -92,8 +97,9 @@ func TestUnmarshalFolderError(t *testing.T) {
 
 func TestUnmarshalFolderSuccess(t *testing.T) {
 	testSuite := []struct {
-		title string
-		jason string
+		title    string
+		jason    string
+		expected Folder
 	}{
 		{
 			title: "empty folder is allowed",
@@ -104,9 +110,14 @@ func TestUnmarshalFolderSuccess(t *testing.T) {
     "name": "test",
     "project": "perses"
   },
-  "spec": []
+  "spec": {}
 }
 `,
+			expected: Folder{
+				Kind:     KindFolder,
+				Metadata: ProjectMetadata{Metadata: Metadata{Name: "test"}, ProjectMetadataWrapper: ProjectMetadataWrapper{Project: "perses"}},
+				Spec:     FolderSpec{},
+			},
 		},
 		{
 			title: "folder with empty sub-folder is allowed",
@@ -117,20 +128,139 @@ func TestUnmarshalFolderSuccess(t *testing.T) {
     "name": "test",
     "project": "perses"
   },
-  "spec": [
-    {
-      "kind": "Folder",
-      "name": "emptySubFolder"
-    }
-  ]
+  "spec": {
+    "items": [
+      {
+        "kind": "Folder",
+        "name": "emptySubFolder"
+      }
+    ]
+  }
 }
 `,
+			expected: Folder{
+				Kind:     KindFolder,
+				Metadata: ProjectMetadata{Metadata: Metadata{Name: "test"}, ProjectMetadataWrapper: ProjectMetadataWrapper{Project: "perses"}},
+				Spec: FolderSpec{
+					Items: []FolderItem{
+						{Kind: KindFolder, Name: "emptySubFolder"},
+					},
+				},
+			},
+		},
+		{
+			title: "folder with display.name is unmarshalled correctly",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "display": {
+      "name": "My Pretty Folder"
+    },
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "myDashboard"
+      }
+    ]
+  }
+}
+`,
+			expected: Folder{
+				Kind:     KindFolder,
+				Metadata: ProjectMetadata{Metadata: Metadata{Name: "test"}, ProjectMetadataWrapper: ProjectMetadataWrapper{Project: "perses"}},
+				Spec: FolderSpec{
+					Display: &FolderDisplay{Name: "My Pretty Folder"},
+					Items: []FolderItem{
+						{Kind: KindDashboard, Name: "myDashboard"},
+					},
+				},
+			},
+		},
+		{
+			title: "folder with display.name and nested sub-folder",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "display": {
+      "name": "Top Level"
+    },
+    "items": [
+      {
+        "kind": "Folder",
+        "name": "child",
+        "items": [
+          {
+            "kind": "Dashboard",
+            "name": "dash1"
+          }
+        ]
+      }
+    ]
+  }
+}
+`,
+			expected: Folder{
+				Kind:     KindFolder,
+				Metadata: ProjectMetadata{Metadata: Metadata{Name: "test"}, ProjectMetadataWrapper: ProjectMetadataWrapper{Project: "perses"}},
+				Spec: FolderSpec{
+					Display: &FolderDisplay{Name: "Top Level"},
+					Items: []FolderItem{
+						{
+							Kind: KindFolder,
+							Name: "child",
+							Items: []FolderItem{
+								{Kind: KindDashboard, Name: "dash1"},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			title: "folder without display.name has nil display",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "myDashboard"
+      }
+    ]
+  }
+}
+`,
+			expected: Folder{
+				Kind:     KindFolder,
+				Metadata: ProjectMetadata{Metadata: Metadata{Name: "test"}, ProjectMetadataWrapper: ProjectMetadataWrapper{Project: "perses"}},
+				Spec: FolderSpec{
+					Items: []FolderItem{
+						{Kind: KindDashboard, Name: "myDashboard"},
+					},
+				},
+			},
 		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			result := Folder{}
 			assert.NoError(t, json.Unmarshal([]byte(test.jason), &result))
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }

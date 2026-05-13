@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { FolderResource, FolderSpec, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { FolderItem, FolderResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { editFolderDialogValidationSchema, EditFolderValidationType } from '../../validation';
@@ -32,7 +32,7 @@ export interface EditFolderDialogProps {
 }
 
 /**
- * Dialog used to edit a folder: rename it and reassign dashboards.
+ * Dialog used to edit a folder: rename it, set a display name, and reassign dashboards.
  * @param open Define if the dialog should be opened or not.
  * @param onClose Provides the function to close itself.
  * @param onSuccess Action to perform when user confirmed.
@@ -53,23 +53,23 @@ export const EditFolderDialog = ({
 
   const { folderToEdit, editingRoot } = useMemo(():
     | { folderToEdit: FolderResource; editingRoot: true }
-    | { folderToEdit: FolderSpec; editingRoot: false } => {
+    | { folderToEdit: FolderItem; editingRoot: false } => {
     const editingRoot = path.length === 0;
     if (editingRoot) {
       return { folderToEdit: structuredClone(folder), editingRoot };
     } else {
-      const subFolder = getSubFolderDeepCopy(folder.spec, path);
+      const subFolder = getSubFolderDeepCopy(folder.spec.items ?? [], path);
       return { folderToEdit: subFolder, editingRoot };
     }
   }, [folder, path]);
 
   const dashboardNamesInFolder: string[] = useMemo(() => {
-    return collectDashboards(folderToEdit.spec, false);
-  }, [folderToEdit.spec]);
+    return collectDashboards(editingRoot ? folderToEdit.spec.items : folderToEdit.items, false);
+  }, [editingRoot, folderToEdit]);
 
   const dashboardsInSiblingFolders: string[] = useMemo(
-    () => collectDashboards(folder.spec, true, (name) => !dashboardNamesInFolder.includes(name)),
-    [dashboardNamesInFolder, folder.spec]
+    () => collectDashboards(folder.spec.items, true, (name) => !dashboardNamesInFolder.includes(name)),
+    [dashboardNamesInFolder, folder.spec.items]
   );
 
   const options = useMemo(
@@ -88,24 +88,36 @@ export const EditFolderDialog = ({
         name,
         label: dashboards.get(name)?.displayName,
       })),
-      name: editingRoot ? folderToEdit.metadata.name : folderToEdit.name,
+      name: editingRoot ? getResourceDisplayName(folderToEdit) : folderToEdit.name,
     },
   });
   const { reset } = form;
 
   const processForm: SubmitHandler<EditFolderValidationType> = (data) => {
-    const nonDashboardSpecs = folderToEdit.spec?.filter((s) => s.kind !== 'Dashboard') ?? [];
-    const dashboardSpecs = data.selectedDashboards.map((option) => ({ kind: 'Dashboard' as const, name: option.name }));
-    const updatedSpec = [...nonDashboardSpecs, ...dashboardSpecs];
+    const dashboardItems = data.selectedDashboards.map((option) => ({ kind: 'Dashboard' as const, name: option.name }));
 
     let updatedFolder: FolderResource;
     if (editingRoot) {
-      folderToEdit.spec = updatedSpec;
-      updatedFolder = folderToEdit;
+      const nonDashboardItems = folderToEdit.spec.items?.filter((s) => s.kind !== 'Dashboard') ?? [];
+      updatedFolder = {
+        ...folderToEdit,
+        spec: {
+          display: { name: data.name },
+          items: [...nonDashboardItems, ...dashboardItems],
+        },
+      };
     } else {
-      const updatedNode: FolderSpec = { ...folderToEdit, name: data.name, spec: updatedSpec };
+      const nonDashboardItems = (folderToEdit.items ?? []).filter((s) => s.kind !== 'Dashboard');
+      const updatedNode: FolderItem = {
+        ...folderToEdit,
+        name: data.name,
+        items: [...nonDashboardItems, ...dashboardItems],
+      };
       const rootFolderClone = { ...folder };
-      rootFolderClone.spec = replaceSubFolder(rootFolderClone.spec, path, updatedNode);
+      rootFolderClone.spec = {
+        ...rootFolderClone.spec,
+        items: replaceSubFolder(rootFolderClone.spec.items ?? [], path, updatedNode),
+      };
       updatedFolder = rootFolderClone;
     }
 
@@ -134,19 +146,17 @@ export const EditFolderDialog = ({
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Stack spacing={2}>
-              {!editingRoot && (
-                <Controller
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      label="Name"
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      {...field}
-                    />
-                  )}
-                  name="name"
-                />
-              )}
+              <Controller
+                render={({ field, fieldState }) => (
+                  <TextField
+                    label="Name"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    {...field}
+                  />
+                )}
+                name="name"
+              />
               <Controller
                 control={form.control}
                 name="selectedDashboards"

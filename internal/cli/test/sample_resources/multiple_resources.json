@@ -4,12 +4,14 @@
     "metadata": {
       "name": "ff15"
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "node_exporter"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "node_exporter"
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -17,12 +19,14 @@
       "name": "aoe4",
       "project": "game"
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "node_exporter"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "node_exporter"
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -30,12 +34,14 @@
       "name": "foo",
       "project": "perses"
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "node_exporter"
-      }
-    ]   
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "node_exporter"
+        }
+      ]
+    }
   },
   {
     "kind": "Project",
