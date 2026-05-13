@@ -143,7 +143,7 @@ func (o *option) setDashboards() error {
 func (o *option) computeEphemeralDashboardName(dashboardName string) string {
 	var result strings.Builder
 	if len(o.prefix) > 0 {
-		result.WriteString(fmt.Sprintf("%s-", strings.ReplaceAll(strings.ToLower(o.prefix), " ", "-")))
+		_, _ = fmt.Fprintf(&result, "%s-", strings.ReplaceAll(strings.ToLower(o.prefix), " ", "-"))
 	}
 	result.WriteString(dashboardName)
 	return result.String()

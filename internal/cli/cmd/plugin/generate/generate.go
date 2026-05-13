@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	plugin "github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/output"
 	apiv1 "github.com/perses/perses/pkg/model/api/v1/plugin"
@@ -37,7 +37,8 @@ type generateOptions struct {
 	persesCMD.Option
 	pluginModuleName  string
 	pluginModuleOrg   string
-	pluginType        string
+	pluginType        apiv1.Kind
+	rawPluginType     string
 	pluginName        string
 	pluginPascalName  string
 	pluginDisplayName string
@@ -70,15 +71,19 @@ func (o *generateOptions) Complete(args []string) error {
 		o.outputDir = "."
 	}
 
+	if len(o.rawPluginType) > 0 {
+		o.pluginType = apiv1.Kind(o.rawPluginType)
+	}
+
 	return nil
 }
 
-var availablePluginTypes = []string{
-	"Datasource",
-	"TimeSeriesQuery",
-	"Variable",
-	"Panel",
-	"Explore",
+var availablePluginTypes = []apiv1.Kind{
+	apiv1.KindDatasource,
+	apiv1.KindTimeSeriesQuery,
+	apiv1.KindVariable,
+	apiv1.KindPanel,
+	apiv1.KindExplore,
 }
 
 func (o *generateOptions) Validate() error {
@@ -98,7 +103,7 @@ func (o *generateOptions) Validate() error {
 	}
 
 	if !slices.Contains(availablePluginTypes, o.pluginType) {
-		return fmt.Errorf("plugin.type %q is not valid, possible values are: %s", o.pluginType, strings.Join(availablePluginTypes, ", "))
+		return fmt.Errorf("plugin.type %q is not valid, possible values are: %s", o.pluginType, availablePluginTypes)
 	}
 
 	o.pluginName = GetKebabCase(o.pluginName)
@@ -118,35 +123,35 @@ func replacePaths(outputRelativePath string, o *generateOptions) string {
 	return outputRelativePath
 }
 
-func getPluginPath(pluginName string, pluginType string) (string, error) {
+func getPluginPath(pluginName string, pluginType apiv1.Kind) (string, error) {
 	pluginSlug := GetKebabCase(pluginName)
 	switch pluginType {
-	case "Datasource":
+	case apiv1.KindDatasource:
 		return path.Join("src", "datasources", pluginSlug), nil
-	case "TimeSeriesQuery":
+	case apiv1.KindTimeSeriesQuery:
 		return path.Join("src", "queries", pluginSlug), nil
-	case "Variable":
+	case apiv1.KindVariable:
 		return path.Join("src", "variables", pluginSlug), nil
-	case "Panel":
+	case apiv1.KindPanel:
 		return path.Join("src", "panels", pluginSlug), nil
-	case "Explore":
+	case apiv1.KindExplore:
 		return path.Join("src", "explore", pluginSlug), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
 }
 
-func getTemplatePath(pluginType string) (string, error) {
+func getTemplatePath(pluginType apiv1.Kind) (string, error) {
 	switch pluginType {
-	case "Datasource":
+	case apiv1.KindDatasource:
 		return path.Join("templates", "datasource"), nil
-	case "TimeSeriesQuery":
+	case apiv1.KindTimeSeriesQuery:
 		return path.Join("templates", "query", "timeseriesquery"), nil
-	case "Variable":
+	case apiv1.KindVariable:
 		return path.Join("templates", "variable"), nil
-	case "Panel":
+	case apiv1.KindPanel:
 		return path.Join("templates", "panel"), nil
-	case "Explore":
+	case apiv1.KindExplore:
 		return path.Join("templates", "explore"), nil
 	}
 
@@ -194,7 +199,7 @@ func (o *generateOptions) Execute() error {
 		if GetKebabCase(p.Spec.Name) != GetKebabCase(o.pluginName) {
 			persesPlugins = append(persesPlugins, toGeneratedPlugin(p))
 
-			pluginPath, errPath := getPluginPath(p.Spec.Name, string(p.Kind))
+			pluginPath, errPath := getPluginPath(p.Spec.Name, p.Kind)
 			if errPath != nil {
 				return fmt.Errorf("could not get existing plugin path %q: %w", o.pluginName, errPath)
 			}
@@ -207,7 +212,7 @@ func (o *generateOptions) Execute() error {
 	}
 
 	persesPlugins = append(persesPlugins, toGeneratedPlugin(apiv1.Plugin{
-		Kind: apiv1.Kind(o.pluginType),
+		Kind: o.pluginType,
 		Spec: apiv1.Spec{
 			Display: &common.Display{
 				Name: o.pluginDisplayName,
@@ -355,7 +360,7 @@ A single plugin can be generated at a time.
 	cmd.Flags().StringVar(&o.pluginModuleOrg, "module.org", "", "The organization name on which the plugin module will be created, useful for publising the plugin. This is required only when the module does not exist, ignored otherwise.")
 	cmd.Flags().StringVar(&o.pluginName, "plugin.name", "", "The plugin name. A pascal case and kebab case variants will be generated inside the templates. If a plugin with the same name already exists, it will be overwritten.")
 	cmd.Flags().StringVar(&o.pluginDisplayName, "plugin.display-name", "", "The more human name of the plugin to be used in the UI. If not provided, the plugin name will be used.")
-	cmd.Flags().StringVar(&o.pluginType, "plugin.type", "", "The plugin type can be one of 'Datasource', 'TimeSeriesQuery', 'Variable', 'Panel', or 'Explore'.")
+	cmd.Flags().StringVar(&o.rawPluginType, "plugin.type", "", "The plugin type can be one of 'Datasource', 'TimeSeriesQuery', 'Variable', 'Panel', or 'Explore'.")
 
 	return cmd
 }

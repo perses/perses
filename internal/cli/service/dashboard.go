@@ -61,8 +61,8 @@ func (d *dashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (d *dashboard) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"PROJECT",
-		"AGE",
+		nameColumnHeader,
+		projectColumnHeader,
+		ageColumnHeader,
 	}
 }

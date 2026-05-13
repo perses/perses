@@ -15,7 +15,7 @@ import { Box, Chip, Tooltip } from '@mui/material';
 import { GridColDef, GridFilterInputValue, GridFilterItem, GridFilterOperator } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DispatchWithPromise } from '@perses-dev/core';
-import { intlFormatDistance } from 'date-fns';
+import { formatAbsoluteTime, formatRelativeTime } from '../utils/dashboardTableUtils';
 
 export const PROJECT_COL_DEF: GridColDef = {
   field: 'project',
@@ -67,8 +67,8 @@ export const CREATED_AT_COL_DEF: GridColDef = {
   minWidth: 125,
   valueGetter: (_, row) => new Date(row.createdAt),
   renderCell: (params) => (
-    <Tooltip title={params.value.toUTCString()} placement="top">
-      <span>{intlFormatDistance(params.value, new Date())}</span>
+    <Tooltip title={formatAbsoluteTime(params.value)} placement="top">
+      <span>{formatRelativeTime(params.value)}</span>
     </Tooltip>
   ),
 };
@@ -81,8 +81,8 @@ export const UPDATED_AT_COL_DEF: GridColDef = {
   minWidth: 125,
   valueGetter: (_, row) => new Date(row.updatedAt),
   renderCell: (params) => (
-    <Tooltip title={params.value.toUTCString()} placement="top">
-      <span>{intlFormatDistance(params.value, new Date())}</span>
+    <Tooltip title={formatAbsoluteTime(params.value)} placement="top">
+      <span>{formatRelativeTime(params.value)}</span>
     </Tooltip>
   ),
 };
@@ -97,7 +97,7 @@ export const VIEWED_AT_COL_DEF: GridColDef = {
   renderCell: (params) =>
     params.value ? (
       <Tooltip title={params.value.toUTCString()} placement="top">
-        <span>{intlFormatDistance(params.value, new Date())}</span>
+        <span>{formatRelativeTime(params.value)}</span>
       </Tooltip>
     ) : (
       <span>—</span>

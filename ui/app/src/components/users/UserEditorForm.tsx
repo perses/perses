@@ -13,9 +13,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';

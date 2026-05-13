@@ -187,7 +187,7 @@ func (c *Changelog) GenerateChangelog() string {
 func generateChangelog(clog *Changelog, version string) string {
 	now := time.Now()
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("## %s / %s\n\n", version, now.Format("2006-01-02")))
+	_, _ = fmt.Fprintf(&buffer, "## %s / %s\n\n", version, now.Format("2006-01-02"))
 	buffer.WriteString(clog.GenerateChangelog())
 	if len(clog.Unknown) > 0 {
 		buffer.WriteString("\n[//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>\n\n")

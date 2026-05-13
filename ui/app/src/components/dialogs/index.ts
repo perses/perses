@@ -11,9 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './AddFolderDialog';
 export * from './CreateDashboardDialog';
+export * from './CreateFolderDialog';
 export * from './CreateProjectDialog';
 export * from './DeleteResourceDialog';
 export * from './EditDashboardDialog';
+export * from './EditFolderDialog';
 export * from './RenameResourceDialog';
 export * from './UpdateEphemeralDashboardDialog';

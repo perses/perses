@@ -102,8 +102,8 @@ func (g *globalRole) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (g *globalRole) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"AGE",
+		nameColumnHeader,
+		ageColumnHeader,
 		"ACTIONS",
 		"SCOPE",
 	}

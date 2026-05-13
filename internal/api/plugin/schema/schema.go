@@ -64,10 +64,38 @@ func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error)
 
 		currentDir, _ := filepath.Split(currentPath)
 		logrus.Tracef("Loading model package from %s", currentDir)
+		// Name is the lowest type level of the plugin. For example, for the Prometheus module, it can return PrometheusTimeseriesQuery.
+		// It is called "name" because in the plugin definition located in package.json, this value is present in the `name` field.
+		// Example - extract from package.json:
+		//       {
+		//        "kind": "TimeSeriesQuery",
+		//        "spec": {
+		//          "display": {
+		//            "name": "Prometheus Time Series Query"
+		//          },
+		//          "name": "PrometheusTimeSeriesQuery"
+		//        }
+		//      },
+		//
+		// Besides in the plugin schema, "PrometheusTimeSeriesQuery" is the value of the `kind` field
+		// Example - extract from query.cue:
+		//
+		// kind: "PrometheusTimeSeriesQuery"
+		// spec: close({
+		//	ds.#selector
+		//	query:             strings.MinRunes(1)
+		//	seriesNameFormat?: string
+		//	minStep?:          =~ds.#durationRegex | =~common.#variableSyntaxRegex
+		//	resolution?:       number
+		// })
+		//
+		// #variableSyntaxRegex: "^\\$\\w+$"
 		name, instance, schemaErr := LoadModelSchema(currentDir)
 		if schemaErr != nil {
 			return schemaErr
 		}
+		// getPlugin is extracting the plugin definition in package.json.
+		// So here, with the previous example, pl.kind is equal to `TimeSeriesQuery`
 		pl := getPlugin(moduleSpec.Plugins, name)
 		if pl == nil {
 			return fmt.Errorf("unable to find the plugin with the associated schema with kind %s", name)
@@ -366,6 +394,9 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	}
 	for _, schema := range schemas {
 		if schema.Kind.IsQuery() {
+			// Here the information about the "super type" of the query (aka TimeSeriesQuery for PrometheusTimeSeriesQuery) disappears.
+			// This is a known validation gap yet to be solved: because of this you can currently wrongly pass the validation
+			// with e.g the super type `LogQuery` & the plugin implementation `PrometheusTimeSeriesQuery`.
 			s.queries.Add(schema.Name, module.Metadata, schema.Instance)
 		} else {
 			switch schema.Kind {

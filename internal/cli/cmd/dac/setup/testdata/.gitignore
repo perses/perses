@@ -1,3 +1,4 @@
 example.cue
+main.go
 # folder used to store the results of the `percli dac build` command
 built

@@ -13,7 +13,7 @@
 
 import { resolve } from 'node:path';
 import rspack from '@rspack/core';
-import refreshPlugin from '@rspack/plugin-react-refresh';
+import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
 import TerserPlugin from 'terser-webpack-plugin';
 import { defineConfig } from '@rspack/cli';
 
@@ -77,14 +77,15 @@ export default defineConfig({
     extensions: ['...', '.ts', '.tsx', '.jsx'],
     alias: isSharedDev ? { ...sharedAliases, ...localAliases, ...singletonAliases } : {},
   },
-  experiments: {
-    css: true,
-  },
   optimization: {
     minimizer: [new TerserPlugin(), new rspack.LightningCssMinimizerRspackPlugin()],
   },
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        type: 'css',
+      },
       {
         test: /\.(ttf|eot|woff|woff2)$/,
         type: 'asset/resource',
@@ -157,14 +158,14 @@ export default defineConfig({
       publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
     new rspack.CopyRspackPlugin({
-        patterns: [
-            {
-                from: 'src/locales',
-                to: 'locales',
-                noErrorOnMissing: true,
-            },
-        ],
-    }),    
-    isDev ? new refreshPlugin() : null,
+      patterns: [
+        {
+          from: 'src/locales',
+          to: 'locales',
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
+    isDev ? new ReactRefreshRspackPlugin() : null,
   ].filter(Boolean),
 });

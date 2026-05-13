@@ -80,10 +80,10 @@ func (r *roleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (r *roleBinding) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"PROJECT",
+		nameColumnHeader,
+		projectColumnHeader,
 		"ROLE",
-		"AGE",
+		ageColumnHeader,
 		"SUBJECT KIND",
 		"SUBJECT NAME",
 	}

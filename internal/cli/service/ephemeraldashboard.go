@@ -64,9 +64,9 @@ func (e *ephemeralDashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (e *ephemeralDashboard) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"PROJECT",
-		"AGE",
+		nameColumnHeader,
+		projectColumnHeader,
+		ageColumnHeader,
 		"REMAINING TTL",
 	}
 }

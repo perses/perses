@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDacSetupCMD(t *testing.T) {
@@ -39,16 +40,16 @@ func TestDacSetupCMD(t *testing.T) {
 
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "Nominal case with CUE",
-			Args:            []string{"--version", "v0.51.0-beta.1"},
-			IsErrorExpected: false,
-			ExpectedMessage: "DaC setup for cue finished successfully\n",
+			Title:                "Nominal case with CUE",
+			Args:                 []string{"--version", "v0.51.0"},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: "DaC setup for cue finished successfully\n",
 		},
 		{
-			Title:           "Nominal case with Go",
-			Args:            []string{"--language", "go", "--version", "v0.50.0"},
-			IsErrorExpected: false,
-			ExpectedMessage: "DaC setup for go finished successfully\n",
+			Title:                "Nominal case with Go",
+			Args:                 []string{"--language", "go", "--version", "v0.50.0"},
+			IsErrorExpected:      false,
+			ExpectedRegexMessage: "DaC setup for go finished successfully\n",
 		},
 		{
 			Title:           "no version provided & no server",
@@ -66,8 +67,13 @@ func TestDacSetupCMD(t *testing.T) {
 			Title:           "too-old Perses version submitted",
 			Args:            []string{"--version", "0.42.1"},
 			IsErrorExpected: true,
-			ExpectedMessage: "version should be at least v0.51.0-beta.0 or higher",
+			ExpectedMessage: "version should be at least v0.51.0 or higher",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
+
+	_, err = os.Stat("example.cue")
+	require.NoError(t, err)
+	_, err = os.Stat("main.go")
+	require.NoError(t, err)
 }

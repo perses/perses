@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonProps, Tooltip } from '@mui/material';
-import { Action, Scope } from '@perses-dev/core';
+import { Button, ButtonProps } from '@mui/material';
 import { ReactElement } from 'react';
-import { useIsReadonly } from '../../context/Config';
-import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { CRUDAction, CRUDActionProps } from './CRUDAction';
 
-export interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
-  action?: Action;
-  scope?: Scope;
-  project?: string;
-}
+export interface CRUDButtonProps extends Omit<ButtonProps, 'action'>, Omit<CRUDActionProps, 'render'> {}
 
-/*
+/**
  * CRUDButton is an alias of MUI Button, that will add a Tooltip with a reason if the button need to be disabled.
  * If action, scope and project are provided, it will check if the user has the permission to execute the action.
  */
@@ -39,66 +33,26 @@ export function CRUDButton({
   onClick,
   ...props
 }: CRUDButtonProps): ReactElement {
-  const isReadonly = useIsReadonly();
   const isMobileSize = useIsMobileSize();
-  const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
-
-  if (isReadonly) {
-    return (
-      <Tooltip title="Resource managed via code only" placement="top">
-        <span>
-          <Button
-            variant={variant}
-            color={color}
-            size="small"
-            sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
-            onClick={onClick}
-            disabled
-            {...props}
-          >
-            {children}
-          </Button>
-        </span>
-      </Tooltip>
-    );
-  }
-
-  if (!hasPermission && action && scope && project) {
-    const errorMessage =
-      project === GlobalProject
-        ? `Missing '${action}' global permission for '${scope}' kind`
-        : `Missing '${action}' permission in '${project}' project for '${scope}' kind`;
-
-    return (
-      <Tooltip title={errorMessage} placement="top">
-        <span>
-          <Button
-            variant={variant}
-            color={color}
-            size="small"
-            sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
-            onClick={onClick}
-            disabled
-            {...props}
-          >
-            {children}
-          </Button>
-        </span>
-      </Tooltip>
-    );
-  }
 
   return (
-    <Button
-      variant={variant}
-      color={color}
-      size="small"
-      sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
-      onClick={onClick}
-      disabled={disabled}
-      {...props}
-    >
-      {children}
-    </Button>
+    <CRUDAction
+      action={action}
+      scope={scope}
+      project={project}
+      render={(actionDisabled) => (
+        <Button
+          variant={variant}
+          color={color}
+          size="small"
+          sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
+          onClick={onClick}
+          disabled={actionDisabled || disabled}
+          {...props}
+        >
+          {children}
+        </Button>
+      )}
+    />
   );
 }

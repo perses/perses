@@ -42,7 +42,7 @@ func RunInDirectory(directory string, name string, args ...string) error {
 }
 
 func Create(name string, args ...string) *exec.Cmd {
-	cmd := exec.Command(name, args...)
+	cmd := exec.Command(name, args...) //nolint:gosec
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd

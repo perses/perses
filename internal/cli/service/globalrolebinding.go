@@ -79,8 +79,8 @@ func (g *globalRoleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 func (g *globalRoleBinding) GetColumHeader() []string {
 	return []string{
-		"NAME",
-		"AGE",
+		nameColumnHeader,
+		ageColumnHeader,
 		"ROLE",
 		"SUBJECT KIND",
 		"SUBJECT NAME",

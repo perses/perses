@@ -60,9 +60,6 @@ func (f *FolderSpec) validate() error {
 	if f.Kind != KindDashboard && f.Kind != KindFolder {
 		return fmt.Errorf("kind can only be %q or %q but not %q", KindDashboard, KindFolder, f.Kind)
 	}
-	if f.Kind == KindFolder && len(f.Spec) == 0 {
-		return fmt.Errorf("when kind is equal to %q, then spec cannot be empty", KindFolder)
-	}
 	if f.Kind == KindDashboard && len(f.Spec) > 0 {
 		return fmt.Errorf("when kind is equal to %q, then spec must be empty", KindDashboard)
 	}
@@ -116,9 +113,6 @@ func (f *Folder) UnmarshalYAML(unmarshal func(any) error) error {
 func (f *Folder) validate() error {
 	if f.Kind != KindFolder {
 		return fmt.Errorf("invalid kind: %q for a Folder type", f.Kind)
-	}
-	if len(f.Spec) == 0 {
-		return fmt.Errorf("spec cannot be empty")
 	}
 	// Verify there is only one reference to a dashboard.
 	// We have to limit it because otherwise in the UI we won't be able to determinate from which folder the dashboard is coming from.

@@ -13,13 +13,12 @@
 
 import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
 import React, { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Button,
   Box,
   BoxProps,
+  Button,
   Divider,
   FormControl,
   FormControlLabel,
@@ -36,7 +35,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { FormEditorProps } from '../form-drawers';

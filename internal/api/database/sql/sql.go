@@ -297,7 +297,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	result := reflect.ValueOf(slice)
 	// to avoid any miss usage when using this method, slice should be a pointer to a slice.
 	// first check if slice is a pointer
-	if typeParameter.Kind() != reflect.Ptr {
+	if typeParameter.Kind() != reflect.Pointer {
 		return fmt.Errorf("slice in parameter is not a pointer to a slice but a %q", typeParameter.Kind())
 	}
 
@@ -328,7 +328,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 		}
 		// first create a pointer with the accurate type
 		var value reflect.Value
-		if typeParameter.Elem().Kind() != reflect.Ptr {
+		if typeParameter.Elem().Kind() != reflect.Pointer {
 			value = reflect.New(typeParameter.Elem())
 		} else {
 			// in case it's a pointer, then we should create a pointer of the struct and not a pointer of a pointer
@@ -339,7 +339,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 		if unmarshalErr := json.Unmarshal([]byte(rowJSONDoc), obj); unmarshalErr != nil {
 			return unmarshalErr
 		}
-		if typeParameter.Elem().Kind() != reflect.Ptr {
+		if typeParameter.Elem().Kind() != reflect.Pointer {
 			// In case the type of the slice element is not a pointer,
 			// we should return the value of the pointer created in the previous step.
 			sliceElem.Set(reflect.Append(sliceElem, value.Elem()))

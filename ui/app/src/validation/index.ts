@@ -13,4 +13,5 @@
 
 export * from './dashboard';
 export * from './ephemeraldashboard';
+export * from './folder';
 export * from './project';

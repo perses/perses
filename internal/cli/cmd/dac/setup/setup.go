@@ -32,14 +32,31 @@ import (
 const (
 	cueLanguage      = "cue"
 	goLanguage       = "go"
-	cueSchemasPath   = "cue/"
-	minVersionForGo  = "v0.44.0"        // Release that introduced the Go SDK
-	minVersionForCue = "v0.51.0-beta.0" // Release that brought the move to CUE's new modules -> TODO change to stable v0.51.0 once released
+	minVersionForGo  = "v0.44.0" // Release that introduced the Go SDK
+	minVersionForCue = "v0.51.0" // Release that brought the move to CUE's new modules
 	exampleCUEDac    = `package mydac
 
 import "github.com/perses/perses/cue/dac-utils/dashboard@v0"
 
 dashboard & { #name: "myDashboardAsCode", #project: "myProject" }`
+	exampleGoDac = `package main
+
+import (
+	"flag"
+
+	"github.com/perses/perses/go-sdk"
+	"github.com/perses/perses/go-sdk/dashboard"
+)
+
+func main() {
+	flag.Parse()
+
+	exec := sdk.NewExec()
+	builder, buildErr := dashboard.New("myDashboardAsCode",
+		dashboard.ProjectName("myProject"),
+	)
+	exec.BuildDashboard(builder, buildErr)
+}`
 )
 
 func addOutputDirToGitignore() error {
@@ -196,8 +213,16 @@ func (o *option) Execute() error {
 		} else if err != nil {
 			return err
 		}
+		exampleFilePath := "main.go"
+		if err := os.WriteFile(exampleFilePath, []byte(exampleGoDac), 0600); err != nil {
+			return fmt.Errorf("failed to create main.go: %w", err)
+		}
+		logrus.Debugf("main.go file created successfully")
 		// Resolve the sdk dependency
-		if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
+		cmd := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)) // nolint: gosec
+		cmd.Stdout = o.writer
+		cmd.Stderr = o.errWriter
+		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
 		}
 	} else {
