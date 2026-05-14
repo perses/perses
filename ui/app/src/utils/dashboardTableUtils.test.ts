@@ -249,6 +249,7 @@ describe('buildTableRows – flat folders', () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]!.kind).toBe('Folder');
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.children).toHaveLength(2);
   });
 
@@ -261,6 +262,7 @@ describe('buildTableRows – flat folders', () => {
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.path).toEqual([]);
   });
 
@@ -296,6 +298,7 @@ describe('buildTableRows – flat folders', () => {
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.displayName).toBe('my-folder');
   });
 
@@ -398,6 +401,7 @@ describe('buildTableRows – flat folders', () => {
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('f');
     expect(rows[0]!.version).toBe(7);
   });
 });
@@ -435,9 +439,11 @@ describe('buildTableRows – nested folders', () => {
 
     expect(rows).toHaveLength(1);
     const outerRow = rows[0]!;
+    expect(outerRow.name).toBe('outer');
     expect(outerRow.children).toHaveLength(1);
     const innerRow = outerRow.children![0]!;
     expect(innerRow.kind).toBe('Folder');
+    expect(innerRow.name).toBe('inner');
     expect(innerRow.children).toHaveLength(1);
     expect(innerRow.children![0]!.name).toBe('dash-a');
   });
