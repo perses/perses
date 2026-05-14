@@ -60,6 +60,48 @@ func TestUnmarshalFolderError(t *testing.T) {
 			err: fmt.Errorf("dashboard \"myDashboard\" is referenced multiple times in the folder \"test\""),
 		},
 		{
+			title: "dashboard item with empty name",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": ""
+      }
+    ]
+  }
+}
+`,
+			err: fmt.Errorf("name is required"),
+		},
+		{
+			title: "folder item with empty name",
+			jason: `
+{
+  "kind": "Folder",
+  "metadata": {
+    "name": "test",
+    "project": "perses"
+  },
+  "spec": {
+    "items": [
+      {
+        "kind": "Folder",
+        "name": ""
+      }
+    ]
+  }
+}
+`,
+			err: fmt.Errorf("name is required"),
+		},
+		{
 			title: "dashboard cannot have a list of sub-items",
 			jason: `
 {

@@ -65,6 +65,9 @@ func (f *FolderItem) validate() error {
 	if f.Kind != KindDashboard && f.Kind != KindFolder {
 		return fmt.Errorf("kind can only be %q or %q but not %q", KindDashboard, KindFolder, f.Kind)
 	}
+	if len(f.Name) == 0 {
+		return fmt.Errorf("name is required")
+	}
 	if f.Kind == KindDashboard && len(f.Items) > 0 {
 		return fmt.Errorf("when kind is equal to %q, then items must be empty", KindDashboard)
 	}
