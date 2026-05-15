@@ -23,6 +23,7 @@ import (
 	"net/http/httputil"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -36,6 +37,8 @@ import (
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
+
+var pluginPathRegex = regexp.MustCompile(`^/plugins/[^/]+`)
 
 const prefixPathPlaceholder = "PREFIX_PATH_PLACEHOLDER"
 
@@ -107,15 +110,9 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		// The first thing to do is to replace the URL path with the local path of the plugin.
 		localPath := filepath.Join(loaded.LocalPath, filepath.FromSlash(relPath))
 
-		// Ensure the resolved path is contained within the plugin's directory
-		// to prevent path traversal attacks.
-		// loaded.LocalPath is cleaned separately because it comes from plugin config, not the URL.
-		cleanedPluginDir := filepath.Clean(loaded.LocalPath)
-		if localPath != cleanedPluginDir && !strings.HasPrefix(localPath, cleanedPluginDir+string(filepath.Separator)) {
-			logrus.Errorf("path traversal attempt detected: resolved path %s escapes plugin directory %s", localPath, loaded.LocalPath)
-			return apiinterface.BadRequestError
-		}
-
+		// X-Content-Type-Options: nosniff is an HTTP response header that tells browsers: "Do not try to guess the content type — trust the Content-Type header I sent you."
+		// Without it, browsers perform "MIME sniffing". For example, a file served as text/plain could be sniffed as text/html and executed as HTML, which could open the door to XSS attacks.
+		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options
 		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		return c.File(localPath)
 	}
@@ -123,7 +120,10 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 	// When developing a plugin, you will be able to serve the files of the plugin using a dev server (with rsbuild).
 	res := c.Response()
 	var proxyErr error
+	req.URL.Path = pluginPathRegex.ReplaceAllString(req.URL.Path, "")
+
 	reverseProxy := httputil.NewSingleHostReverseProxy(devEnvironment.URL.URL)
+
 	reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
 		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", devEnvironment.URL.String(), err)
 		proxyErr = err
