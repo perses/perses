@@ -11,7 +11,7 @@ deps: {
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v:       "v0.1.2"
+		v:       "v0.2.0-beta.2"
 		default: true
 	}
 }

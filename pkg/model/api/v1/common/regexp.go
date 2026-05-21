@@ -19,6 +19,8 @@ import (
 )
 
 // Regexp encapsulates a regexp.Regexp and makes it JSON/YAML marshalable.
+// DEPRECATED
+// Use github.com/perses/spec/go/common.Regexp instead
 type Regexp struct {
 	*regexp.Regexp
 	original string
@@ -26,6 +28,8 @@ type Regexp struct {
 
 // NewRegexp creates a new anchored Regexp and returns an error if the
 // passed-in regular expression does not compile.
+// DEPRECATED
+// Use github.com/perses/spec/go/common.Regexp instead
 func NewRegexp(s string) (Regexp, error) {
 	regex, err := regexp.Compile(s)
 	return Regexp{
@@ -35,6 +39,8 @@ func NewRegexp(s string) (Regexp, error) {
 }
 
 // MustNewRegexp works like NewRegexp, but panics if the regular expression does not compile.
+// DEPRECATED
+// Use github.com/perses/spec/go/common.Regexp instead
 func MustNewRegexp(s string) Regexp {
 	re, err := NewRegexp(s)
 	if err != nil {

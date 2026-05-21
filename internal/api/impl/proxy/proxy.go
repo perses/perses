@@ -45,11 +45,12 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource"
-	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
+	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -614,10 +615,12 @@ func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
 	}
 
 	if driverConfig != nil {
+		readTimeout, _ := common.ParseDuration(string(driverConfig.ReadTimeout))
+		writeTimeout, _ := common.ParseDuration(string(driverConfig.WriteTimeout))
 		mysqlConfig.Params = driverConfig.Params
 		mysqlConfig.MaxAllowedPacket = driverConfig.MaxAllowedPacket
-		mysqlConfig.ReadTimeout = driverConfig.ReadTimeout
-		mysqlConfig.WriteTimeout = driverConfig.WriteTimeout
+		mysqlConfig.ReadTimeout = time.Duration(readTimeout)
+		mysqlConfig.WriteTimeout = time.Duration(writeTimeout)
 	}
 
 	if tlsConfig != nil {
@@ -673,8 +676,8 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 		query.Set("prepareThreshold", fmt.Sprintf("%d", *s.config.Postgres.PrepareThreshold))
 	}
 
-	if s.config.Postgres.ConnectTimeout != 0 {
-		query.Set("connect_timeout", s.config.Postgres.ConnectTimeout.String())
+	if len(s.config.Postgres.ConnectTimeout) > 0 && s.config.Postgres.ConnectTimeout != "0" {
+		query.Set("connect_timeout", string(s.config.Postgres.ConnectTimeout))
 	}
 
 	if s.config.Postgres.SSLMode != "" {

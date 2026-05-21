@@ -18,7 +18,7 @@ import (
 	"time"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 )
 
 type Option func(dashboard *Builder) error

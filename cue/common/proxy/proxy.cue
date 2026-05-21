@@ -15,12 +15,12 @@
 // Import statements like:
 // `import "github.com/perses/perses/cue/common/proxy"`
 // should be replaced by:
-// `import "github.com/perses/shared/cue/common/proxy"`
+// `import "github.com/perses/spec/cue/datasource/proxy"`
 
 package proxy
 
 import (
-	sharedProxy "github.com/perses/shared/cue/common/proxy"
+	specProxy "github.com/perses/spec/cue/datasource/proxy"
 )
 
 // This file is here to ensure retrocompatibility for eventual CUE schemas
@@ -28,4 +28,4 @@ import (
 // migration of common CUE schemas to the shared repository - that happened
 // with https://github.com/perses/shared/pull/13.
 
-sharedProxy
+specProxy
