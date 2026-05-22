@@ -22,7 +22,7 @@ test.describe('homeView', () => {
     await homePage.navigateToProject('perses');
 
     const projectPage = new AppProjectPage(page);
-    await projectPage.navigateToDashboard('perses', 'Demo');
+    await projectPage.navigateToDashboard('perses', ['demos', 'Demo']);
   });
 
   test('can navigate to an important dashboard', async ({ page }) => {

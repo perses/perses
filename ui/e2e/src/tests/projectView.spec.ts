@@ -22,8 +22,20 @@ test.describe('ProjectView', () => {
     await projectPage.goto(project);
 
     const navigationPromise = page.waitForNavigation();
-    await projectPage.navigateToDashboard(project, 'Demo');
+    await projectPage.navigateToDashboard(project, ['demos', 'Demo']);
     await navigationPromise;
+  });
+
+  test('can create a folder with a dashboard that already belongs to another folder', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.createFolder('my_folder', ['Demo']);
+
+    const listRoot = page.locator('#main-dashboard-list');
+    await expect(listRoot.getByText('my_folder')).toBeVisible();
+
+    await projectPage.clickDashboardItemInList(['my_folder', 'Demo'], 'main-dashboard-list');
   });
 
   test('can change current tab', async ({ page }) => {
