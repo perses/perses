@@ -40,6 +40,7 @@ type Panel struct {
 	Type         string            `json:"type"`
 	Title        string            `json:"title"`
 	Description  string            `json:"description"`
+	Repeat       string            `json:"repeat"`
 	Collapsed    bool              `json:"collapsed"`
 	Panels       []Panel           `json:"panels"`
 	GridPosition GridPosition      `json:"gridPos"`
@@ -64,6 +65,9 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	}
 	if desc, ok := tmp["description"]; ok {
 		_ = json.Unmarshal(desc, &panel.Description)
+	}
+	if repeat, ok := tmp["repeat"]; ok {
+		_ = json.Unmarshal(repeat, &panel.Repeat)
 	}
 	if collapsed, ok := tmp["collapsed"]; ok {
 		_ = json.Unmarshal(collapsed, &panel.Collapsed)
