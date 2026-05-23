@@ -1,0 +1,95 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "row-repeat-test",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Row Repeat Dashboard"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "value1",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "SomeVariable",
+            "spec": {
+              "values": [
+                "value1",
+                "value2"
+              ]
+            }
+          },
+          "name": "myVar"
+        }
+      }
+    ],
+    "panels": {
+      "0_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Panel in repeated row",
+            "description": "A panel inside the repeated row"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "iwas": "timeseries",
+              "expr": "up"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "ExoticQuery",
+                  "spec": {
+                    "query": "up"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Repeated Row",
+            "collapse": {
+              "open": true
+            }
+          },
+          "repeatVariable": "myVar",
+          "items": [
+            {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0_0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}
