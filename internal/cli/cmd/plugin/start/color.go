@@ -17,8 +17,8 @@ import (
 	"math"
 	"math/rand/v2"
 
+	"github.com/crazy3lf/colorconv"
 	"github.com/fatih/color"
-	"github.com/redbo/gohsv"
 )
 
 const goldenRatioConjugate = 0.618033988749895
@@ -32,7 +32,7 @@ func generateColors(n int) []*color.Color {
 	for range n {
 		h := rand.Float64() + goldenRatioConjugate // nolint: gosec // We don't need a secure random number here.
 		h = math.Mod(h, 1.0)                       // Normalize the value to keep only the decimal value.
-		r, g, b := gohsv.HSVtoRGB(h*360, 0.5, 0.95)
+		r, g, b, _ := colorconv.HSVToRGB(h*360, 0.5, 0.95)
 		result = append(result, color.RGB(int(r), int(g), int(b)))
 	}
 	return result

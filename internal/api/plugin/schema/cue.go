@@ -87,12 +87,16 @@ func LoadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) 
 }
 
 func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType string, pluginName string) error {
+	version := "unknown"
+	if plugin.Metadata != nil && plugin.Metadata.Version != "" {
+		version = plugin.Metadata.Version
+	}
 	if schema == nil {
-		return fmt.Errorf("schema not found for plugin %s", plugin.Kind)
+		return fmt.Errorf("schema not found for plugin %s with version %s", plugin.Kind, version)
 	}
 	pluginData, err := plugin.JSONMarshal()
 	if err != nil {
-		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
+		logrus.WithError(err).Debugf("unable to marshal the plugin %q with version %s", plugin.Kind, version)
 		return err
 	}
 	ctx := cuecontext.New()
