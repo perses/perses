@@ -3,10 +3,12 @@
   "metadata": {
     "name": "ff15"
   },
-  "spec": [
-    {
-      "kind": "Dashboard",
-      "name": "node_exporter"
-    }
-  ]
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "node_exporter"
+      }
+    ]
+  }
 }

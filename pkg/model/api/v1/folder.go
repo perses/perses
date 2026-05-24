@@ -20,19 +20,24 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
-type FolderSpec struct {
+type FolderDisplay struct {
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+}
+
+// FolderItem is a single node in the folder tree. Kind is either "Dashboard" or "Folder".
+// When Kind is "Folder", Items holds the nested children.
+type FolderItem struct {
 	// Kind can only have two values: `Dashboard` or `Folder`
 	Kind Kind `json:"kind" yaml:"kind"`
 	// Name is the reference to the dashboard when `Kind` is equal to `Dashboard`.
-	// When `Kind` is equal to `Folder`, then it's just the name of the folder
-	Name string `json:"name" yaml:"name"`
-	// Spec must only be set when 'Kind' is equal to 'Folder'.
-	Spec []FolderSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
+	// When `Kind` is equal to `Folder`, then it's just the name of the folder.
+	Name  string       `json:"name" yaml:"name"`
+	Items []FolderItem `json:"items,omitempty" yaml:"items,omitempty"`
 }
 
-func (f *FolderSpec) UnmarshalJSON(data []byte) error {
-	var tmp FolderSpec
-	type plain FolderSpec
+func (f *FolderItem) UnmarshalJSON(data []byte) error {
+	var tmp FolderItem
+	type plain FolderItem
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -43,9 +48,9 @@ func (f *FolderSpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (f *FolderSpec) UnmarshalYAML(unmarshal func(any) error) error {
-	var tmp FolderSpec
-	type plain FolderSpec
+func (f *FolderItem) UnmarshalYAML(unmarshal func(any) error) error {
+	var tmp FolderItem
+	type plain FolderItem
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -56,20 +61,28 @@ func (f *FolderSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
-func (f *FolderSpec) validate() error {
+func (f *FolderItem) validate() error {
 	if f.Kind != KindDashboard && f.Kind != KindFolder {
 		return fmt.Errorf("kind can only be %q or %q but not %q", KindDashboard, KindFolder, f.Kind)
 	}
-	if f.Kind == KindDashboard && len(f.Spec) > 0 {
-		return fmt.Errorf("when kind is equal to %q, then spec must be empty", KindDashboard)
+	if len(f.Name) == 0 {
+		return fmt.Errorf("name is required")
+	}
+	if f.Kind == KindDashboard && len(f.Items) > 0 {
+		return fmt.Errorf("when kind is equal to %q, then items must be empty", KindDashboard)
 	}
 	return nil
+}
+
+type FolderSpec struct {
+	Display *FolderDisplay `json:"display,omitempty" yaml:"display,omitempty"`
+	Items   []FolderItem   `json:"items,omitempty" yaml:"items,omitempty"`
 }
 
 type Folder struct {
 	Kind     Kind            `json:"kind" yaml:"kind"`
 	Metadata ProjectMetadata `json:"metadata" yaml:"metadata"`
-	Spec     []FolderSpec    `json:"spec" yaml:"spec"`
+	Spec     FolderSpec      `json:"spec" yaml:"spec"`
 }
 
 func (f *Folder) GetMetadata() modelAPI.Metadata {
@@ -120,12 +133,12 @@ func (f *Folder) validate() error {
 	// Because the number of folders you can describe in this document is not limited but the URL is limited, you won't be able to put the folder tree in the URL.
 	//
 	// So if the dashboard is referenced in multiple sub-folder, the UI won't be able to know from which folder the dashboard is coming from.
-	folderList := make([]FolderSpec, len(f.Spec))
-	copy(folderList, f.Spec)
+	itemList := make([]FolderItem, len(f.Spec.Items))
+	copy(itemList, f.Spec.Items)
 	dashboardSet := make(map[string]bool)
-	for len(folderList) > 0 {
-		var current FolderSpec
-		current, folderList = folderList[0], folderList[1:]
+	for len(itemList) > 0 {
+		var current FolderItem
+		current, itemList = itemList[0], itemList[1:]
 		if current.Kind == KindDashboard {
 			if !dashboardSet[current.Name] {
 				dashboardSet[current.Name] = true
@@ -133,7 +146,7 @@ func (f *Folder) validate() error {
 				return fmt.Errorf("dashboard %q is referenced multiple times in the folder %q", current.Name, f.Metadata.Name)
 			}
 		} else {
-			folderList = append(folderList, current.Spec...)
+			itemList = append(itemList, current.Items...)
 		}
 	}
 	return nil

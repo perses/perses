@@ -4,6 +4,17 @@
 
 package v1
 
-#FolderSpec: _
+#FolderDisplay: {
+	name?: string @go(Name)
+}
+
+// FolderItem is a single node in the folder tree. Kind is either "Dashboard" or "Folder".
+// When Kind is "Folder", Items holds the nested children.
+#FolderItem: _
+
+#FolderSpec: {
+	display?: null | #FolderDisplay @go(Display,*FolderDisplay)
+	items?: [...#FolderItem] @go(Items,[]FolderItem)
+}
 
 #Folder: _

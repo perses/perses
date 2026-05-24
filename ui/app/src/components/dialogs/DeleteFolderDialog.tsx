@@ -46,7 +46,7 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
         deleteRoot: true,
       };
     } else {
-      const subFolder = getSubFolderRef(folder.spec, path);
+      const subFolder = getSubFolderRef(folder.spec.items ?? [], path);
       return {
         name: subFolder.name,
         displayName: subFolder.name,
@@ -75,10 +75,10 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
         onError: onError,
       });
     } else {
-      const specs = withoutSubFolder(folder.spec, path);
+      const updatedItems = withoutSubFolder(folder.spec.items ?? [], path);
       updateFolderMutation.mutate(
         {
-          spec: specs,
+          spec: { ...folder.spec, items: updatedItems },
           metadata: folder.metadata,
           kind: 'Folder',
         },
