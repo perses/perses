@@ -110,4 +110,3 @@ Perses plans to support a multi-level timezone configuration system. The followi
 
 - [Dashboard Configuration](./dashboard.md)
 - [Panel Configuration](./plugin.md)
-- [Date & Time Units](../api/plugins.md#date-time-units)
