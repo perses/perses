@@ -329,8 +329,8 @@ Potential future improvements to metrics and instrumentation:
 
 ## Related Documentation
 
-- [Configuration](../configuration/configuration.md) - Server configuration options
-- [Dashboard](./dashboard.md) - Dashboard concepts and structure
-- [Project](./project.md) - Project organization
-- [Authorization](./authorization.md) - Permission model
+- [Configuration](./configuration/configuration.md) - Server configuration options
+- [Dashboard](./concepts/dashboard.md) - Dashboard concepts and structure
+- [Project](./concepts/project.md) - Project organization
+- [Authorization](./concepts/authorization.md) - Permission model
 - [Prometheus Documentation](https://prometheus.io/docs/) - Prometheus metrics and querying
