@@ -19,13 +19,11 @@ import {
   getResourceDisplayName,
   getResourceExtendedDisplayName,
 } from '@perses-dev/core';
-import { Card, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
-import { ListProperties } from '../list';
 import {
   AddFolderDialog,
   CreateDashboardDialog,
@@ -36,7 +34,6 @@ import {
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
 import { useNavHistory } from '../../context/DashboardNavHistory';
 import DashboardTreeList from './DashboardTreeList';
-import { DashboardFlatList } from './DashboardFlatList';
 
 type editDashboardAction = { type: 'editDashboard'; target: DashboardResource };
 type duplicateDashboardAction = { type: 'duplicateDashboard'; target: DashboardResource };
@@ -76,33 +73,22 @@ export interface DashboardListRow {
   viewedAt?: string;
 }
 
-export interface DashboardListProperties extends ListProperties {
+export interface DashboardListProperties {
   dashboardList: DashboardResource[];
   folderList: FolderResource[];
+  isLoading: boolean;
   isEphemeralDashboardEnabled: boolean;
-  viewMode?: 'flat' | 'tree';
-  initialState?: GridInitialStateCommunity;
 }
 
 /**
- * Display dashboards in a table style.
+ * Display dashboards in a tree style.
  * @param props.dashboardList Contains all dashboards to display
- * @param props.hideToolbar Hide toolbar if enabled
- * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
-  const {
-    dashboardList,
-    folderList,
-    hideToolbar,
-    isLoading,
-    initialState,
-    isEphemeralDashboardEnabled,
-    viewMode = 'flat',
-  } = props;
+  const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
   const navHistory = useNavHistory();
@@ -248,31 +234,17 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
 
   return (
     <Stack width="100%">
-      {viewMode === 'tree' ? (
-        <DashboardTreeList
-          folderList={folderList}
-          dashboardsMap={dashboardsMap}
-          handleRenameButtonClick={handleRenameButtonClick}
-          handleDuplicateButtonClick={handleDuplicateButtonClick}
-          handleDeleteButtonClick={handleDeleteButtonClick}
-          handleEditFolderButtonClick={handleEditFolderButtonClick}
-          handleAddFolderButtonClick={handleAddFolderButtonClick}
-          handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
-          isLoading={isLoading}
-        />
-      ) : (
-        <Card>
-          <DashboardFlatList
-            dashboardList={dashboardsRows}
-            handleRenameButtonClick={handleRenameButtonClick}
-            handleDuplicateButtonClick={handleDuplicateButtonClick}
-            handleDeleteButtonClick={handleDeleteButtonClick}
-            initialState={initialState}
-            hideToolbar={hideToolbar}
-            isLoading={isLoading}
-          />
-        </Card>
-      )}
+      <DashboardTreeList
+        folderList={folderList}
+        dashboardsMap={dashboardsMap}
+        handleRenameButtonClick={handleRenameButtonClick}
+        handleDuplicateButtonClick={handleDuplicateButtonClick}
+        handleDeleteButtonClick={handleDeleteButtonClick}
+        handleEditFolderButtonClick={handleEditFolderButtonClick}
+        handleAddFolderButtonClick={handleAddFolderButtonClick}
+        handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
+        isLoading={isLoading}
+      />
       {activeDialog.type === 'editDashboard' && (
         <EditDashboardDialog
           open={activeDialog.type === 'editDashboard'}

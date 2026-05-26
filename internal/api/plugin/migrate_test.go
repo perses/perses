@@ -69,6 +69,11 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "panel_with_links_grafana_dashboard.json",
 			expectedPersesDashboardFile: "panel_with_links_perses_dashboard.json",
 		},
+		{
+			title:                       "dashboard with repeated row should set repeatVariable on grid layout",
+			inputGrafanaDashboardFile:   "row_repeat_grafana_dashboard.json",
+			expectedPersesDashboardFile: "row_repeat_perses_dashboard.json",
+		},
 	}
 
 	pl := LoadTestPlugins()
