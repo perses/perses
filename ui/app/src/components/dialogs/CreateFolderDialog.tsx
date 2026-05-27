@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
 import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { FolderResource, FolderSpec, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { FolderItem, FolderResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateFolderValidationType, useFolderValidationSchema } from '../../validation';
@@ -63,7 +63,7 @@ export const CreateFolderDialog = ({
   const { reset } = form;
 
   const processForm: SubmitHandler<CreateFolderValidationType> = (data) => {
-    const dashboardSpecs: FolderSpec[] = data.selectedDashboards.map((option) => ({
+    const dashboardItems: FolderItem[] = data.selectedDashboards.map((option) => ({
       kind: 'Dashboard' as const,
       name: option.name,
     }));
@@ -73,7 +73,10 @@ export const CreateFolderDialog = ({
         name: generateMetadataName(data.name),
         project: projectName,
       },
-      spec: dashboardSpecs,
+      spec: {
+        display: { name: data.name },
+        items: dashboardItems,
+      },
     };
 
     createFolderMutation.mutate(newFolder, {

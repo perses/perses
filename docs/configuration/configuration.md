@@ -840,6 +840,18 @@ archive_paths:
 # Allow use of plugins in dev mode.
 enable_dev: <bool> | default = false # Optional
 
+# The list of plugin or module activated. Leave empty if you want to activate all plugins found in the `path` directory.
+# If not empty, only the plugins whose name is in this list will be activated.
+# The name can be the name of the plugin or the name of the module. For example, you can put `Prometheus` to enable the Prometheus module that contains query, variables and datasource plugin.
+# Use either Enabled or Disabled. Both can not be used at the same time.
+enabled:
+    - <string> # Optional
+# The list of plugin or module deactivated. Leave empty if you want to activate all plugins found in the `path` directory.
+# If not empty, the plugins whose name is in this list will be deactivated.
+# The name can be the name of the plugin or the name of the module. For example, you can put `Prometheus` to disable the Prometheus module that contains query, variables and datasource plugin.
+# Use either Enabled or Disabled. Both can not be used at the same time.
+disabled:
+  - <string> # Optional
 ```
 
 ### Dashboard config

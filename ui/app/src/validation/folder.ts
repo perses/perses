@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { FolderSpec } from '@perses-dev/core';
+import { FolderItem } from '@perses-dev/core';
 import { useFolderList } from '../model/folder-client';
 import { getSubFolderRef } from '../utils/folderUtils';
 import { generateMetadataName } from '../utils/metadata';
@@ -97,12 +97,12 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
  * Returns a validation schema for the Add Sub-folder dialog.
  * Extends {@link editFolderDialogValidationSchema} with a sibling name uniqueness check at the level identified by `path`.
  *
- * @param spec - Root spec array of the {@link FolderResource} being edited.
+ * @param items - Root items array of the {@link FolderResource} being edited.
  * @param path - Ordered folder names leading to the parent of the new sub-folder. Pass `[]` for root level.
  */
-export function useAddFolderValidationSchema(spec: FolderSpec[], path: string[]): z.ZodSchema {
+export function useAddFolderValidationSchema(items: FolderItem[], path: string[]): z.ZodSchema {
   return useMemo(() => {
-    const siblings = path.length === 0 ? spec : (getSubFolderRef(spec, path).spec ?? []);
+    const siblings = path.length === 0 ? items : (getSubFolderRef(items, path).items ?? []);
     const siblingFolderNames = siblings.filter((s) => s.kind === 'Folder').map((s) => s.name.toLowerCase());
 
     return editFolderDialogValidationSchema.refine(
@@ -112,5 +112,5 @@ export function useAddFolderValidationSchema(spec: FolderSpec[], path: string[])
         path: ['name'],
       })
     );
-  }, [spec, path]);
+  }, [items, path]);
 }

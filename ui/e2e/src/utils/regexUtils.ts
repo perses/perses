@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './animationUtils';
-export * from './canvasUtils';
-export * from './formUtils';
-export * from './regexUtils';
-export * from './timeUtils';
+export function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

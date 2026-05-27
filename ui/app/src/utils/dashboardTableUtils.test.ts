@@ -228,10 +228,12 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'my-folder', project: 'p', version: 1 },
-      spec: [
-        { kind: 'Dashboard', name: 'dash-a' },
-        { kind: 'Dashboard', name: 'dash-b' },
-      ],
+      spec: {
+        items: [
+          { kind: 'Dashboard', name: 'dash-a' },
+          { kind: 'Dashboard', name: 'dash-b' },
+        ],
+      },
     };
     const map = new Map([
       [
@@ -247,6 +249,7 @@ describe('buildTableRows – flat folders', () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]!.kind).toBe('Folder');
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.children).toHaveLength(2);
   });
 
@@ -254,11 +257,12 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'my-folder', project: 'p', version: 1 },
-      spec: [],
+      spec: { items: [] },
     };
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.path).toEqual([]);
   });
 
@@ -276,7 +280,7 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'my-folder', project: 'p', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'dash-a' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'dash-a' }] },
     };
     const map = new Map([['p', new Map([['dash-a', dash]])]]);
 
@@ -289,11 +293,12 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'my-folder', project: 'p', version: 1 },
-      spec: [],
+      spec: { items: [] },
     };
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('my-folder');
     expect(rows[0]!.displayName).toBe('my-folder');
   });
 
@@ -321,7 +326,7 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'in-folder' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'in-folder' }] },
     };
     const map = new Map([
       [
@@ -353,7 +358,7 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'dash-a' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'dash-a' }] },
     };
     const map = new Map([['p', new Map([['dash-a', dash]])]]);
 
@@ -367,7 +372,7 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'missing' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'missing' }] },
     };
 
     const rows = buildTableRows([folder], new Map());
@@ -379,7 +384,7 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'empty-folder', project: 'p', version: 1 },
-      spec: [],
+      spec: { items: [] },
     };
 
     const rows = buildTableRows([folder], new Map());
@@ -391,11 +396,12 @@ describe('buildTableRows – flat folders', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 7 },
-      spec: [],
+      spec: { items: [] },
     };
 
     const rows = buildTableRows([folder], new Map());
 
+    expect(rows[0]!.name).toBe('f');
     expect(rows[0]!.version).toBe(7);
   });
 });
@@ -417,13 +423,15 @@ describe('buildTableRows – nested folders', () => {
     const outer: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'outer', project: 'p', version: 1 },
-      spec: [
-        {
-          kind: 'Folder',
-          name: 'inner',
-          spec: [{ kind: 'Dashboard', name: 'dash-a' }],
-        },
-      ],
+      spec: {
+        items: [
+          {
+            kind: 'Folder',
+            name: 'inner',
+            items: [{ kind: 'Dashboard', name: 'dash-a' }],
+          },
+        ],
+      },
     };
     const map = new Map([['p', new Map([['dash-a', dash]])]]);
 
@@ -431,9 +439,11 @@ describe('buildTableRows – nested folders', () => {
 
     expect(rows).toHaveLength(1);
     const outerRow = rows[0]!;
+    expect(outerRow.name).toBe('outer');
     expect(outerRow.children).toHaveLength(1);
     const innerRow = outerRow.children![0]!;
     expect(innerRow.kind).toBe('Folder');
+    expect(innerRow.name).toBe('inner');
     expect(innerRow.children).toHaveLength(1);
     expect(innerRow.children![0]!.name).toBe('dash-a');
   });
@@ -452,19 +462,21 @@ describe('buildTableRows – nested folders', () => {
     const top: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'top', project: 'p', version: 1 },
-      spec: [
-        {
-          kind: 'Folder',
-          name: 'mid',
-          spec: [
-            {
-              kind: 'Folder',
-              name: 'deep',
-              spec: [{ kind: 'Dashboard', name: 'dash-a' }],
-            },
-          ],
-        },
-      ],
+      spec: {
+        items: [
+          {
+            kind: 'Folder',
+            name: 'mid',
+            items: [
+              {
+                kind: 'Folder',
+                name: 'deep',
+                items: [{ kind: 'Dashboard', name: 'dash-a' }],
+              },
+            ],
+          },
+        ],
+      },
     };
     const map = new Map([['p', new Map([['dash-a', dash]])]]);
 
@@ -474,11 +486,11 @@ describe('buildTableRows – nested folders', () => {
     expect(dashRow.path).toEqual(['top', 'mid', 'deep']);
   });
 
-  it('a nested folder with no spec produces undefined children', () => {
+  it('a nested folder with no items produces undefined children', () => {
     const outer: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'outer', project: 'p', version: 1 },
-      spec: [{ kind: 'Folder', name: 'inner' }],
+      spec: { items: [{ kind: 'Folder', name: 'inner' }] },
     };
 
     const rows = buildTableRows([outer], new Map());
@@ -486,11 +498,11 @@ describe('buildTableRows – nested folders', () => {
     expect(rows[0]!.children![0]!.children).toBeUndefined();
   });
 
-  it('throws on an unknown kind in folder spec', () => {
+  it('throws on an unknown kind in folder items', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 1 },
-      spec: [{ kind: 'Unknown', name: 'x' }] as unknown as FolderResource['spec'],
+      spec: { items: [{ kind: 'Unknown', name: 'x' }] as unknown as FolderResource['spec']['items'] },
     };
 
     expect(() => buildTableRows([folder], new Map())).toThrow('Unknown kind: Unknown');
@@ -522,12 +534,12 @@ describe('buildTableRows – multiple projects', () => {
     const folderA: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f-a', project: 'proj-a', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'dash-1' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'dash-1' }] },
     };
     const folderB: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f-b', project: 'proj-b', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'dash-2' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'dash-2' }] },
     };
     const map = new Map([
       ['proj-a', new Map([['dash-1', dashA]])],
@@ -567,7 +579,7 @@ describe('buildTableRows – multiple projects', () => {
     const folderA: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f-a', project: 'proj-a', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'same-name' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'same-name' }] },
     };
     const map = new Map([
       ['proj-a', new Map([['same-name', dashA]])],
@@ -587,7 +599,7 @@ describe('buildTableRows – multiple projects', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'ghost-project', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'anything' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'anything' }] },
     };
 
     const rows = buildTableRows([folder], new Map());
@@ -611,7 +623,7 @@ describe('buildTableRows – idempotency', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'p', version: 1 },
-      spec: [{ kind: 'Dashboard', name: 'dash-a' }],
+      spec: { items: [{ kind: 'Dashboard', name: 'dash-a' }] },
     };
     const map = new Map([['p', new Map([['dash-a', dash]])]]);
 

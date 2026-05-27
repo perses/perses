@@ -12,12 +12,9 @@
 // limitations under the License.
 
 import { Page } from '@playwright/test';
+import { escapeRegExp } from '../utils';
 
 const recentDashboardListId = 'recent-dashboard-list';
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /**
  * The Perses App home page.

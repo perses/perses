@@ -302,6 +302,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 						Open: !panel.Collapsed,
 					},
 				},
+				RepeatVariable: panel.Repeat,
 			}
 			grid := dashboard.Layout{
 				Kind: dashboard.KindGridLayout,

@@ -4,10 +4,12 @@
     "name": "myfolder",
     "project": "newproject"
   },
-  "spec": [
-    {
-      "kind": "Dashboard",
-      "name": "node_exporter"
-    }
-  ]
+  "spec": {
+    "items": [
+      {
+        "kind": "Dashboard",
+        "name": "node_exporter"
+      }
+    ]
+  }
 }
