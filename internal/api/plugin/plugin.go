@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -83,6 +84,8 @@ func New(cfg config.Plugin) Plugin {
 			folders:      cfg.ArchivePaths,
 			targetFolder: cfg.Path,
 		},
+		enabled:   cfg.Enabled,
+		disabled:  cfg.Disabled,
 		sch:       schema.New(),
 		mig:       migrate.New(),
 		loaded:    make(tree.Tree[*Loaded]),
@@ -97,6 +100,10 @@ type pluginFile struct {
 	loaded tree.Tree[*Loaded]
 	// devLoaded is a map that contains all the loaded plugin modules in development mode.
 	devLoaded tree.Tree[*Loaded]
+	// enabled is the list of plugin or module that will be kept when loading them from the file system. If empty, all plugins/modules will be loaded.
+	enabled []string
+	// disabled is the list of plugin or module that will be dropped when loading them from the file system. If empty, all plugins/modules will be loaded.
+	disabled []string
 	// archibal is the archive service used only to extract the plugin files from the archive.
 	archibal *arch
 	// sch is the service used to load and provide the schema of the plugin.
@@ -220,6 +227,11 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 	}
 	pluginModule.Spec = npmPackageData.Perses
 
+	if p.filter(pluginModule) {
+		logrus.Debugf("plugin module %q has been filtered", manifest.Name)
+		return nil
+	}
+
 	if IsSchemaRequired(pluginModule.Spec) {
 		if pluginSchemaLoadErr := p.sch.Load(pluginPath, *pluginModule); pluginSchemaLoadErr != nil {
 			pluginStatus.IsLoaded = false
@@ -259,4 +271,39 @@ func (p *pluginFile) storeLoadedList() error {
 		return marshalErr
 	}
 	return os.WriteFile(filepath.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
+}
+
+// filter is filtering the module and/or the plugins based on the configuration.
+// The boolean returned is true if the complete module is filtered, false if only some plugins are filtered or if no filtering is applied.
+func (p *pluginFile) filter(pluginModule *v1.PluginModule) bool {
+	if len(p.enabled) > 0 {
+		// if the module or the plugin is in the activated list, we keep it, otherwise we filter it out
+		if slices.Contains(p.enabled, strings.ToLower(pluginModule.Metadata.Name)) {
+			return false
+		}
+		var newSpec []plugin.Plugin
+		for _, plg := range pluginModule.Spec.Plugins {
+			if slices.Contains(p.enabled, strings.ToLower(plg.Spec.Name)) {
+				newSpec = append(newSpec, plg)
+			}
+		}
+		pluginModule.Spec.Plugins = newSpec
+		// if the length of the new spec is 0, it means that all the plugins of the module are filtered out, so we can filter out the complete module
+		return len(newSpec) == 0
+	}
+	if len(p.disabled) > 0 {
+		// we can then check if the module or plugins are dropped. Logic is the opposite of the activation, if the module or the plugin is in the deactivated list, we filter it out, otherwise we keep it.
+		if slices.Contains(p.disabled, strings.ToLower(pluginModule.Metadata.Name)) {
+			return true
+		}
+		var newSpec []plugin.Plugin
+		for _, plg := range pluginModule.Spec.Plugins {
+			if !slices.Contains(p.disabled, strings.ToLower(plg.Spec.Name)) {
+				newSpec = append(newSpec, plg)
+			}
+		}
+		pluginModule.Spec.Plugins = newSpec
+		return len(newSpec) == 0
+	}
+	return false
 }

@@ -2,15 +2,16 @@ module dac-test
 
 go 1.26.2
 
-replace github.com/perses/perses => ../../ // Use current version
+// TODO Remove this comment when plugins/prometheus is updated with new proxy definition
+// plugins/prometheus cannot compile anymore since the definition in the SDK change.
+// replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.0
+	github.com/perses/perses v0.53.1
 	github.com/perses/plugins/prometheus v0.57.1
 	github.com/perses/plugins/staticlistvariable v0.8.1
 	github.com/perses/plugins/table v0.11.2
 	github.com/perses/plugins/timeserieschart v0.12.1
-	github.com/perses/spec v0.1.2
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -34,9 +35,9 @@ require (
 	github.com/zitadel/oidc/v3 v3.47.5 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

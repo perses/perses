@@ -14,7 +14,9 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -46,6 +48,16 @@ type Plugin struct {
 	ArchivePaths []string `json:"archive_paths,omitempty" yaml:"archive_paths,omitempty"`
 	// DevEnvironment is the configuration to use when developing a plugin
 	EnableDev bool `json:"enable_dev" yaml:"enable_dev"`
+	// Enabled is a list of plugin activated. Leave empty if you want to activate all plugins found in the `path` directory.
+	// If not empty, only the plugins whose name is in this list will be activated.
+	// The name can be the name of the plugin or the name of the module. For example, you can put `Prometheus` to enable the Prometheus module that contains query, variables and datasource plugin.
+	// Use either Enabled or Disabled. Both can not be used at the same time.
+	Enabled []string `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	// Disabled is a list of plugin deactivated. Leave empty if you want to activate all plugins found in the `path` directory.
+	// If not empty, the plugins whose name is in this list will be deactivated.
+	// The name can be the name of the plugin or the name of the module. For example, you can put `Prometheus` to disable the Prometheus module that contains query, variables and datasource plugin.
+	// Use either Enabled or Disabled. Both can not be used at the same time.
+	Disabled []string `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 }
 
 func (p *Plugin) Verify() error {
@@ -72,6 +84,23 @@ func (p *Plugin) Verify() error {
 		} else {
 			p.ArchivePaths = append(p.ArchivePaths, DefaultArchivePluginPath)
 		}
+	}
+	if len(p.Enabled) > 0 && len(p.Disabled) > 0 {
+		return fmt.Errorf("the 'activated' and 'deactivated' attributes can not be used at the same time. Please use either one of them")
+	}
+	if len(p.Enabled) > 0 {
+		newEnabled := make([]string, len(p.Enabled))
+		for _, s := range p.Enabled {
+			newEnabled = append(newEnabled, strings.ToLower(s))
+		}
+		p.Enabled = newEnabled
+	}
+	if len(p.Disabled) > 0 {
+		newDisabled := make([]string, len(p.Disabled))
+		for _, s := range p.Disabled {
+			newDisabled = append(newDisabled, strings.ToLower(s))
+		}
+		p.Disabled = newDisabled
 	}
 	return nil
 }

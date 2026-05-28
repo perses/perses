@@ -8,26 +8,28 @@
       "updatedAt": "2026-03-18T00:00:00Z",
       "version": 0
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "demo"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "benchmark"
-      },
-      {
-        "kind": "Folder",
-        "name": "infrastructure",
-        "spec": [
-          {
-            "kind": "Dashboard",
-            "name": "nodeexporter"
-          }
-        ]
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "demo"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "benchmark"
+        },
+        {
+          "kind": "Folder",
+          "name": "infrastructure",
+          "items": [
+            {
+              "kind": "Dashboard",
+              "name": "nodeexporter"
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -38,12 +40,14 @@
       "updatedAt": "2026-03-18T00:00:00Z",
       "version": 0
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "nodeexporter"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "nodeexporter"
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -54,24 +58,26 @@
       "updatedAt": "2026-03-18T00:00:00Z",
       "version": 0
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "panels"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "panelgroups"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "duplicatepanels"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "defaults"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "panels"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "panelgroups"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "duplicatepanels"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "defaults"
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -82,28 +88,30 @@
       "updatedAt": "2026-03-18T00:00:00Z",
       "version": 0
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "timeserieschartpanel"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "timeserieschartlegends"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "gaugechartpanel"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "statchartpanel"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "table"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "timeserieschartpanel"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "timeserieschartlegends"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "gaugechartpanel"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "statchartpanel"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "table"
+        }
+      ]
+    }
   },
   {
     "kind": "Folder",
@@ -114,23 +122,25 @@
       "updatedAt": "2026-03-18T00:00:00Z",
       "version": 0
     },
-    "spec": [
-      {
-        "kind": "Dashboard",
-        "name": "variables"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "editjson"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "markdownpanel"
-      },
-      {
-        "kind": "Dashboard",
-        "name": "tracing"
-      }
-    ]
+    "spec": {
+      "items": [
+        {
+          "kind": "Dashboard",
+          "name": "variables"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "editjson"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "markdownpanel"
+        },
+        {
+          "kind": "Dashboard",
+          "name": "tracing"
+        }
+      ]
+    }
   }
 ]

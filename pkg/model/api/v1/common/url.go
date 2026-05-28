@@ -19,6 +19,8 @@ import (
 	"path"
 )
 
+// DEPRECATED
+// Use github.com/perses/spec/go/common.ParseURL instead
 func ParseURL(rawURL string) (*URL, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -27,6 +29,8 @@ func ParseURL(rawURL string) (*URL, error) {
 	return &URL{URL: u}, nil
 }
 
+// DEPRECATED
+// Use github.com/perses/spec/go/common.MustParseURL instead
 func MustParseURL(rawURL string) *URL {
 	u, err := url.Parse(rawURL)
 	if err != nil {
@@ -35,6 +39,8 @@ func MustParseURL(rawURL string) *URL {
 	return &URL{URL: u}
 }
 
+// DEPRECATED
+// Use github.com/perses/spec/go/common.NewURL instead
 func NewURL(u *URL, paths ...string) *URL {
 	result := &URL{
 		URL: &url.URL{},
@@ -49,6 +55,8 @@ func NewURL(u *URL, paths ...string) *URL {
 	return result
 }
 
+// DEPRECATED
+// Use github.com/perses/spec/go/common.URL instead
 // +kubebuilder:validation:Schemaless
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Format=uri

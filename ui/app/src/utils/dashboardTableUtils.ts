@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource, FolderSpec, getResourceDisplayName } from '@perses-dev/core';
+import { FolderItem, FolderResource, getResourceDisplayName } from '@perses-dev/core';
 import { intlFormatDistance } from 'date-fns';
 import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
@@ -125,19 +125,19 @@ const mapToTableData = (
       displayName: getResourceDisplayName(folder),
       tags: folder.metadata.tags,
       version: folder.metadata.version,
-      children: mapFolderSpecToTableRow(folder.spec, map, project, buildPath(rootPath, folder.metadata.name)),
+      children: mapFolderItemsToTableRow(folder.spec.items, map, project, buildPath(rootPath, folder.metadata.name)),
     };
   });
 };
 
-const mapFolderSpecToTableRow = (
-  folderSpec: FolderSpec[],
+const mapFolderItemsToTableRow = (
+  folderItems: FolderItem[] | undefined,
   dashboardMap: Map<string, DashboardListRow & { inFolder?: boolean }>,
   project: string,
   parentPath: string[]
-): DashboardTreeTableRow[] => {
-  return folderSpec
-    .map((item) => {
+): DashboardTreeTableRow[] | undefined => {
+  return folderItems
+    ?.map((item) => {
       switch (item.kind) {
         case 'Dashboard': {
           const resource = dashboardMap.get(item.name);
@@ -154,8 +154,8 @@ const mapFolderSpecToTableRow = (
             project: project,
             path: parentPath,
             displayName: item.name,
-            children: item.spec
-              ? mapFolderSpecToTableRow(item.spec, dashboardMap, project, buildPath(parentPath, item.name))
+            children: item.items
+              ? mapFolderItemsToTableRow(item.items, dashboardMap, project, buildPath(parentPath, item.name))
               : undefined,
           };
         default:

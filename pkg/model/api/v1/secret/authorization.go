@@ -92,7 +92,7 @@ func (a *Authorization) GetCredentials() (string, error) {
 
 func (a *Authorization) validate() error {
 	if len(a.Credentials) > 0 && len(a.CredentialsFile) > 0 {
-		return fmt.Errorf("at most one of authorization credentials & credentials_file must be configured")
+		return fmt.Errorf("at most one of authorization credentials & credentialsFile must be configured")
 	}
 	a.Type = strings.TrimSpace(a.Type)
 	if len(a.Type) == 0 {

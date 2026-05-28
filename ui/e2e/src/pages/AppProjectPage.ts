@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, Page } from '@playwright/test';
+import { escapeRegExp } from '../utils';
 import { DatasourceEditor } from './DatasourceEditor';
 import { VariableEditor } from './VariableEditor';
 import { SecretEditor } from './SecretEditor';
@@ -25,7 +26,9 @@ export class AppProjectPage {
   readonly page: Page;
 
   readonly addDashboardButton: Locator;
+  readonly addFolderButton: Locator;
   readonly createDashboardDialog: Locator;
+  readonly createFolderDialog: Locator;
 
   readonly datasourceEditor: Locator;
   readonly addDatasourceButton: Locator;
@@ -43,9 +46,11 @@ export class AppProjectPage {
     this.page = page;
 
     this.addDashboardButton = page.getByRole('button', { name: 'Add Dashboard' });
+    this.addFolderButton = page.getByRole('button', { name: 'Add Folder' });
     this.createDashboardDialog = page.getByRole('dialog', {
       name: 'Create Dashboard',
     });
+    this.createFolderDialog = page.getByRole('dialog', { name: 'Add Folder' });
 
     this.addDatasourceButton = page.getByRole('button', { name: 'Add Datasource' });
     this.datasourceEditor = page.getByTestId('datasource-editor');
@@ -102,13 +107,15 @@ export class AppProjectPage {
   /**
    * Navigates to the specified project dashboard using the project page UI.
    * @param projectName - Name of the project.
-   * @param dashboardName - Name of the dashboard.
+   * @param path - Path to the dashboard as an array of strings. Each element except the last
+   *   represents a folder to expand, and the last element is the dashboard name.
+   *   Example: ['myFolder', 'mySubFolder', 'myDashboard']
    */
-  async navigateToDashboard(projectName: string, dashboardName: string): Promise<void> {
+  async navigateToDashboard(projectName: string, path: string[]): Promise<void> {
     await this.goto(projectName);
 
     const navigationPromise = this.page.waitForURL(`/projects/${projectName}`, { waitUntil: 'domcontentloaded' });
-    await this.clickDashboardItemInList(dashboardName, mainDashboardListId);
+    await this.clickDashboardItemInList(path, mainDashboardListId);
     await navigationPromise;
   }
 
@@ -119,16 +126,66 @@ export class AppProjectPage {
     await tab.click();
   }
 
-  async clickDashboardItemInList(dashboardName: string, dashboardListId: string): Promise<void> {
-    const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(new RegExp(`^${dashboardName}$`, 'i'));
+  /**
+   * Expands folders and clicks the dashboard at the end of the given path.
+   * @param path - Array of folder/dashboard names. All elements except the last are folders
+   *   to expand in order; the last element is the dashboard to click.
+   * @param dashboardListId - The id of the list root element.
+   * @throws Error if the path is empty.
+   */
+  async clickDashboardItemInList(path: string[], dashboardListId: string): Promise<void> {
+    if (path.length === 0) {
+      throw new Error('Path must contain at least a dashboard name');
+    }
 
-    const navigationPromise = this.page.waitForURL(new RegExp(`.*/dashboards/${dashboardName}.*`, 'i'));
+    const listRoot = this.page.locator(`#${dashboardListId}`);
+    await listRoot.waitFor({ state: 'attached' });
+
+    const folders = path.slice(0, -1);
+    const dashboardName = path[path.length - 1]!;
+
+    for (const folderName of folders) {
+      const row = listRoot
+        .locator('tr')
+        .filter({ hasText: new RegExp(`^${escapeRegExp(folderName)}$`, 'i') })
+        .first();
+      await row.waitFor({ state: 'visible' });
+      const toggle = row.locator('[aria-label="expand folder"]');
+      await toggle.waitFor({ state: 'visible' });
+      const isExpanded = await toggle.getAttribute('aria-expanded');
+      if (isExpanded === 'false') {
+        await toggle.click();
+      }
+    }
+
+    const dashboardButton = listRoot.getByText(new RegExp(`^${escapeRegExp(dashboardName)}$`, 'i'));
+
+    const navigationPromise = this.page.waitForURL(new RegExp(`.*/dashboards/${escapeRegExp(dashboardName)}.*`, 'i'));
 
     await dashboardButton.click();
 
     await this.page.getByTestId('panel-group-header').first().waitFor();
 
     return navigationPromise;
+  }
+
+  async createFolder(name: string, dashboardNames: string[]): Promise<void> {
+    await this.addFolderButton.click();
+    await this.createFolderDialog.waitFor({ state: 'visible' });
+
+    await this.createFolderDialog.getByRole('textbox', { name: 'Name' }).fill(name);
+
+    const dashboardsInput = this.createFolderDialog.getByRole('combobox', { name: 'Dashboards' });
+    for (const dashboardName of dashboardNames) {
+      await dashboardsInput.fill(dashboardName);
+      await this.page.getByRole('option', { name: dashboardName }).click();
+    }
+
+    // Close the dropdown popup before clicking the submit button
+    await dashboardsInput.press('Escape');
+
+    await this.createFolderDialog.getByRole('button', { name: 'Add' }).click();
+    await this.createFolderDialog.waitFor({ state: 'hidden' });
   }
 
   getDatasourceEditor(): DatasourceEditor {

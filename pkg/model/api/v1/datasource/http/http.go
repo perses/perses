@@ -21,6 +21,8 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.AllowedEndpoint
 type AllowedEndpoint struct {
 	EndpointPattern common.Regexp `json:"endpointPattern" yaml:"endpointPattern"`
 	Method          string        `json:"method" yaml:"method"`
@@ -69,6 +71,8 @@ func (h *AllowedEndpoint) validate() error {
 	return nil
 }
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.Config
 type Config struct {
 	// URL is the url required to contact the datasource
 	URL *common.URL `json:"url" yaml:"url"`
@@ -116,6 +120,9 @@ func (h *Config) validate() error {
 	return nil
 }
 
+// Proxy is the definition that can be used by a datasource when configuring a HTTP proxy.
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.Proxy
 type Proxy struct {
 	Kind string `json:"kind" yaml:"kind"`
 	Spec Config `json:"spec" yaml:"spec"`

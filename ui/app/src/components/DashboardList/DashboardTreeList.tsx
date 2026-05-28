@@ -133,7 +133,12 @@ function DashboardTreeList({
             <Box sx={{ paddingLeft: paddingLeft + 'px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               {kind === 'Folder' ? (
                 <>
-                  <IconButton onClick={row.getToggleExpandedHandler()} sx={{ padding: 0 }}>
+                  <IconButton
+                    onClick={row.getToggleExpandedHandler()}
+                    aria-expanded={row.getIsExpanded()}
+                    aria-label={row.getIsExpanded() ? 'collapse folder' : 'expand folder'}
+                    sx={{ padding: 0 }}
+                  >
                     {row.getIsExpanded() || !row.getCanExpand() ? (
                       <ChevronDownIcon fontSize="small" />
                     ) : (

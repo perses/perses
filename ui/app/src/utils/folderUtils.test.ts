@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderSpec } from '@perses-dev/core';
+import { FolderItem } from '@perses-dev/core';
 import {
   collectDashboards,
   getSubFolderDeepCopy,
@@ -21,16 +21,16 @@ import {
   withoutSubFolder,
 } from './folderUtils';
 
-function makeTree(): FolderSpec[] {
+function makeTree(): FolderItem[] {
   return [
     {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Folder', name: 'C' }],
+          items: [{ kind: 'Folder', name: 'C' }],
         },
         { kind: 'Folder', name: 'D' },
       ],
@@ -40,187 +40,187 @@ function makeTree(): FolderSpec[] {
 }
 
 describe('collectDashboards', () => {
-  it('returns an empty array for a folder with no spec', () => {
-    const folder: FolderSpec = { kind: 'Folder', name: 'Empty' };
-    expect(collectDashboards(folder.spec)).toEqual([]);
+  it('returns an empty array for a folder with no items', () => {
+    const folder: FolderItem = { kind: 'Folder', name: 'Empty' };
+    expect(collectDashboards(folder.items)).toEqual([]);
   });
 
-  it('returns an empty array for a folder with an empty spec', () => {
-    const folder: FolderSpec = { kind: 'Folder', name: 'Empty', spec: [] };
-    expect(collectDashboards(folder.spec)).toEqual([]);
+  it('returns an empty array for a folder with an empty items array', () => {
+    const folder: FolderItem = { kind: 'Folder', name: 'Empty', items: [] };
+    expect(collectDashboards(folder.items)).toEqual([]);
   });
 
   it('returns direct dashboard names', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'dash-1' },
         { kind: 'Dashboard', name: 'dash-2' },
       ],
     };
-    expect(collectDashboards(folder.spec)).toEqual(['dash-1', 'dash-2']);
+    expect(collectDashboards(folder.items)).toEqual(['dash-1', 'dash-2']);
   });
 
   it('collects dashboards from nested sub-folders', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'dash-1' },
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Dashboard', name: 'dash-2' }],
+          items: [{ kind: 'Dashboard', name: 'dash-2' }],
         },
       ],
     };
-    expect(collectDashboards(folder.spec)).toEqual(['dash-1', 'dash-2']);
+    expect(collectDashboards(folder.items)).toEqual(['dash-1', 'dash-2']);
   });
 
   it('collects dashboards from deeply nested sub-folders', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         {
           kind: 'Folder',
           name: 'B',
-          spec: [
+          items: [
             {
               kind: 'Folder',
               name: 'C',
-              spec: [{ kind: 'Dashboard', name: 'dash-deep' }],
+              items: [{ kind: 'Dashboard', name: 'dash-deep' }],
             },
           ],
         },
       ],
     };
-    expect(collectDashboards(folder.spec)).toEqual(['dash-deep']);
+    expect(collectDashboards(folder.items)).toEqual(['dash-deep']);
   });
 
   it('collects all dashboards across multiple sub-folders', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'Root',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'dash-root' },
         {
           kind: 'Folder',
           name: 'A',
-          spec: [{ kind: 'Dashboard', name: 'dash-a' }],
+          items: [{ kind: 'Dashboard', name: 'dash-a' }],
         },
         {
           kind: 'Folder',
           name: 'B',
-          spec: [
+          items: [
             { kind: 'Dashboard', name: 'dash-b1' },
             { kind: 'Dashboard', name: 'dash-b2' },
           ],
         },
       ],
     };
-    expect(collectDashboards(folder.spec)).toEqual(['dash-root', 'dash-a', 'dash-b1', 'dash-b2']);
+    expect(collectDashboards(folder.items)).toEqual(['dash-root', 'dash-a', 'dash-b1', 'dash-b2']);
   });
 
   it('ignores sub-folders that contain no dashboards', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Folder', name: 'Empty' },
         { kind: 'Dashboard', name: 'dash-1' },
       ],
     };
-    expect(collectDashboards(folder.spec)).toEqual(['dash-1']);
+    expect(collectDashboards(folder.items)).toEqual(['dash-1']);
   });
 
   it('does not recurse into sub-folders when deep is false', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'dash-1' },
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Dashboard', name: 'dash-2' }],
+          items: [{ kind: 'Dashboard', name: 'dash-2' }],
         },
       ],
     };
-    expect(collectDashboards(folder.spec, false)).toEqual(['dash-1']);
+    expect(collectDashboards(folder.items, false)).toEqual(['dash-1']);
   });
 
   it('returns an empty array when deep is false and there are no direct dashboards', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Dashboard', name: 'dash-2' }],
+          items: [{ kind: 'Dashboard', name: 'dash-2' }],
         },
       ],
     };
-    expect(collectDashboards(folder.spec, false)).toEqual([]);
+    expect(collectDashboards(folder.items, false)).toEqual([]);
   });
 
   it('filters dashboards by name', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'prod-1' },
         { kind: 'Dashboard', name: 'dev-1' },
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Dashboard', name: 'prod-2' }],
+          items: [{ kind: 'Dashboard', name: 'prod-2' }],
         },
       ],
     };
-    expect(collectDashboards(folder.spec, true, (name) => name.startsWith('prod'))).toEqual(['prod-1', 'prod-2']);
+    expect(collectDashboards(folder.items, true, (name) => name.startsWith('prod'))).toEqual(['prod-1', 'prod-2']);
   });
 
   it('returns an empty array when filter matches nothing', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'dash-1' },
         { kind: 'Dashboard', name: 'dash-2' },
       ],
     };
-    expect(collectDashboards(folder.spec, true, () => false)).toEqual([]);
+    expect(collectDashboards(folder.items, true, () => false)).toEqual([]);
   });
 
   it('combines deep=false with a filter', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [
+      items: [
         { kind: 'Dashboard', name: 'prod-1' },
         { kind: 'Dashboard', name: 'dev-1' },
         {
           kind: 'Folder',
           name: 'B',
-          spec: [{ kind: 'Dashboard', name: 'prod-2' }],
+          items: [{ kind: 'Dashboard', name: 'prod-2' }],
         },
       ],
     };
-    expect(collectDashboards(folder.spec, false, (name) => name.startsWith('prod'))).toEqual(['prod-1']);
+    expect(collectDashboards(folder.items, false, (name) => name.startsWith('prod'))).toEqual(['prod-1']);
   });
 
   it('does not mutate the input', () => {
-    const folder: FolderSpec = {
+    const folder: FolderItem = {
       kind: 'Folder',
       name: 'A',
-      spec: [{ kind: 'Dashboard', name: 'dash-1' }],
+      items: [{ kind: 'Dashboard', name: 'dash-1' }],
     };
-    const specBefore = [...(folder.spec ?? [])];
-    collectDashboards(folder.spec);
-    expect(folder.spec).toEqual(specBefore);
+    const itemsBefore = [...(folder.items ?? [])];
+    collectDashboards(folder.items);
+    expect(folder.items).toEqual(itemsBefore);
   });
 });
 
@@ -234,22 +234,22 @@ describe('withoutSubFolder', () => {
   it('removes a direct child folder', () => {
     const result = withoutSubFolder(makeTree(), ['A', 'D']);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec).toHaveLength(1);
-    expect(a.spec!.at(0)?.name).toBe('B');
+    expect(a.items).toHaveLength(1);
+    expect(a.items!.at(0)?.name).toBe('B');
   });
 
   it('removes a deeply nested folder', () => {
     const result = withoutSubFolder(makeTree(), ['A', 'B', 'C']);
     const a = result.find((s) => s.name === 'A')!;
-    const b = a.spec!.find((s) => s.name === 'B')!;
-    expect(b.spec).toHaveLength(0);
+    const b = a.items!.find((s) => s.name === 'B')!;
+    expect(b.items).toHaveLength(0);
   });
 
-  it('does not mutate the original spec', () => {
+  it('does not mutate the original items', () => {
     const original = makeTree();
     withoutSubFolder(original, ['A', 'D']);
     const a = original.find((s) => s.name === 'A')!;
-    expect(a.spec).toHaveLength(2);
+    expect(a.items).toHaveLength(2);
   });
 
   it('throws when path is empty', () => {
@@ -271,13 +271,13 @@ describe('withoutSubFolder', () => {
   it('preserves sibling folders and their children', () => {
     const result = withoutSubFolder(makeTree(), ['A', 'B']);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec).toHaveLength(1);
-    expect(a.spec!.at(0)?.name).toBe('D');
+    expect(a.items).toHaveLength(1);
+    expect(a.items!.at(0)?.name).toBe('D');
     expect(result.find((s) => s.name === 'E')).toBeDefined();
   });
 
   it('returns an empty array when the only root folder is removed', () => {
-    const single: FolderSpec[] = [{ kind: 'Folder', name: 'Solo' }];
+    const single: FolderItem[] = [{ kind: 'Folder', name: 'Solo' }];
     expect(withoutSubFolder(single, ['Solo'])).toEqual([]);
   });
 });
@@ -304,7 +304,7 @@ describe('getSubFolderDeepCopy', () => {
     const copy = getSubFolderDeepCopy(original, ['A', 'B']);
     (copy as { name: string }).name = 'MUTATED';
     const a = original.find((s) => s.name === 'A')!;
-    expect(a.spec!.find((s) => s.name === 'B')).toBeDefined();
+    expect(a.items!.find((s) => s.name === 'B')).toBeDefined();
   });
 
   it('throws when path is empty', () => {
@@ -325,8 +325,8 @@ describe('getSubFolderDeepCopy', () => {
 
   it('includes the children of the returned node', () => {
     const result = getSubFolderDeepCopy(makeTree(), ['A']);
-    expect(result.spec).toHaveLength(2);
-    expect(result.spec!.map((s) => s.name)).toEqual(['B', 'D']);
+    expect(result.items).toHaveLength(2);
+    expect(result.items!.map((s) => s.name)).toEqual(['B', 'D']);
   });
 });
 
@@ -352,7 +352,7 @@ describe('getSubFolderRef', () => {
     const ref = getSubFolderRef(original, ['A', 'B']);
     (ref as { name: string }).name = 'MUTATED';
     const a = original.find((s) => s.name === 'A')!;
-    expect(a.spec!.find((s) => s.name === 'MUTATED')).toBeDefined();
+    expect(a.items!.find((s) => s.name === 'MUTATED')).toBeDefined();
   });
 
   it('throws when path is empty', () => {
@@ -373,13 +373,13 @@ describe('getSubFolderRef', () => {
 
   it('includes the children of the returned node', () => {
     const result = getSubFolderRef(makeTree(), ['A']);
-    expect(result.spec).toHaveLength(2);
-    expect(result.spec!.map((s) => s.name)).toEqual(['B', 'D']);
+    expect(result.items).toHaveLength(2);
+    expect(result.items!.map((s) => s.name)).toEqual(['B', 'D']);
   });
 });
 
 describe('replaceSubFolder', () => {
-  const newNode: FolderSpec = { kind: 'Folder', name: 'NEW' };
+  const newNode: FolderItem = { kind: 'Folder', name: 'NEW' };
 
   it('replaces a root-level folder', () => {
     const result = replaceSubFolder(makeTree(), ['E'], newNode);
@@ -391,40 +391,40 @@ describe('replaceSubFolder', () => {
   it('replaces a direct child folder', () => {
     const result = replaceSubFolder(makeTree(), ['A', 'D'], newNode);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec!.find((s) => s.name === 'D')).toBeUndefined();
-    expect(a.spec!.find((s) => s.name === 'NEW')).toBeDefined();
+    expect(a.items!.find((s) => s.name === 'D')).toBeUndefined();
+    expect(a.items!.find((s) => s.name === 'NEW')).toBeDefined();
   });
 
   it('replaces a deeply nested folder', () => {
     const result = replaceSubFolder(makeTree(), ['A', 'B', 'C'], newNode);
     const a = result.find((s) => s.name === 'A')!;
-    const b = a.spec!.find((s) => s.name === 'B')!;
-    expect(b.spec!.find((s) => s.name === 'C')).toBeUndefined();
-    expect(b.spec!.find((s) => s.name === 'NEW')).toBeDefined();
+    const b = a.items!.find((s) => s.name === 'B')!;
+    expect(b.items!.find((s) => s.name === 'C')).toBeUndefined();
+    expect(b.items!.find((s) => s.name === 'NEW')).toBeDefined();
   });
 
-  it('does not mutate the original spec', () => {
+  it('does not mutate the original items', () => {
     const original = makeTree();
     replaceSubFolder(original, ['A', 'D'], newNode);
     const a = original.find((s) => s.name === 'A')!;
-    expect(a.spec!.find((s) => s.name === 'D')).toBeDefined();
-    expect(a.spec!.find((s) => s.name === 'NEW')).toBeUndefined();
+    expect(a.items!.find((s) => s.name === 'D')).toBeDefined();
+    expect(a.items!.find((s) => s.name === 'NEW')).toBeUndefined();
   });
 
   it('preserves the position of the replaced node', () => {
     // B is index 0, D is index 1 under A
     const result = replaceSubFolder(makeTree(), ['A', 'B'], newNode);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec!.at(0)?.name).toBe('NEW');
-    expect(a.spec!.at(1)?.name).toBe('D');
+    expect(a.items!.at(0)?.name).toBe('NEW');
+    expect(a.items!.at(1)?.name).toBe('D');
   });
 
   it('preserves sibling folders and their children', () => {
     const result = replaceSubFolder(makeTree(), ['A', 'D'], newNode);
     const a = result.find((s) => s.name === 'A')!;
-    const b = a.spec!.find((s) => s.name === 'B')!;
-    expect(b.spec).toHaveLength(1);
-    expect(b.spec!.at(0)?.name).toBe('C');
+    const b = a.items!.find((s) => s.name === 'B')!;
+    expect(b.items).toHaveLength(1);
+    expect(b.items!.at(0)?.name).toBe('C');
     expect(result.find((s) => s.name === 'E')).toBeDefined();
   });
 
@@ -446,7 +446,7 @@ describe('replaceSubFolder', () => {
 });
 
 describe('insertSubFolder', () => {
-  const newFolder: FolderSpec = { kind: 'Folder', name: 'NEW' };
+  const newFolder: FolderItem = { kind: 'Folder', name: 'NEW' };
 
   it('inserts at the root level when parentPath is empty', () => {
     const result = insertSubFolder(makeTree(), [], newFolder);
@@ -457,36 +457,36 @@ describe('insertSubFolder', () => {
   it('inserts as a child of a root-level folder', () => {
     const result = insertSubFolder(makeTree(), ['A'], newFolder);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec).toHaveLength(3);
-    expect(a.spec!.at(2)?.name).toBe('NEW');
+    expect(a.items).toHaveLength(3);
+    expect(a.items!.at(2)?.name).toBe('NEW');
   });
 
   it('inserts as a child of a deeply nested folder', () => {
     const result = insertSubFolder(makeTree(), ['A', 'B'], newFolder);
     const a = result.find((s) => s.name === 'A')!;
-    const b = a.spec!.find((s) => s.name === 'B')!;
-    expect(b.spec).toHaveLength(2);
-    expect(b.spec!.at(1)?.name).toBe('NEW');
+    const b = a.items!.find((s) => s.name === 'B')!;
+    expect(b.items).toHaveLength(2);
+    expect(b.items!.at(1)?.name).toBe('NEW');
   });
 
-  it('inserts into a folder that currently has no spec', () => {
+  it('inserts into a folder that currently has no items', () => {
     const result = insertSubFolder(makeTree(), ['E'], newFolder);
     const e = result.find((s) => s.name === 'E')!;
-    expect(e.spec).toHaveLength(1);
-    expect(e.spec!.at(0)?.name).toBe('NEW');
+    expect(e.items).toHaveLength(1);
+    expect(e.items!.at(0)?.name).toBe('NEW');
   });
 
-  it('does not mutate the original spec', () => {
+  it('does not mutate the original items', () => {
     const original = makeTree();
     insertSubFolder(original, ['A'], newFolder);
     const a = original.find((s) => s.name === 'A')!;
-    expect(a.spec).toHaveLength(2);
+    expect(a.items).toHaveLength(2);
   });
 
   it('preserves existing siblings', () => {
     const result = insertSubFolder(makeTree(), ['A'], newFolder);
     const a = result.find((s) => s.name === 'A')!;
-    expect(a.spec!.map((s) => s.name)).toEqual(['B', 'D', 'NEW']);
+    expect(a.items!.map((s) => s.name)).toEqual(['B', 'D', 'NEW']);
   });
 
   it('throws when a folder with the same name already exists', () => {

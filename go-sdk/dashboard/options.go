@@ -149,6 +149,8 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 	}
 }
 
+// AddCustomPanelGroup can be used for creating panel groups with custom grid positions in dashboards.
+// It introduces a new API for specifying the exact layout of panels within a group.
 func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgroup.Option) Option {
 	return func(builder *Builder) error {
 		r, err := panelgroup.New(title, options...)

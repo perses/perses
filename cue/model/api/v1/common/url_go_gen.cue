@@ -4,6 +4,8 @@
 
 package common
 
+// DEPRECATED
+// Use github.com/perses/spec/go/common.URL instead
 // +kubebuilder:validation:Schemaless
 // +kubebuilder:validation:Type=string
 // +kubebuilder:validation:Format=uri

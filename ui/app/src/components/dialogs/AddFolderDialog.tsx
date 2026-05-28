@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { FolderResource, FolderSpec, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { FolderItem, FolderResource, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EditFolderValidationType, useAddFolderValidationSchema } from '../../validation';
@@ -50,9 +50,12 @@ export const AddFolderDialog = ({
 }: AddFolderDialogProps): ReactElement => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateFolderMutation = useUpdateFolderMutation();
-  const addFolderSchema = useAddFolderValidationSchema(folder.spec, path);
+  const addFolderSchema = useAddFolderValidationSchema(folder.spec.items ?? [], path);
 
-  const dashboardsInSiblingFolders: string[] = useMemo(() => collectDashboards(folder.spec, true), [folder.spec]);
+  const dashboardsInSiblingFolders: string[] = useMemo(
+    () => collectDashboards(folder.spec.items, true),
+    [folder.spec.items]
+  );
 
   const options = useMemo(
     () =>
@@ -73,14 +76,16 @@ export const AddFolderDialog = ({
   const { reset } = form;
 
   const processForm: SubmitHandler<EditFolderValidationType> = (data) => {
-    const dashboardSpecs = data.selectedDashboards.map((option) => ({ kind: 'Dashboard' as const, name: option.name }));
-    const newFolder: FolderSpec = { kind: 'Folder', name: data.name, spec: dashboardSpecs };
+    const dashboardItems = data.selectedDashboards.map((option) => ({ kind: 'Dashboard' as const, name: option.name }));
+    const newFolder: FolderItem = { kind: 'Folder', name: data.name, items: dashboardItems };
     const rootClone = structuredClone(folder);
-    const updatedSpec =
-      path.length === 0 ? [...folder.spec, newFolder] : insertSubFolder(rootClone.spec, path, newFolder);
+    const updatedItems =
+      path.length === 0
+        ? [...(folder.spec.items ?? []), newFolder]
+        : insertSubFolder(rootClone.spec.items ?? [], path, newFolder);
 
     updateFolderMutation.mutate(
-      { ...folder, spec: updatedSpec },
+      { ...folder, spec: { ...folder.spec, items: updatedItems } },
       {
         onSuccess: (updatedFolder: FolderResource) => {
           successSnackbar(`Folder ${getResourceExtendedDisplayName(updatedFolder)} has been successfully updated`);
