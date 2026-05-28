@@ -94,7 +94,7 @@ func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType str
 	if schema == nil {
 		return fmt.Errorf("schema not found for plugin %s with version %s", plugin.Kind, version)
 	}
-	pluginData, err := plugin.JSONMarshal()
+	pluginData, err := plugin.MarshalJSON()
 	if err != nil {
 		logrus.WithError(err).Debugf("unable to marshal the plugin %q with version %s", plugin.Kind, version)
 		return err

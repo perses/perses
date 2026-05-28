@@ -5,4 +5,6 @@
 package common
 
 // Regexp encapsulates a regexp.Regexp and makes it JSON/YAML marshalable.
+// DEPRECATED
+// Use github.com/perses/spec/go/common.Regexp instead
 #Regexp: _

@@ -14,8 +14,8 @@
 package http
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/datasource/proxy/http"
 )
 
 func URL(url string) Option {

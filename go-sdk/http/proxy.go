@@ -14,7 +14,7 @@
 package http
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/spec/go/datasource/proxy/http"
 )
 
 type Option func(proxy *Builder) error
@@ -26,7 +26,7 @@ type Builder struct {
 func New(url string, options ...Option) (Builder, error) {
 	var builder = &Builder{
 		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
+			Kind: http.ProxyKindName,
 			Spec: http.Config{},
 		},
 	}

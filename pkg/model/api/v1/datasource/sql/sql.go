@@ -21,6 +21,8 @@ import (
 )
 
 // Driver the SQL driver to use
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Driver
 type Driver string
 
 const (
@@ -30,6 +32,8 @@ const (
 )
 
 // SSLMode postgres ssl modes
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.SSLMode
 type SSLMode string
 
 const (
@@ -41,6 +45,8 @@ const (
 	SSLModeVerifyCA   SSLMode = "verify-ca"
 )
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.MySQLConfig
 type MySQLConfig struct {
 	Params           map[string]string `json:"params,omitempty" yaml:"params,omitempty"`
 	MaxAllowedPacket int               `json:"maxAllowedPacket,omitempty" yaml:"maxAllowedPacket,omitempty"`
@@ -49,6 +55,8 @@ type MySQLConfig struct {
 	WriteTimeout     time.Duration     `json:"writeTimeout,omitempty" yaml:"writeTimeout,omitempty"`
 }
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.PostgresConfig
 type PostgresConfig struct {
 	// MaxConns is the maximum size of the pool
 	MaxConns int32 `json:"maxConns,omitempty" yaml:"maxConns,omitempty"`
@@ -104,6 +112,8 @@ func (p *PostgresConfig) validate() error {
 	return nil
 }
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Config
 type Config struct {
 	Driver Driver `json:"driver" yaml:"driver"`
 	// Host is the hostname required to contact the datasource
@@ -198,6 +208,8 @@ func (s *Config) verifySupportedDriver() error {
 	return nil
 }
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Proxy
 type Proxy struct {
 	Kind string `json:"kind" yaml:"kind"`
 	Spec Config `json:"spec" yaml:"spec"`

@@ -5,6 +5,8 @@
 package sql
 
 // Driver the SQL driver to use
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Driver
 #Driver: string // #enumDriver
 
 #enumDriver:
@@ -17,6 +19,8 @@ package sql
 #DriverPostgreSQL: #Driver & "postgres"
 
 // SSLMode postgres ssl modes
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.SSLMode
 #SSLMode: string // #enumSSLMode
 
 #enumSSLMode:
@@ -34,6 +38,8 @@ package sql
 #SSLModeVerifyFull: #SSLMode & "verify-full"
 #SSLModeVerifyCA:   #SSLMode & "verify-ca"
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.MySQLConfig
 #MySQLConfig: {
 	params?: {[string]: string} @go(Params,map[string]string)
 	maxAllowedPacket?: int @go(MaxAllowedPacket)
@@ -42,10 +48,16 @@ package sql
 	writeTimeout?:     int @go(WriteTimeout,time.Duration)
 }
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.PostgresConfig
 #PostgresConfig: _
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Config
 #Config: _
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/sql.Proxy
 #Proxy: {
 	kind: string  @go(Kind)
 	spec: #Config @go(Spec)

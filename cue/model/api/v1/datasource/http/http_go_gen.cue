@@ -4,10 +4,17 @@
 
 package http
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.AllowedEndpoint
 #AllowedEndpoint: _
 
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.Config
 #Config: _
 
+// Proxy is the definition that can be used by a datasource when configuring a HTTP proxy.
+// DEPRECATED.
+// Use github.com/perses/spec/go/datasource/proxy/http.Proxy
 #Proxy: {
 	kind: string  @go(Kind)
 	spec: #Config @go(Spec)
