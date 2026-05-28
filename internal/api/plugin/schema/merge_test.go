@@ -25,17 +25,17 @@ import (
 
 // loadSchemaFromTestdata is a helper that loads a single LoadSchema from a
 // testdata directory, reusing the same LoadModelSchema function used in production.
-func loadSchemaFromTestdata(t *testing.T, schemaDir string, kind plugin.Kind) LoadSchema {
+func loadSchemaFromTestdata(t *testing.T, schemaDir string) LoadSchema {
 	t.Helper()
 	name, instance, err := LoadModelSchema(schemaDir)
 	require.NoError(t, err)
-	return LoadSchema{Kind: kind, Name: name, Instance: instance}
+	return LoadSchema{Kind: plugin.KindPanel, Name: name, Instance: instance}
 }
 
 func TestGenerateSchemaDisjunctionSingleSchema(t *testing.T) {
 	ctx := cuecontext.New()
 	schemas := []LoadSchema{
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/first", plugin.KindPanel),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
 	}
 	result, err := GenerateSchemaDisjunction(ctx, schemas)
 	require.NoError(t, err)
@@ -45,9 +45,9 @@ func TestGenerateSchemaDisjunctionSingleSchema(t *testing.T) {
 func TestGenerateSchemaDisjunctionMultipleSchemas(t *testing.T) {
 	ctx := cuecontext.New()
 	schemas := []LoadSchema{
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/first", plugin.KindPanel),
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/second", plugin.KindPanel),
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/third", plugin.KindPanel),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/second"),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/third"),
 	}
 	result, err := GenerateSchemaDisjunction(ctx, schemas)
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestGenerateSchemaDisjunctionEmptySchemas(t *testing.T) {
 func TestGenerateSchemaDefinitionsSingleSchema(t *testing.T) {
 	ctx := cuecontext.New()
 	schemas := []LoadSchema{
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/first", plugin.KindPanel),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
 	}
 	result, err := GenerateSchemaDefinitions(ctx, schemas)
 	require.NoError(t, err)
@@ -77,8 +77,8 @@ func TestGenerateSchemaDefinitionsSingleSchema(t *testing.T) {
 func TestGenerateSchemaDefinitionsMultipleSchemas(t *testing.T) {
 	ctx := cuecontext.New()
 	schemas := []LoadSchema{
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/first", plugin.KindPanel),
-		loadSchemaFromTestdata(t, "testdata/schemas/panels/second", plugin.KindPanel),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/first"),
+		loadSchemaFromTestdata(t, "testdata/schemas/panels/second"),
 	}
 	result, err := GenerateSchemaDefinitions(ctx, schemas)
 	require.NoError(t, err)

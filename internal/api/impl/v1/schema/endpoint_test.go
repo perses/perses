@@ -68,10 +68,10 @@ func (s *stubPluginService) GetLoadedPlugin(_, _, _ string) (*pluginpkg.Loaded, 
 
 // helpers
 
-func newEchoContext(t *testing.T, method, path string) (echo.Context, *httptest.ResponseRecorder) {
+func newEchoContext(t *testing.T, path string) (echo.Context, *httptest.ResponseRecorder) {
 	t.Helper()
 	e := echo.New()
-	req := httptest.NewRequest(method, path, nil)
+	req := httptest.NewRequest(http.MethodGet, path, nil)
 	rec := httptest.NewRecorder()
 	return e.NewContext(req, rec), rec
 }
@@ -89,7 +89,7 @@ func newEndpointWithSchemas(schemas []pluginschema.LoadSchema) *endpoint {
 
 func TestDashboardSchemaWithNoPlugins(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, http.MethodGet, "/api/v1/schemas/dashboard")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/dashboard")
 
 	err := ep.DashboardSchema(ctx)
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestDashboardSchemaWithNoPlugins(t *testing.T) {
 
 func TestPluginListWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, http.MethodGet, "/api/v1/schemas/plugin")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin")
 
 	err := ep.PluginList(ctx)
 	require.NoError(t, err)
@@ -114,7 +114,7 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 
 func TestPluginDefinitionWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, http.MethodGet, "/api/v1/schemas/plugin/AnyPlugin")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/AnyPlugin")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("AnyPlugin")
 
@@ -131,7 +131,7 @@ func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
 	schemas := []pluginschema.LoadSchema{{Kind: v1plugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, http.MethodGet, "/api/v1/schemas/plugin/NonExistent")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/NonExistent")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("NonExistent")
 
@@ -149,7 +149,7 @@ func TestPluginDefinitionPluginExists(t *testing.T) {
 	schemas := []pluginschema.LoadSchema{{Kind: v1plugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, http.MethodGet, "/api/v1/schemas/plugin/firstchart")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/firstchart")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("firstchart")
 
