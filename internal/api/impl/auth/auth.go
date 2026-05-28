@@ -107,6 +107,7 @@ type endpoint struct {
 	authz            authorization.Authorization
 	isAuthnEnable    bool
 	isDelegatedAuthn bool
+	apiPrefix        string
 }
 
 func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
@@ -117,6 +118,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 		isAuthnEnable:   isAuthnEnable,
 		// Currently only k8s is a delegated authentication provider
 		isDelegatedAuthn: providers.KubernetesProvider.Enable,
+		apiPrefix:        apiPrefix,
 	}
 
 	// Register the native provider if enabled
@@ -210,7 +212,11 @@ func (e *endpoint) logout(ctx echo.Context) error {
 		}
 	}
 
-	return ctx.Redirect(302, "/")
+	prefix := "/"
+	if len(e.apiPrefix) > 0 {
+		prefix = e.apiPrefix
+	}
+	return ctx.Redirect(302, prefix)
 }
 
 // withOAuthErrorMdw applies to the handler a middleware that the error is well managed in oauth2.0 context.
