@@ -20,6 +20,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useUsername } from '../../model/auth/auth-client';
 import { ProfileRoute } from '../../model/route';
 import { useIsDelegatedAuthnProviderEnabled } from '../../context/Config';
+import { PERSES_APP_CONFIG } from '../../config';
 import { ThemeSwitch } from './ThemeSwitch';
 
 export function AccountMenu(): ReactElement {
@@ -72,7 +73,7 @@ export function AccountMenu(): ReactElement {
         {/* Since perses doesn't have control over delegated authn providers, don't show the
           logout button when one is enabled */}
         {!isDelegatedAuthnProviderEnabled && (
-          <MenuItem component="a" href="/api/auth/logout">
+          <MenuItem component="a" href={`${PERSES_APP_CONFIG.api_prefix}/api/auth/logout`}>
             <ListItemIcon>
               <Logout />
             </ListItemIcon>
