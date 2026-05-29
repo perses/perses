@@ -44,11 +44,13 @@ var (
 	datasourceSpecHidSelector   = cue.Hid("_Spec_1", "_")
 	panelSpecHidSelector        = cue.Hid("_PanelSpec_0", "_")
 	variableSpecHidSelector     = cue.Hid("_Variable_0", "_")
+	layoutHidSelector           = cue.Hid("_Layout_0", "_")
 	projMetadataHidSelector     = cue.Hid("_ProjectMetadata_0", "_")
 	projMetadataWrapHidSelector = cue.Hid("_ProjectMetadataWrapper_0", "_")
 	listSpecHidSelector         = cue.Hid("_ListSpec_0", "_")
 	// string
 	pluginSelector = cue.Str("plugin")
+	specSelector   = cue.Str("spec")
 )
 
 var cueValidationOptions = []cue.Option{
@@ -132,6 +134,11 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// this is done to avoid the inline union issue during `cue vet`
 	final = final.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), metadata)
 	final = final.FillPath(cue.MakePath(dashboardDefSelector, projMetadataHidSelector), projMetadataWrapper)
+
+	// fill the missing LayoutSpec
+	// for now the only option is GridLayoutSpec
+	gridLayoutSpec := ctx.EncodeType(dashboard.GridLayoutSpec{})
+	final = final.FillPath(cue.MakePath(dashboardDefSelector, layoutHidSelector, specSelector), gridLayoutSpec)
 
 	if validateErr := final.Validate(cueValidationOptions...); validateErr != nil {
 		// retrieve the full error detail to provide better insights to the end user:
