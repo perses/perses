@@ -273,6 +273,9 @@ func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) 
 }
 
 func (s *completeSchema) ValidateDashboardAnnotations(annotations []dashboard.AnnotationSpec) error {
+	if len(annotations) == 0 {
+		return nil
+	}
 	if len(s.devSch.annotations) == 0 && len(s.sch.annotations) == 0 {
 		return fmt.Errorf("annotations schemas are not loaded")
 	}
