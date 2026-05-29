@@ -22,6 +22,7 @@ import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
 import { HelperDashboardView } from './HelperDashboardView';
 
+/* START */
 /**
  * The View for displaying an existing Dashboard.
  */
