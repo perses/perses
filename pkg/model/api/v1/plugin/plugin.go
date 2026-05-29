@@ -37,6 +37,7 @@ const (
 	KindLogQuery        Kind = "LogQuery"
 	KindQuery           Kind = "Query"
 	KindExplore         Kind = "Explore"
+	KindAnnotation      Kind = "Annotation"
 )
 
 func (k Kind) IsQuery() bool {
@@ -81,7 +82,8 @@ func (p *Plugin) UnmarshalYAML(unmarshal func(any) error) error {
 
 func (p *Plugin) validate() error {
 	if p.Kind != KindVariable && p.Kind != KindDatasource &&
-		p.Kind != KindPanel && !p.Kind.IsQuery() && p.Kind != KindExplore {
+		p.Kind != KindPanel && !p.Kind.IsQuery() &&
+		p.Kind != KindExplore && p.Kind != KindAnnotation {
 		return fmt.Errorf("invalid plugin kind %s", p.Kind)
 	}
 	return nil

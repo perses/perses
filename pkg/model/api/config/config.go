@@ -69,6 +69,8 @@ type Config struct {
 	Datasource DatasourceConfig `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	// Variable contains the configuration for the variable.
 	Variable VariableConfig `json:"variable,omitempty" yaml:"variable,omitempty"`
+	// Annotation contains the configuration for the variable.
+	Annotation AnnotationConfig `json:"annotation,omitempty" yaml:"annotation,omitempty"`
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	// DEPRECATED.
 	// Please use the config EphemeralDashboard instead.
