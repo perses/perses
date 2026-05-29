@@ -124,7 +124,6 @@ func (d *DashboardSpec) validate() error {
 			return fmt.Errorf("variable %q (index %d) already exists", name, i)
 		}
 	}
-
 	for panelKey := range d.Panels {
 		if err := common.ValidateID(panelKey); err != nil {
 			return err
