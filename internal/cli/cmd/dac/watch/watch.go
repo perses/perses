@@ -56,8 +56,17 @@ func (o *option) Complete(args []string) error {
 	return nil
 }
 
-// Validate ensures the output directory is properly configured and exists
+// Validate ensures the source and output directories are properly configured and exist
 func (o *option) Validate() error {
+	// Ensure source directory exists and is a directory
+	info, err := os.Stat(o.sourceDir)
+	if err != nil {
+		return fmt.Errorf("source directory %q does not exist or is not accessible: %w", o.sourceDir, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("source path %q is not a directory", o.sourceDir)
+	}
+
 	// Ensure output directory exists
 	if err := os.MkdirAll(config.Global.Dac.OutputFolder, 0750); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
