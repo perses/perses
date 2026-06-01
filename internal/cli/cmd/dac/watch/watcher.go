@@ -31,6 +31,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/dac/build"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/mod/modfile"
 )
@@ -46,9 +47,29 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
-// shouldSkipDirectory checks if a directory should be skipped during file walks
-func (w *watcher) shouldSkipDirectory(name string) bool {
-	return name == "vendor" || name == "node_modules" || name == ".git" || name == w.buildDir
+// shouldSkipDirectory checks if a directory should be skipped during file walks.
+// It expects the full directory path (not just the base name) so that the build
+// directory can be matched precisely by its absolute path.
+func (w *watcher) shouldSkipDirectory(path string) bool {
+	// Well-known directories are matched by base name since they can appear
+	// anywhere in the source tree.
+	switch filepath.Base(path) {
+	case "vendor", "node_modules", ".git":
+		return true
+	}
+
+	// Match the build directory by absolute path so that unrelated directories
+	// that merely share its base name (e.g. another "dashboards" folder) are not
+	// skipped by mistake. The build directory's absolute path is precomputed once
+	// at watcher creation time.
+	if w.absoluteBuildDir == "" {
+		return false
+	}
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	return absPath == w.absoluteBuildDir
 }
 
 // detectModulePaths finds module paths for both Go and CUE projects.
@@ -94,21 +115,21 @@ func (w *watcher) isLocalImport(importPath string) bool {
 
 type watcher struct {
 	async.SimpleTask
-	sourceDir     string
-	buildDir      string
-	buildArgs     []string
-	debounceDelay time.Duration
-	writer        io.Writer
-	errWriter     io.Writer
-	buildOption   *build.Option
-	modulePaths   []string            // Module paths from go.mod and cue.mod for identifying local imports
-	changedFiles  map[string]bool     // Track files changed during debounce period
-	dependencyMap map[string][]string // Maps library files to dashboard files that import them
-	allDashboards map[string]bool     // Track all known dashboard files for deletion detection
+	sourceDir        string
+	absoluteBuildDir string
+	buildArgs        []string
+	debounceDelay    time.Duration
+	writer           io.Writer
+	errWriter        io.Writer
+	buildOption      *build.Option
+	modulePaths      []string            // Module paths from go.mod and cue.mod for identifying local imports
+	changedFiles     map[string]bool     // Track files changed during debounce period
+	dependencyMap    map[string][]string // Maps library files to dashboard files that import them
+	allDashboards    map[string]bool     // Track all known dashboard files for deletion detection
 }
 
 // newWatcher creates a new file watcher that monitors DaC files and triggers rebuilds
-func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, debounceDelay time.Duration, writer, errWriter io.Writer) *watcher {
+func newWatcher(sourceDir, absoluteBuildDir, outputFormat string, buildArgs []string, debounceDelay common.Duration, writer, errWriter io.Writer) *watcher {
 	// Create build option to reuse build logic
 	buildOpt := &build.Option{
 		DirectoryOption: opt.DirectoryOption{Directory: sourceDir},
@@ -119,16 +140,16 @@ func newWatcher(sourceDir, buildDir, outputFormat string, buildArgs []string, de
 	buildOpt.SetErrWriter(errWriter)
 
 	w := &watcher{
-		sourceDir:     sourceDir,
-		buildDir:      buildDir,
-		buildArgs:     buildArgs,
-		debounceDelay: debounceDelay,
-		writer:        writer,
-		errWriter:     errWriter,
-		buildOption:   buildOpt,
-		modulePaths:   detectModulePaths(sourceDir),
-		changedFiles:  make(map[string]bool),
-		dependencyMap: make(map[string][]string),
+		sourceDir:        sourceDir,
+		absoluteBuildDir: absoluteBuildDir,
+		buildArgs:        buildArgs,
+		debounceDelay:    time.Duration(debounceDelay),
+		writer:           writer,
+		errWriter:        errWriter,
+		buildOption:      buildOpt,
+		modulePaths:      detectModulePaths(sourceDir),
+		changedFiles:     make(map[string]bool),
+		dependencyMap:    make(map[string][]string),
 	}
 	// Build initial dependency map
 	w.buildDependencyMap()
@@ -412,7 +433,7 @@ func (w *watcher) findDashboardFiles() []string {
 			return nil
 		}
 		if info.IsDir() {
-			if w.shouldSkipDirectory(info.Name()) {
+			if w.shouldSkipDirectory(path) {
 				return filepath.SkipDir
 			}
 			return nil
@@ -659,7 +680,7 @@ func (w *watcher) resolveImportToFiles(importPath string) []string {
 			return nil
 		}
 
-		if w.shouldSkipDirectory(info.Name()) {
+		if w.shouldSkipDirectory(path) {
 			return filepath.SkipDir
 		}
 
@@ -736,7 +757,7 @@ func (w *watcher) addWatchRecursive(watcher *fsnotify.Watcher, root string) erro
 			return err
 		}
 		if info.IsDir() {
-			if w.shouldSkipDirectory(info.Name()) {
+			if w.shouldSkipDirectory(path) {
 				return filepath.SkipDir
 			}
 			return watcher.Add(path)
