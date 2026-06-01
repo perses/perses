@@ -24,16 +24,17 @@ export function buildProxyUrl({
 }: {
   project?: string;
   dashboard?: string;
-  name: string;
+  name?: string;
 }): string {
   const basePath = PERSES_APP_CONFIG.api_prefix;
-  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
+  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}`;
   if (dashboard) {
     url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
   }
   if (project) {
     url = `projects/${encodeURIComponent(project)}/${url}`;
   }
+  url = name === undefined ? `unsaved/${url}` : `${url}/${encodeURIComponent(name)}`;
   return `${basePath}/proxy/${url}`;
 }
 
