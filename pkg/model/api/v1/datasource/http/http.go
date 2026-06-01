@@ -85,6 +85,10 @@ type Config struct {
 	// Secret is the name of the secret that should be used for the proxy or discovery configuration
 	// It will contain any sensitive information such as password, token, certificate.
 	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
+	// AllowHeaders will drop all headers not in the list before forwarding the request to the datasource.
+	AllowHeaders []string `json:"allowHeaders,omitempty" yaml:"allowHeaders,omitempty"`
+	// DropHeaders will only keep headers in the list before forwarding the request to the datasource.
+	DropHeaders []string `json:"dropHeaders,omitempty" yaml:"dropHeaders,omitempty"`
 }
 
 func (h *Config) UnmarshalJSON(data []byte) error {
@@ -116,6 +120,9 @@ func (h *Config) UnmarshalYAML(unmarshal func(any) error) error {
 func (h *Config) validate() error {
 	if h.URL == nil {
 		return fmt.Errorf("url cannot be empty")
+	}
+	if len(h.AllowHeaders) > 0 && len(h.DropHeaders) > 0 {
+		return fmt.Errorf("cannot specify both allowHeaders and dropHeaders at the same time")
 	}
 	return nil
 }
