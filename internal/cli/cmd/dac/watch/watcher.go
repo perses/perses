@@ -334,7 +334,7 @@ func (w *watcher) rebuildAffectedFiles() {
 	// Clear the changed files map
 	w.changedFiles = make(map[string]bool)
 
-	logrus.Debugf("🔄 Changes detected in %d file(s), rebuilding...", len(filesToBuild))
+	logrus.Infof("🔄 Changes detected in %d file(s), rebuilding...", len(filesToBuild))
 
 	// Check if any changed files are library/shared files (not buildable as main packages)
 	hasLibraryFiles := false
@@ -373,7 +373,7 @@ func (w *watcher) rebuildAffectedFiles() {
 			}
 		}
 		if !hasErrors {
-			logrus.Debug("✅ Build successful!")
+			logrus.Info("✅ Build successful!")
 		}
 		return
 	}
@@ -393,7 +393,7 @@ func (w *watcher) rebuildAffectedFiles() {
 		return
 	}
 
-	logrus.Debug("✅ Build successful!")
+	logrus.Info("✅ Build successful!")
 }
 
 // buildFile builds a single file using the build option and returns the output path
@@ -461,7 +461,7 @@ func (w *watcher) buildAllDashboards() {
 		return
 	}
 
-	logrus.Debugf("Building %d dashboard(s)...", len(dashboards))
+	logrus.Infof("Building %d dashboard(s)...", len(dashboards))
 	hasErrors := false
 	successCount := 0
 
@@ -479,7 +479,7 @@ func (w *watcher) buildAllDashboards() {
 	if hasErrors {
 		logrus.Warnf("⚠️ Build completed with errors (%d/%d succeeded)", successCount, len(dashboards))
 	} else {
-		logrus.Debugf("✅ Build successful! (%d dashboard(s))", len(dashboards))
+		logrus.Infof("✅ Build successful! (%d dashboard(s))", len(dashboards))
 	}
 }
 
