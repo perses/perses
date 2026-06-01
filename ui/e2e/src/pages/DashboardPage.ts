@@ -15,6 +15,7 @@ import { expect, Locator, Page } from '@playwright/test';
 import { PanelEditor } from './PanelEditor';
 import { VariableEditor } from './VariableEditor';
 import { PanelGroup } from './PanelGroup';
+import { TabGroup } from './TabGroup';
 import { Panel } from './Panel';
 
 type PanelGroupConfig = {
@@ -200,16 +201,26 @@ export class DashboardPage {
     return new PanelGroup(container);
   }
 
-  async addPanelGroup(panelGrouName: string): Promise<void> {
+  getTabGroup(groupName: string): TabGroup {
+    const container = this.panelGroups.filter({ hasText: groupName });
+    return new TabGroup(container);
+  }
+
+  async addPanelGroup(panelGroupName: string, layoutKind?: 'Grid' | 'Tabs'): Promise<void> {
     await this.addPanelGroupButton.click();
     const dialog = this.getDialog('add panel group');
+    if (layoutKind) {
+      const layoutSelect = dialog.getByTestId('panel-group-editor-layout-kind');
+      await layoutSelect.click();
+      await this.page.getByRole('option', { name: layoutKind }).click();
+    }
     const nameInput = dialog.getByLabel('Name');
-    await nameInput.type(panelGrouName);
+    await nameInput.fill(panelGroupName);
     await dialog.getByRole('button', { name: 'Add' }).click();
   }
 
-  async editPanelGroup(panelGrouName: string, { name }: PanelGroupConfig): Promise<void> {
-    const panelGroup = this.getPanelGroup(panelGrouName);
+  async editPanelGroup(panelGroupName: string, { name }: PanelGroupConfig): Promise<void> {
+    const panelGroup = this.getPanelGroup(panelGroupName);
     await panelGroup.startEditing();
     const dialog = this.getDialog('edit panel group');
     const nameInput = dialog.getByLabel('Name');
