@@ -175,7 +175,8 @@ func (w *watcher) Execute(ctx context.Context, _ context.CancelFunc) error {
 
 	// Initial build - build all dashboard files
 	logrus.Debug("🔨 Running initial build...")
-	w.buildAllDashboards()
+	dashboards := w.findDashboardFiles()
+	w.buildDashboards(dashboards)
 
 	var debounceTimer *time.Timer
 	var debouncePending bool
@@ -336,18 +337,24 @@ func (w *watcher) rebuildAffectedFiles() {
 
 	logrus.Infof("🔄 Changes detected in %d file(s), rebuilding...", len(filesToBuild))
 
+	// Prepare a set of dashboard files to be built
+	dashboardFiles := make(map[string]bool)
+
 	// Check if any changed files are library/shared files (not buildable as main packages)
-	hasLibraryFiles := false
+	// If this is directly dashboards, add them directly into the set of dashboards
+	libraryFiles := make(map[string]bool)
 	for _, file := range filesToBuild {
 		isDash := w.isDashboardFile(file)
 		logrus.Debugf("   - %s (library: %v)", file, !isDash)
-		if !isDash {
-			hasLibraryFiles = true
+		if isDash {
+			dashboardFiles[file] = true
+		} else {
+			libraryFiles[file] = true
 		}
 	}
 
-	// If library files changed, find and rebuild affected dashboards
-	if hasLibraryFiles {
+	// If library files changed, find the affected dashboards and add them to the set of dashboards
+	if len(libraryFiles) > 0 {
 		affectedDashboards := w.findAffectedDashboards(filesToBuild)
 		if len(affectedDashboards) == 0 {
 			// Fallback: if we can't determine dependencies, rebuild all
@@ -355,45 +362,24 @@ func (w *watcher) rebuildAffectedFiles() {
 			w.buildAllDashboards()
 			return
 		}
-		logrus.Debugf("Library file(s) changed, rebuilding %d affected dashboard(s)...", len(affectedDashboards))
+		logrus.Debugf("Library file(s) changed, will rebuild %d affected dashboard(s)...", len(affectedDashboards))
 		if logrus.IsLevelEnabled(logrus.DebugLevel) {
 			for _, dashboard := range affectedDashboards {
 				relPath, _ := filepath.Rel(w.sourceDir, dashboard)
 				logrus.Debugf("   → %s", relPath)
 			}
 		}
-		hasErrors := false
 		for _, dashboard := range affectedDashboards {
-			outputPath, err := w.buildFile(dashboard)
-			if err != nil {
-				logrus.Errorf("❌ Build failed for %s: %v", dashboard, err)
-				hasErrors = true
-			} else {
-				logrus.Debugf("Successfully built %s at %s", dashboard, outputPath)
-			}
+			dashboardFiles[dashboard] = true
 		}
-		if !hasErrors {
-			logrus.Info("✅ Build successful!")
-		}
-		return
 	}
 
-	// Build each changed dashboard file individually
-	hasErrors := false
-	for _, file := range filesToBuild {
-		outputPath, err := w.buildFile(file)
-		if err != nil {
-			logrus.Errorf("❌ Build failed for %s: %v", file, err)
-			hasErrors = true
-		} else {
-			logrus.Debugf("Successfully built %s at %s", file, outputPath)
-		}
+	// Turn back the set into a slice and build all the dashboards
+	dashboardFilesSlice := make([]string, 0, len(dashboardFiles))
+	for dashboard := range dashboardFiles {
+		dashboardFilesSlice = append(dashboardFilesSlice, dashboard)
 	}
-	if hasErrors {
-		return
-	}
-
-	logrus.Info("✅ Build successful!")
+	w.buildDashboards(dashboardFilesSlice)
 }
 
 // buildFile builds a single file using the build option and returns the output path
@@ -456,6 +442,11 @@ func (w *watcher) findDashboardFiles() []string {
 // buildAllDashboards builds all dashboard files in the source directory
 func (w *watcher) buildAllDashboards() {
 	dashboards := w.findDashboardFiles()
+	w.buildDashboards(dashboards)
+}
+
+// buildDashboards builds given dashboard files in the source directory
+func (w *watcher) buildDashboards(dashboards []string) {
 	if len(dashboards) == 0 {
 		logrus.Warn("⚠️  No dashboard files found")
 		return
