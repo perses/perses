@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -33,11 +35,13 @@ import (
 type option struct {
 	persesCMD.Option
 	opt.OutputOption
-	sourceDir     string
-	buildArgs     []string
-	debounceDelay time.Duration
-	writer        io.Writer
-	errWriter     io.Writer
+	sourceDir             string
+	absoluteBuildDir      string
+	buildArgs             []string
+	debounceDelay         common.Duration
+	debounceDelayAsString string
+	writer                io.Writer
+	errWriter             io.Writer
 }
 
 // Complete initializes the watch command with the provided arguments
@@ -52,6 +56,22 @@ func (o *option) Complete(args []string) error {
 	}
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
+	}
+
+	debounceDelay, err := common.ParseDuration(o.debounceDelayAsString)
+	if err != nil {
+		return err
+	}
+	o.debounceDelay = debounceDelay
+
+	// Precompute the absolute path of the build directory once, so directory
+	// checks during file walks don't have to recompute it every time.
+	buildDir := config.Global.Dac.OutputFolder
+	var errBuildDir error
+	o.absoluteBuildDir, errBuildDir = filepath.Abs(buildDir)
+	if errBuildDir != nil {
+		logrus.Errorf("Failed to resolve absolute path for build directory %q: %v", buildDir, errBuildDir)
+		return errBuildDir
 	}
 	return nil
 }
@@ -76,11 +96,10 @@ func (o *option) Validate() error {
 
 // Execute starts the file watcher and manages the watch lifecycle
 func (o *option) Execute() error {
-	buildDir := config.Global.Dac.OutputFolder
 
 	logrus.Info("📦 Dashboard-as-Code Watcher")
 	logrus.Infof("   Source: %s", o.sourceDir)
-	logrus.Infof("   Output: %s", buildDir)
+	logrus.Infof("   Output: %s", o.absoluteBuildDir)
 	logrus.Infof("   Format: %s", o.Output)
 	logrus.Info("")
 	logrus.Info("👀 Watching for changes... (Ctrl+C to stop)")
@@ -93,7 +112,7 @@ func (o *option) Execute() error {
 	// Create watcher task
 	watcher := newWatcher(
 		o.sourceDir,
-		buildDir,
+		o.absoluteBuildDir,
 		o.Output,
 		o.buildArgs,
 		o.debounceDelay,
@@ -134,9 +153,7 @@ func (o *option) SetErrWriter(errWriter io.Writer) {
 
 // NewCMD creates the watch command for automatic Dashboard-as-Code rebuilding
 func NewCMD() *cobra.Command {
-	o := &option{
-		debounceDelay: 500 * time.Millisecond,
-	}
+	o := &option{}
 
 	cmd := &cobra.Command{
 		Use:   "watch [source-dir]",
@@ -177,7 +194,7 @@ percli dac watch ./my-dashboards -- --arg1=value1 --arg2=value2`,
 	}
 
 	opt.AddOutputFlags(cmd, &o.OutputOption)
-	cmd.Flags().DurationVar(&o.debounceDelay, "debounce", 500*time.Millisecond, "Debounce delay for file changes")
+	cmd.Flags().StringVar(&o.debounceDelayAsString, "debounce", "500ms", "Debounce delay for file changes")
 
 	return cmd
 }

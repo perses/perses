@@ -108,11 +108,13 @@ func TestFindDashboardFiles(t *testing.T) {
 	tests := []struct {
 		name      string
 		sourceDir string
+		buildDir  string
 		expected  []string
 	}{
 		{
 			name:      "Go project with 2 dashboards",
 			sourceDir: filepath.Join("testdata", "go-simple"),
+			buildDir:  "built",
 			expected: []string{
 				filepath.Join("testdata", "go-simple", "dashboards", "dash1", "main.go"),
 				filepath.Join("testdata", "go-simple", "dashboards", "dash2", "main.go"),
@@ -121,20 +123,42 @@ func TestFindDashboardFiles(t *testing.T) {
 		{
 			name:      "CUE project with 2 dashboards",
 			sourceDir: filepath.Join("testdata", "cue-simple"),
+			buildDir:  "built",
 			expected: []string{
 				filepath.Join("testdata", "cue-simple", "dashboards", "dash1.cue"),
 				filepath.Join("testdata", "cue-simple", "dashboards", "my-dashboard.cue"),
 			},
+		},
+		{
+			// The build directory must be skipped: pointing it at dash2 excludes it.
+			name:      "Go project with build dir inside dashboards",
+			sourceDir: filepath.Join("testdata", "go-simple"),
+			buildDir:  filepath.Join("testdata", "go-simple", "dashboards", "dash2"),
+			expected: []string{
+				filepath.Join("testdata", "go-simple", "dashboards", "dash1", "main.go"),
+			},
+		},
+		{
+			// Pointing the build dir at the whole dashboards folder skips everything.
+			name:      "CUE project with build dir on dashboards folder",
+			sourceDir: filepath.Join("testdata", "cue-simple"),
+			buildDir:  filepath.Join("testdata", "cue-simple", "dashboards"),
+			expected:  nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
+			buildDirAbs, err := filepath.Abs(tt.buildDir)
+			if err != nil {
+				t.Fatalf("failed to resolve build dir abs path: %v", err)
+			}
 			w := &watcher{
-				sourceDir: tt.sourceDir,
-				buildDir:  "built",
-				writer:    &buf,
+				sourceDir:   tt.sourceDir,
+				buildDir:    tt.buildDir,
+				buildDirAbs: buildDirAbs,
+				writer:      &buf,
 			}
 			result := w.findDashboardFiles()
 
@@ -297,6 +321,15 @@ func TestNewWatcher(t *testing.T) {
 
 	if w.debounceDelay != 500*time.Millisecond {
 		t.Errorf("debounceDelay = %v, expected %v", w.debounceDelay, 500*time.Millisecond)
+	}
+
+	// Check that the build directory absolute path was precomputed
+	expectedBuildDirAbs, err := filepath.Abs("built")
+	if err != nil {
+		t.Fatalf("failed to resolve expected build dir abs path: %v", err)
+	}
+	if w.buildDirAbs != expectedBuildDirAbs {
+		t.Errorf("buildDirAbs = %v, expected %v", w.buildDirAbs, expectedBuildDirAbs)
 	}
 
 	// Check that dependency map was built
