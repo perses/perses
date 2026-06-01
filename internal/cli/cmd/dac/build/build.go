@@ -193,18 +193,6 @@ func (o *Option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
-// Run executes the build process programmatically.
-// This is useful for other commands to trigger builds without going through the CLI (e.g watch command).
-func (o *Option) Run() error {
-	if err := o.Complete(nil); err != nil {
-		return err
-	}
-	if err := o.Validate(); err != nil {
-		return err
-	}
-	return o.Execute()
-}
-
 func NewCMD() *cobra.Command {
 	o := &Option{}
 	cmd := &cobra.Command{
