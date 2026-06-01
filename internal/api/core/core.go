@@ -84,7 +84,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	// register the API
-	runner.HTTPServerBuilder().
+	runner.
+		WithDefaultLogrusBuilder().
+		HTTPServerBuilder().
 		ActivatePprof(enablePprof).
 		APIRegistration(persesAPI).
 		GzipSkipper(func(c echo.Context) bool {
