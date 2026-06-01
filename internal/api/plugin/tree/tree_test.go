@@ -44,7 +44,7 @@ func TestTree_Add(t *testing.T) {
 				},
 			},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
 				},
@@ -53,7 +53,7 @@ func TestTree_Add(t *testing.T) {
 		{
 			name: "adding higher version updates latest",
 			baseTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"latest": "old-inst",
 				},
@@ -66,7 +66,7 @@ func TestTree_Add(t *testing.T) {
 				},
 			},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"v1.1.0": "new-inst",
 					"latest": "new-inst",
@@ -81,11 +81,11 @@ func TestTree_Add(t *testing.T) {
 				{"schema", plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regB"}, "b-inst"},
 			},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: "regA"}: {
+				Node{Name: "schema", registry: "regA"}: {
 					"v0.1.0": "a-inst",
 					"latest": "a-inst",
 				},
-				node{name: "schema", registry: "regB"}: {
+				Node{Name: "schema", registry: "regB"}: {
 					"v0.1.0": "b-inst",
 					"latest": "b-inst",
 				},
@@ -99,7 +99,7 @@ func TestTree_Add(t *testing.T) {
 				{"dup", plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}, "second"},
 			},
 			expectedTree: Tree[any]{
-				node{name: "dup", registry: plugin.DefaultRegistry}: {
+				Node{Name: "dup", registry: plugin.DefaultRegistry}: {
 					"v2.0.0": "second",
 					"latest": "second",
 				},
@@ -129,14 +129,14 @@ func TestTree_Remove(t *testing.T) {
 		{
 			name: "remove non-existent version is no-op",
 			baseTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
 				},
 			},
 			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}}},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
 				},
@@ -145,7 +145,7 @@ func TestTree_Remove(t *testing.T) {
 		{
 			name: "remove non-latest version",
 			baseTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"v1.1.0": "new-inst",
 					"latest": "new-inst",
@@ -153,7 +153,7 @@ func TestTree_Remove(t *testing.T) {
 			},
 			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v1.0.0", Registry: ""}}},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.1.0": "new-inst",
 					"latest": "new-inst",
 				},
@@ -162,7 +162,7 @@ func TestTree_Remove(t *testing.T) {
 		{
 			name: "remove latest updates latest to highest remaining",
 			baseTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "a-inst",
 					"v1.2.0": "c-inst",
 					"latest": "c-inst",
@@ -170,7 +170,7 @@ func TestTree_Remove(t *testing.T) {
 			},
 			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v1.2.0", Registry: ""}}},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "a-inst",
 					"latest": "a-inst",
 				},
@@ -179,7 +179,7 @@ func TestTree_Remove(t *testing.T) {
 		{
 			name: "remove last version deletes key",
 			baseTree: Tree[any]{
-				node{name: "dup", registry: plugin.DefaultRegistry}: {
+				Node{Name: "dup", registry: plugin.DefaultRegistry}: {
 					"v2.0.0": "second",
 					"latest": "second",
 				},
@@ -190,18 +190,18 @@ func TestTree_Remove(t *testing.T) {
 		{
 			name: "remove version in one registry does not affect other",
 			baseTree: Tree[any]{
-				node{name: "schema", registry: "regA"}: {
+				Node{Name: "schema", registry: "regA"}: {
 					"v0.1.0": "a-inst",
 					"latest": "a-inst",
 				},
-				node{name: "schema", registry: "regB"}: {
+				Node{Name: "schema", registry: "regB"}: {
 					"v0.1.0": "b-inst",
 					"latest": "b-inst",
 				},
 			},
 			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regA"}}},
 			expectedTree: Tree[any]{
-				node{name: "schema", registry: "regB"}: {
+				Node{Name: "schema", registry: "regB"}: {
 					"v0.1.0": "b-inst",
 					"latest": "b-inst",
 				},
@@ -235,7 +235,7 @@ func TestTree_Get(t *testing.T) {
 		{
 			name: "get latest when version empty",
 			baseTree: Tree[string]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"v1.1.0": "inst-2",
 					"latest": "inst-2",
@@ -249,7 +249,7 @@ func TestTree_Get(t *testing.T) {
 		{
 			name: "get specific existing version",
 			baseTree: Tree[string]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "old-inst",
 					"v1.1.0": "new-inst",
 					"latest": "new-inst",
@@ -263,7 +263,7 @@ func TestTree_Get(t *testing.T) {
 		{
 			name: "get non-existent version returns false",
 			baseTree: Tree[string]{
-				node{name: "schema", registry: plugin.DefaultRegistry}: {
+				Node{Name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
 					"latest": "inst-1",
 				},
@@ -275,11 +275,11 @@ func TestTree_Get(t *testing.T) {
 		{
 			name: "registry isolation",
 			baseTree: Tree[string]{
-				node{name: "schema", registry: "regA"}: {
+				Node{Name: "schema", registry: "regA"}: {
 					"v0.1.0": "a-inst",
 					"latest": "a-inst",
 				},
-				node{name: "schema", registry: "regB"}: {
+				Node{Name: "schema", registry: "regB"}: {
 					"v0.1.0": "b-inst",
 					"latest": "b-inst",
 				},
