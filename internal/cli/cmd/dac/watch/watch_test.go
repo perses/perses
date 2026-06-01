@@ -19,6 +19,8 @@ import (
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/perses/spec/go/common"
 )
 
 func TestParseGoImports(t *testing.T) {
@@ -150,15 +152,14 @@ func TestFindDashboardFiles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer
-			buildDirAbs, err := filepath.Abs(tt.buildDir)
+			absoluteBuildDir, err := filepath.Abs(tt.buildDir)
 			if err != nil {
 				t.Fatalf("failed to resolve build dir abs path: %v", err)
 			}
 			w := &watcher{
-				sourceDir:   tt.sourceDir,
-				buildDir:    tt.buildDir,
-				buildDirAbs: buildDirAbs,
-				writer:      &buf,
+				sourceDir:        tt.sourceDir,
+				absoluteBuildDir: absoluteBuildDir,
+				writer:           &buf,
 			}
 			result := w.findDashboardFiles()
 
@@ -204,7 +205,6 @@ func TestBuildDependencyMap(t *testing.T) {
 			var buf bytes.Buffer
 			w := &watcher{
 				sourceDir:     tt.sourceDir,
-				buildDir:      "built",
 				writer:        &buf,
 				dependencyMap: make(map[string][]string),
 				allDashboards: make(map[string]bool),
@@ -240,7 +240,6 @@ func TestFindAffectedDashboards(t *testing.T) {
 	var buf bytes.Buffer
 	w := &watcher{
 		sourceDir:     filepath.Join("testdata", "go-simple"),
-		buildDir:      "built",
 		writer:        &buf,
 		dependencyMap: make(map[string][]string),
 		allDashboards: make(map[string]bool),
@@ -306,7 +305,7 @@ func TestNewWatcher(t *testing.T) {
 		"built",
 		"yaml",
 		nil,
-		500*time.Millisecond,
+		common.Duration(500*time.Millisecond),
 		&buf,
 		&buf,
 	)
@@ -324,12 +323,9 @@ func TestNewWatcher(t *testing.T) {
 	}
 
 	// Check that the build directory absolute path was precomputed
-	expectedBuildDirAbs, err := filepath.Abs("built")
-	if err != nil {
-		t.Fatalf("failed to resolve expected build dir abs path: %v", err)
-	}
-	if w.buildDirAbs != expectedBuildDirAbs {
-		t.Errorf("buildDirAbs = %v, expected %v", w.buildDirAbs, expectedBuildDirAbs)
+	expectedAbsoluteBuildDir := "built" // use a non-absolute build dir here as not the purpose of that test
+	if w.absoluteBuildDir != expectedAbsoluteBuildDir {
+		t.Errorf("absoluteBuildDir = %v, expected %v", w.absoluteBuildDir, expectedAbsoluteBuildDir)
 	}
 
 	// Check that dependency map was built
