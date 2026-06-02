@@ -2,10 +2,33 @@
 
 ## 0.54.0-beta.0 / 2026-06-01
 
+This is the first release of the v0.54.0 beta series.
+
+It includes new plugins: Jaeger, GreptimeDB and Splunk.
+As adding more plugins is increasing the size of the container image, likely we will remove some of them in future
+release.
+It does not mean we will remove the support for these plugins, it is just we won't include them into the default image.
+You will have to add them manually.
+The drop will occur once we are able to provide a good way to add plugins to an existing installation without having to
+rebuild the image.
+In the meantime, if you don't want to use these plugins, you can choose to enable or disable them by configuration.
+
+This release also includes the long awaited sub-folder system to better organize your dashboards and improve the
+accessibility by adding keyboard shortcuts.
+
+As this is a beta release, it may contain bugs and breaking changes. We recommend to test it in a non-production
+environment before upgrading.
+
+Finally, thank you to all the contributor who made this release possible,
+you are more and more, and we are really happy to see the community growing and contributing to make Perses better and
+better!
+
+### Core & UI
+
 - [FEATURE] By configuration, enable or disable plugins (#4084)
-- [FEATURE] Add edit display name to root level folder edit action (#4065)
-- [FEATURE] Manage a sub-folder system (#3966)
-- [FEATURE] : Keyboard shortcut (#4019)
+- [FEATURE] Manage a sub-folder system (#3966) (#4065)
+- [FEATURE] Keyboard shortcut (#4019)
+- [FEATURE] Add new plugin: Jaeger, GreptimeDB and Splunk
 - [ENHANCEMENT] Allow decrypt secret in DB with "authenticated" mode AEAD for future backward compatibility (#4056)
 - [ENHANCEMENT] migrate Grafana row repeat to Perses grid layout repeatVariable (#4079)
 - [ENHANCEMENT] Remove flat dashboard view, keep only tree view (#4066)
@@ -35,6 +58,35 @@
 - [DOC] Fix authorization provider documentation (#3980)
 - [DOC] Adds comprehensive documentation for Perses Prometheus instrumentation, focusing on the custom dashboard usage metrics. (#4062)
 - [DOCS]: improve the migration documentation (#4036)
+
+### Plugins improvements
+
+- [FEATURE] Table: add search bar to column filter dropdown (perses/plugins#635)
+- [FEATURE] Table: add DataLink support to Go SDK (perses/plugins#631)
+- [FEATURE] LogsTable: add Grafana migration script (perses/plugins#622)
+- [FEATURE] LogsTable: add JSON export to the logs table (perses/plugins#604)
+- [FEATURE] Loki: add loki values, value names and logql variables (perses/plugins#651)
+- [FEATURE] Loki: add query migration script for log queries (perses/plugins#634)
+- [FEATURE] TracingGanttChart: add search functionality (perses/plugins#661)
+- [FEATURE] Prometheus: add request headers and query params interpolation (perses/plugins#638)
+- [ENHANCEMENT] Table: improve migration (perses/plugins#654)
+- [ENHANCEMENT] TraceTable: enable word wrap on spans and start time columns (perses/plugins#655)
+- [ENHANCEMENT] TracingGanttChart: show span kind, status and scope in attribute pane (perses/plugins#617)
+- [ENHANCEMENT] TracingGanttChart: show error message if panel query is a search query instead of a single trace (perses/plugins#537)
+- [ENHANCEMENT] TracingGanttChart: support span attributes with type double (perses/plugins#421)
+- [ENHANCEMENT] TracingGanttChart: add number of events and links in tab (perses/plugins#341)
+- [ENHANCEMENT] TimeSeriesChart: query settings: support all format attributes (perses/plugins#643)
+- [ENHANCEMENT] TimeSeriesChart: support migration of unit overrides (perses/plugins#616)
+- [ENHANCEMENT] allow variable replacement on tempo queries (perses/plugins#621)
+- [BUGFIX] Partial table cell settings - gauge chart and range function (perses/plugins#645)
+- [BUGFIX] table go-sdk: fix Density constant values (perses/plugins#653)
+- [BUGFIX] Table: don't fail migration on duplicated rename (perses/plugins#624)
+- [BUGFIX] parse text errors from Loki api to display errors correctly (perses/plugins#649)
+- [BUGFIX] TracingGanttChart: fix attribute pane resizing (perses/plugins#636)
+- [BUGFIX] TimeSeriesChart: don't fail migration on undefined refId (perses/plugins#623)
+- [BUGFIX] TimeSeriesChart: Grafana migration: handle string value for fillOpacity params (perses/plugins#610)
+- [BUGFIX] TimeSeriesChart: Grafana migration: don't fail on undefined calcs (perses/plugins#603)
+- [BUGFIX] PrometheusTimeSeriesQuery: Grafana migration: don't match non-prom queries when type is set (perses/plugins#632)
 
 ## 0.53.1 / 2026-03-11
 
