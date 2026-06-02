@@ -59,7 +59,8 @@ Examples:
 
 - images built from the main branch: `persesdev/perses:main-2023-12-23-a2223483-distroless-debug`
   or `persesdev/perses:main-2023-12-23-a2223483-distroless`
-- latest Perses image: `persesdev/perses` or `persesdev/perses:latest-debug`
+- latest Perses image from the main branch: `persesdev/perses:main-latest-debug` or `persesdev/perses:main-latest`
+- latest stable Perses image: `persesdev/perses` or `persesdev/perses:latest-debug`
 - precise release image: `persesdev/perses:v0.50.0`, `persesdev/perses:v0.50.0-debug`, `persesdev/perses:v0.50.0-distroless`, `persesdev/perses:v0.50.0-distroless-debug`
 - minor release image: `persesdev/perses:v0.50`, `persesdev/perses:v0.50-debug`, `persesdev/perses:v0.50-distroless`, `persesdev/perses:v0.50-distroless-debug`
 

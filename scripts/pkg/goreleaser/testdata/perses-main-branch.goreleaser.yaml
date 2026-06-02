@@ -7,6 +7,7 @@ dockers_v2:
     images:
       - "docker.io/persesdev/perses"
     tags:
+      - "main-latest"
       - "main-2006-01-02-abc1234-distroless"
     labels:
       "org.opencontainers.image.authors": "The Perses Authors <perses-team@googlegroups.com>"
