@@ -468,8 +468,8 @@ github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJw
 github.com/opencontainers/image-spec v1.1.1/go.mod h1:qpqAh3Dmcf36wStyyWU+kCeDgrGnAve2nCC8+7h8Q0M=
 github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7olPtrEc=
 github.com/pelletier/go-toml/v2 v2.3.1/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/perses/common v0.30.2 h1:RAiVxUpX76lTCb4X7pfcXSvYdXQmZwKi4oDKAEO//u0=
-github.com/perses/common v0.30.2/go.mod h1:DFtur1QPah2/ChXbKKhw7djYdwNgz27s5fPKpiK0Xao=
+github.com/perses/common v0.31.0 h1:3jDf6RvtKg7F+hahoPgljl2pHRSSgb/bt+ELlmFc/qk=
+github.com/perses/common v0.31.0/go.mod h1:YQ71/UC6KCogfiTRuh3FLar11KolNGScwms5MVlc/f4=
 github.com/perses/spec v0.2.0-beta.2 h1:ZB5oYJkii3Lo8KCVQ6fMIzZNaCFT5tzSLvH4psr9w8Y=
 github.com/perses/spec v0.2.0-beta.2/go.mod h1:ROQN9NSBvz7MGPL5/L1yGMYe7YGNPTBCyxBLaDpXHsc=
 github.com/pierrec/lz4/v4 v4.1.22 h1:cKFw6uJDK+/gfw5BcDL0JL5aBsAFdsIT18eRtLj7VIU=
