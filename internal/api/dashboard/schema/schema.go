@@ -48,6 +48,9 @@ var (
 	projMetadataHidSelector     = cue.Hid("_ProjectMetadata_0", "_")
 	projMetadataWrapHidSelector = cue.Hid("_ProjectMetadataWrapper_0", "_")
 	listSpecHidSelector         = cue.Hid("_ListSpec_0", "_")
+	listVariableSpecSelector    = cue.Hid("_ListVariableSpec_0", "_")
+	textSpecHidSelector         = cue.Hid("_TextSpec_0", "_")
+	textVariableSpecSelector    = cue.Hid("_TextVariableSpec_0", "_")
 	// string
 	pluginSelector = cue.Str("plugin")
 	specSelector   = cue.Str("spec")
@@ -90,6 +93,27 @@ func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 		return cue.Value{}, fmt.Errorf("unexpected AST node type %T: %w", node, err)
 	}
 	return ctx.BuildExpr(expr), nil
+}
+
+func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string) cue.Value {
+	node := value.Syntax(utils.CueSyntaxOptions...)
+
+	ast.Walk(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.Ident:
+			if x.Name == oldName {
+				x.Name = newName
+			}
+		}
+		return true
+	}, nil)
+
+	expr, err := utils.CastASTNodeToASTExpr(node)
+	if err != nil {
+		return cue.Value{}
+	}
+	return ctx.BuildExpr(expr)
+
 }
 
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
@@ -179,21 +203,58 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 
 	if variables, ok := plugins[v1plugin.KindVariable]; ok {
 		// load TextVariableSpec and ListVariableSpec
-		textSpec := ctx.EncodeType(dashboard.TextVariableSpec{})
-		if textSpec.Err() != nil {
-			return cue.Value{}, fmt.Errorf("could not encode TextVariableSpec: %w", textSpec.Err())
+		textVarSpec := ctx.EncodeType(dashboard.TextVariableSpec{})
+		if textVarSpec.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not encode TextVariableSpec: %w", textVarSpec.Err())
 		}
-		listSpec := ctx.EncodeType(dashboard.ListVariableSpec{})
+
+		// rename _Display_0 to _Display_TextSpec_0 to avoid name collision
+		// resulting in the `incomplete value` during cue vet
+		textVarSpec = renameDefinition(ctx, textVarSpec, "_Display_0", "_Display_TextSpec_0")
+
+		listVarSpec := ctx.EncodeType(dashboard.ListVariableSpec{})
+		if listVarSpec.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not encode ListVariableSpec: %w", listVarSpec.Err())
+		}
+
+		// rename _Display_0 to _Display_ListSpec_0 to avoid name collision
+		// resulting in the `incomplete value` during cue vet
+		listVarSpec = renameDefinition(ctx, listVarSpec, "_Display_0", "_Display_ListSpec_0")
+
+		// grab _ListSpec_0 and inject it into _ListVariableSpec_0
+		// this is done to avoid the incomplete value error during cue vet
+		// cue vet has trouble working with embeded fields
+		listSpec := listVarSpec.LookupPath(cue.MakePath(listSpecHidSelector))
 		if listSpec.Err() != nil {
-			return cue.Value{}, fmt.Errorf("could not encode ListVariableSpec: %w", listSpec.Err())
+			return cue.Value{}, fmt.Errorf("could not lookup ListSpec schema: %w", listSpec.Err())
+		}
+
+		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector), listSpec)
+		listVarSpec, err = removeEmptyStringField(ctx, listVarSpec)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("failed to remove empty fields from ListVariable schema: %w", err)
+		}
+
+		// grab _TextSpec_0 and inject it into _TextVariableSpec_0
+		// this is done to avoid the incomplete value error during cue vet
+		// cue vet has trouble working with embeded fields
+		textSpec := textVarSpec.LookupPath(cue.MakePath(textSpecHidSelector))
+		if textSpec.Err() != nil {
+			return cue.Value{}, fmt.Errorf("could not lookup TextSpec schema: %w", textSpec.Err())
+		}
+
+		textVarSpec = textVarSpec.FillPath(cue.MakePath(textVariableSpecSelector), textSpec)
+		textVarSpec, err = removeEmptyStringField(ctx, textVarSpec)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("failed to remove empty fields from TextVariable schema: %w", err)
 		}
 
 		// plugins only present in ListVariable
-		listSpec = listSpec.FillPath(cue.MakePath(listSpecHidSelector, pluginSelector), variables)
+		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
 
 		// OR join variable type specs
 		var variableSpec []ast.Expr
-		for _, value := range []cue.Value{textSpec, listSpec} {
+		for _, value := range []cue.Value{textVarSpec, listVarSpec} {
 			node := value.Syntax(
 				cue.InlineImports(true),
 				cue.All(),
@@ -220,7 +281,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 		completeVarSpecValue := ctx.BuildExpr(completeVarSpecExpr)
 
 		// unify the variable spec with the dashboard schema
-		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector), completeVarSpecValue)
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector), completeVarSpecValue)
 	}
 
 	return result, nil
