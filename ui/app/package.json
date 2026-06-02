@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/app",
-  "version": "0.53.1",
+  "version": "0.54.0-beta.0",
   "private": true,
   "scripts": {
     "clean": "rimraf dist/",
@@ -22,7 +22,7 @@
     "@mui/x-data-grid": "^7.25.0",
     "@nexucis/kvsearch": "^0.9.1",
     "@perses-dev/components": "^0.54.0-beta.1",
-    "@perses-dev/core": "0.53.1",
+    "@perses-dev/core": "0.54.0-beta.0",
     "@perses-dev/dashboards": "^0.54.0-beta.1",
     "@perses-dev/explore": "^0.54.0-beta.1",
     "@perses-dev/plugin-system": "^0.54.0-beta.1",

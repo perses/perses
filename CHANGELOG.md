@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.54.0-beta.0 / 2026-06-01
+
+- [FEATURE] By configuration, enable or disable plugins (#4084)
+- [FEATURE] Add edit display name to root level folder edit action (#4065)
+- [FEATURE] Manage a sub-folder system (#3966)
+- [FEATURE] : Keyboard shortcut (#4019)
+- [ENHANCEMENT] Allow decrypt secret in DB with "authenticated" mode AEAD for future backward compatibility (#4056)
+- [ENHANCEMENT] migrate Grafana row repeat to Perses grid layout repeatVariable (#4079)
+- [ENHANCEMENT] Remove flat dashboard view, keep only tree view (#4066)
+- [ENHANCEMENT] allow to load versioned plugins (#4064)
+- [ENHANCEMENT] `dac setup`: generate example file for Go setup too (#3986)
+- [ENHANCEMENT] `percli apply`: add new flag `--create-project` (#3987)
+- [ENHANCEMENT] Add e2e test coverage for SearchBar (#3928)
+- [ENHANCEMENT] go-sdk: Add custom panel group option to allow customized panel alignment (#3997)
+- [ENHANCEMENT] Log incorrectly sized encryption key size (#3999)
+- [ENHANCEMENT] Publish container images to quay.io (#3934)
+- [ENHANCEMENT] UI: simplify breadcrumbs and restore page header hierarchy (#4010)
+- [ENHANCEMENT] UI: aligning configuration page layout with admin and projects (#4011)
+- [ENHANCEMENT] UI: Improving visual hierarchy (#3985)
+- [ENHANCEMENT] UI: refactor project and admin page (#3996)
+- [ENHANCEMENT] Add SBOM files to releases (#3956)
+- [BUGFIX] Fix `percli get user` panic when users exist (#4092)
+- [BUGFIX] Fix native logout not working with api_prefix set (#4089)
+- [BUGFIX] Fix some error message when password/credentials files config missing (#4078)
+- [BUGFIX] set correct ContentLength for request body (#4007)
+- [BUGFIX] Fix navigation to a dashboard from a dashboard (#3971)
+- [BUGFIX] remove tag characters restrictions (#3959)
+- [BUGFIX] Set specific Content-Type for static UI resources (#3988)
+- [BUGFIX] UI: fallback to metadata.name when project spec or display name is missing (#3998)
+- [DOC] Add timezone resolution documentation (#4061)
+- [DOC] Add getting started page documentation (#3931)
+- [DOC] Describe generation of encryption keys (#4000)
+- [DOC] Fix authorization provider documentation (#3980)
+- [DOC] Adds comprehensive documentation for Perses Prometheus instrumentation, focusing on the custom dashboard usage metrics. (#4062)
+- [DOCS]: improve the migration documentation (#4036)
+
 ## 0.53.1 / 2026-03-11
 
 ### Core & UI
