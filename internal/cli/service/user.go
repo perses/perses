@@ -48,7 +48,7 @@ func (u *user) DeleteResource(name string) error {
 func (u *user) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.User)
+		entity := hit.(*modelV1.PublicUser)
 		line := []string{
 			entity.Metadata.Name,
 			output.FormatAge(entity.Metadata.UpdatedAt),
