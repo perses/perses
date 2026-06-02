@@ -2,16 +2,15 @@ module dac-test
 
 go 1.26.2
 
-// TODO Remove this comment when plugins/prometheus is updated with new proxy definition
-// plugins/prometheus cannot compile anymore since the definition in the SDK change.
-// replace github.com/perses/perses => ../../ // Use current version
+replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.1
-	github.com/perses/plugins/prometheus v0.57.1
-	github.com/perses/plugins/staticlistvariable v0.8.1
-	github.com/perses/plugins/table v0.11.2
-	github.com/perses/plugins/timeserieschart v0.12.1
+	github.com/perses/perses v0.53.2-0.20260528092308-be0485a3bde6
+	github.com/perses/plugins/prometheus v0.58.0-beta.1
+	github.com/perses/plugins/staticlistvariable v0.9.0-beta.0
+	github.com/perses/plugins/table v0.13.0-beta.0
+	github.com/perses/plugins/timeserieschart v0.13.0-beta.1
+	github.com/perses/spec v0.2.0-beta.2
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -26,7 +25,7 @@ require (
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/perses/common v0.30.2 // indirect
+	github.com/perses/common v0.31.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
