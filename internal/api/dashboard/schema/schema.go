@@ -223,7 +223,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 
 		// grab _ListSpec_0 and inject it into _ListVariableSpec_0
 		// this is done to avoid the incomplete value error during cue vet
-		// cue vet has trouble working with embeded fields
+		// cue vet has trouble working with embedded fields
 		listSpec := listVarSpec.LookupPath(cue.MakePath(listSpecHidSelector))
 		if listSpec.Err() != nil {
 			return cue.Value{}, fmt.Errorf("could not lookup ListSpec schema: %w", listSpec.Err())
@@ -237,7 +237,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 
 		// grab _TextSpec_0 and inject it into _TextVariableSpec_0
 		// this is done to avoid the incomplete value error during cue vet
-		// cue vet has trouble working with embeded fields
+		// cue vet has trouble working with embedded fields
 		textSpec := textVarSpec.LookupPath(cue.MakePath(textSpecHidSelector))
 		if textSpec.Err() != nil {
 			return cue.Value{}, fmt.Errorf("could not lookup TextSpec schema: %w", textSpec.Err())
