@@ -98,6 +98,13 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 			},
 			expectedManifests: []DockerManifest{
 				{
+					Name: "docker.io/persesdev/bar:main-latest",
+					Images: []string{
+						"docker.io/persesdev/bar:main-latest-amd64",
+						"docker.io/persesdev/bar:main-latest-arm64",
+					},
+				},
+				{
 					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
 					Images: []string{
 						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
@@ -106,6 +113,8 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 				},
 			},
 			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-latest-amd64",
+				"docker.io/persesdev/bar:main-latest-arm64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
 			},
@@ -121,6 +130,13 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 			},
 			expectedManifests: []DockerManifest{
 				{
+					Name: "docker.io/persesdev/bar:main-latest",
+					Images: []string{
+						"docker.io/persesdev/bar:main-latest-amd64",
+						"docker.io/persesdev/bar:main-latest-arm64",
+					},
+				},
+				{
 					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
 					Images: []string{
 						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
@@ -128,10 +144,24 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 					},
 				},
 				{
+					Name: "ghcr.io/perses/bar:main-latest",
+					Images: []string{
+						"ghcr.io/perses/bar:main-latest-amd64",
+						"ghcr.io/perses/bar:main-latest-arm64",
+					},
+				},
+				{
 					Name: "ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless",
 					Images: []string{
 						"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
 						"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+				{
+					Name: "quay.io/perses/bar:main-latest",
+					Images: []string{
+						"quay.io/perses/bar:main-latest-amd64",
+						"quay.io/perses/bar:main-latest-arm64",
 					},
 				},
 				{
@@ -143,10 +173,16 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 				},
 			},
 			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-latest-amd64",
+				"docker.io/persesdev/bar:main-latest-arm64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"ghcr.io/perses/bar:main-latest-amd64",
+				"ghcr.io/perses/bar:main-latest-arm64",
 				"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
 				"ghcr.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"quay.io/perses/bar:main-latest-amd64",
+				"quay.io/perses/bar:main-latest-arm64",
 				"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-amd64",
 				"quay.io/perses/bar:main-2006-01-02-abc1234-distroless-arm64",
 			},
@@ -162,10 +198,24 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 			},
 			expectedManifests: []DockerManifest{
 				{
+					Name: "docker.io/persesdev/bar:main-latest",
+					Images: []string{
+						"docker.io/persesdev/bar:main-latest-amd64",
+						"docker.io/persesdev/bar:main-latest-arm64",
+					},
+				},
+				{
 					Name: "docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless",
 					Images: []string{
 						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
 						"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+					},
+				},
+				{
+					Name: "docker.io/persesdev/bar:main-latest-debug",
+					Images: []string{
+						"docker.io/persesdev/bar:main-latest-debug-amd64",
+						"docker.io/persesdev/bar:main-latest-debug-arm64",
 					},
 				},
 				{
@@ -177,8 +227,12 @@ func TestDockerConfig_BuildDockerImagesAndManifests(t *testing.T) {
 				},
 			},
 			expectedDockerImages: []string{
+				"docker.io/persesdev/bar:main-latest-amd64",
+				"docker.io/persesdev/bar:main-latest-arm64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-amd64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-arm64",
+				"docker.io/persesdev/bar:main-latest-debug-amd64",
+				"docker.io/persesdev/bar:main-latest-debug-arm64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-amd64",
 				"docker.io/persesdev/bar:main-2006-01-02-abc1234-distroless-debug-arm64",
 			},

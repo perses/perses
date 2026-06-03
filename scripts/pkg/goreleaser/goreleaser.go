@@ -136,7 +136,9 @@ func (c *DockerConfig) generateTags(debug bool) []string {
 		suffix = DefaultDebugSuffix
 	}
 	if c.Branch == DefaultMainBranch {
-		return []string{fmt.Sprintf("%s-%s-%s-distroless%s", DefaultMainBranch, c.Date, c.Commit, suffix)}
+		return []string{fmt.Sprintf("main-latest%s", suffix),
+			fmt.Sprintf("%s-%s-%s-distroless%s", DefaultMainBranch, c.Date, c.Commit, suffix),
+		}
 	}
 	var tags []string
 	for _, tag := range DefaultTags {
@@ -191,7 +193,7 @@ func (c *DockerConfig) Build() []config.DockerV2 {
 
 // BuildDockerImagesAndManifests builds the list of docker images and Manifests to be pushed for the main branch.
 // This function should not be used for other branches as we are not pushing images for other branches.
-// The exceptiong is during the release process where goreleaser will handle everything automatically (tags, manifests, etc).
+// The exception is during the release process where goreleaser will handle everything automatically (tags, manifests, etc).
 func (c *DockerConfig) BuildDockerImagesAndManifests() ([]DockerManifest, []string) {
 	configs := c.Build()
 	var images []string

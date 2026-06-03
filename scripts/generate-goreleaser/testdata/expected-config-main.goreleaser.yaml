@@ -69,6 +69,7 @@ dockers_v2:
       - "docker.io/persesdev/perses"
       - "quay.io/persesdev/perses"
     tags:
+      - "main-latest"
       - "main-2024-01-01-abc1234-distroless"
     extra_files:
       - LICENSE
@@ -98,6 +99,7 @@ dockers_v2:
       - "docker.io/persesdev/perses"
       - "quay.io/persesdev/perses"
     tags:
+      - "main-latest-debug"
       - "main-2024-01-01-abc1234-distroless-debug"
     extra_files:
       - LICENSE
