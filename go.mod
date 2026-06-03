@@ -21,7 +21,7 @@ require (
 	github.com/goreleaser/goreleaser/v2 v2.13.1
 	github.com/gorilla/securecookie v1.1.2
 	github.com/huandu/go-sqlbuilder v1.41.0
-	github.com/jackc/pgx/v5 v5.9.2
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.4.0
 	github.com/labstack/echo/v4 v4.15.2
@@ -32,7 +32,7 @@ require (
 	github.com/perses/spec v0.2.0-beta.2
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
-	github.com/prometheus/common v0.68.0
+	github.com/prometheus/common v0.68.1
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.18.1
 	github.com/sirupsen/logrus v1.9.4
@@ -228,7 +228,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
-	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/term v0.43.0 // indirect
