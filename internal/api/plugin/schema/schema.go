@@ -288,7 +288,7 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 		}
 	}
 
-	return append(schemas, devSchemas...)
+	return allSchemas
 }
 
 func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
