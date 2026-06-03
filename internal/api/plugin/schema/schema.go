@@ -311,7 +311,7 @@ func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 
 func loadSchemaPresent(ls LoadSchema, presentSchemas []LoadSchema) bool {
 	for _, sch := range presentSchemas {
-		if ls.Name == sch.Name {
+		if (ls.Name == sch.Name) && (ls.Kind == sch.Kind) {
 			return true
 		}
 	}
