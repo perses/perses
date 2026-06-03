@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.54.0-beta.0 / 2026-06-01
+## 0.54.0-beta.0 / 2026-06-03
 
 This is the first release of the v0.54.0 beta series.
 
