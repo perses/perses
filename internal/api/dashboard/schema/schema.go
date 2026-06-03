@@ -110,7 +110,8 @@ func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string
 
 	expr, err := utils.CastASTNodeToASTExpr(node)
 	if err != nil {
-		return cue.Value{}
+		logrus.WithError(err).Error("unable to rename CUE definition")
+		return value
 	}
 	return ctx.BuildExpr(expr)
 
