@@ -90,7 +90,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
+		return ctx.Blob(http.StatusOK, "text/x-cue", []byte("{}"))
 	}
 	for _, ls := range schemas {
 		if strings.EqualFold(ls.Name, pluginName) {
@@ -119,7 +119,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 func (e *endpoint) PluginList(ctx echo.Context) error {
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, "application/schema+json", []byte("{}"))
+		return ctx.Blob(http.StatusOK, "text/x-cue", []byte("{}"))
 	}
 	cueCtx := cuecontext.New()
 	list, err := schema.GenerateSchemaDefinitions(cueCtx, schemas)
