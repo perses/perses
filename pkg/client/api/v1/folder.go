@@ -26,7 +26,7 @@ type FolderInterface interface {
 	Create(entity *v1.Folder) (*v1.Folder, error)
 	Update(entity *v1.Folder) (*v1.Folder, error)
 	Delete(name string) error
-	// Get is returning an unique Folder.
+	// Get is returning a unique Folder.
 	// As such name is the exact value of Folder.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Folder, error)

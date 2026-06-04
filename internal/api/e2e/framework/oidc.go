@@ -14,7 +14,7 @@
 package e2eframework
 
 // This file is a copy paste of the internal/testutil of zitalde/oidc library
-// It helps setting up required data for testing, such as tokens, claims and verifiers.
+// It helps to set up required data for testing, such as tokens, claims and verifiers.
 
 import (
 	"context"

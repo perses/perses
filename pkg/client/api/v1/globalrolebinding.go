@@ -26,7 +26,7 @@ type GlobalRoleBindingInterface interface {
 	Create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error)
 	Update(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error)
 	Delete(name string) error
-	// Get is returning an unique GlobalRoleBinding.
+	// Get is returning a unique GlobalRoleBinding.
 	// As such name is the exact value of GlobalRoleBinding.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.GlobalRoleBinding, error)

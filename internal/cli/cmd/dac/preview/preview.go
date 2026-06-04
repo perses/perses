@@ -31,8 +31,7 @@ import (
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	commonSpec "github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +43,7 @@ type previewResponse struct {
 	Current   string `json:"current,omitempty" yaml:"current,omitempty"`
 }
 
-func newEphemeralDashboard(project string, name string, ttl commonSpec.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
+func newEphemeralDashboard(project string, name string, ttl common.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
 	return &modelV1.EphemeralDashboard{
 		Kind: modelV1.KindEphemeralDashboard,
 		Metadata: modelV1.ProjectMetadata{
@@ -68,7 +67,7 @@ type option struct {
 	writer       io.Writer
 	errWriter    io.Writer
 	apiClient    api.ClientInterface
-	ttl          commonSpec.Duration
+	ttl          common.Duration
 	ttlAsAString string
 	prefix       string
 }
@@ -88,7 +87,7 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
-	ttl, err := commonSpec.ParseDuration(o.ttlAsAString)
+	ttl, err := common.ParseDuration(o.ttlAsAString)
 	if err != nil {
 		return err
 	}

@@ -26,7 +26,7 @@ type EphemeralDashboardInterface interface {
 	Create(entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard, error)
 	Update(entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard, error)
 	Delete(name string) error
-	// Get is returning an unique EphemeralDashboard.
+	// Get is returning a unique EphemeralDashboard.
 	// As such name is the exact value of EphemeralDashboard.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.EphemeralDashboard, error)

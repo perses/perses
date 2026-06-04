@@ -30,13 +30,12 @@ import (
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
-	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	datasourceSQL "github.com/perses/perses/pkg/model/api/v1/datasource/sql"
-	commonSpec "github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	datasourceSpec "github.com/perses/spec/go/datasource"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 )
 
 func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
@@ -65,7 +64,7 @@ func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: commonSpec.Plugin{
+		Plugin: common.Plugin{
 			Kind: "PrometheusDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -98,7 +97,7 @@ func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: commonSpec.Plugin{
+		Plugin: common.Plugin{
 			Kind: "PostgresDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},

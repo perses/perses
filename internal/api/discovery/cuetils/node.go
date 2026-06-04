@@ -22,7 +22,7 @@ import (
 
 	"cuelang.org/go/cue"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/sirupsen/logrus"
 )
 
@@ -194,7 +194,7 @@ func buildTree(queue []iteratorQueue) error {
 			for it.Next() {
 				node.Type = StructNodeType
 				// We have to evaluate the value to resolve eventual references in the schema before going further.
-				// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
+				// Otherwise, inline refs (at least) are not resolved and "block" the tree construction.
 				valueWithResolvedRefs := it.Value().Eval()
 				if valueWithResolvedRefs.Err() != nil {
 					return valueWithResolvedRefs.Err()

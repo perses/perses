@@ -26,7 +26,7 @@ type ProjectInterface interface {
 	Create(entity *v1.Project) (*v1.Project, error)
 	Update(entity *v1.Project) (*v1.Project, error)
 	Delete(name string) error
-	// Get is returning an unique Project.
+	// Get is returning a unique Project.
 	// As such name is the exact value of Project.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Project, error)

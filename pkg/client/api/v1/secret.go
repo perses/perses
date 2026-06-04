@@ -26,7 +26,7 @@ type SecretInterface interface {
 	Create(entity *v1.Secret) (*v1.Secret, error)
 	Update(entity *v1.Secret) (*v1.Secret, error)
 	Delete(name string) error
-	// Get is returning an unique Secret.
+	// Get is returning a unique Secret.
 	// As such name is the exact value of Secret.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Secret, error)

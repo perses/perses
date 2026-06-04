@@ -24,8 +24,8 @@ import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/client/transport"
 	"github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
+	"github.com/perses/spec/go/common"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )

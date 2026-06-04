@@ -26,7 +26,7 @@ type RoleInterface interface {
 	Create(entity *v1.Role) (*v1.Role, error)
 	Update(entity *v1.Role) (*v1.Role, error)
 	Delete(name string) error
-	// Get is returning an unique Role.
+	// Get is returning a unique Role.
 	// As such name is the exact value of Role.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Role, error)
