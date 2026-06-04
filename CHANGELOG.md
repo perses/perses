@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.54.0-beta.1 / 2026-06-04
+
+Due to some issues with goreleaser and cuelang the previous version has not been properly released, we had to release a
+new version containing the fix to unlock goreleaser and cuelang releases.
+
+These changes do not have any impact on the end users.
+
 ## 0.54.0-beta.0 / 2026-06-03
 
 This is the first release of the v0.54.0 beta series.
