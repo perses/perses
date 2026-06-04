@@ -15,7 +15,6 @@ package watch
 
 import (
 	"context"
-	"fmt"
 	"go/parser"
 	"go/token"
 	"io"
@@ -29,7 +28,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/cli/cmd/dac/build"
-	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
@@ -227,20 +225,42 @@ func (w *watcher) handleDeletion(name string) {
 	// Get list of all dashboards we knew about BEFORE the deletion
 	// Must use cached state, not filesystem scan (folder already deleted!)
 	dashboardsBefore := make(map[string]bool)
+	libsBefore := make(map[string]bool)
 	for dash := range w.allDashboards {
 		dashboardsBefore[dash] = true
+	}
+
+	for lib := range w.dependencyMap {
+		libsBefore[lib] = true
 	}
 
 	logrus.Debug("   Rebuilding dependency map...")
 	w.buildDependencyMap()
 
-	// Find removed dashboards by comparing before/after
+	// Remove generated outputs for dashboards that were deleted.
 	for dashboard := range dashboardsBefore {
 		if !w.allDashboards[dashboard] {
-			relPath, _ := filepath.Rel(w.sourceDir, dashboard)
-			logrus.Debugf("   ❌ Dashboard removed: %s", relPath)
+			inputPath, _ := filepath.Rel(w.sourceDir, dashboard)
+			logrus.Debugf("   ❌ Dashboard removed: %s", inputPath)
+			outputPath := w.buildOption.BuildOutputFilePath(inputPath)
+			if err := os.Remove(outputPath); err != nil && !os.IsNotExist(err) {
+				logrus.Warnf("   ⚠️  Failed to remove Dashboard output file %s: %v", outputPath, err)
+			} else {
+				logrus.Infof("   🗑️  Removed Dashboard output file: %s", outputPath)
+			}
 		}
 	}
+
+	// Display the libs removed
+	for lib := range libsBefore {
+		if len(w.dependencyMap[lib]) == 0 {
+			inputPath, _ := filepath.Rel(w.sourceDir, lib)
+			logrus.Debugf("   ❌ Library removed: %s", inputPath)
+		}
+	}
+
+	// A deletion (especially of a library file) can invalidate dependent dashboards; rebuild to refresh outputs.
+	w.buildAllDashboards()
 }
 
 // handleNewDirectory handles new directory creation events
@@ -404,11 +424,8 @@ func (w *watcher) buildFile(file string) (string, error) {
 		return "", err
 	}
 
-	// Compute output path (same logic as build.Option.buildOutputFilePath)
-	baseName := strings.TrimSuffix(file, filepath.Ext(file))
-	outputPath := filepath.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s_output.%s", baseName, w.buildOption.Output))
-
-	return outputPath, nil
+	// Compute the output path reusing the same logic as in build command.
+	return w.buildOption.BuildOutputFilePath(file), nil
 }
 
 // findDashboardFiles finds all dashboard files in the source directory
