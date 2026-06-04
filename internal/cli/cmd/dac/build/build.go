@@ -168,7 +168,7 @@ func (o *Option) processFile(file string, extension string) error {
 	}
 
 	// Build the path of the file where to store the command output
-	outputFilePath := o.buildOutputFilePath(file)
+	outputFilePath := o.BuildOutputFilePath(file)
 
 	// Write the output to the file
 	if writeErr := os.WriteFile(outputFilePath, cmdOutput, 0644); writeErr != nil { // nolint: gosec
@@ -177,8 +177,13 @@ func (o *Option) processFile(file string, extension string) error {
 	return output.HandleString(o.writer, fmt.Sprintf("Successfully built %s at %s", file, outputFilePath))
 }
 
-// buildOutputFilePath generates the output file path based on the input file path
-func (o *Option) buildOutputFilePath(inputFilePath string) string {
+// BuildOutputFilePath generates the output file path based on the input file path
+// Example when the dac output folder is "built", and the output format is "yaml":
+//   - inputFilePath: "dashboards/my_dashboard.cue"
+//   - outputFilePath: "built/dashboards/my_dashboard_output.yaml"
+//
+// /!\ Be sure to be in a DaC context so config.Global.Dac.OutputFolder is correctly set when calling this function.
+func (o *Option) BuildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
