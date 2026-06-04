@@ -17,8 +17,8 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/datasource/proxy/http"
 )
 
 // NewFromSchema is generating a tree representing the schema passed in parameter.
@@ -41,7 +41,7 @@ func NewFromSchema(v cue.Value) ([]*Node, error) {
 	}
 	for it.Next() {
 		// We have to evaluate the value to resolve eventual references in the schema before going further.
-		// Otherwise inline refs (at least) are not resolved and "block" the tree construction.
+		// Otherwise, inline refs (at least) are not resolved and "block" the tree construction.
 		valueWithResolvedRefs := it.Value().Eval()
 		if valueWithResolvedRefs.Err() != nil {
 			return nil, valueWithResolvedRefs.Err()

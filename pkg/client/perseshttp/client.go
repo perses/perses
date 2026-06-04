@@ -16,7 +16,7 @@ package perseshttp
 import (
 	"net/http"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 )
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.

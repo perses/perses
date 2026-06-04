@@ -26,7 +26,7 @@ type DashboardInterface interface {
 	Create(entity *v1.Dashboard) (*v1.Dashboard, error)
 	Update(entity *v1.Dashboard) (*v1.Dashboard, error)
 	Delete(name string) error
-	// Get is returning an unique Dashboard.
+	// Get is returning a unique Dashboard.
 	// As such name is the exact value of Dashboard.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Dashboard, error)

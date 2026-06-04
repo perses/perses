@@ -29,7 +29,7 @@ type UserInterface interface {
 	Create(entity *v1.User) (*v1.PublicUser, error)
 	Update(entity *v1.User) (*v1.PublicUser, error)
 	Delete(name string) error
-	// Get is returning an unique User.
+	// Get is returning a unique User.
 	// As such name is the exact value of User.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.PublicUser, error)

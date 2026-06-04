@@ -26,7 +26,7 @@ type GlobalSecretInterface interface {
 	Create(entity *v1.GlobalSecret) (*v1.GlobalSecret, error)
 	Update(entity *v1.GlobalSecret) (*v1.GlobalSecret, error)
 	Delete(name string) error
-	// Get is returning an unique GlobalSecret.
+	// Get is returning a unique GlobalSecret.
 	// As such name is the exact value of GlobalSecret.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.GlobalSecret, error)
