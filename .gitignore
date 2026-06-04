@@ -52,3 +52,6 @@ dev/kubernetes/local
 /prometheus
 
 !.gitkeep
+
+ui-sbom.cdx.json
+/**/*.sbom.spdx.json
