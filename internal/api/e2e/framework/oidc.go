@@ -133,28 +133,37 @@ func NewAccessToken(issuer, subject string, audience []string, expiration time.T
 
 // These variables always result in a valid token
 var (
-	ValidSubject    = "john.doeOIDC"
-	ValidAudience   = []string{"unit", "test", "clientID"}
-	ValidAuthTime   = time.Now().Add(-time.Minute)       // authtime is always 1 minute in the past
-	ValidExpiration = ValidAuthTime.Add(2 * time.Minute) // token is always 1 more minute available
-	ValidJWTID      = "9876"
-	ValidNonce      = ""
-	ValidACR        = "something"
-	ValidAMR        = []string{"foo", "bar"}
-	ValidClientID   = "clientID"
-	ValidSkew       = time.Second
+	validSubject  = "john.doeOIDC"
+	validAudience = []string{"unit", "test", "clientID"}
+	validJWTID    = "9876"
+	validNonce    = ""
+	validACR      = "something"
+	validAMR      = []string{"foo", "bar"}
+	validClientID = "clientID"
+	validSkew     = time.Second
 )
+
+// we are generating the auth time at the time of token generation to avoid the possibility to have a token expired when the tests finally run.
+// This issue happens on Windows because it takes much more time to load the tests comparing to Mac or Linux.
+func validAuthTime() time.Time {
+	return time.Now().Add(-time.Minute) // authtime is always 1 minute in the past
+}
+
+// Same thing than for the authTime. The expiration time is generating at runtime to avoid generating the time when tests are loading (not starting).
+func validExpiration() time.Time {
+	return time.Now().Add(time.Minute)
+}
 
 // ValidIDToken returns a token and claims that are in the token.
 // It uses the Valid* global variables and the token will always
 // pass verification.
 func ValidIDToken(issuer string) (string, *oidc.IDTokenClaims) {
-	return NewIDToken(issuer, ValidSubject, ValidAudience, ValidExpiration, ValidAuthTime, ValidNonce, ValidACR, ValidAMR, ValidClientID, ValidSkew, "")
+	return NewIDToken(issuer, validSubject, validAudience, validExpiration(), validAuthTime(), validNonce, validACR, validAMR, validClientID, validSkew, "")
 }
 
 // ValidAccessToken returns a token and claims that are in the token.
 // It uses the Valid* global variables and the token always passes
 // verification within the same test run.
 func ValidAccessToken(issuer string) (string, *oidc.AccessTokenClaims) {
-	return NewAccessToken(issuer, ValidSubject, ValidAudience, ValidExpiration, ValidJWTID, ValidClientID, ValidSkew)
+	return NewAccessToken(issuer, validSubject, validAudience, validExpiration(), validJWTID, validClientID, validSkew)
 }
