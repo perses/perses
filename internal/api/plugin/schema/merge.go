@@ -16,6 +16,8 @@ package schema
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
@@ -27,10 +29,21 @@ const (
 	definitionPrefix = "#"
 )
 
+// helper struct for ordering plugins
+type pluginValue struct {
+	name  string
+	value cue.Value
+}
+
 // Function generates a disjunction (OR join) of a list of LoadSchemas
 // and returns it in a single cue.Value
 func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 	var expr []ast.Expr
+
+	// sorting the slice so that the plugin order is not random
+	slices.SortFunc(schemas, func(a, b LoadSchema) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 
 	for _, ls := range schemas {
 		// build instance for all schemas
@@ -78,23 +91,28 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 
 // Generates a single cue.Value composed of a list of cue definitions (prefixed by #)
 func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
-	definitions := make(map[string]cue.Value)
+	definitions := []pluginValue{}
 	for _, ls := range schemas {
 		value := ctx.BuildInstance(ls.Instance)
 		if value.Err() != nil {
 			return cue.Value{}, fmt.Errorf("unable to build instance %s: %w", ls.Name, value.Err())
 		}
-		definitions[ls.Name] = value
+		definitions = append(definitions, pluginValue{ls.Name, value})
 	}
 
+	// sorting the slice so that the plugin order is not random
+	slices.SortFunc(definitions, func(a, b pluginValue) int {
+		return strings.Compare(a.name, b.name)
+	})
+
 	var declsList []ast.Decl
-	for name, value := range definitions {
-		expr, err := utils.CastASTNodeToASTExpr(value.Syntax(utils.CueSyntaxOptions...))
+	for _, plugin := range definitions {
+		expr, err := utils.CastASTNodeToASTExpr(plugin.value.Syntax(utils.CueSyntaxOptions...))
 		if err != nil {
 			return cue.Value{}, err
 		}
 		decls := &ast.Field{
-			Label: ast.NewIdent(fmt.Sprintf("%s%s", definitionPrefix, name)),
+			Label: ast.NewIdent(fmt.Sprintf("%s%s", definitionPrefix, plugin.name)),
 			Value: expr,
 		}
 		declsList = append(declsList, decls)
