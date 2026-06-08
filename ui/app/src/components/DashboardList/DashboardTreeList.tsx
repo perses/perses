@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { FolderResource } from '@perses-dev/core';
-import { Box, CircularProgress, Stack } from '@mui/material';
+import { Box, Chip, CircularProgress, Stack } from '@mui/material';
 import { Table, TableColumnConfig } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -140,6 +140,26 @@ function DashboardTreeList({
         header: 'Tags',
         align: 'left',
         enableSorting: true,
+        cellDescription: (): string => '',
+        cell: ({ getValue }): ReactNode => {
+          const tags: string[] | undefined = getValue();
+          return tags ? (
+            <Box
+              sx={{
+                pt: 0.75,
+                mt: -1,
+                overflow: 'inherit',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {tags.map((tag, index) => (
+                <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
+              ))}
+            </Box>
+          ) : (
+            ''
+          );
+        },
       },
       {
         id: 'version',
