@@ -44,8 +44,8 @@ func TestGetSchemaDashboard(t *testing.T) {
 
 func TestGetSchemaPluginList(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
-		// Without any plugins loaded the endpoint returns an empty JSON object.
-		// With plugins loaded it returns CUE text. Both are valid.
+		// Without any plugins loaded the endpoint returns an empty CUE struct literal.
+		// With plugins loaded it returns CUE text with definitions.
 		expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugin")).
 			Expect().
 			Status(http.StatusOK)
@@ -73,7 +73,7 @@ func TestGetSchemaPluginDefinitionWithRealPlugins(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		// If no plugins are present the response is the empty JSON object "{}".
+		// If no plugins are present the response is the empty CUE struct literal "{}".
 		// Only continue when the plugin list is non-empty.
 		if listResp.Body().Raw() == "{}" {
 			t.Skip("no plugins loaded in this environment, skipping per-plugin definition test")
