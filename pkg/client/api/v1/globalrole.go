@@ -26,7 +26,7 @@ type GlobalRoleInterface interface {
 	Create(entity *v1.GlobalRole) (*v1.GlobalRole, error)
 	Update(entity *v1.GlobalRole) (*v1.GlobalRole, error)
 	Delete(name string) error
-	// Get is returning an unique GlobalRole.
+	// Get is returning a unique GlobalRole.
 	// As such name is the exact value of GlobalRole.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.GlobalRole, error)

@@ -26,7 +26,7 @@ type GlobalDatasourceInterface interface {
 	Create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error)
 	Update(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error)
 	Delete(name string) error
-	// Get is returning an unique GlobalDatasource.
+	// Get is returning a unique GlobalDatasource.
 	// As such name is the exact value of GlobalDatasource.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.GlobalDatasource, error)

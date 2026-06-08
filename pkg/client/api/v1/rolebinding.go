@@ -26,7 +26,7 @@ type RoleBindingInterface interface {
 	Create(entity *v1.RoleBinding) (*v1.RoleBinding, error)
 	Update(entity *v1.RoleBinding) (*v1.RoleBinding, error)
 	Delete(name string) error
-	// Get is returning an unique RoleBinding.
+	// Get is returning a unique RoleBinding.
 	// As such name is the exact value of RoleBinding.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.RoleBinding, error)

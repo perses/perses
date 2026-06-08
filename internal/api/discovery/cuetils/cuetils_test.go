@@ -20,9 +20,8 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -26,7 +26,7 @@ type DatasourceInterface interface {
 	Create(entity *v1.Datasource) (*v1.Datasource, error)
 	Update(entity *v1.Datasource) (*v1.Datasource, error)
 	Delete(name string) error
-	// Get is returning an unique Datasource.
+	// Get is returning a unique Datasource.
 	// As such name is the exact value of Datasource.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Datasource, error)

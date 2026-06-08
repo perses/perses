@@ -26,7 +26,7 @@ type GlobalVariableInterface interface {
 	Create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error)
 	Update(entity *v1.GlobalVariable) (*v1.GlobalVariable, error)
 	Delete(name string) error
-	// Get is returning an unique GlobalVariable.
+	// Get is returning a unique GlobalVariable.
 	// As such name is the exact value of GlobalVariable.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.GlobalVariable, error)

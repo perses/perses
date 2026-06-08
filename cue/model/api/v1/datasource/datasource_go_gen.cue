@@ -5,9 +5,9 @@
 package datasource
 
 import (
-	"github.com/perses/perses/cue/model/api/v1/datasource/http"
-	"github.com/perses/perses/cue/model/api/v1/common"
-	"github.com/perses/perses/cue/model/api/v1/datasource/sql"
+	"github.com/perses/spec/cue/datasource/proxy/http"
+	"github.com/perses/spec/cue/common"
+	"github.com/perses/spec/cue/datasource/proxy/sql"
 )
 
 // Prometheus is only used for testing purpose.

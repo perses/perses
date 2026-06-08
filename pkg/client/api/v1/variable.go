@@ -26,7 +26,7 @@ type VariableInterface interface {
 	Create(entity *v1.Variable) (*v1.Variable, error)
 	Update(entity *v1.Variable) (*v1.Variable, error)
 	Delete(name string) error
-	// Get is returning an unique Variable.
+	// Get is returning a unique Variable.
 	// As such name is the exact value of Variable.metadata.name. It cannot be empty.
 	// If you want to perform a research by prefix, please use the method List
 	Get(name string) (*v1.Variable, error)
