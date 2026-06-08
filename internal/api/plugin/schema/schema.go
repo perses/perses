@@ -320,7 +320,7 @@ func loadSchemaPresent(ls LoadSchema, presentSchemas []LoadSchema) bool {
 
 func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v map[string]*build.Instance) []LoadSchema {
 	for version, instance := range v {
-		if version == plugin.LatestVersion {
+		if version != plugin.LatestVersion {
 			continue
 		}
 		schemas = append(schemas, LoadSchema{
