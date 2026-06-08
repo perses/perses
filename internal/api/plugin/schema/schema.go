@@ -282,9 +282,9 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	schemas := s.sch.getAllSchemas()
 	devSchemas := s.devSch.getAllSchemas()
 
-	for _, s := range append(devSchemas, schemas...) {
-		if !loadSchemaPresent(s, allSchemas) {
-			allSchemas = append(allSchemas, s)
+	for _, ls := range append(devSchemas, schemas...) {
+		if !loadSchemaPresent(ls, allSchemas) {
+			allSchemas = append(allSchemas, ls)
 		}
 	}
 
@@ -300,9 +300,9 @@ func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 	schemas := s.sch.getSchemas(kind)
 	devSchemas := s.devSch.getSchemas(kind)
 
-	for _, s := range append(devSchemas, schemas...) {
-		if !loadSchemaPresent(s, allSchemas) {
-			allSchemas = append(allSchemas, s)
+	for _, ls := range append(devSchemas, schemas...) {
+		if !loadSchemaPresent(ls, allSchemas) {
+			allSchemas = append(allSchemas, ls)
 		}
 	}
 
