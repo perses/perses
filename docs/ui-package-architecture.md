@@ -14,7 +14,7 @@ Official plugins live in a third repository: [`perses/plugins`](https://github.c
 | Package | Repository | Published | Role |
 | --- | --- | --- | --- |
 | `@perses-dev/app` | `perses/perses` | No | Main Perses web application (routing, admin pages, API clients, project management) |
-| `@perses-dev/core` | `perses/perses` | Yes | Legacy shared types and utilities. Being replaced by `@perses-dev/spec` and `@perses-dev/client` |
+| `@perses-dev/core` | `perses/perses` | Yes (deprecated) | **Deprecated.** Legacy shared types and utilities. Use `@perses-dev/spec` and `@perses-dev/client` instead |
 | `@perses-dev/spec` | External npm | Yes | Open dashboard and plugin specification types (data models shared across UI, API, and DaC) |
 | `@perses-dev/client` | `perses/shared` | Yes | HTTP client helpers, fetch utilities, and API-facing types built on top of `@perses-dev/spec` |
 | `@perses-dev/components` | `perses/shared` | Yes | Reusable UI components (dialogs, tables, editors, formatting controls) |
@@ -69,7 +69,7 @@ graph TD
 
 - **`@perses-dev/spec`**: canonical TypeScript types for dashboard specs, panel definitions, variables, datasources, and query results. This is the language-neutral contract Perses is built around. See [Open specification](./concepts/open-specification.md).
 - **`@perses-dev/client`**: shared HTTP and API helpers used by UI packages when talking to the Perses backend.
-- **`@perses-dev/core`**: older shared types and helpers still consumed by the app and temporarily exposed to plugins through module federation. New code should prefer `@perses-dev/spec` and `@perses-dev/client`.
+- **`@perses-dev/core`** (deprecated): legacy shared types and helpers still consumed by the app and temporarily exposed to plugins through module federation. Do not use in new code — prefer `@perses-dev/spec` and `@perses-dev/client`.
 
 ### Feature libraries (`perses/shared`)
 
