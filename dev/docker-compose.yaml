@@ -2,6 +2,7 @@
 # TO RUN WITH POSTGRES AND PROMETHEUS: docker-compose --file dev/docker-compose.yaml --profile postgres --profile prometheus up --detach
 # TO RUN WITH PROMETHEUS AND TEMPO: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile tempo up --detach
 # TO RUN WITH LOKI: docker-compose --file dev/docker-compose.yaml --profile loki up --detach
+# TO RUN WITH ALERTMANAGER: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile alertmanager up --detach
 
 name: 'perses-dev'
 services:
@@ -58,9 +59,49 @@ services:
       - --enable-feature=native-histograms
     volumes:
       - ./extra/prometheus.yaml:/etc/prometheus.yaml
+      - ./extra/alerting-rules.yaml:/etc/alerting-rules.yaml
     ports:
       - '9090:9090'
     profiles: [prometheus]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yaml
+    volumes:
+      - ./extra/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
+    ports:
+      - '9093:9093'
+    profiles: [alertmanager]
+
+  alertmanager-init:
+    image: curlimages/curl:8.13.0
+    profiles: [alertmanager]
+    depends_on:
+      - alertmanager
+    restart: 'no'
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        sleep 5
+        NOW=$$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+        FUTURE_EPOCH=$$(( $$(date +%s) + 2592000 ))
+        FUTURE=$$(date -u -d @$$FUTURE_EPOCH +%Y-%m-%dT%H:%M:%S.000Z 2>/dev/null || date -u -r $$FUTURE_EPOCH +%Y-%m-%dT%H:%M:%S.000Z 2>/dev/null)
+        echo 'NOW=$$NOW FUTURE=$$FUTURE'
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d '{\'matchers\':[{\'name\':\'alertname\',\'value\':\'ServiceErrorRate\',\'isRegex\':false,\'isEqual\':true}],\'startsAt\':\'$$NOW\',\'endsAt\':\'$$FUTURE\',\'createdBy\':\'dev-setup\',\'comment\':\'Silenced for dev testing\'}'
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d '{\'matchers\':[{\'name\':\'alertname\',\'value\':\'AvalancheCounterGrowing\',\'isRegex\':false,\'isEqual\':true}],\'startsAt\':\'$$NOW\',\'endsAt\':\'$$FUTURE\',\'createdBy\':\'dev-setup\',\'comment\':\'Silenced for dev testing — counter growth is expected\'}'
+
+        curl -s -X POST http://alertmanager:9093/api/v2/silences \
+          -H 'Content-Type: application/json' \
+          -d '{\'matchers\':[{\'name\':\'team\',\'value\':\'app-backend\',\'isRegex\':false,\'isEqual\':true},{\'name\':\'severity\',\'value\':\'info\',\'isRegex\':false,\'isEqual\':true}],\'startsAt\':\'$$NOW\',\'endsAt\':\'$$FUTURE\',\'createdBy\':\'oncall-bot\',\'comment\':\'Suppress low-priority app-backend alerts during dev\'}'
+
+        echo 'Silences created successfully'
 
   # Generate fake metrics
   avalanche:

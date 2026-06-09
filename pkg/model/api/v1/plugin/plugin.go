@@ -36,11 +36,13 @@ const (
 	KindProfileQuery    Kind = "ProfileQuery"
 	KindLogQuery        Kind = "LogQuery"
 	KindQuery           Kind = "Query"
+	KindAlertsQuery     Kind = "AlertsQuery"
+	KindSilencesQuery   Kind = "SilencesQuery"
 	KindExplore         Kind = "Explore"
 )
 
 func (k Kind) IsQuery() bool {
-	return k == KindTimeSeriesQuery || k == KindTraceQuery || k == KindProfileQuery || k == KindLogQuery
+	return k == KindTimeSeriesQuery || k == KindTraceQuery || k == KindProfileQuery || k == KindLogQuery || k == KindAlertsQuery || k == KindSilencesQuery
 }
 
 type Spec struct {

@@ -27,7 +27,7 @@ test.describe('SearchBar', () => {
     const demoLink = searchBar.getDashboardLink('perses', 'demo');
 
     // Verify the dashboard is highlighted (important dashboards have bold text)
-    await expect(demoLink).toHaveCSS('font-weight', '900');
+    await expect(demoLink).toHaveCSS('font-weight', '700');
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
@@ -75,7 +75,7 @@ test.describe('SearchBar', () => {
 
     const importantDashboard = searchBar.getDashboardLink('testing', 'markdownpanel');
     await expect(importantDashboard).toBeVisible();
-    await expect(importantDashboard).toHaveCSS('font-weight', '900');
+    await expect(importantDashboard).toHaveCSS('font-weight', '700');
 
     // timeserieschartpanel is NOT in the important_dashboards list
     const nonImportantDashboard = searchBar.getDashboardLink('testing', 'timeserieschartpanel');
