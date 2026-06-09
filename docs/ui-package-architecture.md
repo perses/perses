@@ -2,26 +2,27 @@
 
 Perses UI is split across multiple npm packages so features can be reused, embedded, and extended independently. This page describes the role of each package, how they relate to each other, and the dependency structure between them.
 
-The UI code lives in two Git repositories:
+The UI code is spread across several Git repositories:
 
 - [`perses/perses`](https://github.com/perses/perses): the main application and legacy shared utilities under `ui/`
 - [`perses/shared`](https://github.com/perses/shared): publishable feature libraries consumed by the app, plugins, and external integrators
+- [`perses/spec`](https://github.com/perses/spec): the open dashboard and plugin specification types published as `@perses-dev/spec`
 
-Official plugins live in a third repository: [`perses/plugins`](https://github.com/perses/plugins).
+Official plugins live in [`perses/plugins`](https://github.com/perses/plugins).
 
 ## Package overview
 
 | Package | Repository | Published | Role |
 | --- | --- | --- | --- |
-| `@perses-dev/app` | `perses/perses` | No | Main Perses web application (routing, admin pages, API clients, project management) |
-| `@perses-dev/core` | `perses/perses` | Yes (deprecated) | **Deprecated.** Legacy shared types and utilities. Use `@perses-dev/spec` and `@perses-dev/client` instead |
-| `@perses-dev/spec` | External npm | Yes | Open dashboard and plugin specification types (data models shared across UI, API, and DaC) |
-| `@perses-dev/client` | `perses/shared` | Yes | HTTP client helpers, fetch utilities, and API-facing types built on top of `@perses-dev/spec` |
-| `@perses-dev/components` | `perses/shared` | Yes | Reusable UI components (dialogs, tables, editors, formatting controls) |
-| `@perses-dev/plugin-system` | `perses/shared` | Yes | Plugin runtime, registry, datasource/variable providers, and module federation host |
-| `@perses-dev/dashboards` | `perses/shared` | Yes | Dashboard viewing and editing experience |
-| `@perses-dev/explore` | `perses/shared` | Yes | Explore view for ad-hoc querying across datasources |
-| Plugin packages (e.g. `@perses-dev/prometheus-plugin`) | `perses/plugins` | Yes | Datasource, panel, query, and variable implementations |
+| `@perses-dev/app` | [`perses/perses`](https://github.com/perses/perses) | No | Main Perses web application (routing, admin pages, API clients, project management) |
+| `@perses-dev/core` | [`perses/perses`](https://github.com/perses/perses) | Yes (deprecated) | **Deprecated.** Legacy shared types and utilities. Use `@perses-dev/spec` and `@perses-dev/client` instead |
+| `@perses-dev/spec` | [`perses/spec`](https://github.com/perses/spec) | Yes | Open dashboard and plugin specification types (data models shared across UI, API, and DaC) |
+| `@perses-dev/client` | [`perses/shared`](https://github.com/perses/shared) | Yes | HTTP client helpers, fetch utilities, and API-facing types built on top of `@perses-dev/spec` |
+| `@perses-dev/components` | [`perses/shared`](https://github.com/perses/shared) | Yes | Reusable UI components (dialogs, tables, editors, formatting controls) |
+| `@perses-dev/plugin-system` | [`perses/shared`](https://github.com/perses/shared) | Yes | Plugin runtime, registry, datasource/variable providers, and module federation host |
+| `@perses-dev/dashboards` | [`perses/shared`](https://github.com/perses/shared) | Yes | Dashboard viewing and editing experience |
+| `@perses-dev/explore` | [`perses/shared`](https://github.com/perses/shared) | Yes | Explore view for ad-hoc querying across datasources |
+| Plugin packages (e.g. `@perses-dev/prometheus-plugin`) | [`perses/plugins`](https://github.com/perses/plugins) | Yes | Datasource, panel, query, and variable implementations |
 
 Internal packages in `perses/perses/ui` (`e2e`, `internal-utils`) support development and testing. They are not published and are not part of the runtime dependency graph.
 
@@ -67,7 +68,7 @@ graph TD
 
 ### Foundation layer
 
-- **`@perses-dev/spec`**: canonical TypeScript types for dashboard specs, panel definitions, variables, datasources, and query results. This is the language-neutral contract Perses is built around. See [Open specification](./concepts/open-specification.md).
+- **`@perses-dev/spec`**: canonical TypeScript types for dashboard specs, panel definitions, variables, datasources, and query results. This is the language-neutral contract Perses is built around. Source: [`perses/spec`](https://github.com/perses/spec). See [Open specification](./concepts/open-specification.md).
 - **`@perses-dev/client`**: shared HTTP and API helpers used by UI packages when talking to the Perses backend.
 - **`@perses-dev/core`** (deprecated): legacy shared types and helpers still consumed by the app and temporarily exposed to plugins through module federation. Do not use in new code — prefer `@perses-dev/spec` and `@perses-dev/client`.
 
@@ -129,4 +130,5 @@ For more day-to-day commands and workspace layout, see [ui/README.md](../ui/READ
 - [Plugin concept](./concepts/plugin.md)
 - [Embedding panels](./embedding-panels.md)
 - [UI README](../ui/README.md)
+- [Spec repository](https://github.com/perses/spec)
 - [Shared libraries README](https://github.com/perses/shared)
