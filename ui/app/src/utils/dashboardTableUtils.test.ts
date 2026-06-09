@@ -377,10 +377,11 @@ describe('buildTableRows – flat folders', () => {
 
     const rows = buildTableRows([folder], new Map());
 
-    expect(rows[0]!.children).toHaveLength(0);
+    expect(rows[0]!.children).toHaveLength(1);
+    expect(rows[0]!.children![0]!.kind).toBe('NoItems');
   });
 
-  it('a folder referencing no dashboards produces an empty children array', () => {
+  it('a folder referencing no dashboards produces a NoItems child', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'empty-folder', project: 'p', version: 1 },
@@ -389,7 +390,8 @@ describe('buildTableRows – flat folders', () => {
 
     const rows = buildTableRows([folder], new Map());
 
-    expect(rows[0]!.children).toHaveLength(0);
+    expect(rows[0]!.children).toHaveLength(1);
+    expect(rows[0]!.children![0]!.kind).toBe('NoItems');
   });
 
   it('carries folder version from metadata', () => {
@@ -486,7 +488,7 @@ describe('buildTableRows – nested folders', () => {
     expect(dashRow.path).toEqual(['top', 'mid', 'deep']);
   });
 
-  it('a nested folder with no items produces undefined children', () => {
+  it('a nested folder with no items produces a NoItems child', () => {
     const outer: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'outer', project: 'p', version: 1 },
@@ -495,7 +497,8 @@ describe('buildTableRows – nested folders', () => {
 
     const rows = buildTableRows([outer], new Map());
 
-    expect(rows[0]!.children![0]!.children).toBeUndefined();
+    expect(rows[0]!.children![0]!.children).toHaveLength(1);
+    expect(rows[0]!.children![0]!.children![0]!.kind).toBe('NoItems');
   });
 
   it('throws on an unknown kind in folder items', () => {
@@ -595,7 +598,7 @@ describe('buildTableRows – multiple projects', () => {
     expect(looseRow.project).toBe('proj-b');
   });
 
-  it('emits an empty children list for a folder whose project has no dashboards in the map', () => {
+  it('emits a NoItems child for a folder whose project has no dashboards in the map', () => {
     const folder: FolderResource = {
       kind: 'Folder',
       metadata: { name: 'f', project: 'ghost-project', version: 1 },
@@ -604,7 +607,8 @@ describe('buildTableRows – multiple projects', () => {
 
     const rows = buildTableRows([folder], new Map());
 
-    expect(rows[0]!.children).toHaveLength(0);
+    expect(rows[0]!.children).toHaveLength(1);
+    expect(rows[0]!.children![0]!.kind).toBe('NoItems');
   });
 });
 
