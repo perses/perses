@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem, FolderResource, getResourceDisplayName } from '@perses-dev/core';
+import { getResourceDisplayName } from '@perses-dev/core';
 import { intlFormatDistance } from 'date-fns';
+import { FolderItem, FolderResource } from '../model/folder';
 import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
 

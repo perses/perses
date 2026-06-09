@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProjectMetadata } from './resource';
+import { ProjectMetadata } from '@perses-dev/client';
 
 export interface FolderDisplay {
   name?: string;

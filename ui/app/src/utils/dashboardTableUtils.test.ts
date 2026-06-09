@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource } from '@perses-dev/core';
+import { FolderResource } from '../model/folder';
 import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';

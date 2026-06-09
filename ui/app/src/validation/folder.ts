@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { FolderItem } from '@perses-dev/core';
+import { FolderItem } from '../model/folder';
 import { useFolderList } from '../model/folder-client';
 import { getSubFolderRef } from '../utils/folderUtils';
 import { generateMetadataName } from '../utils/metadata';

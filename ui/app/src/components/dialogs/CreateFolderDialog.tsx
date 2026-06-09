@@ -14,9 +14,10 @@
 import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
 import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { FolderItem, FolderResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FolderItem, FolderResource } from '../../model/folder';
 import { CreateFolderValidationType, useFolderValidationSchema } from '../../validation';
 import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateFolderMutation } from '../../model/folder-client';

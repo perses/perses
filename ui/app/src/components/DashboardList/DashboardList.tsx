@@ -15,7 +15,6 @@ import {
   DashboardResource,
   DashboardSelector,
   EphemeralDashboardInfo,
-  FolderResource,
   getResourceDisplayName,
   getResourceExtendedDisplayName,
 } from '@perses-dev/core';
@@ -24,6 +23,7 @@ import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
+import { FolderResource } from '../../model/folder';
 import {
   AddFolderDialog,
   CreateDashboardDialog,

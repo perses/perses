@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource } from '@perses-dev/core';
 import { Box, CircularProgress, IconButton, Link, Stack } from '@mui/material';
 import { Table, TableColumnConfig } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -23,6 +22,7 @@ import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
 import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { FolderResource } from '../../model/folder';
 import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
 import {
   buildTableRows,
