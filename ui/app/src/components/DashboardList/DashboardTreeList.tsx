@@ -12,15 +12,11 @@
 // limitations under the License.
 
 import { FolderResource } from '@perses-dev/core';
-import { Box, CircularProgress, IconButton, Link, Stack } from '@mui/material';
+import { Box, CircularProgress, Stack } from '@mui/material';
 import { Table, TableColumnConfig } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
-import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
-import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
 import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
@@ -32,10 +28,11 @@ import {
   sortDashboardTableStringColumn,
 } from '../../utils/dashboardTableUtils';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { NameCell } from './NameCell';
 import { DashboardListRow } from './DashboardList';
 
 export interface DashboardTreeTableRow {
-  kind: 'Folder' | 'Dashboard';
+  kind: 'Folder' | 'Dashboard' | 'NoItems';
   name: string;
   displayName: string;
   project: string;
@@ -125,44 +122,17 @@ function DashboardTreeList({
         width: 300,
         cellDescription: (): string => '',
         sortingFn: sortStringColumn('displayName'),
-        cell: ({ row, getValue }): ReactElement => {
-          const value = getValue() as string;
-          const kind = row.original.kind;
-          const paddingLeft = kind === 'Folder' ? row.depth * 24 : (row.depth + 1) * 24;
-          return (
-            <Box sx={{ paddingLeft: paddingLeft + 'px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {kind === 'Folder' ? (
-                <>
-                  <IconButton
-                    onClick={row.getToggleExpandedHandler()}
-                    aria-expanded={row.getIsExpanded()}
-                    aria-label={row.getIsExpanded() ? 'collapse folder' : 'expand folder'}
-                    sx={{ padding: 0 }}
-                  >
-                    {row.getIsExpanded() || !row.getCanExpand() ? (
-                      <ChevronDownIcon fontSize="small" />
-                    ) : (
-                      <ChevronRightIcon fontSize="small" />
-                    )}
-                  </IconButton>
-                  <FolderOutlineIcon fontSize="small" />
-                  {value}
-                </>
-              ) : (
-                <>
-                  <ViewDashboardOutlineIcon fontSize="small" />
-                  <Link
-                    href={`/projects/${row.original.project}/dashboards/${row.original.name}`}
-                    color="inherit"
-                    underline="hover"
-                  >
-                    {value}
-                  </Link>
-                </>
-              )}
-            </Box>
-          );
-        },
+        cell: ({ row, getValue }): ReactElement => (
+          <NameCell
+            kind={row.original.kind}
+            depth={row.depth}
+            displayName={getValue() as string}
+            project={row.original.project}
+            name={row.original.name}
+            isOpen={row.getIsExpanded() || !row.getCanExpand()}
+            onToggleExpanded={row.getToggleExpandedHandler()}
+          />
+        ),
       },
       {
         id: 'tags',
@@ -219,6 +189,9 @@ function DashboardTreeList({
         width: 90,
         cellDescription: (): string => '',
         cell: ({ row }): ReactElement | undefined => {
+          if (row.original.kind === 'NoItems') {
+            return undefined;
+          }
           if (row.original.kind === 'Dashboard') {
             return (
               <Stack direction="row" gap={1} alignItems="center" justifyContent="center">
