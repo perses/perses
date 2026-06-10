@@ -130,7 +130,7 @@ The API backend is now available on port 8080 :). You can log in with user: `adm
 
 ### Web App
 
-See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI.
+See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI. For an overview of UI npm packages and their dependencies, see [docs/ui-package-architecture.md](./docs/ui-package-architecture.md).
 
 ### Development Container Image
 
