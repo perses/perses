@@ -13,10 +13,10 @@
 
 import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { Dialog, useSnackbar } from '@perses-dev/components';
-import { FolderItem, FolderResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FolderItem, FolderResource } from '@perses-dev/client';
 import { editFolderDialogValidationSchema, EditFolderValidationType } from '../../validation';
 import { useUpdateFolderMutation } from '../../model/folder-client';
 import { collectDashboards, getSubFolderDeepCopy, replaceSubFolder } from '../../utils/folderUtils';

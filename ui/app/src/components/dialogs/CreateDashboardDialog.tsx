@@ -23,10 +23,11 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
+import { Dialog, getResourceDisplayName } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DashboardSelector, EphemeralDashboardInfo, getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
+import { DashboardSelector } from '@perses-dev/spec';
 import {
   CreateDashboardValidationType,
   CreateEphemeralDashboardValidationType,

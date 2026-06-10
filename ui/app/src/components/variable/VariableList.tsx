@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, getResourceDisplayName, getVariableProject, Variable } from '@perses-dev/core';
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { useSnackbar } from '@perses-dev/components';
+import { Action, getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import { getVariableProject, VariableType } from '@perses-dev/client';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
@@ -46,7 +46,7 @@ import { VariableDrawer } from './VariableDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>): ReactElement {
+export function VariableList<T extends VariableType>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();

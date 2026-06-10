@@ -15,7 +15,7 @@ import { Await, Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ReactElement, Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
-import { ProjectResource } from '@perses-dev/core';
+import { ProjectResource } from '@perses-dev/client';
 import { getProject } from '../model/project-client';
 
 function GuardedProjectRoute(): ReactElement {

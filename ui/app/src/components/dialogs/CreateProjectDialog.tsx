@@ -13,10 +13,10 @@
 
 import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
-import { Dialog, useSnackbar } from '@perses-dev/components';
+import { Dialog, getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { ProjectResource } from '@perses-dev/client';
 import { CreateProjectValidationType, useProjectValidationSchema } from '../../validation';
 import { generateMetadataName } from '../../utils/metadata';
 import { useCreateProjectMutation } from '../../model/project-client';

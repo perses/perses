@@ -13,7 +13,7 @@
 
 import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
 import fetch from 'node-fetch';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { AppHomePage, DashboardPage } from '../pages';
 
 type DashboardTestOptions = {

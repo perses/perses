@@ -11,10 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Variable, ExternalVariableDefinition } from '@perses-dev/core';
+import { VariableType } from '@perses-dev/client';
+import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ExternalVariableSource } from '../model/variables';
 
-export function buildProjectVariableDefinition(projectName: string, variables: Variable[]): ExternalVariableDefinition {
+export function buildProjectVariableDefinition(
+  projectName: string,
+  variables: VariableType[]
+): ExternalVariableDefinition {
   return {
     editLink: `/projects/${projectName}/variables`,
     tooltip: {
@@ -25,7 +29,7 @@ export function buildProjectVariableDefinition(projectName: string, variables: V
   };
 }
 
-export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVariableDefinition {
+export function buildGlobalVariableDefinition(variables: VariableType[]): ExternalVariableDefinition {
   return {
     editLink: `/admin/variables`,
     tooltip: {
@@ -43,7 +47,7 @@ export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVa
  */
 function buildExternalVariableDefinition(
   source: ExternalVariableSource,
-  variables: Variable[]
+  variables: VariableType[]
 ): ExternalVariableDefinition {
   return {
     source: source,

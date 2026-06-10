@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch } from '@perses-dev/core';
+import { fetch } from '@perses-dev/client';
 import { useQueryParam } from 'use-query-params';
 import buildURL from '../url-builder';
 import { HTTPHeader, HTTPMethodPOST } from '../http';
