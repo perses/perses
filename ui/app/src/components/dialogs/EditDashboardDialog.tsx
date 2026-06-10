@@ -13,8 +13,9 @@
 
 import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { ProjectMetadata } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
@@ -41,7 +42,7 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
     mode: 'onBlur',
     defaultValues: {
       dashboardName: getResourceDisplayName(dashboard),
-      tags: dashboard.metadata.tags ?? [],
+      tags: (dashboard.metadata as ProjectMetadata).tags ?? [],
     },
   });
   const { reset } = form;
@@ -55,7 +56,7 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
 
     reset({
       dashboardName: getResourceDisplayName(dashboard),
-      tags: dashboard.metadata.tags ?? [],
+      tags: (dashboard.metadata as ProjectMetadata).tags ?? [],
     });
   }, [dashboard, open, reset]);
 
@@ -65,7 +66,7 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
       metadata: {
         ...dashboard.metadata,
         tags: data.tags,
-      },
+      } as ProjectMetadata,
       spec: {
         ...dashboard.spec,
         display: {

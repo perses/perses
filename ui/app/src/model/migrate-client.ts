@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
+import { fetchJson, StatusError } from '@perses-dev/core';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 

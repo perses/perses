@@ -17,7 +17,7 @@ import Import from 'mdi-material-ui/Import';
 import { useNavigate } from 'react-router-dom';
 
 import { useSnackbar } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';

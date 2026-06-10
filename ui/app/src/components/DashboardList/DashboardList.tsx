@@ -11,18 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DashboardResource,
-  DashboardSelector,
-  EphemeralDashboardInfo,
-  FolderResource,
-  getResourceDisplayName,
-  getResourceExtendedDisplayName,
-} from '@perses-dev/core';
+import { DashboardSelector, EphemeralDashboardInfo, FolderResource, ProjectMetadata } from '@perses-dev/core';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { Stack } from '@mui/material';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import {
   AddFolderDialog,
@@ -104,7 +98,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         version: dashboard.metadata.version ?? 0,
         createdAt: dashboard.metadata.createdAt ?? '',
         updatedAt: dashboard.metadata.updatedAt ?? '',
-        tags: dashboard.metadata.tags ?? [],
+        tags: (dashboard.metadata as ProjectMetadata).tags ?? [],
         viewedAt,
       };
     });

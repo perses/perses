@@ -23,6 +23,14 @@ import {
   SHOW_SHORTCUTS_EVENT,
 } from '@perses-dev/dashboards';
 
+interface PersesHotkeyMeta {
+  id?: string;
+  category?: ShortcutCategory;
+  displayOverride?: string;
+  name?: string;
+  description?: string;
+}
+
 /** Modal displaying all registered keyboard shortcuts, grouped by category. */
 export function ShortcutHelpModal(): ReactElement {
   const [open, setOpen] = useState(false);
@@ -68,9 +76,9 @@ function ShortcutHelpContent(): ReactElement {
 
     // Process single hotkeys
     for (const reg of hotkeys) {
-      const meta = reg.options.meta;
+      const meta = reg.options.meta as PersesHotkeyMeta | undefined;
       if (meta?.category) {
-        const category = meta.category as ShortcutCategory;
+        const category = meta.category;
         if (groups[category]) {
           groups[category].push({
             name: meta.name ?? meta.id ?? reg.hotkey,
@@ -83,9 +91,9 @@ function ShortcutHelpContent(): ReactElement {
 
     // Process sequences
     for (const reg of sequences) {
-      const meta = reg.options.meta;
+      const meta = reg.options.meta as PersesHotkeyMeta | undefined;
       if (meta?.category) {
-        const category = meta.category as ShortcutCategory;
+        const category = meta.category;
         if (groups[category]) {
           groups[category].push({
             name: meta.name ?? reg.sequence.join(' '),

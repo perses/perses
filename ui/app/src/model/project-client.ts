@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, fetchJson, ProjectResource, StatusError } from '@perses-dev/core';
+import { fetchJson, ProjectResource, StatusError } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import {
   useMutation,
   UseMutationResult,

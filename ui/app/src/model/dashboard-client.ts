@@ -19,7 +19,8 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
+import { fetchJson, StatusError } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
 import { useImportantDashboardSelectors } from '../context/Config';

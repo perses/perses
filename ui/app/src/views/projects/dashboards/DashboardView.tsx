@@ -13,9 +13,8 @@
 
 import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
-import { DashboardResource, getResourceExtendedDisplayName } from '@perses-dev/core';
-import { DashboardResource as DashboardResourceModel } from '@perses-dev/dashboards';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useEffect } from 'react';
 import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
@@ -45,11 +44,11 @@ function DashboardView(): ReactElement | null {
   );
 
   const handleDashboardSave = useCallback(
-    (data: DashboardResourceModel) => {
+    (data: DashboardResource) => {
       if (data.kind !== 'Dashboard') {
         throw new Error('Invalid kind');
       }
-      return updateDashboardMutation.mutateAsync(data as DashboardResource, {
+      return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
           successSnackbar(
             `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`

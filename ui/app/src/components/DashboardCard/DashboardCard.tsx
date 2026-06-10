@@ -13,7 +13,8 @@
 
 import { Button, Stack, Typography } from '@mui/material';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { DashboardResource, getResourceDisplayName } from '@perses-dev/core';
+import { getResourceDisplayName } from '@perses-dev/components';
+import { DashboardResource } from '@perses-dev/dashboards';
 import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
 import { ReactElement } from 'react';
