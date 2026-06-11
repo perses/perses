@@ -13,12 +13,28 @@
 
 package model
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 const (
 	ErrorCodeConflict = 409
 	ErrorCodeNotFound = 404
 )
+
+var ErrNoSubscriberAvailable = errors.New("no subscriber slot available")
+var ErrWatchNotEnabled = errors.New("watch is not enabled")
+
+// IsNoSubscriberAvailable returns true if the error indicates watch subscriber capacity was reached.
+func IsNoSubscriberAvailable(err error) bool {
+	return errors.Is(err, ErrNoSubscriberAvailable)
+}
+
+// IsWatchNotEnabled returns true if watch support is disabled for the requested kind.
+func IsWatchNotEnabled(err error) bool {
+	return errors.Is(err, ErrWatchNotEnabled)
+}
 
 // IsKeyNotFound returns true if the error code is ErrorCodeNotFound.
 func IsKeyNotFound(err error) bool {
