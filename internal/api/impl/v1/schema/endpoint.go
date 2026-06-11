@@ -100,19 +100,11 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 	if len(plugins) == 0 {
 		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "plugin not found"})
 	}
-
-	cueCtx := cuecontext.New()
-	list, err := schema.GenerateSchemaDefinitions(cueCtx, plugins)
+	data, err := generateCUEbytes(plugins)
 	if err != nil {
-		logrus.WithError(err).Error("unable to generate plugin definition list")
-		return apiinterface.InternalError
+		return err
 	}
 
-	data, exportErr := utils.CueValueToHTTPData(list)
-	if exportErr != nil {
-		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
-		return apiinterface.InternalError
-	}
 	return ctx.Blob(http.StatusOK, "text/x-cue", data)
 }
 
@@ -121,17 +113,26 @@ func (e *endpoint) PluginList(ctx echo.Context) error {
 	if len(schemas) == 0 {
 		return ctx.Blob(http.StatusOK, "text/x-cue", []byte("{}"))
 	}
-	cueCtx := cuecontext.New()
-	list, err := schema.GenerateSchemaDefinitions(cueCtx, schemas)
+	data, err := generateCUEbytes(schemas)
 	if err != nil {
-		logrus.WithError(err).Error("unable to generate plugin definition list")
-		return apiinterface.InternalError
+		return err
+	}
+
+	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+}
+
+func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
+	cueCtx := cuecontext.New()
+	list, err := schema.GenerateSchemaDefinitions(cueCtx, ls)
+	if err != nil {
+		logrus.WithError(err).Error("unable to generate plugins schema definition")
+		return nil, apiinterface.InternalError
 	}
 
 	data, exportErr := utils.CueValueToHTTPData(list)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
-		return apiinterface.InternalError
+		return nil, apiinterface.InternalError
 	}
-	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+	return data, nil
 }
