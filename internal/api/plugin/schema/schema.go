@@ -278,14 +278,19 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	defer s.mutex.RUnlock()
 
 	var allSchemas []LoadSchema
+	allSchemasMap := map[string]LoadSchema{}
 
 	schemas := s.sch.getAllSchemas()
 	devSchemas := s.devSch.getAllSchemas()
 
 	for _, ls := range append(devSchemas, schemas...) {
-		if !loadSchemaPresent(ls, allSchemas) {
-			allSchemas = append(allSchemas, ls)
+		if _, ok := allSchemasMap[ls.Name]; !ok {
+			allSchemasMap[ls.Name] = ls
 		}
+	}
+
+	for _, ls := range allSchemasMap {
+		allSchemas = append(allSchemas, ls)
 	}
 
 	return allSchemas
@@ -296,26 +301,22 @@ func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 	defer s.mutex.RUnlock()
 
 	var allSchemas []LoadSchema
+	allSchemasMap := map[string]LoadSchema{}
 
 	schemas := s.sch.getSchemas(kind)
 	devSchemas := s.devSch.getSchemas(kind)
 
 	for _, ls := range append(devSchemas, schemas...) {
-		if !loadSchemaPresent(ls, allSchemas) {
-			allSchemas = append(allSchemas, ls)
+		if _, ok := allSchemasMap[ls.Name]; !ok {
+			allSchemasMap[ls.Name] = ls
 		}
+	}
+
+	for _, ls := range allSchemasMap {
+		allSchemas = append(allSchemas, ls)
 	}
 
 	return allSchemas
-}
-
-func loadSchemaPresent(ls LoadSchema, presentSchemas []LoadSchema) bool {
-	for _, sch := range presentSchemas {
-		if (ls.Name == sch.Name) && (ls.Kind == sch.Kind) {
-			return true
-		}
-	}
-	return false
 }
 
 func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v map[string]*build.Instance) []LoadSchema {
