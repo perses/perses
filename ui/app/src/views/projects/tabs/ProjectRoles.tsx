@@ -13,8 +13,8 @@
 
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
-import { Role, RoleResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
+import { Role, RoleResource } from '@perses-dev/client';
 import { RoleList } from '../../../components/roles/RoleList';
 import {
   useDeleteRoleMutation,

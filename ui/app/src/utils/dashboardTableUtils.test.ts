@@ -11,10 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource } from '@perses-dev/core';
+import { FolderResource } from '@perses-dev/client';
 import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';
+
+jest.mock('echarts', () => ({
+  use: jest.fn(),
+  init: jest.fn(() => ({
+    setOption: jest.fn(),
+    resize: jest.fn(),
+    dispose: jest.fn(),
+  })),
+}));
+
+jest.mock('echarts/core', () => ({
+  use: jest.fn(),
+  init: jest.fn(() => ({
+    setOption: jest.fn(),
+    resize: jest.fn(),
+    dispose: jest.fn(),
+  })),
+}));
 
 describe('buildTableRows – no folders', () => {
   it('returns an empty array when both inputs are empty', () => {

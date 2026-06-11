@@ -13,8 +13,8 @@
 
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
-import { getResourceExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { VariableResource, VariableType } from '@perses-dev/client';
 import { VariableList } from '../../../components/variable/VariableList';
 import {
   useCreateVariableMutation,
@@ -82,7 +82,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
     (variable: VariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         deleteVariableMutation.mutate(variable, {
-          onSuccess: (deletedVariable: Variable) => {
+          onSuccess: (deletedVariable: VariableType) => {
             successSnackbar(
               `Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
             );

@@ -11,18 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DashboardResource,
-  DashboardSelector,
-  EphemeralDashboardInfo,
-  FolderResource,
-  getResourceDisplayName,
-  getResourceExtendedDisplayName,
-} from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
+import { DashboardResource } from '@perses-dev/dashboards';
+import { DashboardSelector } from '@perses-dev/spec';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import {
   AddFolderDialog,

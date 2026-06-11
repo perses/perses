@@ -11,19 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  getResourceDisplayName,
-  EphemeralDashboardResource,
-  parseDurationString,
-  getResourceExtendedDisplayName,
-} from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance, add } from 'date-fns';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { EphemeralDashboardResource } from '@perses-dev/client';
+import { parseDurationString } from '@perses-dev/spec';
 import { DeleteResourceDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {

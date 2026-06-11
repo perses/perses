@@ -13,8 +13,8 @@
 
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
-import { RoleBinding, RoleBindingResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
+import { RoleBinding, RoleBindingResource } from '@perses-dev/client';
 import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
 import {
   useDeleteRoleBindingMutation,

@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
-import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, VariableDefinition, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import {
   PluginRegistry,
   TimeRangeProviderWithQueryParams,
@@ -22,16 +21,17 @@ import {
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
+import { getVariableProject, VariableType } from '@perses-dev/client';
 import { useDatasourceApi } from '../../model/datasource-api';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
-interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
+interface VariableDrawerProps<T extends VariableType> extends DrawerProps<T> {
   variable: T;
 }
 
-export function VariableDrawer<T extends Variable>({
+export function VariableDrawer<T extends VariableType>({
   variable,
   action,
   isOpen,

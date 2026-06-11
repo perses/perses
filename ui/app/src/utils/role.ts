@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Subject } from '@perses-dev/core';
+import { Subject } from '@perses-dev/client';
 
 // subjectsSummary returns a formatted string of a list of subjects where max is the amount of subject to show with their name
 export function subjectsSummary(subjects: Subject[], max: number): string {

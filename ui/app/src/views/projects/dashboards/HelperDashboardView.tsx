@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { getResourceDisplayName, ExternalVariableDefinition } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
-import { DashboardResource, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { DashboardResource, ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
@@ -113,6 +112,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                 <ViewDashboard
                   key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
                   dashboardResource={dashboardResource}
+                  isAnnotationEnabled={false}
                   datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={

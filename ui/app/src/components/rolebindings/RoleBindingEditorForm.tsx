@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
 import React, { ReactElement, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
@@ -19,6 +18,7 @@ import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleA
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/client';
 import { useUserList } from '../../model/user-client';
 import { FormEditorProps } from '../form-drawers';
 

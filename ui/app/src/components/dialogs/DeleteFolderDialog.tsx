@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { DispatchWithoutAction, ReactElement, useCallback, useMemo } from 'react';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { FolderResource } from '@perses-dev/client';
 import { withoutSubFolder, getSubFolderRef } from '../../utils/folderUtils';
 import { useDeleteFolderMutation, useUpdateFolderMutation } from '../../model/folder-client';
 import { DeleteDialog } from './DeleteDialog';
