@@ -14,6 +14,7 @@
 package dashboard
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -152,6 +153,10 @@ func (s *service) RawMetadataList(q *dashboard.Query, params apiInterface.Parame
 		return nil, err
 	}
 	return s.dao.RawMetadataList(query)
+}
+
+func (s *service) Watch(ctx context.Context) (<-chan *v1.WatchEvent, error) {
+	return s.dao.Watch(ctx)
 }
 
 func (s *service) Validate(entity *v1.Dashboard) error {
