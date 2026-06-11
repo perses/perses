@@ -26,6 +26,7 @@ const (
 	CreateAction   Action = "create"
 	UpdateAction   Action = "update"
 	DeleteAction   Action = "delete"
+	WatchAction    Action = "watch"
 	WildcardAction Action = "*"
 )
 
@@ -79,6 +80,9 @@ func GetAction(action string) (*Action, error) {
 		return &result, nil
 	case strings.ToLower(string(DeleteAction)):
 		result := DeleteAction
+		return &result, nil
+	case strings.ToLower(string(WatchAction)):
+		result := WatchAction
 		return &result, nil
 	case strings.ToLower(string(WildcardAction)):
 		result := WildcardAction
