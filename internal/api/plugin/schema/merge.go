@@ -93,7 +93,7 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
 	definitions := []pluginValue{}
 	for _, ls := range schemas {
-		value := ctx.BuildInstance(ls.Instance)
+		value := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if value.Err() != nil {
 			return cue.Value{}, fmt.Errorf("unable to build instance %s: %w", ls.Name, value.Err())
 		}
