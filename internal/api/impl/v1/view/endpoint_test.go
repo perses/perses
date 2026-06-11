@@ -14,6 +14,7 @@
 package view
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -137,6 +138,10 @@ func (*mockDashboardService) MetadataList(_ *dashboard.Query, _ apiInterface.Par
 }
 
 func (*mockDashboardService) RawMetadataList(_ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) Watch(_ context.Context) (<-chan *v1.WatchEvent, error) {
 	panic("unimplemented")
 }
 

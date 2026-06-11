@@ -92,12 +92,12 @@ type persistence struct {
 	variable           variable.DAO
 }
 
-func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
+func newPersistenceManager(conf config.Database, watchConf config.Watch) (PersistenceManager, error) {
 	persesDAO, err := database.New(conf)
 	if err != nil {
 		return nil, err
 	}
-	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
+	dashboardDAO := dashboardImpl.NewDAO(watchConf, persesDAO)
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
 	ephemeralDashboardDAO := ephemeralDashboardImpl.NewDAO(persesDAO)
 	folderDAO := folderImpl.NewDAO(persesDAO)

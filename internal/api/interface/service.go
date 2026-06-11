@@ -14,11 +14,13 @@
 package apiinterface
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/pkg/model/api"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Parameters struct {
@@ -35,4 +37,5 @@ type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
 	RawList(query V, parameters Parameters) ([]json.RawMessage, error)
 	MetadataList(query V, parameters Parameters) ([]api.Entity, error)
 	RawMetadataList(query V, parameters Parameters) ([]json.RawMessage, error)
+	Watch(ctx context.Context) (<-chan *v1.WatchEvent, error)
 }
