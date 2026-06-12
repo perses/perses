@@ -30,6 +30,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
 )
@@ -48,8 +49,8 @@ type Loaded struct {
 type Plugin interface {
 	Load() error
 	LoadDevPlugin(plugins []v1.PluginInDevelopment) error
-	RefreshDevPlugin(metadata plugin.ModuleMetadata) error
-	UnLoadDevPlugin(metadata plugin.ModuleMetadata) error
+	RefreshDevPlugin(metadata module.Metadata) error
+	UnLoadDevPlugin(metadata module.Metadata) error
 	List() ([]byte, error)
 	UnzipArchives() error
 	GetLoadedPlugin(name, version, registry string) (*Loaded, bool)
@@ -134,7 +135,7 @@ func (p *pluginFile) GetLoadedPlugin(name, version, registry string) (*Loaded, b
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	// Check in the dev plugin first
-	moduleMetadata := plugin.ModuleMetadata{Version: version, Registry: registry}
+	moduleMetadata := module.Metadata{Version: version, Registry: registry}
 	if devLoaded, ok := p.devLoaded.Get(name, moduleMetadata); ok {
 		return devLoaded, true
 	}
@@ -193,7 +194,7 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 		return nil
 	}
 
-	pluginStatus := &plugin.ModuleStatus{
+	pluginStatus := &module.Status{
 		IsLoaded: true,
 		InDev:    false,
 	}
@@ -204,7 +205,7 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 	}
 	pluginModule := &v1.PluginModule{
 		Kind: v1.PluginModuleKind,
-		Metadata: plugin.ModuleMetadata{
+		Metadata: module.Metadata{
 			Name:    manifest.Name,
 			Version: manifest.Metadata.BuildInfo.Version,
 		},
@@ -225,7 +226,10 @@ func (p *pluginFile) loadSinglePlugin(file os.DirEntry, pluginPath string) *v1.P
 		logrus.WithError(readErr).Error(pluginStatus.Error)
 		return pluginModule
 	}
-	pluginModule.Spec = npmPackageData.Perses
+	pluginModule.Spec = v1.ModuleSpec{
+		SchemasPath: npmPackageData.Perses.SchemasPath,
+		Plugins:     npmPackageData.Perses.Plugins,
+	}
 
 	if p.filter(pluginModule) {
 		logrus.Debugf("plugin module %q has been filtered", manifest.Name)
@@ -281,7 +285,7 @@ func (p *pluginFile) filter(pluginModule *v1.PluginModule) bool {
 		if slices.Contains(p.enabled, strings.ToLower(pluginModule.Metadata.Name)) {
 			return false
 		}
-		var newSpec []plugin.Plugin
+		var newSpec []module.Plugin
 		for _, plg := range pluginModule.Spec.Plugins {
 			if slices.Contains(p.enabled, strings.ToLower(plg.Spec.Name)) {
 				newSpec = append(newSpec, plg)
@@ -296,7 +300,7 @@ func (p *pluginFile) filter(pluginModule *v1.PluginModule) bool {
 		if slices.Contains(p.disabled, strings.ToLower(pluginModule.Metadata.Name)) {
 			return true
 		}
-		var newSpec []plugin.Plugin
+		var newSpec []module.Plugin
 		for _, plg := range pluginModule.Spec.Plugins {
 			if !slices.Contains(p.disabled, strings.ToLower(plg.Spec.Name)) {
 				newSpec = append(newSpec, plg)

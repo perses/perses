@@ -21,6 +21,7 @@ import (
 	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -79,7 +80,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 				},
 				Spec: datasourceSpec.Spec{
 					Default: true,
-					Plugin: common.Plugin{
+					Plugin: plugin.Plugin{
 						Kind: "PrometheusDatasource",
 						Spec: pluginSpecAsMapInterface,
 					},
@@ -143,7 +144,7 @@ spec:
 				},
 				Spec: datasourceSpec.Spec{
 					Default: true,
-					Plugin: common.Plugin{
+					Plugin: plugin.Plugin{
 						Kind: "PrometheusDatasource",
 						Spec: pluginSpecAsMapInterface,
 					},

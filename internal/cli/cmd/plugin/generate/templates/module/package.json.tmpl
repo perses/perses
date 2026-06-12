@@ -69,8 +69,10 @@
     "mf-stats.json"
   ],
   "perses": {
-    "moduleName": "{{.ModulePascalName}}",
-    "moduleOrg": "{{.ModuleOrg}}",
+    "metadata": {
+      "name": "{{.ModulePascalName}}",
+      "registry": "{{.ModuleOrg}}"
+    },
     "schemasPath": "schemas",
     "plugins": [{{ range $index, $item := .PersesPlugins }}
       {{ if $index }},{{end}}{{- template "persesPlugin" $item -}}

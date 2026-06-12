@@ -18,7 +18,8 @@ import (
 	"path/filepath"
 
 	"github.com/perses/perses/internal/cli/file"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/plugin"
 )
 
 const (
@@ -46,7 +47,10 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 		return err
 	}
 	// check if the schema folder exists only if it requires schema
-	if IsSchemaRequired(npmPackageData.Perses) {
+	if IsSchemaRequired(v1.ModuleSpec{
+		SchemasPath: npmPackageData.Perses.SchemasPath,
+		Plugins:     npmPackageData.Perses.Plugins,
+	}) {
 		exist, err = file.Exists(schemaFolder)
 		if err != nil {
 			return err
@@ -59,7 +63,7 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 }
 
 // IsSchemaRequired check if any plugins described in the module require a schema
-func IsSchemaRequired(moduleSpec plugin.ModuleSpec) bool {
+func IsSchemaRequired(moduleSpec v1.ModuleSpec) bool {
 	for _, plg := range moduleSpec.Plugins {
 		if plg.Kind == plugin.KindDatasource || plg.Kind == plugin.KindPanel ||
 			plg.Kind == plugin.KindVariable || plg.Kind == plugin.KindAnnotation ||

@@ -20,20 +20,20 @@ import (
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
-func loadPluginFromJSON(testDataPath string, t *testing.T) common.Plugin {
+func loadPluginFromJSON(testDataPath string, t *testing.T) plugin.Plugin {
 	data, readErr := os.ReadFile(testDataPath) //nolint: gosec
 	if readErr != nil {
 		t.Fatal(readErr)
 	}
 
-	plg := common.Plugin{}
+	plg := plugin.Plugin{}
 	unmarshallErr := json.Unmarshal(data, &plg)
 	if unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
@@ -57,7 +57,7 @@ func loadQueriesFromJSON(testDataPath string, t *testing.T) []dashboard.Query {
 	return queries
 }
 
-func loadPlugin(path string, modules []plugin.ModuleSpec, sch Schema, t *testing.T) {
+func loadPlugin(path string, modules []v1.ModuleSpec, sch Schema, t *testing.T) {
 	for _, module := range modules {
 		if err := sch.Load(path, v1.PluginModule{Spec: module}); err != nil {
 			t.Fatal(err)
@@ -66,13 +66,13 @@ func loadPlugin(path string, modules []plugin.ModuleSpec, sch Schema, t *testing
 }
 
 func loadPanelPlugins(panelsPath string, sch Schema, t *testing.T) {
-	modules := []plugin.ModuleSpec{
+	modules := []v1.ModuleSpec{
 		{
 			SchemasPath: "first",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindPanel,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "FirstChart",
 					},
 				},
@@ -80,10 +80,10 @@ func loadPanelPlugins(panelsPath string, sch Schema, t *testing.T) {
 		},
 		{
 			SchemasPath: "second",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindPanel,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "SecondChart",
 					},
 				},
@@ -91,10 +91,10 @@ func loadPanelPlugins(panelsPath string, sch Schema, t *testing.T) {
 		},
 		{
 			SchemasPath: "third",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindPanel,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "ThirdChart",
 					},
 				},
@@ -105,13 +105,13 @@ func loadPanelPlugins(panelsPath string, sch Schema, t *testing.T) {
 }
 
 func loadQueryPlugins(queryPath string, sch Schema, t *testing.T) {
-	modules := []plugin.ModuleSpec{
+	modules := []v1.ModuleSpec{
 		{
 			SchemasPath: "custom",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindTimeSeriesQuery,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "CustomGraphQuery",
 					},
 				},
@@ -119,10 +119,10 @@ func loadQueryPlugins(queryPath string, sch Schema, t *testing.T) {
 		},
 		{
 			SchemasPath: "sql",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindTraceQuery,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "SQLGraphQuery",
 					},
 				},
@@ -133,13 +133,13 @@ func loadQueryPlugins(queryPath string, sch Schema, t *testing.T) {
 }
 
 func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
-	modules := []plugin.ModuleSpec{
+	modules := []v1.ModuleSpec{
 		{
 			SchemasPath: "first",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindVariable,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "FirstVariable",
 					},
 				},
@@ -147,10 +147,10 @@ func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
 		},
 		{
 			SchemasPath: "second",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindVariable,
-					Spec: plugin.Spec{
+					Spec: module.PluginSpec{
 						Name: "SecondVariable",
 					},
 				},
@@ -437,22 +437,22 @@ func TestValidateDashboardVariables(t *testing.T) {
 func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 	// Successful load case
 	s := newSch()
-	module := v1.PluginModule{
-		Spec: plugin.ModuleSpec{
+	pluginModule := v1.PluginModule{
+		Spec: v1.ModuleSpec{
 			SchemasPath: "first",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindPanel,
-					Spec: plugin.Spec{Name: "FirstChart"},
+					Spec: module.PluginSpec{Name: "FirstChart"},
 				},
 			},
 		},
 	}
 	// should load without error
-	if err := s.load("testdata/schemas/panels", module); err != nil {
+	if err := s.load("testdata/schemas/panels", pluginModule); err != nil {
 		t.Fatalf("unexpected error while loading schema: %v", err)
 	}
-	inst, ok := s.panels.Get("FirstChart", module.Metadata)
+	inst, ok := s.panels.Get("FirstChart", pluginModule.Metadata)
 	if !ok || inst == nil {
 		t.Fatalf("expected panel schema instance to be registered, got ok=%v, inst=%v", ok, inst)
 	}
@@ -460,12 +460,12 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 	// Error case: module spec does not include the matching plugin
 	s2 := newSch()
 	moduleMissing := v1.PluginModule{
-		Spec: plugin.ModuleSpec{
+		Spec: v1.ModuleSpec{
 			SchemasPath: "first",
-			Plugins: []plugin.Plugin{
+			Plugins: []module.Plugin{
 				{
 					Kind: plugin.KindPanel,
-					Spec: plugin.Spec{Name: "SomeOtherName"},
+					Spec: module.PluginSpec{Name: "SomeOtherName"},
 				},
 			},
 		},

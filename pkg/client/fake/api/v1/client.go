@@ -54,7 +54,7 @@ func (c *client) Health() v1.HealthInterface {
 }
 
 func (c *client) Plugin() v1.PluginInterface {
-	return &plugin{}
+	return &plg{}
 }
 
 func (c *client) Project() v1.ProjectInterface {

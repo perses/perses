@@ -17,8 +17,8 @@ import (
 	"fmt"
 
 	"cuelang.org/go/cue"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/datasource/proxy/http"
+	"github.com/perses/spec/go/plugin"
 )
 
 // NewFromSchema is generating a tree representing the schema passed in parameter.
@@ -60,8 +60,8 @@ func NewFromSchema(v cue.Value) ([]*Node, error) {
 	return root.Nodes, nil
 }
 
-func BuildPluginAndInjectProxy(decodedSchema []*Node, proxy http.Config) (common.Plugin, error) {
-	plugin := common.Plugin{}
+func BuildPluginAndInjectProxy(decodedSchema []*Node, proxy http.Config) (plugin.Plugin, error) {
+	plugin := plugin.Plugin{}
 	if len(decodedSchema) != 2 {
 		return plugin, fmt.Errorf("invalid plugin schema. Plugin schema should only contain 'kind' and 'spec' field at the root")
 	}

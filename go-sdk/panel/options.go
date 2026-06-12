@@ -16,8 +16,8 @@ package panel
 import (
 	"github.com/perses/perses/go-sdk/link"
 	"github.com/perses/perses/go-sdk/query"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 )
 
 func Title(title string) Option {
@@ -40,7 +40,7 @@ func Description(description string) Option {
 	}
 }
 
-func Plugin(plugin common.Plugin) Option {
+func Plugin(plugin plugin.Plugin) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Plugin = plugin
 		return nil

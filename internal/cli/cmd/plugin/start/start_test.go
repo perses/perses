@@ -21,7 +21,7 @@ import (
 
 	"github.com/perses/perses/internal/test"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
