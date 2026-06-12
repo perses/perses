@@ -3,8 +3,5 @@
   "include": ["src"],
   "compilerOptions": {
     "sourceMap": true,
-    "paths": {
-      "@perses-dev/core": ["../core/src"]
-    }
   }
 }

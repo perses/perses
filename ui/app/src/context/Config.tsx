@@ -14,9 +14,9 @@
 import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { DashboardSelector, DurationString } from '@perses-dev/core';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
+import { DashboardSelector, DurationString } from '@perses-dev/spec';
 import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
 
@@ -90,6 +90,11 @@ export function useIsExplorerEnabled(): boolean {
 export function useIsKeyboardShortcutsEnabled(): boolean {
   const { config } = useConfigContext();
   return config.frontend.enable_keyboard_shortcuts ?? true;
+}
+
+export function useIsAutoRefreshDashboardsEnabled(): boolean {
+  const { config } = useConfigContext();
+  return config.frontend.event_watching?.auto_refresh_dashboards ?? false;
 }
 
 export function useIsEphemeralDashboardEnabled(): boolean {

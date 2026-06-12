@@ -16,7 +16,7 @@ import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
 import { ChangeEvent, ReactElement, useState } from 'react';
 import { JSONEditor } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/client';
 import { useIsMobileSize } from '../../utils/browser-size';
 import GrafanaFlow from './GrafanaFlow';
 import PersesFlow from './PersesFlow';

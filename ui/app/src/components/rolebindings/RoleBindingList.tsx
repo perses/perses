@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getMetadataProject, RoleBinding, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import { Action, getMetadataProject, RoleBinding } from '@perses-dev/client';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';

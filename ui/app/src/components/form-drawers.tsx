@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DispatchWithPromise } from '@perses-dev/core';
+import { Action } from '@perses-dev/client';
+import { DispatchWithPromise } from '@perses-dev/components';
 import { Dispatch, DispatchWithoutAction } from 'react';
 
 export interface DrawerProps<T> {

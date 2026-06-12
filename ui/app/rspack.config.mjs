@@ -25,8 +25,7 @@ const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.me
 const nodeModulesPath = resolve(import.meta.dirname, '../node_modules');
 const sharedNodeModulesPath = resolve(sharedPackagesPath, 'node_modules');
 
-const localAliases = {
-  '@perses-dev/core': resolve(nodeModulesPath, '@perses-dev/core/dist'),
+const localAliases = {  
   '@perses-dev/internal-utils': resolve(nodeModulesPath, '@perses-dev/internal-utils/dist'),
 };
 
@@ -132,6 +131,13 @@ export default defineConfig({
         port: parseInt(process.env.PORT ?? '3000'),
         allowedHosts: 'all',
         proxy: [
+          {
+            // SSE watch endpoints: disable compression so the streamed response
+            // is never buffered by the dev-server proxy.
+            context: ['/api/v1/watch'],
+            target: 'http://localhost:8080',
+            compress: false,
+          },
           {
             context: ['/api', '/proxy', '/plugins'],
             target: 'http://localhost:8080',

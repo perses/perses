@@ -12,17 +12,11 @@
 // limitations under the License.
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
-import {
-  EphemeralDashboardResource,
-  getResourceExtendedDisplayName,
-  DEFAULT_DASHBOARD_DURATION,
-  DEFAULT_REFRESH_INTERVAL,
-  EphemeralDashboardSpec,
-  DurationString,
-} from '@perses-dev/core';
-import { DashboardResource } from '@perses-dev/dashboards';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useState } from 'react';
+import { DashboardResource, EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
+import { DurationString } from '@perses-dev/spec';
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';

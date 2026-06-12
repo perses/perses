@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
 import { useSnackbar } from '@perses-dev/components';
-import { UserResource } from '@perses-dev/core';
+import { UserResource } from '@perses-dev/client';
 import { UserList } from '../../../components/users/UserList';
 import {
   useCreateUserMutation,

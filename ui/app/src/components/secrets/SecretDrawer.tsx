@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Secret } from '@perses-dev/core';
 import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { Secret } from '@perses-dev/client';
 import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 import { SecretEditorForm } from './SecretEditorForm';

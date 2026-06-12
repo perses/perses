@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
+import { fetchJson, Permission, StatusError } from '@perses-dev/client';
+import { DashboardSelector, DurationString } from '@perses-dev/spec';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -181,6 +182,10 @@ export interface TimeRangeConfig {
   options?: DurationString[];
 }
 
+export interface EventWatchingConfig {
+  auto_refresh_dashboards: boolean;
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
@@ -188,6 +193,7 @@ export interface FrontendConfig {
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   banner?: Banner;
+  event_watching?: EventWatchingConfig;
 }
 
 export interface EphemeralDashboardConfig {

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Tooltip } from '@mui/material';
-import { Action, Scope } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { Action, Scope } from '@perses-dev/client';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 
