@@ -152,7 +152,7 @@ func getTemplatePath(pluginType apiv1.Kind) (string, error) {
 		return path.Join("templates", "query", "timeseriesquery"), nil
 	case apiv1.KindVariable:
 		return path.Join("templates", "variable"), nil
-	case "Annotation":
+	case apiv1.KindAnnotation:
 		return path.Join("templates", "annotations"), nil
 	case apiv1.KindPanel:
 		return path.Join("templates", "panel"), nil
