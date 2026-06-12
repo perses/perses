@@ -497,6 +497,7 @@ func (m *mig) remove(kind plugin.Kind, name string) {
 			delete(m.panels, name)
 		case plugin.KindVariable:
 			delete(m.variables, name)
+		// TODO: annotations
 		case plugin.KindDatasource, plugin.KindExplore:
 		// No migration script for datasource or explorer, so nothing to remove
 		default:

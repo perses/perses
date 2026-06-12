@@ -112,7 +112,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                 <ViewDashboard
                   key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
                   dashboardResource={dashboardResource}
-                  isAnnotationEnabled={false}
                   datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}
                   dashboardTitleComponent={
@@ -126,6 +125,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}
                   isReadonly={isReadonly}
+                  isAnnotationEnabled={true}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}
