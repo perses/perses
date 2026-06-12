@@ -23,21 +23,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCastASTNodeToASTExprASTExpr(t *testing.T) {
+func TestASTNodeToASTExprASTExpr(t *testing.T) {
 	// A plain ast.Expr (e.g. *ast.StructLit) must be returned as-is.
 	s := &ast.StructLit{}
-	expr, err := CastASTNodeToASTExpr(s)
+	expr, err := ASTNodeToASTExpr(s)
 	require.NoError(t, err)
 	assert.Equal(t, s, expr)
 }
 
-func TestCastASTNodeToASTExprASTFile(t *testing.T) {
+func TestASTNodeToASTExprASTFile(t *testing.T) {
 	// An *ast.File returned by value.Syntax() must be unwrapped into a StructLit,
 	// dropping any package/import declarations.
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`a: 1`)
 	node := v.Syntax(CueSyntaxOptions...)
-	expr, err := CastASTNodeToASTExpr(node)
+	expr, err := ASTNodeToASTExpr(node)
 	require.NoError(t, err)
 	assert.NotNil(t, expr)
 	// The resulting expression must be a StructLit (no package wrapper).
@@ -45,10 +45,10 @@ func TestCastASTNodeToASTExprASTFile(t *testing.T) {
 	assert.True(t, ok, "expected *ast.StructLit, got %T", expr)
 }
 
-func TestCastASTNodeToASTExprUnknownType(t *testing.T) {
+func TestASTNodeToASTExprUnknownType(t *testing.T) {
 	// An unrecognised ast.Node type must return an error containing the type name.
 	type unknownNode struct{ ast.Node }
-	_, err := CastASTNodeToASTExpr(unknownNode{})
+	_, err := ASTNodeToASTExpr(unknownNode{})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unexpected ast.Node type")
 }

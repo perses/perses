@@ -88,7 +88,7 @@ func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 	}, nil)
 
 	// build the new value
-	expr, err := utils.CastASTNodeToASTExpr(node)
+	expr, err := utils.ASTNodeToASTExpr(node)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unexpected AST node type %T: %w", node, err)
 	}
@@ -108,7 +108,7 @@ func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string
 		return true
 	}, nil)
 
-	expr, err := utils.CastASTNodeToASTExpr(node)
+	expr, err := utils.ASTNodeToASTExpr(node)
 	if err != nil {
 		logrus.WithError(err).Error("unable to rename CUE definition")
 		return value

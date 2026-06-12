@@ -33,7 +33,7 @@ var CueSyntaxOptions = []cue.Option{
 
 // Helper function to cast ast.Node into ast.Expr
 // Needed because ast.Node does not have to strictly implement ast.Expr interface
-func CastASTNodeToASTExpr(node ast.Node) (ast.Expr, error) {
+func ASTNodeToASTExpr(node ast.Node) (ast.Expr, error) {
 	var tmpExpr ast.Expr
 	switch n := node.(type) {
 	case ast.Expr:
@@ -63,7 +63,7 @@ func CUEValueToASTExpr(v cue.Value) (ast.Expr, error) {
 		cue.Definitions(true),
 	)
 
-	expr, err := CastASTNodeToASTExpr(node)
+	expr, err := ASTNodeToASTExpr(node)
 	if err != nil {
 		return nil, fmt.Errorf("could not cast AST node to AST expr: %w", err)
 	}
