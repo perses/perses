@@ -52,13 +52,7 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 			return cue.Value{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
 
-		node := inst.Syntax(
-			cue.InlineImports(true),
-			cue.All(),
-			cue.Definitions(true),
-		)
-
-		castExpr, err := utils.CastASTNodeToASTExpr(node)
+		castExpr, err := utils.CUEValueToASTExpr(inst)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
@@ -107,7 +101,7 @@ func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 
 	var declsList []ast.Decl
 	for _, plugin := range definitions {
-		expr, err := utils.CastASTNodeToASTExpr(plugin.value.Syntax(utils.CueSyntaxOptions...))
+		expr, err := utils.CUEValueToASTExpr(plugin.value)
 		if err != nil {
 			return cue.Value{}, err
 		}

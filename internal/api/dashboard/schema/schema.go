@@ -123,10 +123,10 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	if encoded.Err() != nil {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
-	node := encoded.Syntax(utils.CueSyntaxOptions...)
-	expr, err := utils.CastASTNodeToASTExpr(node)
+
+	expr, err := utils.CUEValueToASTExpr(encoded)
 	if err != nil {
-		return cue.Value{}, fmt.Errorf("unexpected AST node type %T for %s: %w", node, dashboardDefinitionName, err)
+		return cue.Value{}, fmt.Errorf("could not cast CUE value to AST expr: %w", err)
 	}
 
 	// only doing this so that the entire CUE will be wrapped in a #Dashboard definition
@@ -253,30 +253,19 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 		// plugins only present in ListVariable
 		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
 
-		// OR join variable type specs
-		var variableSpec []ast.Expr
-		for _, value := range []cue.Value{textVarSpec, listVarSpec} {
-			node := value.Syntax(
-				cue.InlineImports(true),
-				cue.All(),
-				cue.Definitions(true),
-			)
-
-			castExpr, err := utils.CastASTNodeToASTExpr(node)
-			if err != nil {
-				return cue.Value{}, fmt.Errorf("could not process variable spec schema: %w", err)
-			}
-			variableSpec = append(variableSpec, castExpr)
+		textVartSpecExpr, err := utils.CUEValueToASTExpr(textVarSpec)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("could not process text variable spec schema: %w", err)
 		}
-
-		if len(variableSpec) != 2 {
-			return cue.Value{}, fmt.Errorf("invalid number of variable spec schemas, expected 2, got %d", len(variableSpec))
+		listVarSpecExpr, err := utils.CUEValueToASTExpr(listVarSpec)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("could not process list variable spec schema: %w", err)
 		}
 
 		completeVarSpecExpr := &ast.BinaryExpr{
 			Op: token.OR,
-			X:  variableSpec[0],
-			Y:  variableSpec[1],
+			X:  textVartSpecExpr,
+			Y:  listVarSpecExpr,
 		}
 
 		completeVarSpecValue := ctx.BuildExpr(completeVarSpecExpr)

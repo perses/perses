@@ -56,6 +56,20 @@ func CastASTNodeToASTExpr(node ast.Node) (ast.Expr, error) {
 	return tmpExpr, nil
 }
 
+func CUEValueToASTExpr(v cue.Value) (ast.Expr, error) {
+	node := v.Syntax(
+		cue.InlineImports(true),
+		cue.All(),
+		cue.Definitions(true),
+	)
+
+	expr, err := CastASTNodeToASTExpr(node)
+	if err != nil {
+		return nil, fmt.Errorf("could not cast AST node to AST expr: %w", err)
+	}
+	return expr, nil
+}
+
 func CueValueToHTTPData(v cue.Value) ([]byte, error) {
 	// generate expr
 	node := v.Syntax(CueSyntaxOptions...)
