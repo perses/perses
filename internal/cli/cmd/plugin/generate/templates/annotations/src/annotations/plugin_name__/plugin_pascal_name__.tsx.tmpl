@@ -1,0 +1,16 @@
+import { AnnotationPlugin, parseVariables } from '@perses-dev/plugin-system';
+import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import { {{ .PluginPascalName }}OptionEditor } from './{{ .PluginPascalName }}OptionEditor';
+import { getAnnotationData } from './get-annotation-data';
+
+export const {{ .PluginPascalName }}: AnnotationPlugin<{{ .PluginPascalName }}Spec> = {
+  getAnnotationData,
+  dependsOn: (spec: {{ .PluginPascalName }}Spec) => {
+    const queryVariables = parseVariables(spec.query);
+    return {
+      variables: [...queryVariables],
+    };
+  },
+  OptionsEditorComponent: {{ .PluginPascalName }}OptionEditor,
+  createInitialOptions: () => ({ query: '' }),
+};

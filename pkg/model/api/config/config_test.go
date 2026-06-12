@@ -80,9 +80,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "disable_local": false
   },
-  "annotation": {
-    "disable_local": false
-  },
   "ephemeral_dashboard": {
     "enable": false,
     "cleanup_interval": "0s"
@@ -150,9 +147,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
-  },
-  "annotation": {
     "disable_local": false
   },
   "ephemeral_dashboard": {

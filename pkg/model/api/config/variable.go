@@ -32,8 +32,3 @@ type VariableConfig struct {
 	// DisableLocal when used is preventing the possibility to add a variable directly in the dashboard spec.
 	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
 }
-
-type AnnotationConfig struct {
-	// DisableLocal when used is preventing the possibility to add an annotation directly in the dashboard spec.
-	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
-}

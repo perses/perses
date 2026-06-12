@@ -25,7 +25,6 @@ import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import {
   useIsKeyboardShortcutsEnabled,
-  useIsLocalAnnoltationEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
 } from '../../../context/Config';
@@ -57,7 +56,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   } = props;
   const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
 
-  const isLocalAnnotationEnabled = useIsLocalAnnoltationEnabled();
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
@@ -127,7 +125,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}
                   isReadonly={isReadonly}
-                  isAnnotationEnabled={isLocalAnnotationEnabled}
+                  isAnnotationEnabled={true}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}

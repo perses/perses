@@ -1,0 +1,89 @@
+import { ReactElement, useState } from 'react';
+import { Autocomplete, Stack, TextField } from '@mui/material';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+
+type {{ .PluginPascalName }}OptionEditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
+
+export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName }}OptionEditorProps): ReactElement {
+  const { onChange, value, isReadonly } = props;
+  const { query, title, legend, tags } = value;
+
+  const [localQuery, setLocalQuery] = useState(query);
+
+  const handleQueryBlur = (event: React.FocusEvent<HTMLInputElement>): void => {
+    const next = event.target.value;
+    if (next !== value.query) {
+      onChange({ ...value, query: next });
+    }
+  };
+
+  const handleTitleChange = (next: string): void => {
+    onChange({ ...value, title: next || undefined });
+  };
+
+  const handleLegendChange = (next: string): void => {
+    onChange({ ...value, legend: next || undefined });
+  };
+
+  const handleTagsChange = (next: string[]): void => {
+    onChange({ ...value, tags: next.length > 0 ? next : undefined });
+  };
+
+  return (
+    <Stack spacing={2}>
+      <TextField
+        fullWidth
+        label="Query"
+        placeholder="Enter your query"
+        value={localQuery}
+        onChange={(e) => setLocalQuery(e.target.value)}
+        onBlur={handleQueryBlur}
+        slotProps={{
+          inputLabel: { shrink: isReadonly ? true : undefined },
+          input: { readOnly: isReadonly },
+        }}
+      />
+      <TextField
+        fullWidth
+        label="Title"
+        placeholder="Example: 'Deployment {{"{{"}}service{{"}}"}}'"
+        helperText="Title displayed in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
+        value={title ?? ''}
+        onChange={(e) => handleTitleChange(e.target.value)}
+        slotProps={{
+          inputLabel: { shrink: isReadonly ? true : undefined },
+          input: { readOnly: isReadonly },
+        }}
+      />
+      <TextField
+        fullWidth
+        label="Legend"
+        placeholder="Example: '{{"{{"}}instance{{"}}"}}'"
+        helperText="Text displayed below the title in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
+        value={legend ?? ''}
+        onChange={(e) => handleLegendChange(e.target.value)}
+        slotProps={{
+          inputLabel: { shrink: isReadonly ? true : undefined },
+          input: { readOnly: isReadonly },
+        }}
+      />
+      <Autocomplete
+        multiple
+        freeSolo
+        options={[]}
+        value={tags ?? []}
+        onChange={(_, next) => handleTagsChange(next as string[])}
+        readOnly={isReadonly}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Tags"
+            placeholder="Add label names..."
+            helperText="Label names to display as tags in the annotation tooltip. Leave empty to show all labels. Press Enter to add."
+          />
+        )}
+      />
+    </Stack>
+  );
+}
