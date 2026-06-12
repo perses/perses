@@ -253,7 +253,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 		// plugins only present in ListVariable
 		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
 
-		textVartSpecExpr, err := utils.CUEValueToASTExpr(textVarSpec)
+		textVarSpecExpr, err := utils.CUEValueToASTExpr(textVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process text variable spec schema: %w", err)
 		}
@@ -264,7 +264,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 
 		completeVarSpecExpr := &ast.BinaryExpr{
 			Op: token.OR,
-			X:  textVartSpecExpr,
+			X:  textVarSpecExpr,
 			Y:  listVarSpecExpr,
 		}
 
