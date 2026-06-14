@@ -36,8 +36,8 @@ github.com/perses/plugins/table v0.13.0-beta.0 h1:JTdSt3ThMoPpu1h+/eNigoPDzTtuhQ
 github.com/perses/plugins/table v0.13.0-beta.0/go.mod h1:Czy7Wyfe/CqsX/YuzGYd92DuSgfYE/ZN0EBOIWIYIW0=
 github.com/perses/plugins/timeserieschart v0.13.0-beta.1 h1:ID1mXklLjG46odmTgGj5i1PWae1FFqHwnYXE9Skdowg=
 github.com/perses/plugins/timeserieschart v0.13.0-beta.1/go.mod h1:suE341oux6jAriexCGokFGU2uOfUB5s888hlWddHBzc=
-github.com/perses/spec v0.2.0-beta.2 h1:ZB5oYJkii3Lo8KCVQ6fMIzZNaCFT5tzSLvH4psr9w8Y=
-github.com/perses/spec v0.2.0-beta.2/go.mod h1:ROQN9NSBvz7MGPL5/L1yGMYe7YGNPTBCyxBLaDpXHsc=
+github.com/perses/spec v0.2.0-beta.3 h1:y4FfXhKC81vbxvf4s8lTvABwV5ko7E+bLnSkvZcPoT0=
+github.com/perses/spec v0.2.0-beta.3/go.mod h1:ROQN9NSBvz7MGPL5/L1yGMYe7YGNPTBCyxBLaDpXHsc=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.23.2 h1:Je96obch5RDVy3FDMndoUsjAhG5Edi49h0RJWRi/o0o=
