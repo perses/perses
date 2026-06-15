@@ -16,14 +16,13 @@ package query
 import (
 	"fmt"
 
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 )
 
 type Option struct {
 	Kind   plugin.Kind
-	Plugin common.Plugin
+	Plugin plugin.Plugin
 	Error  error
 }
 

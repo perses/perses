@@ -17,9 +17,9 @@ import (
 	"encoding/json"
 
 	"cuelang.org/go/cue/build"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,7 +33,7 @@ var mappingSort = []variable.Sort{
 	variable.SortAlphabeticalCaseInsensitiveDesc,
 }
 
-var defaultVariablePlugin = common.Plugin{
+var defaultVariablePlugin = plugin.Plugin{
 	Kind: "StaticListVariable",
 	Spec: &struct {
 		Values []string `json:"values"`
@@ -176,6 +176,6 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 	}
 }
 
-func ExecuteVariableScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
+func ExecuteVariableScript(cueScript *build.Instance, grafanaVariableData []byte) (*plugin.Plugin, bool, error) {
 	return executeCuelangScript(cueScript, grafanaVariableData, varDefID, "variable")
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 	"github.com/spf13/cobra"
 )
 
@@ -87,7 +87,7 @@ func (o *option) Execute() error {
 		status := plugin.Status
 		if status == nil {
 			// If the status is nil, we set it to an empty status.
-			status = &pluginModel.ModuleStatus{}
+			status = &module.Status{}
 		}
 		matrix = append(matrix, []string{
 			plugin.Metadata.Name,

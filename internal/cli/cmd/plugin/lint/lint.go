@@ -26,6 +26,7 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +67,7 @@ func (o *option) Execute() error {
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
-	if plugin.IsSchemaRequired(npmPackageData.Perses) {
+	if plugin.IsSchemaRequired(*v1.NewModuleSpec(npmPackageData.Perses)) {
 		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
 			return errors.New("CUE module not found")
 		}
@@ -75,10 +76,10 @@ func (o *option) Execute() error {
 		// Note that the path used in the package.json is used when building the archive to put in the correct place the schemas,
 		// to be able to find them later.
 		npmPackageData.Perses.SchemasPath = o.relativeSchemaPath
-		if _, err := schema.Load(o.pluginPath, npmPackageData.Perses); err != nil {
+		if _, err := schema.Load(o.pluginPath, *v1.NewModuleSpec(npmPackageData.Perses)); err != nil {
 			return err
 		}
-		if _, err := migrate.Load(o.pluginPath, npmPackageData.Perses); err != nil {
+		if _, err := migrate.Load(o.pluginPath, *v1.NewModuleSpec(npmPackageData.Perses)); err != nil {
 			return err
 		}
 	}

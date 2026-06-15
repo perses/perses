@@ -13,7 +13,7 @@
 
 package datasource
 
-import "github.com/perses/spec/go/common"
+import "github.com/perses/spec/go/plugin"
 
 func Name(name string) Option {
 	return func(datasource *Builder) error {
@@ -36,7 +36,7 @@ func Default(isDefault bool) Option {
 	}
 }
 
-func Plugin(plugin common.Plugin) Option {
+func Plugin(plugin plugin.Plugin) Option {
 	return func(datasource *Builder) error {
 		datasource.Spec.Plugin = plugin
 		return nil

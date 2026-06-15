@@ -26,7 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -278,14 +278,14 @@ type mockPluginService struct {
 	loaded map[string]*plugin.Loaded
 }
 
-func (m *mockPluginService) Load() error                                         { return nil }
-func (m *mockPluginService) LoadDevPlugin(_ []v1.PluginInDevelopment) error      { return nil }
-func (m *mockPluginService) RefreshDevPlugin(_ pluginModel.ModuleMetadata) error { return nil }
-func (m *mockPluginService) UnLoadDevPlugin(_ pluginModel.ModuleMetadata) error  { return nil }
-func (m *mockPluginService) List() ([]byte, error)                               { return nil, nil }
-func (m *mockPluginService) UnzipArchives() error                                { return nil }
-func (m *mockPluginService) Schema() schema.Schema                               { return nil }
-func (m *mockPluginService) Migration() migrate.Migration                        { return nil }
+func (m *mockPluginService) Load() error                                    { return nil }
+func (m *mockPluginService) LoadDevPlugin(_ []v1.PluginInDevelopment) error { return nil }
+func (m *mockPluginService) RefreshDevPlugin(_ module.Metadata) error       { return nil }
+func (m *mockPluginService) UnLoadDevPlugin(_ module.Metadata) error        { return nil }
+func (m *mockPluginService) List() ([]byte, error)                          { return nil, nil }
+func (m *mockPluginService) UnzipArchives() error                           { return nil }
+func (m *mockPluginService) Schema() schema.Schema                          { return nil }
+func (m *mockPluginService) Migration() migrate.Migration                   { return nil }
 func (m *mockPluginService) GetLoadedPlugin(name, _, _ string) (*plugin.Loaded, bool) {
 	l, ok := m.loaded[name]
 	return l, ok
@@ -302,7 +302,7 @@ func TestServePluginFilesPathTraversal(t *testing.T) {
 			"testplugin": {
 				LocalPath: pluginDir,
 				Module: v1.PluginModule{
-					Status: &pluginModel.ModuleStatus{IsLoaded: true},
+					Status: &module.Status{IsLoaded: true},
 				},
 			},
 		},

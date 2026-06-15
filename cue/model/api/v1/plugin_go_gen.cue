@@ -4,15 +4,20 @@
 
 package v1
 
-import "github.com/perses/perses/cue/model/api/v1/plugin"
+import "github.com/perses/spec/cue/module"
 
 #PluginModuleKind: "PluginModule"
 
+#ModuleSpec: {
+	schemasPath: string @go(SchemasPath)
+	plugins: [...module.#Plugin] @go(Plugins,[]module.Plugin)
+}
+
 #PluginModule: {
-	kind:     string                      @go(Kind)
-	metadata: plugin.#ModuleMetadata      @go(Metadata)
-	spec:     plugin.#ModuleSpec          @go(Spec)
-	status?:  null | plugin.#ModuleStatus @go(Status,*plugin.ModuleStatus)
+	kind:     string                @go(Kind)
+	metadata: module.#Metadata      @go(Metadata)
+	spec:     #ModuleSpec           @go(Spec)
+	status?:  null | module.#Status @go(Status,*module.Status)
 }
 
 #PluginInDevelopment: _

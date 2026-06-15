@@ -36,6 +36,7 @@ import (
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"github.com/perses/spec/go/plugin"
 )
 
 func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
@@ -64,7 +65,7 @@ func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: "PrometheusDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -97,7 +98,7 @@ func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: "PostgresDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},

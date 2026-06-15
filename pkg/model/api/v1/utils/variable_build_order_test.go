@@ -18,9 +18,9 @@ import (
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,7 +59,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector(1)",
@@ -79,7 +79,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($__to)",
@@ -99,7 +99,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($doe) (rate($foo{label='$bar'}))",
@@ -113,7 +113,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "test",
@@ -138,7 +138,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Spec: v1.VariableSpec{
 						Kind: variable.KindList,
 						Spec: &variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($foo)",
@@ -161,7 +161,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Spec: v1.VariableSpec{
 						Kind: variable.KindList,
 						Spec: &variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($undefinedVar) (rate($foo{label='$undefinedVar'}))",
@@ -193,7 +193,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Spec: v1.VariableSpec{
 						Kind: variable.KindList,
 						Spec: &variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($undefinedVar)",
@@ -219,7 +219,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusLabelValuesVariable",
 								Spec: map[string]any{
 									"labelName": "$foo",
@@ -236,7 +236,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "test",
@@ -250,7 +250,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($foo)",
@@ -286,7 +286,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
@@ -300,7 +300,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "test",
@@ -314,7 +314,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($foo)",
@@ -386,7 +386,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr":      "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
@@ -432,7 +432,7 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
@@ -593,7 +593,7 @@ func TestBuildOrder(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "sum by($doe, $bar) (rate($foo{label='$bar'}))",
@@ -607,7 +607,7 @@ func TestBuildOrder(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "test",
@@ -621,7 +621,7 @@ func TestBuildOrder(t *testing.T) {
 					Kind: variable.KindList,
 					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
+							Plugin: plugin.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]any{
 									"expr": "vector($foo)",

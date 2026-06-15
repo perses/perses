@@ -28,8 +28,9 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/output"
-	apiv1 "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
+	pluginSpec "github.com/perses/spec/go/plugin"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ type generateOptions struct {
 	persesCMD.Option
 	pluginModuleName  string
 	pluginModuleOrg   string
-	pluginType        apiv1.Kind
+	pluginType        pluginSpec.Kind
 	rawPluginType     string
 	pluginName        string
 	pluginPascalName  string
@@ -53,11 +54,11 @@ type ExposedModule struct {
 }
 
 type GeneratedPlugin struct {
-	apiv1.Plugin
+	module.Plugin
 	PluginPascalName string
 }
 
-func toGeneratedPlugin(p apiv1.Plugin) GeneratedPlugin {
+func toGeneratedPlugin(p module.Plugin) GeneratedPlugin {
 	return GeneratedPlugin{
 		Plugin:           p,
 		PluginPascalName: GetPascalCase(p.Spec.Name),
@@ -72,19 +73,19 @@ func (o *generateOptions) Complete(args []string) error {
 	}
 
 	if len(o.rawPluginType) > 0 {
-		o.pluginType = apiv1.Kind(o.rawPluginType)
+		o.pluginType = pluginSpec.Kind(o.rawPluginType)
 	}
 
 	return nil
 }
 
-var availablePluginTypes = []apiv1.Kind{
-	apiv1.KindDatasource,
-	apiv1.KindTimeSeriesQuery,
-	apiv1.KindVariable,
-	apiv1.KindAnnotation,
-	apiv1.KindPanel,
-	apiv1.KindExplore,
+var availablePluginTypes = []pluginSpec.Kind{
+	pluginSpec.KindDatasource,
+	pluginSpec.KindTimeSeriesQuery,
+	pluginSpec.KindVariable,
+	pluginSpec.KindAnnotation,
+	pluginSpec.KindPanel,
+	pluginSpec.KindExplore,
 }
 
 func (o *generateOptions) Validate() error {
@@ -124,39 +125,39 @@ func replacePaths(outputRelativePath string, o *generateOptions) string {
 	return outputRelativePath
 }
 
-func getPluginPath(pluginName string, pluginType apiv1.Kind) (string, error) {
+func getPluginPath(pluginName string, pluginType pluginSpec.Kind) (string, error) {
 	pluginSlug := GetKebabCase(pluginName)
 	switch pluginType {
-	case apiv1.KindDatasource:
+	case pluginSpec.KindDatasource:
 		return path.Join("src", "datasources", pluginSlug), nil
-	case apiv1.KindTimeSeriesQuery:
+	case pluginSpec.KindTimeSeriesQuery:
 		return path.Join("src", "queries", pluginSlug), nil
-	case apiv1.KindVariable:
+	case pluginSpec.KindVariable:
 		return path.Join("src", "variables", pluginSlug), nil
-	case apiv1.KindAnnotation:
+	case pluginSpec.KindAnnotation:
 		return path.Join("src", "annotations", pluginSlug), nil
-	case apiv1.KindPanel:
+	case pluginSpec.KindPanel:
 		return path.Join("src", "panels", pluginSlug), nil
-	case apiv1.KindExplore:
+	case pluginSpec.KindExplore:
 		return path.Join("src", "explore", pluginSlug), nil
 	}
 
 	return "", fmt.Errorf("unknown plugin type %q", pluginType)
 }
 
-func getTemplatePath(pluginType apiv1.Kind) (string, error) {
+func getTemplatePath(pluginType pluginSpec.Kind) (string, error) {
 	switch pluginType {
-	case apiv1.KindDatasource:
+	case pluginSpec.KindDatasource:
 		return path.Join("templates", "datasource"), nil
-	case apiv1.KindTimeSeriesQuery:
+	case pluginSpec.KindTimeSeriesQuery:
 		return path.Join("templates", "query", "timeseriesquery"), nil
-	case apiv1.KindVariable:
+	case pluginSpec.KindVariable:
 		return path.Join("templates", "variable"), nil
-	case apiv1.KindAnnotation:
+	case pluginSpec.KindAnnotation:
 		return path.Join("templates", "annotations"), nil
-	case apiv1.KindPanel:
+	case pluginSpec.KindPanel:
 		return path.Join("templates", "panel"), nil
-	case apiv1.KindExplore:
+	case pluginSpec.KindExplore:
 		return path.Join("templates", "explore"), nil
 	}
 
@@ -181,7 +182,7 @@ func (o *generateOptions) Execute() error {
 	var exposedModules []ExposedModule
 
 	currentModule, err := plugin.ReadPackage(o.outputDir)
-	var currentPlugins []apiv1.Plugin
+	var currentPlugins []module.Plugin
 
 	if err != nil || currentModule == nil {
 		if err != nil && errors.Is(err, os.ErrNotExist) {
@@ -195,8 +196,8 @@ func (o *generateOptions) Execute() error {
 		log.Printf("No perses plugin module found under %q, creating a new one", o.outputDir)
 		isModuleGeneration = true
 	} else {
-		o.pluginModuleName = currentModule.Perses.ModuleName
-		o.pluginModuleOrg = currentModule.Perses.ModuleOrg
+		o.pluginModuleName = currentModule.Perses.Metadata.Name
+		o.pluginModuleOrg = currentModule.Perses.Metadata.Registry
 		currentPlugins = currentModule.Perses.Plugins
 	}
 
@@ -217,9 +218,9 @@ func (o *generateOptions) Execute() error {
 		}
 	}
 
-	persesPlugins = append(persesPlugins, toGeneratedPlugin(apiv1.Plugin{
+	persesPlugins = append(persesPlugins, toGeneratedPlugin(module.Plugin{
 		Kind: o.pluginType,
-		Spec: apiv1.Spec{
+		Spec: module.PluginSpec{
 			Display: &common.Display{
 				Name: o.pluginDisplayName,
 			},
@@ -242,15 +243,15 @@ func (o *generateOptions) Execute() error {
 			persesQueryPlugins = append(persesQueryPlugins, p)
 		} else {
 			switch p.Kind {
-			case apiv1.KindDatasource:
+			case pluginSpec.KindDatasource:
 				persesDatasourcePlugins = append(persesDatasourcePlugins, p)
-			case apiv1.KindVariable:
+			case pluginSpec.KindVariable:
 				persesVariablePlugins = append(persesVariablePlugins, p)
-			case apiv1.KindAnnotation:
+			case pluginSpec.KindAnnotation:
 				persesAnnotationsPlugins = append(persesAnnotationsPlugins, p)
-			case apiv1.KindExplore:
+			case pluginSpec.KindExplore:
 				persesExplorePlugins = append(persesExplorePlugins, p)
-			case apiv1.KindPanel:
+			case pluginSpec.KindPanel:
 				persesPanelPlugins = append(persesPanelPlugins, p)
 			}
 		}
