@@ -30,7 +30,7 @@ import (
 
 func TestGetSchemaDashboard(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
-		resp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "dashboard")).
+		resp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "dashboards")).
 			Expect().
 			Status(http.StatusOK)
 
@@ -46,7 +46,7 @@ func TestGetSchemaPluginList(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
 		// Without any plugins loaded the endpoint returns an empty CUE struct literal.
 		// With plugins loaded it returns CUE text with definitions.
-		expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugin")).
+		expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins")).
 			Expect().
 			Status(http.StatusOK)
 		return nil
@@ -55,7 +55,7 @@ func TestGetSchemaPluginList(t *testing.T) {
 
 func TestGetSchemaPluginDefinitionNotFound(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
-		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugin", "NonExistentPlugin")).
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins", "NonExistentPlugin")).
 			Expect().
 			Status(http.StatusNotFound).
 			JSON().Object().HasValue("message", "plugin not found")
@@ -69,7 +69,7 @@ func TestGetSchemaPluginDefinitionWithRealPlugins(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
 		// Probe the plugin list first so the test does not hard-code a name that
 		// might not be installed in all environments.
-		listResp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugin")).
+		listResp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins")).
 			Expect().
 			Status(http.StatusOK)
 
@@ -80,7 +80,7 @@ func TestGetSchemaPluginDefinitionWithRealPlugins(t *testing.T) {
 		}
 
 		// TimeSeriesChart ships with Perses by default; try fetching its definition.
-		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugin", "TimeSeriesChart")).
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins", "TimeSeriesChart")).
 			Expect().
 			Status(http.StatusOK).
 			Header("Content-Type").Contains("text/x-cue")
