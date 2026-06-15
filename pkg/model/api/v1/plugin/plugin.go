@@ -21,10 +21,13 @@ import (
 )
 
 const (
-	LatestVersion   = "latest"
+	// Deprecated. Use github.com/perses/spec/go/plugin/plugin.LatestVersion instead
+	LatestVersion = "latest"
+	// Deprecated. Use github.com/perses/spec/go/plugin/plugin.DefaultRegistry instead
 	DefaultRegistry = "perses.dev"
 )
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Kind instead
 type Kind string
 
 const (
@@ -46,11 +49,13 @@ func (k Kind) IsQuery() bool {
 	return k == KindTimeSeriesQuery || k == KindTraceQuery || k == KindProfileQuery || k == KindLogQuery || k == KindAlertsQuery || k == KindSilencesQuery
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.PluginSpec instead
 type Spec struct {
 	Display *common.Display `json:"display" yaml:"display"`
 	Name    string          `json:"name" yaml:"name"`
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Plugin instead
 type Plugin struct {
 	Kind Kind `json:"kind" yaml:"kind"`
 	Spec Spec `json:"spec" yaml:"spec"`
@@ -91,12 +96,14 @@ func (p *Plugin) validate() error {
 	return nil
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Status instead
 type ModuleStatus struct {
 	IsLoaded bool   `json:"isLoaded" yaml:"isLoaded"`
 	InDev    bool   `json:"inDev" yaml:"inDev"`
 	Error    string `json:"error,omitempty" yaml:"error,omitempty"`
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Spec instead
 type ModuleSpec struct {
 	SchemasPath string   `json:"schemasPath" yaml:"schemasPath"`
 	ModuleName  string   `json:"moduleName,omitempty" yaml:"moduleName,omitempty"`
@@ -140,6 +147,7 @@ func (m *ModuleSpec) validate() error {
 	return nil
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Metadata instead
 type ModuleMetadata struct {
 	Name     string `json:"name" yaml:"name"`
 	Version  string `json:"version" yaml:"version"`

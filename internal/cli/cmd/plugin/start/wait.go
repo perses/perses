@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/perses/common/async"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
 

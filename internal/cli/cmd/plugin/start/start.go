@@ -36,8 +36,8 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -303,7 +303,7 @@ func (o *option) waitForShutdownAndCleanup(ctx context.Context, devServerTasks [
 
 	// Unregister plugins from the remote server
 	for _, plg := range pluginInDev {
-		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(pluginModel.ModuleMetadata{
+		if err := o.apiClient.V1().Plugin().UnLoadDevPlugin(module.Metadata{
 			Name:     plg.Name,
 			Version:  plg.Version,
 			Registry: plg.Registry,
@@ -356,7 +356,7 @@ func (o *option) watchPluginSchema(ctx context.Context, pluginInDev *v1.PluginIn
 	if readErr != nil {
 		return fmt.Errorf("failed to read package for the plugin %q", pluginInDev.AbsolutePath)
 	}
-	if !plugin.IsSchemaRequired(npmPackageData.Perses) || pluginInDev.DisableSchema {
+	if !plugin.IsSchemaRequired(*v1.NewModuleSpec(npmPackageData.Perses)) || pluginInDev.DisableSchema {
 		logrus.Debugf("the plugin %q does not require a schema or is disabled, no need to watch it", pluginInDev.Name)
 		return nil
 	}
@@ -384,7 +384,7 @@ func (o *option) watchPluginSchema(ctx context.Context, pluginInDev *v1.PluginIn
 					continue
 				}
 
-				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(pluginModel.ModuleMetadata{
+				if apiErr := o.apiClient.V1().Plugin().RefreshDevPlugin(module.Metadata{
 					Name:     pluginInDev.Name,
 					Version:  pluginInDev.Version,
 					Registry: pluginInDev.Registry,

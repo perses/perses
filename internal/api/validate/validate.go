@@ -21,8 +21,8 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 )
 
 // We want to keep only variables that are not only a number.
@@ -108,7 +108,7 @@ func validateVariableNames(variables []dashboard.Variable) error {
 	return nil
 }
 
-func validateDatasourcePlugin(plugin common.Plugin, name string, sch schema.Schema) error {
+func validateDatasourcePlugin(plugin plugin.Plugin, name string, sch schema.Schema) error {
 	if _, _, err := datasource.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
 	}

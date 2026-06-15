@@ -470,8 +470,8 @@ github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7ol
 github.com/pelletier/go-toml/v2 v2.3.1/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/perses/common v0.31.0 h1:3jDf6RvtKg7F+hahoPgljl2pHRSSgb/bt+ELlmFc/qk=
 github.com/perses/common v0.31.0/go.mod h1:YQ71/UC6KCogfiTRuh3FLar11KolNGScwms5MVlc/f4=
-github.com/perses/spec v0.2.0-beta.2 h1:ZB5oYJkii3Lo8KCVQ6fMIzZNaCFT5tzSLvH4psr9w8Y=
-github.com/perses/spec v0.2.0-beta.2/go.mod h1:ROQN9NSBvz7MGPL5/L1yGMYe7YGNPTBCyxBLaDpXHsc=
+github.com/perses/spec v0.2.0-beta.3.0.20260612133246-e30c5159985c h1:97w8IJVU/jjJ1VpiLFD56ueuZZDZIND0YBoSsdj/dkM=
+github.com/perses/spec v0.2.0-beta.3.0.20260612133246-e30c5159985c/go.mod h1:ROQN9NSBvz7MGPL5/L1yGMYe7YGNPTBCyxBLaDpXHsc=
 github.com/pierrec/lz4/v4 v4.1.22 h1:cKFw6uJDK+/gfw5BcDL0JL5aBsAFdsIT18eRtLj7VIU=
 github.com/pierrec/lz4/v4 v4.1.22/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pjbgf/sha1cd v0.3.2 h1:a9wb0bp1oC2TGwStyn0Umc/IGKQnEgF0vVaZ8QF8eo4=

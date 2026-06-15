@@ -31,9 +31,9 @@ import (
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -63,7 +63,7 @@ func ReplaceInputValue(input map[string]string, grafanaDashboard string) string 
 	return result
 }
 
-func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]schema.LoadSchema, error) {
+func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]schema.LoadSchema, error) {
 	var schemas []schema.LoadSchema
 	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -136,7 +136,7 @@ func GetPluginKind(migrateFile string) (plugin.Kind, error) {
 }
 
 // executeCuelangScript executes a CUE migration script against grafana data
-func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
+func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*plugin.Plugin, bool, error) {
 	ctx := cuecontext.New()
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -172,7 +172,7 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 }
 
 // convertToPlugin converts a CUE value to a common.Plugin struct
-func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
+func convertToPlugin(migrateValue cue.Value) (*plugin.Plugin, bool, error) {
 	if migrateValue.IsNull() {
 		return nil, true, nil
 	}
@@ -183,7 +183,7 @@ func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if string(data) == "" || string(data) == "{}" {
 		return nil, true, nil
 	}
-	plg := &common.Plugin{}
+	plg := &plugin.Plugin{}
 	return plg, false, json.Unmarshal(data, plg)
 }
 

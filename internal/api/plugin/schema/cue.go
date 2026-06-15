@@ -23,11 +23,11 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/load"
-	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
-// Options to run the final validation (e.g only concrete values allowed)
+// CueValidationOptions is the options to run the final validation (e.g only concrete values allowed)
 var CueValidationOptions = []cue.Option{
 	cue.Concrete(true),
 	cue.Attributes(true),
@@ -86,7 +86,7 @@ func LoadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) 
 	return buildInstance, nil
 }
 
-func validatePlugin(plugin common.Plugin, schema *build.Instance, pluginType string, pluginName string) error {
+func validatePlugin(plugin plugin.Plugin, schema *build.Instance, pluginType string, pluginName string) error {
 	version := "unknown"
 	if plugin.Metadata != nil && plugin.Metadata.Version != "" {
 		version = plugin.Metadata.Version

@@ -18,7 +18,7 @@ import (
 
 	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 )
 
 const pluginResource = "plugins"
@@ -27,8 +27,8 @@ var devPluginResource = fmt.Sprintf("%s/dev", pluginResource)
 
 type PluginInterface interface {
 	PushDevPlugin([]*v1.PluginInDevelopment) error
-	RefreshDevPlugin(metadata pluginModel.ModuleMetadata) error
-	UnLoadDevPlugin(metadata pluginModel.ModuleMetadata) error
+	RefreshDevPlugin(metadata module.Metadata) error
+	UnLoadDevPlugin(metadata module.Metadata) error
 	List() ([]v1.PluginModule, error)
 }
 
@@ -51,7 +51,7 @@ func (c *plugin) PushDevPlugin(plugins []*v1.PluginInDevelopment) error {
 		Error()
 }
 
-func (c *plugin) RefreshDevPlugin(metadata pluginModel.ModuleMetadata) error {
+func (c *plugin) RefreshDevPlugin(metadata module.Metadata) error {
 	return c.client.Post().
 		Resource(fmt.Sprintf("%s/refresh", devPluginResource)).
 		Body(metadata).
@@ -59,7 +59,7 @@ func (c *plugin) RefreshDevPlugin(metadata pluginModel.ModuleMetadata) error {
 		Error()
 }
 
-func (c *plugin) UnLoadDevPlugin(metadata pluginModel.ModuleMetadata) error {
+func (c *plugin) UnLoadDevPlugin(metadata module.Metadata) error {
 	return c.client.Delete().
 		Resource(devPluginResource).
 		Body(metadata).

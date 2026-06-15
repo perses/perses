@@ -19,7 +19,7 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +38,7 @@ func TestDashboardToCue(t *testing.T) {
 func TestGenerateDashboardCueValueWithNoPluginKinds(t *testing.T) {
 	ctx := cuecontext.New()
 	// No plugins injected: the base dashboard schema must still be returned intact.
-	result, err := GenerateDashboardCueValue(ctx, map[v1plugin.Kind]cue.Value{})
+	result, err := GenerateDashboardCueValue(ctx, map[specPlugin.Kind]cue.Value{})
 	require.NoError(t, err)
 
 	dashDef := result.LookupPath(cue.MakePath(cue.Def("#Dashboard")))
@@ -53,11 +53,11 @@ func TestGenerateDashboardCueValueWithAllPluginKinds(t *testing.T) {
 		return v
 	}
 
-	plugins := map[v1plugin.Kind]cue.Value{
-		v1plugin.KindPanel:      makePlugin("TestPanel"),
-		v1plugin.KindDatasource: makePlugin("TestDatasource"),
-		v1plugin.KindQuery:      makePlugin("TestQuery"),
-		v1plugin.KindVariable:   makePlugin("TestVariable"),
+	plugins := map[specPlugin.Kind]cue.Value{
+		specPlugin.KindPanel:      makePlugin("TestPanel"),
+		specPlugin.KindDatasource: makePlugin("TestDatasource"),
+		specPlugin.KindQuery:      makePlugin("TestQuery"),
+		specPlugin.KindVariable:   makePlugin("TestVariable"),
 	}
 
 	result, err := GenerateDashboardCueValue(ctx, plugins)

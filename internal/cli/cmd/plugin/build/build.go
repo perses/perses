@@ -28,6 +28,7 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -91,7 +92,7 @@ func (o *option) Execute() error {
 	if readErr != nil {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
-	if o.isSchemaRequired = plugin.IsSchemaRequired(npmPackageData.Perses); o.isSchemaRequired {
+	if o.isSchemaRequired = plugin.IsSchemaRequired(*v1.NewModuleSpec(npmPackageData.Perses)); o.isSchemaRequired {
 		if _, err := os.Stat(filepath.Join(o.pluginPath, plugin.CuelangModuleFolder)); os.IsNotExist(err) {
 			return errors.New("cue modules not found")
 		}

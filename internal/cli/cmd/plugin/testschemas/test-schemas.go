@@ -30,8 +30,8 @@ import (
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cmd/plugin/config"
 	"github.com/perses/perses/internal/cli/output"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	pluginSpec "github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -94,7 +94,7 @@ func (o *option) Execute() error {
 		return fmt.Errorf("unable to read plugin package.json: %w", readErr)
 	}
 
-	if !plugin.IsSchemaRequired(npmPackageData.Perses) {
+	if !plugin.IsSchemaRequired(*v1.NewModuleSpec(npmPackageData.Perses)) {
 		return output.HandleString(o.writer, "No schemas found in this plugin, nothing to test")
 	}
 
@@ -260,7 +260,7 @@ func (o *option) runModelValidationTests(testDir string, buildInstance *build.In
 		}
 
 		// Unmarshal the JSON to the plugin struct
-		var plg common.Plugin
+		var plg pluginSpec.Plugin
 		if err := json.Unmarshal(data, &plg); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse JSON: %v", err)
 			results = append(results, result)
@@ -298,7 +298,7 @@ func (o *option) runModelValidationTests(testDir string, buildInstance *build.In
 }
 
 // runMigrationTestsForPath runs migration tests for a specific directory path
-func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, modelBuildInstance *build.Instance, pluginKind v1plugin.Kind) ([]TestResult, error) {
+func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, modelBuildInstance *build.Instance, pluginKind pluginSpec.Kind) ([]TestResult, error) {
 	var results []TestResult
 
 	return results, filepath.WalkDir(testDir, func(currentPath string, d os.DirEntry, err error) error {
@@ -344,7 +344,7 @@ func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, 
 		}
 
 		// Extract plugin kind from expected.json
-		var expectedPlugin common.Plugin
+		var expectedPlugin pluginSpec.Plugin
 		if err := json.Unmarshal(expectedData, &expectedPlugin); err != nil {
 			result.Error = fmt.Sprintf("Failed to parse expected.json: %v", err)
 			results = append(results, result)
@@ -366,15 +366,15 @@ func (o *option) runMigrationTestsForPath(testDir string, migrateBuildInstance, 
 			return filepath.SkipDir
 		}
 
-		var resultPlugin *common.Plugin
+		var resultPlugin *pluginSpec.Plugin
 		var resultIsEmpty bool
 		// Set default definition ID and type based on the plugin kind from the loaded schema
 		switch pluginKind {
-		case v1plugin.KindVariable:
+		case pluginSpec.KindVariable:
 			resultPlugin, resultIsEmpty, err = migrate.ExecuteVariableScript(migrateBuildInstance, inputData)
-		case v1plugin.KindQuery:
+		case pluginSpec.KindQuery:
 			resultPlugin, resultIsEmpty, err = migrate.ExecuteQueryScript(migrateBuildInstance, inputData)
-		case v1plugin.KindPanel:
+		case pluginSpec.KindPanel:
 			resultPlugin, resultIsEmpty, err = migrate.ExecutePanelScript(migrateBuildInstance, inputData)
 		default:
 			return fmt.Errorf("unsupported migration schema kind: %s", pluginKind)

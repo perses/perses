@@ -20,9 +20,9 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/test"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/datasource/proxy/http"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -122,7 +122,7 @@ func TestNewFromSchema(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetInstance(v1plugin.KindDatasource, tt.schema)
+			instance, err := sch.GetInstance(specPlugin.KindDatasource, tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -162,7 +162,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetInstance(v1plugin.KindDatasource, tt.schema)
+			instance, err := sch.GetInstance(specPlugin.KindDatasource, tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}

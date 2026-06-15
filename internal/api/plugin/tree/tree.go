@@ -14,8 +14,8 @@
 package tree
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 	"golang.org/x/mod/semver"
 )
 
@@ -47,7 +47,7 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 				continue
 			}
 			// Here we are adding manually to ensure the latest version pointer is correctly set.
-			result.Add(key.Name, plugin.ModuleMetadata{Registry: key.registry, Version: version}, instance)
+			result.Add(key.Name, module.Metadata{Registry: key.registry, Version: version}, instance)
 		}
 	}
 	return result
@@ -59,7 +59,7 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 // The second map key is the version of the plugin.
 type Tree[T any] map[Node]map[string]T
 
-func (t Tree[T]) Add(name string, moduleMetadata plugin.ModuleMetadata, instance T) {
+func (t Tree[T]) Add(name string, moduleMetadata module.Metadata, instance T) {
 	key := newNode(name, moduleMetadata.Registry)
 	moduleVersion := moduleMetadata.Version
 	if _, ok := t[key]; !ok {
@@ -71,7 +71,7 @@ func (t Tree[T]) Add(name string, moduleMetadata plugin.ModuleMetadata, instance
 	}
 }
 
-func (t Tree[T]) Remove(name string, moduleMetadata plugin.ModuleMetadata) {
+func (t Tree[T]) Remove(name string, moduleMetadata module.Metadata) {
 	key := newNode(name, moduleMetadata.Registry)
 	moduleVersion := moduleMetadata.Version
 	if _, ok := t[key]; !ok {
@@ -99,7 +99,7 @@ func (t Tree[T]) Remove(name string, moduleMetadata plugin.ModuleMetadata) {
 // In the Prometheus plugin case, the schema name can be `PrometheusTimeSeriesQuery`, while the module name is `prometheus`.
 //
 // The name and metadata.name can also be the same.
-func (t Tree[T]) Get(name string, moduleMetadata plugin.ModuleMetadata) (T, bool) {
+func (t Tree[T]) Get(name string, moduleMetadata module.Metadata) (T, bool) {
 	key := newNode(name, moduleMetadata.Registry)
 	moduleVersion := moduleMetadata.Version
 	if moduleVersion == "" {
@@ -114,11 +114,11 @@ func (t Tree[T]) Get(name string, moduleMetadata plugin.ModuleMetadata) (T, bool
 	return emptyValue, false
 }
 
-func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *common.PluginMetadata) (T, bool) {
+func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *plugin.Metadata) (T, bool) {
 	if pluginMetadata == nil {
-		return t.Get(name, plugin.ModuleMetadata{Version: plugin.LatestVersion, Registry: plugin.DefaultRegistry})
+		return t.Get(name, module.Metadata{Version: plugin.LatestVersion, Registry: plugin.DefaultRegistry})
 	}
-	return t.Get(name, plugin.ModuleMetadata{Version: pluginMetadata.Version, Registry: pluginMetadata.Registry})
+	return t.Get(name, module.Metadata{Version: pluginMetadata.Version, Registry: pluginMetadata.Registry})
 }
 
 // isLatest is checking if the given version is the latest one for the given schemaNameKind

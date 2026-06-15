@@ -19,7 +19,7 @@ import (
 )
 
 // PluginMetadata
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.PluginMetadata
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/plugin/plugin.Metadata
 type PluginMetadata struct {
 	// Version is optional. If not provided, it means the latest version available in the Perses instance.
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
@@ -28,7 +28,7 @@ type PluginMetadata struct {
 }
 
 // Plugin
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.Plugin
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/plugin/plugin.Plugin
 type Plugin struct {
 	// Kind is the type of the plugin (e.g., Panel, Variable, Datasource, etc.).
 	Kind string `json:"kind" yaml:"kind"`

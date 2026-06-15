@@ -21,8 +21,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
 )
 
 const (
@@ -35,7 +35,7 @@ type NPMPackage struct {
 	Version    string            `json:"version"`
 	Scripts    map[string]string `json:"scripts"`
 	Workspaces []string          `json:"workspaces"`
-	Perses     plugin.ModuleSpec `json:"perses"`
+	Perses     module.Module     `json:"perses"`
 }
 
 type BuildInfo struct {

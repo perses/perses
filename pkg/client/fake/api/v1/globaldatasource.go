@@ -23,6 +23,7 @@ import (
 	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	"github.com/perses/spec/go/datasource/proxy/http"
+	"github.com/perses/spec/go/plugin"
 )
 
 func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
@@ -36,7 +37,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: plugin.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						Proxy: &http.Proxy{
@@ -56,7 +57,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: plugin.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						DirectURL: u.URL,
@@ -71,7 +72,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 			},
 			Spec: datasourceSpec.Spec{
 				Default: false,
-				Plugin: common.Plugin{
+				Plugin: plugin.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
 						Proxy: &http.Proxy{

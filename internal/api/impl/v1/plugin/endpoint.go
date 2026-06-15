@@ -21,7 +21,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 	"github.com/sirupsen/logrus"
 )
 
@@ -66,7 +66,7 @@ func (e *endpoint) PushDevPlugin(ctx echo.Context) error {
 }
 
 func (e *endpoint) RefreshDevPlugin(ctx echo.Context) error {
-	var pluginMetadata pluginModel.ModuleMetadata
+	var pluginMetadata module.Metadata
 	if err := ctx.Bind(&pluginMetadata); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
@@ -78,7 +78,7 @@ func (e *endpoint) RefreshDevPlugin(ctx echo.Context) error {
 }
 
 func (e *endpoint) DeleteDevPlugin(ctx echo.Context) error {
-	var pluginMetadata pluginModel.ModuleMetadata
+	var pluginMetadata module.Metadata
 	if err := ctx.Bind(&pluginMetadata); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}

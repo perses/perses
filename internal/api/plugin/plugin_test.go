@@ -17,7 +17,8 @@ import (
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,14 +35,14 @@ func TestFilter(t *testing.T) {
 			title: "no filter",
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "foo",
 							},
 						},
@@ -51,14 +52,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: false,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "foo",
 							},
 						},
@@ -73,14 +74,14 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "foo",
 							},
 						},
@@ -90,14 +91,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: false,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "foo",
 							},
 						},
@@ -112,14 +113,14 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "foo",
 							},
 						},
@@ -129,10 +130,10 @@ func TestFilter(t *testing.T) {
 			isFiltered: true,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{},
+				Spec: v1.ModuleSpec{},
 			},
 		},
 		{
@@ -142,20 +143,20 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "tartampion",
 							},
 						},
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -165,14 +166,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: false,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -187,14 +188,14 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -204,14 +205,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: true,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -226,14 +227,14 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -243,10 +244,10 @@ func TestFilter(t *testing.T) {
 			isFiltered: true,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{},
+				Spec: v1.ModuleSpec{},
 			},
 		},
 		{
@@ -256,20 +257,20 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "tartampion",
 							},
 						},
@@ -279,14 +280,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: false,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "tartampion",
 							},
 						},
@@ -301,14 +302,14 @@ func TestFilter(t *testing.T) {
 			},
 			module: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},
@@ -318,14 +319,14 @@ func TestFilter(t *testing.T) {
 			isFiltered: false,
 			expectedModule: &v1.PluginModule{
 				Kind: v1.PluginModuleKind,
-				Metadata: plugin.ModuleMetadata{
+				Metadata: module.Metadata{
 					Name: "foo",
 				},
-				Spec: plugin.ModuleSpec{
-					Plugins: []plugin.Plugin{
+				Spec: v1.ModuleSpec{
+					Plugins: []module.Plugin{
 						{
 							Kind: plugin.KindPanel,
-							Spec: plugin.Spec{
+							Spec: module.PluginSpec{
 								Name: "bar",
 							},
 						},

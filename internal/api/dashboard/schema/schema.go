@@ -25,8 +25,8 @@ import (
 
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/perses/spec/go/dashboard"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -179,7 +179,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.Value) (cue.Value, error) {
+func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue.Value) (cue.Value, error) {
 	dashSpec, err := dashboardToCue(ctx)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unable to load dashboard schema: %w", err)
@@ -188,21 +188,21 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[v1plugin.Kind]cue.V
 	result := dashSpec
 
 	// unify with panel plugins
-	if panels, ok := plugins[v1plugin.KindPanel]; ok {
+	if panels, ok := plugins[specPlugin.KindPanel]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, panelSpecHidSelector, pluginSelector), panels)
 	}
 
 	// unify with datasource plugins
-	if datasources, ok := plugins[v1plugin.KindDatasource]; ok {
+	if datasources, ok := plugins[specPlugin.KindDatasource]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, datasourceSpecHidSelector, pluginSelector), datasources)
 	}
 
 	// unify with query plugins
-	if queries, ok := plugins[v1plugin.KindQuery]; ok {
+	if queries, ok := plugins[specPlugin.KindQuery]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
 	}
 
-	if variables, ok := plugins[v1plugin.KindVariable]; ok {
+	if variables, ok := plugins[specPlugin.KindVariable]; ok {
 		// load TextVariableSpec and ListVariableSpec
 		textVarSpec := ctx.EncodeType(dashboard.TextVariableSpec{})
 		if textVarSpec.Err() != nil {

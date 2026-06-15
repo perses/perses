@@ -16,29 +16,30 @@ package fakev1
 import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	pluginModel "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 )
 
-type plugin struct {
+type plg struct {
 	v1.PluginInterface
 }
 
-func (c *plugin) List() ([]modelV1.PluginModule, error) {
+func (c *plg) List() ([]modelV1.PluginModule, error) {
 	return []modelV1.PluginModule{
 		{
 			Kind: "PluginModule",
-			Metadata: pluginModel.ModuleMetadata{
+			Metadata: module.Metadata{
 				Name:    "plugin1",
 				Version: "v0.1.0",
 			},
-			Spec: pluginModel.ModuleSpec{
-				Plugins: []pluginModel.Plugin{
+			Spec: modelV1.ModuleSpec{
+				Plugins: []module.Plugin{
 					{
-						Kind: pluginModel.KindPanel,
+						Kind: plugin.KindPanel,
 					},
 				},
 			},
-			Status: &pluginModel.ModuleStatus{
+			Status: &module.Status{
 				IsLoaded: true,
 				InDev:    false,
 			},
