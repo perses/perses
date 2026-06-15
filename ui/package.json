@@ -21,6 +21,7 @@
   },
   "workspaces": [
     "app",
+    "core",
     "e2e",
     "internal-utils"
   ],
