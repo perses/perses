@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem, FolderResource, getResourceDisplayName } from '@perses-dev/core';
 import { intlFormatDistance } from 'date-fns';
+import { getResourceDisplayName } from '@perses-dev/components';
+import { FolderItem, FolderResource } from '@perses-dev/client';
 import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
 
@@ -135,8 +136,8 @@ const mapFolderItemsToTableRow = (
   dashboardMap: Map<string, DashboardListRow & { inFolder?: boolean }>,
   project: string,
   parentPath: string[]
-): DashboardTreeTableRow[] | undefined => {
-  return folderItems
+): DashboardTreeTableRow[] => {
+  const rows = folderItems
     ?.map((item) => {
       switch (item.kind) {
         case 'Dashboard': {
@@ -156,7 +157,7 @@ const mapFolderItemsToTableRow = (
             displayName: item.name,
             children: item.items
               ? mapFolderItemsToTableRow(item.items, dashboardMap, project, buildPath(parentPath, item.name))
-              : undefined,
+              : [noItemsRow(project, parentPath)],
           };
         default:
           throw new Error(`Unknown kind: ${item.kind}`);
@@ -164,11 +165,24 @@ const mapFolderItemsToTableRow = (
     })
     .filter((row): row is DashboardTreeTableRow => row !== undefined)
     .sort((a, b) => compareFolderFirst(a.kind, b.kind));
+
+  if (!rows || rows.length === 0) {
+    return [noItemsRow(project, parentPath)];
+  }
+  return rows;
 };
 
 const buildPath = (parentPath: string[], name: string): string[] => {
   return [...parentPath, name];
 };
+
+const noItemsRow = (project: string, path: string[]): DashboardTreeTableRow => ({
+  kind: 'NoItems',
+  name: '__no_items__',
+  displayName: '',
+  project: project,
+  path: path,
+});
 
 function compareFolderFirst(kindA: string, kindB: string, isDesc = false): number {
   if (kindA === kindB) return 0;

@@ -13,15 +13,11 @@
 
 import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
-import { Dialog, useSnackbar } from '@perses-dev/components';
-import {
-  DurationString,
-  EphemeralDashboardResource,
-  getResourceDisplayName,
-  getResourceExtendedDisplayName,
-} from '@perses-dev/core';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { EphemeralDashboardResource } from '@perses-dev/client';
+import { DurationString } from '@perses-dev/spec';
 import { useUpdateEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import {
   updateEphemeralDashboardDialogValidationSchema,

@@ -28,6 +28,8 @@ If you are new to Perses, please review the rest of this README first before sta
 
 ## Package organization
 
+The UI is split across multiple npm packages so features can be embedded and extended independently. For a full overview of each package, how they relate, and the dependency graph, see [UI package architecture](../docs/ui-package-architecture.md).
+
 The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
 
 The root `package.json` in `ui` has

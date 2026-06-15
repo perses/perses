@@ -1,0 +1,55 @@
+import { AnnotationData } from '@perses-dev/spec';
+import { AnnotationContext, replaceVariables } from '@perses-dev/plugin-system';
+import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+
+export const getAnnotationData = async (
+  spec: {{ .PluginPascalName }}Spec,
+  context: AnnotationContext,
+  abortSignal?: AbortSignal
+): Promise<AnnotationData[]> => {
+  // Return empty data if the query is empty
+  if (!spec.query) {
+    return [];
+  }
+
+  const query = replaceVariables(spec.query, context.variableState);
+
+  const client = await context.datasourceStore.getDatasourceClient(
+    // A default datasource will be selected by matching the kind if not provided
+    spec.datasource ?? { kind: 'UnknownDatasource' }
+  );
+
+  const { start, end } = context.absoluteTimeRange;
+
+  // TODO: replace with the actual client method and response shape
+  const response = await (client as any).query(
+    { query, start: start / 1000, end: end / 1000 },
+    { signal: abortSignal }
+  );
+
+  const result: AnnotationData[] = [];
+  for (const series of response?.data?.result ?? []) {
+    const startTs = series.values?.[0]?.[0];
+    const endTs = series.values?.[series.values.length - 1]?.[0];
+
+    if (startTs !== undefined && endTs !== undefined) {
+      const labels = series.metric ?? {};
+      result.push({
+        start: startTs * 1000,
+        end: endTs * 1000,
+        title: spec.title,
+        legend: spec.legend,
+        tags:
+          spec.tags && spec.tags.length > 0
+            ? spec.tags.reduce<Record<string, string>>((acc, name) => {
+                const v = labels[name];
+                if (v !== undefined) acc[name] = v;
+                return acc;
+              }, {})
+            : labels,
+      });
+    }
+  }
+
+  return result;
+};

@@ -25,8 +25,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
-import { getResourceDisplayName } from '@perses-dev/core';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
 import Magnify from 'mdi-material-ui/Magnify';
 import { Link as RouterLink } from 'react-router-dom';

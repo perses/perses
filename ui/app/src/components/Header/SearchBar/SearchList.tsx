@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isProjectMetadata, Resource } from '@perses-dev/core';
 import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Theme, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
 import { Link as RouterLink } from 'react-router-dom';
+import { isProjectMetadata, Resource } from '@perses-dev/client';
 import { ProjectRoute } from '../../../model/route';
 
 const kvSearchConfig: KVSearchConfiguration = {

@@ -13,10 +13,10 @@
 
 import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
-import { EphemeralDashboardResource, EphemeralDashboardSpec, getResourceExtendedDisplayName } from '@perses-dev/core';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { DashboardResource as DashboardResourceModel } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useEffect } from 'react';
+import { EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
 import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';

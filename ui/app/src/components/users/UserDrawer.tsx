@@ -13,7 +13,7 @@
 
 import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { UserResource } from '@perses-dev/core';
+import { UserResource } from '@perses-dev/client';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { UserEditorForm } from './UserEditorForm';

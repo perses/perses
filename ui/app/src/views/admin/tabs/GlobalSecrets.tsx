@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
 import { useSnackbar } from '@perses-dev/components';
-import { GlobalSecretResource, Secret } from '@perses-dev/core';
+import { GlobalSecretResource, Secret } from '@perses-dev/client';
 import { SecretList } from '../../../components/secrets/SecretList';
 import {
   useCreateGlobalSecretMutation,

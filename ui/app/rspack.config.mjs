@@ -25,8 +25,7 @@ const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.me
 const nodeModulesPath = resolve(import.meta.dirname, '../node_modules');
 const sharedNodeModulesPath = resolve(sharedPackagesPath, 'node_modules');
 
-const localAliases = {
-  '@perses-dev/core': resolve(nodeModulesPath, '@perses-dev/core/dist'),
+const localAliases = {  
   '@perses-dev/internal-utils': resolve(nodeModulesPath, '@perses-dev/internal-utils/dist'),
 };
 
