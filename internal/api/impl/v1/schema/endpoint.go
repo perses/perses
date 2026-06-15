@@ -29,7 +29,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	specPlugin "github.com/perses/spec/go/plugin"
 )
 
 type endpoint struct {
@@ -46,17 +46,17 @@ func NewEndpoint(pluginService plugin.Plugin, readonly bool) route.Endpoint {
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathSchemas))
-	group.GET("/dashboard", e.DashboardSchema, true)
-	group.GET("/plugin", e.PluginList, true)
-	group.GET("/plugin/:pluginName", e.PluginDefinition, true)
+	group.GET("/dashboards", e.DashboardSchema, true)
+	group.GET("/plugins", e.PluginList, true)
+	group.GET("/plugins/:pluginName", e.PluginDefinition, true)
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 	cueCtx := cuecontext.New()
 
 	// grab plugin schemas & aggregate them into a single cue value per plugin kind
-	plugins := map[v1plugin.Kind]cue.Value{}
-	for _, kind := range []v1plugin.Kind{v1plugin.KindDatasource, v1plugin.KindPanel, v1plugin.KindVariable, v1plugin.KindQuery} {
+	plugins := map[specPlugin.Kind]cue.Value{}
+	for _, kind := range []specPlugin.Kind{specPlugin.KindDatasource, specPlugin.KindPanel, specPlugin.KindVariable, specPlugin.KindQuery} {
 		schemas := e.pluginSvc.Schema().GetSchemas(kind)
 		if len(schemas) == 0 {
 			continue

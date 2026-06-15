@@ -23,7 +23,8 @@ import (
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
 	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	v1plugin "github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,12 +35,12 @@ import (
 type stubSchema struct {
 	pluginschema.Schema
 	allSchemas  []pluginschema.LoadSchema
-	kindSchemas map[v1plugin.Kind][]pluginschema.LoadSchema
+	kindSchemas map[specPlugin.Kind][]pluginschema.LoadSchema
 }
 
 func (s *stubSchema) GetAllSchemas() []pluginschema.LoadSchema { return s.allSchemas }
 
-func (s *stubSchema) GetSchemas(kind v1plugin.Kind) []pluginschema.LoadSchema {
+func (s *stubSchema) GetSchemas(kind specPlugin.Kind) []pluginschema.LoadSchema {
 	if s.kindSchemas != nil {
 		return s.kindSchemas[kind]
 	}
@@ -54,14 +55,14 @@ type stubPluginService struct {
 	sch pluginschema.Schema
 }
 
-func (s *stubPluginService) Schema() pluginschema.Schema                      { return s.sch }
-func (s *stubPluginService) Migration() pluginmigrate.Migration               { return nil }
-func (s *stubPluginService) Load() error                                      { return nil }
-func (s *stubPluginService) LoadDevPlugin(_ []v1.PluginInDevelopment) error   { return nil }
-func (s *stubPluginService) RefreshDevPlugin(_ v1plugin.ModuleMetadata) error { return nil }
-func (s *stubPluginService) UnLoadDevPlugin(_ v1plugin.ModuleMetadata) error  { return nil }
-func (s *stubPluginService) List() ([]byte, error)                            { return []byte("[]"), nil }
-func (s *stubPluginService) UnzipArchives() error                             { return nil }
+func (s *stubPluginService) Schema() pluginschema.Schema                    { return s.sch }
+func (s *stubPluginService) Migration() pluginmigrate.Migration             { return nil }
+func (s *stubPluginService) Load() error                                    { return nil }
+func (s *stubPluginService) LoadDevPlugin(_ []v1.PluginInDevelopment) error { return nil }
+func (s *stubPluginService) RefreshDevPlugin(_ module.Metadata) error       { return nil }
+func (s *stubPluginService) UnLoadDevPlugin(_ module.Metadata) error        { return nil }
+func (s *stubPluginService) List() ([]byte, error)                          { return []byte("[]"), nil }
+func (s *stubPluginService) UnzipArchives() error                           { return nil }
 func (s *stubPluginService) GetLoadedPlugin(_, _, _ string) (*pluginpkg.Loaded, bool) {
 	return nil, false
 }
@@ -89,7 +90,7 @@ func newEndpointWithSchemas(schemas []pluginschema.LoadSchema) *endpoint {
 
 func TestDashboardSchemaWithNoPlugins(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/dashboard")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/dashboards")
 
 	err := ep.DashboardSchema(ctx)
 	require.NoError(t, err)
@@ -102,7 +103,7 @@ func TestDashboardSchemaWithNoPlugins(t *testing.T) {
 
 func TestPluginListWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins")
 
 	err := ep.PluginList(ctx)
 	require.NoError(t, err)
@@ -114,7 +115,7 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 
 func TestPluginDefinitionWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/AnyPlugin")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/AnyPlugin")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("AnyPlugin")
 
@@ -128,10 +129,10 @@ func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
 	// Schemas are present but the requested name does not match any.
 	name, instance, loadErr := pluginschema.LoadModelSchema("../../../plugin/schema/testdata/schemas/panels/first")
 	require.NoError(t, loadErr)
-	schemas := []pluginschema.LoadSchema{{Kind: v1plugin.KindPanel, Name: name, Instance: instance}}
+	schemas := []pluginschema.LoadSchema{{Kind: specPlugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/NonExistent")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/NonExistent")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("NonExistent")
 
@@ -146,10 +147,10 @@ func TestPluginDefinitionPluginExists(t *testing.T) {
 	// because PluginDefinition uses strings.EqualFold for name comparison.
 	name, instance, loadErr := pluginschema.LoadModelSchema("../../../plugin/schema/testdata/schemas/panels/first")
 	require.NoError(t, loadErr)
-	schemas := []pluginschema.LoadSchema{{Kind: v1plugin.KindPanel, Name: name, Instance: instance}}
+	schemas := []pluginschema.LoadSchema{{Kind: specPlugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugin/firstchart")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/firstchart")
 	ctx.SetParamNames("pluginName")
 	ctx.SetParamValues("firstchart")
 
