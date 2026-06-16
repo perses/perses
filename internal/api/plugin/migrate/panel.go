@@ -159,27 +159,59 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *da
 	}
 }
 
+type matchedQuery struct {
+	query  *queryInstance
+	plugin *plugin.Plugin
+}
+
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
-	isQueryMigrationEmpty := true
+	var matchedQueries []matchedQuery
 	for _, query := range queries {
-		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
-		if pluginErr != nil {
-			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
+		plugin, isEmpty, err := ExecuteQueryScript(query.instance, target)
+		if err != nil || isEmpty {
 			continue
 		}
-		if !queryMigrationIsEmpty {
-			result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
-				Kind: string(query.kind),
-				Spec: dashboard.QuerySpec{
-					Plugin: *queryPlugin,
-				},
-			})
-			isQueryMigrationEmpty = false
-			break
-		}
+		matchedQueries = append(matchedQueries, matchedQuery{query, plugin})
 	}
-	return isQueryMigrationEmpty
+	if len(matchedQueries) > 1 {
+		logrus.Warnf("ambiguous query migration: %d plugins matched the same target", len(matchedQueries))
+		// should this return true as well, since there are too many matches?
+		return true
+	}
+	if len(matchedQueries) == 0 {
+		return true
+	}
+	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
+		Kind: string(matchedQueries[0].query.kind),
+		Spec: dashboard.QuerySpec{
+			Plugin: *matchedQueries[0].plugin,
+		},
+	})
+
+	return false
 }
+
+// func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
+// 	isQueryMigrationEmpty := true
+// 	for _, query := range queries {
+// 		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
+// 		if pluginErr != nil {
+// 			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
+// 			continue
+// 		}
+// 		if !queryMigrationIsEmpty {
+// 			result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
+// 				Kind: string(query.kind),
+// 				Spec: dashboard.QuerySpec{
+// 					Plugin: *queryPlugin,
+// 				},
+// 			})
+// 			isQueryMigrationEmpty = false
+// 			break
+// 		}
+// 	}
+// 	return isQueryMigrationEmpty
+// }
 
 func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*plugin.Plugin, bool, error) {
 	return executeCuelangScript(cueScript, grafanaQueryData, "#target", "query")
