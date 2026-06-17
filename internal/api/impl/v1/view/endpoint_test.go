@@ -32,6 +32,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/prometheus/client_golang/prometheus"
 	promclient "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -144,7 +145,7 @@ func TestEndpoint(t *testing.T) {
 	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
+	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time":1.7}`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
@@ -165,6 +166,19 @@ func TestEndpoint(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, count.Write(&metric))
 	assert.Equal(t, 2.0, *metric.Counter.Value)
+
+	// Verify dual classic + native histogram exposition after observing 1.7s.
+	histMetric := promclient.Metric{}
+	hist, err := dashboardRenderTime.GetMetricWithLabelValues("project", "dashboard")
+	require.NoError(t, err)
+	require.NoError(t, hist.(prometheus.Histogram).Write(&histMetric))
+	require.NotNil(t, histMetric.Histogram)
+	assert.Equal(t, uint64(1), histMetric.Histogram.GetSampleCount(), "expected one observation")
+	assert.InDelta(t, 1.7, histMetric.Histogram.GetSampleSum(), 1e-9)
+	assert.NotEmpty(t, histMetric.Histogram.GetBucket(), "classic histogram buckets must remain populated for backward compatibility")
+	assert.True(t, histMetric.Histogram.Schema != nil, "native histogram schema must be set")
+	assert.Equal(t, int32(3), histMetric.Histogram.GetSchema(), "factor 1.1 should map to native histogram schema 3")
+	assert.NotEmpty(t, histMetric.Histogram.GetPositiveSpan(), "native histogram must have at least one positive span after observation")
 }
 
 func TestNotAllowed(t *testing.T) {
