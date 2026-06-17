@@ -16,209 +16,154 @@ package provisioning
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"time"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/dependency"
-	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/cli/file"
-	"github.com/perses/perses/internal/cli/resource"
-	modelAPI "github.com/perses/perses/pkg/model/api"
-	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
-type insertFunc func() (modelAPI.Entity, error)
+// watchDebounce is the quiet period after the last filesystem event before a reload is
+// triggered. This batches rapid successive changes (e.g. a directory of files being
+// written at once) into a single applyEntity call.
+// watchDebounce is the quiet period after the last filesystem event before a reload is
+// triggered. 500ms gives enough time for tools that write multiple files sequentially
+// (e.g. a DAC build outputting several YAML files) to finish before we reload once.
+const watchDebounce = 500 * time.Millisecond
 
-func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool) async.SimpleTask {
-	return &provisioning{
+func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool) (async.SimpleTask, async.SimpleTask) {
+	svc := &provisioningService{
 		serviceManager: serviceManager,
-		folders:        folders,
 		caseSensitive:  caseSensitive,
 	}
+	return &provisioningTask{
+			folders: folders,
+			svc:     svc,
+		}, &provisioningWatcher{
+			folders: folders,
+			svc:     svc,
+		}
 }
 
-type provisioning struct {
-	async.SimpleTask
-	serviceManager dependency.ServiceManager
-	folders        []string
-	caseSensitive  bool
+type provisioningTask struct {
+	svc     provisioningServiceInterface
+	folders []string
 }
 
-func (p *provisioning) Execute(_ context.Context, _ context.CancelFunc) error {
+type provisioningWatcher struct {
+	svc     provisioningServiceInterface
+	folders []string
+}
+
+func (p *provisioningTask) Execute(_ context.Context, _ context.CancelFunc) error {
 	if len(p.folders) == 0 {
 		return nil
 	}
-	var entities []modelAPI.Entity
-	for _, dir := range p.folders {
-		objects, errors := file.UnmarshalEntitiesFromDirectory(dir)
-		for _, err := range errors {
-			logrus.WithError(err).Warningf("unable to load every entity from the folder %q", dir)
-		}
-
-		if len(objects) > 0 {
-			entities = append(entities, objects...)
-		}
-
-	}
-	p.applyEntity(entities)
+	p.svc.reloadAllEntities(p.folders)
 	return nil
 }
 
-func (p *provisioning) String() string {
-	return "provisioning service"
+func (p *provisioningTask) String() string {
+	return "provisioning task service"
 }
 
-func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
-	for _, entity := range entities {
-		entity.GetMetadata().Flatten(p.caseSensitive)
-		kind := modelV1.Kind(entity.GetKind())
-		name := entity.GetMetadata().GetName()
-		project := resource.GetProject(entity.GetMetadata(), "")
-		param := apiInterface.Parameters{
-			Name:    name,
-			Project: project,
-		}
-		createFun, updateFunc, svcErr := p.getService(entity, param)
-		if svcErr != nil {
-			logrus.WithError(svcErr).Warningf("unable to retrieve the service associated to %q", kind)
-			continue
-		}
+// Execute watches all configured folders recursively for changes and calls reload
+// whenever a relevant filesystem event is detected.
+//
+// Kubernetes compatibility: ConfigMaps are mounted via atomic double-symlink swaps
+// (..data → ..timestamp). fsnotify watching directories (not files) naturally catches
+// these RENAME events. On each Rename/Remove we re-register all directories so the
+// watcher follows the new inodes. A short debounce window batches bursts of events
+// into a single reload.
+func (p *provisioningWatcher) Execute(ctx context.Context, _ context.CancelFunc) error {
+	if len(p.folders) == 0 {
+		return nil
+	}
 
-		// the document doesn't exist, so we have to create it.
-		_, createErr := createFun()
-
-		if createErr == nil {
-			continue
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return fmt.Errorf("unable to create provisioning watcher: %w", err)
+	}
+	defer func() {
+		if closeErr := watcher.Close(); closeErr != nil {
+			logrus.WithError(closeErr).Error("failed to close provisioning watcher")
 		}
+	}()
 
-		if !databaseModel.IsKeyConflict(createErr) {
-			logrus.WithError(createErr).Errorf("unable to create the %q %q", kind, name)
-			continue
-		}
+	if registerErr := p.registerFoldersRecursively(watcher); registerErr != nil {
+		return fmt.Errorf("unable to register folders for watching: %w", registerErr)
+	}
 
-		if _, updateError := updateFunc(); updateError != nil {
-			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
+	var debounceC <-chan time.Time
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+
+		case event, ok := <-watcher.Events:
+			if !ok {
+				return nil
+			}
+			logrus.Debugf("provisioning watcher: %s %q", event.Op, event.Name)
+
+			// CHMOD only changes file permissions, not content – ignore it to
+			// avoid spurious reloads triggered by the OS or antivirus tools
+			// that chmod files after a write.
+			if event.Op == fsnotify.Chmod {
+				continue
+			}
+
+			if event.Has(fsnotify.Create) {
+				if info, statErr := os.Stat(event.Name); statErr == nil && info.IsDir() {
+					if watchErr := watcher.Add(event.Name); watchErr != nil {
+						logrus.WithError(watchErr).Warningf("unable to watch new directory %q", event.Name)
+					}
+				}
+			}
+
+			if event.Has(fsnotify.Rename) || event.Has(fsnotify.Remove) {
+				_ = p.registerFoldersRecursively(watcher)
+			}
+
+			debounceC = time.After(watchDebounce)
+
+		case watchErr, ok := <-watcher.Errors:
+			if !ok {
+				return nil
+			}
+			logrus.WithError(watchErr).Error("provisioning watcher error")
+
+		case <-debounceC:
+			debounceC = nil
+			p.svc.reloadAllEntities(p.folders)
 		}
 	}
 }
 
-func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, err error) {
-	switch entity := object.(type) {
-	case *modelV1.Dashboard:
-		svc := p.serviceManager.GetDashboard()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Datasource:
-		svc := p.serviceManager.GetDatasource()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Folder:
-		svc := p.serviceManager.GetFolder()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.GlobalDatasource:
-		svc := p.serviceManager.GetGlobalDatasource()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.GlobalRole:
-		svc := p.serviceManager.GetGlobalRole()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.GlobalRoleBinding:
-		svc := p.serviceManager.GetGlobalRoleBinding()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.GlobalSecret:
-		svc := p.serviceManager.GetGlobalSecret()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.GlobalVariable:
-		svc := p.serviceManager.GetGlobalVariable()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Project:
-		svc := p.serviceManager.GetProject()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Role:
-		svc := p.serviceManager.GetRole()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.RoleBinding:
-		svc := p.serviceManager.GetRoleBinding()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Secret:
-		svc := p.serviceManager.GetSecret()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.User:
-		svc := p.serviceManager.GetUser()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	case *modelV1.Variable:
-		svc := p.serviceManager.GetVariable()
-		return func() (modelAPI.Entity, error) {
-				return svc.Create(nil, entity)
-			},
-			func() (modelAPI.Entity, error) {
-				return svc.Update(nil, entity, parameters)
-			}, nil
-	// We don't support the provisioning of the following resources: EphemeralDashboard
-	default:
-		return nil, nil, fmt.Errorf("resource %q not supported by the provisioning service", entity.GetKind())
+func (p *provisioningWatcher) String() string {
+	return "provisioning watcher service"
+}
+
+func (p *provisioningWatcher) registerFoldersRecursively(watcher *fsnotify.Watcher) error {
+	for _, dir := range p.folders {
+		if err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				logrus.WithError(err).Warningf("unable to access %q while registering watcher", path)
+				return nil
+			}
+			if d.IsDir() {
+				if watchErr := watcher.Add(path); watchErr != nil {
+					logrus.WithError(watchErr).Warningf("unable to watch directory %q", path)
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
+	return nil
 }

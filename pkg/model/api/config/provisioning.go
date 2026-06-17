@@ -21,6 +21,9 @@ type ProvisioningConfig struct {
 	Folders []string `json:"folders,omitempty" yaml:"folders,omitempty"`
 	// Interval is the refresh frequency
 	Interval common.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
+	// EnableWatch can be used to update provisioning on change instead of waiting for the configured interval.
+	// Interval is still used to reconcile the state.
+	EnableWatch bool `json:"enableWatch,omitempty" yaml:"enableWatch,omitempty"`
 }
 
 func (p *ProvisioningConfig) Verify() error {
