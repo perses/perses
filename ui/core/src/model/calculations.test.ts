@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
+
 import { CalculationsMap, CalculationType, getCalculation, getCalculations } from './calculations';
 
 interface CalculationTestCase {

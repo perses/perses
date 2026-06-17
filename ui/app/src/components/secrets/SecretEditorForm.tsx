@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
@@ -34,10 +32,13 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
-import TrashIcon from 'mdi-material-ui/TrashCan';
-import PlusIcon from 'mdi-material-ui/Plus';
 import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/client';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import PlusIcon from 'mdi-material-ui/Plus';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+import { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import { FormEditorProps } from '../form-drawers';
 
 const noAuthIndex = 'noAuth';

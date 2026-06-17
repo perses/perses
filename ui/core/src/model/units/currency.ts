@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { toUpper } from 'lodash';
+
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitConfig, UnitGroupConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
-import { getFormatterFromCache } from './formatterCache';
 
 // See Intl.supportedValuesOf("currency") for valid options, key names will
 // be converted to uppercase to match the expectation of Intl.NumberFormat

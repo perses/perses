@@ -21,8 +21,8 @@ import {
 } from '@mui/material';
 import { SxProps, SystemStyleObject, Theme } from '@mui/system';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { Link as RouterLink } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 export type BreadcrumbVariant = 'default' | 'workspace';
 

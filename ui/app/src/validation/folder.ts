@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { useMemo } from 'react';
 import { FolderItem } from '@perses-dev/client';
+import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useFolderList } from '../model/folder-client';
 import { getSubFolderRef } from '../utils/folderUtils';
 import { generateMetadataName } from '../utils/metadata';

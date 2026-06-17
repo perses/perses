@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, ProjectMetadata } from './resource';
 import { Kind } from './kind';
+import { Metadata, ProjectMetadata } from './resource';
 
 export type Action = 'create' | 'read' | 'update' | 'delete' | '*';
 export const ACTIONS = ['*', 'create', 'read', 'update', 'delete'];

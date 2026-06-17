@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { resolve } from 'node:path';
+
+import { defineConfig } from '@rspack/cli';
 import rspack from '@rspack/core';
 import { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
 import TerserPlugin from 'terser-webpack-plugin';
-import { defineConfig } from '@rspack/cli';
 
 const isDev = process.env.NODE_ENV === 'development';
 const isSharedDev = isDev && process.env.SHARED_DEV === 'true';
@@ -25,7 +26,7 @@ const sharedPackagesPath = process.env.SHARED_PACKAGES_PATH ?? resolve(import.me
 const nodeModulesPath = resolve(import.meta.dirname, '../node_modules');
 const sharedNodeModulesPath = resolve(sharedPackagesPath, 'node_modules');
 
-const localAliases = {  
+const localAliases = {
   '@perses-dev/internal-utils': resolve(nodeModulesPath, '@perses-dev/internal-utils/dist'),
 };
 

@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
-import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 
 interface DeleteDialogProps<T> {
   itemKind: string;

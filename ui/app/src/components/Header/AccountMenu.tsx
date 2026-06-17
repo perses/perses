@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent, ReactElement, useState } from 'react';
 import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
-import AccountCircle from 'mdi-material-ui/AccountCircle';
 import AccountBox from 'mdi-material-ui/AccountBox';
+import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
+import { MouseEvent, ReactElement, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+
+import { PERSES_APP_CONFIG } from '../../config';
+import { useIsDelegatedAuthnProviderEnabled } from '../../context/Config';
 import { useUsername } from '../../model/auth/auth-client';
 import { ProfileRoute } from '../../model/route';
-import { useIsDelegatedAuthnProviderEnabled } from '../../context/Config';
-import { PERSES_APP_CONFIG } from '../../config';
 import { ThemeSwitch } from './ThemeSwitch';
 
 export function AccountMenu(): ReactElement {

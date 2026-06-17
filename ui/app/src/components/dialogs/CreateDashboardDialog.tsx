@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Autocomplete,
   Button,
@@ -23,11 +23,12 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
-import { Dialog, getResourceDisplayName } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName } from '@perses-dev/components';
 import { DashboardSelector } from '@perses-dev/spec';
+import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import {
   CreateDashboardValidationType,
   CreateEphemeralDashboardValidationType,

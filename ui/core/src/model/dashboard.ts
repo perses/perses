@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DashboardSpec, DashboardSelector } from '@perses-dev/spec';
+
 import { ProjectMetadata } from './resource';
 
 export type { DashboardSelector, DashboardSpec };

@@ -13,6 +13,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
 import Router from './Router';
 /**
  * Renders the Perses application in the target container.

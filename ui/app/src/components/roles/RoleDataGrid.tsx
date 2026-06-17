@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, ReactElement, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
+import { memo, ReactElement, useMemo } from 'react';
+
 import {
   CommonRow,
   DATA_GRID_INITIAL_STATE_SORT_BY_NAME,

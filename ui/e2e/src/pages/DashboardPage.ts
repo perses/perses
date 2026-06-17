@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { expect, Locator, Page } from '@playwright/test';
-import { PanelEditor } from './PanelEditor';
-import { VariableEditor } from './VariableEditor';
-import { PanelGroup } from './PanelGroup';
+
 import { Panel } from './Panel';
+import { PanelEditor } from './PanelEditor';
+import { PanelGroup } from './PanelGroup';
+import { VariableEditor } from './VariableEditor';
 
 type PanelGroupConfig = {
   name: string;

@@ -13,6 +13,7 @@
 
 import { PluginLoader, remotePluginLoader } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
+
 import { PERSES_APP_CONFIG } from '../config';
 
 export function useRemotePluginLoader(): PluginLoader {

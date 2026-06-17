@@ -11,9 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This view intentionally uses ARIA `role` attributes (e.g. role="button") for
+// semantics; the equivalent tag swap suggested by jsx-a11y/prefer-tag-over-role
+// is not applicable to these MUI components.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
 import ShieldAccount from 'mdi-material-ui/ShieldAccount';
+import React, { ReactElement } from 'react';
+
 import { ProfileSections } from './ProfileView';
 
 interface IAccountSettingItem {
@@ -75,6 +81,7 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
             {s.items.map((i) => (
               <ListItem
                 role="button"
+                tabIndex={0}
                 key={i.view}
                 onClick={() => handleViewChange(i.view)}
                 sx={{

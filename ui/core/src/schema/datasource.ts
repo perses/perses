@@ -13,6 +13,7 @@
 
 import { datasourceSpecSchema, buildDatasourceSpecSchema } from '@perses-dev/spec';
 import { z } from 'zod';
+
 import { Datasource, DatasourceDefinition } from '../model';
 import { metadataSchema, projectMetadataSchema } from './metadata';
 import { PluginSchema } from './plugin';

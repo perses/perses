@@ -14,9 +14,9 @@
 import numbro from 'numbro';
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
-import { getFormatterFromCache } from './formatterCache';
 
 /**
  * We support both SI (decimal) and IEC (binary) units for bytes:

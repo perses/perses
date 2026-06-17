@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+
 import { selectMenuItem, waitForAnimations } from '../utils';
 
 export class PanelEditor {

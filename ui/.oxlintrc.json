@@ -1,0 +1,47 @@
+{
+  "plugins": ["typescript", "react", "jsx-a11y", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "jest": true,
+    "browser": true
+  },
+  "rules": {
+    "typescript/explicit-function-return-type": "error",
+    "typescript/explicit-module-boundary-types": "error",
+    "typescript/array-type": ["error", { "default": "array-simple" }],
+    "eqeqeq": ["error", "always"],
+    "no-unused-vars": "off",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-nested-ternary": "error",
+    "react/exhaustive-deps": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-curly-brace-presence": [
+      "error",
+      { "props": "never", "children": "never", "propElementValues": "always" }
+    ],
+    "import/no-duplicates": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["mdi-material-ui", "!mdi-material-ui/"],
+            "message": "Please use the default import from the icon file directly rather than using a named import.\n\nGood:\nimport IconName from 'mdi-material-ui/IconName';\n\nBad:\nimport { IconName } from 'mdi-material-ui';\n"
+          }
+        ]
+      }
+    ]
+  },
+  "ignorePatterns": ["**/dist"]
+}

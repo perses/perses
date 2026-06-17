@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
-import { Action, useSnackbar } from '@perses-dev/components';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { getMetadataProject, Secret } from '@perses-dev/client';
+import { Action, useSnackbar } from '@perses-dev/components';
+import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
-import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   ListPropertiesWithCallbacks,
@@ -31,7 +33,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DeleteResourceDialog } from '../dialogs';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
 

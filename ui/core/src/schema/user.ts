@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
+
 import { NativeProvider, OAuthProvider, UserResource, UserSpec } from '../model';
 import { metadataSchema } from './metadata';
 

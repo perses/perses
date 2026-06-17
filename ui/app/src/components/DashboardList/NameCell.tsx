@@ -14,10 +14,11 @@
 import { Box, IconButton, Link } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
 import FolderOpenOutlineIcon from 'mdi-material-ui/FolderOpenOutline';
+import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
 import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
 import { ReactElement } from 'react';
+
 import { DashboardTreeTableRow } from './DashboardTreeList';
 
 export interface NameCellProps {

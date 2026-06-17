@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, ReactElement, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
+import { memo, ReactElement, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
   DataGridProperties,
   CommonRow,

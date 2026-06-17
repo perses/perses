@@ -11,36 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatBytes, BytesFormatOptions as BytesFormatOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
-import { formatBits, BitsFormatOptions as BitsFormatOptions, BITS_GROUP_CONFIG, BITS_UNIT_CONFIG } from './bits';
-import {
-  formatDecimal,
-  DecimalFormatOptions as DecimalFormatOptions,
-  DECIMAL_GROUP_CONFIG,
-  DECIMAL_UNIT_CONFIG,
-} from './decimal';
-import {
-  formatPercent,
-  PercentFormatOptions as PercentFormatOptions,
-  PERCENT_GROUP_CONFIG,
-  PERCENT_UNIT_CONFIG,
-} from './percent';
+import { formatBits, BitsFormatOptions, BITS_GROUP_CONFIG, BITS_UNIT_CONFIG } from './bits';
+import { formatBytes, BytesFormatOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
+import { formatCurrency, CURRENCY_GROUP_CONFIG, CURRENCY_UNIT_CONFIG, CurrencyFormatOptions } from './currency';
+import { formatDate, DateFormatOptions, DATE_GROUP_CONFIG, DATE_UNIT_CONFIG } from './date';
+import { formatDecimal, DecimalFormatOptions, DECIMAL_GROUP_CONFIG, DECIMAL_UNIT_CONFIG } from './decimal';
+import { formatPercent, PercentFormatOptions, PERCENT_GROUP_CONFIG, PERCENT_UNIT_CONFIG } from './percent';
 import {
   TEMPERATURE_GROUP_CONFIG,
   formatTemperature,
   TEMPERATURE_UNIT_CONFIG,
   TemperatureFormatOptions,
 } from './temperature';
-import { formatTime, TimeFormatOptions as TimeFormatOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
-import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
 import {
   formatThroughput,
   THROUGHPUT_GROUP_CONFIG,
   THROUGHPUT_UNIT_CONFIG,
   ThroughputFormatOptions,
 } from './throughput';
-import { formatCurrency, CURRENCY_GROUP_CONFIG, CURRENCY_UNIT_CONFIG, CurrencyFormatOptions } from './currency';
-import { formatDate, DateFormatOptions, DATE_GROUP_CONFIG, DATE_UNIT_CONFIG } from './date';
+import { formatTime, TimeFormatOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
+import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
 
 /**
  * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
