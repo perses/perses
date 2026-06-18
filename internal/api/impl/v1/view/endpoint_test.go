@@ -171,8 +171,9 @@ func TestEndpoint(t *testing.T) {
 	histMetric := promclient.Metric{}
 	hist, err := dashboardRenderTime.GetMetricWithLabelValues("project", "dashboard")
 	require.NoError(t, err)
-	require.NoError(t, hist.(prometheus.Histogram).Write(&histMetric))
-	require.NotNil(t, histMetric.Histogram)
+	h, ok := hist.(prometheus.Histogram)
+	require.True(t, ok, "dashboardRenderTime metric does not implement prometheus.Histogram")
+	require.NoError(t, h.Write(&histMetric))
 	assert.Equal(t, uint64(1), histMetric.Histogram.GetSampleCount(), "expected one observation")
 	assert.InDelta(t, 1.7, histMetric.Histogram.GetSampleSum(), 1e-9)
 	assert.NotEmpty(t, histMetric.Histogram.GetBucket(), "classic histogram buckets must remain populated for backward compatibility")
