@@ -14,15 +14,12 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/ast/astutil"
-	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/format"
-	"cuelang.org/go/encoding/jsonschema"
 )
 
 var CueSyntaxOptions = []cue.Option{
@@ -80,30 +77,6 @@ func MarshalCUE(v cue.Value) ([]byte, error) {
 	data, err := format.Node(node, format.Simplify())
 	if err != nil {
 		return nil, fmt.Errorf("could not format CUE value: %w", err)
-	}
-	return data, nil
-}
-
-// TODO: still not working with the existing plugin schemas, errors out
-// probably due to import statements in schemas?
-func ExportToJSONSchema(v cue.Value) ([]byte, error) {
-	// generate expr
-	jsonExpr, err := jsonschema.Generate(v, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error while generating JSON schema: %w", err)
-	}
-
-	// build expr
-	ctx := cuecontext.New()
-	jsonSchema := ctx.BuildExpr(jsonExpr)
-	if jsonSchema.Err() != nil {
-		return nil, fmt.Errorf("error while building expression: %w", jsonSchema.Err())
-	}
-
-	// marshal JSON response
-	data, err := json.Marshal(jsonSchema)
-	if err != nil {
-		return nil, fmt.Errorf("error while marshaling JSON schema: %w", err)
 	}
 	return data, nil
 }
