@@ -25,6 +25,7 @@ import (
 
 	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
@@ -81,7 +82,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	data, err := utils.MarshalCUE(result)
+	data, err := apiCue.MarshalCUE(result)
 	if err != nil {
 		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
 		return apiinterface.InternalError
@@ -134,7 +135,7 @@ func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 		return nil, apiinterface.InternalError
 	}
 
-	data, exportErr := utils.MarshalCUE(list)
+	data, exportErr := apiCue.MarshalCUE(list)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return nil, apiinterface.InternalError

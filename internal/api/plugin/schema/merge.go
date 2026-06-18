@@ -22,7 +22,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/token"
-	"github.com/perses/perses/internal/api/utils"
+	apiCue "github.com/perses/perses/internal/api/cue"
 )
 
 const (
@@ -52,7 +52,7 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 			return cue.Value{}, fmt.Errorf("error while building instance %s: %w", ls.Name, inst.Err())
 		}
 
-		castExpr, err := utils.CUEValueToASTExpr(inst)
+		castExpr, err := apiCue.CUEValueToASTExpr(inst)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process %s plugin schema: %w", ls.Name, err)
 		}
@@ -101,7 +101,7 @@ func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 
 	var declsList []ast.Decl
 	for _, plugin := range definitions {
-		expr, err := utils.CUEValueToASTExpr(plugin.value)
+		expr, err := apiCue.CUEValueToASTExpr(plugin.value)
 		if err != nil {
 			return cue.Value{}, err
 		}

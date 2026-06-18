@@ -23,7 +23,7 @@ import (
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/token"
 
-	"github.com/perses/perses/internal/api/utils"
+	apiCue "github.com/perses/perses/internal/api/cue"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
 	specPlugin "github.com/perses/spec/go/plugin"
@@ -88,7 +88,7 @@ func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 	}, nil)
 
 	// build the new value
-	expr, err := utils.ASTNodeToASTExpr(node)
+	expr, err := apiCue.ASTNodeToASTExpr(node)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unexpected AST node type %T: %w", node, err)
 	}
@@ -96,7 +96,7 @@ func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 }
 
 func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string) cue.Value {
-	node := value.Syntax(utils.CueSyntaxOptions...)
+	node := value.Syntax(apiCue.CueSyntaxOptions...)
 
 	ast.Walk(node, func(n ast.Node) bool {
 		switch x := n.(type) {
@@ -108,7 +108,7 @@ func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string
 		return true
 	}, nil)
 
-	expr, err := utils.ASTNodeToASTExpr(node)
+	expr, err := apiCue.ASTNodeToASTExpr(node)
 	if err != nil {
 		logrus.WithError(err).Error("unable to rename CUE definition")
 		return value
@@ -124,7 +124,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
 
-	expr, err := utils.CUEValueToASTExpr(encoded)
+	expr, err := apiCue.CUEValueToASTExpr(encoded)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("could not cast CUE value to AST expr: %w", err)
 	}
@@ -256,11 +256,11 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 		// plugins only present in ListVariable
 		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
 
-		textVarSpecExpr, err := utils.CUEValueToASTExpr(textVarSpec)
+		textVarSpecExpr, err := apiCue.CUEValueToASTExpr(textVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process text variable spec schema: %w", err)
 		}
-		listVarSpecExpr, err := utils.CUEValueToASTExpr(listVarSpec)
+		listVarSpecExpr, err := apiCue.CUEValueToASTExpr(listVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process list variable spec schema: %w", err)
 		}
