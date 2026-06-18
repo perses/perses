@@ -163,6 +163,9 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// fill the missing LayoutSpec
 	// for now the only option is GridLayoutSpec
 	gridLayoutSpec := ctx.EncodeType(dashboard.GridLayoutSpec{})
+	if err := gridLayoutSpec.Err(); err != nil {
+		return cue.Value{}, fmt.Errorf("could not build grid layout spec schema: %w", err)
+	}
 	final = final.FillPath(cue.MakePath(dashboardDefSelector, layoutHidSelector, specSelector), gridLayoutSpec)
 
 	if validateErr := final.Validate(cueValidationOptions...); validateErr != nil {
@@ -269,6 +272,9 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 		}
 
 		completeVarSpecValue := ctx.BuildExpr(completeVarSpecExpr)
+		if err := completeVarSpecValue.Err(); err != nil {
+			return cue.Value{}, fmt.Errorf("could not build variable schema: %w", err)
+		}
 
 		// unify the variable spec with the dashboard schema
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, variableSpecHidSelector, specSelector), completeVarSpecValue)
