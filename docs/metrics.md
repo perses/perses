@@ -285,7 +285,7 @@ The dashboard usage metrics are designed to be privacy-friendly:
 Unlike Grafana, where detailed usage analytics are typically only available in the paid Enterprise edition, Perses provides dashboard usage metrics in the open-source version. This makes it easier for teams to:
 
 - Understand dashboard adoption
-/- Identify and fix problematic dashboards
+- Identify and fix problematic dashboards
 - Optimize dashboard performance
 - Make data-driven decisions about dashboard management
 
