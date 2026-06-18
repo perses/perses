@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatValue } from './units';
-import { UnitTestCase } from './types';
 import { getFormatterStats } from './formatterCache';
+import { UnitTestCase } from './types';
+import { formatValue } from './units';
 
 const PERCENT_TESTS: UnitTestCase[] = [
   // percent

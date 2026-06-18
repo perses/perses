@@ -11,26 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Compass from 'mdi-material-ui/Compass';
+import { CircularProgress, Menu, MenuItem, Stack, ListItemIcon, ListItemText } from '@mui/material';
+import { ProjectResource } from '@perses-dev/client';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
+import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import { ViewExplore } from '@perses-dev/explore';
+import { PluginRegistry } from '@perses-dev/plugin-system';
+import { useQueryClient } from '@tanstack/react-query';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
+import Compass from 'mdi-material-ui/Compass';
 import React, { ReactElement, useEffect, useMemo, MouseEvent, useState } from 'react';
-import { PluginRegistry } from '@perses-dev/plugin-system';
-import { CircularProgress, Menu, MenuItem, Stack, ListItemIcon, ListItemText } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
-import { ViewExplore } from '@perses-dev/explore';
-import { useQueryClient } from '@tanstack/react-query';
 import { StringParam, useQueryParam } from 'use-query-params';
-import { ProjectResource } from '@perses-dev/client';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+
 import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
+import { useIsProjectDatasourceEnabled } from '../../context/Config';
 import { useDatasourceApi } from '../../model/datasource-api';
-import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useGlobalVariableList } from '../../model/global-variable-client';
 import { useProjectList } from '../../model/project-client';
-import { buildGlobalVariableDefinition } from '../../utils/variables';
-import { useIsProjectDatasourceEnabled } from '../../context/Config';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { buildGlobalVariableDefinition } from '../../utils/variables';
 
 function ExploreView(): ReactElement {
   return <HelperExploreView />;

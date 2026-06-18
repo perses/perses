@@ -12,7 +12,9 @@
 // limitations under the License.
 
 import path from 'path';
+
 import type { PlaywrightTestConfig } from '@playwright/test';
+
 import baseConfig from './base.playwright.config';
 
 /**

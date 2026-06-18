@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import HttpBackend, { HttpBackendOptions } from 'i18next-http-backend';
+import { initReactI18next } from 'react-i18next';
+
 import { PERSES_APP_CONFIG } from '../config';
 
 i18n

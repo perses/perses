@@ -15,6 +15,7 @@
 // units.
 
 import { Duration } from 'date-fns';
+
 import { AbsoluteTimeRange, DurationString } from '../time';
 import { FormatOptions } from './units';
 

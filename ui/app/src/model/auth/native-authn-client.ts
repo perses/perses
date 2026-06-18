@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { fetchJson } from '@perses-dev/client';
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query';
 
-import { fetchJson } from '@perses-dev/client';
 import { HTTPHeader, HTTPMethodPOST } from '../http';
 import buildURL from '../url-builder';
 import { authResource } from './auth-client';

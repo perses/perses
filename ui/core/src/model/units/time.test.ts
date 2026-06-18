@@ -19,9 +19,10 @@ import {
   intervalToPrometheusDuration,
 } from '@perses-dev/core';
 import { Duration } from 'date-fns';
-import { formatValue } from './units';
-import { UnitTestCase } from './types';
+
 import { getFormatterStats } from './formatterCache';
+import { UnitTestCase } from './types';
+import { formatValue } from './units';
 
 const TIME_TESTS: UnitTestCase[] = [
   {
@@ -227,7 +228,7 @@ const TIME_TESTS: UnitTestCase[] = [
 ];
 describe('formatValue', () => {
   it.each(TIME_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
-    const { value, format: format, expected } = args;
+    const { value, format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
   });
 });

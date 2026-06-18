@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { DashboardResource, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/dashboards';
-import { ReactElement, useCallback, useState } from 'react';
-import { EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
 import { DurationString } from '@perses-dev/spec';
+import { ReactElement, useCallback, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';

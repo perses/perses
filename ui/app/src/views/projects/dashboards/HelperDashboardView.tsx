@@ -13,23 +13,24 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
-import { DashboardSpec } from '@perses-dev/spec';
 import { DashboardResource, ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
+import { DashboardSpec } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
+
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { useDatasourceApi } from '../../../model/datasource-api';
-import { useGlobalVariableList } from '../../../model/global-variable-client';
-import { useProject } from '../../../model/project-client';
-import { useVariableList } from '../../../model/variable-client';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
+import { PERSES_APP_CONFIG } from '../../../config';
 import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
 } from '../../../context/Config';
+import { useDatasourceApi } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../../model/global-variable-client';
+import { useProject } from '../../../model/project-client';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
-import { PERSES_APP_CONFIG } from '../../../config';
+import { useVariableList } from '../../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;

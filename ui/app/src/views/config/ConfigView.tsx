@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
 import { Stack, Box } from '@mui/material';
+import { JSONEditor } from '@perses-dev/components';
 import Cog from 'mdi-material-ui/Cog';
 import Puzzle from 'mdi-material-ui/Puzzle';
-import { JSONEditor } from '@perses-dev/components';
-import { MenuTab, MenuTabs } from '../../components/tabs';
+import { ReactElement, useState } from 'react';
 
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import PageHeader from '../../components/page-header/PageHeader';
+import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { PluginsList } from './PluginsList';

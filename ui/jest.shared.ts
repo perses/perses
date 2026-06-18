@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+
+import type { Config } from '@jest/types';
 
 const swcrcPath = resolve(__dirname, './.cjs.swcrc');
 const swcrc = JSON.parse(readFileSync(swcrcPath, 'utf-8'));

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Box, Alert } from '@mui/material';
-import { ReactElement, useMemo } from 'react';
 import { useLocalStorage } from '@perses-dev/components';
+import { ReactElement, useMemo } from 'react';
+
 import { useBanner } from '../context/Config';
 
 /*

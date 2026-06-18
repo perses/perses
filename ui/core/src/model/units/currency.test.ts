@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatValue } from './units';
-import { UnitTestCase } from './types';
 import { getFormatterStats } from './formatterCache';
+import { UnitTestCase } from './types';
+import { formatValue } from './units';
 
 const CURRENCY_TESTS: UnitTestCase[] = [
   {
@@ -50,7 +50,7 @@ const CURRENCY_TESTS: UnitTestCase[] = [
 
 describe('formatValue', () => {
   it.each(CURRENCY_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
-    const { value, format: format, expected } = args;
+    const { value, format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
   });
 

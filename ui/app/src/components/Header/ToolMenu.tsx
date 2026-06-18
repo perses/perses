@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, ReactElement, useState } from 'react';
 import { Box, IconButton, ListItemIcon, Menu as MUIMenu, MenuItem, Typography } from '@mui/material';
-import Menu from 'mdi-material-ui/Menu';
-import { Link as RouterLink } from 'react-router-dom';
-import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Cog from 'mdi-material-ui/Cog';
 import Compass from 'mdi-material-ui/Compass';
-import { AdminRoute, ConfigRoute, ExploreRoute } from '../../model/route';
+import Menu from 'mdi-material-ui/Menu';
+import ShieldStar from 'mdi-material-ui/ShieldStar';
+import React, { MouseEvent, ReactElement, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
+import { AdminRoute, ConfigRoute, ExploreRoute } from '../../model/route';
 
 export function ToolMenu(): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

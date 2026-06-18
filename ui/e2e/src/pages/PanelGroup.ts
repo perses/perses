@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, expect } from '@playwright/test';
+
 import { waitForAnimations } from '../utils';
 import { Panel } from './Panel';
 

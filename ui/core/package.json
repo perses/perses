@@ -2,19 +2,22 @@
   "name": "@perses-dev/core",
   "version": "0.54.0-beta.1",
   "description": "Core functionality consumed by both the Perses UI and plugins",
-  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/perses/perses.git"
   },
-  "bugs": {
-    "url": "https://github.com/perses/perses/issues"
-  },
-  "module": "dist/index.js",
-  "main": "dist/cjs/index.js",
-  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -25,21 +28,18 @@
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "cross-env TZ=UTC jest",
     "test:watch": "cross-env TZ=UTC jest --watch",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
+    "@perses-dev/spec": "0.2.0-beta.0",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
     "numbro": "^2.3.6",
-    "zod": "^3.21.4",
-    "@perses-dev/spec": "0.2.0-beta.0"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

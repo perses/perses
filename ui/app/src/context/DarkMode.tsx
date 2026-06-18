@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useEffect, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import {
   ChartsProvider,
@@ -21,6 +20,7 @@ import {
   useLocalStorage,
 } from '@perses-dev/components';
 import { TOGGLE_THEME_EVENT } from '@perses-dev/dashboards';
+import React, { createContext, ReactElement, useContext, useEffect, useMemo } from 'react';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme

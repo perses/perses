@@ -60,7 +60,7 @@ const TEMPERATURE_TESTS: UnitTestCase[] = [
 
 describe('temperature formatValue', () => {
   it.each(TEMPERATURE_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
-    const { value, format: format, expected } = args;
+    const { value, format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
   });
 

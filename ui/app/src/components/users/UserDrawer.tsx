@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, ReactElement, useState } from 'react';
-import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { UserResource } from '@perses-dev/client';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { Dispatch, ReactElement, useState } from 'react';
+
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { UserEditorForm } from './UserEditorForm';

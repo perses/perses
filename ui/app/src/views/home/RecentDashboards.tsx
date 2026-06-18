@@ -11,18 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Dashboard rows intentionally use role="row" as a stable e2e test selector
+// (see e2e AppHomePage.getByRole('row')); jsx-a11y/prefer-tag-over-role does
+// not apply here.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+
 import { Box, Card, CardContent, CircularProgress, Divider, IconButton, Stack, Typography } from '@mui/material';
-import HistoryIcon from 'mdi-material-ui/History';
-import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
-import Archive from 'mdi-material-ui/Archive';
-import Close from 'mdi-material-ui/Close';
-import { ReactElement, useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
-import { useRecentDashboardList } from '../../model/dashboard-client';
-import { useNavHistoryDispatch } from '../../context/DashboardNavHistory';
+import Archive from 'mdi-material-ui/Archive';
+import Close from 'mdi-material-ui/Close';
+import HistoryIcon from 'mdi-material-ui/History';
+import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
+import { ReactElement, useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { useNavHistoryDispatch } from '../../context/DashboardNavHistory';
+import { useRecentDashboardList } from '../../model/dashboard-client';
 
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();

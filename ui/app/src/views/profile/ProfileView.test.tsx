@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import '@testing-library/jest-dom';
+import { render, screen, waitFor } from '@testing-library/react';
+
 import ProfileView from './ProfileView';
 
 jest.mock('../../context/Authorization', () => ({

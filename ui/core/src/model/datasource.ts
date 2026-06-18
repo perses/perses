@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSpec, DatasourceSelector } from '@perses-dev/spec';
+
 import { Metadata, ProjectMetadata } from './resource';
 export type { DatasourceSelector, DatasourceSpec };
 

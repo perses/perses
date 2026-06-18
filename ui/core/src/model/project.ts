@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata } from './resource';
 import { Display } from './display';
+import { Metadata } from './resource';
 
 export interface ProjectResource {
   kind: 'Project';

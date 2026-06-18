@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatBytes } from './bytes';
 import { formatBits } from './bits';
+import { formatBytes } from './bytes';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
+import { getFormatterFromCache } from './formatterCache';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
-import { getFormatterFromCache } from './formatterCache';
 
 type ThroughputUnit =
   | 'bits/sec'

@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
+import { LogData } from './log-data';
+import { ProfileData } from './profile-data';
 import { TimeSeriesData } from './time-series-data';
 import { TraceData } from './trace-data';
-import { ProfileData } from './profile-data';
-import { LogData } from './log-data';
 
 interface QuerySpec<PluginSpec> {
   name?: string;

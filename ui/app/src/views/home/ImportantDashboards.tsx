@@ -11,15 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Dashboard rows intentionally use role="row" as a stable e2e test selector
+// (see e2e AppHomePage.getByRole('row')); jsx-a11y/prefer-tag-over-role does
+// not apply here.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+
 import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
+import { intlFormatDistance } from 'date-fns';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
-import { intlFormatDistance } from 'date-fns';
 import { ReactElement, useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { useImportantDashboardList } from '../../model/dashboard-client';
-import { useConfig } from '../../model/config-client';
+
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { useConfig } from '../../model/config-client';
+import { useImportantDashboardList } from '../../model/dashboard-client';
 
 export function ImportantDashboards(): ReactElement {
   const { data: config } = useConfig();

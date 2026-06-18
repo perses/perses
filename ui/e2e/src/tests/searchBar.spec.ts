@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
+
 import { AppHomePage, SearchBar } from '../pages';
 
 test.describe('SearchBar', () => {

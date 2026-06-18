@@ -12,22 +12,23 @@
 // limitations under the License.
 
 import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
-import Magnify from 'mdi-material-ui/Magnify';
-import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import Archive from 'mdi-material-ui/Archive';
-import DatabaseIcon from 'mdi-material-ui/Database';
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
-import Close from 'mdi-material-ui/Close';
-import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
 import { isProjectMetadata, Resource } from '@perses-dev/client';
-import { useIsMobileSize } from '../../../utils/browser-size';
+import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
+import Archive from 'mdi-material-ui/Archive';
+import Close from 'mdi-material-ui/Close';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
+import Magnify from 'mdi-material-ui/Magnify';
+import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
-import { useProjectList } from '../../../model/project-client';
-import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
+import { useProjectList } from '../../../model/project-client';
+import { AdminRoute, ProjectRoute } from '../../../model/route';
+import { useIsMobileSize } from '../../../utils/browser-size';
 import { SearchList } from './SearchList';
 
 function shortcutDisplay(): string {

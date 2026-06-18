@@ -15,6 +15,7 @@ import { Box, Chip, Tooltip } from '@mui/material';
 import { GridColDef, GridFilterInputValue, GridFilterItem, GridFilterOperator } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DispatchWithPromise } from '@perses-dev/components';
+
 import { formatAbsoluteTime, formatRelativeTime } from '../utils/dashboardTableUtils';
 
 export const PROJECT_COL_DEF: GridColDef = {

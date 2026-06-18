@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
+import { GlobalDatasourceResource } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import { ReactElement, useCallback } from 'react';
-import { GlobalDatasourceResource } from '@perses-dev/client';
+
 import { DatasourceList } from '../../../components/datasource/DatasourceList';
 import {
   useCreateGlobalDatasourceMutation,

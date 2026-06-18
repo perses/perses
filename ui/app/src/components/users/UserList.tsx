@@ -13,15 +13,16 @@
 
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { Action, UserResource } from '@perses-dev/client';
-import { DeleteResourceDialog } from '../dialogs';
-import { useIsReadonly } from '../../context/Config';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
+import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   ListPropertiesWithCallbacks,

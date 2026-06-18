@@ -29,7 +29,7 @@ export interface IFlatPermission {
  * @returns
  */
 export const normalizePermissions = (flatPermissions: IFlatPermission[]): IFlatPermission[] => {
-  /* 
+  /*
     Avoid mutate the original array and return a cloned version 
     There might be a feature to toggle views of Raw and normalized data
   */
@@ -48,7 +48,7 @@ export const normalizePermissions = (flatPermissions: IFlatPermission[]): IFlatP
           fullGrantItems.add(`${item.key}`);
         }
       } else {
-        /* 
+        /*
         This block finds redundant actions 
         Redundant actions should not be rendered for individual scopes
         Because they are already covered by the '*' scope

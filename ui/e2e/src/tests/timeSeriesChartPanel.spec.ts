@@ -15,6 +15,7 @@ import {
   mockTimeSeriesResponseWithStableValue,
   mockTimeSeriesResponseWithNullValues,
 } from '@perses-dev/internal-utils';
+
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 

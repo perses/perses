@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
+
 import { metadataSchema, projectMetadataSchema } from './metadata';
 
 export const secretSpecSchema = z

@@ -11,23 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link as RouterLink } from 'react-router-dom';
 import { AppBar, Box, Button, Divider, Toolbar } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
-import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Compass from 'mdi-material-ui/Compass';
+import ShieldStar from 'mdi-material-ui/ShieldStar';
 import React from 'react';
-import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
-import { AdminRoute, ConfigRoute } from '../../model/route';
-import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
+import { Link as RouterLink } from 'react-router-dom';
+
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
-import WhitePersesLogo from '../logo/WhitePersesLogo';
-import PersesLogoCropped from '../logo/PersesLogoCropped';
+import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
+import { AdminRoute, ConfigRoute } from '../../model/route';
+import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { BannerInfo } from '../BannerInfo';
-import { ToolMenu } from './ToolMenu';
+import PersesLogoCropped from '../logo/PersesLogoCropped';
+import WhitePersesLogo from '../logo/WhitePersesLogo';
 import { AccountMenu } from './AccountMenu';
-import { ThemeSwitch } from './ThemeSwitch';
 import { SearchBar } from './SearchBar/SearchBar';
+import { ThemeSwitch } from './ThemeSwitch';
+import { ToolMenu } from './ToolMenu';
 
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();

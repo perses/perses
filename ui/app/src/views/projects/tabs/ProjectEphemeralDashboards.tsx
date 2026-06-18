@@ -13,8 +13,9 @@
 
 import { Card, CardProps } from '@mui/material';
 import { ReactElement } from 'react';
-import { useEphemeralDashboardList } from '../../../model/ephemeral-dashboard-client';
+
 import { EphemeralDashboardList } from '../../../components/EphemeralDashboardList/EphemeralDashboardList';
+import { useEphemeralDashboardList } from '../../../model/ephemeral-dashboard-client';
 
 interface ProjectEphemeralDashboardsProps extends CardProps {
   projectName: string;

@@ -9,8 +9,8 @@
     "build": "rspack build",
     "type-check": "tsc --noEmit",
     "test": "cross-env TZ=UTC jest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
     "analyze": "rspack build --analyze"
   },
   "dependencies": {
@@ -20,8 +20,8 @@
     "@mui/material": "^6.1.10",
     "@mui/x-data-grid": "^7.25.0",
     "@nexucis/kvsearch": "^0.9.1",
-    "@perses-dev/components": "^0.54.0-beta.6",
     "@perses-dev/client": "^0.54.0-beta.6",
+    "@perses-dev/components": "^0.54.0-beta.6",
     "@perses-dev/dashboards": "^0.54.0-beta.6",
     "@perses-dev/explore": "^0.54.0-beta.6",
     "@perses-dev/plugin-system": "^0.54.0-beta.6",

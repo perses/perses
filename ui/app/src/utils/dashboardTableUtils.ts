@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { intlFormatDistance } from 'date-fns';
-import { getResourceDisplayName } from '@perses-dev/components';
 import { FolderItem, FolderResource } from '@perses-dev/client';
-import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
+import { getResourceDisplayName } from '@perses-dev/components';
+import { intlFormatDistance } from 'date-fns';
+
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
+import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 
 export interface RowWithOriginal<TData> {
   original: TData;

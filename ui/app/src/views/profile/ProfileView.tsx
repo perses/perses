@@ -13,8 +13,9 @@
 
 import { Avatar, Box, Divider, Typography, useTheme } from '@mui/material';
 import { lazy, ReactElement, Suspense, useState } from 'react';
-import { useIsMobileSize } from '../../utils/browser-size';
+
 import { useAuthorizationContext } from '../../context/Authorization';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { ProfileSettings } from './ProfileSettings';
 
 export enum ProfileSections {

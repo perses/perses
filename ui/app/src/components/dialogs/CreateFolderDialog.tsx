@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
-import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
 import { FolderItem, FolderResource } from '@perses-dev/client';
-import { CreateFolderValidationType, useFolderValidationSchema } from '../../validation';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateFolderMutation } from '../../model/folder-client';
 import { generateMetadataName } from '../../utils/metadata';
+import { CreateFolderValidationType, useFolderValidationSchema } from '../../validation';
 
 export interface CreateFolderDialogProps {
   projectName: string;
