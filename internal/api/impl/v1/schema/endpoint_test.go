@@ -116,7 +116,7 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 func TestPluginDefinitionWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/AnyPlugin")
-	ctx.SetParamNames("pluginName")
+	ctx.SetParamNames(pluginNameParam)
 	ctx.SetParamValues("AnyPlugin")
 
 	err := ep.PluginDefinition(ctx)
@@ -133,7 +133,7 @@ func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
 
 	ep := newEndpointWithSchemas(schemas)
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/NonExistent")
-	ctx.SetParamNames("pluginName")
+	ctx.SetParamNames(pluginNameParam)
 	ctx.SetParamValues("NonExistent")
 
 	err := ep.PluginDefinition(ctx)
@@ -151,7 +151,7 @@ func TestPluginDefinitionPluginExists(t *testing.T) {
 
 	ep := newEndpointWithSchemas(schemas)
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/firstchart")
-	ctx.SetParamNames("pluginName")
+	ctx.SetParamNames(pluginNameParam)
 	ctx.SetParamValues("firstchart")
 
 	err := ep.PluginDefinition(ctx)

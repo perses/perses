@@ -32,6 +32,8 @@ import (
 	specPlugin "github.com/perses/spec/go/plugin"
 )
 
+const pluginNameParam = "pluginName"
+
 type endpoint struct {
 	pluginSvc plugin.Plugin
 	readonly  bool
@@ -48,7 +50,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathSchemas))
 	group.GET("/dashboards", e.DashboardSchema, true)
 	group.GET("/plugins", e.PluginList, true)
-	group.GET("/plugins/:pluginName", e.PluginDefinition, true)
+	group.GET(fmt.Sprintf("/plugins/:%s", pluginNameParam), e.PluginDefinition, true)
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
@@ -85,7 +87,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 }
 
 func (e *endpoint) PluginDefinition(ctx echo.Context) error {
-	pluginName := ctx.Param("pluginName")
+	pluginName := ctx.Param(pluginNameParam)
 	var plugins []schema.LoadSchema
 
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
