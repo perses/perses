@@ -32,7 +32,10 @@ import (
 	specPlugin "github.com/perses/spec/go/plugin"
 )
 
-const pluginNameParam = "pluginName"
+const (
+	pluginNameParam = "pluginName"
+	contentType     = "text/x-cue"
+)
 
 type endpoint struct {
 	pluginSvc plugin.Plugin
@@ -78,12 +81,12 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	data, err := utils.CueValueToHTTPData(result)
+	data, err := utils.MarshalCUE(result)
 	if err != nil {
 		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
 		return apiinterface.InternalError
 	}
-	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
 func (e *endpoint) PluginDefinition(ctx echo.Context) error {
@@ -92,7 +95,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, "text/x-cue", []byte("{}"))
+		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))
 	}
 	for _, ls := range schemas {
 		if strings.EqualFold(ls.Name, pluginName) {
@@ -107,20 +110,20 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		return err
 	}
 
-	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
 func (e *endpoint) PluginList(ctx echo.Context) error {
 	schemas := e.pluginSvc.Schema().GetAllSchemas()
 	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, "text/x-cue", []byte("{}"))
+		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))
 	}
 	data, err := generateCUEbytes(schemas)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Blob(http.StatusOK, "text/x-cue", data)
+	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
 func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
@@ -131,7 +134,7 @@ func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 		return nil, apiinterface.InternalError
 	}
 
-	data, exportErr := utils.CueValueToHTTPData(list)
+	data, exportErr := utils.MarshalCUE(list)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return nil, apiinterface.InternalError

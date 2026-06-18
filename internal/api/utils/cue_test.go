@@ -58,7 +58,7 @@ func TestCueValueToHTTPDataValidValue(t *testing.T) {
 	v := ctx.CompileString(`#Spec: { kind: string }`)
 	require.NoError(t, v.Err())
 
-	data, err := CueValueToHTTPData(v)
+	data, err := MarshalCUE(v)
 	require.NoError(t, err)
 	assert.NotEmpty(t, data)
 	assert.Contains(t, string(data), "kind")
@@ -71,7 +71,7 @@ func TestCueValueToHTTPDataRemoveExplicitErrorComment(t *testing.T) {
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`x: _|_`)
 
-	data, err := CueValueToHTTPData(v)
+	data, err := MarshalCUE(v)
 	require.NoError(t, err)
 	assert.False(t,
 		strings.Contains(string(data), "// explicit error (_|_ literal) in source"),

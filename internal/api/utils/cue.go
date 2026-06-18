@@ -70,7 +70,7 @@ func CUEValueToASTExpr(v cue.Value) (ast.Expr, error) {
 	return expr, nil
 }
 
-func CueValueToHTTPData(v cue.Value) ([]byte, error) {
+func MarshalCUE(v cue.Value) ([]byte, error) {
 	// generate expr
 	node := v.Syntax(CueSyntaxOptions...)
 
