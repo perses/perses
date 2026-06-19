@@ -29,7 +29,10 @@ import (
 // watchDebounce is the quiet period after the last filesystem event before a reload is
 // triggered. This batches rapid successive changes (e.g. a directory of files being
 // written at once) into a single applyEntity call.
-const watchDebounce = 200 * time.Millisecond
+// watchDebounce is the quiet period after the last filesystem event before a reload is
+// triggered. 500ms gives enough time for tools that write multiple files sequentially
+// (e.g. a DAC build outputting several YAML files) to finish before we reload once.
+const watchDebounce = 500 * time.Millisecond
 
 func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool) (async.SimpleTask, async.SimpleTask) {
 	svc := &provisioningService{
@@ -106,6 +109,13 @@ func (p *provisioningWatcher) Execute(ctx context.Context, _ context.CancelFunc)
 				return nil
 			}
 			logrus.Debugf("provisioning watcher: %s %q", event.Op, event.Name)
+
+			// CHMOD only changes file permissions, not content – ignore it to
+			// avoid spurious reloads triggered by the OS or antivirus tools
+			// that chmod files after a write.
+			if event.Op == fsnotify.Chmod {
+				continue
+			}
 
 			if event.Has(fsnotify.Create) {
 				if info, statErr := os.Stat(event.Name); statErr == nil && info.IsDir() {

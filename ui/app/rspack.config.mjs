@@ -132,6 +132,13 @@ export default defineConfig({
         allowedHosts: 'all',
         proxy: [
           {
+            // SSE watch endpoints: disable compression so the streamed response
+            // is never buffered by the dev-server proxy.
+            context: ['/api/v1/watch'],
+            target: 'http://localhost:8080',
+            compress: false,
+          },
+          {
             context: ['/api', '/proxy', '/plugins'],
             target: 'http://localhost:8080',
           },

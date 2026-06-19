@@ -111,7 +111,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                 dashboard={dashboardResource.metadata.name}
               >
                 <ViewDashboard
-                  key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
+                  key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}@${dashboardResource.metadata.version ?? 0}`}
                   dashboardResource={dashboardResource}
                   datasourceApi={datasourceApi}
                   externalVariableDefinitions={externalVariableDefinitions}

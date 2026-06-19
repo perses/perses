@@ -22,6 +22,7 @@ import { ShortcutHelpModal } from './components/ShortcutHelpModal';
 import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
 import { PersesLoader } from './components/PersesLoader';
 import { useIsKeyboardShortcutsEnabled } from './context/Config';
+import { useDashboardWatcher } from './model/dashboard-client';
 import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {
@@ -31,6 +32,10 @@ function isDashboardViewRoute(pathname: string): boolean {
 function App(): ReactElement {
   const location = useLocation();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+
+  // Subscribe to backend SSE events and invalidate dashboard queries on change.
+  // No-ops when frontend.event_watching.auto_refresh_dashboards is false (default).
+  useDashboardWatcher();
 
   return (
     <Box

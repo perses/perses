@@ -14,6 +14,8 @@
 package provisioning
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -27,6 +29,48 @@ import (
 )
 
 type insertFunc func() (modelAPI.Entity, error)
+type getEntityFunc func() (modelAPI.Entity, error)
+
+// specChanged returns true if the incoming entity's content differs from the existing one.
+// It compares JSON representations after stripping transient metadata fields (version,
+// updatedAt, createdAt) so that a no-op provisioning reload does NOT trigger an update.
+func specChanged(incoming, existing modelAPI.Entity) bool {
+	inJSON, err := json.Marshal(incoming)
+	if err != nil {
+		return true
+	}
+	exJSON, err := json.Marshal(existing)
+	if err != nil {
+		return true
+	}
+
+	var inMap, exMap map[string]interface{}
+	if err := json.Unmarshal(inJSON, &inMap); err != nil {
+		return true
+	}
+	if err := json.Unmarshal(exJSON, &exMap); err != nil {
+		return true
+	}
+
+	stripTransientMetadata(inMap)
+	stripTransientMetadata(exMap)
+
+	inNorm, _ := json.Marshal(inMap)
+	exNorm, _ := json.Marshal(exMap)
+	return !bytes.Equal(inNorm, exNorm)
+}
+
+// stripTransientMetadata removes metadata fields that are managed by the server and
+// should not be considered when comparing whether an entity's content has changed.
+func stripTransientMetadata(m map[string]interface{}) {
+	meta, ok := m["metadata"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	delete(meta, "version")
+	delete(meta, "updatedAt")
+	delete(meta, "createdAt")
+}
 
 // provisioningServiceInterface is the minimal interface used by both the task and the watcher.
 type provisioningServiceInterface interface {
@@ -61,7 +105,7 @@ func (p *provisioningService) applyEntity(entities []modelAPI.Entity) {
 			Name:    name,
 			Project: project,
 		}
-		createFun, updateFunc, svcErr := p.getService(entity, param)
+		createFun, updateFunc, getFunc, svcErr := p.getService(entity, param)
 		if svcErr != nil {
 			logrus.WithError(svcErr).Warningf("unable to retrieve the service associated to %q", kind)
 			continue
@@ -79,13 +123,21 @@ func (p *provisioningService) applyEntity(entities []modelAPI.Entity) {
 			continue
 		}
 
+		// The entity already exists. Only update it if the content has actually changed
+		// to avoid triggering unnecessary SSE events and frontend refreshes.
+		existing, getErr := getFunc()
+		if getErr == nil && !specChanged(entity, existing) {
+			logrus.Debugf("provisioning: %s %q is unchanged, skipping update", kind, name)
+			continue
+		}
+
 		if _, updateError := updateFunc(); updateError != nil {
 			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}
 }
 
-func (p *provisioningService) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, err error) {
+func (p *provisioningService) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, getFunc getEntityFunc, err error) {
 	switch entity := object.(type) {
 	case *modelV1.Dashboard:
 		svc := p.serviceManager.GetDashboard()
@@ -94,6 +146,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Datasource:
 		svc := p.serviceManager.GetDatasource()
@@ -102,6 +157,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Folder:
 		svc := p.serviceManager.GetFolder()
@@ -110,6 +168,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.GlobalDatasource:
 		svc := p.serviceManager.GetGlobalDatasource()
@@ -118,6 +179,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.GlobalRole:
 		svc := p.serviceManager.GetGlobalRole()
@@ -126,6 +190,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.GlobalRoleBinding:
 		svc := p.serviceManager.GetGlobalRoleBinding()
@@ -134,6 +201,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.GlobalSecret:
 		svc := p.serviceManager.GetGlobalSecret()
@@ -142,6 +212,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.GlobalVariable:
 		svc := p.serviceManager.GetGlobalVariable()
@@ -150,6 +223,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Project:
 		svc := p.serviceManager.GetProject()
@@ -158,6 +234,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Role:
 		svc := p.serviceManager.GetRole()
@@ -166,6 +245,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.RoleBinding:
 		svc := p.serviceManager.GetRoleBinding()
@@ -174,6 +256,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Secret:
 		svc := p.serviceManager.GetSecret()
@@ -182,6 +267,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.User:
 		svc := p.serviceManager.GetUser()
@@ -190,6 +278,9 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	case *modelV1.Variable:
 		svc := p.serviceManager.GetVariable()
@@ -198,9 +289,12 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			},
 			func() (modelAPI.Entity, error) {
 				return svc.Update(nil, entity, parameters)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Get(parameters)
 			}, nil
 	// We don't support the provisioning of the following resources: EphemeralDashboard
 	default:
-		return nil, nil, fmt.Errorf("resource %q not supported by the provisioning service", entity.GetKind())
+		return nil, nil, nil, fmt.Errorf("resource %q not supported by the provisioning service", entity.GetKind())
 	}
 }

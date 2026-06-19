@@ -27,6 +27,11 @@ database:
 provisioning:
   folders:
     - "dev/data"
+  enableWatch: true
+
+watch:
+  kinds:
+    - Dashboard
 
 ephemeral_dashboard:
   enable: true
@@ -36,6 +41,8 @@ frontend:
   enable_keyboard_shortcuts: true
   explorer:
     enable: true
+  event_watching:
+    auto_refresh_dashboards: true
 
   important_dashboards:
     - project: "perses"

@@ -1,0 +1,80 @@
+kind: Dashboard
+metadata:
+    name: withoutVariable3
+    createdAt: 0001-01-01T00:00:00Z
+    updatedAt: 0001-01-01T00:00:00Z
+    version: 0
+    project: MyProject
+spec:
+    display:
+        name: Without Variable 3
+    datasources:
+        promDemo:
+            default: true
+            plugin:
+                kind: PrometheusDatasource
+                spec:
+                    directUrl: http://localhost:9090
+    panels:
+        "0_0":
+            kind: Panel
+            spec:
+                display:
+                    name: CPU Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_0_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "1_0":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_1_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+    layouts:
+        - kind: Grid
+          spec:
+            display:
+                title: Overview
+            items:
+                - x: 0
+                  "y": 0
+                  width: 24
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_0'
+        - kind: Grid
+          spec:
+            display:
+                title: Memory
+            items:
+                - x: 0
+                  "y": 0
+                  width: 24
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_0'
+    duration: 1h

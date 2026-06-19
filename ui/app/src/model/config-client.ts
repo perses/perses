@@ -182,6 +182,10 @@ export interface TimeRangeConfig {
   options?: DurationString[];
 }
 
+export interface EventWatchingConfig {
+  auto_refresh_dashboards: boolean;
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
@@ -189,6 +193,7 @@ export interface FrontendConfig {
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   banner?: Banner;
+  event_watching?: EventWatchingConfig;
 }
 
 export interface EphemeralDashboardConfig {

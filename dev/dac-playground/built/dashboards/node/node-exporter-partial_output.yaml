@@ -1,0 +1,60 @@
+kind: Dashboard
+metadata:
+  name: node-exporter-partial
+  createdAt: "0001-01-01T00:00:00Z"
+  project: MyProject
+  updatedAt: "0001-01-01T00:00:00Z"
+  version: 0
+spec:
+  display:
+    name: Node Exporter / Partial
+  panels:
+    "0_0":
+      kind: Panel
+      spec:
+        display:
+          name: CPU usage
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (mode) (rate(node_cpu_seconds_total{instance=~"$instance"}[5m]))
+    "0_1":
+      kind: Panel
+      spec:
+        display:
+          name: Memory usage
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_MemTotal_bytes{instance=~"$instance"} - node_memory_MemAvailable_bytes{instance=~"$instance"}
+  layouts:
+    - kind: Grid
+      spec:
+        display:
+          title: CPU & Memory
+        items:
+          - x: 0
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: '#/spec/panels/0_0'
+          - x: 12
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: '#/spec/panels/0_1'
+  duration: 1h
