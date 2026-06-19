@@ -70,7 +70,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("encoding %s: %w", dashboardDefinitionName, encoded.Err())
 	}
 
-	expr, err := apiCue.CUEValueToASTExpr(encoded)
+	expr, err := apiCue.ValueToASTExpr(encoded)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("could not cast CUE value to AST expr: %w", err)
 	}
@@ -202,11 +202,11 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 		// plugins only present in ListVariable
 		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector, pluginSelector), variables)
 
-		textVarSpecExpr, err := apiCue.CUEValueToASTExpr(textVarSpec)
+		textVarSpecExpr, err := apiCue.ValueToASTExpr(textVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process text variable spec schema: %w", err)
 		}
-		listVarSpecExpr, err := apiCue.CUEValueToASTExpr(listVarSpec)
+		listVarSpecExpr, err := apiCue.ValueToASTExpr(listVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("could not process list variable spec schema: %w", err)
 		}

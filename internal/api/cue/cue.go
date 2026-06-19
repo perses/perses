@@ -54,7 +54,7 @@ func astNodeToAstExpr(node ast.Node) (ast.Expr, error) {
 	return tmpExpr, nil
 }
 
-func CUEValueToASTExpr(v cue.Value) (ast.Expr, error) {
+func ValueToASTExpr(v cue.Value) (ast.Expr, error) {
 	node := v.Syntax(
 		cue.InlineImports(true),
 		cue.All(),
