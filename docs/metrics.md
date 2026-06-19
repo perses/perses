@@ -78,7 +78,7 @@ rate(perses_dashboard_render_errors_total[5m])
 
 #### `perses_dashboard_render_time_seconds`
 
-**Type:** Histogram
+**Type:** Histogram (with native histogram support)
 
 **Description:** Tracks the time taken to render a dashboard in the frontend.
 
@@ -86,7 +86,9 @@ rate(perses_dashboard_render_errors_total[5m])
 - `project`: The project name containing the dashboard
 - `dashboard`: The dashboard name
 
-**Buckets:** Uses Prometheus default buckets (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10)
+**Buckets:** Prometheus default buckets (`0.005`–`10`) for the classic exposition.
+
+**Native histogram:** The metric is also exposed as a Prometheus [native histogram](https://prometheus.io/docs/specs/native_histograms/) for higher-resolution percentiles. If your Prometheus has native histograms enabled, it will ingest both formats automatically. Existing classic-histogram queries keep working unchanged.
 
 **Example:**
 ```promql
@@ -325,7 +327,6 @@ Potential future improvements to metrics and instrumentation:
 - Query performance tracking
 - API endpoint metrics
 - More granular error categorization
-- Native histogram support for better percentile calculations
 
 ## Related Documentation
 
