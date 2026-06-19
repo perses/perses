@@ -23,9 +23,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
+	apiCue "github.com/perses/perses/internal/api/cue"
 	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	apiinterface "github.com/perses/perses/internal/api/interface"
-	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
@@ -104,7 +104,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		}
 	}
 	if len(plugins) == 0 {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "plugin not found"})
+		return apiinterface.HandleNotFoundError("plugin not found")
 	}
 	data, err := generateCUEbytes(plugins)
 	if err != nil {
