@@ -33,7 +33,7 @@ require (
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/perses/common v0.31.1
-	github.com/perses/spec v0.2.0-beta.3.0.20260612133246-e30c5159985c
+	github.com/perses/spec v0.2.0-beta.6
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
 	github.com/prometheus/common v0.68.1

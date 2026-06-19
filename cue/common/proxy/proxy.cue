@@ -15,17 +15,28 @@
 // Import statements like:
 // `import "github.com/perses/perses/cue/common/proxy"`
 // should be replaced by:
-// `import "github.com/perses/spec/cue/datasource/proxy"`
+// `import "github.com/perses/spec/cue/datasource/proxy/http"`
+// or
+// // `import "github.com/perses/spec/cue/datasource/proxy/sql"`
 
 package proxy
 
 import (
-	specProxy "github.com/perses/spec/cue/datasource/proxy"
+	"github.com/perses/spec/cue/datasource"
+	httpProxy "github.com/perses/spec/cue/datasource/proxy/http"
+	sqlProxy "github.com/perses/spec/cue/datasource/proxy/sql"
 )
 
-// This file is here to ensure retrocompatibility for eventual CUE schemas
-// outside of the Perses organization that relied on this package before the
-// migration of common CUE schemas to the shared repository - that happened
-// with https://github.com/perses/shared/pull/13.
+#HTTPAllowedEndpoint: httpProxy.#AllowedEndpoint
 
-specProxy
+#HTTPProxy: httpProxy.#Proxy
+
+#baseHTTPDatasourceSpec: datasource.#HTTPDatasourceSpec
+
+#MySQL: sqlProxy.#MySQLConfig
+
+#Postgres: sqlProxy.#PostgresConfig
+
+#SQLProxy: sqlProxy.#Proxy
+
+#baseSQLDatasourceSpec: datasource.#SQLDatasourceSpec
