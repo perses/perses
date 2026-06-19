@@ -75,6 +75,13 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), "")
+		// A project-scoped resource cannot be provisioned if its parent project doesn't exist:
+		// the resource would be silently persisted but never visible until the project is created.
+		// So we refuse to provision it and report the missing project.
+		if len(project) > 0 && !p.projectExists(project) {
+			logrus.Errorf("unable to provision the %q %q: project %q doesn't exist", kind, name, project)
+			continue
+		}
 		param := apiInterface.Parameters{
 			Name:    name,
 			Project: project,
@@ -101,6 +108,16 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}
+}
+
+// projectExists returns true if a project with the given name exists in the database.
+// In case the lookup fails for any reason other than a missing project, we assume the
+// project exists so that a transient database error doesn't silently drop the resource.
+func (p *provisioning) projectExists(name string) bool {
+	if _, err := p.serviceManager.GetProject().Get(apiInterface.Parameters{Name: name}); err != nil {
+		return !databaseModel.IsKeyNotFound(err)
+	}
+	return true
 }
 
 func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, err error) {
