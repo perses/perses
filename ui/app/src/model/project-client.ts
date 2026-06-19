@@ -20,8 +20,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { fetchJson, ProjectResource, StatusError } from '@perses-dev/client';
-import { DashboardResource } from '@perses-dev/dashboards';
+import { DashboardResource, fetchJson, ProjectResource, StatusError } from '@perses-dev/client';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { resource as dashboardResource, useDashboardList } from './dashboard-client';

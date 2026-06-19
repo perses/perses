@@ -14,8 +14,7 @@
 import { Tooltip } from '@mui/material';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import { ReactElement } from 'react';
-import { Action } from '@perses-dev/components';
-import { Scope } from '@perses-dev/client';
+import { Action, Scope } from '@perses-dev/client';
 import { CRUDAction } from './CRUDAction';
 
 interface CRUDGridActionsCellItemProps {

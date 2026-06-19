@@ -13,14 +13,10 @@
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import {
-  DashboardResource as CoreDashboardResource,
-  DashboardResource,
-  DEFAULT_DASHBOARD_DURATION,
-  DEFAULT_REFRESH_INTERVAL,
-} from '@perses-dev/dashboards';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/dashboards';
 import { ReactElement, useCallback, useState } from 'react';
 import { DashboardSpec } from '@perses-dev/spec';
+import { DashboardResource } from '@perses-dev/client';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -48,7 +44,7 @@ function CreateDashboardView(): ReactElement | null {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const createDashboardMutation = useCreateDashboardMutation();
 
-  const data: CoreDashboardResource = {
+  const data: DashboardResource = {
     kind: 'Dashboard',
     metadata: {
       name: generateMetadataName(dashboardName),
@@ -77,8 +73,8 @@ function CreateDashboardView(): ReactElement | null {
       }
       setIsLeavingConfirmDialogEnabled(false); // Disable the leaving dialog before navigating
 
-      return createDashboardMutation.mutateAsync(data as CoreDashboardResource, {
-        onSuccess: (createdDashboard: CoreDashboardResource) => {
+      return createDashboardMutation.mutateAsync(data, {
+        onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(
             `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
           );
