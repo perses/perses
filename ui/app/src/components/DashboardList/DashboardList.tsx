@@ -15,8 +15,7 @@ import { Stack } from '@mui/material';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
-import { DashboardResource } from '@perses-dev/dashboards';
+import { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
 import { DashboardSelector } from '@perses-dev/spec';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import {
