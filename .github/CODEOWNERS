@@ -1,6 +1,6 @@
 /cue @AntoineThebaud
 /docs @AntoineThebaud
-/go-sdk @Gladorme
+/go-sdk @Gladorme @celian-garcia
 /internal/api @Nexucis @celian-garcia
 /internal/api/plugin/migrate @Nexucis @AntoineThebaud
 /internal/api/plugin/schema @Nexucis @AntoineThebaud
