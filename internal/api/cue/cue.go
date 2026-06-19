@@ -38,6 +38,8 @@ func astNodeToAstExpr(node ast.Node) (ast.Expr, error) {
 		result = n
 	// handling *ast.File
 	case *ast.File:
+		// elts is the list of ast.File declarations needed to construct the new ast.Expr
+		// name mirrors the ast.StructLit field it is used by
 		var elts []ast.Decl
 		for _, declr := range n.Decls {
 			switch declr.(type) {
