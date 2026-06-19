@@ -41,6 +41,15 @@ type Banner struct {
 	Message  string `json:"message" yaml:"message"`
 }
 
+type EventWatching struct {
+	// AutoRefreshDashboards enables the auto refresh of dashboards.
+	// When a dashboard is updated, the dashboard will be automatically refreshed in the browser.
+	// It is disabled by default and advised to not use it in production.
+	// Very useful, though, in Dasboard as Code when you are developping a new dashboard.
+	//TODO: implement it
+	AutoRefreshDashboards bool `json:"auto_refresh_dashboards" yaml:"auto_refresh_dashboards"`
+}
+
 func (b *Banner) Verify() error {
 	allowedSeverities := []string{"error", "warning", "info"}
 	if len(b.Severity) == 0 {
@@ -84,4 +93,6 @@ type Frontend struct {
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
+	// EventWatching is activating the event watching feature.
+	EventWatching EventWatching `json:"event_watching" yaml:"event_watching"`
 }
