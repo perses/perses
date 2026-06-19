@@ -32,10 +32,10 @@ var CueSyntaxOptions = []cue.Option{
 // Helper function to cast ast.Node into ast.Expr
 // Needed because ast.Node does not have to strictly implement ast.Expr interface
 func astNodeToAstExpr(node ast.Node) (ast.Expr, error) {
-	var tmpExpr ast.Expr
+	var result ast.Expr
 	switch n := node.(type) {
 	case ast.Expr:
-		tmpExpr = n
+		result = n
 	// handling *ast.File
 	case *ast.File:
 		var elts []ast.Decl
@@ -47,11 +47,11 @@ func astNodeToAstExpr(node ast.Node) (ast.Expr, error) {
 				elts = append(elts, declr)
 			}
 		}
-		tmpExpr = &ast.StructLit{Elts: elts}
+		result = &ast.StructLit{Elts: elts}
 	default:
-		return tmpExpr, fmt.Errorf("unexpected ast.Node type %T", node)
+		return result, fmt.Errorf("unexpected ast.Node type %T", node)
 	}
-	return tmpExpr, nil
+	return result, nil
 }
 
 func ValueToASTExpr(v cue.Value) (ast.Expr, error) {
