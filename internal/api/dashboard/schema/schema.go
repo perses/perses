@@ -63,60 +63,6 @@ var cueValidationOptions = []cue.Option{
 	cue.Hidden(false),
 }
 
-// Helper function designed specifically to remove the "": _Metadata_0 & _ProjectMetadataWrapper_0 field from _ProjectMetadata_0
-// this is a workaround to mitigate issues with cue vet
-func removeEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) {
-	// get the ast.Node
-	node := val.Syntax()
-
-	// walk the dashboard ast.Node and prepare a new list of fields newDecls
-	ast.Walk(node, func(n ast.Node) bool {
-		if st, ok := n.(*ast.StructLit); ok {
-			var newDecls []ast.Decl
-			for _, decl := range st.Elts {
-				if f, ok := decl.(*ast.Field); ok {
-					// identify the empty string label and skip it
-					if lit, ok := f.Label.(*ast.BasicLit); ok && lit.Value == `""` {
-						continue
-					}
-				}
-				newDecls = append(newDecls, decl)
-			}
-			st.Elts = newDecls
-		}
-		return true
-	}, nil)
-
-	// build the new value
-	expr, err := apiCue.ASTNodeToASTExpr(node)
-	if err != nil {
-		return cue.Value{}, fmt.Errorf("unexpected AST node type %T: %w", node, err)
-	}
-	return ctx.BuildExpr(expr), nil
-}
-
-func renameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string) cue.Value {
-	node := value.Syntax(apiCue.CueSyntaxOptions...)
-
-	ast.Walk(node, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.Ident:
-			if x.Name == oldName {
-				x.Name = newName
-			}
-		}
-		return true
-	}, nil)
-
-	expr, err := apiCue.ASTNodeToASTExpr(node)
-	if err != nil {
-		logrus.WithError(err).Error("unable to rename CUE definition")
-		return value
-	}
-	return ctx.BuildExpr(expr)
-
-}
-
 func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	// load dashboard
 	encoded := ctx.EncodeType(v1.Dashboard{})
@@ -140,7 +86,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
 	}
 
-	final, err = removeEmptyStringField(ctx, final)
+	final, err = apiCue.RemoveEmptyStringField(ctx, final)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("failed to remove empty fields from dashboard schema: %w", err)
 	}
@@ -214,7 +160,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 
 		// rename _Display_0 to _Display_TextSpec_0 to avoid name collision
 		// resulting in the `incomplete value` during cue vet
-		textVarSpec = renameDefinition(ctx, textVarSpec, "_Display_0", "_Display_TextSpec_0")
+		textVarSpec = apiCue.RenameDefinition(ctx, textVarSpec, "_Display_0", "_Display_TextSpec_0")
 
 		listVarSpec := ctx.EncodeType(dashboard.ListVariableSpec{})
 		if listVarSpec.Err() != nil {
@@ -223,7 +169,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 
 		// rename _Display_0 to _Display_ListSpec_0 to avoid name collision
 		// resulting in the `incomplete value` during cue vet
-		listVarSpec = renameDefinition(ctx, listVarSpec, "_Display_0", "_Display_ListSpec_0")
+		listVarSpec = apiCue.RenameDefinition(ctx, listVarSpec, "_Display_0", "_Display_ListSpec_0")
 
 		// grab _ListSpec_0 and inject it into _ListVariableSpec_0
 		// this is done to avoid the incomplete value error during cue vet
@@ -234,7 +180,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 		}
 
 		listVarSpec = listVarSpec.FillPath(cue.MakePath(listVariableSpecSelector), listSpec)
-		listVarSpec, err = removeEmptyStringField(ctx, listVarSpec)
+		listVarSpec, err = apiCue.RemoveEmptyStringField(ctx, listVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("failed to remove empty fields from ListVariable schema: %w", err)
 		}
@@ -248,7 +194,7 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 		}
 
 		textVarSpec = textVarSpec.FillPath(cue.MakePath(textVariableSpecSelector), textSpec)
-		textVarSpec, err = removeEmptyStringField(ctx, textVarSpec)
+		textVarSpec, err = apiCue.RemoveEmptyStringField(ctx, textVarSpec)
 		if err != nil {
 			return cue.Value{}, fmt.Errorf("failed to remove empty fields from TextVariable schema: %w", err)
 		}

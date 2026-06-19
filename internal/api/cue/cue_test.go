@@ -26,7 +26,7 @@ import (
 func TestASTNodeToASTExprASTExpr(t *testing.T) {
 	// A plain ast.Expr (e.g. *ast.StructLit) must be returned as-is.
 	s := &ast.StructLit{}
-	expr, err := ASTNodeToASTExpr(s)
+	expr, err := astNodeToAstExpr(s)
 	require.NoError(t, err)
 	assert.Equal(t, s, expr)
 }
@@ -37,7 +37,7 @@ func TestASTNodeToASTExprASTFile(t *testing.T) {
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`a: 1`)
 	node := v.Syntax(CueSyntaxOptions...)
-	expr, err := ASTNodeToASTExpr(node)
+	expr, err := astNodeToAstExpr(node)
 	require.NoError(t, err)
 	assert.NotNil(t, expr)
 	// The resulting expression must be a StructLit (no package wrapper).
@@ -48,7 +48,7 @@ func TestASTNodeToASTExprASTFile(t *testing.T) {
 func TestASTNodeToASTExprUnknownType(t *testing.T) {
 	// An unrecognised ast.Node type must return an error containing the type name.
 	type unknownNode struct{ ast.Node }
-	_, err := ASTNodeToASTExpr(unknownNode{})
+	_, err := astNodeToAstExpr(unknownNode{})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unexpected ast.Node type")
 }
@@ -77,4 +77,34 @@ func TestCueValueToHTTPDataRemoveExplicitErrorComment(t *testing.T) {
 		strings.Contains(string(data), "// explicit error (_|_ literal) in source"),
 		"output must not contain the explicit error comment",
 	)
+}
+
+func TestRemoveEmptyStringField(t *testing.T) {
+	ctx := cuecontext.New()
+	// Build a value that has an empty-string field alongside a real field.
+	v := ctx.CompileString(`{"": "should be removed", name: "keep"}`)
+	require.NoError(t, v.Err())
+
+	result, err := RemoveEmptyStringField(ctx, v)
+	require.NoError(t, err)
+
+	data, err := MarshalCUE(result)
+	require.NoError(t, err)
+	body := string(data)
+	assert.NotContains(t, body, `""`)
+	assert.Contains(t, body, "name")
+}
+
+func TestRenameDefinition(t *testing.T) {
+	ctx := cuecontext.New()
+	v := ctx.CompileString(`_OldName_0: {x: 1}`)
+	require.NoError(t, v.Err())
+
+	result := RenameDefinition(ctx, v, "_OldName_0", "_NewName_0")
+
+	data, err := MarshalCUE(result)
+	require.NoError(t, err)
+	body := string(data)
+	assert.NotContains(t, body, "_OldName_0")
+	assert.Contains(t, body, "_NewName_0")
 }
