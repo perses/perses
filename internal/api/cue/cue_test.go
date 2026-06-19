@@ -36,7 +36,7 @@ func TestASTNodeToASTExprASTFile(t *testing.T) {
 	// dropping any package/import declarations.
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`a: 1`)
-	node := v.Syntax(CueSyntaxOptions...)
+	node := v.Syntax(cueSyntaxOptions...)
 	expr, err := astNodeToAstExpr(node)
 	require.NoError(t, err)
 	assert.NotNil(t, expr)

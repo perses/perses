@@ -23,7 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var CueSyntaxOptions = []cue.Option{
+var cueSyntaxOptions = []cue.Option{
 	cue.InlineImports(true),
 	cue.All(),
 	cue.Hidden(false),
@@ -70,7 +70,7 @@ func ValueToASTExpr(v cue.Value) (ast.Expr, error) {
 
 func MarshalCUE(v cue.Value) ([]byte, error) {
 	// generate expr
-	node := v.Syntax(CueSyntaxOptions...)
+	node := v.Syntax(cueSyntaxOptions...)
 
 	// postprocess node to remove comments that break the file
 	postprocessSchemaASTNode(node)
@@ -116,7 +116,7 @@ func RemoveEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 
 // RenameDefinition renames all AST identifiers matching oldName to newName within value.
 func RenameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string) cue.Value {
-	node := value.Syntax(CueSyntaxOptions...)
+	node := value.Syntax(cueSyntaxOptions...)
 
 	ast.Walk(node, func(n ast.Node) bool {
 		if x, ok := n.(*ast.Ident); ok && x.Name == oldName {
