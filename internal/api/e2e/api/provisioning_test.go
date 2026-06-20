@@ -61,6 +61,35 @@ func TestProvisioningSkipsResourcesInUnknownProject(t *testing.T) {
 	e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), existingProject, roleInExistingProject)
 }
 
+func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
+	conf := e2eframework.DefaultConfig()
+	_, _, manager := e2eframework.CreateServer(t, conf)
+	defer manager.Persistence().GetPersesDAO().Close()
+
+	// Both the project and a role belonging to it are provisioned in the same
+	// batch, with no project pre-created. The role file is named so that
+	// filepath.Walk reads it *before* the project file; the provisioning service
+	// must still apply the project first so the role is not wrongly refused.
+	project := e2eframework.NewProject("batchproject")
+	roleInProject := e2eframework.NewRole("batchproject", "batchrole")
+
+	provisioningDir := t.TempDir()
+	writeEntityToFile(t, filepath.Join(provisioningDir, "a_role.json"), roleInProject)
+	writeEntityToFile(t, filepath.Join(provisioningDir, "z_project.json"), project)
+
+	if err := provisioning.New(manager.Service(), []string{provisioningDir}, true).Execute(context.Background(), func() {}); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := manager.Persistence().GetProject().Get("batchproject")
+	assert.NoError(t, err, "project declared in the same batch must be provisioned")
+
+	_, err = manager.Persistence().GetRole().Get("batchproject", "batchrole")
+	assert.NoError(t, err, "role must be provisioned once its project is created in the same batch")
+
+	e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), project, roleInProject)
+}
+
 func writeEntityToFile(t *testing.T, path string, entity modelAPI.Entity) {
 	t.Helper()
 	if err := os.WriteFile(path, testUtils.JSONMarshalStrict(entity), 0600); err != nil {

@@ -16,6 +16,7 @@ package provisioning
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/perses/common/async"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -70,6 +71,16 @@ func (p *provisioning) String() string {
 }
 
 func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
+	// Provisioning files have no guaranteed order, yet a project-scoped resource
+	// can only be created once its parent project exists. So we apply every
+	// Project first, ensuring projects declared in the same provisioning batch
+	// are created before the resources that belong to them. This keeps the
+	// "refuse resources in a non-existing project" guard from rejecting valid
+	// resources whose project simply happens to be listed later.
+	sort.SliceStable(entities, func(i, j int) bool {
+		return modelV1.Kind(entities[i].GetKind()) == modelV1.KindProject &&
+			modelV1.Kind(entities[j].GetKind()) != modelV1.KindProject
+	})
 	for _, entity := range entities {
 		entity.GetMetadata().Flatten(p.caseSensitive)
 		kind := modelV1.Kind(entity.GetKind())
