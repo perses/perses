@@ -53,7 +53,7 @@ func TestMigrateEndpoint(t *testing.T) {
 			var persesDashboard modelV1.Dashboard
 			testUtils.JSONUnmarshalFromFile(test.resultDashboardPath, &persesDashboard)
 
-			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 				entity := modelAPI.Migrate{
 					GrafanaDashboard: grafanaDashboard,
 				}

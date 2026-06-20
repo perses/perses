@@ -35,7 +35,7 @@ func TestMainScenarioDatasource(t *testing.T) {
 }
 
 func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewDatasource(t, "", "myDTS")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDatasource)).
 			WithJSON(entity).
@@ -46,7 +46,7 @@ func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
 }
 
 func TestCreateDatasourceWithNonExistingProject(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewDatasource(t, "awesomeProjectThatDoesntExist", "myDTS")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDatasource)).
 			WithJSON(entity).
