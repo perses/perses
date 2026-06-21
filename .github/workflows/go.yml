@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: check license headers
         run: make checklicense
   docs-fmt:
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -91,7 +91,7 @@ jobs:
           POSTGRES_PASSWORD: password
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -111,7 +111,7 @@ jobs:
     needs: "download-plugin"
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -163,7 +163,7 @@ jobs:
           POSTGRES_PASSWORD: password
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -203,7 +203,7 @@ jobs:
     needs: "download-plugin"
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
@@ -221,7 +221,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
