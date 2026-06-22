@@ -38,10 +38,10 @@ func TestMainScenarioEphemeralDashboard(t *testing.T) {
 }
 
 func TestCreateEphemeralDashboardWithWrongName(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewEphemeralDashboard(t, "perses", "Incorrect Name With Space")
 		project := e2eframework.NewProject("perses")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
 
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, "perses", utils.PathEphemeralDashboard)).
 			WithJSON(entity).
@@ -52,10 +52,10 @@ func TestCreateEphemeralDashboardWithWrongName(t *testing.T) {
 }
 
 func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewEphemeralDashboard(t, "perses", "test")
 		project := e2eframework.NewProject("perses")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
 
 		ephemeralDashboard := extractEphemeralDashboardFromHTTPBody(expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, entity.Metadata.Project, utils.PathEphemeralDashboard)).
 			WithJSON(entity).
@@ -85,11 +85,11 @@ func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
 }
 
 func TestListEphemeralDashboardInEmptyProject(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		demoEphemeralDashboard := e2eframework.NewEphemeralDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
 		demoProject := e2eframework.NewProject("Demo")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoProject, demoEphemeralDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), persesProject, demoProject, demoEphemeralDashboard)
 
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, demoProject.GetMetadata().GetName(), utils.PathEphemeralDashboard)).
 			Expect().
