@@ -389,6 +389,11 @@ func (s *completeSchema) GetInstance(kind plugin.Kind, name string) (*build.Inst
 			return s.devSch.getQuerySchema(name, nil)
 		}
 		return s.sch.getQuerySchema(name, nil)
+	case plugin.KindAnnotation:
+		if _, ok := s.devSch.annotations.GetWithPluginMetadata(name, nil); ok {
+			return s.devSch.getAnnotationSchema(name, nil)
+		}
+		return s.sch.getAnnotationSchema(name, nil)
 	}
 
 	return nil, fmt.Errorf("schema not found for plugin %s of kind %s", name, kind)
@@ -551,10 +556,21 @@ func (s *sch) getQuerySchema(name string, metadata *plugin.Metadata) (*build.Ins
 	return instance, nil
 }
 
+func (s *sch) getAnnotationSchema(name string, metadata *plugin.Metadata) (*build.Instance, error) {
+	if len(s.annotations) == 0 {
+		return nil, fmt.Errorf("annotation schemas are not loaded")
+	}
+	instance, ok := s.annotations.GetWithPluginMetadata(name, metadata)
+	if !ok {
+		return nil, fmt.Errorf("annotation schema not found for plugin %s", name)
+	}
+	return instance, nil
+}
+
 func (sch sch) getAllSchemas() []LoadSchema {
 	var schemas []LoadSchema
 
-	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery} {
+	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation} {
 		schemaGroup := sch.getSchemas(kind)
 		schemas = append(schemas, schemaGroup...)
 	}
@@ -580,6 +596,10 @@ func (s *sch) getSchemas(kind plugin.Kind) []LoadSchema {
 		}
 	case plugin.KindQuery:
 		for node, versions := range s.queries {
+			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
+		}
+	case plugin.KindAnnotation:
+		for node, versions := range s.annotations {
 			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
 		}
 	}
