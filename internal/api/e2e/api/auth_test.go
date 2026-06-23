@@ -36,7 +36,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usrEntity := e2eframework.NewUser("foo", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
@@ -60,7 +60,7 @@ func TestAuth(t *testing.T) {
 }
 
 func TestAuth_EmptyPassword(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usrEntity := e2eframework.NewUser("foo", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
@@ -90,7 +90,7 @@ func TestAuth_OAuthProvider_AuthEndpoint(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathLogin)).
 			Expect().
 			Status(http.StatusOK).
@@ -109,7 +109,7 @@ func TestAuth_OIDCProvider_AuthEndpoint(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOIDC, providerConfig.SlugID, utils.PathLogin)).
 			Expect().
 			Status(http.StatusOK).
@@ -129,7 +129,7 @@ func TestAuth_OAuthProvider_CallbackEndpoint(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		// Callback expect some inputs. If they're not given, the server return an error.
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathCallback)).
 			Expect().
@@ -159,7 +159,7 @@ func TestAuth_OIDCProvider_CallbackEndpoint(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		// Callback expect some inputs. If they're not given, the server return an error.
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOIDC, providerConfig.SlugID, utils.PathCallback)).
 			Expect().
@@ -189,7 +189,7 @@ func TestAuth_OAuthProvider_DeviceCode(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathDeviceCode)).
 			Expect().
 			Status(http.StatusOK).
@@ -215,7 +215,7 @@ func TestAuth_OIDCProvider_DeviceCode(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOIDC, providerConfig.SlugID, utils.PathDeviceCode)).
 			Expect().
 			Status(http.StatusOK).
@@ -240,7 +240,7 @@ func TestAuth_OAuthProvider_Token_FromDeviceCode(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("john.doe", ""),
 		}
@@ -268,7 +268,7 @@ func TestAuth_OIDCProvider_Token_FromDeviceCode(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("john.doeOIDC", ""),
 		}
@@ -296,7 +296,7 @@ func TestAuth_OAuthProvider_Token_FromClientCredentials(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("john.doe", ""),
 		}
@@ -329,7 +329,7 @@ func TestAuth_OIDCProvider_Token_FromClientCredentials(t *testing.T) {
 	conf := e2eframework.DefaultAuthConfig()
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
-	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("client-id-oidc", ""),
 		}
@@ -361,7 +361,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
 	// Server with oauth provider configured.
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("john.doe", ""),
 		}
@@ -397,7 +397,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 	})
 
 	// Server without oauth provider configured.
-	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		persesBaseURL := common.MustParseURL(server.URL)
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathToken)
@@ -431,7 +431,7 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
 	// Server with OIDC provider configured.
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("MyClientID", ""),
 		}
@@ -467,7 +467,7 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 	})
 
 	// Server without OIDC provider configured.
-	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		persesBaseURL := common.MustParseURL(server.URL)
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathToken)

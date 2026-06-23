@@ -26,6 +26,14 @@ import (
 	datasourceSpec "github.com/perses/spec/go/datasource"
 )
 
+// buildCollapsedSpec is building a grid layout collapse spec respecting the same default value as Cue SDK
+func buildCollapsedSpec(isCollapsed *bool) *dashboard.GridLayoutCollapse {
+	if isCollapsed == nil {
+		return nil // to have consistent default with Cue SDK
+	}
+	return &dashboard.GridLayoutCollapse{Open: !*isCollapsed}
+}
+
 type GridItem struct {
 	X, Y, W, H int
 }
@@ -120,9 +128,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 			RepeatVariable: r.RepeatVariable,
 		}
 
-		if !r.IsCollapsed {
-			gridLayoutSpec.Display.Collapse = &dashboard.GridLayoutCollapse{Open: true}
-		}
+		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
 
 		for i := range r.Panels {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
@@ -197,9 +203,7 @@ func AddCustomPanelGroup(title string, positions []GridItem, options ...panelgro
 			RepeatVariable: r.RepeatVariable,
 		}
 
-		if !r.IsCollapsed {
-			gridLayoutSpec.Display.Collapse = &dashboard.GridLayoutCollapse{Open: true}
-		}
+		gridLayoutSpec.Display.Collapse = buildCollapsedSpec(r.IsCollapsed)
 
 		builder.Dashboard.Spec.Layouts = append(builder.Dashboard.Spec.Layouts, dashboard.Layout{
 			Kind: "Grid",

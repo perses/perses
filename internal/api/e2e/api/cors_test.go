@@ -46,7 +46,7 @@ func TestDefaultConfig(t *testing.T) {
 	config.Security.CORS = apiConfig.CORSConfig{
 		Enable: true,
 	}
-	e2eframework.WithServerConfig(t, config, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, config, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		resp := sendPreflightRequest(expect, "https://github.com")
 		resp.Status(http.StatusNoContent)
 		resp.Header("Access-Control-Allow-Origin").IsEqual("*")
@@ -69,7 +69,7 @@ func TestCustomConfig(t *testing.T) {
 		AllowMethods: []string{"OPTIONS", "GET"},
 		MaxAge:       86400,
 	}
-	e2eframework.WithServerConfig(t, config, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, config, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		// test allowed CORS request
 		resp := sendPreflightRequest(expect, "https://github.com")
 		resp.Status(http.StatusNoContent)
