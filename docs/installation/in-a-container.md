@@ -53,6 +53,7 @@ We are publishing a set of tags to match different requirements when running Per
 3. The tag `latest` is an alias for the `distroless` distribution and is erased with the latest release.
 4. The tag `latest-debug` is an alias for the `distroless-debug` distribution and is erased with the latest release.
 5. We are also providing an image for each commit created on the `main` branch.
+   We are creating a tag for each commit on the main branch and a tag for the latest commit on the main branch named `main-latest` and `main-latest-debug`.
    The tag created for each commit is following this pattern: `main-<YYYY-MM-DD>-<short commit ID>-<distribution>`
 
 Examples:
