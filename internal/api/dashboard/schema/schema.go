@@ -40,6 +40,7 @@ var (
 	dashboardDefSelector = cue.Def("#Dashboard")
 	// hidden
 	metadataHidSelector         = cue.Hid("_Metadata_0", "_")
+	annotationsSpecHidSelector  = cue.Hid("_AnnotationSpec_0", "_")
 	querySpecHidSelector        = cue.Hid("_QuerySpec_0", "_")
 	datasourceSpecHidSelector   = cue.Hid("_Spec_1", "_")
 	panelSpecHidSelector        = cue.Hid("_PanelSpec_0", "_")
@@ -149,6 +150,11 @@ func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue
 	// unify with query plugins
 	if queries, ok := plugins[specPlugin.KindQuery]; ok {
 		result = result.FillPath(cue.MakePath(dashboardDefSelector, querySpecHidSelector, pluginSelector), queries)
+	}
+
+	// unify with annotation plugins
+	if annotations, ok := plugins[specPlugin.KindAnnotation]; ok {
+		result = result.FillPath(cue.MakePath(dashboardDefSelector, annotationsSpecHidSelector, pluginSelector), annotations)
 	}
 
 	if variables, ok := plugins[specPlugin.KindVariable]; ok {

@@ -62,7 +62,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 
 	// grab plugin schemas & aggregate them into a single cue value per plugin kind
 	plugins := map[specPlugin.Kind]cue.Value{}
-	for _, kind := range []specPlugin.Kind{specPlugin.KindDatasource, specPlugin.KindPanel, specPlugin.KindVariable, specPlugin.KindQuery} {
+	for _, kind := range []specPlugin.Kind{specPlugin.KindDatasource, specPlugin.KindPanel, specPlugin.KindVariable, specPlugin.KindQuery, specPlugin.KindAnnotation} {
 		schemas := e.pluginSvc.Schema().GetSchemas(kind)
 		if len(schemas) == 0 {
 			continue
