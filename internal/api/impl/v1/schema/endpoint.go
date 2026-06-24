@@ -22,7 +22,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	apiCue "github.com/perses/perses/internal/api/cue"
-	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -60,7 +59,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 	cueCtx := cuecontext.New()
 
-	result, err := dashboardSchema.GenerateDashboardSchema(cueCtx, e.pluginSvc.Schema())
+	result, err := e.pluginSvc.Schema().GenerateDashboardSchema(cueCtx)
 	if err != nil {
 		logrus.WithError(err).Error("unable to generate dashboard schema")
 		return apiinterface.InternalError

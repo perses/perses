@@ -22,7 +22,9 @@ import (
 	"strings"
 	"sync"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
+	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
@@ -139,9 +141,9 @@ type Schema interface {
 	ValidateDashboardAnnotations([]dashboard.AnnotationSpec) error
 	ValidateVariable(plugin plugin.Plugin, varName string) error
 	GetAllSchemas() []LoadSchema
-	GetSchemas(kind plugin.Kind) []LoadSchema
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
+	GenerateDashboardSchema(ctx *cue.Context) (cue.Value, error)
 }
 
 func New() Schema {
@@ -328,29 +330,6 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	return allSchemas
 }
 
-func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
-	var allSchemas []LoadSchema
-	allSchemasMap := map[string]LoadSchema{}
-
-	schemas := s.sch.getSchemas(kind)
-	devSchemas := s.devSch.getSchemas(kind)
-
-	for _, ls := range append(devSchemas, schemas...) {
-		if _, ok := allSchemasMap[ls.Name]; !ok {
-			allSchemasMap[ls.Name] = ls
-		}
-	}
-
-	for _, ls := range allSchemasMap {
-		allSchemas = append(allSchemas, ls)
-	}
-
-	return allSchemas
-}
-
 func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, bool) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -358,6 +337,40 @@ func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, 
 		return ls, true
 	}
 	return s.sch.getSchema(name, version, registry)
+}
+
+func (s *completeSchema) GenerateDashboardSchema(ctx *cue.Context) (cue.Value, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	plugins := map[plugin.Kind]cue.Value{}
+	for _, kind := range []plugin.Kind{
+		plugin.KindDatasource, plugin.KindPanel,
+		plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation,
+	} {
+		merged := mergeSchemasByKind(s.sch.getSchemas(kind), s.devSch.getSchemas(kind))
+		if len(merged) == 0 {
+			continue
+		}
+		disjunction, err := GenerateSchemaDisjunction(ctx, merged)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("unable to merge %s plugin schemas: %w", kind, err)
+		}
+		plugins[kind] = disjunction
+	}
+	return dashboardSchema.GenerateDashboardCueValue(ctx, plugins)
+}
+
+func mergeSchemasByKind(main, dev []LoadSchema) []LoadSchema {
+	seen := map[string]struct{}{}
+	var result []LoadSchema
+	for _, ls := range append(dev, main...) {
+		if _, ok := seen[ls.Name]; !ok {
+			seen[ls.Name] = struct{}{}
+			result = append(result, ls)
+		}
+	}
+	return result
 }
 
 func (s *completeSchema) GetInstance(kind plugin.Kind, name string) (*build.Instance, error) {

@@ -19,8 +19,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"cuelang.org/go/cue"
 	"github.com/labstack/echo/v4"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
 	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
@@ -36,18 +38,10 @@ import (
 // stubSchema implements pluginschema.Schema with controllable responses.
 type stubSchema struct {
 	pluginschema.Schema
-	allSchemas  []pluginschema.LoadSchema
-	kindSchemas map[specPlugin.Kind][]pluginschema.LoadSchema
+	allSchemas []pluginschema.LoadSchema
 }
 
 func (s *stubSchema) GetAllSchemas() []pluginschema.LoadSchema { return s.allSchemas }
-
-func (s *stubSchema) GetSchemas(kind specPlugin.Kind) []pluginschema.LoadSchema {
-	if s.kindSchemas != nil {
-		return s.kindSchemas[kind]
-	}
-	return nil
-}
 
 func (s *stubSchema) GetSchema(name, _, _ string) (pluginschema.LoadSchema, bool) {
 	for _, ls := range s.allSchemas {
@@ -56,6 +50,10 @@ func (s *stubSchema) GetSchema(name, _, _ string) (pluginschema.LoadSchema, bool
 		}
 	}
 	return pluginschema.LoadSchema{}, false
+}
+
+func (s *stubSchema) GenerateDashboardSchema(ctx *cue.Context) (cue.Value, error) {
+	return dashboardSchema.GenerateDashboardCueValue(ctx, map[specPlugin.Kind]cue.Value{})
 }
 
 // plugin service stub
