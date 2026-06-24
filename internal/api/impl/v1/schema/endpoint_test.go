@@ -21,8 +21,8 @@ import (
 
 	"cuelang.org/go/cue"
 	"github.com/labstack/echo/v4"
-	apiinterface "github.com/perses/perses/internal/api/interface"
 	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
 	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
