@@ -90,7 +90,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		// the resource would be silently persisted but never visible until the project is created.
 		// So we refuse to provision it and report the missing project.
 		if len(project) > 0 && !p.projectExists(project) {
-			logrus.Errorf("unable to provision the %q %q: project %q doesn't exist", kind, name, project)
+			logrus.Errorf("unable to provision the %q/%q: project %q doesn't exist", kind, name, project)
 			continue
 		}
 		param := apiInterface.Parameters{
