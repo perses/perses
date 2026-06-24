@@ -53,6 +53,12 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 	return result
 }
 
+// Entry holds a node and its associated latest-version instance.
+type Entry[T any] struct {
+	Node     Node
+	Instance T
+}
+
 // Tree is a struct used to manage the loaded plugin instances.
 // This struct is here to allow to manage multiple versions of the same plugin and the latest version of the plugin.
 // The first map key is the node (name + registry).
@@ -119,6 +125,17 @@ func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *plugin.Metad
 		return t.Get(name, module.Metadata{Version: plugin.LatestVersion, Registry: plugin.DefaultRegistry})
 	}
 	return t.Get(name, module.Metadata{Version: pluginMetadata.Version, Registry: pluginMetadata.Registry})
+}
+
+// List returns one Entry per node, containing the latest-version instance.
+func (t Tree[T]) List() []Entry[T] {
+	result := make([]Entry[T], 0, len(t))
+	for node, versions := range t {
+		if instance, ok := versions[plugin.LatestVersion]; ok {
+			result = append(result, Entry[T]{Node: node, Instance: instance})
+		}
+	}
+	return result
 }
 
 // isLatest is checking if the given version is the latest one for the given schemaNameKind

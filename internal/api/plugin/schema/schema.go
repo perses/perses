@@ -350,20 +350,6 @@ func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 	return allSchemas
 }
 
-func getAllPluginsOfKind(schemas []LoadSchema, kind plugin.Kind, n tree.Node, v map[string]*build.Instance) []LoadSchema {
-	for version, instance := range v {
-		if version != plugin.LatestVersion {
-			continue
-		}
-		schemas = append(schemas, LoadSchema{
-			Kind:     kind,
-			Name:     n.Name,
-			Instance: instance,
-		})
-	}
-	return schemas
-}
-
 func (s *completeSchema) GetInstance(kind plugin.Kind, name string) (*build.Instance, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -567,41 +553,38 @@ func (s *sch) getAnnotationSchema(name string, metadata *plugin.Metadata) (*buil
 	return instance, nil
 }
 
-func (sch sch) getAllSchemas() []LoadSchema {
+func (s *sch) getAllSchemas() []LoadSchema {
 	var schemas []LoadSchema
-
 	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation} {
-		schemaGroup := sch.getSchemas(kind)
-		schemas = append(schemas, schemaGroup...)
+		schemas = append(schemas, s.getSchemas(kind)...)
 	}
-
 	return schemas
 }
 
 func (s *sch) getSchemas(kind plugin.Kind) []LoadSchema {
-	var schemas []LoadSchema
-
+	var t tree.Tree[*build.Instance]
 	switch kind {
 	case plugin.KindDatasource:
-		for node, versions := range s.datasources {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
+		t = s.datasources
 	case plugin.KindPanel:
-		for node, versions := range s.panels {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
+		t = s.panels
 	case plugin.KindVariable:
-		for node, versions := range s.variables {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
+		t = s.variables
 	case plugin.KindQuery:
-		for node, versions := range s.queries {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
+		t = s.queries
 	case plugin.KindAnnotation:
-		for node, versions := range s.annotations {
-			schemas = getAllPluginsOfKind(schemas, kind, node, versions)
-		}
+		t = s.annotations
+	default:
+		return nil
+	}
+	entries := t.List()
+	schemas := make([]LoadSchema, 0, len(entries))
+	for _, e := range entries {
+		schemas = append(schemas, LoadSchema{
+			Kind:     kind,
+			Name:     e.Node.Name,
+			Instance: e.Instance,
+		})
 	}
 	return schemas
 }
