@@ -24,6 +24,7 @@ import (
 	"cuelang.org/go/cue/token"
 
 	apiCue "github.com/perses/perses/internal/api/cue"
+	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
 	specPlugin "github.com/perses/spec/go/plugin"
@@ -127,6 +128,27 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 		return cue.Value{}, fmt.Errorf("failed to validate dashboard schema: %s", fullErrStr)
 	}
 	return final, nil
+}
+
+// GenerateDashboardSchema fetches all plugin schemas from s, merges them by kind,
+// and returns the complete dashboard CUE value ready for serialisation.
+func GenerateDashboardSchema(ctx *cue.Context, s pluginschema.Schema) (cue.Value, error) {
+	plugins := map[specPlugin.Kind]cue.Value{}
+	for _, kind := range []specPlugin.Kind{
+		specPlugin.KindDatasource, specPlugin.KindPanel,
+		specPlugin.KindVariable, specPlugin.KindQuery, specPlugin.KindAnnotation,
+	} {
+		schemas := s.GetSchemas(kind)
+		if len(schemas) == 0 {
+			continue
+		}
+		merged, err := pluginschema.GenerateSchemaDisjunction(ctx, schemas)
+		if err != nil {
+			return cue.Value{}, fmt.Errorf("unable to merge %s plugin schemas: %w", kind, err)
+		}
+		plugins[kind] = merged
+	}
+	return GenerateDashboardCueValue(ctx, plugins)
 }
 
 func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue.Value) (cue.Value, error) {

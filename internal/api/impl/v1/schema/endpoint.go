@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -61,25 +60,9 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 	cueCtx := cuecontext.New()
 
-	// grab plugin schemas & aggregate them into a single cue value per plugin kind
-	plugins := map[specPlugin.Kind]cue.Value{}
-	for _, kind := range []specPlugin.Kind{specPlugin.KindDatasource, specPlugin.KindPanel, specPlugin.KindVariable, specPlugin.KindQuery, specPlugin.KindAnnotation} {
-		schemas := e.pluginSvc.Schema().GetSchemas(kind)
-		if len(schemas) == 0 {
-			continue
-		}
-		merged, err := schema.GenerateSchemaDisjunction(cueCtx, schemas)
-		if err != nil {
-			logrus.WithError(err).Errorf("unable to merge %s plugin schemas", kind)
-			return apiinterface.InternalError
-		}
-		plugins[kind] = merged
-	}
-
-	// inject plugin cue values into the dashboard schema
-	result, err := dashboardSchema.GenerateDashboardCueValue(cueCtx, plugins)
+	result, err := dashboardSchema.GenerateDashboardSchema(cueCtx, e.pluginSvc.Schema())
 	if err != nil {
-		logrus.WithError(err).Error("unable to merge dashboard schema with plugin schemas")
+		logrus.WithError(err).Error("unable to generate dashboard schema")
 		return apiinterface.InternalError
 	}
 
