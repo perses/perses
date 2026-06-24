@@ -25,16 +25,6 @@ import (
 	apiCue "github.com/perses/perses/internal/api/cue"
 )
 
-const (
-	definitionPrefix = "#"
-)
-
-// helper struct for ordering plugins
-type pluginValue struct {
-	name  string
-	value cue.Value
-}
-
 // Function generates a disjunction (OR join) of a list of LoadSchemas
 // and returns it in a single cue.Value
 func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
@@ -85,35 +75,22 @@ func GenerateSchemaDisjunction(ctx *cue.Context, schemas []LoadSchema) (cue.Valu
 
 // Generates a single cue.Value composed of a list of cue definitions (prefixed by #)
 func GenerateSchemaDefinitions(ctx *cue.Context, schemas []LoadSchema) (cue.Value, error) {
-	definitions := []pluginValue{}
+	// sorting the slice so that the plugin order is not random
+	slices.SortFunc(schemas, func(a, b LoadSchema) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	result := ctx.CompileString("{}")
 	for _, ls := range schemas {
 		value := ctx.BuildInstance(ls.Instance, cue.InferBuiltins(true))
 		if value.Err() != nil {
 			return cue.Value{}, fmt.Errorf("unable to build instance %s: %w", ls.Name, value.Err())
 		}
-		definitions = append(definitions, pluginValue{ls.Name, value})
+		defPath := cue.MakePath(cue.Def(fmt.Sprintf("#%s", ls.Name)))
+		result = result.FillPath(defPath, value)
 	}
-
-	// sorting the slice so that the plugin order is not random
-	slices.SortFunc(definitions, func(a, b pluginValue) int {
-		return strings.Compare(a.name, b.name)
-	})
-
-	var declsList []ast.Decl
-	for _, plugin := range definitions {
-		expr, err := apiCue.ValueToASTExpr(plugin.value)
-		if err != nil {
-			return cue.Value{}, err
-		}
-		decls := &ast.Field{
-			Label: ast.NewIdent(fmt.Sprintf("%s%s", definitionPrefix, plugin.name)),
-			Value: expr,
-		}
-		declsList = append(declsList, decls)
+	if result.Err() != nil {
+		return cue.Value{}, fmt.Errorf("building schema value: %w", result.Err())
 	}
-	final := ctx.BuildExpr(&ast.StructLit{Elts: declsList})
-	if final.Err() != nil {
-		return cue.Value{}, fmt.Errorf("building schema value: %w", final.Err())
-	}
-	return final, nil
+	return result, nil
 }
