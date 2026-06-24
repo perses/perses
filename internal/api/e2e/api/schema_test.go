@@ -29,7 +29,7 @@ import (
 )
 
 func TestGetSchemaDashboard(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
 		resp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "dashboards")).
 			Expect().
 			Status(http.StatusOK)
@@ -43,7 +43,7 @@ func TestGetSchemaDashboard(t *testing.T) {
 }
 
 func TestGetSchemaPluginList(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
 		// Without any plugins loaded the endpoint returns an empty CUE struct literal.
 		// With plugins loaded it returns CUE text with definitions.
 		expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins")).
@@ -54,7 +54,7 @@ func TestGetSchemaPluginList(t *testing.T) {
 }
 
 func TestGetSchemaPluginDefinitionNotFound(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins", "NonExistentPlugin")).
 			Expect().
 			Status(http.StatusNotFound).
@@ -66,7 +66,7 @@ func TestGetSchemaPluginDefinitionNotFound(t *testing.T) {
 func TestGetSchemaPluginDefinitionWithRealPlugins(t *testing.T) {
 	// This test uses the default server config, which points at the real plugins directory.
 	// It verifies that a known plugin can be fetched as a CUE definition.
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager) []modelAPI.Entity {
 		// Probe the plugin list first so the test does not hard-code a name that
 		// might not be installed in all environments.
 		listResp := expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins")).
