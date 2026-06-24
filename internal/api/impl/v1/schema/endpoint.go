@@ -16,7 +16,6 @@ package schema
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -34,8 +33,10 @@ import (
 )
 
 const (
-	pluginNameParam = "pluginName"
-	contentType     = "text/x-cue"
+	pluginNameParam    = "pluginName"
+	versionQueryParam  = "version"
+	registryQueryParam = "registry"
+	contentType        = "text/x-cue"
 )
 
 type endpoint struct {
@@ -92,25 +93,25 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 
 func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 	pluginName := ctx.Param(pluginNameParam)
-	var plugins []schema.LoadSchema
+	version := ctx.QueryParam(versionQueryParam)
+	registry := ctx.QueryParam(registryQueryParam)
 
-	schemas := e.pluginSvc.Schema().GetAllSchemas()
-	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))
+	if version == "" {
+		version = specPlugin.LatestVersion
 	}
-	for _, ls := range schemas {
-		if strings.EqualFold(ls.Name, pluginName) {
-			plugins = append(plugins, ls)
-		}
+	if registry == "" {
+		registry = specPlugin.DefaultRegistry
 	}
-	if len(plugins) == 0 {
-		return apiinterface.HandleNotFoundError("plugin not found")
+
+	ls, ok := e.pluginSvc.Schema().GetSchema(pluginName, version, registry)
+	if !ok {
+		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found", pluginName))
 	}
-	data, err := generateCUEbytes(plugins)
+
+	data, err := generateCUEbytes([]schema.LoadSchema{ls})
 	if err != nil {
 		return err
 	}
-
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 

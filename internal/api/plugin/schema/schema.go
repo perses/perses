@@ -140,6 +140,7 @@ type Schema interface {
 	ValidateVariable(plugin plugin.Plugin, varName string) error
 	GetAllSchemas() []LoadSchema
 	GetSchemas(kind plugin.Kind) []LoadSchema
+	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 }
 
@@ -350,6 +351,15 @@ func (s *completeSchema) GetSchemas(kind plugin.Kind) []LoadSchema {
 	return allSchemas
 }
 
+func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, bool) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	if ls, ok := s.devSch.getSchema(name, version, registry); ok {
+		return ls, true
+	}
+	return s.sch.getSchema(name, version, registry)
+}
+
 func (s *completeSchema) GetInstance(kind plugin.Kind, name string) (*build.Instance, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -553,6 +563,33 @@ func (s *sch) getAnnotationSchema(name string, metadata *plugin.Metadata) (*buil
 	return instance, nil
 }
 
+func (s *sch) treeForKind(kind plugin.Kind) tree.Tree[*build.Instance] {
+	switch kind {
+	case plugin.KindDatasource:
+		return s.datasources
+	case plugin.KindPanel:
+		return s.panels
+	case plugin.KindVariable:
+		return s.variables
+	case plugin.KindQuery:
+		return s.queries
+	case plugin.KindAnnotation:
+		return s.annotations
+	}
+	return nil
+}
+
+func (s *sch) getSchema(name, version, registry string) (LoadSchema, bool) {
+	meta := &plugin.Metadata{Version: version, Registry: registry}
+	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation} {
+		t := s.treeForKind(kind)
+		if instance, ok := t.GetWithPluginMetadata(name, meta); ok {
+			return LoadSchema{Kind: kind, Name: name, Instance: instance}, true
+		}
+	}
+	return LoadSchema{}, false
+}
+
 func (s *sch) getAllSchemas() []LoadSchema {
 	var schemas []LoadSchema
 	for _, kind := range []plugin.Kind{plugin.KindDatasource, plugin.KindPanel, plugin.KindVariable, plugin.KindQuery, plugin.KindAnnotation} {
@@ -562,19 +599,8 @@ func (s *sch) getAllSchemas() []LoadSchema {
 }
 
 func (s *sch) getSchemas(kind plugin.Kind) []LoadSchema {
-	var t tree.Tree[*build.Instance]
-	switch kind {
-	case plugin.KindDatasource:
-		t = s.datasources
-	case plugin.KindPanel:
-		t = s.panels
-	case plugin.KindVariable:
-		t = s.variables
-	case plugin.KindQuery:
-		t = s.queries
-	case plugin.KindAnnotation:
-		t = s.annotations
-	default:
+	t := s.treeForKind(kind)
+	if t == nil {
 		return nil
 	}
 	entries := t.List()

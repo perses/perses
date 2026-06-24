@@ -14,11 +14,13 @@
 package schema
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
 	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
@@ -45,6 +47,15 @@ func (s *stubSchema) GetSchemas(kind specPlugin.Kind) []pluginschema.LoadSchema 
 		return s.kindSchemas[kind]
 	}
 	return nil
+}
+
+func (s *stubSchema) GetSchema(name, _, _ string) (pluginschema.LoadSchema, bool) {
+	for _, ls := range s.allSchemas {
+		if ls.Name == name {
+			return ls, true
+		}
+	}
+	return pluginschema.LoadSchema{}, false
 }
 
 // plugin service stub
@@ -115,14 +126,13 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 
 func TestPluginDefinitionWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/AnyPlugin")
+	ctx, _ := newEchoContext(t, "/api/v1/schemas/plugins/AnyPlugin")
 	ctx.SetParamNames(pluginNameParam)
 	ctx.SetParamValues("AnyPlugin")
 
 	err := ep.PluginDefinition(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "{}", rec.Body.String())
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, apiinterface.NotFoundError))
 }
 
 func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
@@ -132,27 +142,24 @@ func TestPluginDefinitionPluginDoesNotExist(t *testing.T) {
 	schemas := []pluginschema.LoadSchema{{Kind: specPlugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/NonExistent")
+	ctx, _ := newEchoContext(t, "/api/v1/schemas/plugins/NonExistent")
 	ctx.SetParamNames(pluginNameParam)
 	ctx.SetParamValues("NonExistent")
 
 	err := ep.PluginDefinition(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusNotFound, rec.Code)
-	assert.Contains(t, rec.Body.String(), "plugin not found")
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, apiinterface.NotFoundError))
 }
 
 func TestPluginDefinitionPluginExists(t *testing.T) {
-	// The schema is registered as "FirstChart"; querying "firstchart" must still match
-	// because PluginDefinition uses strings.EqualFold for name comparison.
 	name, instance, loadErr := pluginschema.LoadModelSchema("../../../plugin/schema/testdata/schemas/panels/first")
 	require.NoError(t, loadErr)
 	schemas := []pluginschema.LoadSchema{{Kind: specPlugin.KindPanel, Name: name, Instance: instance}}
 
 	ep := newEndpointWithSchemas(schemas)
-	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/firstchart")
+	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins/FirstChart")
 	ctx.SetParamNames(pluginNameParam)
-	ctx.SetParamValues("firstchart")
+	ctx.SetParamValues("FirstChart")
 
 	err := ep.PluginDefinition(ctx)
 	require.NoError(t, err)
