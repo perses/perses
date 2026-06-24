@@ -48,6 +48,7 @@ items:
 When creating or updating a folder, Perses validates the tree:
 
 - Each dashboard referenced in `spec.items` can appear **only once** in that folder resource.
+- The same dashboard can be referenced in **different** folder resources within the same project.
 - A `Dashboard` item cannot contain nested `items`.
 - Every item must have a non-empty `name`.
 - Each item `kind` must be `Folder` or `Dashboard`.

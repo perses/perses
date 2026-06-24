@@ -44,6 +44,7 @@ Like dashboards, folders support an optional display name through `spec.display.
 Perses validates folder trees when they are created or updated:
 
 - A **dashboard can appear only once** in a given folder tree. The same dashboard cannot be referenced in multiple subfolders of the same folder resource.
+- The **same dashboard can be referenced in different folder resources**. For example, `cluster-overview` can appear in both a `platform` folder and an `on-call` folder within the same project.
 - A **dashboard item cannot contain nested items**. Only `Folder` items can have an `items` list.
 - Every item must have a non-empty `name`.
 - Each item `kind` must be either `Dashboard` or `Folder`.
