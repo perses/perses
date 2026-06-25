@@ -13,8 +13,8 @@
 
 import { Card } from '@mui/material';
 import { ReactElement, useCallback } from 'react';
-import { useSnackbar } from '@perses-dev/components';
-import { getResourceExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { GlobalVariableResource, VariableType } from '@perses-dev/client';
 import { VariableList } from '../../../components/variable/VariableList';
 import {
   useCreateGlobalVariableMutation,
@@ -41,7 +41,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
     (variable: GlobalVariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         createVariableMutation.mutate(variable, {
-          onSuccess: (createdVariable: Variable) => {
+          onSuccess: (createdVariable: VariableType) => {
             successSnackbar(
               `Global Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`
             );
@@ -61,7 +61,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
     (variable: GlobalVariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         updateVariableMutation.mutate(variable, {
-          onSuccess: (updatedVariable: Variable) => {
+          onSuccess: (updatedVariable: VariableType) => {
             successSnackbar(
               `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`
             );
@@ -81,7 +81,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
     (variable: GlobalVariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         deleteVariableMutation.mutate(variable, {
-          onSuccess: (deletedVariable: Variable) => {
+          onSuccess: (deletedVariable: VariableType) => {
             successSnackbar(
               `Global Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
             );

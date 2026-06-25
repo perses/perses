@@ -16,13 +16,14 @@ package tree
 import (
 	"testing"
 
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
 type treeParameter struct {
 	name     string
-	metadata plugin.ModuleMetadata
+	metadata module.Metadata
 	instance any
 }
 
@@ -39,7 +40,7 @@ func TestTree_Add(t *testing.T) {
 			treeParameter: []treeParameter{
 				{
 					name:     "schema",
-					metadata: plugin.ModuleMetadata{Version: "v1.0.0", Registry: ""},
+					metadata: module.Metadata{Version: "v1.0.0", Registry: ""},
 					instance: "inst-1",
 				},
 			},
@@ -61,7 +62,7 @@ func TestTree_Add(t *testing.T) {
 			treeParameter: []treeParameter{
 				{
 					name:     "schema",
-					metadata: plugin.ModuleMetadata{Version: "v1.1.0", Registry: ""},
+					metadata: module.Metadata{Version: "v1.1.0", Registry: ""},
 					instance: "new-inst",
 				},
 			},
@@ -77,8 +78,8 @@ func TestTree_Add(t *testing.T) {
 			name:     "different registries are distinct keys",
 			baseTree: nil,
 			treeParameter: []treeParameter{
-				{"schema", plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regA"}, "a-inst"},
-				{"schema", plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regB"}, "b-inst"},
+				{"schema", module.Metadata{Version: "v0.1.0", Registry: "regA"}, "a-inst"},
+				{"schema", module.Metadata{Version: "v0.1.0", Registry: "regB"}, "b-inst"},
 			},
 			expectedTree: Tree[any]{
 				node{name: "schema", registry: "regA"}: {
@@ -95,8 +96,8 @@ func TestTree_Add(t *testing.T) {
 			name:     "duplicate version overwrites instance",
 			baseTree: nil,
 			treeParameter: []treeParameter{
-				{"dup", plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}, "first"},
-				{"dup", plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}, "second"},
+				{"dup", module.Metadata{Version: "v2.0.0", Registry: ""}, "first"},
+				{"dup", module.Metadata{Version: "v2.0.0", Registry: ""}, "second"},
 			},
 			expectedTree: Tree[any]{
 				node{name: "dup", registry: plugin.DefaultRegistry}: {
@@ -134,7 +135,7 @@ func TestTree_Remove(t *testing.T) {
 					"latest": "inst-1",
 				},
 			},
-			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}}},
+			removes: []treeParameter{{name: "schema", metadata: module.Metadata{Version: "v2.0.0", Registry: ""}}},
 			expectedTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "inst-1",
@@ -151,7 +152,7 @@ func TestTree_Remove(t *testing.T) {
 					"latest": "new-inst",
 				},
 			},
-			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v1.0.0", Registry: ""}}},
+			removes: []treeParameter{{name: "schema", metadata: module.Metadata{Version: "v1.0.0", Registry: ""}}},
 			expectedTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.1.0": "new-inst",
@@ -168,7 +169,7 @@ func TestTree_Remove(t *testing.T) {
 					"latest": "c-inst",
 				},
 			},
-			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v1.2.0", Registry: ""}}},
+			removes: []treeParameter{{name: "schema", metadata: module.Metadata{Version: "v1.2.0", Registry: ""}}},
 			expectedTree: Tree[any]{
 				node{name: "schema", registry: plugin.DefaultRegistry}: {
 					"v1.0.0": "a-inst",
@@ -184,7 +185,7 @@ func TestTree_Remove(t *testing.T) {
 					"latest": "second",
 				},
 			},
-			removes:      []treeParameter{{name: "dup", metadata: plugin.ModuleMetadata{Version: "v2.0.0", Registry: ""}}},
+			removes:      []treeParameter{{name: "dup", metadata: module.Metadata{Version: "v2.0.0", Registry: ""}}},
 			expectedTree: Tree[any]{},
 		},
 		{
@@ -199,7 +200,7 @@ func TestTree_Remove(t *testing.T) {
 					"latest": "b-inst",
 				},
 			},
-			removes: []treeParameter{{name: "schema", metadata: plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regA"}}},
+			removes: []treeParameter{{name: "schema", metadata: module.Metadata{Version: "v0.1.0", Registry: "regA"}}},
 			expectedTree: Tree[any]{
 				node{name: "schema", registry: "regB"}: {
 					"v0.1.0": "b-inst",
@@ -228,7 +229,7 @@ func TestTree_Get(t *testing.T) {
 		name     string
 		baseTree Tree[string]
 		nameArg  string
-		meta     plugin.ModuleMetadata
+		meta     module.Metadata
 		expected string
 		exists   bool
 	}{
@@ -242,7 +243,7 @@ func TestTree_Get(t *testing.T) {
 				},
 			},
 			nameArg:  "schema",
-			meta:     plugin.ModuleMetadata{Version: "", Registry: ""},
+			meta:     module.Metadata{Version: "", Registry: ""},
 			expected: "inst-2",
 			exists:   true,
 		},
@@ -256,7 +257,7 @@ func TestTree_Get(t *testing.T) {
 				},
 			},
 			nameArg:  "schema",
-			meta:     plugin.ModuleMetadata{Version: "v1.0.0", Registry: ""},
+			meta:     module.Metadata{Version: "v1.0.0", Registry: ""},
 			expected: "old-inst",
 			exists:   true,
 		},
@@ -269,7 +270,7 @@ func TestTree_Get(t *testing.T) {
 				},
 			},
 			nameArg: "schema",
-			meta:    plugin.ModuleMetadata{Version: "v9.9.9", Registry: ""},
+			meta:    module.Metadata{Version: "v9.9.9", Registry: ""},
 			exists:  false,
 		},
 		{
@@ -285,7 +286,7 @@ func TestTree_Get(t *testing.T) {
 				},
 			},
 			nameArg:  "schema",
-			meta:     plugin.ModuleMetadata{Version: "v0.1.0", Registry: "regB"},
+			meta:     module.Metadata{Version: "v0.1.0", Registry: "regB"},
 			expected: "b-inst",
 			exists:   true,
 		},

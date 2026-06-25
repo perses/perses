@@ -6,9 +6,13 @@ package plugin
 
 import "github.com/perses/spec/cue/common"
 
-#LatestVersion:   "latest"
+// Deprecated. Use github.com/perses/spec/go/plugin/plugin.LatestVersion instead
+#LatestVersion: "latest"
+
+// Deprecated. Use github.com/perses/spec/go/plugin/plugin.DefaultRegistry instead
 #DefaultRegistry: "perses.dev"
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Kind instead
 #Kind: string // #enumKind
 
 #enumKind:
@@ -22,7 +26,8 @@ import "github.com/perses/spec/cue/common"
 	#KindQuery |
 	#KindAlertsQuery |
 	#KindSilencesQuery |
-	#KindExplore
+	#KindExplore |
+	#KindAnnotation
 
 #KindVariable:        #Kind & "Variable"
 #KindDatasource:      #Kind & "Datasource"
@@ -35,22 +40,28 @@ import "github.com/perses/spec/cue/common"
 #KindAlertsQuery:     #Kind & "AlertsQuery"
 #KindSilencesQuery:   #Kind & "SilencesQuery"
 #KindExplore:         #Kind & "Explore"
+#KindAnnotation:      #Kind & "Annotation"
 
+// Deprecated. Use github.com/perses/spec/go/module/module.PluginSpec instead
 #Spec: {
 	display?: null | common.#Display @go(Display,*common.Display)
 	name:     string                 @go(Name)
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Plugin instead
 #Plugin: _
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Status instead
 #ModuleStatus: {
 	isLoaded: bool   @go(IsLoaded)
 	inDev:    bool   @go(InDev)
 	error?:   string @go(Error)
 }
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Spec instead
 #ModuleSpec: _
 
+// Deprecated. Use github.com/perses/spec/go/module/module.Metadata instead
 #ModuleMetadata: {
 	name:     string @go(Name)
 	version:  string @go(Version)

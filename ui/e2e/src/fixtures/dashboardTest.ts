@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
-import fetch from 'node-fetch';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/dashboards';
 import { AppHomePage, DashboardPage } from '../pages';
 
 type DashboardTestOptions = {
@@ -52,7 +51,7 @@ async function getDashboardJson(projectName: string, dashboardName: string): Pro
   return dashboardJson as unknown as DashboardResource;
 }
 
-async function createDashboard(content: unknown): Promise<fetch.Response> {
+async function createDashboard(content: unknown): Promise<Response> {
   const queryUrl = `${BACKEND_BASE_URL}/api/v1/dashboards`;
   return fetch(queryUrl, {
     method: 'POST',
@@ -79,7 +78,7 @@ async function duplicateDashboard(projectName: string, dashboardName: string, ne
   }
 }
 
-async function deleteDashboard(projectName: string, dashboardName: string): Promise<fetch.Response> {
+async function deleteDashboard(projectName: string, dashboardName: string): Promise<Response> {
   const queryUrl = `${BACKEND_BASE_URL}/api/v1/projects/${projectName}/dashboards/${dashboardName}`;
   const result = await fetch(queryUrl, {
     method: 'DELETE',

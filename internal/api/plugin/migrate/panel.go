@@ -19,14 +19,13 @@ import (
 	"regexp"
 
 	"cuelang.org/go/cue/build"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
 var (
-	defaultPanelPlugin = common.Plugin{
+	defaultPanelPlugin = plugin.Plugin{
 		Kind: "Markdown",
 		Spec: &struct {
 			Text string `json:"text"`
@@ -34,7 +33,7 @@ var (
 			Text: "**Migration from Grafana not supported !**",
 		},
 	}
-	defaultQueryPlugin = common.Plugin{
+	defaultQueryPlugin = plugin.Plugin{
 		Kind: "PrometheusTimeSeriesQuery",
 		Spec: &struct {
 			Query string `json:"query"`
@@ -182,10 +181,10 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	return isQueryMigrationEmpty
 }
 
-func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
+func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*plugin.Plugin, bool, error) {
 	return executeCuelangScript(cueScript, grafanaQueryData, "#target", "query")
 }
 
-func ExecutePanelScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
+func ExecutePanelScript(cueScript *build.Instance, grafanaPanelData []byte) (*plugin.Plugin, bool, error) {
 	return executeCuelangScript(cueScript, grafanaPanelData, "#panel", "panel")
 }

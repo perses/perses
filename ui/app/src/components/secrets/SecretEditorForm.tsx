@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
-import React, { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -38,6 +37,7 @@ import {
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/client';
 import { FormEditorProps } from '../form-drawers';
 
 const noAuthIndex = 'noAuth';

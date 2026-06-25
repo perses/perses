@@ -15,9 +15,9 @@ import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { ProjectResource } from '@perses-dev/core';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ProjectResource } from '@perses-dev/client';
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),

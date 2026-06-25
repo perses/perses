@@ -36,6 +36,7 @@ import (
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"github.com/perses/spec/go/plugin"
 )
 
 func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
@@ -64,7 +65,7 @@ func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: "PrometheusDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -97,7 +98,7 @@ func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 
 	return datasourceSpec.Spec{
 		Default: false,
-		Plugin: common.Plugin{
+		Plugin: plugin.Plugin{
 			Kind: "PostgresDatasource",
 			Spec: pluginSpecAsMapInterface,
 		},
@@ -180,10 +181,10 @@ func newGlobalSQLDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 }
 
 func TestHTTPProxyGlobalDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		dtsName := "myDTS"
 		dts := newGlobalHTTPDatasource(t, dtsName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dts)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/api/v1/status/config", utils.PathGlobalDatasource, dtsName)).
 			Expect().
@@ -193,10 +194,10 @@ func TestHTTPProxyGlobalDatasource(t *testing.T) {
 }
 
 func TestSQLProxyBadMethod(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		dtsName := "mySQLDTS"
 		dts := newGlobalSQLDatasource(t, dtsName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dts)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s", utils.PathGlobalDatasource, dtsName)).
 			Expect().
@@ -206,15 +207,15 @@ func TestSQLProxyBadMethod(t *testing.T) {
 }
 
 func TestSQLProxyGlobalDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		// set the postgres user password since the secret isn't working in the test
 		t.Setenv("PGUSER", "user")
 		t.Setenv("PGPASSWORD", "password")
 		dtsName := "mySQLDTS"
 		dts := newGlobalSQLDatasource(t, dtsName)
 		s := e2eframework.NewGlobalSecret(dtsName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, s)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dts)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), s)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
 
 		expect.POST(fmt.Sprintf("/proxy/%s/%s", utils.PathGlobalDatasource, dtsName)).
 			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
@@ -227,13 +228,13 @@ func TestSQLProxyGlobalDatasource(t *testing.T) {
 }
 
 func TestHTTPProxyProjectDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		dtsName := "myDTS"
 		projectName := "perses"
 		dts := newHTTPDatasource(t, projectName, dtsName)
 		project := e2eframework.NewProject(projectName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dts)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
 			Expect().
@@ -243,7 +244,7 @@ func TestHTTPProxyProjectDatasource(t *testing.T) {
 }
 
 func TestSQLProxyProjectDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		// set the postgres user password since the secret isn't working in the test
 		t.Setenv("PGUSER", "user")
 		t.Setenv("PGPASSWORD", "password")
@@ -251,8 +252,8 @@ func TestSQLProxyProjectDatasource(t *testing.T) {
 		projectName := "perses"
 		dts := newSQLDatasource(t, projectName, dtsName)
 		project := e2eframework.NewProject(projectName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dts)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
 
 		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s", utils.PathProject, projectName, utils.PathDatasource, dtsName)).
 			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
@@ -265,15 +266,15 @@ func TestSQLProxyProjectDatasource(t *testing.T) {
 }
 
 func TestHTTPProxyLocalDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		dtsName := "myDTS"
 		dashboardName := "myDashboard"
 		projectName := "perses"
 		dts := newHTTPDatasource(t, projectName, dtsName)
 		dash := newDashboard(projectName, dashboardName, dtsName, dts)
 		project := e2eframework.NewProject(projectName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dash)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dash)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			Expect().
@@ -283,7 +284,7 @@ func TestHTTPProxyLocalDatasource(t *testing.T) {
 }
 
 func TestSQLProxyLocalDatasource(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		// set the postgres user password since the secret isn't working in the test
 		t.Setenv("PGUSER", "user")
 		t.Setenv("PGPASSWORD", "password")
@@ -293,8 +294,8 @@ func TestSQLProxyLocalDatasource(t *testing.T) {
 		dts := newSQLDatasource(t, projectName, dtsName)
 		dash := newDashboard(projectName, dashboardName, dtsName, dts)
 		project := e2eframework.NewProject(projectName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, dash)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dash)
 
 		expect.POST(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			WithBytes([]byte(fmt.Sprintf(`{"query": "SELECT datname FROM pg_database"}`))).
@@ -307,15 +308,15 @@ func TestSQLProxyLocalDatasource(t *testing.T) {
 }
 
 func TestHTTPProxyLocalDatasourceWithRealDashboard(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		var dash v1.Dashboard
 		testUtils.JSONUnmarshalFromFile(filepath.Join("testdata", "dashboard.json"), &dash)
 		dtsName := "Victoria Metrics"
 		dashboardName := "myDashboard"
 		projectName := "perses"
 		project := e2eframework.NewProject(projectName)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, &dash)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), &dash)
 
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/%s/%s/%s/%s/api/v1/status/config", utils.PathProject, projectName, utils.PathDashboard, dashboardName, utils.PathDatasource, dtsName)).
 			Expect().

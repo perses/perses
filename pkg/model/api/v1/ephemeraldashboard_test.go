@@ -22,6 +22,7 @@ import (
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,7 +57,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 									Display: &dashboard.PanelDisplay{
 										Name: "simple line chart",
 									},
-									Plugin: common.Plugin{
+									Plugin: plugin.Plugin{
 										Kind: "TimeSeriesChart",
 										Spec: TimeSeriesSpec{
 											ShowLegend: false,
@@ -165,7 +166,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 								Kind: variable.KindList,
 								Spec: &dashboard.ListVariableSpec{
 									ListSpec: variable.ListSpec{
-										Plugin: common.Plugin{
+										Plugin: plugin.Plugin{
 											Kind: "PrometheusLabelNamesVariable",
 											Spec: map[string]any{
 												"matchers": []string{
@@ -181,7 +182,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 								Kind: variable.KindList,
 								Spec: &dashboard.ListVariableSpec{
 									ListSpec: variable.ListSpec{
-										Plugin: common.Plugin{
+										Plugin: plugin.Plugin{
 											Kind: "PrometheusLabelValuesVariable",
 											Spec: map[string]any{
 												"labelName": "$labelName",
@@ -202,7 +203,7 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 									Display: &dashboard.PanelDisplay{
 										Name: "simple line chart",
 									},
-									Plugin: common.Plugin{
+									Plugin: plugin.Plugin{
 										Kind: "TimeSeriesChart",
 										Spec: TimeSeriesSpec{
 											ShowLegend: false,
@@ -423,7 +424,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 			Display: &dashboard.PanelDisplay{
 				Name: "simple line chart",
 			},
-			Plugin: common.Plugin{
+			Plugin: plugin.Plugin{
 				Kind: "TimeSeriesChart",
 				Spec: map[string]any{
 					"lines": []any{
@@ -454,7 +455,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 						Kind: variable.KindList,
 						Spec: &dashboard.ListVariableSpec{
 							ListSpec: variable.ListSpec{
-								Plugin: common.Plugin{
+								Plugin: plugin.Plugin{
 									Kind: "PrometheusLabelNamesVariable",
 									Spec: map[string]any{
 										"matchers": []any{
@@ -470,7 +471,7 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 						Kind: variable.KindList,
 						Spec: &dashboard.ListVariableSpec{
 							ListSpec: variable.ListSpec{
-								Plugin: common.Plugin{
+								Plugin: plugin.Plugin{
 									Kind: "PrometheusLabelValuesVariable",
 									Spec: map[string]any{
 										"labelName": "$labelName",

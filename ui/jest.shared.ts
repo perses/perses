@@ -31,7 +31,7 @@ const config: Config.InitialOptions = {
 
     // Tell Jest where other Perses packages live since it doesn't know about project references.
     // Exclude `spec` and `dashboards` since they live outside of the perses/ui workspace.
-    '^@perses-dev/(?!spec|dashboards)(.*)$': '<rootDir>/../$1/src',
+    '^@perses-dev/(?!spec|dashboards|components|client)(.*)$': '<rootDir>/../$1/src',
 
     // Configure Jest to handle stylesheets
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',

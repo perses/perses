@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatusError } from '@perses-dev/core';
+import { StatusError } from '@perses-dev/client';
 import { refreshToken } from './auth/auth-client';
 
 const JWT_COOKIES = ['jwtPayload', 'jwtSignature', 'jwtRefreshToken'];

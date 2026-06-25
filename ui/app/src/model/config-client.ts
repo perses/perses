@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { DashboardSelector, DurationString, fetchJson, Permission, StatusError } from '@perses-dev/core';
 import { Duration } from 'date-fns';
+import { fetchJson, Permission, StatusError } from '@perses-dev/client';
+import { DashboardSelector, DurationString } from '@perses-dev/spec';
 import buildURL from './url-builder';
 
 const resource = 'config';

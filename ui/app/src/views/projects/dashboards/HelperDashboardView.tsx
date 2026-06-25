@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { getResourceDisplayName, ExternalVariableDefinition } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
-import { DashboardResource, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
+import { DashboardResource } from '@perses-dev/client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
@@ -126,6 +126,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   onDiscard={onDiscard}
                   isInitialVariableSticky={true}
                   isReadonly={isReadonly}
+                  isAnnotationEnabled={true}
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}

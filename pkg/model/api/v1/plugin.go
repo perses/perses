@@ -17,17 +17,29 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/common"
+	"github.com/perses/spec/go/module"
 )
 
 const PluginModuleKind = "PluginModule"
 
+type ModuleSpec struct {
+	SchemasPath string          `json:"schemasPath" yaml:"schemasPath"`
+	Plugins     []module.Plugin `json:"plugins" yaml:"plugins"`
+}
+
+func NewModuleSpec(module module.Module) *ModuleSpec {
+	return &ModuleSpec{
+		SchemasPath: module.SchemasPath,
+		Plugins:     module.Plugins,
+	}
+}
+
 type PluginModule struct {
-	Kind     string                `json:"kind" yaml:"kind"`
-	Metadata plugin.ModuleMetadata `json:"metadata" yaml:"metadata"`
-	Spec     plugin.ModuleSpec     `json:"spec" yaml:"spec"`
-	Status   *plugin.ModuleStatus  `json:"status,omitempty" yaml:"status,omitempty"`
+	Kind     string          `json:"kind" yaml:"kind"`
+	Metadata module.Metadata `json:"metadata" yaml:"metadata"`
+	Spec     ModuleSpec      `json:"spec" yaml:"spec"`
+	Status   *module.Status  `json:"status,omitempty" yaml:"status,omitempty"`
 }
 
 type PluginInDevelopment struct {

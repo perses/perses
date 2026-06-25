@@ -9,6 +9,11 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 ## Perses application
 
+### Upgrading from v0.53.0 to v0.54.0
+
+No breaking changes have been introduced in this version. Therefore, you can upgrade to this version without any special
+action.
+
 ### Upgrading from v0.52.0 to v0.53.0
 
 #### User change in container image
@@ -48,21 +53,237 @@ max_version -> maxVersion
 
 ## Plugin developer
 
+### Upgrading from v0.53.0 to v0.54.0
+
+#### GO-SDK: Import path change
+
+##### Query plugin definition
+
+Since the definition of the dashboard and datasource has been moved to the repository `perses/spec`, few import path
+needs to be updated.
+
+If you are defining a query plugin, you probably have the following definition:
+
+```go
+package yourquery
+
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/query"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
+
+const PluginKind = "YourLogQuery"
+
+type PluginSpec struct {
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query      string               `json:"query" yaml:"query"`
+}
+
+type Option func(plugin *Builder) error
+
+func create(query string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
+	}
+
+	defaults := []Option{
+		Query(query),
+	}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func YourLogQuery(expr string, options ...Option) query.Option {
+	plg, err := create(expr, options...)
+	return query.Option{
+		Kind: plugin.KindLogQuery,
+		Plugin: common.Plugin{
+			Kind: PluginKind,
+			Spec: plg,
+		},
+		Error: err,
+	}
+}
+```
+
+In this situation, you simply need to replace the import path of the `plugin` and `common` packages to
+`"github.com/perses/spec/go/plugin"`:
+
+```go
+package yourquery
+
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/query"
+	"github.com/perses/spec/go/plugin"
+)
+
+const PluginKind = "YourLogQuery"
+
+type PluginSpec struct {
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query      string               `json:"query" yaml:"query"`
+}
+
+type Option func(plugin *Builder) error
+
+func create(query string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
+	}
+
+	defaults := []Option{
+		Query(query),
+	}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func YourLogQuery(expr string, options ...Option) query.Option {
+	plg, err := create(expr, options...)
+	return query.Option{
+		Kind: plugin.KindLogQuery,
+		Plugin: plugin.Plugin{
+			Kind: PluginKind,
+			Spec: plg,
+		},
+		Error: err,
+	}
+}
+```
+
+Note that if you are using more things than `plugin` in the `github.com/perses/perses/pkg/model/api/v1/common` package,
+you should also update the import path to `"github.com/perses/spec/go/common"`.
+
+##### Datasource plugin definition
+
+There are two possibilities:
+
+1. If you are defining an HTTP datasource plugin with the simple struct:
+
+```go
+package yourdatasource
+
+import "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+
+type PluginSpec struct {
+	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+}
+```
+
+In this case, we have provided a new struct `datasource.HTTPDatasourceSpec` from the package
+`github.com/perses/spec/go/datasource` that can be used instead of defining it manually. You can simply removed your
+struct and use the new one.
+
+```go
+package yourdatasource
+
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	datasourceSpec "github.com/perses/spec/go/datasource"
+)
+
+const (
+	PluginKind = "YourDatasource"
+)
+
+type Option func(plugin *Builder) error
+
+func create(options ...Option) (Builder, error) {
+	builder := &Builder{
+		HTTPDatasourceSpec: datasourceSpec.HTTPDatasourceSpec{},
+	}
+
+	var defaults []Option
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+type Builder struct {
+	datasourceSpec.HTTPDatasourceSpec `json:",inline" yaml:",inline"`
+}
+
+func YourDatasource(options ...Option) datasource.Option {
+	return func(builder *datasource.Builder) error {
+		plugin, err := create(options...)
+		if err != nil {
+			return err
+		}
+
+		builder.Spec.Plugin.Kind = PluginKind
+		builder.Spec.Plugin.Spec = plugin.HTTPDatasourceSpec
+		return nil
+	}
+}
+
+func Selector(datasourceName string) *datasource.Selector {
+	return &datasource.Selector{
+		Kind: PluginKind,
+		Name: datasourceName,
+	}
+}
+```
+
+2. If you are defining a datasource plugin with a more complex struct, you can replace the import path of the `http`
+   package to `"github.com/perses/spec/go/datasource/proxy/http"`.
+
+```go
+package yourdatasource
+
+import "github.com/perses/spec/go/datasource/proxy/http"
+
+type PluginSpec struct {
+	DirectURL  string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy      *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	OtherField string      `json:"otherField,omitempty" yaml:"otherField,omitempty"`
+}
+
+```
+
 ### Upgrading from v0.52.0 to v0.53.0
 
 #### Change in "Run Query" behavior in `MultiQueryEditor`
 
-`MultiQueryEditor` component has a new mandatory method: `onQueryRun`. It will be called when the user click on the
-button "Run Query". It's useful if you want to execute a query only when this button is clicked and not on every
-`onChange` (previous Perses behavior). Now the `onChange` method is always called when something change in the editor.
+`MultiQueryEditor` component has a new mandatory method: `onQueryRun`.It will be called when the user click on the
+button "Run Query".It's useful if you want to execute a query only when this button is clicked and not on every
+`onChange` (previous Perses behavior).Now the `onChange` method is always called when something change in the editor.
 On the Perses app, queries are only executed when the user click on the "Run Query" button, however changes are still
 saved
-if user save the dashboard without clicking on "Run Query". But embedded use-cases might want to execute queries on
+if user save the dashboard without clicking on "Run Query".But embedded use-cases might want to execute queries on
 every change,
 so this new behavior allows both use-cases.
 
 In parallel, the caching of queries has been greatly improved to avoid memory leaks on dashboard refresh. More info can
-be found in related PR: [#3518](https://github.com/perses/perses/pull/3518)
+be found in related PR: [#3518](https: //github.com/perses/perses/pull/3518)
 And queries errors are now displayed at the query level (before it was only displayed at the panel level, could be hard
 to know which queries are causing issues).
 
@@ -86,6 +307,7 @@ export function FooExplorer(): ReactElement {
         </Stack>
     );
 }
+
 ```
 
 to this:

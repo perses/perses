@@ -19,18 +19,16 @@ import DatabaseIcon from 'mdi-material-ui/Database';
 import ShieldIcon from 'mdi-material-ui/Shield';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import KeyIcon from 'mdi-material-ui/Key';
-import {
-  getResourceDisplayName,
-  getResourceExtendedDisplayName,
-  DashboardSelector,
-  DatasourceResource,
-  VariableResource,
-  RoleResource,
-  RoleBindingResource,
-  SecretResource,
-} from '@perses-dev/core';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import {
+  DatasourceResource,
+  RoleBindingResource,
+  RoleResource,
+  SecretResource,
+  VariableResource,
+} from '@perses-dev/client';
+import { DashboardSelector } from '@perses-dev/spec';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog, CreateFolderDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';

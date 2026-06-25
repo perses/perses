@@ -22,9 +22,9 @@ import (
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	commonSpec "github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/plugin"
 )
 
 // Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
@@ -180,7 +180,7 @@ func buildVariableDependencies(variables []dashboard.Variable, projectVariables 
 	return definedDeps, nil
 }
 
-func findAllVariableUsedInPlugin(plugin commonSpec.Plugin) [][]string {
+func findAllVariableUsedInPlugin(plugin plugin.Plugin) [][]string {
 	var matches [][]string
 	findAllVariableUsed(reflect.ValueOf(plugin.Spec), &matches)
 	return matches

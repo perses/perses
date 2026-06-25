@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { EphemeralDashboardResource, fetchJson, StatusError } from '@perses-dev/core';
+
+import { EphemeralDashboardResource, fetchJson, StatusError } from '@perses-dev/client';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 

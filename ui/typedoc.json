@@ -1,5 +1,5 @@
 {
   "entryPointStrategy": "packages",
-  "entryPoints": ["core"],
+  "entryPoints": ["."],
   "out": "typedoc"
 }

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Tooltip } from '@mui/material';
-import { Action, Scope } from '@perses-dev/core';
 import { GridActionsCellItem } from '@mui/x-data-grid';
 import { ReactElement } from 'react';
+import { Action, Scope } from '@perses-dev/client';
 import { CRUDAction } from './CRUDAction';
 
 interface CRUDGridActionsCellItemProps {

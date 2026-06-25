@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, getMetadataProject, Secret } from '@perses-dev/core';
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -20,6 +19,7 @@ import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import { Action, getMetadataProject, Secret } from '@perses-dev/client';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';

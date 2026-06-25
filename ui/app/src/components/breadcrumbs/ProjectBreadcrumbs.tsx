@@ -13,8 +13,9 @@
 
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { ProjectResource } from '@perses-dev/client';
+import { getResourceDisplayName } from '@perses-dev/components';
 import { BreadcrumbVariant, HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {

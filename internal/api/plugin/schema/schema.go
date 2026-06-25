@@ -25,10 +25,10 @@ import (
 	"cuelang.org/go/cue/build"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
-	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
+	"github.com/perses/spec/go/module"
+	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,7 +39,7 @@ type LoadSchema struct {
 }
 
 // Load is loading the list of the schema associated with the given plugin module.
-func Load(pluginPath string, moduleSpec plugin.ModuleSpec) ([]LoadSchema, error) {
+func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]LoadSchema, error) {
 	var schemas []LoadSchema
 	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -118,7 +118,7 @@ func isPackageModel(file string) (bool, error) {
 	return strings.Contains(string(data), "package model"), nil
 }
 
-func getPlugin(plugins []plugin.Plugin, kind string) *plugin.Plugin {
+func getPlugin(plugins []module.Plugin, kind string) *module.Plugin {
 	for _, p := range plugins {
 		if p.Spec.Name == kind {
 			return &p
@@ -131,12 +131,13 @@ type Schema interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnloadDevPlugin(module v1.PluginModule)
-	ValidateDatasource(plugin common.Plugin, dtsName string) error
+	ValidateDatasource(plugin plugin.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*dashboard.Panel) error
-	ValidatePanel(plugin common.Plugin, panelName string) error
+	ValidatePanel(plugin plugin.Plugin, panelName string) error
 	ValidateGlobalVariable(v v1.VariableSpec) error
 	ValidateDashboardVariables([]dashboard.Variable) error
-	ValidateVariable(plugin common.Plugin, varName string) error
+	ValidateDashboardAnnotations([]dashboard.AnnotationSpec) error
+	ValidateVariable(plugin plugin.Plugin, varName string) error
 	GetDatasourceSchema(pluginName string) (*build.Instance, error)
 }
 
@@ -174,7 +175,7 @@ func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (s *completeSchema) ValidateDatasource(plugin common.Plugin, dtsName string) error {
+func (s *completeSchema) ValidateDatasource(plugin plugin.Plugin, dtsName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.datasources.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
@@ -209,7 +210,7 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 	return errors.Join(errs...)
 }
 
-func (s *completeSchema) ValidatePanel(plugin common.Plugin, panelName string) error {
+func (s *completeSchema) ValidatePanel(plugin plugin.Plugin, panelName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
@@ -262,13 +263,43 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 	return errors.Join(errs...)
 }
 
-func (s *completeSchema) ValidateVariable(plugin common.Plugin, varName string) error {
+func (s *completeSchema) ValidateVariable(plugin plugin.Plugin, varName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateVariable(plugin, varName)
 	}
 	return s.sch.validateVariable(plugin, varName)
+}
+
+func (s *completeSchema) ValidateDashboardAnnotations(annotations []dashboard.AnnotationSpec) error {
+	if len(annotations) == 0 {
+		return nil
+	}
+	if len(s.devSch.annotations) == 0 && len(s.sch.annotations) == 0 {
+		return fmt.Errorf("annotations schemas are not loaded")
+	}
+	var errs []error
+	for _, a := range annotations {
+		name := a.Display.Name
+		logrus.Tracef("Annotations to validate: %s", name)
+		if err := s.ValidateAnnotations(a.Plugin, name); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) == 0 {
+		logrus.Debug("All annotations are valid")
+	}
+	return errors.Join(errs...)
+}
+
+func (s *completeSchema) ValidateAnnotations(plugin plugin.Plugin, annoName string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	if _, ok := s.devSch.annotations.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
+		return s.devSch.validateAnnotation(plugin, annoName)
+	}
+	return s.sch.validateAnnotation(plugin, annoName)
 }
 
 func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance, error) {
@@ -285,7 +316,7 @@ func (s *completeSchema) GetDatasourceSchema(pluginName string) (*build.Instance
 	return s.sch.getDatasourceSchema(pluginName, nil)
 }
 
-func (s *completeSchema) validateQuery(plugin common.Plugin, queryName string) error {
+func (s *completeSchema) validateQuery(plugin plugin.Plugin, queryName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	if _, ok := s.devSch.queries.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
@@ -298,6 +329,7 @@ type sch struct {
 	datasources tree.Tree[*build.Instance]
 	queries     tree.Tree[*build.Instance]
 	variables   tree.Tree[*build.Instance]
+	annotations tree.Tree[*build.Instance]
 	panels      tree.Tree[*build.Instance]
 }
 
@@ -306,12 +338,13 @@ func newSch() *sch {
 		datasources: make(tree.Tree[*build.Instance]),
 		queries:     make(tree.Tree[*build.Instance]),
 		variables:   make(tree.Tree[*build.Instance]),
+		annotations: make(tree.Tree[*build.Instance]),
 		panels:      make(tree.Tree[*build.Instance]),
 	}
 }
 
-func (s *sch) load(pluginPath string, module v1.PluginModule) error {
-	schemas, err := Load(pluginPath, module.Spec)
+func (s *sch) load(pluginPath string, pluginModule v1.PluginModule) error {
+	schemas, err := Load(pluginPath, pluginModule.Spec)
 	if err != nil {
 		return err
 	}
@@ -320,15 +353,17 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 			// Here the information about the "super type" of the query (aka TimeSeriesQuery for PrometheusTimeSeriesQuery) disappears.
 			// This is a known validation gap yet to be solved: because of this you can currently wrongly pass the validation
 			// with e.g the super type `LogQuery` & the plugin implementation `PrometheusTimeSeriesQuery`.
-			s.queries.Add(schema.Name, module.Metadata, schema.Instance)
+			s.queries.Add(schema.Name, pluginModule.Metadata, schema.Instance)
 		} else {
 			switch schema.Kind {
 			case plugin.KindDatasource:
-				s.datasources.Add(schema.Name, module.Metadata, schema.Instance)
+				s.datasources.Add(schema.Name, pluginModule.Metadata, schema.Instance)
 			case plugin.KindVariable:
-				s.variables.Add(schema.Name, module.Metadata, schema.Instance)
+				s.variables.Add(schema.Name, pluginModule.Metadata, schema.Instance)
+			case plugin.KindAnnotation:
+				s.annotations.Add(schema.Name, pluginModule.Metadata, schema.Instance)
 			case plugin.KindPanel:
-				s.panels.Add(schema.Name, module.Metadata, schema.Instance)
+				s.panels.Add(schema.Name, pluginModule.Metadata, schema.Instance)
 			default:
 				return fmt.Errorf("unknown kind %s", schema.Kind)
 			}
@@ -337,7 +372,7 @@ func (s *sch) load(pluginPath string, module v1.PluginModule) error {
 	return nil
 }
 
-func (s *sch) remove(kind plugin.Kind, name string, moduleMetadata plugin.ModuleMetadata) {
+func (s *sch) remove(kind plugin.Kind, name string, moduleMetadata module.Metadata) {
 	if kind.IsQuery() {
 		s.queries.Remove(name, moduleMetadata)
 	} else {
@@ -346,13 +381,15 @@ func (s *sch) remove(kind plugin.Kind, name string, moduleMetadata plugin.Module
 			s.datasources.Remove(name, moduleMetadata)
 		case plugin.KindVariable:
 			s.variables.Remove(name, moduleMetadata)
+		case plugin.KindAnnotation:
+			s.annotations.Remove(name, moduleMetadata)
 		case plugin.KindPanel:
 			s.panels.Remove(name, moduleMetadata)
 		}
 	}
 }
 
-func (s *sch) validateDatasource(plugin common.Plugin, dtsName string) error {
+func (s *sch) validateDatasource(plugin plugin.Plugin, dtsName string) error {
 	if len(s.datasources) == 0 {
 		return fmt.Errorf("datasource schemas are not loaded")
 	}
@@ -360,7 +397,7 @@ func (s *sch) validateDatasource(plugin common.Plugin, dtsName string) error {
 	return validatePlugin(plugin, instance, "datasource", dtsName)
 }
 
-func (s *sch) validatePanel(plugin common.Plugin, panelName string) error {
+func (s *sch) validatePanel(plugin plugin.Plugin, panelName string) error {
 	if s.panels == nil {
 		return fmt.Errorf("panel schemas are not loaded")
 	}
@@ -368,7 +405,7 @@ func (s *sch) validatePanel(plugin common.Plugin, panelName string) error {
 	return validatePlugin(plugin, instance, "panel", panelName)
 }
 
-func (s *sch) validateQuery(plugin common.Plugin, queryName string) error {
+func (s *sch) validateQuery(plugin plugin.Plugin, queryName string) error {
 	if s.queries == nil {
 		return fmt.Errorf("query schemas are not loaded")
 	}
@@ -376,7 +413,7 @@ func (s *sch) validateQuery(plugin common.Plugin, queryName string) error {
 	return validatePlugin(plugin, instance, "query", queryName)
 }
 
-func (s *sch) validateVariable(plugin common.Plugin, variableName string) error {
+func (s *sch) validateVariable(plugin plugin.Plugin, variableName string) error {
 	if len(s.variables) == 0 {
 		return fmt.Errorf("variable schemas are not loaded")
 	}
@@ -384,7 +421,15 @@ func (s *sch) validateVariable(plugin common.Plugin, variableName string) error 
 	return validatePlugin(plugin, instance, "variable", variableName)
 }
 
-func (s *sch) getDatasourceSchema(datasourceName string, metadata *common.PluginMetadata) (*build.Instance, error) {
+func (s *sch) validateAnnotation(plugin plugin.Plugin, annotationName string) error {
+	if len(s.annotations) == 0 {
+		return fmt.Errorf("annotation schemas are not loaded")
+	}
+	instance, _ := s.annotations.GetWithPluginMetadata(plugin.Kind, plugin.Metadata)
+	return validatePlugin(plugin, instance, "annotation", annotationName)
+}
+
+func (s *sch) getDatasourceSchema(datasourceName string, metadata *plugin.Metadata) (*build.Instance, error) {
 	if len(s.datasources) == 0 {
 		return nil, fmt.Errorf("datasource schemas are not loaded")
 	}

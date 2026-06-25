@@ -5,7 +5,7 @@
 package common
 
 // PluginMetadata
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.PluginMetadata
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/plugin/plugin.Metadata
 #PluginMetadata: {
 	// Version is optional. If not provided, it means the latest version available in the Perses instance.
 	version?: string @go(Version)
@@ -15,5 +15,5 @@ package common
 }
 
 // Plugin
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/common.Plugin
+// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/plugin/plugin.Plugin
 #Plugin: _

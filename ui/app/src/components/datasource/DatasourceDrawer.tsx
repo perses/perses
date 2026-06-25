@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Datasource, DatasourceDefinition } from '@perses-dev/core';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
+import { Datasource, DatasourceDefinition } from '@perses-dev/client';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';

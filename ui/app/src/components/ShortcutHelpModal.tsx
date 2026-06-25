@@ -21,6 +21,7 @@ import {
   SHORTCUT_CATEGORY_ORDER,
   ShortcutCategory,
   SHOW_SHORTCUTS_EVENT,
+  HotkeyMeta,
 } from '@perses-dev/dashboards';
 
 /** Modal displaying all registered keyboard shortcuts, grouped by category. */
@@ -68,7 +69,7 @@ function ShortcutHelpContent(): ReactElement {
 
     // Process single hotkeys
     for (const reg of hotkeys) {
-      const meta = reg.options.meta;
+      const meta = reg.options.meta as HotkeyMeta;
       if (meta?.category) {
         const category = meta.category as ShortcutCategory;
         if (groups[category]) {
@@ -83,7 +84,7 @@ function ShortcutHelpContent(): ReactElement {
 
     // Process sequences
     for (const reg of sequences) {
-      const meta = reg.options.meta;
+      const meta = reg.options.meta as HotkeyMeta;
       if (meta?.category) {
         const category = meta.category as ShortcutCategory;
         if (groups[category]) {

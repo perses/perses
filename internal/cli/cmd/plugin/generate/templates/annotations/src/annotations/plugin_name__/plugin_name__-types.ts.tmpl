@@ -1,0 +1,9 @@
+import { DatasourceSelector } from '@perses-dev/spec';
+
+export interface {{ .PluginPascalName }}Spec {
+  query: string;
+  datasource?: DatasourceSelector;
+  title?: string;
+  legend?: string;
+  tags?: string[];
+}

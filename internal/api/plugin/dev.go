@@ -18,7 +18,7 @@ import (
 
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
+	"github.com/perses/spec/go/module"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,13 +37,16 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 		}
 		pluginModule := v1.PluginModule{
 			Kind: v1.PluginModuleKind,
-			Metadata: plugin.ModuleMetadata{
+			Metadata: module.Metadata{
 				Name:     plg.Name,
 				Version:  plg.Version,
 				Registry: plg.Registry,
 			},
-			Spec: npmPackageData.Perses,
-			Status: &plugin.ModuleStatus{
+			Spec: v1.ModuleSpec{
+				SchemasPath: npmPackageData.Perses.SchemasPath,
+				Plugins:     npmPackageData.Perses.Plugins,
+			},
+			Status: &module.Status{
 				IsLoaded: true,
 				InDev:    true,
 			},
@@ -73,7 +76,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 	return p.storeLoadedList()
 }
 
-func (p *pluginFile) RefreshDevPlugin(metadata plugin.ModuleMetadata) error {
+func (p *pluginFile) RefreshDevPlugin(metadata module.Metadata) error {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()
 	plg, ok := p.devLoaded.Get(metadata.Name, metadata)
@@ -94,7 +97,7 @@ func (p *pluginFile) RefreshDevPlugin(metadata plugin.ModuleMetadata) error {
 	return nil
 }
 
-func (p *pluginFile) UnLoadDevPlugin(metadata plugin.ModuleMetadata) error {
+func (p *pluginFile) UnLoadDevPlugin(metadata module.Metadata) error {
 	p.mutex.Lock()
 	plg, ok := p.devLoaded.Get(metadata.Name, metadata)
 	if !ok {

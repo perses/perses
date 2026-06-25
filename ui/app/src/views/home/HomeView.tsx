@@ -14,7 +14,8 @@
 import { Box, Stack } from '@mui/material';
 import { ReactElement, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardSelector, ProjectResource } from '@perses-dev/core';
+import { DashboardSelector } from '@perses-dev/spec';
+import { ProjectResource } from '@perses-dev/client';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';

@@ -16,20 +16,18 @@ import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 're
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
-import {
-  getResourceDisplayName,
-  GlobalDatasourceResource,
-  getResourceExtendedDisplayName,
-  GlobalVariableResource,
-  GlobalRoleResource,
-  GlobalRoleBindingResource,
-  GlobalSecretResource,
-} from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
-import { useSnackbar } from '@perses-dev/components';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ShieldIcon from 'mdi-material-ui/Shield';
 import AccountIcon from 'mdi-material-ui/Account';
+import {
+  GlobalDatasourceResource,
+  GlobalRoleBindingResource,
+  GlobalRoleResource,
+  GlobalSecretResource,
+  GlobalVariableResource,
+} from '@perses-dev/client';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation, useGlobalVariableList } from '../../model/global-variable-client';
