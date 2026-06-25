@@ -58,7 +58,7 @@ func TestGetSchemaPluginDefinitionNotFound(t *testing.T) {
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathSchemas, "plugins", "NonExistentPlugin")).
 			Expect().
 			Status(http.StatusNotFound).
-			JSON().Object().HasValue("message", "plugin not found")
+			JSON().Object().HasValue("message", "document not found: plugin \"NonExistentPlugin\" not found")
 		return nil
 	})
 }
