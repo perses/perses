@@ -23,12 +23,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var cueSyntaxOptions = []cue.Option{
-	cue.InlineImports(true),
-	cue.All(),
-	cue.Hidden(false),
-}
-
 // Helper function to cast ast.Node into ast.Expr
 // Needed because ast.Node does not have to strictly implement ast.Expr interface
 func astNodeToAstExpr(node ast.Node) (ast.Expr, error) {
@@ -72,7 +66,11 @@ func ValueToASTExpr(v cue.Value) (ast.Expr, error) {
 
 func MarshalCUE(v cue.Value) ([]byte, error) {
 	// generate expr
-	node := v.Syntax(cueSyntaxOptions...)
+	node := v.Syntax(
+		cue.InlineImports(true),
+		cue.All(),
+		cue.Hidden(false),
+	)
 
 	// postprocess node to remove comments that break the file
 	postprocessSchemaASTNode(node)
@@ -118,7 +116,11 @@ func RemoveEmptyStringField(ctx *cue.Context, val cue.Value) (cue.Value, error) 
 
 // RenameDefinition renames all AST identifiers matching oldName to newName within value.
 func RenameDefinition(ctx *cue.Context, value cue.Value, oldName, newName string) cue.Value {
-	node := value.Syntax(cueSyntaxOptions...)
+	node := value.Syntax(
+		cue.InlineImports(true),
+		cue.All(),
+		cue.Hidden(false),
+	)
 
 	ast.Walk(node, func(n ast.Node) bool {
 		if x, ok := n.(*ast.Ident); ok && x.Name == oldName {

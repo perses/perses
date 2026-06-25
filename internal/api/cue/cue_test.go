@@ -17,6 +17,7 @@ import (
 	"strings"
 	"testing"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,11 @@ func TestASTNodeToASTExprASTFile(t *testing.T) {
 	// dropping any package/import declarations.
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`a: 1`)
-	node := v.Syntax(cueSyntaxOptions...)
+	node := v.Syntax(
+		cue.InlineImports(true),
+		cue.All(),
+		cue.Hidden(false),
+	)
 	expr, err := astNodeToAstExpr(node)
 	require.NoError(t, err)
 	assert.NotNil(t, expr)
