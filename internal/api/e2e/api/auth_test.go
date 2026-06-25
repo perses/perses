@@ -28,6 +28,8 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	roleV1 "github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
 	"github.com/stretchr/testify/assert"
@@ -488,5 +490,207 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 		assert.ErrorContains(t, err, "oauth2: cannot fetch token: 405 Method Not Allowed")
 
 		return nil
+	})
+}
+
+// oidcDeviceCodeLogin performs the device-code grant against the given OIDC provider slug and returns the Perses access token.
+func oidcDeviceCodeLogin(expect *httpexpect.Expect, slugID string) string {
+	jsonToken := expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOIDC, slugID, utils.PathToken)).
+		WithFormField("grant_type", modelAPI.GrantTypeDeviceCode).
+		WithFormField("device_code", "myCode").
+		Expect().
+		Status(http.StatusOK).
+		JSON()
+	return jsonToken.Path("$.access_token").String().Raw()
+}
+
+// TestAuth_OIDCProvider_ClaimGrantsGlobalRole verifies that a claim value mapped to a GlobalRole in the
+// provider config is honoured end-to-end: the user gets the GlobalRole's permissions without any DB RoleBinding.
+func TestAuth_OIDCProvider_ClaimGrantsGlobalRole(t *testing.T) {
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+		"roles": []string{"admin"},
+	})
+	defer providerServer.Close()
+
+	providerConfig.Provider.Claims = []apiConfig.ProviderClaimConfig{
+		{
+			ClaimName: "roles",
+			Mappings: []apiConfig.ClaimMapping{
+				{ClaimValue: "admin", RoleName: "admin"},
+			},
+		},
+	}
+
+	conf := e2eframework.DefaultAuthConfig()
+	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
+
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		// Create the GlobalRole "admin" that the claim mapping references.
+		globalRole := e2eframework.NewGlobalRole("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRole)
+
+		// Log in via device code — the OIDC mock returns roles: ["admin"] in the token.
+		token := oidcDeviceCodeLogin(expect, providerConfig.SlugID)
+
+		// The claim grants the admin GlobalRole (wildcard permissions), so creating a global role must succeed.
+		anotherRole := e2eframework.NewGlobalRole("another-role")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).
+			WithJSON(anotherRole).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
+			Expect().
+			Status(http.StatusOK)
+
+		// Without a token, the same request must be rejected.
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).
+			WithJSON(e2eframework.NewGlobalRole("no-token-role")).
+			Expect().
+			Status(http.StatusUnauthorized)
+
+		return []modelAPI.Entity{
+			e2eframework.NewUser("john.doeOIDC", ""),
+			globalRole,
+			anotherRole,
+		}
+	})
+}
+
+// TestAuth_OIDCProvider_WrongClaimValue_NoExtraPermissions verifies that when the token carries a claim value
+// that does not match any mapping, no extra permissions are granted.
+func TestAuth_OIDCProvider_WrongClaimValue_NoExtraPermissions(t *testing.T) {
+	// Token carries "viewer" but only "admin" is mapped.
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+		"roles": []string{"viewer"},
+	})
+	defer providerServer.Close()
+
+	providerConfig.Provider.Claims = []apiConfig.ProviderClaimConfig{
+		{
+			ClaimName: "roles",
+			Mappings: []apiConfig.ClaimMapping{
+				{ClaimValue: "admin", RoleName: "admin"},
+			},
+		},
+	}
+
+	conf := e2eframework.DefaultAuthConfig()
+	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
+
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		globalRole := e2eframework.NewGlobalRole("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRole)
+
+		token := oidcDeviceCodeLogin(expect, providerConfig.SlugID)
+
+		// "viewer" doesn't match "admin" mapping — creating a GlobalRole must be forbidden.
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).
+			WithJSON(e2eframework.NewGlobalRole("should-fail")).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		return []modelAPI.Entity{
+			e2eframework.NewUser("john.doeOIDC", ""),
+			globalRole,
+		}
+	})
+}
+
+// TestAuth_OIDCProvider_ClaimGrantsProjectRole verifies that a claim mapped to a project-scoped Role
+// grants permissions only within that project and not globally.
+func TestAuth_OIDCProvider_ClaimGrantsProjectRole(t *testing.T) {
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+		"roles": []string{"editor"},
+	})
+	defer providerServer.Close()
+
+	const projectName = "claim-test-project"
+
+	providerConfig.Provider.Claims = []apiConfig.ProviderClaimConfig{
+		{
+			ClaimName: "roles",
+			Mappings: []apiConfig.ClaimMapping{
+				{ClaimValue: "editor", RoleName: "editor", Project: projectName},
+			},
+		},
+	}
+
+	conf := e2eframework.DefaultAuthConfig()
+	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
+
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		// Create the project and the project-scoped Role "editor" with wildcard create permissions.
+		project := e2eframework.NewProject(projectName)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
+
+		editorRole := e2eframework.NewRole(projectName, "editor")
+		// Override to wildcard-create so we can POST any project resource without plugin validation.
+		editorRole.Spec.Permissions = []roleV1.Permission{
+			{Actions: []roleV1.Action{roleV1.CreateAction}, Scopes: []roleV1.Scope{roleV1.WildcardScope}},
+		}
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), editorRole)
+
+		token := oidcDeviceCodeLogin(expect, providerConfig.SlugID)
+
+		// The claim grants the project-scoped "editor" Role; creating a project-scoped Role must succeed.
+		innerRole := e2eframework.NewRole(projectName, "inner-role")
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, projectName, utils.PathRole)).
+			WithJSON(innerRole).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
+			Expect().
+			Status(http.StatusOK)
+
+		// The claim is project-scoped; creating a GlobalRole must be forbidden.
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).
+			WithJSON(e2eframework.NewGlobalRole("should-fail")).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		return []modelAPI.Entity{
+			e2eframework.NewUser("john.doeOIDC", ""),
+			innerRole,
+			editorRole,
+			project,
+		}
+	})
+}
+
+// TestAuth_OIDCProvider_NoClaims_NoExtraPermissions verifies that when the OIDC token carries no claims
+// matching the configured mappings, no extra permissions are granted.
+func TestAuth_OIDCProvider_NoClaims_NoExtraPermissions(t *testing.T) {
+	// Standard mock — no extra claims in the token.
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	defer providerServer.Close()
+
+	// Configure a mapping that would grant admin if the claim were present.
+	providerConfig.Provider.Claims = []apiConfig.ProviderClaimConfig{
+		{
+			ClaimName: "roles",
+			Mappings: []apiConfig.ClaimMapping{
+				{ClaimValue: "admin", RoleName: "admin"},
+			},
+		},
+	}
+
+	conf := e2eframework.DefaultAuthConfig()
+	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
+
+	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		globalRole := e2eframework.NewGlobalRole("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRole)
+
+		token := oidcDeviceCodeLogin(expect, providerConfig.SlugID)
+
+		// No "roles" claim in the token — the mapping is never triggered, so this must be forbidden.
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).
+			WithJSON(e2eframework.NewGlobalRole("should-fail")).
+			WithHeader(e2eframework.CreateAuthorizationHeader(token)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		return []modelAPI.Entity{
+			e2eframework.NewUser("john.doeOIDC", ""),
+			globalRole,
+		}
 	})
 }
