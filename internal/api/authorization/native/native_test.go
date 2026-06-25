@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/perses/perses/internal/api/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
@@ -263,6 +264,148 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for b.Loop() {
 				mockCache.hasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
+			}
+		})
+	}
+}
+
+// makeNativeWithMappings builds a native struct suitable for unit-testing claim logic
+// without any database dependencies.
+func makeNativeWithMappings(claimMappings map[providerKey][]claimRoleMapping, cacheObj *cache) *native {
+	return &native{
+		cache:         cacheObj,
+		claimMappings: claimMappings,
+	}
+}
+
+func makeJWTClaims(kind, id string, claims map[string][]string) *crypto.JWTClaims {
+	return &crypto.JWTClaims{
+		ProviderInfo:    crypto.ProviderInfo{ProviderKind: kind, ProviderID: id},
+		PersistedClaims: claims,
+	}
+}
+
+func TestClaimPermissions(t *testing.T) {
+	// Shared GlobalRole "admin" with wildcard permissions.
+	adminGlobalRole := &v1.GlobalRole{
+		Metadata: v1.Metadata{Name: "admin"},
+		Spec: v1.RoleSpec{
+			Permissions: []role.Permission{
+				{Actions: []role.Action{role.WildcardAction}, Scopes: []role.Scope{role.WildcardScope}},
+			},
+		},
+	}
+	// Project-scoped Role "editor" in "platform".
+	editorRole := &v1.Role{
+		Metadata: v1.ProjectMetadata{
+			Metadata:               v1.Metadata{Name: "editor"},
+			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{Project: "platform"},
+		},
+		Spec: v1.RoleSpec{
+			Permissions: []role.Permission{
+				{Actions: []role.Action{role.ReadAction, role.UpdateAction}, Scopes: []role.Scope{role.DashboardScope}},
+			},
+		},
+	}
+
+	testCache := &cache{
+		globalRoles: []*v1.GlobalRole{adminGlobalRole},
+		roles:       []*v1.Role{editorRole},
+	}
+
+	mappings := map[providerKey][]claimRoleMapping{
+		{kind: "oidc", id: "keycloak"}: {
+			{claimName: "roles", claimValue: "admin", roleName: "admin", project: ""},
+			{claimName: "roles", claimValue: "ops", roleName: "editor", project: "platform"},
+		},
+	}
+	n := makeNativeWithMappings(mappings, testCache)
+
+	testSuites := []struct {
+		title          string
+		claims         *crypto.JWTClaims
+		expectedNil    bool
+		expectedKeys   []string
+	}{
+		{
+			title:       "nil claims returns nil",
+			claims:      nil,
+			expectedNil: true,
+		},
+		{
+			title:       "empty PersistedClaims returns nil",
+			claims:      makeJWTClaims("oidc", "keycloak", nil),
+			expectedNil: true,
+		},
+		{
+			title:       "unknown provider key returns nil",
+			claims:      makeJWTClaims("oauth", "github", map[string][]string{"roles": {"admin"}}),
+			expectedNil: true,
+		},
+		{
+			title:       "GlobalRole mapping match returns wildcard project key",
+			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin"}}),
+			expectedNil: false,
+			expectedKeys: []string{v1.WildcardProject},
+		},
+		{
+			title:       "claim value not in mapping returns nil",
+			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"viewer"}}),
+			expectedNil: true,
+		},
+		{
+			title:       "project-scoped Role mapping match returns project key",
+			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"ops"}}),
+			expectedNil: false,
+			expectedKeys: []string{"platform"},
+		},
+		{
+			title:       "both global and project mappings match",
+			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin", "ops"}}),
+			expectedNil: false,
+			expectedKeys: []string{v1.WildcardProject, "platform"},
+		},
+		{
+			title: "unknown GlobalRole name logs warning and returns nil",
+			claims: makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}),
+			expectedNil: true,
+		},
+	}
+
+	// Extra case: unknown GlobalRole name in mappings
+	nWithBadMapping := makeNativeWithMappings(map[providerKey][]claimRoleMapping{
+		{kind: "oidc", id: "keycloak"}: {
+			{claimName: "roles", claimValue: "unknown-role", roleName: "nonexistent", project: ""},
+		},
+	}, testCache)
+
+	t.Run("unknown GlobalRole name returns nil", func(t *testing.T) {
+		result := nWithBadMapping.claimPermissions(makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}))
+		assert.Nil(t, result)
+	})
+
+	t.Run("unknown project Role name returns nil", func(t *testing.T) {
+		nBadProject := makeNativeWithMappings(map[providerKey][]claimRoleMapping{
+			{kind: "oidc", id: "keycloak"}: {
+				{claimName: "roles", claimValue: "dev", roleName: "nonexistent", project: "platform"},
+			},
+		}, testCache)
+		result := nBadProject.claimPermissions(makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"dev"}}))
+		assert.Nil(t, result)
+	})
+
+	for i := range testSuites {
+		test := testSuites[i]
+		t.Run(test.title, func(t *testing.T) {
+			result := n.claimPermissions(test.claims)
+			if test.expectedNil {
+				assert.Nil(t, result)
+				return
+			}
+			assert.NotNil(t, result)
+			for _, key := range test.expectedKeys {
+				assert.Contains(t, result, key, "expected project key %q in result", key)
+				assert.NotEmpty(t, result[key])
 			}
 		})
 	}
