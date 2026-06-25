@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Accordion, AccordionDetails, Chip, AccordionSummary, Box, Divider, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, Chip, AccordionSummary, Box, Typography } from '@mui/material';
 
 import { ReactElement, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
@@ -26,6 +26,7 @@ import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import { useUserPermissions } from '../../model/user-client';
 import { useAuthorizationContext } from '../../context/Authorization';
 import { normalizePermissions } from './profile-permissions-utils';
+import { ProfileContainer } from './ProfileContainer';
 
 const ProfilePermissions = (): ReactElement => {
   const { username } = useAuthorizationContext();
@@ -52,128 +53,115 @@ const ProfilePermissions = (): ReactElement => {
   };
 
   return (
-    <Box data-testid="permissions-container" sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: (theme) => theme.spacing(2, 2),
-          gap: 0.5,
-        }}
-      >
-        <ShieldAccount sx={{ fontSize: 24 }} />
-        <Typography variant="h1" sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-          Permissions and roles
-        </Typography>
-      </Box>
-      <Divider />
-      <Box sx={{ padding: (theme) => theme.spacing(2, 2) }}>
-        {normalizedPermissions.map((item) => (
-          <Accordion
-            data-testid={`${item.key}-according`}
+    <ProfileContainer
+      icon={<ShieldAccount sx={{ fontSize: 24 }} />}
+      title="Permissions and roles"
+      testId="permissions-container"
+    >
+      {normalizedPermissions.map((item) => (
+        <Accordion
+          data-testid={`${item.key}-according`}
+          sx={{
+            boxShadow: 'none',
+            outline: expandedAccording.includes(item.key) ? '1px solid' : 'none',
+            outlineColor: 'divider',
+          }}
+          expanded={expandedAccording.includes(item.key)}
+          onChange={() => handleAccordingOnChange(item.key)}
+          key={item.key}
+        >
+          <AccordionSummary
+            expandIcon={<ChevronDownIcon />}
             sx={{
-              boxShadow: 'none',
               outline: expandedAccording.includes(item.key) ? '1px solid' : 'none',
               outlineColor: 'divider',
+              paddingBottom: 1,
             }}
-            expanded={expandedAccording.includes(item.key)}
-            onChange={() => handleAccordingOnChange(item.key)}
-            key={item.key}
+            id={item.key}
           >
-            <AccordionSummary
-              expandIcon={<ChevronDownIcon />}
-              sx={{
-                outline: expandedAccording.includes(item.key) ? '1px solid' : 'none',
-                outlineColor: 'divider',
-                paddingBottom: 1,
-              }}
-              id={item.key}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {item.key !== '*' && <Archive sx={{ fontSize: 24 }} />}
-                <Typography variant="h2">{item.key === '*' ? 'Global' : item.key}</Typography>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>
-                        <Typography variant="h4" fontWeight="bold">
-                          Actions
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="h4" fontWeight="bold">
-                          Scopes
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(item.permissions || []).map((permission, index) =>
-                      permission.actions.length && permission.scopes.length ? (
-                        <TableRow
-                          data-testid={`${item.key}-permission-${index}`}
-                          key={`permission-${index}`}
-                          sx={{
-                            borderBottom: `${index !== item.permissions.length - 1 ? '1px solid' : 'none'}`,
-                            borderColor: 'divider',
-                          }}
-                        >
-                          <TableCell sx={{ borderBottom: 'none' }}>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              {!permission.actions.includes('*') ? (
-                                permission.actions.map((a) => (
-                                  <Chip
-                                    data-testid={`${item.key}-permission-${index}-action-${a}`}
-                                    key={`permission-${index}-${a}`}
-                                    label={a}
-                                  />
-                                ))
-                              ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {item.key !== '*' && <Archive sx={{ fontSize: 24 }} />}
+              <Typography variant="h2">{item.key === '*' ? 'Global' : item.key}</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      <Typography variant="h4" fontWeight="bold">
+                        Actions
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="h4" fontWeight="bold">
+                        Scopes
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(item.permissions || []).map((permission, index) =>
+                    permission.actions.length && permission.scopes.length ? (
+                      <TableRow
+                        data-testid={`${item.key}-permission-${index}`}
+                        key={`permission-${index}`}
+                        sx={{
+                          borderBottom: `${index !== item.permissions.length - 1 ? '1px solid' : 'none'}`,
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <TableCell sx={{ borderBottom: 'none' }}>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            {!permission.actions.includes('*') ? (
+                              permission.actions.map((a) => (
                                 <Chip
-                                  data-testid={`${item.key}-permission-${index}-action-all`}
-                                  key={`permission-${index}-all`}
-                                  label="All Actions"
-                                  sx={{ fontWeight: 'bold' }}
+                                  data-testid={`${item.key}-permission-${index}-action-${a}`}
+                                  key={`permission-${index}-${a}`}
+                                  label={a}
                                 />
-                              )}
-                            </Box>
-                          </TableCell>
-                          <TableCell sx={{ borderBottom: 'none' }}>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              {!permission.scopes.includes('*') ? (
-                                permission.scopes.map((s) => (
-                                  <Chip
-                                    data-testid={`${item.key}-permission-${index}-scope-${s}`}
-                                    key={`permission-${index}-${s}`}
-                                    label={s}
-                                  />
-                                ))
-                              ) : (
+                              ))
+                            ) : (
+                              <Chip
+                                data-testid={`${item.key}-permission-${index}-action-all`}
+                                key={`permission-${index}-all`}
+                                label="All Actions"
+                                sx={{ fontWeight: 'bold' }}
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ borderBottom: 'none' }}>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            {!permission.scopes.includes('*') ? (
+                              permission.scopes.map((s) => (
                                 <Chip
-                                  data-testid={`${item.key}-permission-${index}-scope-all`}
-                                  key={`permission-${index}-all`}
-                                  label="All Resources"
-                                  sx={{ fontWeight: 'bold' }}
+                                  data-testid={`${item.key}-permission-${index}-scope-${s}`}
+                                  key={`permission-${index}-${s}`}
+                                  label={s}
                                 />
-                              )}
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      ) : null
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Box>
-    </Box>
+                              ))
+                            ) : (
+                              <Chip
+                                data-testid={`${item.key}-permission-${index}-scope-all`}
+                                key={`permission-${index}-all`}
+                                label="All Resources"
+                                sx={{ fontWeight: 'bold' }}
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ) : null
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </AccordionDetails>
+        </Accordion>
+      ))}
+    </ProfileContainer>
   );
 };
 

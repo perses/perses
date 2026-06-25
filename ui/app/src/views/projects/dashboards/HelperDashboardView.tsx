@@ -63,6 +63,9 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
+  //TODO: We should pass down userPreferenceTimezone to the dashboard view using a prop
+  // Picking the value from the useLocalStorage is a bad practice, because a component should technically have no clue about the app level local storage
+
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
