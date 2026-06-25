@@ -206,6 +206,18 @@ func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect
 	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 }
 
+// WithServiceManager is like WithServer but exposes the full dependency.Manager
+// (including Service()) rather than just PersistenceManager. Use this for tests
+// that need to drive internal services directly (e.g. provisioning).
+func WithServiceManager(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager) []modelAPI.Entity) {
+	conf := DefaultConfig()
+	server, expect, dependencyManager := CreateServer(t, conf)
+	defer dependencyManager.Persistence().GetPersesDAO().Close()
+	defer server.Close()
+	entities := testFunc(server, expect, dependencyManager)
+	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
+}
+
 func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager, string) []modelAPI.Entity) {
 	conf := DefaultAuthConfig()
 	server, expect, dependencyManager := CreateServer(t, conf)
