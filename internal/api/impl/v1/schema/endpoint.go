@@ -57,9 +57,8 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
-	cueCtx := cuecontext.New()
 
-	result, err := e.pluginSvc.Schema().GenerateDashboardSchema(cueCtx)
+	result, err := e.pluginSvc.Schema().GenerateDashboardSchema()
 	if err != nil {
 		logrus.WithError(err).Error("unable to generate dashboard schema")
 		return apiinterface.InternalError

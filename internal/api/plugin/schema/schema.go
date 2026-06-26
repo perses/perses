@@ -24,6 +24,7 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
+	"cuelang.org/go/cue/cuecontext"
 	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -143,7 +144,7 @@ type Schema interface {
 	GetAllSchemas() []LoadSchema
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
-	GenerateDashboardSchema(ctx *cue.Context) (cue.Value, error)
+	GenerateDashboardSchema() (cue.Value, error)
 }
 
 func New() Schema {
@@ -339,10 +340,11 @@ func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, 
 	return s.sch.getSchema(name, version, registry)
 }
 
-func (s *completeSchema) GenerateDashboardSchema(ctx *cue.Context) (cue.Value, error) {
+func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
+	ctx := cuecontext.New()
 	plugins := map[plugin.Kind]cue.Value{}
 	for _, kind := range []plugin.Kind{
 		plugin.KindDatasource, plugin.KindPanel,
