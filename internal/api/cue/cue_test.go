@@ -63,7 +63,7 @@ func TestCueValueToHTTPDataValidValue(t *testing.T) {
 	v := ctx.CompileString(`#Spec: { kind: string }`)
 	require.NoError(t, v.Err())
 
-	data, err := MarshalCUE(v)
+	data, err := Marshal(v)
 	require.NoError(t, err)
 	assert.NotEmpty(t, data)
 	assert.Contains(t, string(data), "kind")
@@ -76,7 +76,7 @@ func TestCueValueToHTTPDataRemoveExplicitErrorComment(t *testing.T) {
 	ctx := cuecontext.New()
 	v := ctx.CompileString(`x: _|_`)
 
-	data, err := MarshalCUE(v)
+	data, err := Marshal(v)
 	require.NoError(t, err)
 	assert.False(t,
 		strings.Contains(string(data), "// explicit error (_|_ literal) in source"),
@@ -93,7 +93,7 @@ func TestRemoveEmptyStringField(t *testing.T) {
 	result, err := RemoveEmptyStringField(ctx, v)
 	require.NoError(t, err)
 
-	data, err := MarshalCUE(result)
+	data, err := Marshal(result)
 	require.NoError(t, err)
 	body := string(data)
 	assert.NotContains(t, body, `""`)
@@ -107,7 +107,7 @@ func TestRenameDefinition(t *testing.T) {
 
 	result := RenameDefinition(ctx, v, "_OldName_0", "_NewName_0")
 
-	data, err := MarshalCUE(result)
+	data, err := Marshal(result)
 	require.NoError(t, err)
 	body := string(data)
 	assert.NotContains(t, body, "_OldName_0")

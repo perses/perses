@@ -65,7 +65,7 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	data, err := apiCue.MarshalCUE(result)
+	data, err := apiCue.Marshal(result)
 	if err != nil {
 		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
 		return apiinterface.InternalError
@@ -118,7 +118,7 @@ func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
 		return nil, apiinterface.InternalError
 	}
 
-	data, exportErr := apiCue.MarshalCUE(list)
+	data, exportErr := apiCue.Marshal(list)
 	if exportErr != nil {
 		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
 		return nil, apiinterface.InternalError

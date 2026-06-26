@@ -64,7 +64,7 @@ func ValueToASTExpr(v cue.Value) (ast.Expr, error) {
 	return expr, nil
 }
 
-func MarshalCUE(v cue.Value) ([]byte, error) {
+func Marshal(v cue.Value) ([]byte, error) {
 	// generate expr
 	node := v.Syntax(
 		cue.InlineImports(true),
