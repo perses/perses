@@ -33,7 +33,7 @@ import (
 )
 
 func TestProvisioningSkipsResourcesInUnknownProject(t *testing.T) {
-	e2eframework.WithServiceManager(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		// Only "existingproject" is created. The provisioned roles below target
 		// "existingproject" (must be provisioned) and "unknownproject" (must be refused).
 		existingProject := e2eframework.NewProject("existingproject")
@@ -63,7 +63,7 @@ func TestProvisioningSkipsResourcesInUnknownProject(t *testing.T) {
 }
 
 func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
-	e2eframework.WithServiceManager(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		// Both the project and a role belonging to it are provisioned in the same
 		// batch, with no project pre-created. The role file is named so that
 		// filepath.Walk reads it *before* the project file; the provisioning service
