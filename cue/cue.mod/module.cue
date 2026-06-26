@@ -7,7 +7,7 @@ source: {
 }
 deps: {
 	"github.com/perses/shared/cue@v0": {
-		v:       "v0.54.0-beta.8"
+		v:       "v0.54.0-beta.9"
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
