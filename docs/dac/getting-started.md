@@ -184,7 +184,6 @@ import (
 )
 
 func main() {
-	flag.Parse()
 	exec := sdk.NewExec()
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.ProjectName("MyProject"),

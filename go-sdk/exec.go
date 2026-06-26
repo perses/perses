@@ -54,6 +54,7 @@ func executeDashboardBuilder(builder dashboard.Builder, outputFormat string, wri
 }
 
 func NewExec() Exec {
+	flag.Parse()
 	output := flag.Lookup("output").Value.String()
 
 	return Exec{
