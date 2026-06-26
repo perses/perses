@@ -92,6 +92,11 @@ export function useIsKeyboardShortcutsEnabled(): boolean {
   return config.frontend.enable_keyboard_shortcuts ?? true;
 }
 
+export function useIsAutoRefreshDashboardsEnabled(): boolean {
+  const { config } = useConfigContext();
+  return config.frontend.event_watching?.auto_refresh_dashboards ?? false;
+}
+
 export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
   return config.ephemeral_dashboard.enable;

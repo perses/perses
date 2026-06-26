@@ -14,9 +14,12 @@
 package toolbox
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
@@ -58,7 +61,10 @@ type Toolbox[T api.Entity, K databaseModel.Query] interface {
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
 	List(ctx echo.Context, q K) error
+	Watch(ctx echo.Context) error
 }
+
+const watchKeepAlivePeriod = 30 * time.Second
 
 func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface.Service[T, K, V], authz authorization.Authorization, kind v1.Kind, caseSensitive bool) Toolbox[T, V] {
 	return &toolbox[T, K, V]{
@@ -209,6 +215,156 @@ func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
 	}
 
 	return ctx.JSON(http.StatusOK, list)
+}
+
+func (t *toolbox[T, K, V]) Watch(ctx echo.Context) error {
+	parameters := ExtractParameters(ctx, t.caseSensitive)
+	hasProjectParam := len(parameters.Project) > 0
+	hasNameParam := len(parameters.Name) > 0
+	projectParam := ""
+	if hasProjectParam {
+		projectParam = parameters.Project
+	}
+	nameParam := ""
+	if hasNameParam {
+		nameParam = parameters.Name
+	}
+
+	scope, err := role.GetScope(string(t.kind))
+	if err != nil {
+		return err
+	}
+	if err := t.precheckWatchPermission(ctx, *scope, projectParam, nameParam, hasProjectParam, hasNameParam); err != nil {
+		return err
+	}
+
+	flusher, ok := ctx.Response().Writer.(http.Flusher)
+	if !ok {
+		return fmt.Errorf("%w: streaming is not supported", apiInterface.InternalError)
+	}
+
+	events, watchErr := t.service.Watch(ctx.Request().Context())
+	if watchErr != nil {
+		if databaseModel.IsWatchNotEnabled(watchErr) {
+			return apiInterface.HandleNotFoundError(watchErr.Error())
+		}
+		if databaseModel.IsNoSubscriberAvailable(watchErr) {
+			ctx.Response().Header().Set("Retry-After", "1")
+			return echo.NewHTTPError(http.StatusServiceUnavailable, watchErr.Error())
+		}
+		return apiInterface.HandleError(watchErr)
+	}
+
+	header := ctx.Response().Header()
+	header.Set(echo.HeaderContentType, "text/event-stream")
+	header.Set(echo.HeaderCacheControl, "no-cache")
+	header.Set("Connection", "keep-alive")
+	ctx.Response().WriteHeader(http.StatusOK)
+
+	if err := writeWatchSSE(ctx.Response().Writer, "connected", map[string]string{"status": "ok"}); err != nil {
+		return err
+	}
+	flusher.Flush()
+
+	ticker := time.NewTicker(watchKeepAlivePeriod)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Request().Context().Done():
+			return nil
+		case event, ok := <-events:
+			if !ok {
+				return nil
+			}
+			if !watchEventMatches(event, projectParam, nameParam, hasProjectParam, hasNameParam) {
+				continue
+			}
+			if !t.isWatchEventAuthorized(ctx, *scope, event, projectParam, nameParam, hasProjectParam, hasNameParam) {
+				continue
+			}
+			if err := writeWatchSSE(ctx.Response().Writer, "resource", event); err != nil {
+				return err
+			}
+			flusher.Flush()
+		case <-ticker.C:
+			if _, err := io.WriteString(ctx.Response().Writer, ": keepalive\n\n"); err != nil {
+				return err
+			}
+			flusher.Flush()
+		}
+	}
+}
+
+func (t *toolbox[T, K, V]) precheckWatchPermission(ctx echo.Context, scope role.Scope, projectParam, nameParam string, hasProjectParam bool, hasNameParam bool) error {
+	if !t.authz.IsEnabled() {
+		return nil
+	}
+	if role.IsGlobalScope(scope) {
+		if ok := t.authz.HasPermission(ctx, role.ReadAction, v1.WildcardProject, scope); !ok {
+			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' scope", role.ReadAction, scope))
+		}
+		return nil
+	}
+	permProject := ""
+	if scope == role.ProjectScope {
+		if hasNameParam {
+			permProject = nameParam
+		}
+	} else if hasProjectParam {
+		permProject = projectParam
+	}
+	if len(permProject) == 0 {
+		return nil
+	}
+	if ok := t.authz.HasPermission(ctx, role.ReadAction, permProject, scope); !ok {
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' scope", role.ReadAction, permProject, scope))
+	}
+	return nil
+}
+
+func (t *toolbox[T, K, V]) isWatchEventAuthorized(ctx echo.Context, scope role.Scope, event *v1.WatchEvent, projectParam, nameParam string, hasProjectParam bool, hasNameParam bool) bool {
+	if !t.authz.IsEnabled() || role.IsGlobalScope(scope) {
+		return true
+	}
+	permProject := ""
+	if scope == role.ProjectScope {
+		if hasNameParam {
+			permProject = nameParam
+		} else {
+			permProject = event.Name
+		}
+	} else if hasProjectParam {
+		permProject = projectParam
+	} else {
+		permProject = event.Project
+	}
+	if len(permProject) == 0 {
+		return false
+	}
+	return t.authz.HasPermission(ctx, role.ReadAction, permProject, scope)
+}
+
+func watchEventMatches(event *v1.WatchEvent, projectParam, nameParam string, hasProjectParam bool, hasNameParam bool) bool {
+	if event == nil {
+		return false
+	}
+	if hasProjectParam && event.Project != projectParam {
+		return false
+	}
+	if hasNameParam && event.Name != nameParam {
+		return false
+	}
+	return true
+}
+
+func writeWatchSSE(writer io.Writer, eventType string, payload any) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	_, err = io.WriteString(writer, fmt.Sprintf("event: %s\ndata: %s\n\n", eventType, data))
+	return err
 }
 
 func (t *toolbox[T, K, V]) bind(ctx echo.Context, entity api.Entity) error {

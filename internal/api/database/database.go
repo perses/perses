@@ -26,42 +26,17 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
 
 type dao struct {
 	databaseModel.DAO
-	client databaseModel.DAO
 }
 
-func (d *dao) Close() error {
-	return d.client.Close()
-}
-
-func (d *dao) Init() error {
-	return d.client.Init()
-}
-func (d *dao) IsCaseSensitive() bool {
-	return d.client.IsCaseSensitive()
-}
-func (d *dao) Create(entity modelAPI.Entity) error {
-	return d.client.Create(entity)
-}
-func (d *dao) Upsert(entity modelAPI.Entity) error {
-	return d.client.Upsert(entity)
-}
-func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	return d.client.Get(kind, metadata, entity)
-}
-func (d *dao) Query(query databaseModel.Query, slice any) error {
-	return d.client.Query(query, slice)
-}
-func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
-	return d.client.RawQuery(query)
-}
 func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
-	raws, err := d.client.RawQuery(query)
+	raws, err := d.RawQuery(query)
 	if err != nil {
 		return nil, err
 	}
@@ -72,18 +47,6 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
 	return result, nil
-}
-func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	return d.client.Delete(kind, metadata)
-}
-func (d *dao) DeleteByQuery(query databaseModel.Query) error {
-	return d.client.DeleteByQuery(query)
-}
-func (d *dao) HealthCheck() bool {
-	return d.client.HealthCheck()
-}
-func (d *dao) GetLatestUpdateTime(kind []modelV1.Kind) (*string, error) {
-	return d.client.GetLatestUpdateTime(kind)
 }
 
 func New(conf config.Database) (databaseModel.DAO, error) {
@@ -150,5 +113,38 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 	} else {
 		return nil, fmt.Errorf("no dao defined")
 	}
-	return &dao{client: client}, nil
+	return &dao{DAO: client}, nil
+}
+
+type watchableDAO struct {
+	databaseModel.DAO
+	publisher databaseModel.EventPublisher
+}
+
+func NewWatchableDAO(baseDAO databaseModel.DAO, publisher databaseModel.EventPublisher) databaseModel.DAO {
+	return &watchableDAO{DAO: baseDAO, publisher: publisher}
+}
+
+func (d *watchableDAO) Create(entity modelAPI.Entity) error {
+	if err := d.DAO.Create(entity); err != nil {
+		return err
+	}
+	d.publisher.Publish(modelV1.NewWatchEventFromEntity(entity, role.CreateAction))
+	return nil
+}
+
+func (d *watchableDAO) Upsert(entity modelAPI.Entity) error {
+	if err := d.DAO.Upsert(entity); err != nil {
+		return err
+	}
+	d.publisher.Publish(modelV1.NewWatchEventFromEntity(entity, role.UpdateAction))
+	return nil
+}
+
+func (d *watchableDAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
+	if err := d.DAO.Delete(kind, metadata); err != nil {
+		return err
+	}
+	d.publisher.Publish(modelV1.NewDeleteWatchEvent(kind, metadata))
+	return nil
 }

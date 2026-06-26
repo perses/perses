@@ -1,0 +1,128 @@
+kind: Dashboard
+metadata:
+  name: node-exporter-simple-copy
+  createdAt: "0001-01-01T00:00:00Z"
+  project: MyProject
+  updatedAt: "0001-01-01T00:00:00Z"
+  version: 0
+spec:
+  display:
+    name: Node Exporter / Simple (copy)
+  panels:
+    "0_0":
+      kind: Panel
+      spec:
+        display:
+          name: System load (1m)
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_load1{instance=~"$instance"}
+    "0_1":
+      kind: Panel
+      spec:
+        display:
+          name: Root filesystem used %
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 100 - (node_filesystem_avail_bytes{instance=~"$instance",mountpoint="/"} / node_filesystem_size_bytes{instance=~"$instance",mountpoint="/"} * 100)
+    "0_2":
+      kind: Panel
+      spec:
+        display:
+          name: RAM used dd%
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: 100 - (node_memory_MemAvailable_bytes{instance=~"$instance"} / node_memory_MemTotal_bytes{instance=~"$instance"} * 100)
+    "1_0":
+      kind: Panel
+      spec:
+        display:
+          name: CPU usage
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (mode) (rate(node_cpu_seconds_total{instance=~"$instance"}[5m]))
+    "1_1":
+      kind: Panel
+      spec:
+        display:
+          name: Memory usage
+        plugin:
+          kind: TimeSeriesChart
+          spec: {}
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: node_memory_MemTotal_bytes{instance=~"$instance"} - node_memory_MemAvailable_bytes{instance=~"$instance"}
+  layouts:
+    - kind: Grid
+      spec:
+        display:
+          title: Overview
+        items:
+          - x: 0
+            "y": 0
+            width: 8
+            height: 8
+            content:
+              $ref: '#/spec/panels/0_0'
+          - x: 8
+            "y": 0
+            width: 8
+            height: 8
+            content:
+              $ref: '#/spec/panels/0_1'
+          - x: 16
+            "y": 0
+            width: 8
+            height: 8
+            content:
+              $ref: '#/spec/panels/0_2'
+    - kind: Grid
+      spec:
+        display:
+          title: Time series
+        items:
+          - x: 0
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: '#/spec/panels/1_0'
+          - x: 12
+            "y": 0
+            width: 12
+            height: 8
+            content:
+              $ref: '#/spec/panels/1_1'
+  duration: 1h

@@ -14,6 +14,7 @@
 package dashboard
 
 import (
+	"context"
 	"encoding/json"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -55,6 +56,7 @@ type DAO interface {
 	RawList(q *Query) ([]json.RawMessage, error)
 	MetadataList(q *Query) ([]api.Entity, error)
 	RawMetadataList(q *Query) ([]json.RawMessage, error)
+	Watch(ctx context.Context) (<-chan *v1.WatchEvent, error)
 }
 
 type Service interface {

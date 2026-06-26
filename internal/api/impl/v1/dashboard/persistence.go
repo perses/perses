@@ -14,24 +14,38 @@
 package dashboard
 
 import (
+	"context"
 	"encoding/json"
 
+	"github.com/perses/perses/internal/api/database"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+const kind = v1.KindDashboard
+
 type dao struct {
 	dashboard.DAO
-	client databaseModel.DAO
-	kind   v1.Kind
+	client     databaseModel.DAO
+	subscriber databaseModel.EventSubscriber
+	kind       v1.Kind
 }
 
-func NewDAO(persesDAO databaseModel.DAO) dashboard.DAO {
+func NewDAO(watchConf config.Watch, persesDAO databaseModel.DAO) dashboard.DAO {
+	client := persesDAO
+	var subscriber databaseModel.EventSubscriber
+	if watchConf.IsEnabled(kind) {
+		daoWatcher := databaseModel.NewEventWatcher()
+		client = database.NewWatchableDAO(persesDAO, daoWatcher)
+		subscriber = daoWatcher
+	}
 	return &dao{
-		client: persesDAO,
-		kind:   v1.KindDashboard,
+		client:     client,
+		subscriber: subscriber,
+		kind:       kind,
 	}
 }
 
@@ -78,4 +92,11 @@ func (d *dao) MetadataList(q *dashboard.Query) ([]api.Entity, error) {
 
 func (d *dao) RawMetadataList(q *dashboard.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
+}
+
+func (d *dao) Watch(ctx context.Context) (<-chan *v1.WatchEvent, error) {
+	if d.subscriber == nil {
+		return nil, databaseModel.ErrWatchNotEnabled
+	}
+	return d.subscriber.Subscribe(ctx)
 }

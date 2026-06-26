@@ -1,0 +1,239 @@
+kind: Dashboard
+metadata:
+    name: withoutVariable
+    createdAt: 0001-01-01T00:00:00Z
+    updatedAt: 0001-01-01T00:00:00Z
+    version: 0
+    project: MyProject
+spec:
+    display:
+        name: Without Variable
+    datasources:
+        promDemo:
+            default: false
+            plugin:
+                kind: PrometheusDatasource
+                spec:
+                    directUrl: http://localhost:9090
+    panels:
+        "0_0":
+            kind: Panel
+            spec:
+                display:
+                    name: CPU Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_0_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "0_1":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_1_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "0_2":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage 2
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_2_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "1_0":
+            kind: Panel
+            spec:
+                display:
+                    name: CPU Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_0_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "1_1":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_1_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "2_0":
+            kind: Panel
+            spec:
+                display:
+                    name: CPU Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_0_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "2_1":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_1_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+        "2_2":
+            kind: Panel
+            spec:
+                display:
+                    name: Memory Usage 2
+                plugin:
+                    kind: TimeSeriesChart
+                    spec:
+                        yAxis:
+                            format:
+                                unit: decimal
+                queries:
+                    - kind: TimeSeriesQuery
+                      spec:
+                        plugin:
+                            kind: PrometheusTimeSeriesQuery
+                            spec:
+                                query: sum by(instance) (rate(avalanche_counter_metric_mmmmm_0_2_total[5m]))
+                                seriesNameFormat: '{{instance}}'
+    layouts:
+        - kind: Grid
+          spec:
+            display:
+                title: Resources usage
+                collapse:
+                    open: false
+            items:
+                - x: 0
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_0'
+                - x: 8
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_1'
+                - x: 16
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/0_2'
+        - kind: Grid
+          spec:
+            display:
+                title: Something else
+                collapse:
+                    open: true
+            items:
+                - x: 0
+                  "y": 0
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_0'
+                - x: 12
+                  "y": 0
+                  width: 12
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/1_1'
+        - kind: Grid
+          spec:
+            display:
+                title: Resources usage
+            items:
+                - x: 0
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/2_0'
+                - x: 8
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/2_1'
+                - x: 16
+                  "y": 0
+                  width: 8
+                  height: 8
+                  content:
+                    $ref: '#/spec/panels/2_2'
+    duration: 2h

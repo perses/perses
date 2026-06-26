@@ -24,18 +24,21 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/toolbox"
 	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type endpoint struct {
-	toolbox  toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
-	readonly bool
+	toolbox        toolbox.Toolbox[*v1.Dashboard, *dashboard.Query]
+	readonly       bool
+	isWatchEnabled bool
 }
 
-func NewEndpoint(service dashboard.Service, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
+func NewEndpoint(watchConf config.Watch, service dashboard.Service, authz authorization.Authorization, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, v1.KindDashboard, caseSensitive),
-		readonly: readonly,
+		toolbox:        toolbox.New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](service, authz, kind, caseSensitive),
+		readonly:       readonly,
+		isWatchEnabled: watchConf.IsEnabled(kind),
 	}
 }
 
@@ -51,6 +54,13 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 	group.GET("", e.List, false)
 	subGroup.GET("", e.List, false)
 	subGroup.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
+	if e.isWatchEnabled {
+		watchGroup := g.Group(fmt.Sprintf("/%s/%s", utils.PathWatch, utils.PathDashboard))
+		watchSubGroup := g.Group(fmt.Sprintf("/%s/%s/:%s/%s", utils.PathWatch, utils.PathProject, utils.ParamProject, utils.PathDashboard))
+		watchGroup.GET("", e.Watch, false)
+		watchSubGroup.GET("", e.Watch, false)
+		watchSubGroup.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Watch, false)
+	}
 }
 
 func (e *endpoint) Create(ctx echo.Context) error {
@@ -74,4 +84,8 @@ func (e *endpoint) Get(ctx echo.Context) error {
 func (e *endpoint) List(ctx echo.Context) error {
 	q := &dashboard.Query{}
 	return e.toolbox.List(ctx, q)
+}
+
+func (e *endpoint) Watch(ctx echo.Context) error {
+	return e.toolbox.Watch(ctx)
 }
