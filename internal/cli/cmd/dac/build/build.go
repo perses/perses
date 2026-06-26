@@ -42,6 +42,20 @@ const (
 
 var folderToIgnore = []string{".git", ".github", ".idea", config.DefaultOutputFolder, "cue.mod"}
 
+// isGoMainPackage reports whether the Go source file at path belongs to
+// package main. Files in non-main packages (library helpers, sub-packages)
+// cannot be passed to `go run` directly and must be skipped during a
+// directory walk.
+func isGoMainPackage(path string) bool {
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, path, nil, parser.PackageClauseOnly)
+	if err != nil {
+		// If parsing fails, fall through so `go run` surfaces the real error.
+		return true
+	}
+	return f.Name.Name == "main"
+}
+
 type option struct {
 	persesCMD.Option
 	opt.FileOption
@@ -93,26 +107,21 @@ func (o *option) Execute() error {
 		}
 
 		extension := filepath.Ext(path)
-		if extension == goExtension {
-			// Only process files declared as package main. Supporting packages that
-			// live alongside a main entrypoint (e.g. helper packages in sub-dirs)
-			// are valid Go code but cannot be passed to `go run` directly.
-			if !isGoMainPackage(path) {
-				logrus.Debugf("file %q has been ignored (not in package main)", path)
-				return nil
+		if extension == goExtension || extension == cueExtension {
+			if extension == goExtension {
+				// Only process files declared as package main. Supporting packages that
+				// live alongside a main entrypoint (e.g. helper packages in sub-dirs)
+				// are valid Go code but cannot be passed to `go run` directly.
+				if !isGoMainPackage(path) {
+					logrus.Debugf("file %q has been ignored (not in package main)", path)
+					return nil
+				}
 			}
-			err = o.processFile(path, extension)
-			if err != nil {
-				errs = append(errs, fmt.Errorf("error processing file %q: %w", path, err))
-			}
-		} else if extension == cueExtension {
 			err = o.processFile(path, extension)
 			if err != nil {
 				// Append the error to highlight the issue to the user on a later stage but don't stop the processing
 				errs = append(errs, fmt.Errorf("error processing file %q: %w", path, err))
 			}
-		} else {
-			logrus.Debugf("file %q has been ignored", path)
 		}
 
 		return nil
@@ -131,20 +140,6 @@ func (o *option) Execute() error {
 	}
 
 	return nil
-}
-
-// isGoMainPackage reports whether the Go source file at path belongs to
-// package main. Files in non-main packages (library helpers, sub-packages)
-// cannot be passed to `go run` directly and must be skipped during a
-// directory walk.
-func isGoMainPackage(path string) bool {
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, path, nil, parser.PackageClauseOnly)
-	if err != nil {
-		// If parsing fails, fall through so `go run` surfaces the real error.
-		return true
-	}
-	return f.Name.Name == "main"
 }
 
 func (o *option) processFile(file string, extension string) error {
