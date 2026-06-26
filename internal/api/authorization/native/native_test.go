@@ -322,10 +322,10 @@ func TestClaimPermissions(t *testing.T) {
 	n := makeNativeWithMappings(mappings, testCache)
 
 	testSuites := []struct {
-		title          string
-		claims         *crypto.JWTClaims
-		expectedNil    bool
-		expectedKeys   []string
+		title        string
+		claims       *crypto.JWTClaims
+		expectedNil  bool
+		expectedKeys []string
 	}{
 		{
 			title:       "nil claims returns nil",
@@ -343,9 +343,9 @@ func TestClaimPermissions(t *testing.T) {
 			expectedNil: true,
 		},
 		{
-			title:       "GlobalRole mapping match returns wildcard project key",
-			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin"}}),
-			expectedNil: false,
+			title:        "GlobalRole mapping match returns wildcard project key",
+			claims:       makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin"}}),
+			expectedNil:  false,
 			expectedKeys: []string{v1.WildcardProject},
 		},
 		{
@@ -354,20 +354,20 @@ func TestClaimPermissions(t *testing.T) {
 			expectedNil: true,
 		},
 		{
-			title:       "project-scoped Role mapping match returns project key",
-			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"ops"}}),
-			expectedNil: false,
+			title:        "project-scoped Role mapping match returns project key",
+			claims:       makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"ops"}}),
+			expectedNil:  false,
 			expectedKeys: []string{"platform"},
 		},
 		{
-			title:       "both global and project mappings match",
-			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin", "ops"}}),
-			expectedNil: false,
+			title:        "both global and project mappings match",
+			claims:       makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"admin", "ops"}}),
+			expectedNil:  false,
 			expectedKeys: []string{v1.WildcardProject, "platform"},
 		},
 		{
-			title: "unknown GlobalRole name logs warning and returns nil",
-			claims: makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}),
+			title:       "unknown GlobalRole name logs warning and returns nil",
+			claims:      makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}),
 			expectedNil: true,
 		},
 	}

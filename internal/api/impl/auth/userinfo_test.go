@@ -22,10 +22,10 @@ import (
 
 func TestExtractPersistedClaims(t *testing.T) {
 	testSuites := []struct {
-		title       string
-		rawClaims   map[string]any
-		configs     []config.ProviderClaimConfig
-		expected    map[string][]string
+		title     string
+		rawClaims map[string]any
+		configs   []config.ProviderClaimConfig
+		expected  map[string][]string
 	}{
 		{
 			title:     "nil claimConfigs returns nil",
