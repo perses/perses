@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -107,6 +108,80 @@ func TestMig_MigrateTags(t *testing.T) {
 	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
 	assert.NoError(t, err)
 	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
+}
+
+func TestMigrateDashboardLinks(t *testing.T) {
+	pl := LoadTestPlugins()
+
+	testCases := []struct {
+		name          string
+		grafanaLink   migrate.GrafanaLink
+		expectedLink  *dashboard.Link
+		expectNilLink bool
+	}{
+		{
+			name: "Full link with variables and target blank",
+			grafanaLink: migrate.GrafanaLink{
+				IncludeVars: true,
+				TargetBlank: true,
+				Title:       "sample link",
+				Tooltip:     "sample link",
+				URL:         "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLink: &dashboard.Link{
+				Name:            "sample link",
+				Tooltip:         "sample link",
+				URL:             "http://fakedomain/${samplevar}/$samplevar",
+				TargetBlank:     true,
+				RenderVariables: true,
+			},
+		},
+		{
+			name: "Link with defaults",
+			grafanaLink: migrate.GrafanaLink{
+				Title: "sample link",
+				URL:   "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLink: &dashboard.Link{
+				Name:            "sample link",
+				URL:             "http://fakedomain/${samplevar}/$samplevar",
+				TargetBlank:     false,
+				RenderVariables: false,
+				Tooltip:         "",
+			},
+		},
+		{
+			name:          "Empty or invalid link should be dropped",
+			grafanaLink:   migrate.GrafanaLink{Title: "sample link"},
+			expectNilLink: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			grafanaDashboard := &migrate.SimplifiedDashboard{
+				UID:   "dashboard-with-links",
+				Title: "Dashboard with links",
+				Links: []migrate.GrafanaLink{tc.grafanaLink},
+			}
+
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			assert.NoError(t, err)
+			assert.NotNil(t, persesDashboard)
+
+			if tc.expectNilLink {
+				assert.Len(t, persesDashboard.Spec.Links, 0)
+			} else {
+				assert.Len(t, persesDashboard.Spec.Links, 1)
+				actualLink := persesDashboard.Spec.Links[0]
+				assert.Equal(t, tc.expectedLink.Name, actualLink.Name)
+				assert.Equal(t, tc.expectedLink.Tooltip, actualLink.Tooltip)
+				assert.Equal(t, tc.expectedLink.URL, actualLink.URL)
+				assert.Equal(t, tc.expectedLink.TargetBlank, actualLink.TargetBlank)
+				assert.Equal(t, tc.expectedLink.RenderVariables, actualLink.RenderVariables)
+			}
+		})
+	}
 }
 
 func TestLinkConversionLogic(t *testing.T) {
