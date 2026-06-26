@@ -108,6 +108,21 @@ func TestDacBuildCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: fmt.Sprintf("Successfully built %s at %s\n", filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml")),
 		},
+		{
+			// Regression test for https://github.com/perses/perses/issues/3819:
+			// non-main Go files in sub-packages must be silently skipped; only
+			// files in package main are passed to `go run`.
+			Title:           "directory with non-main sub-packages skips them without error",
+			Args:            []string{"-d", filepath.Join("testdata", "go")},
+			IsErrorExpected: false,
+			// args/main.go and cmd/main.go are both package main and must be built;
+			// prometheus/query/*.go are package query and must be silently skipped.
+			ExpectedMessage: fmt.Sprintf(
+				"Successfully built %s at %s\nSuccessfully built %s at %s\n",
+				filepath.Join("testdata", "go", "args", "main.go"), filepath.Join("built", "testdata", "go", "args", "main_output.yaml"),
+				filepath.Join("testdata", "go", "cmd", "main.go"), filepath.Join("built", "testdata", "go", "cmd", "main_output.yaml"),
+			),
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuiteCommonAndGo)
 
