@@ -1,0 +1,110 @@
+{
+  "realm": "perses",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+
+  "roles": {
+    "realm": [
+      {
+        "name": "perses-admin",
+        "description": "Full access to all Perses resources"
+      },
+      {
+        "name": "perses-viewer",
+        "description": "Read-only access to all Perses resources"
+      },
+      {
+        "name": "perses-platform-editor",
+        "description": "Read/write access to Dashboards and Datasources in the platform project only"
+      },
+      {
+        "name": "perses-unknown",
+        "description": "Role with no corresponding mapping in Perses config (tests warning log)"
+      }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "perses-client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "perses-secret",
+      "redirectUris": [
+        "http://localhost:8090/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8090"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "realm-roles-claim",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Admin",
+      "credentials": [
+        { "type": "password", "value": "alice", "temporary": false }
+      ],
+      "realmRoles": ["perses-admin"]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Viewer",
+      "credentials": [
+        { "type": "password", "value": "bob", "temporary": false }
+      ],
+      "realmRoles": ["perses-viewer"]
+    },
+    {
+      "username": "carol",
+      "enabled": true,
+      "email": "carol@example.com",
+      "firstName": "Carol",
+      "lastName": "PlatformEditor",
+      "credentials": [
+        { "type": "password", "value": "carol", "temporary": false }
+      ],
+      "realmRoles": ["perses-platform-editor"]
+    },
+    {
+      "username": "dave",
+      "enabled": true,
+      "email": "dave@example.com",
+      "firstName": "Dave",
+      "lastName": "Unknown",
+      "credentials": [
+        { "type": "password", "value": "dave", "temporary": false }
+      ],
+      "realmRoles": ["perses-unknown"]
+    }
+  ]
+}
