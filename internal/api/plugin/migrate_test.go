@@ -116,9 +116,24 @@ func TestMigrateDashboardLinks(t *testing.T) {
 	testCases := []struct {
 		name          string
 		grafanaLink   migrate.GrafanaLink
-		expectedLink  *dashboard.Link
-		expectNilLink bool
+		expectedLinks []dashboard.Link
 	}{
+		{
+			name: "Link with URL only",
+			grafanaLink: migrate.GrafanaLink{
+				URL:     "http://fakedomain/${samplevar}/$samplevar",
+				Tooltip: "",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+					Name:            "",
+				},
+			},
+		},
 		{
 			name: "Full link with variables and target blank",
 			grafanaLink: migrate.GrafanaLink{
@@ -128,12 +143,14 @@ func TestMigrateDashboardLinks(t *testing.T) {
 				Tooltip:     "sample link",
 				URL:         "http://fakedomain/${samplevar}/$samplevar",
 			},
-			expectedLink: &dashboard.Link{
-				Name:            "sample link",
-				Tooltip:         "sample link",
-				URL:             "http://fakedomain/${samplevar}/$samplevar",
-				TargetBlank:     true,
-				RenderVariables: true,
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					Tooltip:         "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     true,
+					RenderVariables: true,
+				},
 			},
 		},
 		{
@@ -142,18 +159,20 @@ func TestMigrateDashboardLinks(t *testing.T) {
 				Title: "sample link",
 				URL:   "http://fakedomain/${samplevar}/$samplevar",
 			},
-			expectedLink: &dashboard.Link{
-				Name:            "sample link",
-				URL:             "http://fakedomain/${samplevar}/$samplevar",
-				TargetBlank:     false,
-				RenderVariables: false,
-				Tooltip:         "",
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+				},
 			},
 		},
 		{
 			name:          "Empty or invalid link should be dropped",
 			grafanaLink:   migrate.GrafanaLink{Title: "sample link"},
-			expectNilLink: true,
+			expectedLinks: []dashboard.Link{},
 		},
 	}
 
@@ -168,18 +187,7 @@ func TestMigrateDashboardLinks(t *testing.T) {
 			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
 			assert.NoError(t, err)
 			assert.NotNil(t, persesDashboard)
-
-			if tc.expectNilLink {
-				assert.Len(t, persesDashboard.Spec.Links, 0)
-			} else {
-				assert.Len(t, persesDashboard.Spec.Links, 1)
-				actualLink := persesDashboard.Spec.Links[0]
-				assert.Equal(t, tc.expectedLink.Name, actualLink.Name)
-				assert.Equal(t, tc.expectedLink.Tooltip, actualLink.Tooltip)
-				assert.Equal(t, tc.expectedLink.URL, actualLink.URL)
-				assert.Equal(t, tc.expectedLink.TargetBlank, actualLink.TargetBlank)
-				assert.Equal(t, tc.expectedLink.RenderVariables, actualLink.RenderVariables)
-			}
+			assert.Equal(t, tc.expectedLinks, persesDashboard.Spec.Links)
 		})
 	}
 }
