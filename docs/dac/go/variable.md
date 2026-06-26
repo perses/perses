@@ -45,7 +45,7 @@ The filter implementation is defined by the variable plugin builder.
 #### Text Variable Constructor
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 var txtVarOptions []txtVar.Option
 txtVar.Text("example-value", txtVarOptions...)
@@ -56,7 +56,7 @@ txtVar.Text("example-value", txtVarOptions...)
 ##### Value
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 txtVar.Value("example-value")
 ```
@@ -66,7 +66,7 @@ Define the value of the text variable.
 ##### Constant
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 txtVar.Constant(true)
 ```
@@ -77,7 +77,7 @@ dashboard.
 ##### Description
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 txtVar.Description("This is a super description")
 ```
@@ -87,7 +87,7 @@ Set the description of the text variable.
 ##### DisplayName
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 txtVar.DisplayName("This is a super description")
 ```
@@ -97,7 +97,7 @@ Set the display name of the text variable.
 ##### Hidden
 
 ```golang
-import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/textvariable"
 
 txtVar.Hidden(true)
 ```
@@ -109,7 +109,7 @@ Define if the text variable is hidden. A hidden variable is a variable that is n
 #### List Variable Constructor
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 var listVarOptions []listVar.Option
 listVar.List(listVarOptions...)
@@ -120,7 +120,7 @@ listVar.List(listVarOptions...)
 ##### DefaultValue
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.DefaultValue("example-value")
 ```
@@ -130,7 +130,7 @@ Define a single default value for the list variable.
 ##### AllowAllValue
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.AllowAllValue(true)
 ```
@@ -141,7 +141,7 @@ values for the variable.
 ##### AllowMultiple
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.AllowMultiple("This is a super description")
 ```
@@ -152,7 +152,7 @@ values to be selected by the user on the dashboard.
 ##### CustomAllValue
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.CustomAllValue("MySuperAllValueCustom")
 ```
@@ -162,7 +162,7 @@ Define a custom value for the "all" option.
 ##### CapturingRegexp
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.CapturingRegexp("^mysuperregexp.*")
 ```
@@ -172,7 +172,7 @@ Define a capturing regexp for the list variable. It will only list the values th
 ##### SortingBy
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.SortingBy(listVar.SortingAlphabeticalAsc)
 ```
@@ -184,7 +184,7 @@ alphabetical-ci-asc" and "alphabetical-ci-desc".
 ##### Description
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.Description("This is a super description")
 ```
@@ -194,7 +194,7 @@ Set the description of the list variable.
 ##### DisplayName
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.DisplayName("This is a super description")
 ```
@@ -204,7 +204,7 @@ Set the display name of the list variable.
 ##### Hidden
 
 ```golang
-import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/listvariable"
 
 listVar.Hidden(true)
 ```
@@ -222,7 +222,7 @@ package main
 
 import (
 	"github.com/perses/perses/go-sdk/dashboard"
-	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
+	listvariable "github.com/perses/perses/go-sdk/variable/listvariable"
 	labelvalues "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
 )
 

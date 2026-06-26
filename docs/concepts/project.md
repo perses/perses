@@ -24,6 +24,8 @@ Once there you have the options to rename or delete your project.
 
 ![rename delete project](../images/project/update.png)
 
+You can also organize dashboards into [folders](./folder.md) to browse them as a tree inside the project.
+
 ### Using the CLI
 
 You can create, read, update, or delete projects using the [CLI](../cli.md). Refer to the [Project API documentation](../api/project.md) for details on the data model and available endpoints.

@@ -54,9 +54,9 @@ func TestMainScenarioUser(t *testing.T) {
 	e2eframework.CreateTestScenario(t, path, creator)
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
-		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 			entity := creator("myResource")
-			e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+			e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), entity)
 
 			// call now the update endpoint, shouldn't return an error
 			o := expect.PUT(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
@@ -68,7 +68,7 @@ func TestMainScenarioUser(t *testing.T) {
 			result := decodePublicUser(t, o)
 			assert.Equal(t, e2eframework.NewPublicUser(entity.GetMetadata().GetName()).GetSpec(), result.GetSpec())
 
-			getFunc, _ := e2eframework.CreateGetFunc(t, manager, entity)
+			getFunc, _ := e2eframework.CreateGetFunc(t, manager.Persistence(), entity)
 			// check the document exists in the db
 			_, err := getFunc()
 			assert.NoError(t, err)
