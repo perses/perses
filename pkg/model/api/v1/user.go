@@ -76,5 +76,8 @@ func (u *User) validate() error {
 	if u.Kind != KindUser {
 		return fmt.Errorf("invalid kind: '%s' for a User type", u.Kind)
 	}
+	if len(u.Spec.NativeProvider.Password) > 0 && len(u.Spec.OauthProviders) > 0 {
+		return fmt.Errorf("nativeProvider and oauthProviders are mutually exclusive, use one of them")
+	}
 	return nil
 }
