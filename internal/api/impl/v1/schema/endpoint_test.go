@@ -22,7 +22,6 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
-	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
@@ -54,8 +53,7 @@ func (s *stubSchema) GetSchema(name, _, _ string) (pluginschema.LoadSchema, bool
 }
 
 func (s *stubSchema) GenerateDashboardSchema() (cue.Value, error) {
-	ctx := cuecontext.New()
-	return dashboardSchema.GenerateDashboardCueValue(ctx, map[specPlugin.Kind]cue.Value{})
+	return cuecontext.New().CompileString("{}"), nil
 }
 
 // plugin service stub

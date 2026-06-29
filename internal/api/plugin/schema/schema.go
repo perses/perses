@@ -25,7 +25,6 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
-	dashboardSchema "github.com/perses/perses/internal/api/dashboard/schema"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
@@ -360,7 +359,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		}
 		plugins[kind] = disjunction
 	}
-	return dashboardSchema.GenerateDashboardCueValue(ctx, plugins)
+	return generateDashboardCueValue(ctx, plugins)
 }
 
 func mergeSchemasByKind(main, dev []LoadSchema) []LoadSchema {

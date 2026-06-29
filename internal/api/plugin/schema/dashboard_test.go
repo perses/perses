@@ -32,13 +32,13 @@ func TestDashboardToCue(t *testing.T) {
 	dashDef := result.LookupPath(cue.MakePath(cue.Def("#Dashboard")))
 	assert.True(t, dashDef.Exists(), "expected #Dashboard definition in the result")
 
-	assert.NoError(t, result.Validate(cueValidationOptions...))
+	assert.NoError(t, result.Validate(dashboardCueValidationOptions...))
 }
 
 func TestGenerateDashboardCueValueWithNoPluginKinds(t *testing.T) {
 	ctx := cuecontext.New()
 	// No plugins injected: the base dashboard schema must still be returned intact.
-	result, err := GenerateDashboardCueValue(ctx, map[specPlugin.Kind]cue.Value{})
+	result, err := generateDashboardCueValue(ctx, map[specPlugin.Kind]cue.Value{})
 	require.NoError(t, err)
 
 	dashDef := result.LookupPath(cue.MakePath(cue.Def("#Dashboard")))
@@ -60,7 +60,7 @@ func TestGenerateDashboardCueValueWithAllPluginKinds(t *testing.T) {
 		specPlugin.KindVariable:   makePlugin("TestVariable"),
 	}
 
-	result, err := GenerateDashboardCueValue(ctx, plugins)
+	result, err := generateDashboardCueValue(ctx, plugins)
 	require.NoError(t, err)
 
 	vals := make(map[string]cue.Value)

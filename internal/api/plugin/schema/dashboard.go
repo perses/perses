@@ -57,7 +57,7 @@ var (
 	specSelector   = cue.Str("spec")
 )
 
-var cueValidationOptions = []cue.Option{
+var dashboardCueValidationOptions = []cue.Option{
 	cue.InlineImports(true),
 	cue.Attributes(true),
 	cue.Definitions(true),
@@ -115,7 +115,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	}
 	final = final.FillPath(cue.MakePath(dashboardDefSelector, layoutHidSelector, specSelector), gridLayoutSpec)
 
-	if validateErr := final.Validate(cueValidationOptions...); validateErr != nil {
+	if validateErr := final.Validate(dashboardCueValidationOptions...); validateErr != nil {
 		// retrieve the full error detail to provide better insights to the end user:
 		ex, errOs := os.Executable()
 		if errOs != nil {
@@ -129,7 +129,7 @@ func dashboardToCue(ctx *cue.Context) (cue.Value, error) {
 	return final, nil
 }
 
-func GenerateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue.Value) (cue.Value, error) {
+func generateDashboardCueValue(ctx *cue.Context, plugins map[specPlugin.Kind]cue.Value) (cue.Value, error) {
 	dashSpec, err := dashboardToCue(ctx)
 	if err != nil {
 		return cue.Value{}, fmt.Errorf("unable to load dashboard schema: %w", err)
