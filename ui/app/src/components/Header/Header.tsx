@@ -25,12 +25,16 @@ import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
 import { SearchBar } from './SearchBar/SearchBar';
 import AppscodeLogo from '../logo/AppscodeLogo';
+import { AppDrawer } from './AppDrawer';
+import { useCookies } from 'react-cookie';
+import { activeOrganization } from '../../constants/auth-token';
 
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();
   const isMobileSize = useIsMobileSize();
   const isAuthEnabled = useIsAuthEnabled();
   const IsExplorerEnabled = useIsExplorerEnabled();
+  const [cookies] = useCookies([activeOrganization]);
 
   const hasPartialPermission = useHasPartialPermission(['read'], GlobalProject, [
     'GlobalDatasource',
@@ -82,8 +86,11 @@ export default function Header(): JSX.Element {
             flexShrink: isMobileSize ? 2 : 1,
             display: 'flex',
             justifyContent: 'end',
+            alignItems: 'center',
+            gap: 1,
           }}
         >
+          {isAuthEnabled && <AppDrawer activeOrganization={cookies[activeOrganization]} />}
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>

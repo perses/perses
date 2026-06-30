@@ -130,7 +130,7 @@ export function Row({
           isResizable={isEditMode && !hasViewPanel}
           margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
-          layouts={{ sm: itemLayouts }}
+          layouts={{ sm: itemLayouts, xxs: itemLayouts }}
           onLayoutChange={onLayoutChange}
           onWidthChange={onWidthChange}
           allowOverlap={hasViewPanel} // Enabling overlap when viewing a specific panel because panel in front of the viewed panel will add empty spaces (empty row height)
