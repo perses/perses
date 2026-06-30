@@ -63,7 +63,7 @@ const MetricNamespace = "perses"
 
 // ProjectResourcePathList is containing the list of the resource path that is part of a project.
 var ProjectResourcePathList = []string{
-	PathDashboard, PathDatasource, PathFolder, PathRole, PathRoleBinding, PathSecret, PathVariable,
+	PathDashboard, PathEphemeralDashboard, PathDatasource, PathFolder, PathRole, PathRoleBinding, PathSecret, PathVariable,
 }
 
 func GetNameParameter(ctx echo.Context) string {
