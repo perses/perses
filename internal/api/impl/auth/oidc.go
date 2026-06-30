@@ -152,6 +152,7 @@ type oIDCEndpoint struct {
 	urlParams              map[string]string
 	issuer                 string
 	svc                    service
+	claimConfigs           []config.ProviderClaimConfig
 	extraLogoutHandler     echo.HandlerFunc
 	apiPrefix              string
 }
@@ -219,6 +220,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
 		svc:                    service{dao: dao, authz: authz},
+		claimConfigs:           provider.Claims,
 		extraLogoutHandler:     extraLogoutHandler,
 		apiPrefix:              apiPrefix,
 	}, nil
@@ -278,14 +280,20 @@ func (e *oIDCEndpoint) auth(ctx echo.Context) error {
 //   - save the user in database if it's a new user, or update it with the collected information
 //   - ultimately, generate a Perses user session with an access and refresh token
 func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, _ rp.RelyingParty, info *oidcUserInfo) {
 		redirectURI := decodeOAuthState(state)
 
 		setCookie := func(cookie *http.Cookie) {
 			http.SetCookie(w, cookie)
 		}
 
-		if _, err := e.performUserSync(info, setCookie); err != nil {
+		var rawClaims map[string]any
+		if tokens != nil && tokens.IDTokenClaims != nil {
+			rawClaims = tokens.IDTokenClaims.Claims
+		}
+		persistedClaims := extractPersistedClaims(rawClaims, e.claimConfigs)
+
+		if _, err := e.performUserSync(info, persistedClaims, setCookie); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(apiinterface.InternalError.Error()))
 			return
@@ -339,6 +347,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 	grantType := ctx.FormValue("grant_type")
 
 	var uInfo *oidcUserInfo
+	var persistedClaims map[string][]string
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
@@ -358,6 +367,11 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Failed to request user info")
 			return err
 		}
+		var rawClaims map[string]any
+		if idClaims != nil {
+			rawClaims = idClaims.Claims
+		}
+		persistedClaims = extractPersistedClaims(rawClaims, e.claimConfigs)
 	case api.GrantTypeClientCredentials:
 		// Extract client_id and client_secret from Authorization header
 		clientID, clientSecret, ok := ctx.Request().BasicAuth()
@@ -377,7 +391,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 		return oidc.ErrUnsupportedGrantType()
 	}
 
-	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
+	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -385,7 +399,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
+func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	// We don´t forget to set the issuer before making any sync in the database.
 	userInfo.issuer = e.issuer
 
@@ -401,12 +415,12 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 		ProviderKind: utils.AuthnKindOIDC,
 		ProviderID:   e.slugID,
 	}
-	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)
+	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, persistedClaims, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, persistedClaims, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err

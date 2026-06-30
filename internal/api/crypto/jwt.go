@@ -38,11 +38,17 @@ type ProviderInfo struct {
 type JWTClaims struct {
 	jwt.RegisteredClaims
 	ProviderInfo
+	// PersistedClaims holds selected upstream token claim values keyed by claim name.
+	// Values are []string because OAuth/OIDC claims can be multi-valued (e.g. roles: ["admin","viewer"]).
+	// Omitted for native-auth tokens.
+	// +optional
+	PersistedClaims map[string][]string `json:"prc,omitempty"`
 }
 
-func signedToken(login string, providerInfo ProviderInfo, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
+func signedToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTClaims{
-		ProviderInfo: providerInfo,
+		ProviderInfo:    providerInfo,
+		PersistedClaims: persistedClaims,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   login,
 			ExpiresAt: jwt.NewNumericDate(expireAt),
@@ -55,8 +61,8 @@ func signedToken(login string, providerInfo ProviderInfo, notBefore time.Time, e
 }
 
 type JWT interface {
-	SignedAccessToken(login string, providerInfo ProviderInfo) (string, error)
-	SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error)
+	SignedAccessToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error)
+	SignedRefreshToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error)
 	// CreateAccessTokenCookie will create two different cookies that contain a piece of the token.
 	// As a reminder, a JWT token has the following structure: header.payload.signature
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
@@ -76,14 +82,14 @@ type jwtImpl struct {
 	cookieConfig    config.Cookie
 }
 
-func (j *jwtImpl) SignedAccessToken(login string, providerInfo ProviderInfo) (string, error) {
+func (j *jwtImpl) SignedAccessToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error) {
 	now := time.Now()
-	return signedToken(login, providerInfo, now, now.Add(j.accessTokenTTL), j.accessKey)
+	return signedToken(login, providerInfo, persistedClaims, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
-func (j *jwtImpl) SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error) {
+func (j *jwtImpl) SignedRefreshToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error) {
 	now := time.Now()
-	return signedToken(login, providerInfo, now, now.Add(j.refreshTokenTTL), j.refreshKey)
+	return signedToken(login, providerInfo, persistedClaims, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {

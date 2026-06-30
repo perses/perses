@@ -1,0 +1,30 @@
+[
+  {
+    "kind": "GlobalRole",
+    "metadata": {
+      "name": "admin"
+    },
+    "spec": {
+      "permissions": [
+        {
+          "actions": ["*"],
+          "scopes": ["*"]
+        }
+      ]
+    }
+  },
+  {
+    "kind": "GlobalRole",
+    "metadata": {
+      "name": "viewer"
+    },
+    "spec": {
+      "permissions": [
+        {
+          "actions": ["read"],
+          "scopes": ["*"]
+        }
+      ]
+    }
+  }
+]

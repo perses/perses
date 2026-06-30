@@ -1,0 +1,58 @@
+security:
+  encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+  enable_auth: true
+  authorization:
+    provider:
+      native:
+        enable: true
+        # All authenticated users can read everything and create projects.
+        guest_permissions:
+          - actions: [read]
+            scopes: ["*"]
+          - actions: [create]
+            scopes: [Project]
+  authentication:
+    providers:
+      enable_native: false
+      oidc:
+        - slug_id: keycloak
+          name: Keycloak
+          client_id: perses-client
+          client_secret: perses-secret
+          # Keycloak's frontend URL (KC_HOSTNAME_URL) is http://localhost:8080.
+          # The Perses container maps "localhost" → host-gateway so it can reach
+          # Keycloak on that address for discovery and token exchange, while the
+          # browser also uses localhost:8080 for the login redirect.
+          issuer: http://localhost:8080/realms/perses
+          scopes: [openid, email, profile]
+          # Callback must be reachable by the browser after Keycloak redirects.
+          redirect_uri: http://localhost:8090/api/auth/providers/oidc/keycloak/callback
+          # PKCE cookie-based flow is unreliable in this dev setup (localhost:8080
+          # → localhost:8090 redirect chain). Disable it; the client secret is
+          # sufficient for a confidential client.
+          disable_pkce: true
+          claims:
+            - claim_name: roles
+              mappings:
+                # Test 1 & 2: global roles
+                - claim_value: perses-admin
+                  role_name: admin         # resolves to GlobalRole "admin" (wildcard permissions)
+                - claim_value: perses-viewer
+                  role_name: viewer        # resolves to GlobalRole "viewer" (read-only)
+                # Test 4: project-scoped role
+                - claim_value: perses-platform-editor
+                  role_name: editor
+                  project: platform        # resolves to Role "editor" in project "platform"
+                # Test 5: role_name that does not exist in Perses — triggers a warning log
+                - claim_value: perses-unknown
+                  role_name: nonexistent-role
+
+database:
+  file:
+    folder: "/perses"
+    extension: "json"
+    case_sensitive: false
+
+provisioning:
+  folders:
+    - "/etc/perses/provisioning"
