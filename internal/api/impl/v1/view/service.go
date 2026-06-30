@@ -14,6 +14,8 @@
 package view
 
 import (
+	"time"
+
 	"github.com/perses/perses/internal/api/interface/v1/view"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -36,12 +38,15 @@ var dashboardRenderErrorCounter = prometheus.NewCounterVec(prometheus.CounterOpt
 	Help:      "The total number of render errors of a dashboard",
 }, labelNames)
 
-// A histogram for the render time of a dashboard.
+// A histogram for the render time of a dashboard (dual classic + native exposition).
 var dashboardRenderTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-	Namespace: utils.MetricNamespace,
-	Name:      "dashboard_render_time_seconds",
-	Help:      "The render time of a dashboard",
-	Buckets:   prometheus.DefBuckets,
+	Namespace:                       utils.MetricNamespace,
+	Name:                            "dashboard_render_time_seconds",
+	Help:                            "The render time of a dashboard",
+	Buckets:                         prometheus.DefBuckets,
+	NativeHistogramBucketFactor:     1.1,
+	NativeHistogramMaxBucketNumber:  100,
+	NativeHistogramMinResetDuration: time.Hour,
 }, labelNames)
 
 func RegisterMetrics(reg prometheus.Registerer) {

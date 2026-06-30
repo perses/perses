@@ -13,8 +13,7 @@
 
 import { Tooltip } from '@mui/material';
 import { ReactElement } from 'react';
-import { Scope } from '@perses-dev/client';
-import { Action } from '@perses-dev/components';
+import { Action, Scope } from '@perses-dev/client';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 

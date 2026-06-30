@@ -16,6 +16,10 @@ import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ProfileView from './ProfileView';
 
+jest.mock('@perses-dev/components', () => ({
+  EChart: (): JSX.Element | null => null,
+}));
+
 jest.mock('../../context/Authorization', () => ({
   useAuthorizationContext: (): { username: string } => ({
     username: 'admin',

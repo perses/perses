@@ -5,12 +5,12 @@ go 1.26.2
 replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.53.2-0.20260528092308-be0485a3bde6
-	github.com/perses/plugins/prometheus v0.58.0-beta.1
-	github.com/perses/plugins/staticlistvariable v0.9.0-beta.0
-	github.com/perses/plugins/table v0.13.0-beta.0
-	github.com/perses/plugins/timeserieschart v0.13.0-beta.1
-	github.com/perses/spec v0.2.0-beta.3.0.20260612133246-e30c5159985c
+	github.com/perses/perses v0.54.0-beta.1.0.20260617122921-ba4a6bd301ae
+	github.com/perses/plugins/prometheus v0.58.0-beta.3
+	github.com/perses/plugins/staticlistvariable v0.9.0-beta.1
+	github.com/perses/plugins/table v0.13.0-beta.1
+	github.com/perses/plugins/timeserieschart v0.13.0-beta.2
+	github.com/perses/spec v0.2.0-beta.6
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -25,16 +25,16 @@ require (
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/perses/common v0.31.0 // indirect
+	github.com/perses/common v0.31.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.68.1 // indirect
+	github.com/prometheus/common v0.69.0 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/zitadel/oidc/v3 v3.47.5 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect

@@ -39,10 +39,10 @@ func TestMainScenarioDashboard(t *testing.T) {
 }
 
 func TestCreateDashboardWithWrongName(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewDashboard(t, "perses", "Incorrect Name With Space")
 		project := e2eframework.NewProject("perses")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
 
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, "perses", utils.PathDashboard)).
 			WithJSON(entity).
@@ -53,10 +53,10 @@ func TestCreateDashboardWithWrongName(t *testing.T) {
 }
 
 func TestUpdateDashboardIncreaseVersion(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		entity := e2eframework.NewDashboard(t, "perses", "test")
 		project := e2eframework.NewProject("perses")
-		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), project)
 
 		dashboard := extractDashboardFromHTTPBody(expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, entity.Metadata.Project, utils.PathDashboard)).
 			WithJSON(entity).
@@ -86,11 +86,11 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 }
 
 func TestListDashboardInEmptyProject(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
 		demoProject := e2eframework.NewProject("Demo")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoProject, demoDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), persesProject, demoProject, demoDashboard)
 
 		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, demoProject.GetMetadata().GetName(), utils.PathDashboard)).
 			Expect().
@@ -105,10 +105,10 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 }
 
 func TestListDashboardWithOnlyMetadata(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), persesProject, demoDashboard)
 
 		response := expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, persesProject.GetMetadata().GetName(), utils.PathDashboard)).
 			WithQuery("metadata_only", true).
@@ -134,7 +134,7 @@ func extractDashboardFromHTTPBody(body interface{}) *modelV1.Dashboard {
 }
 
 func TestAuthListDashboardInProject(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 
 		usrEntity := e2eframework.NewUser("creator", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -157,7 +157,7 @@ func TestAuthListDashboardInProject(t *testing.T) {
 		firstProject := e2eframework.NewProject("first")
 		secondProject := e2eframework.NewProject("second")
 		thirdProject := e2eframework.NewProject("third")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), firstProject, secondProject, thirdProject)
 		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
 			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
 			Expect().
@@ -179,7 +179,7 @@ func TestAuthListDashboardInProject(t *testing.T) {
 		firstDashboard := e2eframework.NewDashboard(t, firstProject.Metadata.Name, "Demo-1")
 		secondDashboard := e2eframework.NewDashboard(t, secondProject.Metadata.Name, "Demo-2")
 		thirdDashboard := e2eframework.NewDashboard(t, thirdProject.Metadata.Name, "Demo-3")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstDashboard, secondDashboard, thirdDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), firstDashboard, secondDashboard, thirdDashboard)
 
 		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
 			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
@@ -199,7 +199,7 @@ func TestAuthListDashboardInProject(t *testing.T) {
 			Length().
 			IsEqual(1)
 
-		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), usrEntity)
 		return []api.Entity{firstProject, secondProject, thirdProject, firstDashboard, secondDashboard, thirdDashboard}
 	})
 }

@@ -14,9 +14,10 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
-import { DashboardResource, ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
+import { DashboardResource } from '@perses-dev/client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
@@ -61,6 +62,9 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
+
+  //TODO: We should pass down userPreferenceTimezone to the dashboard view using a prop
+  // Picking the value from the useLocalStorage is a bad practice, because a component should technically have no clue about the app level local storage
 
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);

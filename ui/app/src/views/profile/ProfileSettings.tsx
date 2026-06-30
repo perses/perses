@@ -13,7 +13,8 @@
 
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import React, { ReactElement } from 'react';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import PreferenceIcon from 'mdi-material-ui/MapClock';
 import { ProfileSections } from './ProfileView';
 
 interface IAccountSettingItem {
@@ -37,7 +38,12 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
     {
       title: 'Permissions and roles',
       view: ProfileSections.PERMISSIONS,
-      icon: <ShieldAccount sx={{ fontSize: 24 }} />,
+      icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
+    },
+    {
+      title: 'Preferences',
+      view: ProfileSections.PREFERENCES,
+      icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
     },
   ];
 

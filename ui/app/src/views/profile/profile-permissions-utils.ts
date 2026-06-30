@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Scope } from '@perses-dev/client';
-import { Action } from '@perses-dev/components';
+import { Action, Scope } from '@perses-dev/client';
 
 export interface IFlatPermission {
   key: string;

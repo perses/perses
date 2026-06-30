@@ -16,6 +16,7 @@ package provisioning
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/perses/common/async"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -70,11 +71,28 @@ func (p *provisioning) String() string {
 }
 
 func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
+	// Provisioning files have no guaranteed order, yet a project-scoped resource
+	// can only be created once its parent project exists. So we apply every
+	// Project first, ensuring projects declared in the same provisioning batch
+	// are created before the resources that belong to them. This keeps the
+	// "refuse resources in a non-existing project" guard from rejecting valid
+	// resources whose project simply happens to be listed later.
+	sort.SliceStable(entities, func(i, j int) bool {
+		return modelV1.Kind(entities[i].GetKind()) == modelV1.KindProject &&
+			modelV1.Kind(entities[j].GetKind()) != modelV1.KindProject
+	})
 	for _, entity := range entities {
 		entity.GetMetadata().Flatten(p.caseSensitive)
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), "")
+		// A project-scoped resource cannot be provisioned if its parent project doesn't exist:
+		// the resource would be silently persisted but never visible until the project is created.
+		// So we refuse to provision it and report the missing project.
+		if len(project) > 0 && !p.projectExists(project) {
+			logrus.Errorf("unable to provision the %q/%q: project %q doesn't exist", kind, name, project)
+			continue
+		}
 		param := apiInterface.Parameters{
 			Name:    name,
 			Project: project,
@@ -101,6 +119,16 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}
+}
+
+// projectExists returns true if a project with the given name exists in the database.
+// In case the lookup fails for any reason other than a missing project, we assume the
+// project exists so that a transient database error doesn't silently drop the resource.
+func (p *provisioning) projectExists(name string) bool {
+	if _, err := p.serviceManager.GetProject().Get(apiInterface.Parameters{Name: name}); err != nil {
+		return !databaseModel.IsKeyNotFound(err)
+	}
+	return true
 }
 
 func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, err error) {

@@ -14,7 +14,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@perses-dev/dashboards": "0.54.0-beta.6",
+    "@perses-dev/dashboards": "^0.54.0-beta.9",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },
@@ -22,6 +22,8 @@
     "@perses-dev/internal-utils": "0.54.0-beta.1",
     "@playwright/test": "^1.54.2",
     "chokidar-cli": "^3.0.0",
-    "eslint-plugin-playwright": "^0.11.2"
+    "eslint-plugin-playwright": "^0.11.2",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   }
 }

@@ -35,7 +35,7 @@ func TestLoginOAuth(t *testing.T) {
 	conf.Security.Authentication.Providers.OAuth = append(conf.Security.Authentication.Providers.OAuth, providerConfig)
 
 	// Server with oauth provider configured.
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			//TODO: At the difference with the OIDC flow, we don't use the client id as username, but query /userinfos
 			//  with provider's token. (in this case returning john.doe like the other flow)
@@ -76,7 +76,7 @@ func TestLoginOIDC(t *testing.T) {
 	conf.Security.Authentication.Providers.OIDC = append(conf.Security.Authentication.Providers.OIDC, providerConfig)
 
 	// Server with oauth provider configured.
-	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
 			e2eframework.NewUser("anything", "password"),
 			e2eframework.NewUser("john.doeOIDC", "password"),
