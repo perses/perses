@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, Checkbox, useTheme } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import React, { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core';
-import { BooleanParam, useQueryParam } from 'use-query-params';
-import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
+import { BooleanParam, JsonParam, useQueryParam } from 'use-query-params';
+import { useEditMode, usePanel, usePanelActions, useViewPanelGroup, usePanelRef } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 
@@ -32,6 +33,7 @@ export interface GridItemContentProps {
  */
 export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { panelGroupItemId, width } = props;
+  const theme = useTheme();
   const panelDefinition = usePanel(panelGroupItemId);
 
   const {
@@ -49,6 +51,27 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   });
 
   const [openQueryViewer, setOpenQueryViewer] = useState(false);
+
+  // Panel selection state
+  const [panelSelectMode] = useQueryParam('panelSelectMode', BooleanParam);
+  const [selectedPanels, setSelectedPanels] = useQueryParam('selectedPanels', JsonParam);
+  const panelRef = usePanelRef(panelGroupItemId);
+  const isSelectMode = panelSelectMode === true;
+  const isViewingSelected = Array.isArray(selectedPanels) && selectedPanels.length > 0 && !isSelectMode;
+  const isSelected =
+    isSelectMode && Array.isArray(selectedPanels) && panelRef
+      ? (selectedPanels as string[]).includes(panelRef.ref)
+      : false;
+
+  const handleToggleSelect = (): void => {
+    if (!panelRef) return;
+    const current: string[] = Array.isArray(selectedPanels) ? (selectedPanels as string[]) : [];
+    if (isSelected) {
+      setSelectedPanels(current.filter((r) => r !== panelRef.ref));
+    } else {
+      setSelectedPanels([...current, panelRef.ref]);
+    }
+  };
 
   const viewQueriesHandler = useMemo(() => {
     return isEditMode || !queries?.length
@@ -121,8 +144,37 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       sx={{
         width: '100%',
         height: '100%',
+        position: 'relative',
       }}
     >
+      {/* Selection overlay — shown in panel select mode */}
+      {isSelectMode && (
+        <Box
+          onClick={handleToggleSelect}
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 2,
+            cursor: 'pointer',
+            border: '2px solid',
+            borderColor: isSelected ? theme.palette.primary.main : 'transparent',
+            borderRadius: 1,
+            bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+            transition: 'border-color 0.15s, background-color 0.15s',
+            '&:hover': {
+              borderColor: theme.palette.primary.main,
+              bgcolor: alpha(theme.palette.primary.main, 0.04),
+            },
+          }}
+        >
+          {/* Checkbox positioned top-right to avoid overlapping the panel title */}
+          <Checkbox
+            checked={isSelected}
+            size="small"
+            sx={{ position: 'absolute', top: 2, right: 4, pointerEvents: 'none', p: 0 }}
+          />
+        </Box>
+      )}
       <DataQueriesProvider
         definitions={definitions}
         options={{ suggestedStepMs, ...pluginQueryOptions }}
@@ -131,10 +183,10 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
         {inView && (
           <Panel
             definition={panelDefinition}
-            readHandlers={isDetailedView ? undefined : readHandlers}
-            detailedViewHandler={isDetailedView ? undefined : detailedViewHandler}
-            editHandlers={isDetailedView ? undefined : editHandlers}
-            viewQueriesHandler={isDetailedView ? undefined : viewQueriesHandler}
+            readHandlers={isDetailedView || isSelectMode || isViewingSelected ? undefined : readHandlers}
+            detailedViewHandler={isDetailedView || isSelectMode || isViewingSelected ? undefined : detailedViewHandler}
+            editHandlers={isDetailedView || isSelectMode || isViewingSelected ? undefined : editHandlers}
+            viewQueriesHandler={isDetailedView || isSelectMode || isViewingSelected ? undefined : viewQueriesHandler}
             panelOptions={props.panelOptions}
             panelGroupItemId={panelGroupItemId}
           />

@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { ReactElement, ReactNode, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
-import { BooleanParam, useQueryParam } from 'use-query-params';
+import { BooleanParam, JsonParam, useQueryParam } from 'use-query-params';
+import CloseIcon from 'mdi-material-ui/Close';
 import {
   PanelDrawer,
   Dashboard,
@@ -75,6 +76,13 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const [detailedView] = useQueryParam('detailedView', BooleanParam);
   const isDetailedView = detailedView === true;
 
+  // Check if we're in selected panels view mode
+  const [selectedPanels, setSelectedPanels] = useQueryParam('selectedPanels', JsonParam);
+  const [panelSelectMode] = useQueryParam('panelSelectMode', BooleanParam);
+  const isViewingSelected = Array.isArray(selectedPanels) && selectedPanels.length > 0 && panelSelectMode !== true;
+
+  const hideToolbar = isDetailedView || isViewingSelected;
+
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
@@ -122,7 +130,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         flexDirection: 'column',
       }}
     >
-      {!isDetailedView && (
+      {!hideToolbar && (
         <DashboardToolbar
           dashboardName={dashboardResource.metadata.name}
           dashboardTitleComponent={dashboardTitleComponent}
@@ -135,7 +143,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
           onCancelButtonClick={onCancelButtonClick}
         />
       )}
-      <Box sx={{ paddingTop: isDetailedView ? 0 : 2, paddingX: isDetailedView ? 0 : 2, height: '100%' }}>
+      <Box sx={{ paddingTop: hideToolbar ? 0 : 2, paddingX: hideToolbar ? 0 : 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
             emptyDashboardProps={{
@@ -157,6 +165,18 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
           <LeaveDialog original={originalDashboard} current={dashboard} />
         )}
       </Box>
+      {/* Exit button for selected panels view — fixed in bottom-right corner */}
+      {isViewingSelected && (
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<CloseIcon />}
+          onClick={() => setSelectedPanels(undefined)}
+          sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 1200 }}
+        >
+          Exit
+        </Button>
+      )}
     </Box>
   );
 };

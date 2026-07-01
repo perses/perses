@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { Outlet, useLocation } from 'react-router-dom';
 import { ReactElement, Suspense, useEffect } from 'react';
 import { ReactRouterProvider } from '@perses-dev/plugin-system';
-import { BooleanParam, useQueryParam } from 'use-query-params';
+import { BooleanParam, JsonParam, useQueryParam } from 'use-query-params';
 import Header from './components/Header/Header';
 import Footer from './components/Footer';
 import { PlatformLoginRoute, SignInRoute, SignUpRoute } from './model/route';
@@ -32,6 +32,12 @@ function App(): ReactElement {
   const [detailedView] = useQueryParam('detailedView', BooleanParam);
   const isDetailedView = detailedView === true;
 
+  const [selectedPanels] = useQueryParam('selectedPanels', JsonParam);
+  const [panelSelectMode] = useQueryParam('panelSelectMode', BooleanParam);
+  const isViewingSelected = Array.isArray(selectedPanels) && selectedPanels.length > 0 && panelSelectMode !== true;
+
+  const hideChrome = isDetailedView || isViewingSelected;
+
   useEffect(() => {
     if (branding?.favicons?.favicon96x96) {
       const favicon = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
@@ -41,12 +47,11 @@ function App(): ReactElement {
     }
   }, [branding]);
 
-  // Hide header in detailed view mode or on login/signup pages
-  const shouldShowHeader =
-    !isDetailedView && location.pathname !== PlatformLoginRoute && location.pathname !== SignUpRoute;
+  // Hide header in detailed view / selected panels view, or on login/signup pages
+  const shouldShowHeader = !hideChrome && location.pathname !== PlatformLoginRoute && location.pathname !== SignUpRoute;
 
-  // Hide footer in detailed view mode or on dashboard view routes
-  const shouldShowFooter = !isDetailedView && !isDashboardViewRoute(location.pathname);
+  // Hide footer in detailed view / selected panels view, or on dashboard view routes
+  const shouldShowFooter = !hideChrome && !isDashboardViewRoute(location.pathname);
 
   return (
     <Box

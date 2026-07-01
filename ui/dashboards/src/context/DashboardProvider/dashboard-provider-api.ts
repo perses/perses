@@ -30,7 +30,7 @@ import { DeletePanelDialogState } from './delete-panel-slice';
 import { SaveChangesConfirmationDialogState } from './save-changes-dialog-slice';
 import { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
 import { EditJsonDialogState } from './edit-json-dialog-slice';
-import { ViewPanelSlice } from './view-panel-slice';
+import { ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 
 const selectEditMode: ({ isEditMode, setEditMode }: DashboardStoreState) => {
   setEditMode: (isEditMode: boolean) => void;
@@ -423,6 +423,23 @@ export function useEditJsonDialog(): {
   editJsonDialog: EditJsonDialogState | undefined;
 } {
   return useDashboardStore(selectEditJsonDialog);
+}
+
+/**
+ * Returns the VirtualPanelRef for a given PanelGroupItemId, used for panel selection.
+ */
+export function usePanelRef(panelGroupItemId: PanelGroupItemId): VirtualPanelRef | undefined {
+  const { panelGroupId, panelGroupItemLayoutId, repeatVariable } = panelGroupItemId;
+  return useDashboardStore(
+    useCallback(
+      (store) => {
+        const panelRef = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupItemLayoutId];
+        if (!panelRef) return undefined;
+        return { ref: panelRef, repeatVariable };
+      },
+      [panelGroupId, panelGroupItemLayoutId, repeatVariable]
+    )
+  );
 }
 
 const selectDetailedView: (state: DashboardStoreState) => boolean | undefined = () => {

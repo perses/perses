@@ -15,6 +15,7 @@ import { ReactElement, useState } from 'react';
 import {
   AppBar,
   Box,
+  Button,
   IconButton,
   Stack,
   SxProps,
@@ -25,7 +26,9 @@ import {
 } from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import CheckboxMultipleOutlineIcon from 'mdi-material-ui/CheckboxMultipleOutline';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { BooleanParam, JsonParam, useQueryParam } from 'use-query-params';
 import { VariableList } from '../Variables';
 
 interface DashboardStickyToolbarProps {
@@ -40,6 +43,24 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
+
+  const [panelSelectMode, setPanelSelectMode] = useQueryParam('panelSelectMode', BooleanParam);
+  const [selectedPanels, setSelectedPanels] = useQueryParam('selectedPanels', JsonParam);
+  const isSelectMode = panelSelectMode === true;
+  const selectedCount = Array.isArray(selectedPanels) ? selectedPanels.length : 0;
+
+  const handleSelectToggle = (): void => {
+    if (isSelectMode) {
+      setPanelSelectMode(undefined);
+      setSelectedPanels(undefined);
+    } else {
+      setPanelSelectMode(true);
+    }
+  };
+
+  const handleViewSelected = (): void => {
+    setPanelSelectMode(undefined);
+  };
 
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
@@ -88,6 +109,23 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
               </IconButton>
             )}
           </Box>
+          <Stack direction="row" alignItems="center" gap={1} pt={1} pl={isBiggerThanMd ? 1 : 0} flexShrink={0}>
+            {isSelectMode && selectedCount > 0 && (
+              <Button variant="contained" size="small" sx={{ whiteSpace: 'nowrap' }} onClick={handleViewSelected}>
+                View Selected ({selectedCount})
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ whiteSpace: 'nowrap', mb: 1, padding: '6px 15px' }}
+              startIcon={<CheckboxMultipleOutlineIcon />}
+              onClick={handleSelectToggle}
+              color={isSelectMode ? 'error' : 'secondary'}
+            >
+              {isSelectMode ? 'Cancel' : 'Select Panels'}
+            </Button>
+          </Stack>
           {isSticky && (
             <Stack
               m={isBiggerThanMd ? 1.5 : 1}
