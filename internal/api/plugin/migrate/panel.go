@@ -179,7 +179,6 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	}
 	if len(matchedQueries) > 1 {
 		logrus.Warnf("ambiguous query migration: %d plugins matched the same target", len(matchedQueries))
-		// should this return true as well, since there are too many matches?
 		return true
 	}
 	if len(matchedQueries) == 0 {
