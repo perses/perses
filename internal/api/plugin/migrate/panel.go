@@ -164,10 +164,13 @@ type matchedQuery struct {
 	plugin *plugin.Plugin
 }
 
+// executeQueryScript is a package-level variable so tests can stub it without real CUE files.
+var executeQueryScript = ExecuteQueryScript
+
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
 	var matchedQueries []matchedQuery
 	for _, query := range queries {
-		plugin, isEmpty, err := ExecuteQueryScript(query.instance, target)
+		plugin, isEmpty, err := executeQueryScript(query.instance, target)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute query migration script")
 			continue
