@@ -168,7 +168,11 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	var matchedQueries []matchedQuery
 	for _, query := range queries {
 		plugin, isEmpty, err := ExecuteQueryScript(query.instance, target)
-		if err != nil || isEmpty {
+		if err != nil {
+			logrus.WithError(err).Debug("failed to execute query migration script")
+			continue
+		}
+		if isEmpty {
 			continue
 		}
 		matchedQueries = append(matchedQueries, matchedQuery{query, plugin})
