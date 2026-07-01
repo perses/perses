@@ -14,15 +14,18 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { MemoryRouter } from 'react-router-dom';
 import { NameCell, NameCellProps } from './NameCell';
 
 const theme = createTheme();
 
 function renderCell(props: NameCellProps): ReturnType<typeof render> {
   return render(
-    <ThemeProvider theme={theme}>
-      <NameCell {...props} />
-    </ThemeProvider>
+    <MemoryRouter>
+      <ThemeProvider theme={theme}>
+        <NameCell {...props} />
+      </ThemeProvider>
+    </MemoryRouter>
   );
 }
 

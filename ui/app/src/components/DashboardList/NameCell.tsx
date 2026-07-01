@@ -17,6 +17,7 @@ import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
 import FolderOpenOutlineIcon from 'mdi-material-ui/FolderOpenOutline';
 import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
+import { Link as RouterLink } from 'react-router-dom';
 import { ReactElement } from 'react';
 import { DashboardTreeTableRow } from './DashboardTreeList';
 
@@ -68,7 +69,7 @@ export function NameCell({
       return (
         <Box sx={{ paddingLeft: `${paddingLeft}px`, display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <ViewDashboardOutlineIcon fontSize="small" />
-          <Link href={`/projects/${project}/dashboards/${name}`} color="inherit" underline="hover">
+          <Link component={RouterLink} to={`/projects/${project}/dashboards/${name}`} color="inherit" underline="hover">
             {displayName}
           </Link>
         </Box>
