@@ -1,5 +1,4 @@
-Proxy
-=====
+# Proxy
 
 Perses can serve as a proxy for various supported datasource types. This is especially useful when:
 
@@ -97,14 +96,13 @@ The request JSON body should have the following schema:
   {
     "query": "select * from table limit 5"
   }
-```  
+```
 
 When contacting one of these URLs, Perses will first get the datasource from the database based on the provided
 information in the URI.
 Then, if a secret is associated with the datasource, Perses will retrieve the secret from the database and use it to
 inject the secret in the request.
 Finally, Perses will execute the query to the SQL datasource and return the response in CSV format to the client.
-
 
 ```mermaid
 sequenceDiagram

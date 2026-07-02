@@ -1,7 +1,7 @@
 # CUE SDK for Dashboard-as-Code
 
 !!! note
-	To get started with Dashboard-as-Code in Perses, have a look at the [DaC user guide](../getting-started.md) first.
+To get started with Dashboard-as-Code in Perses, have a look at the [DaC user guide](../getting-started.md) first.
 
 This section provides detailed information about the CUE SDK to develop dashboards as code in Perses.
 It's focusing on explaining how to use the different builders provided by the SDK, that you should rely on to simplify the coding.
@@ -12,12 +12,12 @@ See the dedicated pages for each builder:
 - [Dashboard](./dashboard.md)
 - [Panel Groups](./panelgroups.md)
 - Variable-related builders:
-    - [Variable Group](./variable/group.md)
-    - [List Variable](./variable/list.md)
-    - [Text Variable](./variable/text.md)
+  - [Variable Group](./variable/group.md)
+  - [List Variable](./variable/list.md)
+  - [Text Variable](./variable/text.md)
 
 !!! note
-	The builders listed above are all about the Perses core model. To know more about the builder utilities for [plugins](../../concepts/plugin.md), please rely on their respective documentation. 
+The builders listed above are all about the Perses core model. To know more about the builder utilities for [plugins](../../concepts/plugin.md), please rely on their respective documentation.
 
 See also some useful patterns for DaC with the CUE SDK in the below section.
 

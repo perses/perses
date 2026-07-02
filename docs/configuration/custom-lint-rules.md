@@ -1,5 +1,4 @@
-Custom Lint Rules for dashboard
-================================
+# Custom Lint Rules for dashboard
 
 To validate a dashboard, we have implemented a set of rules that are for some executed when unmarshalling a dashboard
 from JSON or YAML, for others with Cuelang to validate the plugins used.
@@ -11,13 +10,13 @@ To comply with your organization standards, you may need to implement custom rul
 These rules are defined in a YAML file that can be used either by the CLI or the API. The file must have the following
 structure:
 
-| Field     | Type    | Description                                                                                                                                      | Additional Notes                                      |
-|-----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
-| name      | string  | Unique identifier for the lint rule.                                                                                                             | Required                                              |
-| target    | string  | JSONPath expression to extract the relevant portion of the dashboard data.<br/> Refer to https://goessner.net/articles/JsonPath/ for the syntax. | Required; used to bind the extracted value as `value` |
-| assertion | string  | CEL expression that validates the extracted value. <br/> Refer to https://github.com/google/cel-spec/blob/master/doc/langdef.md for the syntax.  | Required; must evaluate to a boolean                  |
-| message   | string  | Error message to display if the assertion fails.                                                                                                 | Required                                              |
-| disabled  | boolean | Flag indicating whether the rule is active.                                                                                                      | Optional; defaults to `false` if omitted              |
+| Field     | Type    | Description                                                                                                                                 | Additional Notes                                      |
+|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| name      | string  | Unique identifier for the lint rule.                                                                                                        | Required                                              |
+| target    | string  | JSONPath expression to extract the relevant portion of the dashboard data. Refer to https://goessner.net/articles/JsonPath/ for the syntax. | Required; used to bind the extracted value as `value` |
+| assertion | string  | CEL expression that validates the extracted value. Refer to https://github.com/google/cel-spec/blob/master/doc/langdef.md for the syntax.   | Required; must evaluate to a boolean                  |
+| message   | string  | Error message to display if the assertion fails.                                                                                            | Required                                              |
+| disabled  | boolean | Flag indicating whether the rule is active.                                                                                                 | Optional; defaults to `false` if omitted              |
 
 You should take particular attention to the following points:
 

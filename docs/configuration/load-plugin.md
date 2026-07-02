@@ -1,5 +1,5 @@
-How to load a plugin
-====================
+# How to load a plugin
+
 Before being able to use a plugin, it must be recognized and loaded by the Perses backend.
 
 When the Perses backend is starting, it will look at a specific folder that should contain any plugin archive file. This

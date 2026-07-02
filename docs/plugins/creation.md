@@ -100,7 +100,7 @@ Check the [CLI documentation](../cli.md) for more details.
 The implementation is mostly similar across all plugin types.
 
 !!! info
-	For more info on the Cuelang part (model & migrate files), please refer to [CUE in Perses](./cue.md).
+For more info on the Cuelang part (model & migrate files), please refer to [CUE in Perses](./cue.md).
 
 #### Datasource plugin
 
@@ -133,7 +133,7 @@ The implementation is mostly similar across all plugin types.
 
 #### Explore plugin
 
-- _There's no CUE part in the case of Explore plugins._
+- *There's no CUE part in the case of Explore plugins.*
 - Implement your Explore plugin as a React component located in the `src/explore` folder.
 
 ### Test

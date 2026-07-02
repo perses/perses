@@ -3,8 +3,8 @@
 The List Variable builder helps creating list variables in the format expected by Perses.
 
 !!! warning
-	This lib is not meant for direct usage in DaC, as List variables are not standalone objects (they embed a plugin part).
-	This lib should be used by plugin developers to develop wrappers for their variable plugins - as it was done for official plugins.
+This lib is not meant for direct usage in DaC, as List variables are not standalone objects (they embed a plugin part).
+This lib should be used by plugin developers to develop wrappers for their variable plugins - as it was done for official plugins.
 
 ## Usage
 

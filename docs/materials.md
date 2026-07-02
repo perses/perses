@@ -1,5 +1,4 @@
-Materials
-=========
+# Materials
 
 This is a list of presentations, papers, poadcasts, and other materials related to the project.
 

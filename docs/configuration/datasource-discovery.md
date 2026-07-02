@@ -1,5 +1,4 @@
-Datasource Discovery
-====================
+# Datasource Discovery
 
 Datasource discovery is a feature that allows you to automatically discover and register datasources in your
 application. This feature is useful when you have a large number of datasources, and you don't want to manually register

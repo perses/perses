@@ -33,6 +33,7 @@ Perses provides custom metrics to track dashboard usage, which are particularly 
 - `dashboard`: The dashboard name
 
 **Example:**
+
 ```promql
 # Total views for a specific dashboard
 perses_dashboard_views_total{project="myproject", dashboard="mydashboard"}
@@ -60,6 +61,7 @@ topk(10, sum by (project, dashboard) (perses_dashboard_views_total))
 - `dashboard`: The dashboard name
 
 **Example:**
+
 ```promql
 # Total render errors for a specific dashboard
 perses_dashboard_render_errors_total{project="myproject", dashboard="mydashboard"}
@@ -91,6 +93,7 @@ rate(perses_dashboard_render_errors_total[5m])
 **Native histogram:** The metric is also exposed as a Prometheus [native histogram](https://prometheus.io/docs/specs/native_histograms/) for higher-resolution percentiles. If your Prometheus has native histograms enabled, it will ingest both formats automatically. Existing classic-histogram queries keep working unchanged.
 
 **Example:**
+
 ```promql
 # Average render time for a dashboard
 rate(perses_dashboard_render_time_seconds_sum{project="myproject", dashboard="mydashboard"}[5m])
@@ -127,6 +130,7 @@ When a user views a dashboard in the Perses UI:
 **Endpoint:** `POST /api/v1/visit`
 
 **Request Body:**
+
 ```json
 {
   "project": "myproject",
@@ -177,16 +181,19 @@ scrape_configs:
 Create a dashboard in Perses to monitor your Perses instance:
 
 **Most Viewed Dashboards (Last 24h):**
+
 ```promql
 topk(10, increase(perses_dashboard_views_total[24h]))
 ```
 
 **Dashboards with Errors:**
+
 ```promql
 sum by (project, dashboard) (increase(perses_dashboard_render_errors_total[1h])) > 0
 ```
 
 **Slowest Dashboards (95th percentile):**
+
 ```promql
 topk(10,
   histogram_quantile(0.95,
