@@ -176,6 +176,8 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		logrus.Error("failed to get username from context to list the user projects")
 		return nil, apiInterface.InternalError
 	}
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
 	projectPermission := n.cache.permissions[username]
 	if globalPermissions, ok := projectPermission[v1.WildcardProject]; ok && listHasPermission(globalPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}, nil
