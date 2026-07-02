@@ -19,7 +19,7 @@ import { DatasourceResource, DatasourceSelector, GlobalDatasourceResource } from
 export interface BuildDatasourceProxyUrlParams {
   project?: string;
   dashboard?: string;
-  name: string;
+  name?: string;
 }
 
 /**
