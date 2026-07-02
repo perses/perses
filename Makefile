@@ -16,6 +16,7 @@ CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
 MDOX                  ?= mdox
+MD_DOC_FILES_CMD      = find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -print
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
 GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
@@ -58,7 +59,7 @@ checkformat:
 checkdocs:
 	@echo ">> Check markdown docs format"
 	@make fmt-docs
-	@git diff --exit-code -- *.md
+	@git diff --exit-code -- $$($(MD_DOC_FILES_CMD))
 
 .PHONY: checkunused
 checkunused:
@@ -96,7 +97,7 @@ fmt:
 .PHONY: fmt-docs
 fmt-docs:
 	@echo ">> Format markdown documents"
-	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
+	$(MDOX) fmt --soft-wraps -l $$($(MD_DOC_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
 cue-eval:
