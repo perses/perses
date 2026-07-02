@@ -17,8 +17,8 @@ If server permissions allow, you also have the possibility to create your own pr
 ![create project pop-up](../images/project/add_popup.png)
 
 You will then be redirected to your newly created project workspace.
- 
- ![project page](../images/project/page.png)
+
+![project page](../images/project/page.png)
 
 Once there you have the options to rename or delete your project.
 

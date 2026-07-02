@@ -1,5 +1,4 @@
-Migrate from Grafana
-====================
+# Migrate from Grafana
 
 Migrating from Grafana to Perses means to be able to translate the Grafana dashboards to Perses dashboards (in terms of
 data model). This documentation will guide you through the process of doing such migration.
@@ -11,8 +10,8 @@ data model). This documentation will guide you through the process of doing such
 - Perses can't migrate Grafana resources like alerts, users, etc. Only the migration of dashboards is supported.
 
 - The challenge around the migration process is to be able to translate the various Grafana plugins to the ones supported by
-Perses. Since Perses is much younger project than Grafana, it is certain that it doesn't support every possible
-plugin. Therefore, the migration is in best-effort basis. However we are working hard to expand coverage!
+  Perses. Since Perses is much younger project than Grafana, it is certain that it doesn't support every possible
+  plugin. Therefore, the migration is in best-effort basis. However we are working hard to expand coverage!
 
 ## Prerequisites
 
@@ -34,10 +33,10 @@ older version of Grafana. But we can't guarantee it.
 - On the home page, click on the `Import Dashboard` in the top right corner.
 
 - Then, you can either paste the JSON of your Grafana dashboard or upload the JSON file.
-!!! tip
-    If you want the migrated dashboard to use the default Perses datasource, check the
-    `Use default datasource in Perses` checkbox. This will remove any reference to a specific
-    datasource in the migrated dashboard.
+  !!! tip
+  If you want the migrated dashboard to use the default Perses datasource, check the
+  `Use default datasource in Perses` checkbox. This will remove any reference to a specific
+  datasource in the migrated dashboard.
 
 - Click on the `Migrate` button.
 - If the migration is successful, then you will have in return the Perses dashboard as a JSON.
@@ -63,12 +62,15 @@ percli migrate -f grafana-dashboard.json --online -o json > perses-dashboard.jso
 Note: In case you would like to have the result as a K8s CustomResource, you can use the `--format` flag with the value `cr`.
 
 !!! tip
-    If you want the migrated dashboard to use the default Perses datasource, you can use the
-    `--use-default-datasource` flag. This will remove any reference to a specific datasource in the migrated dashboard.
+If you want the migrated dashboard to use the default Perses datasource, you can use the
+`--use-default-datasource` flag. This will remove any reference to a specific datasource in the migrated dashboard.
 
-    ```bash
-    percli migrate -f grafana-dashboard.json --online --use-default-datasource -o json > perses-dashboard.json
-    ```
+```
+```bash
+percli migrate -f grafana-dashboard.json --online --use-default-datasource -o json > perses-dashboard.json
+```
+
+```
 
 - You should check the unsupported migrations. For example, in case of a variable, you will get a static variable like this:
 

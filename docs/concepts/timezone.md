@@ -7,7 +7,7 @@ Perses supports multiple levels of timezone configuration to provide flexibility
 Timezone configuration in Perses determines how date and time values are formatted and displayed throughout the application. The system uses a resolution hierarchy to determine which timezone to apply when formatting timestamps.
 
 !!! note
-    This documentation describes the current timezone behavior and the planned multi-level configuration system. As Perses evolves to support multiple configuration levels, this document will be updated to reflect the implementation details.
+This documentation describes the current timezone behavior and the planned multi-level configuration system. As Perses evolves to support multiple configuration levels, this document will be updated to reflect the implementation details.
 
 ## Current Implementation
 
@@ -73,7 +73,7 @@ Perses plans to support a multi-level timezone configuration system. The followi
 6. **Browser Default**: Fallback to the browser's detected timezone
 
 !!! note
-    These configuration levels are still being developed. This document will be updated as the feature evolves.
+These configuration levels are still being developed. This document will be updated as the feature evolves.
 
 ## Best Practices
 

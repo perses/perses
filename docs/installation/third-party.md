@@ -1,5 +1,4 @@
-Install with package managers
-=================================
+# Install with package managers
 
 ## Brew
 

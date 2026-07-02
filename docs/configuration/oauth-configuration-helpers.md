@@ -50,7 +50,7 @@ security:
 ```
 
 !!! tip
-    The **scope** used to generate a token from client credentials is different from the one used in other flows.
+The **scope** used to generate a token from client credentials is different from the one used in other flows.
 
 *Reference: [https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow)*
 
@@ -80,7 +80,7 @@ security:
 ```
 
 !!! tip
-    Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). As of now, the Perses does not support `RoleBinding` or `GlobalRoleBinding` based on the roles assigned to user in the OIDC provider.
+Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). As of now, the Perses does not support `RoleBinding` or `GlobalRoleBinding` based on the roles assigned to user in the OIDC provider.
 
 *Reference: [Keycloak OpenID Connect](https://www.keycloak.org/securing-apps/oidc-layers)*
 

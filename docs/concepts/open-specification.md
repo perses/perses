@@ -14,16 +14,17 @@ This open specification is currently implemented in the following languages:
 - [Typescript](https://www.typescriptlang.org/) available in [ui/core/src/model/dashboard.ts](https://github.com/perses/perses/blob/main/ui/core/src/model/dashboard.ts#L28-L35) via the npm package [@perses-dev/core](https://www.npmjs.com/package/@perses-dev/core)
 
 !!! warning
-    We aim also to be backward compatible as much as possible. This means that when we release a new version of Perses, we try to ensure that dashboards created with previous versions are still compatible with the new version.
-    This is not always possible, mainly due to the plugins evolutions. But we try to minimize the impact of such changes, and we aim to provide automatic migration soon. If you are interested in this feature, please read the discussion [here](https://github.com/perses/perses/discussions/1186).
-    Once this discussion is closed, we will be able to guarantee backward compatibility for future releases.
+We aim also to be backward compatible as much as possible. This means that when we release a new version of Perses, we try to ensure that dashboards created with previous versions are still compatible with the new version.
+This is not always possible, mainly due to the plugins evolutions. But we try to minimize the impact of such changes, and we aim to provide automatic migration soon. If you are interested in this feature, please read the discussion [here](https://github.com/perses/perses/discussions/1186).
+Once this discussion is closed, we will be able to guarantee backward compatibility for future releases.
 
 ## Being compatible with Perses
+
 This section is here to explain what means for a software or a tool to be compatible with Perses.
 
 !!! warning
-    This documentation can change over the time. Therefore a software that said it is compatible with Perses today may not be compatible anymore in the future if Perses changes its specifications or APIs. 
-    Always check the latest documentation to ensure compatibility.
+This documentation can change over the time. Therefore a software that said it is compatible with Perses today may not be compatible anymore in the future if Perses changes its specifications or APIs.
+Always check the latest documentation to ensure compatibility.
 
 ### What does "compatible with Perses" mean?
 

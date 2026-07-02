@@ -396,6 +396,7 @@ kubernetes: <Kubernetes provider> # Optional
 ```
 
 ##### Native provider
+
 ```yaml
 # Determines if the native authentication provider is enabled. If security.enable_auth is set to true and no other
 # providers are set then this value will be automatically set to true
@@ -419,8 +420,8 @@ scopes:
   - <enum= kind | "*">
 ```
 
-
 ##### Kubernetes provider
+
 ```yaml
 # Must be the only authentication provider enabled and must be run alongside the kubernetes
 # authorization option enabled

@@ -130,7 +130,7 @@ The method needs to be `POST` with the body in the request and the JSON schema s
   {
     "query": "select * from table limit 5"
   }
-```  
+```
 
 ## API definition
 

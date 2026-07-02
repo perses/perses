@@ -70,8 +70,8 @@ package yourquery
 import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
-	"github.com/perses/perses/pkg/model/api/v1/plugin"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/plugin"
 )
 
 const PluginKind = "YourLogQuery"
@@ -266,7 +266,6 @@ type PluginSpec struct {
 	Proxy      *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 	OtherField string      `json:"otherField,omitempty" yaml:"otherField,omitempty"`
 }
-
 ```
 
 ### Upgrading from v0.52.0 to v0.53.0
@@ -404,7 +403,7 @@ In the previous version of the GO-SDK, a query plugin was defined by using the Q
 approach is that it was not possible to provide the high level query type as it was hardcoded in the query builder.
 
 This was not a problem for the Perses app as we only have one query type until recently. It changed with the
-introduction of the new query types:  "ProfileQuery", "LogQuery" and "TraceQuery". To support this new use-case, we had
+introduction of the new query types: "ProfileQuery", "LogQuery" and "TraceQuery". To support this new use-case, we had
 to introduce a breaking change in the way to define a query plugin.
 
 Now, instead of using the Query builder, you need to fill a struct `query.Option` that contains the query plugin and the
@@ -431,7 +430,6 @@ func PromQL(expr string, options ...Option) query.Option {
 		return nil
 	}
 }
-
 ```
 
 to this:
@@ -456,7 +454,6 @@ func PromQL(expr string, options ...Option) query.Option {
 		Error: err,
 	}
 }
-
 ```
 
 #### Plugin Dev API change.

@@ -1,7 +1,7 @@
 # Getting Started
 
 !!! info
-    This guide assumes no prior experience with Perses. For a high-level understanding of the project, see the [Overview](./overview.md).
+This guide assumes no prior experience with Perses. For a high-level understanding of the project, see the [Overview](./overview.md).
 
 ## Install Perses
 
@@ -58,15 +58,15 @@ Before you can visualize data, you need to connect Perses to a datasource.
 1. Navigate to the **Datasources** tab in your project.
 2. Click **Add Datasource**.
 3. Fill in the following fields:
-    - **Name**: a name for your datasource, for example `PrometheusDemo`.
-    - **Set as default**: toggle on.
-    - **Source**: select `Prometheus Datasource`.
-    - **HTTP Settings**: select `Proxy`.
-    - **URL**: the URL of your Prometheus instance, for example `http://prometheus:9090`.
+   - **Name**: a name for your datasource, for example `PrometheusDemo`.
+   - **Set as default**: toggle on.
+   - **Source**: select `Prometheus Datasource`.
+   - **HTTP Settings**: select `Proxy`.
+   - **URL**: the URL of your Prometheus instance, for example `http://prometheus:9090`.
 4. Click **Add** to save.
 
 !!! tip
-    Use **Proxy** mode so the Perses server forwards requests to Prometheus on your behalf. This avoids CORS issues that occur with **Direct access** mode when the browser cannot reach Prometheus directly.
+Use **Proxy** mode so the Perses server forwards requests to Prometheus on your behalf. This avoids CORS issues that occur with **Direct access** mode when the browser cannot reach Prometheus directly.
 
 ![datasource created](images/getting-started/datasource-created.png)
 
@@ -83,12 +83,12 @@ You are taken to an empty dashboard in edit mode.
 
 1. Click **Add Panel** in the top-right toolbar.
 2. Fill in the following fields:
-    - **Name**: `HTTP Requests`
-    - **Type**: `Time Series Chart`
+   - **Name**: `HTTP Requests`
+   - **Type**: `Time Series Chart`
 3. Under **Query**, configure:
-    - **Query Type**: `Prometheus Time Series Query`
-    - **Prometheus Datasource**: your default datasource is pre-selected.
-    - **PromQL Expression**: `up`
+   - **Query Type**: `Prometheus Time Series Query`
+   - **Prometheus Datasource**: your default datasource is pre-selected.
+   - **PromQL Expression**: `up`
 4. Click **Run Query** to preview the chart. You should see a time series line showing the `up` metric.
 5. Click **Add** to add the panel to your dashboard.
 6. Click **Save** in the top-right corner to persist your dashboard.
@@ -125,9 +125,9 @@ To create a variable:
 2. Click **Variables** in the top toolbar.
 3. Click **+ Add Variable**.
 4. Fill in:
-    - **Name**: `job`
-    - **Source**: select `Prometheus Label Values`.
-    - **Label Name**: `job`
+   - **Name**: `job`
+   - **Source**: select `Prometheus Label Values`.
+   - **Label Name**: `job`
 5. Click **Run Query** to preview the values. You should see the available `job` label values from Prometheus.
 6. Click **Add** to save the variable.
 7. Click **Apply** to return to the dashboard.
