@@ -11,10 +11,12 @@ package role
 	#CreateAction |
 	#UpdateAction |
 	#DeleteAction |
+	#WatchAction |
 	#WildcardAction
 
 #ReadAction:     #Action & "read"
 #CreateAction:   #Action & "create"
 #UpdateAction:   #Action & "update"
 #DeleteAction:   #Action & "delete"
+#WatchAction:    #Action & "watch"
 #WildcardAction: #Action & "*"

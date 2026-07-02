@@ -55,6 +55,7 @@ const (
 	PathCurrentUser        = "user"
 	PathVariable           = "variables"
 	PathView               = "view"
+	PathWatch              = "watch"
 	PathWhoAmI             = "whoami"
 	ContextKeyAnonymous    = "anonymous"
 )
