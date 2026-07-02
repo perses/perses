@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { ReactElement, ReactNode, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { BooleanParam, JsonParam, useQueryParam } from 'use-query-params';
-import CloseIcon from 'mdi-material-ui/Close';
 import {
   PanelDrawer,
   Dashboard,
@@ -77,7 +76,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const isDetailedView = detailedView === true;
 
   // Check if we're in selected panels view mode
-  const [selectedPanels, setSelectedPanels] = useQueryParam('selectedPanels', JsonParam);
+  const [selectedPanels] = useQueryParam('selectedPanels', JsonParam);
   const [panelSelectMode] = useQueryParam('panelSelectMode', BooleanParam);
   const isViewingSelected = Array.isArray(selectedPanels) && selectedPanels.length > 0 && panelSelectMode !== true;
 
@@ -165,18 +164,6 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
           <LeaveDialog original={originalDashboard} current={dashboard} />
         )}
       </Box>
-      {/* Exit button for selected panels view — fixed in bottom-right corner */}
-      {isViewingSelected && (
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<CloseIcon />}
-          onClick={() => setSelectedPanels(undefined)}
-          sx={{ position: 'fixed', bottom: 16, right: 16, zIndex: 1200 }}
-        >
-          Exit
-        </Button>
-      )}
     </Box>
   );
 };
