@@ -29,6 +29,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
+	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -117,7 +118,7 @@ func (d *discovery) String() string {
 }
 
 func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
-	sch, err := d.schema.GetDatasourceSchema(d.cfg.DatasourcePluginKind)
+	sch, err := d.schema.GetInstance(specPlugin.KindDatasource, d.cfg.DatasourcePluginKind)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get datasource schema")
 		return nil, nil
