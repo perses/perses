@@ -104,7 +104,7 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.PublicGlobalSecre
 	return v1.NewPublicGlobalSecret(scrt), nil
 }
 
-func (s *service) List(q *globalsecret.Query, _ apiInterface.Parameters) ([]*v1.PublicGlobalSecret, error) {
+func (s *service) List(q *globalsecret.Query) ([]*v1.PublicGlobalSecret, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
@@ -116,14 +116,14 @@ func (s *service) List(q *globalsecret.Query, _ apiInterface.Parameters) ([]*v1.
 	return result, nil
 }
 
-func (s *service) RawList(_ *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ *globalsecret.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) MetadataList(q *globalsecret.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *globalsecret.Query) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *globalsecret.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }
