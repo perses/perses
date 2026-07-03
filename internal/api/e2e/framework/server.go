@@ -208,6 +208,10 @@ func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect
 
 func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager, string) []modelAPI.Entity) {
 	conf := DefaultAuthConfig()
+	WithServerAuthCustomConfig(t, conf, testFunc)
+}
+
+func WithServerAuthCustomConfig(t *testing.T, conf apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager, string) []modelAPI.Entity) {
 	server, expect, dependencyManager := CreateServer(t, conf)
 	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()

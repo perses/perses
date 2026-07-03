@@ -27,6 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/api/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -241,6 +242,55 @@ func CreateTestScenarioWithProject(t *testing.T, path string, creator func(proje
 	})
 }
 
+func CreateTestScenarioWithProjectCustomConfig(t *testing.T, conf apiConfig.Config, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// Creation test : Perform the POST request
+	t.Run("Creation", func(t *testing.T) {
+		WithServerAuthCustomConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+			parent, entity := creator("myProject", "myResource")
+			CreateAndWaitUntilEntityExists(t, manager.Persistence(), parent)
+
+			expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusOK)
+
+			return []modelAPI.Entity{parent, entity}
+		})
+	})
+
+	t.Run("Creation with project path", func(t *testing.T) {
+		WithServerAuthCustomConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+			parent, entity := creator("myProject", "myResource")
+			CreateAndWaitUntilEntityExists(t, manager.Persistence(), parent)
+
+			expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusOK)
+
+			return []modelAPI.Entity{parent, entity}
+		})
+	})
+
+	// Conflict test : Call again the same endpoint, it should now return a conflict error
+	t.Run(fmt.Sprintf("Conflict test (%s)", path), func(t *testing.T) {
+		WithServerAuthCustomConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+			parent, entity := creator("myProject", "myResource")
+			CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), parent, entity)
+
+			expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusConflict)
+
+			return []modelAPI.Entity{parent, entity}
+		})
+	})
+}
+
 func DeleteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// Deletion test
 	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
@@ -263,10 +313,59 @@ func DeleteTestScenarioWithProject(t *testing.T, path string, creator func(proje
 	})
 }
 
+func DeleteTestScenarioWithProjectCustomConfig(t *testing.T, conf apiConfig.Config, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// Deletion test
+	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
+		WithServerAuthCustomConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+			parent, entity := creator("myParentResource", "myResource")
+			CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), parent, entity)
+
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+				WithHeader(CreateAuthorizationHeader(token)).
+				Expect().
+				Status(http.StatusNoContent)
+
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+				WithHeader(CreateAuthorizationHeader(token)).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{parent}
+		})
+	})
+}
+
 func NotFoundTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
 		WithServerAuthConfig(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+			parent, entity := creator("myParentResource", "not-existing")
+			CreateAndWaitUntilEntityExists(t, manager.Persistence(), parent)
+
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+				WithHeader(CreateAuthorizationHeader(token)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{parent}
+		})
+	})
+}
+
+func NotFoundTestScenarioWithProjectCustomConfig(t *testing.T, conf apiConfig.Config, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// "404 - Not found" tests
+	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
+		WithServerAuthCustomConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
 			parent, entity := creator("myParentResource", "not-existing")
 			CreateAndWaitUntilEntityExists(t, manager.Persistence(), parent)
 

@@ -51,7 +51,13 @@ func TestMainScenarioSecret(t *testing.T) {
 	creator := func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewSecret(projectName, name)
 	}
-	e2eframework.CreateTestScenarioWithProject(t, path, creator)
+
+	conf := e2eframework.DefaultAuthConfig()
+	// This scenario does not need plugin schema validation; keep plugin loading minimal to avoid long startup on Windows CI.
+	conf.Plugin.Path = t.TempDir()
+	conf.Plugin.ArchivePaths = nil
+
+	e2eframework.CreateTestScenarioWithProjectCustomConfig(t, conf, path, creator)
 
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
 		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
@@ -76,6 +82,6 @@ func TestMainScenarioSecret(t *testing.T) {
 		})
 	})
 
-	e2eframework.DeleteTestScenarioWithProject(t, path, creator)
-	e2eframework.NotFoundTestScenarioWithProject(t, path, creator)
+	e2eframework.DeleteTestScenarioWithProjectCustomConfig(t, conf, path, creator)
+	e2eframework.NotFoundTestScenarioWithProjectCustomConfig(t, conf, path, creator)
 }

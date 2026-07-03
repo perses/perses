@@ -17,6 +17,7 @@ package e2eframework
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"testing"
@@ -156,25 +157,31 @@ func CreateAndWaitUntilEntitiesExist(t *testing.T, persistenceManager dependency
 func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
 	getFunc, upsertFunc := CreateGetFunc(t, persistenceManager, object)
 
-	// It appears that (maybe because of the tiny short between a deletion order and a creation order),
-	// an entity actually created in database could be removed by a previous delete order.
-	// To avoid that we will upsert the entity multiple times.
-	// Also, we can have some delay between the order to create the document and the actual creation.
-	// So let's wait sometimes
-	nbTimeToCreate := 3
+	// We keep a couple of retries for eventual consistency, but with short polling to avoid long CI stalls.
+	const (
+		nbTimeToCreate         = 3
+		entityVisibleTimeout   = 10 * time.Second
+		entityVisiblePollDelay = 100 * time.Millisecond
+	)
+
 	var err error
 	for i := 0; i < nbTimeToCreate; i++ {
 		if err := upsertFunc(); err != nil {
 			t.Fatal(err)
 		}
-		j := 0
-		for _, err = getFunc(); err != nil && j < 30; _, err = getFunc() {
-			j++
-			time.Sleep(2 * time.Second)
+
+		deadline := time.Now().Add(entityVisibleTimeout)
+		for _, err = getFunc(); err != nil && time.Now().Before(deadline); _, err = getFunc() {
+			time.Sleep(entityVisiblePollDelay)
+		}
+
+		if err == nil {
+			return
 		}
 	}
+
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmt.Errorf("entity %T was not visible after %d attempts (poll timeout %s): %w", object, nbTimeToCreate, entityVisibleTimeout, err))
 	}
 }
 
