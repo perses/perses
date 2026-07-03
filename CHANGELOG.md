@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.54.0-beta.2 / 2026-06-19
+
+- [FEATURE] Add annotation support (#4040)
+- [FEATURE] Add tags display with chips in DashboardTreeList (#4115)
+- [FEATURE] Implement NoItems representation in DashboardTreeList and related components (#4116)
+- [FEATURE] Add alert and silence query kinds (#4047)
+- [FEATURE] Add LogExplorer plugin (#4148)
+- [ENHANCEMENT] Expose perses_dashboard_render_time_seconds metric as a dual classic + native histogram (#4145)
+- [BUGFIX] Fix parsing log level in logrus builder (#4138)
+- [DOC] Document Perses UI package architecture (#4119)
+
+### Plugins improvements
+
+- [BUGFIX] Table: table column filter values (perses/plugins#679)
+- [BUGFIX] Prometheus: fix variable interpolation in label value query (perses/plugins#675)
+
 ## 0.54.0-beta.1 / 2026-06-04
 
 Due to some issues with goreleaser and cuelang the previous version has not been properly released, we had to release a
