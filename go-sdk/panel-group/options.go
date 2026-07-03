@@ -48,7 +48,7 @@ func PanelHeight(height int) Option {
 
 func Collapsed(isCollapsed bool) Option {
 	return func(builder *Builder) error {
-		builder.IsCollapsed = isCollapsed
+		builder.IsCollapsed = &isCollapsed
 		return nil
 	}
 }

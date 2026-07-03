@@ -37,19 +37,19 @@ func TestMainScenarioProject(t *testing.T) {
 }
 
 func TestDeleteProjectWithSubResources(t *testing.T) {
-	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 		projectName := "perses"
 		dash := e2eframework.NewDashboard(t, "perses", "Demo")
 		project := e2eframework.NewProject(projectName)
 		datasource := e2eframework.NewDatasource(t, "perses", "Demo")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, project, dash, datasource)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), project, dash, datasource)
 		expect.DELETE(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathProject, projectName)).
 			Expect().
 			Status(http.StatusNoContent)
 
-		_, err := manager.GetDashboard().Get(projectName, dash.Metadata.Name)
+		_, err := manager.Persistence().GetDashboard().Get(projectName, dash.Metadata.Name)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
-		_, err = manager.GetDatasource().Get(projectName, datasource.Metadata.Name)
+		_, err = manager.Persistence().GetDatasource().Get(projectName, datasource.Metadata.Name)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
 		return []api.Entity{}
 	})

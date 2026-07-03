@@ -190,18 +190,18 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.Project, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *project.Query, _ apiInterface.Parameters) ([]*v1.Project, error) {
+func (s *service) List(q *project.Query) ([]*v1.Project, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(q *project.Query) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *project.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *project.Query) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *project.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *project.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

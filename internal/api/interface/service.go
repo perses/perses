@@ -31,8 +31,8 @@ type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
 	Update(ctx echo.Context, entity T, parameters Parameters) (K, error)
 	Delete(ctx echo.Context, parameters Parameters) error
 	Get(parameters Parameters) (K, error)
-	List(query V, parameters Parameters) ([]K, error)
-	RawList(query V, parameters Parameters) ([]json.RawMessage, error)
-	MetadataList(query V, parameters Parameters) ([]api.Entity, error)
-	RawMetadataList(query V, parameters Parameters) ([]json.RawMessage, error)
+	List(query V) ([]K, error)
+	RawList(query V) ([]json.RawMessage, error)
+	MetadataList(query V) ([]api.Entity, error)
+	RawMetadataList(query V) ([]json.RawMessage, error)
 }

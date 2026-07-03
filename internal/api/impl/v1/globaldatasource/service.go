@@ -98,7 +98,7 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.GlobalDatasource,
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *globaldatasource.Query, _ apiInterface.Parameters) ([]*v1.GlobalDatasource, error) {
+func (s *service) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
@@ -106,15 +106,15 @@ func (s *service) List(q *globaldatasource.Query, _ apiInterface.Parameters) ([]
 	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
 }
 
-func (s *service) MetadataList(_ *globaldatasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ *globaldatasource.Query) ([]api.Entity, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawList(_ *globaldatasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ *globaldatasource.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawMetadataList(_ *globaldatasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ *globaldatasource.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

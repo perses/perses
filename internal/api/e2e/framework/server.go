@@ -197,12 +197,12 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	}), dependencyManager
 }
 
-func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager) []modelAPI.Entity) {
 	conf := DefaultConfig()
 	server, expect, dependencyManager := CreateServer(t, conf)
 	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, dependencyManager.Persistence())
+	entities := testFunc(server, expect, dependencyManager)
 	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 }
 
@@ -217,11 +217,11 @@ func WithServerAuthConfig(t *testing.T, testFunc func(*httptest.Server, *httpexp
 	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), append(entities, usrEntity, globalRole, globalRoleBinding)...)
 }
 
-func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.Manager) []modelAPI.Entity) {
 	server, expect, dependencyManager := CreateServer(t, config)
 	defer dependencyManager.Persistence().GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(server, expect, dependencyManager.Persistence())
+	entities := testFunc(server, expect, dependencyManager)
 	ClearAllKeys(t, dependencyManager.Persistence().GetPersesDAO(), entities...)
 }
 

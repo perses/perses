@@ -21,7 +21,7 @@ type PanelGroup struct {
 	Title          string
 	PanelsWidth    int
 	PanelsHeight   int
-	IsCollapsed    bool
+	IsCollapsed    *bool
 	RepeatVariable string
 	Panels         []dashboard.Panel
 }
@@ -41,7 +41,6 @@ func New(title string, options ...Option) (Builder, error) {
 		Title(title),
 		PanelWidth(12),
 		PanelHeight(8),
-		Collapsed(true),
 	}
 
 	for _, opt := range append(defaults, options...) {

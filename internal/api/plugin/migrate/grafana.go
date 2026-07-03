@@ -34,6 +34,8 @@ type GrafanaLink struct {
 	Title       string `json:"title"`
 	URL         string `json:"url"`
 	TargetBlank bool   `json:"targetBlank"`
+	IncludeVars bool   `json:"includeVars"`
+	Tooltip     string `json:"tooltip"`
 }
 
 type Panel struct {
@@ -181,10 +183,11 @@ func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
 }
 
 type SimplifiedDashboard struct {
-	UID        string   `json:"uid,omitempty"`
-	Title      string   `json:"title"`
-	Tags       []string `json:"tags"`
-	Panels     []Panel  `json:"panels"`
+	UID        string        `json:"uid,omitempty"`
+	Title      string        `json:"title"`
+	Tags       []string      `json:"tags"`
+	Panels     []Panel       `json:"panels"`
+	Links      []GrafanaLink `json:"links"`
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`

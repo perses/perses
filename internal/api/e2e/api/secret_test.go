@@ -54,9 +54,9 @@ func TestMainScenarioSecret(t *testing.T) {
 	e2eframework.CreateTestScenarioWithProject(t, path, creator)
 
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
-		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
 			parent, entity := creator("myProject", "myResource")
-			e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
+			e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), parent, entity)
 
 			// call now the update endpoint, shouldn't return an error
 			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
@@ -68,7 +68,7 @@ func TestMainScenarioSecret(t *testing.T) {
 			result := decodePublicSecret(t, o)
 			assert.Equal(t, e2eframework.NewPublicSecret(parent.GetMetadata().GetName(), entity.GetMetadata().GetName()).GetSpec(), result.GetSpec())
 
-			getFunc, _ := e2eframework.CreateGetFunc(t, manager, entity)
+			getFunc, _ := e2eframework.CreateGetFunc(t, manager.Persistence(), entity)
 			// check the document exists in the db
 			_, err := getFunc()
 			assert.NoError(t, err)

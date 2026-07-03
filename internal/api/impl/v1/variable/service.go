@@ -106,46 +106,18 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.Variable, error) 
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.List(query)
+func (s *service) List(q *variable.Query) ([]*v1.Variable, error) {
+	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *variable.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.RawList(query)
+func (s *service) RawList(q *variable.Query) ([]json.RawMessage, error) {
+	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *variable.Query, params apiInterface.Parameters) ([]api.Entity, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.MetadataList(query)
+func (s *service) MetadataList(q *variable.Query) ([]api.Entity, error) {
+	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *variable.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.RawMetadataList(query)
-}
-
-func manageQuery(q *variable.Query, params apiInterface.Parameters) (*variable.Query, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query, err := deep.Copy(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
-	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
-	}
-	return query, nil
+func (s *service) RawMetadataList(q *variable.Query) ([]json.RawMessage, error) {
+	return s.dao.RawMetadataList(q)
 }

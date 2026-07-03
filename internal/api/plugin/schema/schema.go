@@ -188,9 +188,12 @@ func (s *completeSchema) ValidateDatasource(plugin plugin.Plugin, dtsName string
 // The panels are matched against the known list of CUE definitions (schemas).
 // If no schema matches for at least 1 panel, the validation fails.
 func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) error {
+	s.mutex.RLock()
 	if len(s.devSch.panels) == 0 && len(s.sch.panels) == 0 {
+		s.mutex.RUnlock()
 		return fmt.Errorf("panel schemas are not loaded")
 	}
+	s.mutex.RUnlock()
 	var errs []error
 	for panelName, panel := range panels {
 		logrus.Tracef("Panel to validate: %s", panelName)
@@ -236,9 +239,12 @@ func (s *completeSchema) ValidateGlobalVariable(v v1.VariableSpec) error {
 // This applies to the ListVariable type only (TextVariable is skipped as there are no plugins for this kind)
 // If no schema matches for at least 1 variable, the validation fails.
 func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variable) error {
+	s.mutex.RLock()
 	if len(s.devSch.variables) == 0 && len(s.sch.variables) == 0 {
+		s.mutex.RUnlock()
 		return fmt.Errorf("variable schemas are not loaded")
 	}
+	s.mutex.RUnlock()
 	var errs []error
 	for _, v := range variables {
 		// skip if this is not a ListVariable (no validation needed in this case)
@@ -276,9 +282,12 @@ func (s *completeSchema) ValidateDashboardAnnotations(annotations []dashboard.An
 	if len(annotations) == 0 {
 		return nil
 	}
+	s.mutex.RLock()
 	if len(s.devSch.annotations) == 0 && len(s.sch.annotations) == 0 {
+		s.mutex.RUnlock()
 		return fmt.Errorf("annotations schemas are not loaded")
 	}
+	s.mutex.RUnlock()
 	var errs []error
 	for _, a := range annotations {
 		name := a.Display.Name

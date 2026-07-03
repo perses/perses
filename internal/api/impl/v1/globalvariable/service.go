@@ -98,18 +98,18 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.GlobalVariable, e
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *globalvariable.Query, _ apiInterface.Parameters) ([]*v1.GlobalVariable, error) {
+func (s *service) List(q *globalvariable.Query) ([]*v1.GlobalVariable, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *globalvariable.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(q *globalvariable.Query) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *globalvariable.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *globalvariable.Query) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *globalvariable.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *globalvariable.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

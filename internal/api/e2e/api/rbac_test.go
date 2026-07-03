@@ -31,7 +31,7 @@ import (
 )
 
 func TestNewProjectEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -62,17 +62,17 @@ func TestNewProjectEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusNoContent)
 
-		_, err := manager.GetVariable().Get(projectName, variableEntity.Metadata.Name)
+		_, err := manager.Persistence().GetVariable().Get(projectName, variableEntity.Metadata.Name)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
-		_, err = manager.GetProject().Get(projectName)
+		_, err = manager.Persistence().GetProject().Get(projectName)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
-		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), usrEntity)
 		return []modelAPI.Entity{}
 	})
 }
 
 func TestAnonymousEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -96,13 +96,13 @@ func TestAnonymousEndpoints(t *testing.T) {
 		expect.GET("/api/config").WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusOK)
 		expect.GET("/api/config").Expect().Status(http.StatusOK)
 
-		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), usrEntity)
 		return []modelAPI.Entity{}
 	})
 }
 
 func TestUnauthorizedEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -131,7 +131,7 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 		project2Entity := e2eframework.NewProject("mysuperproject2")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathProject)).WithJSON(project2Entity).WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusUnauthorized)
 
-		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		e2eframework.ClearAllKeys(t, manager.Persistence().GetPersesDAO(), usrEntity)
 		return []modelAPI.Entity{}
 	})
 }
