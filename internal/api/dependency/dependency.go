@@ -21,7 +21,7 @@ type Manager interface {
 }
 
 func NewManager(conf config.Config) (Manager, error) {
-	persistenceManager, err := newPersistenceManager(conf.Database)
+	persistenceManager, err := newPersistenceManager(conf.Database, conf.Watch)
 	if err != nil {
 		return nil, err
 	}

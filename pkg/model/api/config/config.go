@@ -79,6 +79,8 @@ type Config struct {
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
 	// Plugin contains the config for runtime plugins.
 	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
+	// Watch contains the configuration to enable watch endpoints and watch-aware persistence by kind.
+	Watch Watch `json:"watch,omitempty" yaml:"watch,omitempty"`
 }
 
 func (c *Config) Verify() error {

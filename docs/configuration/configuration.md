@@ -132,6 +132,9 @@ frontend: <Frontend config> # Optional
 
 # The configuration to access and load the runtime plugins 
 plugin: <Plugin config> # Optional
+
+# The configuration to enable watch endpoints
+watch: <Watch config> # Optional
 ```
 
 ### Security config
@@ -851,6 +854,13 @@ enabled:
 # The name can be the name of the plugin or the name of the module. For example, you can put `Prometheus` to disable the Prometheus module that contains query, variables and datasource plugin.
 # Use either Enabled or Disabled. Both can not be used at the same time.
 disabled:
+  - <string> # Optional
+```
+
+### Watch config
+```yaml
+# List of kinds to watch. Watchable kinds are: Dashboard
+kinds:
   - <string> # Optional
 ```
 
