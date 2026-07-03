@@ -449,7 +449,7 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 		},
 	}
 	// should load without error
-	if err := s.load("testdata/schemas/panels", pluginModule); err != nil {
+	if err := s.load("testdata/schemas/panels", pluginModule, false); err != nil {
 		t.Fatalf("unexpected error while loading schema: %v", err)
 	}
 	inst, ok := s.panels.Get("FirstChart", pluginModule.Metadata)
@@ -470,7 +470,7 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 			},
 		},
 	}
-	if err := s2.load("testdata/schemas/panels", moduleMissing); err == nil {
+	if err := s2.load("testdata/schemas/panels", moduleMissing, false); err == nil {
 		t.Fatalf("expected error when plugin list does not contain schema kind")
 	} else {
 		// give a readable check to ensure it's the expected failure path

@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
@@ -35,7 +36,59 @@ var CueValidationOptions = []cue.Option{
 	cue.Hidden(true),
 }
 
+// modelSchemaCache memoizes parsed CUE model schemas by their absolute path.
+// Plugin schema files are static for a given process: they are extracted once
+// from the archives and are never modified afterwards. Re-parsing them for every
+// server / dependency-manager instantiation is therefore pure overhead, and that
+// overhead is dramatic on Windows where the CUE loader's filesystem access is very
+// slow. This is especially visible in the integration tests, which spin up a fresh
+// server (hence reload every plugin schema) for almost every test case.
+// Dev plugins can be edited and hot-reloaded, so they bypass this cache.
+var (
+	modelSchemaCacheMu sync.RWMutex
+	modelSchemaCache   = make(map[string]modelSchemaCacheEntry)
+)
+
+type modelSchemaCacheEntry struct {
+	kind     string
+	instance *build.Instance
+}
+
+// LoadModelSchema loads (and parses) the CUE model schema located at schemaPath
+// without using the cache. It always reads the schema from disk.
 func LoadModelSchema(schemaPath string) (string, *build.Instance, error) {
+	return loadModelSchema(schemaPath, false)
+}
+
+// loadModelSchema loads the CUE model schema located at schemaPath. When useCache
+// is true, the parsed result is memoized by its absolute path and reused on
+// subsequent calls, avoiding costly re-parsing of static plugin schema files.
+func loadModelSchema(schemaPath string, useCache bool) (string, *build.Instance, error) {
+	if !useCache {
+		return doLoadModelSchema(schemaPath)
+	}
+	cacheKey, err := filepath.Abs(schemaPath)
+	if err != nil {
+		// Fall back to the raw path if we can't resolve an absolute one.
+		cacheKey = schemaPath
+	}
+	modelSchemaCacheMu.RLock()
+	entry, ok := modelSchemaCache[cacheKey]
+	modelSchemaCacheMu.RUnlock()
+	if ok {
+		return entry.kind, entry.instance, nil
+	}
+	kind, instance, err := doLoadModelSchema(schemaPath)
+	if err != nil {
+		return "", nil, err
+	}
+	modelSchemaCacheMu.Lock()
+	modelSchemaCache[cacheKey] = modelSchemaCacheEntry{kind: kind, instance: instance}
+	modelSchemaCacheMu.Unlock()
+	return kind, instance, nil
+}
+
+func doLoadModelSchema(schemaPath string) (string, *build.Instance, error) {
 	ctx := cuecontext.New()
 	schemaInstance, err := LoadSchemaInstance(schemaPath, "model")
 	if err != nil {

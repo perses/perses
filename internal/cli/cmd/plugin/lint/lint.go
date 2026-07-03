@@ -76,7 +76,7 @@ func (o *option) Execute() error {
 		// Note that the path used in the package.json is used when building the archive to put in the correct place the schemas,
 		// to be able to find them later.
 		npmPackageData.Perses.SchemasPath = o.relativeSchemaPath
-		if _, err := schema.Load(o.pluginPath, *v1.NewModuleSpec(npmPackageData.Perses)); err != nil {
+		if _, err := schema.Load(o.pluginPath, *v1.NewModuleSpec(npmPackageData.Perses), false); err != nil {
 			return err
 		}
 		if _, err := migrate.Load(o.pluginPath, *v1.NewModuleSpec(npmPackageData.Perses)); err != nil {

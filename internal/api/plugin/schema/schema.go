@@ -39,7 +39,10 @@ type LoadSchema struct {
 }
 
 // Load is loading the list of the schema associated with the given plugin module.
-func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]LoadSchema, error) {
+// When useCache is true, parsed model schemas are memoized by path and reused on
+// subsequent calls (safe for static plugin schemas, must be false for dev plugins
+// that can be hot-reloaded).
+func Load(pluginPath string, moduleSpec v1.ModuleSpec, useCache bool) ([]LoadSchema, error) {
 	var schemas []LoadSchema
 	err := filepath.WalkDir(filepath.Join(pluginPath, moduleSpec.SchemasPath), func(currentPath string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -90,7 +93,7 @@ func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]LoadSchema, error) {
 		// })
 		//
 		// #variableSyntaxRegex: "^\\$\\w+$"
-		name, instance, schemaErr := LoadModelSchema(currentDir)
+		name, instance, schemaErr := loadModelSchema(currentDir, useCache)
 		if schemaErr != nil {
 			return schemaErr
 		}
@@ -158,13 +161,15 @@ type completeSchema struct {
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.sch.load(pluginPath, module)
+	// Standard plugins are static once extracted, so their schemas can be cached.
+	return s.sch.load(pluginPath, module, true)
 }
 
 func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	return s.devSch.load(pluginPath, module)
+	// Dev plugins can be edited and hot-reloaded, so their schemas must not be cached.
+	return s.devSch.load(pluginPath, module, false)
 }
 
 func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
@@ -352,8 +357,8 @@ func newSch() *sch {
 	}
 }
 
-func (s *sch) load(pluginPath string, pluginModule v1.PluginModule) error {
-	schemas, err := Load(pluginPath, pluginModule.Spec)
+func (s *sch) load(pluginPath string, pluginModule v1.PluginModule, useCache bool) error {
+	schemas, err := Load(pluginPath, pluginModule.Spec, useCache)
 	if err != nil {
 		return err
 	}
