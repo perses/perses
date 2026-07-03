@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"cuelang.org/go/cue/build"
 	"github.com/perses/spec/go/dashboard"
@@ -162,6 +163,15 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *da
 type matchedQuery struct {
 	query  *queryInstance
 	plugin *plugin.Plugin
+	kind   string
+}
+
+func fprintKinds(mq []matchedQuery) string {
+	kinds := []string{}
+	for _, query := range mq {
+		kinds = append(kinds, query.kind)
+	}
+	return strings.Join(kinds, ", ")
 }
 
 // executeQueryScript is a package-level variable so tests can stub it without real CUE files.
@@ -169,7 +179,7 @@ var executeQueryScript = ExecuteQueryScript
 
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
 	var matchedQueries []matchedQuery
-	for _, query := range queries {
+	for queryKind, query := range queries {
 		plugin, isEmpty, err := executeQueryScript(query.instance, target)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute query migration script")
@@ -178,14 +188,14 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 		if isEmpty {
 			continue
 		}
-		matchedQueries = append(matchedQueries, matchedQuery{query, plugin})
+		matchedQueries = append(matchedQueries, matchedQuery{query, plugin, queryKind})
 	}
 	if len(matchedQueries) > 1 {
-		logrus.Warnf("ambiguous query migration: %d plugins matched the same target", len(matchedQueries))
+		logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), fprintKinds(matchedQueries))
 		return true
 	}
 	if len(matchedQueries) == 0 {
-		logrus.Warn("failed query migration; no plugins found matching target")
+		logrus.Warn("failed query migration: no plugins found matching target")
 		return true
 	}
 	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
