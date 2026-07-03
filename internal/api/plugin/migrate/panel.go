@@ -185,6 +185,7 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 		return true
 	}
 	if len(matchedQueries) == 0 {
+		logrus.Warn("failed query migration; no plugins found matching target")
 		return true
 	}
 	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
