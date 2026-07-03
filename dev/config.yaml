@@ -57,3 +57,18 @@ frontend:
 
 plugin:
   enable_dev: true
+  enabled:
+    - "BarChart"
+    - "DatasourceVariable"
+    - "GaugeChart"
+    - "Loki"
+    - "Markdown"
+    - "Prometheus"
+    - "ScatterChart"
+    - "StatChart"
+    - "StaticListVariable"
+    - "Table"
+    - "Tempo"
+    - "TimeSeriesChart"
+    - "TraceTable"
+    - "TracingGanttChart"
