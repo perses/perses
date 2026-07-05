@@ -89,14 +89,14 @@ func (p *Plugin) Verify() error {
 		return fmt.Errorf("the 'activated' and 'deactivated' attributes can not be used at the same time. Please use either one of them")
 	}
 	if len(p.Enabled) > 0 {
-		newEnabled := make([]string, len(p.Enabled))
+		newEnabled := make([]string, 0, len(p.Enabled))
 		for _, s := range p.Enabled {
 			newEnabled = append(newEnabled, strings.ToLower(s))
 		}
 		p.Enabled = newEnabled
 	}
 	if len(p.Disabled) > 0 {
-		newDisabled := make([]string, len(p.Disabled))
+		newDisabled := make([]string, 0, len(p.Disabled))
 		for _, s := range p.Disabled {
 			newDisabled = append(newDisabled, strings.ToLower(s))
 		}
