@@ -16,7 +16,7 @@
 /* typescript-eslint/explicit-module-boundary-types: 0 */
 
 import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import {
   AmazonLoginButton,
   AppleLoginButton,
@@ -144,17 +144,22 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const config = useConfigContext();
   const theme = useTheme();
   const isNativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
-  const oauthProviders = (config.config?.security?.authentication?.providers?.oauth || []).map((provider) => ({
-    path: `oauth/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.auth_url),
-  }));
-  const oidcProviders = (config.config?.security?.authentication?.providers?.oidc || []).map((provider) => ({
-    path: `oidc/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.issuer),
-  }));
-  const socialProviders = [...oidcProviders, ...oauthProviders];
+  const providers = config.config?.security?.authentication?.providers;
+  // Memoized so that the button components created by createButton() keep a stable
+  // identity across re-renders (a new component type would remount on every render).
+  const socialProviders = useMemo(() => {
+    const oauthProviders = (providers?.oauth || []).map((provider) => ({
+      path: `oauth/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.auth_url),
+    }));
+    const oidcProviders = (providers?.oidc || []).map((provider) => ({
+      path: `oidc/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.issuer),
+    }));
+    return [...oidcProviders, ...oauthProviders];
+  }, [providers?.oauth, providers?.oidc, theme]);
   const path = useRedirectQueryParam();
 
   return (

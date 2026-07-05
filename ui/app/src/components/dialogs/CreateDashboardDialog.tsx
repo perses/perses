@@ -130,7 +130,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
     dashboardForm.reset();
   };
 
-  if (!isDashboardSchemaValidationLoading)
+  if (isDashboardSchemaValidationLoading)
     return (
       <Stack
         sx={{

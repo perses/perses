@@ -130,7 +130,11 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   const { list, query, onClick, icon: Icon, chip, buildRouting: customBuildRouting, isResource } = props;
 
   const [currentSizeList, setCurrentSizeList] = useState<number>(SIZE_LIST);
-  const kvSearch = useRef(new KVSearch<Resource>(kvSearchConfig)).current;
+  const kvSearchRef = useRef<KVSearch<Resource> | null>(null);
+  if (kvSearchRef.current === null) {
+    kvSearchRef.current = new KVSearch<Resource>(kvSearchConfig);
+  }
+  const kvSearch = kvSearchRef.current;
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
     if (!query && list?.[0]?.kind === 'Dashboard') {

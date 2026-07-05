@@ -168,12 +168,12 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
     [dashboardList, dashboardsMap, folderList]
   );
 
-  const handleRenameButtonClick = openDialog('editDashboard');
-  const handleDuplicateButtonClick = openDialog('duplicateDashboard');
-  const handleDeleteButtonClick = openDialog('deleteDashboard');
-  const handleEditFolderButtonClick = openDialog('editFolder');
-  const handleAddFolderButtonClick = openDialog('addFolder');
-  const handleDeleteFolderButtonClick = openDialog('deleteFolder');
+  const handleRenameButtonClick = useMemo(() => openDialog('editDashboard'), [openDialog]);
+  const handleDuplicateButtonClick = useMemo(() => openDialog('duplicateDashboard'), [openDialog]);
+  const handleDeleteButtonClick = useMemo(() => openDialog('deleteDashboard'), [openDialog]);
+  const handleEditFolderButtonClick = useMemo(() => openDialog('editFolder'), [openDialog]);
+  const handleAddFolderButtonClick = useMemo(() => openDialog('addFolder'), [openDialog]);
+  const handleDeleteFolderButtonClick = useMemo(() => openDialog('deleteFolder'), [openDialog]);
 
   const closeDialog = useCallback(() => setActiveDialog({ type: 'none' }), []);
 

@@ -67,18 +67,17 @@ export const EditFolderDialog = ({
     return collectDashboards(editingRoot ? folderToEdit.spec.items : folderToEdit.items, false);
   }, [editingRoot, folderToEdit]);
 
-  const dashboardsInSiblingFolders: string[] = useMemo(
-    () => collectDashboards(folder.spec.items, true, (name) => !dashboardNamesInFolder.includes(name)),
-    [dashboardNamesInFolder, folder.spec.items]
-  );
+  const dashboardsInSiblingFolders: string[] = useMemo(() => {
+    const folderDashboards = new Set(dashboardNamesInFolder);
+    return collectDashboards(folder.spec.items, true, (name) => !folderDashboards.has(name));
+  }, [dashboardNamesInFolder, folder.spec.items]);
 
-  const options = useMemo(
-    () =>
-      [...dashboards.values()]
-        .filter((s) => !dashboardsInSiblingFolders.includes(s.name))
-        .map((d) => ({ label: d.displayName, name: d.name })),
-    [dashboardsInSiblingFolders, dashboards]
-  );
+  const options = useMemo(() => {
+    const siblingFolderDashboards = new Set(dashboardsInSiblingFolders);
+    return [...dashboards.values()]
+      .filter((s) => !siblingFolderDashboards.has(s.name))
+      .map((d) => ({ label: d.displayName, name: d.name }));
+  }, [dashboardsInSiblingFolders, dashboards]);
 
   const form = useForm<EditFolderValidationType>({
     resolver: zodResolver(editFolderDialogValidationSchema),

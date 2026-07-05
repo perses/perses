@@ -64,14 +64,8 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
-  // initialize the map with the provided input values if exist
-  dashboard?.__inputs?.map((input) => {
-    grafanaInput[input.name] = input.value ?? '';
-  });
-
   const setInput = (key: string, value: string): void => {
-    grafanaInput[key] = value;
-    setGrafanaInput(grafanaInput);
+    setGrafanaInput((current) => ({ ...current, [key]: value }));
   };
 
   const importOnClick = (): void => {
@@ -128,8 +122,13 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           disabled={migrateMutation.isPending}
           startIcon={<AutoFix />}
           onClick={() => {
+            // Merge the default input values with the user-provided ones at migration time
+            const input: Record<string, string> = {};
+            dashboard?.__inputs?.forEach((grafanaInputDef) => {
+              input[grafanaInputDef.name] = grafanaInput[grafanaInputDef.name] ?? grafanaInputDef.value ?? '';
+            });
             migrateMutation.mutate({
-              input: grafanaInput,
+              input: input,
               grafanaDashboard: dashboard ?? {},
               useDefaultDatasource: useDefaultDatasource,
             });

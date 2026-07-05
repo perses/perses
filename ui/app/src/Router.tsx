@@ -105,90 +105,93 @@ function AppProviders(): ReactElement {
   );
 }
 
-function Router(): ReactElement {
-  const router = createBrowserRouter(
-    [
-      {
-        path: '/',
-        Component: AppProviders,
-        children: [
-          {
-            path: '',
-            element: <RequireAuth />,
-            children: [
-              { index: true, Component: HomeView },
-              { path: ProfileRoute, Component: ProfileView },
-              {
-                path: AdminRoute,
-                children: [
-                  { index: true, Component: AdminView },
-                  { path: ':tab', Component: AdminView },
-                ],
-              },
-              { path: ConfigRoute, Component: ConfigView },
-              { path: ImportRoute, Component: ImportView },
-              { path: ProjectRoute, Component: ProjectView },
-              {
-                path: ExploreRoute,
-                element: <RequireExplorerEnabled />,
-                children: [{ index: true, Component: ExploreView }],
-              },
-              {
-                path: ProjectRoute,
-                element: <GuardedProjectRoute />,
-                children: [
-                  { index: true, element: <Navigate to="/" replace /> },
-                  {
-                    path: `:projectName`,
-                    children: [
-                      { index: true, Component: ProjectView },
-                      { path: 'dashboard/new', Component: CreateDashboardView },
-                      { path: 'dashboards/:dashboardName', Component: DashboardView },
-                      {
-                        path: 'ephemeraldashboard/new',
-                        element: <RequireEphemeralDashboardEnabled />,
-                        children: [{ index: true, Component: CreateEphemeralDashboardView }],
-                      },
-                      {
-                        path: 'ephemeraldashboards/:ephemeralDashboardName',
-                        element: <RequireEphemeralDashboardEnabled />,
-                        children: [{ index: true, Component: EphemeralDashboardView }],
-                      },
-                      { path: ':tab', Component: ProjectView },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            path: '',
-            element: <AlreadyLoggedIn />,
-            children: [
-              {
-                path: SignInRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: SignInView }],
-              },
-              {
-                path: SignUpRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: SignUpView }],
-              },
-              {
-                path: DelegatedAuthnErrorRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: DelegatedAuthnErrorView }],
-              },
-            ],
-          },
-        ],
-      },
-      { path: '*', element: <Navigate to="/" replace /> },
-    ],
-    { basename: PERSES_APP_CONFIG.api_prefix }
-  );
+// Create the router once at module level: the route config doesn't depend on
+// any component state, and recreating it on every render would rebuild the
+// entire router (and remount the tree) each time.
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      Component: AppProviders,
+      children: [
+        {
+          path: '',
+          element: <RequireAuth />,
+          children: [
+            { index: true, Component: HomeView },
+            { path: ProfileRoute, Component: ProfileView },
+            {
+              path: AdminRoute,
+              children: [
+                { index: true, Component: AdminView },
+                { path: ':tab', Component: AdminView },
+              ],
+            },
+            { path: ConfigRoute, Component: ConfigView },
+            { path: ImportRoute, Component: ImportView },
+            { path: ProjectRoute, Component: ProjectView },
+            {
+              path: ExploreRoute,
+              element: <RequireExplorerEnabled />,
+              children: [{ index: true, Component: ExploreView }],
+            },
+            {
+              path: ProjectRoute,
+              element: <GuardedProjectRoute />,
+              children: [
+                { index: true, element: <Navigate to="/" replace /> },
+                {
+                  path: `:projectName`,
+                  children: [
+                    { index: true, Component: ProjectView },
+                    { path: 'dashboard/new', Component: CreateDashboardView },
+                    { path: 'dashboards/:dashboardName', Component: DashboardView },
+                    {
+                      path: 'ephemeraldashboard/new',
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: CreateEphemeralDashboardView }],
+                    },
+                    {
+                      path: 'ephemeraldashboards/:ephemeralDashboardName',
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: EphemeralDashboardView }],
+                    },
+                    { path: ':tab', Component: ProjectView },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: '',
+          element: <AlreadyLoggedIn />,
+          children: [
+            {
+              path: SignInRoute,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignInView }],
+            },
+            {
+              path: SignUpRoute,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignUpView }],
+            },
+            {
+              path: DelegatedAuthnErrorRoute,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: DelegatedAuthnErrorView }],
+            },
+          ],
+        },
+      ],
+    },
+    { path: '*', element: <Navigate to="/" replace /> },
+  ],
+  { basename: PERSES_APP_CONFIG.api_prefix }
+);
 
+function Router(): ReactElement {
   return (
     <Suspense fallback={<PersesLoader />}>
       <RouterProvider router={router} />

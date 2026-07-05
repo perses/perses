@@ -73,8 +73,9 @@ export function SecretEditorForm({
   onDelete,
 }: SecretEditorFormProps): ReactElement {
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
+  // Deep clone to avoid mutating the resource owned by the parent (initialValue.spec is nested)
   const initialSecretClean: Secret = useMemo(() => {
-    const result = { ...initialValue };
+    const result = structuredClone(initialValue);
     if (result.spec.basicAuth?.password) result.spec.basicAuth.password = '';
     if (result.spec.authorization?.credentials) result.spec.authorization.credentials = '';
     if (result.spec.oauth?.clientID) result.spec.oauth.clientID = '';

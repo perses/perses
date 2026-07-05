@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useReducer, Dispatch, useMemo, ReactElement } from 'react';
+import React, { createContext, useContext, useReducer, Dispatch, ReactElement } from 'react';
 
 const PERSES_DASHBOARD_NAV_HISTORY_KEY = 'PERSES_DASHBOARD_NAV_HISTORY';
 
@@ -28,15 +28,17 @@ const NavHistoryDispatchContext = createContext<
 
 export type NavHistoryAction = { type: 'remove'; project: string; name: string };
 
+function loadInitialHistory(): DashboardNavHistoryItem[] {
+  try {
+    return JSON.parse(window.localStorage.getItem(PERSES_DASHBOARD_NAV_HISTORY_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
 export function NavHistoryProvider(props: { children: React.ReactNode }): ReactElement {
-  const initial = useMemo(() => {
-    try {
-      return JSON.parse(window.localStorage.getItem(PERSES_DASHBOARD_NAV_HISTORY_KEY) || '[]');
-    } catch {
-      return [];
-    }
-  }, []);
-  const [history, dispatch] = useReducer(historyReducer, initial);
+  // Lazy initializer: localStorage is read only once, on first render
+  const [history, dispatch] = useReducer(historyReducer, undefined, loadInitialHistory);
 
   return (
     <NavHistoryContext.Provider value={history}>
@@ -56,24 +58,23 @@ function historyReducer(
     return newHistory;
   }
 
-  // Handle add/update action
-  const index = history.findIndex((item) => item.project === resource.project && item.name === resource.name);
-  if (index > -1) {
+  // Handle add/update action.
+  // Build a new array instead of mutating the previous state: reducers must be
+  // pure, otherwise StrictMode's double invocation would duplicate entries.
+  const newHistory = [
+    // Push dashboard to the beginning of the array (ordered by more recent project visited) with the current date
+    {
+      project: resource.project,
+      name: resource.name,
+      date: new Date().toISOString(),
+    },
     // If the history already contains the dashboard, remove it
-    history.splice(index, 1);
-  }
-  // Push dashboard to the beginning of the array (ordered by more recent project visited) with the current date
-  history.unshift({
-    project: resource.project,
-    name: resource.name,
-    date: new Date().toISOString(),
-  });
+    ...history.filter((item) => !(item.project === resource.project && item.name === resource.name)),
+    // Limiting history to 100 items only
+  ].slice(0, 100);
 
-  // Limiting history to 100 items only
-  history = history.slice(0, 100);
-
-  window.localStorage.setItem(PERSES_DASHBOARD_NAV_HISTORY_KEY, JSON.stringify(history));
-  return history;
+  window.localStorage.setItem(PERSES_DASHBOARD_NAV_HISTORY_KEY, JSON.stringify(newHistory));
+  return newHistory;
 }
 
 /**

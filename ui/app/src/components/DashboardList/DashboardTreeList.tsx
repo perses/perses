@@ -73,7 +73,7 @@ function DashboardTreeList({
     () => (isMobileSize ? 500 : (Math.max(window.innerHeight - 350, 300) ?? 300)),
     [isMobileSize]
   );
-  const [height, setHeight] = useState(getTableHeight());
+  const [height, setHeight] = useState(getTableHeight);
   useEffect(() => {
     const handleResize = (): void => setHeight(() => getTableHeight());
     window.addEventListener('resize', handleResize);

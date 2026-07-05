@@ -28,15 +28,24 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
-  if (isLoading || data === undefined) {
+
+  // Memoize the context value and the derived options array so consumers only
+  // re-render when the config actually changes, not on every provider render.
+  const ctx: ConfigContextType | undefined = useMemo(() => (data ? { config: data } : undefined), [data]);
+  const timeRangeOptions = useMemo(
+    () => data?.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt)),
+    [data?.frontend.time_range?.options]
+  );
+
+  if (isLoading || data === undefined || ctx === undefined) {
     return <PersesLoader />;
   }
   return (
-    <ConfigContext.Provider value={{ config: data }}>
+    <ConfigContext.Provider value={ctx}>
       <TimeRangeSettingsProvider
         showCustom={!data.frontend.time_range?.disable_custom}
         showZoomButtons={!data.frontend.time_range?.disable_zoom}
-        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+        options={timeRangeOptions}
       >
         {props.children}
       </TimeRangeSettingsProvider>

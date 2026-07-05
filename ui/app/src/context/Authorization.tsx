@@ -41,18 +41,18 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
 
   const username = useUsername();
   const { data } = useUserPermissions(username);
-  const userPermissions: Record<string, Permission[]> = useMemo(() => {
-    if (!data) {
-      return {};
-    }
-    return data;
-  }, [data]);
-
-  return (
-    <AuthorizationContext.Provider value={{ enabled, username, userPermissions }}>
-      {props.children}
-    </AuthorizationContext.Provider>
+  // Memoize the context value so consumers only re-render when its content
+  // actually changes, not on every provider render.
+  const ctx: AuthorizationContext = useMemo(
+    () => ({
+      enabled,
+      username,
+      userPermissions: data ?? {},
+    }),
+    [enabled, username, data]
   );
+
+  return <AuthorizationContext.Provider value={ctx}>{props.children}</AuthorizationContext.Provider>;
 }
 
 export function useAuthorizationContext(): AuthorizationContext {

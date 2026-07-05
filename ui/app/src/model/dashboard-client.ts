@@ -104,12 +104,14 @@ export function useRecentDashboardList(
     // Wrapping dashboard with their last seen date from nav history context
     const result: DatedDashboards[] = [];
 
+    // Build an index once for O(1) lookups instead of a find() per history item
+    const dashboardsByKey = new Map(
+      (data ?? []).map((dashboard) => [`${dashboard.metadata.project}/${dashboard.metadata.name}`, dashboard])
+    );
+
     // Iterating with history first to keep history order in the result
     (history ?? []).forEach((historyItem) => {
-      const dashboard = (data ?? []).find(
-        (dashboard) =>
-          historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name
-      );
+      const dashboard = dashboardsByKey.get(`${historyItem.project}/${historyItem.name}`);
       if (dashboard) {
         result.push({ dashboard: dashboard, date: historyItem.date });
       }
@@ -139,10 +141,12 @@ export function useImportantDashboardList(project?: string): {
 
   const importantDashboards = useMemo(() => {
     const result: DashboardResource[] = [];
+    // Build an index once for O(1) lookups instead of a find() per selector
+    const dashboardsByKey = new Map(
+      (dashboards ?? []).map((dashboard) => [`${dashboard.metadata.project}/${dashboard.metadata.name}`, dashboard])
+    );
     importantDashboardSelectors.forEach((selector) => {
-      const dashboard = (dashboards ?? []).find(
-        (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
-      );
+      const dashboard = dashboardsByKey.get(`${selector.project}/${selector.dashboard}`);
       if (dashboard) {
         result.push(dashboard);
       }

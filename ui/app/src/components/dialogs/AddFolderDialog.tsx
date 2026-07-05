@@ -57,13 +57,12 @@ export const AddFolderDialog = ({
     [folder.spec.items]
   );
 
-  const options = useMemo(
-    () =>
-      [...dashboards.values()]
-        .filter((s) => !dashboardsInSiblingFolders.includes(s.name))
-        .map((d) => ({ label: d.displayName, name: d.name })),
-    [dashboardsInSiblingFolders, dashboards]
-  );
+  const options = useMemo(() => {
+    const siblingFolderDashboards = new Set(dashboardsInSiblingFolders);
+    return [...dashboards.values()]
+      .filter((s) => !siblingFolderDashboards.has(s.name))
+      .map((d) => ({ label: d.displayName, name: d.name }));
+  }, [dashboardsInSiblingFolders, dashboards]);
 
   const form = useForm<EditFolderValidationType>({
     resolver: zodResolver(addFolderSchema),

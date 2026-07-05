@@ -33,22 +33,24 @@ interface IProps {
   selectedView: ProfileSections;
 }
 
+// Static settings definitions hoisted to module scope so the arrays and their
+// JSX icons are not recreated on every render.
+const accountSettingsItems: IAccountSettingItem[] = [
+  {
+    title: 'Permissions and roles',
+    view: ProfileSections.PERMISSIONS,
+    icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
+  },
+  {
+    title: 'Preferences',
+    view: ProfileSections.PREFERENCES,
+    icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
+  },
+];
+
+const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
+
 export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): ReactElement => {
-  const accountSettingsItems: IAccountSettingItem[] = [
-    {
-      title: 'Permissions and roles',
-      view: ProfileSections.PERMISSIONS,
-      icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
-    },
-    {
-      title: 'Preferences',
-      view: ProfileSections.PREFERENCES,
-      icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
-    },
-  ];
-
-  const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
-
   const handleViewChange = (view: ProfileSections): void => {
     setSelectedView(view);
   };
