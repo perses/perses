@@ -402,7 +402,7 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 		return nil, err
 	}
 
-	httpClient := http.Client{
+	httpClient := &http.Client{
 		Transport: transport,
 	}
 
