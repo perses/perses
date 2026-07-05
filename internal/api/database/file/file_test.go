@@ -15,6 +15,7 @@ package databasefile
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -109,4 +110,47 @@ func TestDAO_Delete(t *testing.T) {
 	result := &modelV1.Project{}
 	assert.True(t, databaseModel.IsKeyNotFound(d.Get(modelV1.KindProject, projectEntity.GetMetadata(), result)))
 	removeAllFiles(t)
+}
+
+// TestDAO_GetPathTraversal ensures a resource name containing ".." segments
+// cannot be used to read a file located outside the configured data folder.
+func TestDAO_GetPathTraversal(t *testing.T) {
+	root := t.TempDir()
+	folder := filepath.Join(root, "data")
+	if err := os.MkdirAll(folder, 0750); err != nil {
+		t.Fatal(err)
+	}
+	// A sensitive file sitting outside the data folder. Its name matches the
+	// traversal payload so that the case-sensitivity check in Get cannot mask a
+	// successful read.
+	outsideFile := filepath.Join(root, "secret.json")
+	if err := os.WriteFile(outsideFile, []byte(`{"kind":"GlobalDatasource","metadata":{"name":"../../secret"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	d := &DAO{Folder: folder, Extension: config.JSONExtension}
+	result := &modelV1.GlobalDatasource{}
+	err := d.Get(modelV1.KindGlobalDatasource, modelV1.NewMetadata("../../secret"), result)
+	assert.True(t, databaseModel.IsKeyNotFound(err))
+	assert.Empty(t, result.Metadata.Name)
+}
+
+// TestDAO_DeletePathTraversal ensures a resource name containing ".." segments
+// cannot be used to delete a file located outside the configured data folder.
+func TestDAO_DeletePathTraversal(t *testing.T) {
+	root := t.TempDir()
+	folder := filepath.Join(root, "data")
+	if err := os.MkdirAll(folder, 0750); err != nil {
+		t.Fatal(err)
+	}
+	outsideFile := filepath.Join(root, "secret.json")
+	if err := os.WriteFile(outsideFile, []byte(`{}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	d := &DAO{Folder: folder, Extension: config.JSONExtension}
+	err := d.Delete(modelV1.KindGlobalDatasource, modelV1.NewMetadata("../../secret"))
+	assert.True(t, databaseModel.IsKeyNotFound(err))
+	_, statErr := os.Stat(outsideFile)
+	assert.NoError(t, statErr, "the file outside the data folder must not be deleted")
 }

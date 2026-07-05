@@ -68,7 +68,10 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 	if generateIDErr != nil {
 		return generateIDErr
 	}
-	filePath := d.buildPath(key)
+	filePath, buildPathErr := d.buildPath(key)
+	if buildPathErr != nil {
+		return buildPathErr
+	}
 	if _, err := os.Stat(filePath); err == nil {
 		// The file exists, so we should return a conflict error.
 		return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeConflict}
@@ -89,7 +92,10 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	if generateIDErr != nil {
 		return generateIDErr
 	}
-	filePath := d.buildPath(key)
+	filePath, buildPathErr := d.buildPath(key)
+	if buildPathErr != nil {
+		return buildPathErr
+	}
 	data, err := os.ReadFile(filePath) //nolint: gosec
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -239,7 +245,10 @@ func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	if generateIDErr != nil {
 		return generateIDErr
 	}
-	filePath := d.buildPath(key)
+	filePath, buildPathErr := d.buildPath(key)
+	if buildPathErr != nil {
+		return buildPathErr
+	}
 	err := os.Remove(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -286,7 +295,10 @@ func (d *DAO) GetLatestUpdateTime(_ []modelV1.Kind) (*string, error) {
 }
 
 func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
-	filePath := d.buildPath(key)
+	filePath, buildPathErr := d.buildPath(key)
+	if buildPathErr != nil {
+		return buildPathErr
+	}
 	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
 		return err
 	}
@@ -297,8 +309,17 @@ func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 	return os.WriteFile(filePath, data, 0600)
 }
 
-func (d *DAO) buildPath(key string) string {
-	return filepath.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
+func (d *DAO) buildPath(key string) (string, error) {
+	filePath := filepath.Join(d.Folder, fmt.Sprintf("%s.%s", key, d.Extension))
+	// The key is derived from user-controlled resource name/project values. Even
+	// though filepath.Join cleans the result, a key containing ".." segments can
+	// still resolve to a path outside d.Folder, allowing arbitrary file read or
+	// delete. Reject any path that is not contained within d.Folder.
+	rel, err := filepath.Rel(d.Folder, filePath)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+		return "", &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
+	}
+	return filePath, nil
 }
 
 func (d *DAO) unmarshal(data []byte, entity any) error {
