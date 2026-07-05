@@ -55,7 +55,7 @@ Define the dashboard duration.
 import "time"
 import "github.com/perses/perses/go-sdk/dashboard" 
 
-dashboard.RefreshInterval(15*time.minutes)
+dashboard.RefreshInterval(15*time.Minute)
 ```
 
 Define the dashboard refresh interval.
