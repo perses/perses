@@ -91,6 +91,16 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []any, error)
 	return sql, args, nil
 }
 
+// escapeLikePattern escapes the LIKE metacharacters ('%' and '_') and the
+// escape character itself ('\') in s so they are matched literally. This keeps
+// the SQL backend's name-prefix filter consistent with the file backend, which
+// uses a literal strings.HasPrefix. MySQL uses '\' as the default LIKE escape
+// character, so no explicit ESCAPE clause is required.
+func escapeLikePattern(s string) string {
+	replacer := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
+	return replacer.Replace(s)
+}
+
 func (d *DAO) generateSelectQuery(tableName string, project string, name string) (string, []any) {
 	p := project
 	n := name
@@ -102,7 +112,7 @@ func (d *DAO) generateSelectQuery(tableName string, project string, name string)
 		Select(colDoc).
 		From(tableName)
 	if len(n) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", n)))
+		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", escapeLikePattern(n))))
 	}
 	if len(p) > 0 {
 		queryBuilder.Where(queryBuilder.Equal(colProject, p))
@@ -161,7 +171,7 @@ func (d *DAO) generateDeleteQuery(tableName string, project string, name string)
 	queryBuilder := sqlbuilder.NewDeleteBuilder().
 		DeleteFrom(tableName)
 	if len(n) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", n)))
+		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", escapeLikePattern(n))))
 	}
 	if len(p) > 0 {
 		queryBuilder.Where(queryBuilder.Equal(colProject, p))
