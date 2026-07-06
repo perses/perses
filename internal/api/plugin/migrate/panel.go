@@ -174,6 +174,15 @@ func sprintKinds(mq []matchedQuery) string {
 	return strings.Join(kinds, ", ")
 }
 
+func marshalTarget(target json.RawMessage) string {
+	targetJSON, err := json.Marshal(&target)
+	if err != nil {
+		logrus.Warn("unable to marshal target JSON")
+		return ""
+	}
+	return string(targetJSON)
+}
+
 // executeQueryScript is a package-level variable so tests can stub it without real CUE files.
 var executeQueryScript = ExecuteQueryScript
 
@@ -192,10 +201,14 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	}
 	if len(matchedQueries) > 1 {
 		logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), sprintKinds(matchedQueries))
+		targetJson := marshalTarget(target)
+		logrus.Debug(targetJson)
 		return true
 	}
 	if len(matchedQueries) == 0 {
 		logrus.Warn("failed query migration: no plugins found matching target")
+		targetJson := marshalTarget(target)
+		logrus.Debug(targetJson)
 		return true
 	}
 	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
