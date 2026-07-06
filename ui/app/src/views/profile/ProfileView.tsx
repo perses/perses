@@ -17,12 +17,7 @@ import { useIsMobileSize } from '../../utils/browser-size';
 import { useAuthorizationContext } from '../../context/Authorization';
 import { ProfileSettings } from './ProfileSettings';
 import { Preferences } from './Preferences';
-
-export enum ProfileSections {
-  AUTHENTICATION,
-  PERMISSIONS,
-  PREFERENCES,
-}
+import { ProfileSections } from './profile-permissions-utils';
 
 const ProfilePermissions = lazy(() => import('./ProfilePermissions'));
 

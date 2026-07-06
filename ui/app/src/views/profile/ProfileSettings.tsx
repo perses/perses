@@ -15,7 +15,7 @@ import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mu
 import React, { ReactElement } from 'react';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
-import { ProfileSections } from './ProfileView';
+import { ProfileSections } from './profile-permissions-utils';
 
 interface IAccountSettingItem {
   title: string;
