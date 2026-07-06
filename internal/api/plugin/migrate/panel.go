@@ -202,13 +202,17 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 	if len(matchedQueries) > 1 {
 		logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), sprintKinds(matchedQueries))
 		targetJson := marshalTarget(target)
-		logrus.Debug(targetJson)
+		if targetJson != "" {
+			logrus.Debugf("target JSON: %s", targetJson)
+		}
 		return true
 	}
 	if len(matchedQueries) == 0 {
 		logrus.Warn("failed query migration: no plugins found matching target")
 		targetJson := marshalTarget(target)
-		logrus.Debug(targetJson)
+		if targetJson != "" {
+			logrus.Debugf("target JSON: %s", targetJson)
+		}
 		return true
 	}
 	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
