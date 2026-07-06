@@ -160,15 +160,15 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *da
 	}
 }
 
-type matchedTarget struct {
+type matchedQuery struct {
 	query  *queryInstance
 	plugin *plugin.Plugin
 	kind   string
 }
 
-func sprintKinds(mt []matchedTarget) string {
+func sprintKinds(mq []matchedQuery) string {
 	kinds := []string{}
-	for _, query := range mt {
+	for _, query := range mq {
 		kinds = append(kinds, query.kind)
 	}
 	return strings.Join(kinds, ", ")
@@ -178,7 +178,7 @@ func sprintKinds(mt []matchedTarget) string {
 var executeQueryScript = ExecuteQueryScript
 
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
-	var matchedQueries []matchedTarget
+	var matchedQueries []matchedQuery
 	for queryKind, query := range queries {
 		plugin, isEmpty, err := executeQueryScript(query.instance, target)
 		if err != nil {
@@ -188,7 +188,7 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 		if isEmpty {
 			continue
 		}
-		matchedQueries = append(matchedQueries, matchedTarget{query, plugin, queryKind})
+		matchedQueries = append(matchedQueries, matchedQuery{query, plugin, queryKind})
 	}
 	if len(matchedQueries) > 1 {
 		logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), sprintKinds(matchedQueries))
