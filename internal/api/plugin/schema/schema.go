@@ -205,6 +205,9 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 			if err := s.validateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
 				errs = append(errs, fmt.Errorf("panel %q: %w", panelName, err))
 			}
+			if err := validateQuerySemantic(query.Spec.Plugin, panelName, fmt.Sprintf("n°%d", i+1)); err != nil {
+				errs = append(errs, err)
+			}
 		}
 	}
 	if len(errs) == 0 {
