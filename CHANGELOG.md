@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.54.0-beta.3 / 2026-07-03
+
+- [SECURITY] API: Fix miss-usage of project query param [8015fb](https://github.com/perses/perses/commit/8015fb340bdc625953e73a7a688be5b939159540)
+- [FEATURE] pass the user pereferences tz to ViewDashboard (#4184)
+- [FEATURE] add user prefrence (#4170)
+- [ENHANCEMENT] bump shared and plugins versions and add alertmanager plugin (#4205)
+- [ENHANCEMENT] migrate G2P dashboard links (#4173)
+- [BUGFIX] Schema: Fix race condition when validating schemas (#4192)
+- [BUGFIX] Fix wrong minimum version and maximum version assignment (#4191)
+- [BUGFIX] Migrate: enforce checking the grafana variable sort value (#4190)
+- [BUGFIX] Respect api_prefix in dashboard list navigation links (#4185)
+- [BUGFIX] API: Fix missing concurrent access to the permission cache (#4189)
+- [BUGFIX] API: Fix project missing verification for ephemeral dashboard (#4188)
+- [BUGFIX] CUE: fix wrong collapse settings (#4181)
+- [BUGFIX] refuse provisioning of resources in a non-existing project (#3936) (#4154)
+- [BUGFIX] CLI/plugin generate: Fix plugin template using new import (#4153)
+- [BUGFIX] Go SDK set PanelGroup collapse properly (#4150)
+- [BUGFIX] CLI: skip non-main Go packages when building a directory (#4174)
+- [DOC] remove Go Report Card badge (#4201)
+- [DOC] Add documentation for folder feature (#4118)
+- [DOC] Fix go-sdk doc about the listvariable (#4167)
+- [DOC] Add upgrade guide for go-sdk (#4166)
+- [DOC] Complete doc around the tag (#4164)
+- [DOC] [DOCUMENTATION] Add PromQL builder mention (#4207)
+
+### Plugins improvements
+- [FEATURE] LogTable: add logs table CSV export action (perses/plugins#697)
+- [FEATURE] Prometheus & TimeseriesChart: Add annotation support (perses/plugins#642)
+- [FEATURE] AlertManager: add alert manager plugin (perses/plugins#647)
+- [ENHANCEMENT] TracingGanttChart: show UTC time on hover (perses/plugins#714)
+- [ENHANCEMENT] Tempo Explorer: retain selected timezone when clicking … (perses/plugins#715)
+- [ENHANCEMENT] TraceTable: use timezone setting from TimeRangeSelector (perses/plugins#713)
+- [ENHANCEMENT] ScatterChart: make axis and tooltip timezone aware (perses/plugins#712)
+- [ENHANCEMENT] TimeSeriesChart: add query name support for query settings (perses/plugins#585)
+- [ENHANCEMENT] TracingGanttChart: make trace header bar responsive (perses/plugins#717)
+- [BUGFIX] Table: fix cellSettings not applied when table column filters are active (perses/plugins#688)
+- [BUGFIX] Table: fix cellSettings not applied for columns with no data in any query (perses/plugins#700)
+- [BUGFIX] PieChart & BarChart: set shortValues according to the unit (perses/plugins#716)
+- [DOC] GreptimeDB: Add GreptimeDB plugin docs (perses/plugins#686)
+
 ## 0.54.0-beta.2 / 2026-06-19
 
 - [FEATURE] Add annotation support (#4040)
