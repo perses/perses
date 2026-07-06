@@ -479,3 +479,61 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateQuerySemantic(t *testing.T) {
+	tests := []struct {
+		name      string
+		plg       plugin.Plugin
+		wantErr   bool
+		errSubstr string
+	}{
+		{
+			name: "valid PromQL",
+			plg: plugin.Plugin{
+				Kind: "PrometheusTimeSeriesQuery",
+				Spec: map[string]any{"query": "rate(http_requests_total[5m])"},
+			},
+		},
+		{
+			name: "invalid PromQL",
+			plg: plugin.Plugin{
+				Kind: "PrometheusTimeSeriesQuery",
+				Spec: map[string]any{"query": "rate(up[)"},
+			},
+			wantErr:   true,
+			errSubstr: "invalid PromQL",
+		},
+		{
+			name: "variable reference skipped",
+			plg: plugin.Plugin{
+				Kind: "PrometheusTimeSeriesQuery",
+				Spec: map[string]any{"query": `rate(http_requests_total{namespace="$namespace"}[5m])`},
+			},
+		},
+		{
+			name: "empty query skipped",
+			plg: plugin.Plugin{
+				Kind: "PrometheusTimeSeriesQuery",
+				Spec: map[string]any{"query": ""},
+			},
+		},
+		{
+			name: "non-Prometheus plugin skipped",
+			plg: plugin.Plugin{
+				Kind: "LokiLogQuery",
+				Spec: map[string]any{"query": "this is not promql{{{"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateQuerySemantic(tt.plg, "testPanel", "n°1")
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errSubstr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

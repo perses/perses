@@ -14,6 +14,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -25,6 +26,7 @@ import (
 	"cuelang.org/go/cue/build"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/plugins/prometheus/validation"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/perses/spec/go/dashboard/variable"
 	"github.com/perses/spec/go/module"
@@ -204,6 +206,9 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 		for i, query := range panel.Spec.Queries {
 			if err := s.validateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
 				errs = append(errs, fmt.Errorf("panel %q: %w", panelName, err))
+			}
+			if err := validateQuerySemantic(query.Spec.Plugin, panelName, fmt.Sprintf("n°%d", i+1)); err != nil {
+				errs = append(errs, err)
 			}
 		}
 	}
@@ -447,4 +452,33 @@ func (s *sch) getDatasourceSchema(datasourceName string, metadata *plugin.Metada
 		return nil, fmt.Errorf("datasource schema not found for plugin %s", datasourceName)
 	}
 	return instance, nil
+}
+
+const prometheusTimeSeriesQueryKind = "PrometheusTimeSeriesQuery"
+
+func validateQuerySemantic(p plugin.Plugin, panelName string, queryName string) error {
+	if p.Kind != prometheusTimeSeriesQueryKind {
+		return nil
+	}
+	query, err := extractQueryString(p.Spec)
+	if err != nil || query == "" {
+		return nil
+	}
+	if err := validation.ValidatePromQLExpr(query); err != nil {
+		return fmt.Errorf("panel %q query %s: %w", panelName, queryName, err)
+	}
+	return nil
+}
+
+func extractQueryString(spec any) (string, error) {
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return "", err
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return "", err
+	}
+	q, _ := m["query"].(string)
+	return strings.TrimSpace(q), nil
 }
