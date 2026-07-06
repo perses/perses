@@ -43,7 +43,7 @@ Define the proxy allowed endpoints.
 ```golang
 import "github.com/perses/perses/go-sdk/http"
 
-http.Thresholds("GET", "/api/v1/labels")
+http.AddAllowedEndpoint("GET", "/api/v1/labels")
 ```
 
 Add an allowed endpoint to the http proxy.
@@ -53,8 +53,8 @@ Add an allowed endpoint to the http proxy.
 ```golang
 import "github.com/perses/perses/go-sdk/http" 
 
-var headers := make(map[string]string)
-http.WithSparkline(headers)
+headers := make(map[string]string)
+http.Headers(headers)
 ```
 
 Define the headers of the http proxy.
@@ -88,7 +88,7 @@ import (
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/http"
 	
-	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
 )
 
 func main() {
