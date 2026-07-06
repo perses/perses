@@ -69,7 +69,7 @@ func grafanaMappingSort(sort *int) *variable.Sort {
 		return nil
 	}
 	i := *sort
-	if i >= len(mappingSort) {
+	if i >= len(mappingSort) || i < 0 {
 		return nil
 	}
 	return &mappingSort[i]

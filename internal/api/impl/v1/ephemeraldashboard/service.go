@@ -115,36 +115,20 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.EphemeralDashboar
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]*v1.EphemeralDashboard, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.List(query)
+func (s *service) List(q *ephemeraldashboard.Query) ([]*v1.EphemeralDashboard, error) {
+	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.RawList(query)
+func (s *service) RawList(q *ephemeraldashboard.Query) ([]json.RawMessage, error) {
+	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]api.Entity, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.MetadataList(query)
+func (s *service) MetadataList(q *ephemeraldashboard.Query) ([]api.Entity, error) {
+	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
-	query, err := manageQuery(q, params)
-	if err != nil {
-		return nil, err
-	}
-	return s.dao.RawMetadataList(query)
+func (s *service) RawMetadataList(q *ephemeraldashboard.Query) ([]json.RawMessage, error) {
+	return s.dao.RawMetadataList(q)
 }
 
 func (s *service) Validate(entity *v1.EphemeralDashboard) error {
@@ -173,15 +157,4 @@ func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error
 
 func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 	return s.globalVarDAO.List(&globalvariable.Query{})
-}
-
-func manageQuery(q *ephemeraldashboard.Query, params apiInterface.Parameters) (*ephemeraldashboard.Query, error) {
-	query, err := deep.Copy(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
-	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
-	}
-	return query, nil
 }

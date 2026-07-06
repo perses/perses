@@ -45,6 +45,14 @@ func (q *Query) IsRawMetadataQueryAllowed() bool {
 	return false
 }
 
+func (q *Query) GetProjectQueryParam() string {
+	return q.Project
+}
+
+func (q *Query) SetProjectQueryParam(project string) {
+	q.Project = project
+}
+
 type DAO interface {
 	Create(entity *v1.Datasource) error
 	Update(entity *v1.Datasource) error

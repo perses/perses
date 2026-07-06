@@ -103,27 +103,23 @@ func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) err
 func (s *service) Get(parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
-func (s *service) List(q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
-	query, err := manageQuery(q, params)
+func (s *service) List(q *datasource.Query) ([]*v1.Datasource, error) {
+	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
 	}
-	dtsList, err := s.dao.List(query)
-	if err != nil {
-		return nil, err
-	}
-	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
+	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
 }
 
-func (s *service) RawList(_ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ *datasource.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) MetadataList(_ *datasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(_ *datasource.Query) ([]api.Entity, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawMetadataList(_ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(_ *datasource.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -139,16 +135,4 @@ func (s *service) validate(entity *v1.Datasource) error {
 		}
 	}
 	return validate.Datasource(entity, list, s.sch)
-}
-
-func manageQuery(q *datasource.Query, params apiInterface.Parameters) (*datasource.Query, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query, err := deep.Copy(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
-	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
-	}
-	return query, nil
 }
