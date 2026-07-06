@@ -114,14 +114,14 @@ func (f *Format) validate() error {
 	switch *f.Unit {
 	case string(NanoSecondsUnit), string(MicroSecondsUnit), string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
-		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBytesUnit), string(DecimalBytesUnit),
+		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBitsUnit), string(DecimalBitsUnit), string(BinaryBytesUnit), string(DecimalBytesUnit),
 		string(BitsPerSecondsUnit), string(BitsDecPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
 		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),
 		string(SwissFrancUnit), string(RenminbiUnit), string(EuroUnit), string(PoundUnit),
 		string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit), string(SouthKoreanWonUnit),
-		string(NorwegianKroneUnit), string(NewZealandDollarUnit):
+		string(NorwegianKroneUnit), string(NewZealandDollarUnit), string(SwedishKronaDollarUnit), string(SingaporeDollarUnit), string(USDollarUnit):
 		return nil
 	default:
 		return fmt.Errorf("unknown format")
