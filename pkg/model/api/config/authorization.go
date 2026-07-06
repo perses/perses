@@ -65,7 +65,7 @@ func (k *KubernetesAuthorizationProvider) Verify() error {
 	if k.AuthorizerAllowTTL == 0 {
 		k.AuthorizerAllowTTL = common.Duration(DefaultKubernetesAuthorizationAllowTTL)
 	}
-	if k.AuthenticatorTTL == 0 {
+	if k.AuthorizerDenyTTL == 0 {
 		k.AuthorizerDenyTTL = common.Duration(DefaultKubernetesAuthorizationDenyTTL)
 	}
 	return nil
