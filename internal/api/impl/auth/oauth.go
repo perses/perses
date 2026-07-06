@@ -504,8 +504,8 @@ func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCod
 	req.SetBasicAuth(e.deviceCodeConf.ClientID, e.deviceCodeConf.ClientSecret)
 	req = req.WithContext(ctx)
 
-	// Send the request using the default HTTP Client
-	resp, err := http.DefaultClient.Do(req)
+	// Send the request using the provider's HTTP client so the configured TLS and timeout are honored
+	resp, err := e.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
