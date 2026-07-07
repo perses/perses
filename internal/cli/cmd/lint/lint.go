@@ -14,8 +14,10 @@
 package lint
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -29,6 +31,8 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	promqlvalidation "github.com/perses/plugins/prometheus/validation"
+	pluginSpec "github.com/perses/spec/go/plugin"
 	"github.com/spf13/cobra"
 )
 
@@ -107,6 +111,9 @@ func (o *option) Execute() error {
 	if validateErr := o.validate(entities); validateErr != nil {
 		return validateErr
 	}
+	if promqlErr := validatePromQLInEntities(entities); promqlErr != nil {
+		return promqlErr
+	}
 	return output.HandleString(o.writer, "your resources look good")
 }
 
@@ -172,6 +179,65 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 		}
 	}
 	return nil
+}
+
+const prometheusTimeSeriesQueryKind = "PrometheusTimeSeriesQuery"
+
+func validatePromQLInEntities(entities []modelAPI.Entity) error {
+	var errs []string
+	for _, object := range entities {
+		if entity, ok := object.(*modelV1.Dashboard); ok {
+			if err := validateDashboardPromQL(entity); err != nil {
+				errs = append(errs, err.Error())
+			}
+		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "\n"))
+	}
+	return nil
+}
+
+func validateDashboardPromQL(entity *modelV1.Dashboard) error {
+	var errs []string
+	for panelName, panel := range entity.Spec.Panels {
+		for i, query := range panel.Spec.Queries {
+			if err := validateQueryPromQL(query.Spec.Plugin, panelName, i+1); err != nil {
+				errs = append(errs, err.Error())
+			}
+		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("dashboard %q: %s", entity.Metadata.Name, strings.Join(errs, "; "))
+	}
+	return nil
+}
+
+func validateQueryPromQL(p pluginSpec.Plugin, panelName string, queryIndex int) error {
+	if p.Kind != prometheusTimeSeriesQueryKind {
+		return nil
+	}
+	query, err := extractQueryString(p.Spec)
+	if err != nil || query == "" {
+		return nil
+	}
+	if err := promqlvalidation.ValidatePromQLExpr(query); err != nil {
+		return fmt.Errorf("panel %q query #%d: %w", panelName, queryIndex, err)
+	}
+	return nil
+}
+
+func extractQueryString(spec any) (string, error) {
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return "", err
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		return "", err
+	}
+	q, _ := m["query"].(string)
+	return strings.TrimSpace(q), nil
 }
 
 func NewCMD() *cobra.Command {

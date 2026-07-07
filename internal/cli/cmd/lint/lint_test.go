@@ -53,6 +53,26 @@ func TestLintCMD(t *testing.T) {
 			ExpectedMessage: `your resources look good
 `,
 		},
+		{
+			Title:           "lint dashboard with valid PromQL",
+			Args:            []string{"-f", "../../test/sample_resources/dashboard_valid_promql.json"},
+			IsErrorExpected: false,
+			ExpectedMessage: `your resources look good
+`,
+		},
+		{
+			Title:                "lint dashboard with invalid PromQL",
+			Args:                 []string{"-f", "../../test/sample_resources/dashboard_invalid_promql.json"},
+			IsErrorExpected:      true,
+			ExpectedRegexMessage: `invalid PromQL`,
+		},
+		{
+			Title:           "lint dashboard with variable ref in PromQL",
+			Args:            []string{"-f", "../../test/sample_resources/dashboard_variable_promql.json"},
+			IsErrorExpected: false,
+			ExpectedMessage: `your resources look good
+`,
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 }

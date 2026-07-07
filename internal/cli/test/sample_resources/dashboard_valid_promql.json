@@ -1,0 +1,33 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "valid-promql-dashboard",
+    "project": "perses"
+  },
+  "spec": {
+    "duration": "5m",
+    "panels": {
+      "panel1": {
+        "spec": {
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {}
+          },
+          "queries": [
+            {
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "rate(http_requests_total[5m])"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": []
+  }
+}
