@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"cuelang.org/go/cue/build"
 	"github.com/perses/spec/go/dashboard"
@@ -159,26 +160,60 @@ func (m *completeMigration) migrateQueries(targets []json.RawMessage, result *da
 	}
 }
 
+type matchedQuery struct {
+	query  *queryInstance
+	plugin *plugin.Plugin
+	kind   string
+}
+
+func sprintKinds(mq []matchedQuery) string {
+	kinds := []string{}
+	for _, query := range mq {
+		kinds = append(kinds, query.kind)
+	}
+	return strings.Join(kinds, ", ")
+}
+
+// executeQueryScript is a package-level variable so tests can stub it without real CUE files.
+var executeQueryScript = ExecuteQueryScript
+
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
-	isQueryMigrationEmpty := true
-	for _, query := range queries {
-		queryPlugin, queryMigrationIsEmpty, pluginErr := ExecuteQueryScript(query.instance, target)
-		if pluginErr != nil {
-			logrus.WithError(pluginErr).Debug("failed to execute query migration script")
+	var matchedQueries []matchedQuery
+	for queryKind, query := range queries {
+		plugin, isEmpty, err := executeQueryScript(query.instance, target)
+		if err != nil {
+			logrus.WithError(err).Debug("failed to execute query migration script")
 			continue
 		}
-		if !queryMigrationIsEmpty {
-			result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
-				Kind: string(query.kind),
-				Spec: dashboard.QuerySpec{
-					Plugin: *queryPlugin,
-				},
-			})
-			isQueryMigrationEmpty = false
-			break
+		if isEmpty {
+			continue
 		}
+		matchedQueries = append(matchedQueries, matchedQuery{query, plugin, queryKind})
 	}
-	return isQueryMigrationEmpty
+	if len(matchedQueries) > 1 {
+		if logrus.GetLevel() >= 5 {
+			logrus.Debugf("ambiguous query migration: %d (%s) plugins matched the same target; target JSON: %s", len(matchedQueries), sprintKinds(matchedQueries), target)
+		} else {
+			logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), sprintKinds(matchedQueries))
+		}
+		return true
+	}
+	if len(matchedQueries) == 0 {
+		if logrus.GetLevel() >= 5 {
+			logrus.Debugf("failed query migration: no plugins found matching target; target JSON: %s", target)
+		} else {
+			logrus.Warn("failed query migration: no plugins found matching target")
+		}
+		return true
+	}
+	result.Spec.Queries = append(result.Spec.Queries, dashboard.Query{
+		Kind: string(matchedQueries[0].query.kind),
+		Spec: dashboard.QuerySpec{
+			Plugin: *matchedQueries[0].plugin,
+		},
+	})
+
+	return false
 }
 
 func ExecuteQueryScript(cueScript *build.Instance, grafanaQueryData []byte) (*plugin.Plugin, bool, error) {
