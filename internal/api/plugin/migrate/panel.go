@@ -179,8 +179,12 @@ var executeQueryScript = ExecuteQueryScript
 
 func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, result *dashboard.Panel) bool {
 	var matchedQueries []matchedQuery
+	// As we cannot have a direct matching between the Grafana model and the query plugin,
+	// we can only execute every query migration script hoping at most one will work.
+	// The issue is that some Grafana queries are not specific enough to be matched with a single query plugin,
+	// so we can have multiple query migration scripts that match the same Grafana query.
 	for queryKind, query := range queries {
-		plugin, isEmpty, err := executeQueryScript(query.instance, target)
+		plg, isEmpty, err := executeQueryScript(query.instance, target)
 		if err != nil {
 			logrus.WithError(err).Debug("failed to execute query migration script")
 			continue
@@ -188,10 +192,10 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 		if isEmpty {
 			continue
 		}
-		matchedQueries = append(matchedQueries, matchedQuery{query, plugin, queryKind})
+		matchedQueries = append(matchedQueries, matchedQuery{query, plg, queryKind})
 	}
 	if len(matchedQueries) > 1 {
-		if logrus.GetLevel() >= 5 {
+		if logrus.IsLevelEnabled(logrus.DebugLevel) {
 			logrus.Debugf("ambiguous query migration: %d (%s) plugins matched the same target; target JSON: %s", len(matchedQueries), sprintKinds(matchedQueries), target)
 		} else {
 			logrus.Warnf("ambiguous query migration: %d plugins matched the same target: %s", len(matchedQueries), sprintKinds(matchedQueries))
@@ -199,7 +203,7 @@ func migrateQuery(queries map[string]*queryInstance, target json.RawMessage, res
 		return true
 	}
 	if len(matchedQueries) == 0 {
-		if logrus.GetLevel() >= 5 {
+		if logrus.IsLevelEnabled(logrus.DebugLevel) {
 			logrus.Debugf("failed query migration: no plugins found matching target; target JSON: %s", target)
 		} else {
 			logrus.Warn("failed query migration: no plugins found matching target")
