@@ -19,16 +19,16 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-type node struct {
-	name     string
+type Node struct {
+	Name     string
 	registry string
 }
 
-func newNode(name, registry string) node {
+func newNode(name, registry string) Node {
 	if registry == "" {
 		registry = plugin.DefaultRegistry
 	}
-	return node{name: name, registry: registry}
+	return Node{Name: name, registry: registry}
 }
 
 func Merge[T any](a, b Tree[T]) Tree[T] {
@@ -47,17 +47,23 @@ func Merge[T any](a, b Tree[T]) Tree[T] {
 				continue
 			}
 			// Here we are adding manually to ensure the latest version pointer is correctly set.
-			result.Add(key.name, module.Metadata{Registry: key.registry, Version: version}, instance)
+			result.Add(key.Name, module.Metadata{Registry: key.registry, Version: version}, instance)
 		}
 	}
 	return result
+}
+
+// Entry holds a node and its associated latest-version instance.
+type Entry[T any] struct {
+	Node     Node
+	Instance T
 }
 
 // Tree is a struct used to manage the loaded plugin instances.
 // This struct is here to allow to manage multiple versions of the same plugin and the latest version of the plugin.
 // The first map key is the node (name + registry).
 // The second map key is the version of the plugin.
-type Tree[T any] map[node]map[string]T
+type Tree[T any] map[Node]map[string]T
 
 func (t Tree[T]) Add(name string, moduleMetadata module.Metadata, instance T) {
 	key := newNode(name, moduleMetadata.Registry)
@@ -121,8 +127,19 @@ func (t Tree[T]) GetWithPluginMetadata(name string, pluginMetadata *plugin.Metad
 	return t.Get(name, module.Metadata{Version: pluginMetadata.Version, Registry: pluginMetadata.Registry})
 }
 
+// List returns one Entry per node, containing the latest-version instance.
+func (t Tree[T]) List() []Entry[T] {
+	result := make([]Entry[T], 0, len(t))
+	for node, versions := range t {
+		if instance, ok := versions[plugin.LatestVersion]; ok {
+			result = append(result, Entry[T]{Node: node, Instance: instance})
+		}
+	}
+	return result
+}
+
 // isLatest is checking if the given version is the latest one for the given schemaNameKind
-func (t Tree[T]) isLatest(key node, version string) bool {
+func (t Tree[T]) isLatest(key Node, version string) bool {
 	for v := range t[key] {
 		if v == plugin.LatestVersion {
 			continue
@@ -134,7 +151,7 @@ func (t Tree[T]) isLatest(key node, version string) bool {
 	return true
 }
 
-func (t Tree[T]) getLatestVersion(key node) string {
+func (t Tree[T]) getLatestVersion(key Node) string {
 	var currentVersion string
 	for v := range t[key] {
 		if v == plugin.LatestVersion {
