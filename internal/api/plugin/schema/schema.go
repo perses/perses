@@ -408,7 +408,6 @@ func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 func (s *completeSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
 	s.mutex.RLock()
 	if s.cachedDashboardSchema != nil {
-		logrus.Info("return cached schema")
 		data := s.cachedDashboardSchema
 		s.mutex.RUnlock()
 		return data, nil
@@ -429,7 +428,6 @@ func (s *completeSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
 		return nil, err
 	}
 	s.cachedDashboardSchema = data
-	logrus.Info("return built schema")
 	return data, nil
 }
 
@@ -468,7 +466,6 @@ func (s *completeSchema) GetAllSchemasBytes() ([]byte, error) {
 func (s *completeSchema) GetSchemaBytes(name, version, registry string) ([]byte, bool, error) {
 	s.mutex.RLock()
 	if cached, ok := s.cachedPluginByName[name]; ok {
-		logrus.Info("return cached schema")
 		s.mutex.RUnlock()
 		return cached, true, nil
 	}
@@ -493,7 +490,6 @@ func (s *completeSchema) GetSchemaBytes(name, version, registry string) ([]byte,
 		return nil, false, err
 	}
 	s.cachedPluginByName[name] = data
-	logrus.Info("return built schema")
 	return data, true, nil
 }
 
