@@ -23,6 +23,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	apiCue "github.com/perses/perses/internal/api/cue"
 	pluginpkg "github.com/perses/perses/internal/api/plugin"
 	pluginmigrate "github.com/perses/perses/internal/api/plugin/migrate"
 	pluginschema "github.com/perses/perses/internal/api/plugin/schema"
@@ -54,6 +55,41 @@ func (s *stubSchema) GetSchema(name, _, _ string) (pluginschema.LoadSchema, bool
 
 func (s *stubSchema) GenerateDashboardSchema() (cue.Value, error) {
 	return cuecontext.New().CompileString("{}"), nil
+}
+
+func (s *stubSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
+	val, err := s.GenerateDashboardSchema()
+	if err != nil {
+		return nil, err
+	}
+	return apiCue.Marshal(val)
+}
+
+func (s *stubSchema) GetAllSchemasBytes() ([]byte, error) {
+	schemas := s.GetAllSchemas()
+	if len(schemas) == 0 {
+		return []byte("{}"), nil
+	}
+	ctx := cuecontext.New()
+	list, err := pluginschema.GenerateSchemaDefinitions(ctx, schemas)
+	if err != nil {
+		return nil, err
+	}
+	return apiCue.Marshal(list)
+}
+
+func (s *stubSchema) GetSchemaBytes(name, version, registry string) ([]byte, bool, error) {
+	ls, ok := s.GetSchema(name, version, registry)
+	if !ok {
+		return nil, false, nil
+	}
+	ctx := cuecontext.New()
+	list, err := pluginschema.GenerateSchemaDefinitions(ctx, []pluginschema.LoadSchema{ls})
+	if err != nil {
+		return nil, false, err
+	}
+	data, err := apiCue.Marshal(list)
+	return data, true, err
 }
 
 // plugin service stub
