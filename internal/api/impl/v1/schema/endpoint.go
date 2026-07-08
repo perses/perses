@@ -17,14 +17,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"cuelang.org/go/cue/cuecontext"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
-	apiCue "github.com/perses/perses/internal/api/cue"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
-	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	specPlugin "github.com/perses/spec/go/plugin"
@@ -57,16 +54,9 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
-
-	result, err := e.pluginSvc.Schema().GenerateDashboardSchema()
+	data, err := e.pluginSvc.Schema().GenerateDashboardSchemaBytes()
 	if err != nil {
 		logrus.WithError(err).Error("unable to generate dashboard schema")
-		return apiinterface.InternalError
-	}
-
-	data, err := apiCue.Marshal(result)
-	if err != nil {
-		logrus.WithError(err).Error("unable to export dashboard schema as CUE")
 		return apiinterface.InternalError
 	}
 	return ctx.Blob(http.StatusOK, contentType, data)
@@ -84,43 +74,22 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		registry = specPlugin.DefaultRegistry
 	}
 
-	ls, ok := e.pluginSvc.Schema().GetSchema(pluginName, version, registry)
+	data, ok, err := e.pluginSvc.Schema().GetSchemaBytes(pluginName, version, registry)
+	if err != nil {
+		logrus.WithError(err).Error("unable to get plugin schema")
+		return apiinterface.InternalError
+	}
 	if !ok {
 		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found", pluginName))
-	}
-
-	data, err := generateCUEbytes([]schema.LoadSchema{ls})
-	if err != nil {
-		return err
 	}
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
 func (e *endpoint) PluginList(ctx echo.Context) error {
-	schemas := e.pluginSvc.Schema().GetAllSchemas()
-	if len(schemas) == 0 {
-		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))
-	}
-	data, err := generateCUEbytes(schemas)
+	data, err := e.pluginSvc.Schema().GetAllSchemasBytes()
 	if err != nil {
-		return err
+		logrus.WithError(err).Error("unable to list plugin schemas")
+		return apiinterface.InternalError
 	}
-
 	return ctx.Blob(http.StatusOK, contentType, data)
-}
-
-func generateCUEbytes(ls []schema.LoadSchema) ([]byte, error) {
-	cueCtx := cuecontext.New()
-	list, err := schema.GenerateSchemaDefinitions(cueCtx, ls)
-	if err != nil {
-		logrus.WithError(err).Error("unable to generate plugins schema definition")
-		return nil, apiinterface.InternalError
-	}
-
-	data, exportErr := apiCue.Marshal(list)
-	if exportErr != nil {
-		logrus.WithError(exportErr).Error("unable to export plugin schemas as CUE")
-		return nil, apiinterface.InternalError
-	}
-	return data, nil
 }
