@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mholt/archives"
 	"github.com/perses/perses/internal/api/archive"
@@ -57,6 +58,9 @@ func (a *arch) unzip(folder string, archiveFileName string) error {
 	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveName := archive.ExtractArchiveName(archiveFileName)
+	if strings.Contains(archiveName, "..") {
+		return fmt.Errorf("archive name %q contains invalid characters", archiveName)
+	}
 	archiveFile := filepath.Join(folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile) //nolint: gosec
 	defer func() {
@@ -84,6 +88,9 @@ func (a *arch) extractArchiveFileHandler(archiveName string) archives.FileHandle
 	return func(_ context.Context, f archives.FileInfo) error {
 		if f.IsDir() {
 			return nil
+		}
+		if strings.Contains(f.NameInArchive, "..") {
+			return fmt.Errorf("file %q in the archive archive %q contains invalid characters", f.NameInArchive, archiveName)
 		}
 		currentDir, _ := filepath.Split(f.NameInArchive)
 		if mkdirErr := os.MkdirAll(filepath.Join(a.targetFolder, archiveName, currentDir), 0750); mkdirErr != nil {
