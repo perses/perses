@@ -14,6 +14,7 @@ be found in [GOVERNANCE.md](GOVERNANCE.md).
 | Celian Garcia                 | [celian-garcia](https://github.com/celian-garcia)       | Amadeus      |
 | Gabriel Bernal                | [jgbernalp](https://github.com/jgbernalp)               | Red Hat      |
 | Guillaume Ladorme             | [gladorme](https://github.com/Gladorme)                 | Amadeus      |
+| Jeremy Rickards               | [Jeremy Rickards](https://github.com/rickardsjp)        | SAP          |
 | Nicolas Takashi               | [nicolastakashi](https://github.com/nicolastakashi)     | Coralogix    |
 | Steven Cobb                   | [sjcobb](https://github.com/sjcobb)                     | Chronosphere |
 | Seyed Mahmoud SHAHROKNI       | [shahrokni](https://github.com/shahrokni)               | Amadeus      |
