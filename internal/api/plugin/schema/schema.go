@@ -25,6 +25,7 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
+	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
@@ -144,12 +145,22 @@ type Schema interface {
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 	GenerateDashboardSchema() (cue.Value, error)
+	// GenerateDashboardSchemaBytes returns the dashboard schema serialised as CUE bytes.
+	// Results are cached until the next plugin load/unload event.
+	GenerateDashboardSchemaBytes() ([]byte, error)
+	// GetAllSchemasBytes returns all plugin schemas serialised as CUE bytes.
+	// Results are cached until the next plugin load/unload event.
+	GetAllSchemasBytes() ([]byte, error)
+	// GetSchemaBytes returns the CUE bytes for a single plugin schema.
+	// Results are cached until the next plugin load/unload event.
+	GetSchemaBytes(name, version, registry string) ([]byte, bool, error)
 }
 
 func New() Schema {
 	return &completeSchema{
-		sch:    newSch(),
-		devSch: newSch(),
+		sch:                newSch(),
+		devSch:             newSch(),
+		cachedPluginByName: make(map[string][]byte),
 	}
 }
 
@@ -158,17 +169,29 @@ type completeSchema struct {
 	sch    *sch
 	devSch *sch
 	mutex  sync.RWMutex
+
+	cachedDashboardSchema []byte
+	cachedPluginList      []byte
+	cachedPluginByName    map[string][]byte
+}
+
+func (s *completeSchema) invalidateCache() {
+	s.cachedDashboardSchema = nil
+	s.cachedPluginList = nil
+	s.cachedPluginByName = make(map[string][]byte)
 }
 
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	s.invalidateCache()
 	return s.sch.load(pluginPath, module)
 }
 
 func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	s.invalidateCache()
 	return s.devSch.load(pluginPath, module)
 }
 
@@ -178,6 +201,7 @@ func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
 	for _, p := range module.Spec.Plugins {
 		s.devSch.remove(p.Kind, p.Spec.Name, module.Metadata)
 	}
+	s.invalidateCache()
 }
 
 func (s *completeSchema) ValidateDatasource(plugin plugin.Plugin, dtsName string) error {
@@ -319,7 +343,10 @@ func (s *completeSchema) ValidateAnnotations(plugin plugin.Plugin, annoName stri
 func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
+	return s.getAllSchemasLocked()
+}
 
+func (s *completeSchema) getAllSchemasLocked() []LoadSchema {
 	var allSchemas []LoadSchema
 	allSchemasMap := map[string]LoadSchema{}
 
@@ -342,6 +369,10 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, bool) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
+	return s.getSchemaLocked(name, version, registry)
+}
+
+func (s *completeSchema) getSchemaLocked(name, version, registry string) (LoadSchema, bool) {
 	if ls, ok := s.devSch.getSchema(name, version, registry); ok {
 		return ls, true
 	}
@@ -351,7 +382,10 @@ func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, 
 func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
+	return s.generateDashboardSchemaLocked()
+}
 
+func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 	ctx := cuecontext.New()
 	plugins := map[plugin.Kind]cue.Value{}
 	for _, kind := range []plugin.Kind{
@@ -369,6 +403,98 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		plugins[kind] = disjunction
 	}
 	return generateDashboardCueValue(ctx, plugins)
+}
+
+func (s *completeSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
+	s.mutex.RLock()
+	if s.cachedDashboardSchema != nil {
+		logrus.Info("return cached schema")
+		data := s.cachedDashboardSchema
+		s.mutex.RUnlock()
+		return data, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.cachedDashboardSchema != nil {
+		return s.cachedDashboardSchema, nil
+	}
+	val, err := s.generateDashboardSchemaLocked()
+	if err != nil {
+		return nil, err
+	}
+	data, err := apiCue.Marshal(val)
+	if err != nil {
+		return nil, err
+	}
+	s.cachedDashboardSchema = data
+	logrus.Info("return built schema")
+	return data, nil
+}
+
+func (s *completeSchema) GetAllSchemasBytes() ([]byte, error) {
+	s.mutex.RLock()
+	if s.cachedPluginList != nil {
+		data := s.cachedPluginList
+		s.mutex.RUnlock()
+		return data, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.cachedPluginList != nil {
+		return s.cachedPluginList, nil
+	}
+	schemas := s.getAllSchemasLocked()
+	if len(schemas) == 0 {
+		s.cachedPluginList = []byte("{}")
+		return s.cachedPluginList, nil
+	}
+	ctx := cuecontext.New()
+	list, err := GenerateSchemaDefinitions(ctx, schemas)
+	if err != nil {
+		return nil, err
+	}
+	data, err := apiCue.Marshal(list)
+	if err != nil {
+		return nil, err
+	}
+	s.cachedPluginList = data
+	return data, nil
+}
+
+func (s *completeSchema) GetSchemaBytes(name, version, registry string) ([]byte, bool, error) {
+	s.mutex.RLock()
+	if cached, ok := s.cachedPluginByName[name]; ok {
+		logrus.Info("return cached schema")
+		s.mutex.RUnlock()
+		return cached, true, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if cached, ok := s.cachedPluginByName[name]; ok {
+		return cached, true, nil
+	}
+	ls, ok := s.getSchemaLocked(name, version, registry)
+	if !ok {
+		return nil, false, nil
+	}
+	ctx := cuecontext.New()
+	list, err := GenerateSchemaDefinitions(ctx, []LoadSchema{ls})
+	if err != nil {
+		return nil, false, err
+	}
+	data, err := apiCue.Marshal(list)
+	if err != nil {
+		return nil, false, err
+	}
+	s.cachedPluginByName[name] = data
+	logrus.Info("return built schema")
+	return data, true, nil
 }
 
 func mergeSchemasByKind(main, dev []LoadSchema) []LoadSchema {
