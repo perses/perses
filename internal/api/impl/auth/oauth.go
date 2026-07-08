@@ -479,6 +479,7 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	}, nil
 }
 

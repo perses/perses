@@ -97,5 +97,6 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	})
 }
