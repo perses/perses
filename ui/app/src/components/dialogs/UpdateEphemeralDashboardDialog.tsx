@@ -34,8 +34,8 @@ interface UpdateEphemeralDashboardDialog {
 /**
  * Dialog used to rename an ephemeral dashboard.
  * @param props.open Define if the dialog should be opened or not.
- * @param props.closeDialog Provides the function to close itself.
- * @param props.onConfirm Action to perform when user confirmed.
+ * @param props.onClose Provides the function to close itself.
+ * @param props.onSuccess Action to perform when user confirmed.
  * @param props.ephemeralDashboard The ephemeral dashboard resource to rename.
  */
 export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDialog): ReactElement => {

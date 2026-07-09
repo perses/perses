@@ -30,7 +30,6 @@ interface DeleteFolderDialogProps {
  * @param folder The folder resource containing the subfolder to delete.
  * @param path The path of the subfolder to delete. If empty, the root folder will be deleted.
  * @param open Define if the dialog should be opened or not.
- * @param onSubmit Action to perform when user confirmed.
  * @param onClose Provides the function to close itself.
  * @returns A React element representing the delete folder dialog.
  */
