@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/go-jose/go-jose/v4"
@@ -266,7 +265,7 @@ func NewOAuthProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OAuth
 				AccessToken:  "myToken",
 				TokenType:    "myTokenType",
 				RefreshToken: "myRefreshToken",
-				Expiry:       time.Now().Add(4 * time.Hour),
+				ExpiresIn:    3600,
 			})
 			assert.NoError(t, err)
 			writer.Header().Set("Content-Type", "application/json")

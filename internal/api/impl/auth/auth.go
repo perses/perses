@@ -189,6 +189,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	})
 }
 
