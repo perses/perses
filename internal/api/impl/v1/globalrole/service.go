@@ -110,18 +110,18 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.GlobalRole, error
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q *globalrole.Query, _ apiInterface.Parameters) ([]*v1.GlobalRole, error) {
+func (s *service) List(q *globalrole.Query) ([]*v1.GlobalRole, error) {
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(q *globalrole.Query) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
-func (s *service) MetadataList(q *globalrole.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *globalrole.Query) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *globalrole.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

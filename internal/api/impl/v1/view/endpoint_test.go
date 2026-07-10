@@ -125,19 +125,19 @@ func (m *mockDashboardService) Get(_ apiInterface.Parameters) (*v1.Dashboard, er
 	return nil, fmt.Errorf("not found")
 }
 
-func (*mockDashboardService) List(_ *dashboard.Query, _ apiInterface.Parameters) ([]*v1.Dashboard, error) {
+func (*mockDashboardService) List(_ *dashboard.Query) ([]*v1.Dashboard, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawList(_ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (*mockDashboardService) RawList(_ *dashboard.Query) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) MetadataList(_ *dashboard.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (*mockDashboardService) MetadataList(_ *dashboard.Query) ([]api.Entity, error) {
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawMetadataList(_ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (*mockDashboardService) RawMetadataList(_ *dashboard.Query) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 

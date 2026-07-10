@@ -161,6 +161,10 @@ func CreateAuthorizationHeader(token string) (string, string) {
 }
 
 func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.Manager) {
+	// Integration tests don't need to re-extract archives at each server boot.
+	// Redirect archives to an empty temp folder to avoid heavy I/O on Windows CI.
+	conf.Plugin.ArchivePaths = []string{t.TempDir()}
+
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{

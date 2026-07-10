@@ -25,6 +25,11 @@ type Query interface {
 	GetMetadataOnlyQueryParam() bool
 	IsRawQueryAllowed() bool
 	IsRawMetadataQueryAllowed() bool
+	// GetProjectQueryParam will return the project name that is used to filter the list of resources.
+	// In case of global resource, this will return an empty string.
+	// In case of project resource, this will return the project name set in the query parameter or in the URL path.
+	GetProjectQueryParam() string
+	SetProjectQueryParam(project string)
 }
 
 type DAO interface {

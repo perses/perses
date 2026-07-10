@@ -62,7 +62,7 @@ datasource:
         service_configuration:
           enable: true
           port_name: "http"
-          serviceType: "ClusterIP"
+          service_type: "ClusterIP"
         labels:
           app: prometheus
 ```

@@ -141,7 +141,7 @@ func (s *service) Get(parameters apiInterface.Parameters) (*v1.PublicUser, error
 	return v1.NewPublicUser(usr), nil
 }
 
-func (s *service) List(q *user.Query, _ apiInterface.Parameters) ([]*v1.PublicUser, error) {
+func (s *service) List(q *user.Query) ([]*v1.PublicUser, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
@@ -153,14 +153,14 @@ func (s *service) List(q *user.Query, _ apiInterface.Parameters) ([]*v1.PublicUs
 	return result, nil
 }
 
-func (s *service) RawList(_ *user.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawList(_ *user.Query) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) MetadataList(q *user.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+func (s *service) MetadataList(q *user.Query) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(q *user.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
+func (s *service) RawMetadataList(q *user.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

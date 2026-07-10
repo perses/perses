@@ -22,7 +22,7 @@ Need to provide the name of the panel and a list of options.
 ```golang
 import "github.com/perses/perses/go-sdk/panel"
 
-panel.Name("My Super Panel")
+panel.Title("My Super Panel")
 ```
 
 Define the panel title.

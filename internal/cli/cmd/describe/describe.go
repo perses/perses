@@ -76,7 +76,7 @@ func (o *option) Complete(args []string) error {
 
 	svc, svcErr := service.New(o.kind, o.Project, apiClient)
 	if svcErr != nil {
-		return err
+		return svcErr
 	}
 	o.resourceService = svc
 	return nil
