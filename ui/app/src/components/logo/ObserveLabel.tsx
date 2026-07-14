@@ -17,8 +17,8 @@ function ObserveLabel(): ReactElement {
   return (
     <div
       style={{
-        fontSize: '14px',
-        padding: '1px 4px 2px 4px',
+        fontSize: '13px',
+        padding: '0 2px',
         fontWeight: 600,
         color: '#fff',
         border: '2px solid #fff',

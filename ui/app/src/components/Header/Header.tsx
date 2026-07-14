@@ -17,14 +17,13 @@ import { useIsLaptopSize, useIsMobileSize } from '../../utils/browser-size';
 import { AdminRoute, ConfigRoute } from '../../model/route';
 import { useIsAuthEnabled, useIsExplorerEnabled } from '../../context/Config';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
-import AppscodeLogoCropped from '../logo/AppscodeLogoCropped';
 import ObserveLabel from '../logo/ObserveLabel';
 import { BannerInfo } from '../BannerInfo';
 import { ToolMenu } from './ToolMenu';
 import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
 import { SearchBar } from './SearchBar/SearchBar';
-import AppscodeLogo from '../logo/AppscodeLogo';
+import BrandLogo from '../logo/BrandLogo';
 import { AppDrawer } from './AppDrawer';
 import { useCookies } from 'react-cookie';
 import { activeOrganization } from '../../constants/auth-token';
@@ -73,9 +72,10 @@ export default function Header(): JSX.Element {
             to="/"
             sx={{
               padding: 0,
+              minWidth: 30,
             }}
           >
-            {isLaptopSize ? <AppscodeLogo /> : <AppscodeLogoCropped color="white" width={32} height={32} />}
+            <BrandLogo height={30} width="auto" />
           </Button>
           {isLaptopSize && <ObserveLabel />}
         </Box>

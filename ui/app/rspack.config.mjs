@@ -105,7 +105,6 @@ export default defineConfig({
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({
       template: './index.html',
-      favicon: './favicon.ico',
       publicPath: isDev ? '/' : 'PREFIX_PATH_PLACEHOLDER/',
     }),
     isDev ? new refreshPlugin() : null,

@@ -43,9 +43,7 @@ import * as React from 'react';
 import Gitlab from 'mdi-material-ui/Gitlab';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import { useDarkMode } from '../../context/DarkMode';
-import PersesLogoCropped from '../../components/logo/AppscodeLogoCropped';
-import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
-import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
+import BrandLogo from '../../components/logo/BrandLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
 import { useConfigContext } from '../../context/Config';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth-client';
@@ -147,7 +145,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
       justifyContent="center"
       gap={2}
     >
-      {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
+      <BrandLogo />
       <Divider
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"

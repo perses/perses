@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import { ReactElement, ImgHTMLAttributes } from 'react';
-import appscodeLogoCropped from '../../../../assets/appscodeLogoCropped.png';
+import { useBranding } from '../../model/branding-client';
 
-interface AppscodeLogoCroppedProps extends ImgHTMLAttributes<HTMLImageElement> {
+interface BrandLogoProps extends ImgHTMLAttributes<HTMLImageElement> {
   title?: string;
 }
 
-function AppscodeLogoCropped(props: AppscodeLogoCroppedProps): ReactElement {
-  const { title = 'Appscode Logo', width = '130', height = '30', ...rest } = props;
-  return <img src={appscodeLogoCropped} alt={title} width={width} height={height} {...rest} />;
+function BrandLogo(props: BrandLogoProps): ReactElement {
+  const { title = 'Logo', width = 'auto', height = '30', ...rest } = props;
+  const { data: branding } = useBranding();
+  return <img src={branding?.logo} alt={title} width={width} height={height} {...rest} />;
 }
 
-export default AppscodeLogoCropped;
+export default BrandLogo;
