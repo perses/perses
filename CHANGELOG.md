@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.54.0-rc.0 / 2026-07-15
+
+- [SECURITY] Unvalidated project parameter enables filesystem path traversal ([75e5471040cc](https://github.com/perses/perses-ghsa-4227-9989-jrhx/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
+- [SECURITY] Missing authorization in datasource proxy allows cross-scope secret disclosure ([2368c9ef4eb0a](https://github.com/perses/perses/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
+- [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4031)
+- [ENHANCEMENT] Plugin: prevent path injection when extracting the plugins file (#4230)
+- [ENHANCEMENT] Updated migrateQuery to catch ambiguous plugin matches during migration (#4139)
+- [BUGFIX] CUE: fix wrong collapse value (#4183)
+- [BUGFIX] apply default AuthorizerDenyTTL in kubernetes authz provider (#4246)
+- [BUGFIX] plugin: skip migrate.cue whose package is not migrate (#4260)
+- [BUGFIX] Schema: validate dev variable plugins against the variables tree (#4250)
+- [BUGFIX] accept bits/decbits/sek/sgd/usd units in go-sdk Format validation (#4259)
+- [BUGFIX] Return the mkdir error when creating the CLI config directory (#4256)
+- [BUGFIX] config: fix SQL max_allowed_packet YAML tag (#4248)
+- [BUGFIX] config: fix Plugin.Verify lowercasing to not prepend empty strings (#4247)
+- [BUGFIX] plugin: return the real error when reading a plugin package.json fails (#4257)
+- [BUGFIX] plugin: report the real error when a dev plugin package fails to load (#4255)
+- [BUGFIX] use provider HTTP client for OAuth device code token exchange (#4245)
+- [BUGFIX] honor datasource TLS config when fetching OAuth token (#4249)
+- [BUGFIX] escape LIKE metacharacters in name-prefix filter (#4244)
+- [BUGFIX] Allow client to auto-refresh token (#4236)
+- [BUGFIX] reject users with both native and oauth providers (#4187)
+- [BUGFIX] CLI describe: return service.New error instead of a nil err (#4239)
+- [BUGFIX] set PERSES_CLI env on the Windows plugin dev server (#4241)
+- [BUGFIX] Auth: fake latency when user does not exist (#4232)
+- [BUGFIX] Discovery: fix k8s service discovery when no port is declared (#4231)
+- [DOC] fix broken Go SDK examples in http-proxy.md (#4243)
+- [DOC] Fix stale panel group defaults in go-sdk doc (#4240)
+- [DOC] fix dialog JSDoc @param names to match props (#4242)
+- [DOC] fix invalid time.minutes in go-sdk RefreshInterval example (#4237)
+- [DOC] fix timeserieschart import path in query builder example (#4238)
+- [DOC] fix panel Title example to use panel.Title (#4235)
+- [DOC] Schema configuration is deprecated (#4226)
+- [DOC] Fix Kubernetes SD example to use service_type key (#4223)
+
 ## 0.54.0-beta.3 / 2026-07-03
 
 - [SECURITY] API: Fix miss-usage of project query param [8015fb](https://github.com/perses/perses/commit/8015fb340bdc625953e73a7a688be5b939159540)
