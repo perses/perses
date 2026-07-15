@@ -15,8 +15,7 @@ Need to provide a title and a list of options.
 
 - [Title()](#title): with the title provided in the constructor.
 - [PanelWidth()](#panelwidth): 12
-- [PanelHeight()](#panelheight): 6
-- [Collapsed()](#collapsed): true
+- [PanelHeight()](#panelheight): 8
 
 ## Available options
 

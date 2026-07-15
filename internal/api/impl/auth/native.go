@@ -67,6 +67,10 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 	usr, err := e.dao.Get(body.Login)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
+			// In case the user is not found, there is no latency if we are returning immediately an error.
+			// Therefor an attacker could use this to check if a user exists or not.
+			// To avoid this, we will compare a fake password in order to get the same latency when a user exists and the password is not correct.
+			_ = crypto.ComparePasswords("fakepassword", body.Password)
 			return apiinterface.HandleBadRequestError("wrong login or password ")
 		}
 		return apiinterface.InternalError
@@ -93,5 +97,6 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	})
 }

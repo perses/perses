@@ -589,6 +589,9 @@ case_sensitive: <string> | default = false # Optional
 
 ### Schemas config
 
+!!! warning
+    This config is deprecated. It will be removed in the future. Please remove it from your config.
+
 ```yaml
 # Path to the Cue schemas of the panels
 panels_path: <path> | default = "schemas/panels" # Optional

@@ -49,6 +49,27 @@ func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 			sqlArgs:  []any{"bar%", "foo"},
 		},
 		{
+			title:    "a prefix name with an underscore is escaped",
+			project:  "",
+			name:     "foo_bar",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`foo\_bar%`},
+		},
+		{
+			title:    "a prefix name with a percent sign is escaped",
+			project:  "",
+			name:     "100%",
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`100\%%`},
+		},
+		{
+			title:    "a prefix name with a backslash is escaped",
+			project:  "",
+			name:     `foo\bar`,
+			sqlQuery: "SELECT doc FROM perses.dashboard WHERE name LIKE ?",
+			sqlArgs:  []any{`foo\\bar%`},
+		},
+		{
 			title:    "empty query",
 			project:  "",
 			name:     "",

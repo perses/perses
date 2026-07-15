@@ -49,7 +49,7 @@ interface CreateDashboardProps {
 /**
  * Dialog used to create a dashboard.
  * @param props.open Define if the dialog should be opened or not.
- * @param props.projectOptions The project where the dashboard will be created.
+ * @param props.projects The project where the dashboard will be created.
  * If it contains only one element, it will be used as project value and will hide the project selection.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.

@@ -93,7 +93,11 @@ func (d *serviceDiscovery) serviceToGlobalDatasource(svc corev1.Service, decoded
 func (d *serviceDiscovery) extractPort(svc corev1.Service) *corev1.ServicePort {
 	if len(d.cfg.PortName) == 0 && d.cfg.PortNumber == 0 {
 		if len(svc.Spec.Ports) > 1 {
-			logrus.Tracef("svc %q/%q dropped for the discovery %q because pod contains more than one container and no name has been configured to choose it", svc.Namespace, svc.Name, d.discoveryName)
+			logrus.Tracef("svc %q/%q dropped for the discovery %q because service contains more than one port declared and no name has been configured to choose it", svc.Namespace, svc.Name, d.discoveryName)
+			return nil
+		}
+		if len(svc.Spec.Ports) == 0 {
+			logrus.Tracef("svc %q/%q dropped for the discovery %q because service doesn't contain any port declared", svc.Namespace, svc.Name, d.discoveryName)
 			return nil
 		}
 		return &svc.Spec.Ports[0]
