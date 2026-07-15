@@ -29,8 +29,6 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
-	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/sirupsen/logrus"
 )
 
@@ -158,27 +156,13 @@ func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.Datasou
 		return nil
 	}
 
-	proxySpec, proxyKind, proxyErr := datasourceV1.ValidateAndExtract(datasource.Spec.Plugin.Spec)
+	hasSecret, proxyErr := datasourceV1.HasSecret(datasource.Spec.Plugin.Spec)
 	if proxyErr != nil {
 		logrus.WithError(proxyErr).WithFields(map[string]interface{}{
 			"datasource": datasource.Metadata.Name,
 			"project":    datasource.Metadata.Project,
 		}).Error("unable to build or find the config in the datasource spec")
 		return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
-	}
-
-	hasSecret := false
-	switch proxyKind {
-	case datasourceHTTP.ProxyKindName:
-		httpConfig := proxySpec.(*datasourceHTTP.Config)
-		if len(httpConfig.Secret) > 0 {
-			hasSecret = true
-		}
-	case datasourceSQL.ProxyKindName:
-		sqlConfig := proxySpec.(*datasourceSQL.Config)
-		if len(sqlConfig.Secret) > 0 {
-			hasSecret = true
-		}
 	}
 
 	if !hasSecret {
@@ -189,16 +173,4 @@ func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.Datasou
 	}
 
 	return nil
-}
-
-func manageQuery(q *datasource.Query, params apiInterface.Parameters) (*datasource.Query, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query, err := deep.Copy(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
-	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
-	}
-	return query, nil
 }
