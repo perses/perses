@@ -28,6 +28,36 @@ security:
 In case a native provider is used, the users and their password are stored in the Perses database.
 
 Login is done through http POST on /api/auth/providers/native/login.
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+TOKEN_JSON=$(
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"login":"<USER>","password":"<PASS>"}' \
+    "<PERSES_URL>/api/auth/providers/native/login"
+)
+
+ACCESS_TOKEN=$(jq -r '.access_token' <<<"$TOKEN_JSON")
+
+# Then you can use ACCESS_TOKEN in your requests
+curl \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "<PERSES_URL>/api/v1/projects"
+```
+
+One can also use the CLI to login:
+
+```bash
+#!/usr/bin/env bash
+
+percli login <PERSES_URL> --username="<USER>" --password="<PASS>"
+
+# Then you can use the CLI to get anything from Perses
+percli get projects
+```
 
 ## External OIDC/OAuth provider(s)
 
@@ -93,7 +123,7 @@ sequenceDiagram
     participant br as Perses Frontend
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>br: Login with OIDC provider (e.g Microsoft Entra ID)
     activate br
     br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
@@ -154,7 +184,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>pc: EXEC: percli login
     activate pc
     pc->>rp: GET /api/config
@@ -239,7 +269,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     ro->>pc: EXEC: percli login --provider <slug_id> --client-id <client_id> --client-secret <client_secret>
     activate pc
     pc->>rp: GET /api/config
