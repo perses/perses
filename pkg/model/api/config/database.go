@@ -74,7 +74,7 @@ type SQL struct {
 	// Location for time.Time values
 	Loc *time.Location `json:"loc,omitempty" yaml:"loc,omitempty"`
 	// Max packet size allowed
-	MaxAllowedPacket int `json:"max_allowed_packet" yaml:"maxAllowedPacket"`
+	MaxAllowedPacket int `json:"max_allowed_packet" yaml:"max_allowed_packet"`
 	// Server public key name
 	ServerPubKey string `json:"server_pub_key" yaml:"server_pub_key"`
 	// Dial timeout
