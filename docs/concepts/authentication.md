@@ -48,7 +48,7 @@ curl \
   "<PERSES_URL>/api/v1/projects"
 ```
 
-One can also use the CLI to login:
+You can also use the CLI to login:
 
 ```bash
 #!/usr/bin/env bash
