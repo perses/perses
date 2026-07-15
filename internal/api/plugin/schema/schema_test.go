@@ -160,6 +160,25 @@ func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
 	loadPlugin(variablePath, modules, sch, t)
 }
 
+func loadDevVariablePlugin(variablePath string, sch Schema, t *testing.T) {
+	module := v1.PluginModule{
+		Spec: v1.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindVariable,
+					Spec: module.PluginSpec{
+						Name: "FirstVariable",
+					},
+				},
+			},
+		},
+	}
+	if err := sch.LoadDevPlugin(variablePath, module); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestValidatePanels(t *testing.T) {
 	s := New()
 	loadPanelPlugins("testdata/schemas/panels", s, t)
@@ -432,6 +451,32 @@ func TestValidateDashboardVariables(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestValidateVariableWithDevSchema ensures a variable plugin loaded only in
+// development mode is validated against the dev variable schema. It guards
+// against dispatching the dev-load probe to the wrong tree (e.g. panels), which
+// would make ValidateVariable fall through to the production set and reject a
+// dev-only variable plugin.
+func TestValidateVariableWithDevSchema(t *testing.T) {
+	s := New()
+	loadDevVariablePlugin("testdata/schemas/variables", s, t)
+	validFirstVariable := loadPluginFromJSON("testdata/samples/variables/valid_first_variable.json", t)
+
+	variables := []dashboard.Variable{
+		{
+			Kind: variable.KindList,
+			Spec: &dashboard.ListVariableSpec{
+				ListSpec: variable.ListSpec{
+					Plugin: validFirstVariable,
+				},
+				Name: "my1rstVar",
+			},
+		},
+	}
+
+	assert.NoError(t, s.ValidateDashboardVariables(variables))
+	assert.NoError(t, s.ValidateVariable(validFirstVariable, "my1rstVar"))
 }
 
 func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
