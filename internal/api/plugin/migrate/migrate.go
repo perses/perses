@@ -79,12 +79,9 @@ func Load(pluginPath string, moduleSpec v1.ModuleSpec) ([]schema.LoadSchema, err
 		migrateFilePath := filepath.Join(currentPath, "migrate.cue")
 		// We are verifying if the package is a package migrate. Otherwise, we won't be able to use it.
 		if isMigrate, openFileErr := isPackageMigrate(migrateFilePath); openFileErr != nil {
-			if openFileErr != nil {
-				return openFileErr
-			}
-			if !isMigrate {
-				return fs.SkipDir
-			}
+			return openFileErr
+		} else if !isMigrate {
+			return fs.SkipDir
 		}
 
 		instance, schemaErr := LoadMigrateSchema(currentPath)

@@ -16,6 +16,7 @@ package schema
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -522,5 +523,42 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 		if !strings.Contains(err.Error(), "unable to find the plugin with the associated schema") {
 			t.Fatalf("unexpected error message: %v", err)
 		}
+	}
+}
+
+// TestSch_load_SkipsCueFileWithWrongPackage ensures that a .cue file that does not
+// belong to the "model" package is skipped instead of being loaded. The package
+// check is meant to ignore such files, but a bug used to make the skip unreachable,
+// so the file was passed to LoadModelSchema and produced a build error instead of
+// being silently ignored.
+func TestSch_load_SkipsCueFileWithWrongPackage(t *testing.T) {
+	pluginPath := t.TempDir()
+	schemaDir := filepath.Join(pluginPath, "first")
+	if err := os.MkdirAll(schemaDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	// A .cue file that belongs to another package than "model".
+	content := []byte("package notmodel\n\nkind: \"FirstChart\"\nspec: {}\n")
+	if err := os.WriteFile(filepath.Join(schemaDir, "panel.cue"), content, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	s := newSch()
+	pluginModule := v1.PluginModule{
+		Spec: v1.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindPanel,
+					Spec: module.PluginSpec{Name: "FirstChart"},
+				},
+			},
+		},
+	}
+	if err := s.load(pluginPath, pluginModule); err != nil {
+		t.Fatalf("expected the non-model file to be skipped, got error: %v", err)
+	}
+	if _, ok := s.panels.Get("FirstChart", pluginModule.Metadata); ok {
+		t.Fatalf("expected no panel schema to be registered for a non-model file")
 	}
 }
