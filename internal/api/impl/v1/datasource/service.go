@@ -16,35 +16,46 @@ package datasource
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/role"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/sirupsen/logrus"
 )
 
 type service struct {
 	datasource.Service
-	dao datasource.DAO
-	sch schema.Schema
+	dao   datasource.DAO
+	sch   schema.Schema
+	authz authorization.Authorization
 }
 
-func NewService(dao datasource.DAO, sch schema.Schema) datasource.Service {
+func NewService(dao datasource.DAO, sch schema.Schema, authz authorization.Authorization) datasource.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:   dao,
+		sch:   sch,
+		authz: authz,
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Datasource) (*v1.Datasource, error) {
+func (s *service) Create(ctx echo.Context, entity *v1.Datasource) (*v1.Datasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.create(copyEntity)
 }
@@ -61,10 +72,13 @@ func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
+func (s *service) Update(ctx echo.Context, entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.update(copyEntity, parameters)
 }
@@ -135,4 +149,56 @@ func (s *service) validate(entity *v1.Datasource) error {
 		}
 	}
 	return validate.Datasource(entity, list, s.sch)
+}
+
+// checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
+// reader permission.
+func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.Datasource) error {
+	if !s.authz.IsEnabled() {
+		return nil
+	}
+
+	proxySpec, proxyKind, proxyErr := datasourceV1.ValidateAndExtract(datasource.Spec.Plugin.Spec)
+	if proxyErr != nil {
+		logrus.WithError(proxyErr).WithFields(map[string]interface{}{
+			"datasource": datasource.Metadata.Name,
+			"project":    datasource.Metadata.Project,
+		}).Error("unable to build or find the config in the datasource spec")
+		return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
+	}
+
+	hasSecret := false
+	switch proxyKind {
+	case datasourceHTTP.ProxyKindName:
+		httpConfig := proxySpec.(*datasourceHTTP.Config)
+		if len(httpConfig.Secret) > 0 {
+			hasSecret = true
+		}
+	case datasourceSQL.ProxyKindName:
+		sqlConfig := proxySpec.(*datasourceSQL.Config)
+		if len(sqlConfig.Secret) > 0 {
+			hasSecret = true
+		}
+	}
+
+	if !hasSecret {
+		return nil
+	}
+	if ok := s.authz.HasPermission(ctx, role.ReadAction, datasource.Metadata.Project, role.SecretScope); !ok {
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, datasource.Metadata.Project, role.SecretScope))
+	}
+
+	return nil
+}
+
+func manageQuery(q *datasource.Query, params apiInterface.Parameters) (*datasource.Query, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
+	}
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return query, nil
 }
