@@ -168,7 +168,7 @@ func Write(cfg *Config) error {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		mkdirError := os.Mkdir(directory, 0700)
 		if mkdirError != nil {
-			return err
+			return mkdirError
 		}
 	} else if err != nil {
 		return err
@@ -233,7 +233,7 @@ func WriteFromScratch(cfg *Config) error {
 	if _, err := os.Stat(directory); os.IsNotExist(err) {
 		mkdirError := os.Mkdir(directory, 0700)
 		if mkdirError != nil {
-			return err
+			return mkdirError
 		}
 	} else if err != nil {
 		return err
