@@ -19,7 +19,7 @@
 - name: "Jaeger"
   version: "0.1.0-rc.0"
 - name: "LogExplorer"
-  version: "0.1.0-beta.1"
+  version: "0.1.0-rc.0"
 - name: "LogsTable"
   version: "0.3.0-rc.0"
 - name: "Loki"
