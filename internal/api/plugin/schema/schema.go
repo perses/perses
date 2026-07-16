@@ -399,7 +399,6 @@ func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 	return generateDashboardCueValue(ctx, plugins)
 }
 
-// data, err := apiCue.Marshal(val)
 func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	s.mutex.RLock()
 	if s.cachedDashboardSchema.Exists() {
@@ -407,6 +406,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		s.mutex.RUnlock()
 		return data, nil
 	}
+
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	val, err := s.generateDashboardSchemaLocked()
