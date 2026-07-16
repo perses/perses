@@ -25,7 +25,6 @@ import (
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
-	apiCue "github.com/perses/perses/internal/api/cue"
 	"github.com/perses/perses/internal/api/plugin/tree"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/dashboard"
@@ -145,19 +144,19 @@ type Schema interface {
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 	GenerateDashboardSchema() (cue.Value, error)
-	// GetAllSchemasBytes returns all plugin schemas serialised as CUE bytes.
+	// GetAllPluginSchemas returns all plugin schemas serialised as CUE bytes.
 	// Results are cached until the next plugin load/unload event.
-	GetAllSchemasBytes() ([]byte, error)
-	// GetSchemaBytes returns the CUE bytes for a single plugin schema.
+	GetAllPluginSchemas() (cue.Value, error)
+	// GetPluginSchema returns the CUE bytes for a single plugin schema.
 	// Results are cached until the next plugin load/unload event.
-	GetSchemaBytes(name, version, registry string) ([]byte, bool, error)
+	GetPluginSchema(name, version, registry string) (cue.Value, bool, error)
 }
 
 func New() Schema {
 	return &completeSchema{
 		sch:                newSch(),
 		devSch:             newSch(),
-		cachedPluginByName: make(map[string][]byte),
+		cachedPluginByName: make(map[string]cue.Value),
 	}
 }
 
@@ -168,17 +167,14 @@ type completeSchema struct {
 	mutex  sync.RWMutex
 
 	cachedDashboardSchema cue.Value
-	cachedPluginList      []byte
-	cachedPluginByName    map[string][]byte
-
-	cachedPluginListValue   cue.Value
-	cachedPluginByNameValue map[string]cue.Value
+	cachedPluginList      cue.Value
+	cachedPluginByName    map[string]cue.Value
 }
 
 func (s *completeSchema) invalidateCache() {
 	s.cachedDashboardSchema = cue.Value{}
-	s.cachedPluginList = nil
-	s.cachedPluginByName = make(map[string][]byte)
+	s.cachedPluginList = cue.Value{}
+	s.cachedPluginByName = make(map[string]cue.Value)
 }
 
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
@@ -406,8 +402,8 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		s.mutex.RUnlock()
 		return data, nil
 	}
-
 	s.mutex.RUnlock()
+
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	val, err := s.generateDashboardSchemaLocked()
@@ -418,9 +414,9 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	return val, nil
 }
 
-func (s *completeSchema) GetAllSchemasBytes() ([]byte, error) {
+func (s *completeSchema) GetAllPluginSchemas() (cue.Value, error) {
 	s.mutex.RLock()
-	if s.cachedPluginList != nil {
+	if s.cachedPluginList.Exists() {
 		data := s.cachedPluginList
 		s.mutex.RUnlock()
 		return data, nil
@@ -429,28 +425,22 @@ func (s *completeSchema) GetAllSchemasBytes() ([]byte, error) {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	if s.cachedPluginList != nil {
-		return s.cachedPluginList, nil
-	}
 	schemas := s.getAllSchemasLocked()
 	if len(schemas) == 0 {
-		s.cachedPluginList = []byte("{}")
+		s.cachedPluginList = cue.Value{}
 		return s.cachedPluginList, nil
 	}
 	ctx := cuecontext.New()
 	list, err := GenerateSchemaDefinitions(ctx, schemas)
 	if err != nil {
-		return nil, err
+		return cue.Value{}, err
 	}
-	data, err := apiCue.Marshal(list)
-	if err != nil {
-		return nil, err
-	}
-	s.cachedPluginList = data
-	return data, nil
+
+	s.cachedPluginList = list
+	return list, nil
 }
 
-func (s *completeSchema) GetSchemaBytes(name, version, registry string) ([]byte, bool, error) {
+func (s *completeSchema) GetPluginSchema(name, version, registry string) (cue.Value, bool, error) {
 	s.mutex.RLock()
 	if cached, ok := s.cachedPluginByName[name]; ok {
 		s.mutex.RUnlock()
@@ -465,19 +455,15 @@ func (s *completeSchema) GetSchemaBytes(name, version, registry string) ([]byte,
 	}
 	ls, ok := s.getSchemaLocked(name, version, registry)
 	if !ok {
-		return nil, false, nil
+		return cue.Value{}, false, nil
 	}
 	ctx := cuecontext.New()
 	list, err := GenerateSchemaDefinitions(ctx, []LoadSchema{ls})
 	if err != nil {
-		return nil, false, err
+		return cue.Value{}, false, err
 	}
-	data, err := apiCue.Marshal(list)
-	if err != nil {
-		return nil, false, err
-	}
-	s.cachedPluginByName[name] = data
-	return data, true, nil
+	s.cachedPluginByName[name] = list
+	return list, true, nil
 }
 
 func mergeSchemasByKind(main, dev []LoadSchema) []LoadSchema {
