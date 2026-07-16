@@ -76,7 +76,7 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 		registry = specPlugin.DefaultRegistry
 	}
 
-	data, ok, err := e.pluginSvc.Schema().GetSchemaBytes(pluginName, version, registry)
+	cueValue, ok, err := e.pluginSvc.Schema().GetPluginSchema(pluginName, version, registry)
 	if err != nil {
 		logrus.WithError(err).Error("unable to get plugin schema")
 		return apiinterface.InternalError
@@ -84,13 +84,22 @@ func (e *endpoint) PluginDefinition(ctx echo.Context) error {
 	if !ok {
 		return apiinterface.HandleNotFoundError(fmt.Sprintf("plugin %q not found", pluginName))
 	}
+
+	data, err := apiCue.Marshal(cueValue)
+	if err != nil {
+		return apiinterface.InternalError
+	}
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
 func (e *endpoint) PluginList(ctx echo.Context) error {
-	data, err := e.pluginSvc.Schema().GetAllSchemasBytes()
+	list, err := e.pluginSvc.Schema().GetAllPluginSchemas()
 	if err != nil {
 		logrus.WithError(err).Error("unable to list plugin schemas")
+		return apiinterface.InternalError
+	}
+	data, err := apiCue.Marshal(list)
+	if err != nil {
 		return apiinterface.InternalError
 	}
 	return ctx.Blob(http.StatusOK, contentType, data)

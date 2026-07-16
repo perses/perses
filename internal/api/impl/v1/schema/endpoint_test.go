@@ -57,7 +57,7 @@ func (s *stubSchema) GenerateDashboardSchema() (cue.Value, error) {
 	return cuecontext.New().CompileString("{}"), nil
 }
 
-func (s *stubSchema) GetAllSchemasBytes() ([]byte, error) {
+func (s *stubSchema) GetAllPluginSchemas() ([]byte, error) {
 	schemas := s.GetAllSchemas()
 	if len(schemas) == 0 {
 		return []byte("{}"), nil
@@ -70,7 +70,7 @@ func (s *stubSchema) GetAllSchemasBytes() ([]byte, error) {
 	return apiCue.Marshal(list)
 }
 
-func (s *stubSchema) GetSchemaBytes(name, version, registry string) ([]byte, bool, error) {
+func (s *stubSchema) GetPluginSchema(name, version, registry string) ([]byte, bool, error) {
 	ls, ok := s.GetSchema(name, version, registry)
 	if !ok {
 		return nil, false, nil
