@@ -37,6 +37,9 @@ var validUnits = []string{
 	string(EuroUnit), string(PoundUnit), string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit),
 	string(SouthKoreanWonUnit), string(NorwegianKroneUnit), string(NewZealandDollarUnit), string(SwedishKronaDollarUnit),
 	string(SingaporeDollarUnit), string(USDollarUnit),
+	string(CelsiusUnit), string(FahrenheitUnit),
+	string(DatetimeISOUnit), string(DatetimeUSUnit), string(DatetimeLocalUnit), string(DateISOUnit), string(DateUSUnit), string(DateLocalUnit),
+	string(TimeLocalUnit), string(TimeISOUnit), string(TimeUSUnit), string(RelativeTimeUnit), string(UnixTimestampUnit), string(UnixTimestampMsUnit),
 }
 
 func TestFormatUnmarshalJSONValidUnits(t *testing.T) {
@@ -64,6 +67,10 @@ func TestFormatUnmarshalJSON(t *testing.T) {
 		{name: "sek", json: `{"unit":"sek"}`},
 		{name: "sgd", json: `{"unit":"sgd"}`},
 		{name: "usd", json: `{"unit":"usd"}`},
+		{name: "celsius", json: `{"unit":"celsius"}`},
+		{name: "fahrenheit", json: `{"unit":"fahrenheit"}`},
+		{name: "datetime-iso", json: `{"unit":"datetime-iso"}`},
+		{name: "unix-timestamp", json: `{"unit":"unix-timestamp"}`},
 		{name: "no unit", json: `{"decimalPlaces":2}`},
 		{name: "unknown unit", json: `{"unit":"not-a-unit"}`, expectError: true},
 	}
