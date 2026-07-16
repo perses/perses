@@ -19,6 +19,7 @@ import { buildRelativeTimeOption } from '@perses-dev/components';
 import { DashboardSelector, DurationString } from '@perses-dev/spec';
 import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { PersesLoader } from '../components/PersesLoader';
+import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -33,13 +34,17 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
   }
   return (
     <ConfigContext.Provider value={{ config: data }}>
-      <TimeRangeSettingsProvider
-        showCustom={!data.frontend.time_range?.disable_custom}
-        showZoomButtons={!data.frontend.time_range?.disable_zoom}
-        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+      <UserPreferencesContextProvider
+        defaultPreferences={{ timezone: data.frontend.default_user_preferences?.timezone ?? 'local' }}
       >
-        {props.children}
-      </TimeRangeSettingsProvider>
+        <TimeRangeSettingsProvider
+          showCustom={!data.frontend.time_range?.disable_custom}
+          showZoomButtons={!data.frontend.time_range?.disable_zoom}
+          options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+        >
+          {props.children}
+        </TimeRangeSettingsProvider>
+      </UserPreferencesContextProvider>
     </ConfigContext.Provider>
   );
 }
@@ -90,6 +95,11 @@ export function useIsExplorerEnabled(): boolean {
 export function useIsKeyboardShortcutsEnabled(): boolean {
   const { config } = useConfigContext();
   return config.frontend.enable_keyboard_shortcuts ?? true;
+}
+
+export function useDefaultRowsPerPage(): number {
+  const { config } = useConfigContext();
+  return config.frontend.default_user_preferences?.rows_per_page ?? 10;
 }
 
 export function useIsEphemeralDashboardEnabled(): boolean {

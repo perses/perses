@@ -28,6 +28,7 @@ import {
   sortDashboardTableStringColumn,
 } from '../../utils/dashboardTableUtils';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { useDefaultRowsPerPage } from '../../context/Config';
 import { NameCell } from './NameCell';
 import { DashboardListRow } from './DashboardList';
 
@@ -68,6 +69,7 @@ function DashboardTreeList({
   handleDeleteFolderButtonClick,
   isLoading,
 }: DashboardTreeTableProps): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
   const isMobileSize = useIsMobileSize();
   const getTableHeight = useCallback(
     () => (isMobileSize ? 500 : (Math.max(window.innerHeight - 350, 300) ?? 300)),
@@ -85,7 +87,7 @@ function DashboardTreeList({
   }, [folderList, dashboardsMap]);
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
 
   const sortStringColumn = useCallback(
     (accessorKey: 'project' | 'displayName') =>
