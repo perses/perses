@@ -7,7 +7,7 @@ go 1.26.2
 ignore ./ui/node_modules
 
 require (
-	cuelang.org/go v0.17.0
+	cuelang.org/go v0.17.1
 	github.com/PaesslerAG/gval v1.2.4
 	github.com/PaesslerAG/jsonpath v0.1.2-0.20240726212847-3a740cf7976f
 	github.com/brunoga/deep v1.3.1
@@ -32,7 +32,7 @@ require (
 	github.com/mholt/archives v0.1.5
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.4
-	github.com/perses/common v0.31.1
+	github.com/perses/common v0.31.2
 	github.com/perses/spec v0.2.0-beta.9
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
