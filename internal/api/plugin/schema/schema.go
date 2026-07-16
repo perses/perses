@@ -407,6 +407,7 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		return data, nil
 	}
 
+	s.mutex.RUnlock()
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	val, err := s.generateDashboardSchemaLocked()
