@@ -2,11 +2,14 @@
 
 ## 0.54.0-rc.0 / 2026-07-15
 
-- [SECURITY] Unvalidated project parameter enables filesystem path traversal ([75e5471040cc](https://github.com/perses/perses-ghsa-4227-9989-jrhx/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
+### Core & UI
+
+- [SECURITY] Unvalidated project parameter enables filesystem path traversal (CVE-2026-63199) ([75e5471040cc](https://github.com/perses/perses-ghsa-4227-9989-jrhx/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
 - [SECURITY] Missing authorization in datasource proxy allows cross-scope secret disclosure ([2368c9ef4eb0a](https://github.com/perses/perses/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
 - [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4031)
 - [ENHANCEMENT] Plugin: prevent path injection when extracting the plugins file (#4230)
 - [ENHANCEMENT] Updated migrateQuery to catch ambiguous plugin matches during migration (#4139)
+- [BUGFIX] accept temperature and date units in go-sdk Format validation (#4266)
 - [BUGFIX] CUE: fix wrong collapse value (#4183)
 - [BUGFIX] apply default AuthorizerDenyTTL in kubernetes authz provider (#4246)
 - [BUGFIX] plugin: skip migrate.cue whose package is not migrate (#4260)
@@ -26,6 +29,8 @@
 - [BUGFIX] set PERSES_CLI env on the Windows plugin dev server (#4241)
 - [BUGFIX] Auth: fake latency when user does not exist (#4232)
 - [BUGFIX] Discovery: fix k8s service discovery when no port is declared (#4231)
+- [DOC] Add native provider authentication bash and CLI snippets (#4254)
+- [DOC] Fix typo in Dashboard API docs (#4253)
 - [DOC] fix broken Go SDK examples in http-proxy.md (#4243)
 - [DOC] Fix stale panel group defaults in go-sdk doc (#4240)
 - [DOC] fix dialog JSDoc @param names to match props (#4242)
@@ -35,7 +40,20 @@
 - [DOC] Schema configuration is deprecated (#4226)
 - [DOC] Fix Kubernetes SD example to use service_type key (#4223)
 
+### Plugins improvements
+
+- [FEATURE] Add new plugin : OpenSearch (perses/plugins#641)
+- [ENHANCEMENT] TimeseriesChart : Add negative y axis support (perses/plugins#696)
+- [BREAKINGCHANGE] Tempo: remove workaround for Tempo versions before 2.6.0 (perses/plugins#728)
+- [BREAKINGCHANGE] Tempo: Use Query V2 API and surface API (warning) messages (perses/plugins#726)
+- [BUGFIX] Pyroscope: fix timerange (perses/plugins#725)
+- [BUGFIX] Loki query migration incorrectly matching non-Loki datasources (perses/plugins#682)
+- [BUGFIX] Remove selectedMode from timeseries series config (perses/plugins#722)
+- [DOC] Table: fix format modifier syntax in dynamic links example (perses/plugins#727)
+
 ## 0.54.0-beta.3 / 2026-07-03
+
+### Core & UI
 
 - [SECURITY] API: Fix miss-usage of project query param [8015fb](https://github.com/perses/perses/commit/8015fb340bdc625953e73a7a688be5b939159540)
 - [FEATURE] pass the user pereferences tz to ViewDashboard (#4184)
@@ -61,6 +79,7 @@
 - [DOC] [DOCUMENTATION] Add PromQL builder mention (#4207)
 
 ### Plugins improvements
+
 - [FEATURE] LogTable: add logs table CSV export action (perses/plugins#697)
 - [FEATURE] Prometheus & TimeseriesChart: Add annotation support (perses/plugins#642)
 - [FEATURE] AlertManager: add alert manager plugin (perses/plugins#647)
@@ -76,6 +95,8 @@
 - [DOC] GreptimeDB: Add GreptimeDB plugin docs (perses/plugins#686)
 
 ## 0.54.0-beta.2 / 2026-06-19
+
+### Core & UI
 
 - [FEATURE] Add annotation support (#4040)
 - [FEATURE] Add tags display with chips in DashboardTreeList (#4115)
