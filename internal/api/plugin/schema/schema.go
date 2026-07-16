@@ -145,9 +145,6 @@ type Schema interface {
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 	GenerateDashboardSchema() (cue.Value, error)
-	// GenerateDashboardSchemaBytes returns the dashboard schema serialised as CUE bytes.
-	// Results are cached until the next plugin load/unload event.
-	GenerateDashboardSchemaBytes() ([]byte, error)
 	// GetAllSchemasBytes returns all plugin schemas serialised as CUE bytes.
 	// Results are cached until the next plugin load/unload event.
 	GetAllSchemasBytes() ([]byte, error)
@@ -170,13 +167,16 @@ type completeSchema struct {
 	devSch *sch
 	mutex  sync.RWMutex
 
-	cachedDashboardSchema []byte
+	cachedDashboardSchema cue.Value
 	cachedPluginList      []byte
 	cachedPluginByName    map[string][]byte
+
+	cachedPluginListValue   cue.Value
+	cachedPluginByNameValue map[string]cue.Value
 }
 
 func (s *completeSchema) invalidateCache() {
-	s.cachedDashboardSchema = nil
+	s.cachedDashboardSchema = cue.Value{}
 	s.cachedPluginList = nil
 	s.cachedPluginByName = make(map[string][]byte)
 }
@@ -379,12 +379,6 @@ func (s *completeSchema) getSchemaLocked(name, version, registry string) (LoadSc
 	return s.sch.getSchema(name, version, registry)
 }
 
-func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-	return s.generateDashboardSchemaLocked()
-}
-
 func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 	ctx := cuecontext.New()
 	plugins := map[plugin.Kind]cue.Value{}
@@ -405,9 +399,10 @@ func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 	return generateDashboardCueValue(ctx, plugins)
 }
 
-func (s *completeSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
+// data, err := apiCue.Marshal(val)
+func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 	s.mutex.RLock()
-	if s.cachedDashboardSchema != nil {
+	if s.cachedDashboardSchema.Exists() {
 		data := s.cachedDashboardSchema
 		s.mutex.RUnlock()
 		return data, nil
@@ -416,19 +411,15 @@ func (s *completeSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	if s.cachedDashboardSchema != nil {
+	if s.cachedDashboardSchema.Exists() {
 		return s.cachedDashboardSchema, nil
 	}
 	val, err := s.generateDashboardSchemaLocked()
 	if err != nil {
-		return nil, err
+		return cue.Value{}, err
 	}
-	data, err := apiCue.Marshal(val)
-	if err != nil {
-		return nil, err
-	}
-	s.cachedDashboardSchema = data
-	return data, nil
+	s.cachedDashboardSchema = val
+	return val, nil
 }
 
 func (s *completeSchema) GetAllSchemasBytes() ([]byte, error) {

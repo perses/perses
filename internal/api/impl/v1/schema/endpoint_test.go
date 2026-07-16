@@ -57,14 +57,6 @@ func (s *stubSchema) GenerateDashboardSchema() (cue.Value, error) {
 	return cuecontext.New().CompileString("{}"), nil
 }
 
-func (s *stubSchema) GenerateDashboardSchemaBytes() ([]byte, error) {
-	val, err := s.GenerateDashboardSchema()
-	if err != nil {
-		return nil, err
-	}
-	return apiCue.Marshal(val)
-}
-
 func (s *stubSchema) GetAllSchemasBytes() ([]byte, error) {
 	schemas := s.GetAllSchemas()
 	if len(schemas) == 0 {
