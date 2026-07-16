@@ -20,6 +20,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 
+	apiCue "github.com/perses/perses/internal/api/cue"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/route"
@@ -54,11 +55,12 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) DashboardSchema(ctx echo.Context) error {
-	data, err := e.pluginSvc.Schema().GenerateDashboardSchemaBytes()
+	schema, err := e.pluginSvc.Schema().GenerateDashboardSchema()
 	if err != nil {
 		logrus.WithError(err).Error("unable to generate dashboard schema")
 		return apiinterface.InternalError
 	}
+	data, err := apiCue.Marshal(schema)
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
