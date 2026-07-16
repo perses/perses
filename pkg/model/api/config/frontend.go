@@ -32,6 +32,8 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"14d",
 }
 
+var allowedRowsPerPage = []int{10, 25, 50, 100}
+
 type Explorer struct {
 	Enable bool `json:"enable" yaml:"enable"`
 }
@@ -61,6 +63,27 @@ type TimeRange struct {
 	Options                []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
+// DefaultUserPreferences contains the preferences used when the user has not
+// stored an explicit preference in their browser.
+type DefaultUserPreferences struct {
+	Timezone    string `json:"timezone,omitempty" yaml:"timezone,omitempty"`
+	RowsPerPage int    `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
+	Theme       string `json:"theme,omitempty" yaml:"theme,omitempty"`
+}
+
+func (p *DefaultUserPreferences) Verify() error {
+	if p.RowsPerPage < 0 {
+		return fmt.Errorf("frontend.default_user_preferences.rows_per_page cannot be negative")
+	}
+	if p.RowsPerPage != 0 && !slices.Contains(allowedRowsPerPage, p.RowsPerPage) {
+		return fmt.Errorf("frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100")
+	}
+	if p.Theme != "" && p.Theme != "light" && p.Theme != "dark" {
+		return fmt.Errorf("frontend.default_user_preferences.theme must be one of: light, dark")
+	}
+	return nil
+}
+
 func (t *TimeRange) Verify() error {
 	if len(t.Options) == 0 {
 		t.Options = defaultTimeRangeOptions
@@ -84,4 +107,6 @@ type Frontend struct {
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
+	// DefaultUserPreferences contains server-wide defaults for user preferences.
+	DefaultUserPreferences *DefaultUserPreferences `json:"default_user_preferences,omitempty" yaml:"default_user_preferences,omitempty"`
 }

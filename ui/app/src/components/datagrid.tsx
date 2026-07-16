@@ -23,7 +23,7 @@ import {
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { ReactElement } from 'react';
 
-export const DATA_GRID_INITIAL_STATE_SORT_BY_NAME = {
+export const getDataGridInitialStateSortByName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
     columnVisibilityModel: {},
   },
@@ -31,11 +31,11 @@ export const DATA_GRID_INITIAL_STATE_SORT_BY_NAME = {
     sortModel: [{ field: 'name', sort: 'asc' }],
   },
   pagination: {
-    paginationModel: { pageSize: 10, page: 0 },
+    paginationModel: { pageSize, page: 0 },
   },
-};
+});
 
-export const DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME = {
+export const getDataGridInitialStateSortByDisplayName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
     columnVisibilityModel: {},
   },
@@ -43,9 +43,9 @@ export const DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME = {
     sortModel: [{ field: 'displayName', sort: 'asc' }],
   },
   pagination: {
-    paginationModel: { pageSize: 10, page: 0 },
+    paginationModel: { pageSize, page: 0 },
   },
-};
+});
 
 export const DATA_GRID_STYLES = {
   border: 'none',

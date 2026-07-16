@@ -21,6 +21,7 @@ import {
   useLocalStorage,
 } from '@perses-dev/components';
 import { TOGGLE_THEME_EVENT } from '@perses-dev/dashboards';
+import { useConfigContext } from './Config';
 
 // app specific echarts option overrides, empty since perses uses default
 // https://apache.github.io/echarts-handbook/en/concepts/style/#theme
@@ -40,8 +41,13 @@ export const DarkModeContext = createContext<DarkModeContext | undefined>(undefi
  */
 export function DarkModeContextProvider(props: { children: React.ReactNode }): ReactElement {
   const browserPrefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const { config } = useConfigContext();
+  const defaultDarkMode = config.frontend.default_user_preferences?.theme
+    ? config.frontend.default_user_preferences.theme === 'dark'
+    : browserPrefersDarkMode;
 
-  const [isDarkModeEnabled, setDarkMode] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
+  const [storedDarkMode, setDarkMode] = useLocalStorage<boolean | null>(DARK_MODE_PREFERENCE_KEY, null);
+  const isDarkModeEnabled = storedDarkMode ?? defaultDarkMode;
 
   useEffect(() => {
     const handleToggleTheme = (): void => {

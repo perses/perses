@@ -14,15 +14,13 @@
 import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
 import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
-import { TimeZoneSelector, useLocalStorage, useSnackbar } from '@perses-dev/components';
-import { UserPreferences } from '../../model/userPreferences';
+import { TimeZoneSelector, useSnackbar } from '@perses-dev/components';
+import { useUserPreferences } from '../../context/UserPreferences';
 import { ProfileContainer } from './ProfileContainer';
 
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
-  const [userPreferences, setUserPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', {
-    timezone: 'local',
-  });
+  const { userPreferences, setUserPreferences } = useUserPreferences();
   const [timezone, setTimezone] = useState(userPreferences.timezone);
 
   const isTimezoneValid = (tz: string): boolean => {

@@ -239,6 +239,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     }
   },
   "frontend": {
+    "default_user_preferences": {
+      "timezone": "UTC",
+      "rows_per_page": 25,
+      "theme": "dark"
+    },
     "important_dashboards": [
       {
         "project": "perses",
@@ -336,6 +341,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					DefaultUserPreferences: &DefaultUserPreferences{
+						Timezone:    "UTC",
+						RowsPerPage: 25,
+						Theme:       "dark",
+					},
 				},
 				Plugin: Plugin{
 					Path:        "plugins",
@@ -415,6 +425,10 @@ provisioning:
   - "dev/data"
 
 frontend:
+  default_user_preferences:
+    timezone: UTC
+    rows_per_page: 25
+    theme: dark
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"
@@ -510,6 +524,11 @@ plugin:
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					DefaultUserPreferences: &DefaultUserPreferences{
+						Timezone:    "UTC",
+						RowsPerPage: 25,
+						Theme:       "dark",
+					},
 				},
 				Plugin: Plugin{
 					Path:         "custom/plugins",
@@ -538,6 +557,45 @@ plugin:
 				Verify())
 			assert.NoError(t, c.Verify())
 			assert.Equal(t, test.result, c)
+		})
+	}
+}
+
+func TestDefaultUserPreferencesVerify(t *testing.T) {
+	testSuite := []struct {
+		name        string
+		preferences DefaultUserPreferences
+		errMessage  string
+	}{
+		{
+			name:        "valid preferences",
+			preferences: DefaultUserPreferences{Timezone: "UTC", RowsPerPage: 25, Theme: "dark"},
+		},
+		{
+			name:        "invalid rows per page",
+			preferences: DefaultUserPreferences{RowsPerPage: -1},
+			errMessage:  "frontend.default_user_preferences.rows_per_page cannot be negative",
+		},
+		{
+			name:        "unsupported rows per page",
+			preferences: DefaultUserPreferences{RowsPerPage: 20},
+			errMessage:  "frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100",
+		},
+		{
+			name:        "invalid theme",
+			preferences: DefaultUserPreferences{Theme: "system"},
+			errMessage:  "frontend.default_user_preferences.theme must be one of: light, dark",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.preferences.Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+				return
+			}
+			assert.ErrorContains(t, err, test.errMessage)
 		})
 	}
 }
