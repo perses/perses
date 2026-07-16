@@ -61,6 +61,9 @@ func (e *endpoint) DashboardSchema(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 	data, err := apiCue.Marshal(schema)
+	if err != nil {
+		return apiinterface.InternalError
+	}
 	return ctx.Blob(http.StatusOK, contentType, data)
 }
 
