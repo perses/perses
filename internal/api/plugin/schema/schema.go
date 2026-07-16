@@ -401,11 +401,14 @@ func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 
 // data, err := apiCue.Marshal(val)
 func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
+	s.mutex.RLock()
+	if s.cachedDashboardSchema.Exists() {
+		data := s.cachedDashboardSchema
+		s.mutex.RUnlock()
+		return data, nil
+	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	if s.cachedDashboardSchema.Exists() {
-		return s.cachedDashboardSchema, nil
-	}
 	val, err := s.generateDashboardSchemaLocked()
 	if err != nil {
 		return cue.Value{}, err
