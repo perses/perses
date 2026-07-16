@@ -19,60 +19,76 @@ import (
 )
 
 type (
-	TimeUnit       string
-	PercentageUnit string
-	ThroughputUnit string
-	CurrencyUnit   string
-	BytesUnit      string
+	TimeUnit        string
+	PercentageUnit  string
+	ThroughputUnit  string
+	CurrencyUnit    string
+	BytesUnit       string
+	TemperatureUnit string
+	DateUnit        string
 )
 
 const (
-	NanoSecondsUnit        TimeUnit       = "nanoseconds"
-	MicroSecondsUnit       TimeUnit       = "microseconds"
-	MilliSecondsUnit       TimeUnit       = "milliseconds"
-	SecondsUnit            TimeUnit       = "seconds"
-	MinutesUnit            TimeUnit       = "minutes"
-	HoursUnit              TimeUnit       = "hours"
-	DaysUnit               TimeUnit       = "days"
-	WeeksUnit              TimeUnit       = "weeks"
-	MonthsUnit             TimeUnit       = "months"
-	YearsUnit              TimeUnit       = "years"
-	PercentUnit            PercentageUnit = "percent"
-	PercentDecimalUnit     PercentageUnit = "percent-decimal"
-	DecimalUnit            string         = "decimal"
-	BinaryBitsUnit         BytesUnit      = "bits"
-	DecimalBitsUnit        BytesUnit      = "decbits"
-	BinaryBytesUnit        BytesUnit      = "bytes"
-	DecimalBytesUnit       BytesUnit      = "decbytes"
-	BitsPerSecondsUnit     ThroughputUnit = "bits/sec"
-	BitsDecPerSecondsUnit  ThroughputUnit = "decbits/sec"
-	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
-	BytesDecPerSecondsUnit ThroughputUnit = "decbytes/sec"
-	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
-	EventsPerSecondsUnit   ThroughputUnit = "events/sec"
-	MessagesPerSecondsUnit ThroughputUnit = "messages/sec"
-	OpsPerSecondsUnit      ThroughputUnit = "ops/sec"
-	PacketsPerSecondsUnit  ThroughputUnit = "packets/sec"
-	ReadsPerSecondsUnit    ThroughputUnit = "reads/sec"
-	RecordsPerSecondsUnit  ThroughputUnit = "records/sec"
-	RequestsPerSecondsUnit ThroughputUnit = "requests/sec"
-	RowsPerSecondsUnit     ThroughputUnit = "rows/sec"
-	WritesPerSecondsUnit   ThroughputUnit = "writes/sec"
-	AustralianDollarUnit   CurrencyUnit   = "aud"
-	CanadianDollarUnit     CurrencyUnit   = "cad"
-	SwissFrancUnit         CurrencyUnit   = "chf"
-	RenminbiUnit           CurrencyUnit   = "cny"
-	EuroUnit               CurrencyUnit   = "eur"
-	PoundUnit              CurrencyUnit   = "gbp"
-	HongKongDollarUnit     CurrencyUnit   = "hkd"
-	IndianRupeeUniit       CurrencyUnit   = "inr"
-	YenUnit                CurrencyUnit   = "jpy"
-	SouthKoreanWonUnit     CurrencyUnit   = "krw"
-	NorwegianKroneUnit     CurrencyUnit   = "nok"
-	NewZealandDollarUnit   CurrencyUnit   = "nzd"
-	SwedishKronaDollarUnit CurrencyUnit   = "sek"
-	SingaporeDollarUnit    CurrencyUnit   = "sgd"
-	USDollarUnit           CurrencyUnit   = "usd"
+	NanoSecondsUnit        TimeUnit        = "nanoseconds"
+	MicroSecondsUnit       TimeUnit        = "microseconds"
+	MilliSecondsUnit       TimeUnit        = "milliseconds"
+	SecondsUnit            TimeUnit        = "seconds"
+	MinutesUnit            TimeUnit        = "minutes"
+	HoursUnit              TimeUnit        = "hours"
+	DaysUnit               TimeUnit        = "days"
+	WeeksUnit              TimeUnit        = "weeks"
+	MonthsUnit             TimeUnit        = "months"
+	YearsUnit              TimeUnit        = "years"
+	PercentUnit            PercentageUnit  = "percent"
+	PercentDecimalUnit     PercentageUnit  = "percent-decimal"
+	DecimalUnit            string          = "decimal"
+	BinaryBitsUnit         BytesUnit       = "bits"
+	DecimalBitsUnit        BytesUnit       = "decbits"
+	BinaryBytesUnit        BytesUnit       = "bytes"
+	DecimalBytesUnit       BytesUnit       = "decbytes"
+	BitsPerSecondsUnit     ThroughputUnit  = "bits/sec"
+	BitsDecPerSecondsUnit  ThroughputUnit  = "decbits/sec"
+	BytesPerSecondsUnit    ThroughputUnit  = "bytes/sec"
+	BytesDecPerSecondsUnit ThroughputUnit  = "decbytes/sec"
+	CountsPerSecondsUnit   ThroughputUnit  = "counts/sec"
+	EventsPerSecondsUnit   ThroughputUnit  = "events/sec"
+	MessagesPerSecondsUnit ThroughputUnit  = "messages/sec"
+	OpsPerSecondsUnit      ThroughputUnit  = "ops/sec"
+	PacketsPerSecondsUnit  ThroughputUnit  = "packets/sec"
+	ReadsPerSecondsUnit    ThroughputUnit  = "reads/sec"
+	RecordsPerSecondsUnit  ThroughputUnit  = "records/sec"
+	RequestsPerSecondsUnit ThroughputUnit  = "requests/sec"
+	RowsPerSecondsUnit     ThroughputUnit  = "rows/sec"
+	WritesPerSecondsUnit   ThroughputUnit  = "writes/sec"
+	AustralianDollarUnit   CurrencyUnit    = "aud"
+	CanadianDollarUnit     CurrencyUnit    = "cad"
+	SwissFrancUnit         CurrencyUnit    = "chf"
+	RenminbiUnit           CurrencyUnit    = "cny"
+	EuroUnit               CurrencyUnit    = "eur"
+	PoundUnit              CurrencyUnit    = "gbp"
+	HongKongDollarUnit     CurrencyUnit    = "hkd"
+	IndianRupeeUniit       CurrencyUnit    = "inr"
+	YenUnit                CurrencyUnit    = "jpy"
+	SouthKoreanWonUnit     CurrencyUnit    = "krw"
+	NorwegianKroneUnit     CurrencyUnit    = "nok"
+	NewZealandDollarUnit   CurrencyUnit    = "nzd"
+	SwedishKronaDollarUnit CurrencyUnit    = "sek"
+	SingaporeDollarUnit    CurrencyUnit    = "sgd"
+	USDollarUnit           CurrencyUnit    = "usd"
+	CelsiusUnit            TemperatureUnit = "celsius"
+	FahrenheitUnit         TemperatureUnit = "fahrenheit"
+	DatetimeISOUnit        DateUnit        = "datetime-iso"
+	DatetimeUSUnit         DateUnit        = "datetime-us"
+	DatetimeLocalUnit      DateUnit        = "datetime-local"
+	DateISOUnit            DateUnit        = "date-iso"
+	DateUSUnit             DateUnit        = "date-us"
+	DateLocalUnit          DateUnit        = "date-local"
+	TimeLocalUnit          DateUnit        = "time-local"
+	TimeISOUnit            DateUnit        = "time-iso"
+	TimeUSUnit             DateUnit        = "time-us"
+	RelativeTimeUnit       DateUnit        = "relative-time"
+	UnixTimestampUnit      DateUnit        = "unix-timestamp"
+	UnixTimestampMsUnit    DateUnit        = "unix-timestamp-ms"
 )
 
 type Format struct {
@@ -121,7 +137,10 @@ func (f *Format) validate() error {
 		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),
 		string(SwissFrancUnit), string(RenminbiUnit), string(EuroUnit), string(PoundUnit),
 		string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit), string(SouthKoreanWonUnit),
-		string(NorwegianKroneUnit), string(NewZealandDollarUnit), string(SwedishKronaDollarUnit), string(SingaporeDollarUnit), string(USDollarUnit):
+		string(NorwegianKroneUnit), string(NewZealandDollarUnit), string(SwedishKronaDollarUnit), string(SingaporeDollarUnit), string(USDollarUnit),
+		string(CelsiusUnit), string(FahrenheitUnit),
+		string(DatetimeISOUnit), string(DatetimeUSUnit), string(DatetimeLocalUnit), string(DateISOUnit), string(DateUSUnit), string(DateLocalUnit),
+		string(TimeLocalUnit), string(TimeISOUnit), string(TimeUSUnit), string(RelativeTimeUnit), string(UnixTimestampUnit), string(UnixTimestampMsUnit):
 		return nil
 	default:
 		return fmt.Errorf("unknown format")
