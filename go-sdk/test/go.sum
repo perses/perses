@@ -26,8 +26,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f h1:KUppIJq7/+
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nexucis/lamenv v0.5.2 h1:tK/u3XGhCq9qIoVNcXsK9LZb8fKopm0A5weqSRvHd7M=
 github.com/nexucis/lamenv v0.5.2/go.mod h1:HusJm6ltmmT7FMG8A750mOLuME6SHCsr2iFYxp5fFi0=
-github.com/perses/common v0.31.1 h1:Rr4XfHexru+4fbovvB6uDd3nycP76JMegVTTFRkp/lM=
-github.com/perses/common v0.31.1/go.mod h1:utnPOuEk6q0JkaD9I8auzlsDLEkuLnVsNZZHsKIl9T8=
+github.com/perses/common v0.31.2 h1:klsl0KfWn6wVVG4rDJvsTvFO8Owf5ed4nj2VjbQST60=
+github.com/perses/common v0.31.2/go.mod h1:KgLB0ojBFzg93UwTNK8uAE1yuGexBiwqHiAvTFcHRDI=
 github.com/perses/plugins/prometheus v0.58.0-beta.4 h1:lbsDcJ2UumTNP9Lt7a7tAoNgw9cPXJGHL3Dx62nmR+A=
 github.com/perses/plugins/prometheus v0.58.0-beta.4/go.mod h1:7L3Fb/0fs6OEX/7IRKB2tgNMICFH6pWqrafEYMaH3G8=
 github.com/perses/plugins/staticlistvariable v0.9.0-beta.2 h1:+6MBPrSCxzUzqRaAKTrvHQfV/pnhMWnvIUUriypHWzg=
@@ -36,8 +36,8 @@ github.com/perses/plugins/table v0.13.0-beta.2 h1:cqRqU/GIdrgvWk2YNxJukZjMSc9N8U
 github.com/perses/plugins/table v0.13.0-beta.2/go.mod h1:jiopGR4M20j4sTI3pSG0naxwWrAkRzNeI2u234OZHXE=
 github.com/perses/plugins/timeserieschart v0.13.0-beta.3 h1:dq59cyhW6RnCe10dFM+/HihhiEjN35K+uGCLaGm4R84=
 github.com/perses/plugins/timeserieschart v0.13.0-beta.3/go.mod h1:yYVJEDLx+WKZ7zogV2hs4wmJlaIrPhtLqAayEWPU5yw=
-github.com/perses/spec v0.2.0-beta.6 h1:QppHTJudgwChcsp+miJRPKCe6QsIst3UwxBFuBBlWm0=
-github.com/perses/spec v0.2.0-beta.6/go.mod h1:hV2Hojz3oYF/3Trvsy4E7BE5bP1V6e1/T2ExtHwRfkw=
+github.com/perses/spec v0.2.0-beta.9 h1:pDnrlyTDHL1J2cgmaWEoUuIzYCXFRXaI0tea8Wrq2fg=
+github.com/perses/spec v0.2.0-beta.9/go.mod h1:hV2Hojz3oYF/3Trvsy4E7BE5bP1V6e1/T2ExtHwRfkw=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.23.2 h1:Je96obch5RDVy3FDMndoUsjAhG5Edi49h0RJWRi/o0o=

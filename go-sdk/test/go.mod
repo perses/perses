@@ -10,7 +10,7 @@ require (
 	github.com/perses/plugins/staticlistvariable v0.9.0-beta.2
 	github.com/perses/plugins/table v0.13.0-beta.2
 	github.com/perses/plugins/timeserieschart v0.13.0-beta.3
-	github.com/perses/spec v0.2.0-beta.6
+	github.com/perses/spec v0.2.0-beta.9
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -25,7 +25,7 @@ require (
 	github.com/muhlemmer/gu v0.3.1 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/perses/common v0.31.1 // indirect
+	github.com/perses/common v0.31.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
