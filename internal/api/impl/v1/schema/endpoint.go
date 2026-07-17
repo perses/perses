@@ -101,6 +101,9 @@ func (e *endpoint) PluginList(ctx echo.Context) error {
 		logrus.WithError(err).Error("unable to list plugin schemas")
 		return apiinterface.InternalError
 	}
+	if !list.Exists() {
+		return apiinterface.NotFoundError
+	}
 	data, err := apiCue.Marshal(list)
 	if err != nil {
 		return apiinterface.InternalError
