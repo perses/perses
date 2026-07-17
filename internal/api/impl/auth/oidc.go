@@ -416,6 +416,7 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	}, nil
 }
 

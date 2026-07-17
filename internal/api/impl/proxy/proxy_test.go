@@ -14,9 +14,15 @@
 package proxy
 
 import (
+	"context"
 	"crypto/tls"
+	"encoding/pem"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -255,4 +261,42 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestHTTPProxy_getToken_honorsTLSConfig ensures the OAuth token request is
+// performed with the transport built from the datasource secret's TLS config.
+// The token endpoint is served over TLS with a self-signed certificate, so the
+// request only succeeds when the configured transport (trusting that certificate
+// through the secret's CA) is used. If getToken stored a plain http.Client value
+// instead of a *http.Client under the oauth2.HTTPClient context key, oauth2 would
+// silently fall back to http.DefaultClient and the handshake would fail.
+func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"access_token":"secret-token","token_type":"Bearer","expires_in":3600}`))
+	}))
+	defer server.Close()
+
+	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
+
+	h := &httpProxy{
+		secret: &v1.SecretSpec{
+			TLSConfig: &secretModel.TLSConfig{
+				CA:         string(caPEM),
+				MinVersion: "TLS12",
+				MaxVersion: "TLS13",
+			},
+		},
+	}
+
+	oauth := &secretModel.OAuth{
+		ClientID:     "client-id",
+		ClientSecret: "client-secret",
+		TokenURL:     server.URL,
+	}
+
+	token, err := h.getToken(context.Background(), oauth)
+	require.NoError(t, err)
+	require.NotNil(t, token)
+	assert.Equal(t, "secret-token", token.AccessToken)
 }

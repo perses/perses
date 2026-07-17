@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/common"
 	"github.com/tidwall/gjson"
 )
 
@@ -45,6 +46,9 @@ func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
 func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
 	projectQueryParameter := query.GetProjectQueryParam()
 	if len(projectQueryParameter) > 0 {
+		if err := common.ValidateID(projectQueryParameter); err != nil {
+			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the query parameter is invalid: %s", err.Error()))
+		}
 		if len(parameters.Project) > 0 && parameters.Project != projectQueryParameter {
 			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the path (%s) and the project name in the query parameter (%s) are different", parameters.Project, projectQueryParameter))
 		}

@@ -14,12 +14,16 @@
 package auth
 
 import (
+	"context"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
 )
 
 func TestGetRedirectURI_WithAPIPrefix(t *testing.T) {
@@ -66,4 +70,36 @@ func TestDecodeOAuthState(t *testing.T) {
 
 	state = "short--"
 	assert.Equal(t, "", decodeOAuthState(state))
+}
+
+// TestOAuthRetrieveDeviceAccessToken_UsesProviderHTTPClient ensures the device code token
+// exchange goes through the provider-scoped http client (which carries the configured TLS
+// and timeout) rather than http.DefaultClient. The server is served over TLS with a test
+// certificate that only the provider client trusts, so the exchange can only succeed when
+// e.httpClient is used.
+func TestOAuthRetrieveDeviceAccessToken_UsesProviderHTTPClient(t *testing.T) {
+	const deviceCode = "device-code-123"
+	var gotGrantType, gotDeviceCode string
+	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		gotGrantType = r.PostForm.Get("grant_type")
+		gotDeviceCode = r.PostForm.Get("device_code")
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"access_token":"an-access-token","token_type":"Bearer"}`))
+	}))
+	defer srv.Close()
+
+	e := &oAuthEndpoint{
+		// srv.Client() trusts the server's test certificate, unlike http.DefaultClient.
+		httpClient: srv.Client(),
+		deviceCodeConf: oauth2.Config{
+			Endpoint: oauth2.Endpoint{TokenURL: srv.URL},
+		},
+	}
+
+	token, err := e.retrieveDeviceAccessToken(context.Background(), deviceCode)
+	require.NoError(t, err)
+	assert.Equal(t, "an-access-token", token.AccessToken)
+	assert.Equal(t, "urn:ietf:params:oauth:grant-type:device_code", gotGrantType)
+	assert.Equal(t, deviceCode, gotDeviceCode)
 }

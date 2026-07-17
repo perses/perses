@@ -297,7 +297,7 @@ func (s *completeSchema) ValidateDashboardVariables(variables []dashboard.Variab
 func (s *completeSchema) ValidateVariable(plugin plugin.Plugin, varName string) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-	if _, ok := s.devSch.panels.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
+	if _, ok := s.devSch.variables.GetWithPluginMetadata(plugin.Kind, plugin.Metadata); ok {
 		return s.devSch.validateVariable(plugin, varName)
 	}
 	return s.sch.validateVariable(plugin, varName)

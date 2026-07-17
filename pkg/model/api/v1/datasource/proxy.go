@@ -37,6 +37,27 @@ func ValidateAndExtract(pluginSpec any) (any, string, error) {
 	return finder.config, finder.foundKind, finder.err
 }
 
+func HasSecret(pluginSpec any) (bool, error) {
+	proxySpec, proxyKind, proxyErr := ValidateAndExtract(pluginSpec)
+	if proxyErr != nil {
+		return false, proxyErr
+	}
+	hasSecret := false
+	switch proxyKind {
+	case http.ProxyKindName:
+		httpConfig := proxySpec.(*http.Config)
+		if len(httpConfig.Secret) > 0 {
+			hasSecret = true
+		}
+	case sql.ProxyKindName:
+		sqlConfig := proxySpec.(*sql.Config)
+		if len(sqlConfig.Secret) > 0 {
+			hasSecret = true
+		}
+	}
+	return hasSecret, nil
+}
+
 type configFinder struct {
 	err       error
 	found     bool

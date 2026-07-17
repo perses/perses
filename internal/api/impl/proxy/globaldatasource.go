@@ -26,12 +26,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec datasource.Spec) error {
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
-	pr, err := newProxy(datasourceName, "", spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(datasourceName, name)
-	})
+	pr, err := newProxy(datasourceName, "", spec, path, e.crypto, retrieveSecret)
 	if err != nil {
 		return err
 	}
@@ -55,7 +53,12 @@ func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
 		dtsName = body.Spec.Display.Name
 	}
 
-	return e.proxyGlobalDatasource(ctx, dtsName, body.Spec)
+	return e.proxyGlobalDatasource(ctx, dtsName, body.Spec, func(name string) (*v1.SecretSpec, error) {
+		if err := e.checkPermission(ctx, v1.WildcardProject, role.GlobalSecretScope, role.ReadAction); err != nil {
+			return nil, err
+		}
+		return e.getGlobalSecret(dtsName, name)
+	})
 }
 
 func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
@@ -69,7 +72,9 @@ func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyGlobalDatasource(ctx, dts.Metadata.Name, dts.Spec)
+	return e.proxyGlobalDatasource(ctx, dts.Metadata.Name, dts.Spec, func(name string) (*v1.SecretSpec, error) {
+		return e.getGlobalSecret(dtsName, name)
+	})
 }
 
 func (e *endpoint) getGlobalDatasource(name string) (*v1.GlobalDatasource, error) {

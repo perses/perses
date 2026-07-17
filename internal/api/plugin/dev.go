@@ -33,7 +33,7 @@ func (p *pluginFile) LoadDevPlugin(plugins []v1.PluginInDevelopment) error {
 		}
 		npmPackageData, readErr := ReadPackageFromNetwork(devURL, plg.Name)
 		if readErr != nil {
-			return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin package: %s", err))
+			return apiinterface.HandleBadRequestError(fmt.Sprintf("failed to load plugin package: %s", readErr))
 		}
 		pluginModule := v1.PluginModule{
 			Kind: v1.PluginModuleKind,
