@@ -5,9 +5,9 @@ go 1.26.2
 replace github.com/perses/perses => ../../../../../../../ // Use current version
 
 require (
-	github.com/perses/perses v0.54.0-beta.2
-	github.com/perses/plugins/prometheus v0.58.0-beta.4
-	github.com/perses/plugins/timeserieschart v0.13.0-beta.3
+	github.com/perses/perses v0.54.0-beta.3
+	github.com/perses/plugins/prometheus v0.58.0-rc.0
+	github.com/perses/plugins/timeserieschart v0.13.0-rc.0
 	github.com/perses/spec v0.2.0-beta.9
 )
 
@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.70.0 // indirect
 	github.com/prometheus/procfs v0.21.0 // indirect
-	github.com/zitadel/oidc/v3 v3.47.7 // indirect
+	github.com/zitadel/oidc/v3 v3.47.9 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/net v0.56.0 // indirect
