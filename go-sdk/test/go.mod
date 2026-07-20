@@ -1,6 +1,6 @@
 module dac-test
 
-go 1.26.2
+go 1.26.5
 
 replace github.com/perses/perses => ../../ // Use current version
 
