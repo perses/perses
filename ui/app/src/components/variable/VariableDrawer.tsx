@@ -31,6 +31,9 @@ interface VariableDrawerProps<T extends VariableType> extends DrawerProps<T> {
   variable: T;
 }
 
+// Stable reference to avoid re-creating the array on each render
+const INITIAL_VARIABLE_DEFINITIONS: VariableDefinition[] = [];
+
 export function VariableDrawer<T extends VariableType>({
   variable,
   action,
@@ -76,7 +79,7 @@ export function VariableDrawer<T extends VariableType>({
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-                <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
+                <VariableProviderWithQueryParams initialVariableDefinitions={INITIAL_VARIABLE_DEFINITIONS}>
                   <VariableEditorForm
                     initialVariableDefinition={variableDef}
                     action={action}

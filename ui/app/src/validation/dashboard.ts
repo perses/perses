@@ -92,6 +92,6 @@ export function useDashboardValidationSchema(projectName?: string): DashboardVal
       })
     );
 
-    return { schema: refinedSchema, isSchemaLoading: true, hasSchemaError: false };
+    return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
   }, [dashboards, isDashboardsLoading, isError]);
 }

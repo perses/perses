@@ -38,13 +38,12 @@ export function useEphemeralDashboardValidationSchema(projectName?: string): z.Z
   return useMemo(() => {
     return createEphemeralDashboardDialogValidationSchema.refine(
       (schema) => {
-        return (
-          (dashboards.data ?? []).filter(
-            (dashboard) =>
-              dashboard.metadata.project === schema.projectName &&
-              dashboard.metadata.name === generateMetadataName(schema.dashboardName) &&
-              dashboard.spec.ttl === schema.ttl
-          ).length === 0
+        // some() short-circuits on the first match instead of building a filtered array
+        return !(dashboards.data ?? []).some(
+          (dashboard) =>
+            dashboard.metadata.project === schema.projectName &&
+            dashboard.metadata.name === generateMetadataName(schema.dashboardName) &&
+            dashboard.spec.ttl === schema.ttl
         );
       },
       (schema) => ({

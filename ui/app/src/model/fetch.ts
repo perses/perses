@@ -21,7 +21,17 @@ function deleteCookie(name: string): void {
   document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 }
 
+// Guard to ensure the fetch proxy is only installed once, even if
+// enableRefreshFetch() is called multiple times (e.g. on every render of a
+// provider). Without it, each call would wrap the previous proxy, stacking
+// refresh logic indefinitely.
+let isRefreshFetchEnabled = false;
+
 export function enableRefreshFetch(): void {
+  if (isRefreshFetchEnabled) {
+    return;
+  }
+  isRefreshFetchEnabled = true;
   globalThis.fetch = new Proxy(globalThis.fetch, {
     apply: async function (target, that, args: Parameters<typeof globalThis.fetch>): Promise<Response> {
       return target

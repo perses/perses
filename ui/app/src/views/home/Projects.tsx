@@ -34,6 +34,23 @@ import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/pr
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 /**
+ * Colors used for decorative project avatars. Hoisted to module scope to avoid
+ * re-allocating the array on every getProjectColor call.
+ */
+const PROJECT_COLORS: string[] = [
+  '#3B82F6',
+  '#8B5CF6',
+  '#10B981',
+  '#F97316',
+  '#EC4899',
+  '#06B6D4',
+  '#6366F1',
+  '#F43F5E',
+  '#14B8A6',
+  '#F59E0B',
+];
+
+/**
  * Generate a color for a project based on its name.
  * Uses a deterministic hash function to consistently assign colors to projects.
  * Note: Hardcoded colors are used here for decorative project avatars to ensure
@@ -41,30 +58,18 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
  * to the general rule of using theme colors.
  */
 function getProjectColor(projectName: string): string {
-  const colors: string[] = [
-    '#3B82F6',
-    '#8B5CF6',
-    '#10B981',
-    '#F97316',
-    '#EC4899',
-    '#06B6D4',
-    '#6366F1',
-    '#F43F5E',
-    '#14B8A6',
-    '#F59E0B',
-  ];
   let hash = 0;
   for (let i = 0; i < projectName.length; i++) {
     hash = projectName.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % colors.length;
+  const index = Math.abs(hash) % PROJECT_COLORS.length;
   // Index is guaranteed to be within bounds due to modulo operation
-  const color = colors[index];
+  const color = PROJECT_COLORS[index];
   if (color) {
     return color;
   }
   // Fallback to first color (should never happen, but satisfies TypeScript)
-  return colors[0]!;
+  return PROJECT_COLORS[0]!;
 }
 
 interface ProjectCardProps {

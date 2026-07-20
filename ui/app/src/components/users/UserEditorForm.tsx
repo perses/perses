@@ -39,8 +39,9 @@ export function UserEditorForm({
   const nativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
+  // Deep clone to avoid mutating the resource owned by the parent (initialValue.spec is nested)
   const initialUserClean: UserResource = useMemo(() => {
-    const result = { ...initialValue };
+    const result = structuredClone(initialValue);
     if (result.spec.nativeProvider?.password) result.spec.nativeProvider.password = '';
     if (result.spec.oauthProviders === undefined) result.spec.oauthProviders = [];
     return result;
@@ -57,7 +58,9 @@ export function UserEditorForm({
     defaultValues: initialUserClean,
   });
 
-  const { spec } = form.watch();
+  // Only subscribe to the part of the form state used during render,
+  // instead of re-rendering on every change of every field
+  const nativeProvider = form.watch('spec.nativeProvider');
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -182,7 +185,7 @@ export function UserEditorForm({
           <Typography variant="h1" mb={2}>
             Native Provider
           </Typography>
-          {spec.nativeProvider?.password === undefined ? (
+          {nativeProvider?.password === undefined ? (
             <IconButton
               disabled={isReadonly || action === 'read'}
               style={{ width: 'fit-content', height: 'fit-content' }}

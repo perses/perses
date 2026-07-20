@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, ReactElement, useMemo } from 'react';
+import { DataGrid, GridRow, GridColumnHeaders, GridRowParams } from '@mui/x-data-grid';
+import { memo, ReactElement, useCallback, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import {
@@ -38,6 +38,17 @@ function NoUserRowOverlay(): ReactElement {
   return <NoDataOverlay resource="users" />;
 }
 
+const getRowId = (row: Row): string => row.name;
+
+// Stable slots objects: DataGrid is memoized, so recreating these on each render would break its memoization
+const SLOTS = {
+  toolbar: GridToolbar,
+  row: MemoizedRow,
+  columnHeaders: MemoizedColumnHeaders,
+  noRowsOverlay: NoUserRowOverlay,
+};
+const SLOTS_HIDDEN_TOOLBAR = { noRowsOverlay: NoUserRowOverlay };
+
 export function UserDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
 
@@ -49,27 +60,23 @@ export function UserDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactE
     } as GridInitialStateCommunity;
   }, [initialState]);
 
+  const handleRowClick = useCallback(
+    (params: GridRowParams<Row>): void => {
+      onRowClick(params.row.name);
+    },
+    [onRowClick]
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
       <DataGrid
         disableRowSelectionOnClick
-        onRowClick={(params) => {
-          onRowClick(params.row.name);
-        }}
+        onRowClick={handleRowClick}
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.name}
+        getRowId={getRowId}
         loading={isLoading}
-        slots={
-          hideToolbar
-            ? { noRowsOverlay: NoUserRowOverlay }
-            : {
-                toolbar: GridToolbar,
-                row: MemoizedRow,
-                columnHeaders: MemoizedColumnHeaders,
-                noRowsOverlay: NoUserRowOverlay,
-              }
-        }
+        slots={hideToolbar ? SLOTS_HIDDEN_TOOLBAR : SLOTS}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
         slotProps={DATA_GRID_SLOT_PROPS}
