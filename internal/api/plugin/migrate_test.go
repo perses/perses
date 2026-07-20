@@ -32,16 +32,57 @@ import (
 const testDataFolder = "testdata"
 
 // LoadTestPlugins is a helper function that loads the dummy plugins from testdata
-func LoadTestPlugins() Plugin {
+func loadTestPlugins(path string) Plugin {
 	cfg := config.Plugin{
-		Path:        filepath.Join("migrate", testDataFolder, "plugins"),
-		ArchivePath: "unused",
+		Path:         path,
+		ArchivePaths: []string{"unused"},
 	}
 	pluginService := New(cfg)
 	if err := pluginService.Load(); err != nil {
 		logrus.Fatal(err)
 	}
 	return pluginService
+}
+
+func loadDefaultTestPlugins() Plugin {
+	return loadTestPlugins(filepath.Join("migrate", testDataFolder, "plugins"))
+}
+
+// TestNoRegMigration is loading specific plugin and actual production plugins to ensure it is still working
+func TestNoRegMigration(t *testing.T) {
+	testSuite := []struct {
+		title                string
+		pluginPath           string
+		grafanaDashboardFile string
+		persesDashboardFile  string
+	}{
+		{
+			// When moving from cue v0.16 to v0.17, cueValue.MarshalJSON did not work anymore, and somehow it happens when using the timeseriesChart.
+			// This test is ensuring the issue https://github.com/perses/perses/issues/4272 won't happen again.
+			title:                "Cue marshalling",
+			pluginPath:           filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "plugins"),
+			grafanaDashboardFile: filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-grafana.json"),
+			persesDashboardFile:  filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-perses.json"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			pl := loadTestPlugins(test.pluginPath)
+			input := testUtils.ReadFile(test.grafanaDashboardFile)
+			expected := testUtils.ReadFile(test.persesDashboardFile)
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+
+			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			output := testUtils.JSONMarshalStrict(persesDashboard)
+			assert.JSONEq(t, string(expected), string(output))
+		})
+	}
 }
 
 func TestMig_Migrate(t *testing.T) {
@@ -77,7 +118,7 @@ func TestMig_Migrate(t *testing.T) {
 		},
 	}
 
-	pl := LoadTestPlugins()
+	pl := loadDefaultTestPlugins()
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -98,7 +139,7 @@ func TestMig_Migrate(t *testing.T) {
 }
 
 func TestMig_MigrateTags(t *testing.T) {
-	pl := LoadTestPlugins()
+	pl := loadDefaultTestPlugins()
 	grafanaDashboard := &migrate.SimplifiedDashboard{
 		UID:   "dashboard-with-tags",
 		Title: "Dashboard with tags",
@@ -111,7 +152,7 @@ func TestMig_MigrateTags(t *testing.T) {
 }
 
 func TestMigrateDashboardLinks(t *testing.T) {
-	pl := LoadTestPlugins()
+	pl := loadDefaultTestPlugins()
 
 	testCases := []struct {
 		name          string
