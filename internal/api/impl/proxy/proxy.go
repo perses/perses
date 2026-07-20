@@ -294,6 +294,20 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return apiinterface.InternalError
 	}
 
+	if len(h.config.DropHeaders) > 0 {
+		for _, headerToDrop := range h.config.DropHeaders {
+			req.Header.Del(headerToDrop)
+		}
+	}
+
+	if len(h.config.AllowHeaders) > 0 {
+		headerKept := make(http.Header)
+		for _, header := range h.config.AllowHeaders {
+			headerKept.Add(header, req.Header.Get(header))
+		}
+		req.Header = headerKept
+	}
+
 	// redirect the request to the datasource
 	req.URL.Path = h.path
 	h.logWithDefaultEntry().WithField("path", h.path).Debug("request will be redirected to datasource")
