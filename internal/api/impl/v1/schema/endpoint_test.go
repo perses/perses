@@ -56,6 +56,32 @@ func (s *stubSchema) GenerateDashboardSchema() (cue.Value, error) {
 	return cuecontext.New().CompileString("{}"), nil
 }
 
+func (s *stubSchema) GetAllPluginSchemas() (cue.Value, error) {
+	schemas := s.GetAllSchemas()
+	if len(schemas) == 0 {
+		return cue.Value{}, nil
+	}
+	ctx := cuecontext.New()
+	list, err := pluginschema.GenerateSchemaDefinitions(ctx, schemas)
+	if err != nil {
+		return cue.Value{}, err
+	}
+	return list, nil
+}
+
+func (s *stubSchema) GetPluginSchema(name, version, registry string) (cue.Value, bool, error) {
+	ls, ok := s.GetSchema(name, version, registry)
+	if !ok {
+		return cue.Value{}, false, nil
+	}
+	ctx := cuecontext.New()
+	list, err := pluginschema.GenerateSchemaDefinitions(ctx, []pluginschema.LoadSchema{ls})
+	if err != nil {
+		return cue.Value{}, false, err
+	}
+	return list, true, err
+}
+
 // plugin service stub
 
 // stubPluginService implements the pluginpkg.Plugin interface minimally.
@@ -113,11 +139,11 @@ func TestDashboardSchemaWithNoPlugins(t *testing.T) {
 func TestPluginListWithNoSchemas(t *testing.T) {
 	ep := newEndpointWithSchemas(nil)
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins")
-
 	err := ep.PluginList(ctx)
-	require.NoError(t, err)
+
+	require.Error(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "{}", rec.Body.String())
+	assert.Equal(t, "", rec.Body.String())
 }
 
 // PluginDefinition tests
