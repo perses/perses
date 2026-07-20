@@ -25,6 +25,15 @@ import (
 
 const defaultFileDBFolder = "./local_db"
 
+// defaultSQLConnMaxLifetime is the default maximum lifetime of a SQL connection.
+// It is intentionally kept short (shorter than the usual server wait_timeout) so
+// that connections are retired before the server closes them, which otherwise
+// leads to stale connections being handed out (e.g. to the health check ping).
+const defaultSQLConnMaxLifetime = 3 * time.Minute
+
+// defaultSQLConnMaxIdleTime is the default maximum idle time of a SQL connection.
+const defaultSQLConnMaxIdleTime = time.Minute
+
 type FileExtension string
 
 const (
@@ -89,12 +98,14 @@ type SQL struct {
 	AllowCleartextPasswords bool `json:"allow_cleartext_passwords" yaml:"allow_cleartext_passwords"`
 	// Allows fallback to unencrypted connection if server does not support TLS
 	AllowFallbackToPlaintext bool `json:"allow_fallback_to_plaintext" yaml:"allow_fallback_to_plaintext"`
-	// Allows the native password authentication method
-	AllowNativePasswords bool `json:"allow_native_passwords" yaml:"allow_native_passwords"`
+	// Allows the native password authentication method.
+	// When unset, the driver default (true) is used.
+	AllowNativePasswords *bool `json:"allow_native_passwords,omitempty" yaml:"allow_native_passwords,omitempty"`
 	// Allows the old insecure password method
 	AllowOldPasswords bool `json:"allow_old_passwords" yaml:"allow_old_passwords"`
-	// Check connections for liveness before using them
-	CheckConnLiveness bool `json:"check_conn_liveness" yaml:"check_conn_liveness"`
+	// Check connections for liveness before using them.
+	// When unset, the driver default (true) is used.
+	CheckConnLiveness *bool `json:"check_conn_liveness,omitempty" yaml:"check_conn_liveness,omitempty"`
 	// Return number of matching rows instead of rows changed
 	ClientFoundRows bool `json:"client_found_rows" yaml:"client_found_rows"`
 	// Prepend table alias to column names
@@ -108,6 +119,19 @@ type SQL struct {
 	// Reject read-only connections
 	RejectReadOnly bool `json:"reject_read_only" yaml:"reject_read_only"`
 	CaseSensitive  bool `json:"case_sensitive" yaml:"case_sensitive"`
+	// ConnMaxLifetime is the maximum amount of time a connection may be reused.
+	// It should be kept shorter than the server's wait_timeout to avoid reusing
+	// connections that the server has already closed. Defaults to 3 minutes.
+	ConnMaxLifetime common.Duration `json:"conn_max_lifetime,omitempty" yaml:"conn_max_lifetime,omitempty"`
+	// ConnMaxIdleTime is the maximum amount of time a connection may be idle
+	// before it is closed. Defaults to 1 minute.
+	ConnMaxIdleTime common.Duration `json:"conn_max_idle_time,omitempty" yaml:"conn_max_idle_time,omitempty"`
+	// MaxOpenConns is the maximum number of open connections to the database.
+	// A value <= 0 means unlimited (the Go default).
+	MaxOpenConns int `json:"max_open_conns,omitempty" yaml:"max_open_conns,omitempty"`
+	// MaxIdleConns is the maximum number of connections in the idle connection
+	// pool. A value <= 0 keeps the Go default (2).
+	MaxIdleConns int `json:"max_idle_conns,omitempty" yaml:"max_idle_conns,omitempty"`
 }
 
 func (s *SQL) Verify() error {
@@ -147,6 +171,12 @@ func (s *SQL) Verify() error {
 			return err
 		}
 		s.Addr = secret.Hidden(data)
+	}
+	if s.ConnMaxLifetime == 0 {
+		s.ConnMaxLifetime = common.Duration(defaultSQLConnMaxLifetime)
+	}
+	if s.ConnMaxIdleTime == 0 {
+		s.ConnMaxIdleTime = common.Duration(defaultSQLConnMaxIdleTime)
 	}
 	return nil
 }

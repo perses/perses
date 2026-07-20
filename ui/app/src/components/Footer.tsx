@@ -63,7 +63,6 @@ function VersionInfo({
 }
 
 export default function Footer(): ReactElement {
-
   const { data, isLoading } = useHealth();
 
   return (
