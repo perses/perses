@@ -167,13 +167,12 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{
-				User:                 "user",
-				Password:             "password",
-				Net:                  "tcp",
-				Addr:                 "localhost:3306",
-				DBName:               "perses",
-				AllowNativePasswords: true,
-				CaseSensitive:        true,
+				User:          "user",
+				Password:      "password",
+				Net:           "tcp",
+				Addr:          "localhost:3306",
+				DBName:        "perses",
+				CaseSensitive: true,
 			},
 		}
 	} else {

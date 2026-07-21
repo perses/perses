@@ -96,31 +96,46 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		}
 	} else if conf.SQL != nil {
 		c := conf.SQL
-		mysqlConfig := mysql.Config{
-			User:                     string(c.User),
-			Passwd:                   string(c.Password),
-			Net:                      c.Net,
-			Addr:                     string(c.Addr),
-			DBName:                   c.DBName,
-			Collation:                c.Collation,
-			Loc:                      c.Loc,
-			MaxAllowedPacket:         c.MaxAllowedPacket,
-			ServerPubKey:             c.ServerPubKey,
-			Timeout:                  time.Duration(c.Timeout),
-			ReadTimeout:              time.Duration(c.ReadTimeout),
-			WriteTimeout:             time.Duration(c.WriteTimeout),
-			AllowAllFiles:            c.AllowAllFiles,
-			AllowCleartextPasswords:  c.AllowCleartextPasswords,
-			AllowFallbackToPlaintext: c.AllowFallbackToPlaintext,
-			AllowNativePasswords:     c.AllowNativePasswords,
-			AllowOldPasswords:        c.AllowOldPasswords,
-			CheckConnLiveness:        c.CheckConnLiveness,
-			ClientFoundRows:          c.ClientFoundRows,
-			ColumnsWithAlias:         c.ColumnsWithAlias,
-			InterpolateParams:        c.InterpolateParams,
-			MultiStatements:          c.MultiStatements,
-			ParseTime:                c.ParseTime,
-			RejectReadOnly:           c.RejectReadOnly,
+		// Start from the driver's default config (via NewConfig) rather than a bare
+		// struct literal, so that sane defaults such as CheckConnLiveness=true,
+		// AllowNativePasswords=true, Loc=time.UTC and MaxAllowedPacket are preserved
+		// unless explicitly overridden.
+		mysqlConfig := mysql.NewConfig()
+		mysqlConfig.User = string(c.User)
+		mysqlConfig.Passwd = string(c.Password)
+		mysqlConfig.Net = c.Net
+		mysqlConfig.Addr = string(c.Addr)
+		mysqlConfig.DBName = c.DBName
+		if c.Collation != "" {
+			mysqlConfig.Collation = c.Collation
+		}
+		if c.Loc != nil {
+			mysqlConfig.Loc = c.Loc
+		}
+		if c.MaxAllowedPacket != 0 {
+			mysqlConfig.MaxAllowedPacket = c.MaxAllowedPacket
+		}
+		mysqlConfig.ServerPubKey = c.ServerPubKey
+		mysqlConfig.Timeout = time.Duration(c.Timeout)
+		mysqlConfig.ReadTimeout = time.Duration(c.ReadTimeout)
+		mysqlConfig.WriteTimeout = time.Duration(c.WriteTimeout)
+		mysqlConfig.AllowAllFiles = c.AllowAllFiles
+		mysqlConfig.AllowCleartextPasswords = c.AllowCleartextPasswords
+		mysqlConfig.AllowFallbackToPlaintext = c.AllowFallbackToPlaintext
+		mysqlConfig.AllowOldPasswords = c.AllowOldPasswords
+		mysqlConfig.ClientFoundRows = c.ClientFoundRows
+		mysqlConfig.ColumnsWithAlias = c.ColumnsWithAlias
+		mysqlConfig.InterpolateParams = c.InterpolateParams
+		mysqlConfig.MultiStatements = c.MultiStatements
+		mysqlConfig.ParseTime = c.ParseTime
+		mysqlConfig.RejectReadOnly = c.RejectReadOnly
+		// AllowNativePasswords and CheckConnLiveness default to true via NewConfig.
+		// Only override them when the user explicitly set a value in the config.
+		if c.AllowNativePasswords != nil {
+			mysqlConfig.AllowNativePasswords = *c.AllowNativePasswords
+		}
+		if c.CheckConnLiveness != nil {
+			mysqlConfig.CheckConnLiveness = *c.CheckConnLiveness
 		}
 
 		// (OPTIONAL) Configure TLS
@@ -141,6 +156,17 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		db, err := sql.Open("mysql", mysqlConfig.FormatDSN())
 		if err != nil {
 			return nil, err
+		}
+		// Configure the connection pool. Retiring connections before the server's
+		// wait_timeout prevents stale connections from being reused, which is the
+		// main cause of intermittent health check ping failures.
+		db.SetConnMaxLifetime(time.Duration(c.ConnMaxLifetime))
+		db.SetConnMaxIdleTime(time.Duration(c.ConnMaxIdleTime))
+		if c.MaxOpenConns > 0 {
+			db.SetMaxOpenConns(c.MaxOpenConns)
+		}
+		if c.MaxIdleConns > 0 {
+			db.SetMaxIdleConns(c.MaxIdleConns)
 		}
 		client = &databaseSQL.DAO{
 			DB:            db,
