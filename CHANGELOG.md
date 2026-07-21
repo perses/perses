@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.54.0-rc.1 / 2026-07-21
+
+This release candidate is mainly here to revert the schema endpoint feature that was introduced in 0.54.0-rc.0.
+We revert it because it implies to upgrade cuelang to v0.17 which includes some regression that impacts the dashboard migration.
+See https://github.com/perses/perses/issues/4272 for more informations.
+
+- [BreakingChange] Revert " Exposing complete dashboard and plugin CUE schema endpoint" (#4279)
+- [BUGFIX] Fix health error with SQL database (#4274)
+
 ## 0.54.0-rc.0 / 2026-07-16
 
 ### Core & UI

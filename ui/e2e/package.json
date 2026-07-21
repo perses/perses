@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/e2e",
-  "version": "0.54.0-rc.0",
+  "version": "0.54.0-rc.1",
   "private": true,
   "scripts": {
     "e2e": "npm run e2e:local",
@@ -19,7 +19,7 @@
     "date-fns-tz": "^3.2.0"
   },
   "devDependencies": {
-    "@perses-dev/internal-utils": "0.54.0-rc.0",
+    "@perses-dev/internal-utils": "0.54.0-rc.1",
     "@playwright/test": "^1.54.2",
     "chokidar-cli": "^3.0.0",
     "eslint-plugin-playwright": "^0.11.2",

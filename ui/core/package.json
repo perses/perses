@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/core",
-  "version": "0.54.0-rc.0",
+  "version": "0.54.0-rc.1",
   "description": "Core functionality consumed by both the Perses UI and plugins",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -34,7 +34,7 @@
     "mathjs": "^10.6.4",
     "numbro": "^2.3.6",
     "zod": "^3.21.4",
-    "@perses-dev/spec": "0.2.0-beta.6"
+    "@perses-dev/spec": "0.2.0-beta.9"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16"
