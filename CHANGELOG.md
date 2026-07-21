@@ -4,10 +4,17 @@
 
 This release candidate is mainly here to revert the schema endpoint feature that was introduced in 0.54.0-rc.0.
 We revert it because it implies to upgrade cuelang to v0.17 which includes some regression that impacts the dashboard migration.
-See https://github.com/perses/perses/issues/4272 for more informations.
+See https://github.com/perses/perses/issues/4272 for more information.
+
+### Core & UI
 
 - [BreakingChange] Revert " Exposing complete dashboard and plugin CUE schema endpoint" (#4279)
 - [BUGFIX] Fix health error with SQL database (#4274)
+
+### Plugins improvements
+
+- [BUGFIX] Table: use last data point instead of first in buildRawTableData (perses/plugins#736)
+- [BUGFIX] Loki: dispatch to instant query when context.mode is instant (perses/plugins#737)
 
 ## 0.54.0-rc.0 / 2026-07-16
 
