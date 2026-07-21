@@ -14,7 +14,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@perses-dev/dashboards": "^0.54.0-rc.0",
+    "@perses-dev/dashboards": "^0.54.0-rc.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },
