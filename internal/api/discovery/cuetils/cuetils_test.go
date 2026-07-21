@@ -22,7 +22,6 @@ import (
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/datasource/proxy/http"
-	specPlugin "github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -122,7 +121,7 @@ func TestNewFromSchema(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetInstance(specPlugin.KindDatasource, tt.schema)
+			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -162,7 +161,7 @@ spec:
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := cuecontext.New()
-			instance, err := sch.GetInstance(specPlugin.KindDatasource, tt.schema)
+			instance, err := sch.GetDatasourceSchema(tt.schema)
 			if err != nil {
 				t.Fatal(err)
 			}
