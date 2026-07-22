@@ -16,6 +16,9 @@ CUE                   ?= cue
 GOCI                  ?= golangci-lint
 GOFMT                 ?= $(GO)fmt
 MDOX                  ?= mdox
+# docs/ is imported by perses/website and rendered with MkDocs Material.
+# mdox formats GitHub Flavored Markdown and can break MkDocs-specific syntax.
+MDOX_MD_FILES_CMD     = find . -name '*.md' -not -path "./docs/*" -not -path "./.github/perses-ci/*" -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -print
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
 GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)
@@ -56,9 +59,8 @@ checkformat:
 
 .PHONY: checkdocs
 checkdocs:
-	@echo ">> Check markdown docs format"
-	@make fmt-docs
-	@git diff --exit-code -- *.md
+	@echo ">> Check mdox-managed markdown documents"
+	$(MDOX) fmt --check --soft-wraps -l $$($(MDOX_MD_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: checkunused
 checkunused:
@@ -95,8 +97,8 @@ fmt:
 
 .PHONY: fmt-docs
 fmt-docs:
-	@echo ">> Format markdown documents"
-	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -print) --links.validate.config-file=./.mdox.validate.yaml
+	@echo ">> Format mdox-managed markdown documents"
+	$(MDOX) fmt --soft-wraps -l $$($(MDOX_MD_FILES_CMD)) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
 cue-eval:
