@@ -11,8 +11,12 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 ### Upgrading from v0.53.0 to v0.54.0
 
-No breaking changes have been introduced in this version. Therefore, you can upgrade to this version without any special
-action.
+#### SQL Database default configuration changes
+
+The following SQL database config field default value changed to be aligned with driver: https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L97
+
+allow_native_passwords: falseto true
+check_conn_liveness: falseto true
 
 ### Upgrading from v0.52.0 to v0.53.0
 
