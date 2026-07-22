@@ -631,6 +631,10 @@ See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 ```yaml
 interval: <duration> | default = 1h # Optional
 
+# Can be used to update provisioning on change instead of waiting for the configured interval.
+# Interval is still used to reconcile the state.
+enable_watch: <boolean> | default = false # Optional
+
 # List of folder that Perses will read periodically. 
 # Every known data found in the different folders will be injected in the database regardless what exist.
 folders:
