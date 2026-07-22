@@ -18,6 +18,10 @@ updates:
       # Upgrading goreleaser to the latest version is updating the package github.com/charmbracelet/x/ansi to a version which is not compatible with the version required by github.com/charmbracelet/x/cellbuf.
       # So until these dependencies are stabilized, we ignore updates for goreleaser.
       - dependency-name: "github.com/goreleaser/goreleaser/v2"
+      # Ignore updates for cuelang.org/go because there is a regression between v0.16 and v0.17 which is breaking the migration.
+      # Until this is fixed, we cannot upgrade cuelang.org/go to v0.17 and we will ignore updates for this dependency.
+      # See https://github.com/perses/perses/issues/4272 for more context
+      - dependency-name: "cuelang.org/go"
     # Raise all gomod pull requests with custom labels
     labels:
       - "dependencies"
