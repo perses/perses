@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -46,7 +47,8 @@ func TestProvisioningSkipsResourcesInUnknownProject(t *testing.T) {
 		writeEntityToFile(t, filepath.Join(provisioningDir, "valid.json"), roleInExistingProject)
 		writeEntityToFile(t, filepath.Join(provisioningDir, "orphan.json"), roleInUnknownProject)
 
-		if err := provisioning.New(manager.Service(), []string{provisioningDir}, true).Execute(context.Background(), func() {}); err != nil {
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+		if err := task.Execute(context.Background(), func() {}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -75,7 +77,8 @@ func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
 		writeEntityToFile(t, filepath.Join(provisioningDir, "a_role.json"), roleInProject)
 		writeEntityToFile(t, filepath.Join(provisioningDir, "z_project.json"), project)
 
-		if err := provisioning.New(manager.Service(), []string{provisioningDir}, true).Execute(context.Background(), func() {}); err != nil {
+		task, _ := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+		if err := task.Execute(context.Background(), func() {}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -86,6 +89,41 @@ func TestProvisioningCreatesProjectBeforeItsResources(t *testing.T) {
 		assert.NoError(t, err, "role must be provisioned once its project is created in the same batch")
 
 		return []modelAPI.Entity{project, roleInProject}
+	})
+}
+
+func TestProvisioningWatcher(t *testing.T) {
+	e2eframework.WithServer(t, func(_ *httptest.Server, _ *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		provisioningDir := t.TempDir()
+		task, watcher := provisioning.New(manager.Service(), []string{provisioningDir}, true)
+
+		// Initial load like core.go does at startup.
+		if err := task.Execute(context.Background(), func() {}); err != nil {
+			t.Fatal(err)
+		}
+
+		// Start the watcher in the background.
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		go func() {
+			_ = watcher.Execute(ctx, cancel)
+		}()
+
+		// Wait a bit for the watcher to settle and register its fs watchers.
+		time.Sleep(1 * time.Second)
+
+		// Drop a new file to trigger the watcher.
+		project := e2eframework.NewProject("watcherproject")
+		writeEntityToFile(t, filepath.Join(provisioningDir, "project.json"), project)
+
+		// Wait for debounce + some margin. watchDebounce is 500ms.
+		time.Sleep(2 * time.Second)
+
+		// The project should be provisioned.
+		_, err := manager.Persistence().GetProject().Get("watcherproject")
+		assert.NoError(t, err, "project should be provisioned by the watcher")
+
+		return []modelAPI.Entity{project}
 	})
 }
 

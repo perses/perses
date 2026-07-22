@@ -57,8 +57,11 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	if len(conf.Provisioning.Folders) > 0 {
-		provisioningTask := provisioning.New(dependencyManager.Service(), conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
+		provisioningTask, provisioningWatcher := provisioning.New(dependencyManager.Service(), conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
+		if conf.Provisioning.EnableWatch {
+			runner.WithTasks(provisioningWatcher)
+		}
 	}
 	if len(conf.Datasource.Global.Discovery) > 0 {
 		datasourceDiscoveryTasks, sdErr := discovery.New(conf, dependencyManager.Service(), persesDAO.IsCaseSensitive())
