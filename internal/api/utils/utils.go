@@ -49,6 +49,7 @@ const (
 	PathProject            = "projects"
 	PathRole               = "roles"
 	PathRoleBinding        = "rolebindings"
+	PathSchemas            = "schemas"
 	PathSecret             = "secrets"
 	PathUnsaved            = "unsaved"
 	PathUser               = "users"
