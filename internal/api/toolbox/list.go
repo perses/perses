@@ -16,6 +16,7 @@ package toolbox
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/async"
@@ -46,6 +47,9 @@ func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
 func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
 	projectQueryParameter := query.GetProjectQueryParam()
 	if len(projectQueryParameter) > 0 {
+		if !t.caseSensitive {
+			projectQueryParameter = strings.ToLower(projectQueryParameter)
+		}
 		if err := common.ValidateID(projectQueryParameter); err != nil {
 			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the query parameter is invalid: %s", err.Error()))
 		}
