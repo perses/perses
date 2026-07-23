@@ -63,9 +63,9 @@ export interface DatabaseSQL {
   allow_all_files: boolean;
   allow_cleartext_passwords: boolean;
   allow_fallback_to_plaintext: boolean;
-  allow_native_passwords: boolean;
+  allow_native_passwords?: boolean;
   allow_old_passwords: boolean;
-  check_conn_liveness: boolean;
+  check_conn_liveness?: boolean;
   client_found_rows: boolean;
   columns_with_alias: boolean;
   interpolate_params: boolean;
@@ -73,6 +73,10 @@ export interface DatabaseSQL {
   parse_time: boolean;
   reject_read_only: boolean;
   case_sensitive: boolean;
+  conn_max_lifetime?: string;
+  conn_max_idle_time?: string;
+  max_open_conns?: number;
+  max_idle_conns?: number;
 }
 
 export interface Database {

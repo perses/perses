@@ -72,6 +72,7 @@ type JWT interface {
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTClaims, error)
+	GetExpiresIn() int64
 }
 
 type jwtImpl struct {
@@ -171,4 +172,9 @@ func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTClaims, error) {
 		return nil, err
 	}
 	return parsedToken.Claims.(*JWTClaims), nil
+}
+
+// GetExpiresIn returns the number of seconds until the access token expires.
+func (j *jwtImpl) GetExpiresIn() int64 {
+	return int64(j.accessTokenTTL.Seconds())
 }

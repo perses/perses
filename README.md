@@ -7,7 +7,6 @@
 [![build](https://github.com/perses/perses/workflows/ci/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Aci+branch%3Amain)
 [![go](https://github.com/perses/perses/workflows/go/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3Ago+branch%3Amain)
 [![react](https://github.com/perses/perses/workflows/react/badge.svg)](https://github.com/perses/perses/actions?query=workflow%3AReact+branch%3Amain)
-[![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9410/badge)](https://www.bestpractices.dev/projects/9410)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/perses/perses/badge)](https://securityscorecards.dev/viewer/?uri=github.com/perses/perses)
 

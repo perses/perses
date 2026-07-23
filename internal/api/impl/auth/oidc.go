@@ -430,6 +430,7 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims m
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		TokenType:    oidc.BearerToken,
+		ExpiresIn:    e.jwt.GetExpiresIn(),
 	}, nil
 }
 

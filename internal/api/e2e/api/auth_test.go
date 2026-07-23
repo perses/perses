@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/dependency"
@@ -420,6 +421,41 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 		assert.ErrorContains(t, err, "oauth2: cannot fetch token: 405 Method Not Allowed")
 
 		return nil
+	})
+
+	conf2 := e2eframework.DefaultAuthConfig()
+	conf2.Security.Authentication.Providers.OAuth = append(conf2.Security.Authentication.Providers.OAuth, providerConfig)
+	conf2.Security.Authentication.AccessTokenTTL = common.Duration(3 * time.Second)
+	conf2.Security.Authentication.RefreshTokenTTL = common.Duration(time.Hour)
+
+	// Server with oauth provider configured with low TTL.
+	e2eframework.WithServerConfig(t, conf2, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []modelAPI.Entity {
+		usersCreatedByTheSuite := []modelAPI.Entity{
+			e2eframework.NewUser("john.doe", ""),
+		}
+
+		persesBaseURL := common.MustParseURL(server.URL)
+		persesTokenURL := common.MustParseURL(server.URL)
+		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthnKindOAuth, providerConfig.SlugID, utils.PathToken)
+
+		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
+			URL: persesBaseURL,
+			OAuth: &secret.OAuth{
+				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+				TokenURL:     persesTokenURL.String(),
+				AuthStyle:    int(oauth2.AuthStyleInHeader),
+			},
+		})
+		assert.NoError(t, err)
+
+		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
+		assert.NoError(t, err)
+		time.Sleep(5 * time.Second)
+		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
+		assert.NoError(t, err)
+
+		return usersCreatedByTheSuite
 	})
 }
 

@@ -555,14 +555,14 @@ allow_cleartext_passwords: <boolean> | default = false # Optional
 # Allows fallback to unencrypted connection if server does not support TLS
 allow_fallback_to_plaintext: <boolean> | default = false # Optional
 
-# Allows the native password authentication method
-allow_native_passwords: <boolean> | default = false # Optional
+# Allows the native password authentication method. When unset, the driver default (true) is used.
+allow_native_passwords: <boolean> | default = true # Optional
 
 # Allows the old insecure password method
 allow_old_passwords: <boolean> | default = false # Optional
 
-# Check connections for liveness before using them
-check_conn_liveness: <boolean> | default = false # Optional
+# Check connections for liveness before using them. When unset, the driver default (true) is used.
+check_conn_liveness: <boolean> | default = true # Optional
 
 # Return number of matching rows instead of rows changed
 client_found_rows: <boolean> | default = false # Optional
@@ -585,9 +585,25 @@ reject_read_only: <boolean> | default = false # Optional
 # Whether the database is case-sensitive.
 # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
 case_sensitive: <string> | default = false # Optional
+
+# Maximum amount of time a connection may be reused. Keep it shorter than the server's wait_timeout
+# to avoid reusing connections the server has already closed.
+conn_max_lifetime: <duration> | default = 3m # Optional
+
+# Maximum amount of time a connection may be idle before it is closed.
+conn_max_idle_time: <duration> | default = 1m # Optional
+
+# Maximum number of open connections to the database. A value <= 0 means unlimited.
+max_open_conns: <int> # Optional
+
+# Maximum number of connections in the idle connection pool. A value <= 0 keeps the Go default (2).
+max_idle_conns: <int> # Optional
 ```
 
 ### Schemas config
+
+!!! warning
+    This config is deprecated. It will be removed in the future. Please remove it from your config.
 
 ```yaml
 # Path to the Cue schemas of the panels
@@ -614,6 +630,10 @@ See the [TLS Config](../api/secret.md#tls-config-specification) specification.
 
 ```yaml
 interval: <duration> | default = 1h # Optional
+
+# Can be used to update provisioning on change instead of waiting for the configured interval.
+# Interval is still used to reconcile the state.
+enable_watch: <boolean> | default = false # Optional
 
 # List of folder that Perses will read periodically. 
 # Every known data found in the different folders will be injected in the database regardless what exist.

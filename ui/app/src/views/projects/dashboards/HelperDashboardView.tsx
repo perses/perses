@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName, useLocalStorage } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
@@ -31,6 +31,7 @@ import {
 } from '../../../context/Config';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
+import { UserPreferences } from '../../../model/userPreferences';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;
@@ -56,15 +57,12 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     isLeavingConfirmDialogEnabled = true,
   } = props;
   const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
-
+  const [userPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', { timezone: 'local' });
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
-
-  //TODO: We should pass down userPreferenceTimezone to the dashboard view using a prop
-  // Picking the value from the useLocalStorage is a bad practice, because a component should technically have no clue about the app level local storage
 
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
@@ -136,6 +134,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isEditing={isEditing}
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                  userPreferenceTimezone={userPreferences.timezone}
                 />
               </UsageMetricsProvider>
             </ErrorBoundary>

@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,16 +32,57 @@ import (
 const testDataFolder = "testdata"
 
 // LoadTestPlugins is a helper function that loads the dummy plugins from testdata
-func LoadTestPlugins() Plugin {
+func loadTestPlugins(path string) Plugin {
 	cfg := config.Plugin{
-		Path:        filepath.Join("migrate", testDataFolder, "plugins"),
-		ArchivePath: "unused",
+		Path:         path,
+		ArchivePaths: []string{"unused"},
 	}
 	pluginService := New(cfg)
 	if err := pluginService.Load(); err != nil {
 		logrus.Fatal(err)
 	}
 	return pluginService
+}
+
+func loadDefaultTestPlugins() Plugin {
+	return loadTestPlugins(filepath.Join("migrate", testDataFolder, "plugins"))
+}
+
+// TestNoRegMigration is loading specific plugin and actual production plugins to ensure it is still working
+func TestNoRegMigration(t *testing.T) {
+	testSuite := []struct {
+		title                string
+		pluginPath           string
+		grafanaDashboardFile string
+		persesDashboardFile  string
+	}{
+		{
+			// When moving from cue v0.16 to v0.17, cueValue.MarshalJSON did not work anymore, and somehow it happens when using the timeseriesChart.
+			// This test is ensuring the issue https://github.com/perses/perses/issues/4272 won't happen again.
+			title:                "Cue marshalling",
+			pluginPath:           filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "plugins"),
+			grafanaDashboardFile: filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-grafana.json"),
+			persesDashboardFile:  filepath.Join("migrate", "testdata", "non-reg", "cue-marshal", "dashboards", "simple-perses.json"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			pl := loadTestPlugins(test.pluginPath)
+			input := testUtils.ReadFile(test.grafanaDashboardFile)
+			expected := testUtils.ReadFile(test.persesDashboardFile)
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+
+			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			output := testUtils.JSONMarshalStrict(persesDashboard)
+			assert.JSONEq(t, string(expected), string(output))
+		})
+	}
 }
 
 func TestMig_Migrate(t *testing.T) {
@@ -76,7 +118,7 @@ func TestMig_Migrate(t *testing.T) {
 		},
 	}
 
-	pl := LoadTestPlugins()
+	pl := loadDefaultTestPlugins()
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -97,7 +139,7 @@ func TestMig_Migrate(t *testing.T) {
 }
 
 func TestMig_MigrateTags(t *testing.T) {
-	pl := LoadTestPlugins()
+	pl := loadDefaultTestPlugins()
 	grafanaDashboard := &migrate.SimplifiedDashboard{
 		UID:   "dashboard-with-tags",
 		Title: "Dashboard with tags",
@@ -107,6 +149,88 @@ func TestMig_MigrateTags(t *testing.T) {
 	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
 	assert.NoError(t, err)
 	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
+}
+
+func TestMigrateDashboardLinks(t *testing.T) {
+	pl := loadDefaultTestPlugins()
+
+	testCases := []struct {
+		name          string
+		grafanaLink   migrate.GrafanaLink
+		expectedLinks []dashboard.Link
+	}{
+		{
+			name: "Link with URL only",
+			grafanaLink: migrate.GrafanaLink{
+				URL:     "http://fakedomain/${samplevar}/$samplevar",
+				Tooltip: "",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+					Name:            "",
+				},
+			},
+		},
+		{
+			name: "Full link with variables and target blank",
+			grafanaLink: migrate.GrafanaLink{
+				IncludeVars: true,
+				TargetBlank: true,
+				Title:       "sample link",
+				Tooltip:     "sample link",
+				URL:         "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					Tooltip:         "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     true,
+					RenderVariables: true,
+				},
+			},
+		},
+		{
+			name: "Link with defaults",
+			grafanaLink: migrate.GrafanaLink{
+				Title: "sample link",
+				URL:   "http://fakedomain/${samplevar}/$samplevar",
+			},
+			expectedLinks: []dashboard.Link{
+				{
+					Name:            "sample link",
+					URL:             "http://fakedomain/${samplevar}/$samplevar",
+					TargetBlank:     false,
+					RenderVariables: false,
+					Tooltip:         "",
+				},
+			},
+		},
+		{
+			name:          "Empty or invalid link should be dropped",
+			grafanaLink:   migrate.GrafanaLink{Title: "sample link"},
+			expectedLinks: []dashboard.Link{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			grafanaDashboard := &migrate.SimplifiedDashboard{
+				UID:   "dashboard-with-links",
+				Title: "Dashboard with links",
+				Links: []migrate.GrafanaLink{tc.grafanaLink},
+			}
+
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			assert.NoError(t, err)
+			assert.NotNil(t, persesDashboard)
+			assert.Equal(t, tc.expectedLinks, persesDashboard.Spec.Links)
+		})
+	}
 }
 
 func TestLinkConversionLogic(t *testing.T) {

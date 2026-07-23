@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -102,6 +103,8 @@ func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
 	cmd.Stdout = d.writer
 	cmd.Stderr = d.errWriter
 	cmd.Dir = d.pluginPath
+	// PERSES_CLI indicates to the plugin dev server that it is run by the perses CLI
+	cmd.Env = append(os.Environ(), "PERSES_CLI=true")
 	if err := cmd.Start(); err != nil {
 		return err
 	}

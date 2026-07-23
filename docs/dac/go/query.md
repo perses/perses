@@ -33,7 +33,7 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/plugins/prometheus/sdk/go/query"
-	timeseries "github.com/perses/plugins/timeserieschart/sdk/gop"
+	timeseries "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
 func main() {

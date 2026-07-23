@@ -15,6 +15,7 @@ package secret
 
 import (
 	"crypto/tls"
+	"fmt"
 
 	promConfig "github.com/prometheus/common/config"
 )
@@ -40,10 +41,10 @@ func (c *PublicTLSConfig) BuildTLSConfig() (*tls.Config, error) {
 	}
 	minVersion := promConfig.TLSVersions["TLS12"]
 	maxVersion := promConfig.TLSVersions["TLS13"]
-	if len(c.MinVersion) == 0 {
+	if len(c.MinVersion) > 0 {
 		minVersion = promConfig.TLSVersions[c.MinVersion]
 	}
-	if len(c.MaxVersion) == 0 {
+	if len(c.MaxVersion) > 0 {
 		maxVersion = promConfig.TLSVersions[c.MaxVersion]
 	}
 	preConfig := &promConfig.TLSConfig{
@@ -112,10 +113,10 @@ func (c *TLSConfig) BuildTLSConfig() (*tls.Config, error) {
 	}
 	minVersion := promConfig.TLSVersions["TLS12"]
 	maxVersion := promConfig.TLSVersions["TLS13"]
-	if len(c.MinVersion) == 0 {
+	if len(c.MinVersion) > 0 {
 		minVersion = promConfig.TLSVersions[c.MinVersion]
 	}
-	if len(c.MaxVersion) == 0 {
+	if len(c.MaxVersion) > 0 {
 		maxVersion = promConfig.TLSVersions[c.MaxVersion]
 	}
 	preConfig := &promConfig.TLSConfig{
@@ -145,6 +146,12 @@ func (c *TLSConfig) Verify() error {
 	}
 	if len(c.MaxVersion) == 0 {
 		c.MaxVersion = "TLS13"
+	}
+	if promConfig.TLSVersions[c.MinVersion] == 0 {
+		return fmt.Errorf("incorrect TLS minimum version: %s", c.MinVersion)
+	}
+	if promConfig.TLSVersions[c.MaxVersion] == 0 {
+		return fmt.Errorf("incorrect TLS maximum version: %s", c.MaxVersion)
 	}
 	return nil
 }

@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/go-jose/go-jose/v4"
@@ -161,16 +160,19 @@ func CreateAuthorizationHeader(token string) (string, string) {
 }
 
 func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.Manager) {
+	// Integration tests don't need to re-extract archives at each server boot.
+	// Redirect archives to an empty temp folder to avoid heavy I/O on Windows CI.
+	conf.Plugin.ArchivePaths = []string{t.TempDir()}
+
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{
-				User:                 "user",
-				Password:             "password",
-				Net:                  "tcp",
-				Addr:                 "localhost:3306",
-				DBName:               "perses",
-				AllowNativePasswords: true,
-				CaseSensitive:        true,
+				User:          "user",
+				Password:      "password",
+				Net:           "tcp",
+				Addr:          "localhost:3306",
+				DBName:        "perses",
+				CaseSensitive: true,
 			},
 		}
 	} else {
@@ -262,7 +264,7 @@ func NewOAuthProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OAuth
 				AccessToken:  "myToken",
 				TokenType:    "myTokenType",
 				RefreshToken: "myRefreshToken",
-				Expiry:       time.Now().Add(4 * time.Hour),
+				ExpiresIn:    3600,
 			})
 			assert.NoError(t, err)
 			writer.Header().Set("Content-Type", "application/json")

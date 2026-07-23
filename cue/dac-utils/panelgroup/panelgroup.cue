@@ -51,7 +51,9 @@ layout: dashboard.#Layout & {
 		display: {
 			title: #title
 			if #isCollapsed != _|_ {
-				isCollapsed: #isCollapsed
+				collapse: {
+					open: !#isCollapsed
+				}
 			}
 		}
 		items: [for i, panel in #panels {

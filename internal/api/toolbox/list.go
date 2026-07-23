@@ -17,13 +17,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/spec/go/common"
 	"github.com/tidwall/gjson"
 )
 
@@ -44,12 +44,24 @@ func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
 }
 
 func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
+	projectQueryParameter := query.GetProjectQueryParam()
+	if len(projectQueryParameter) > 0 {
+		if err := common.ValidateID(projectQueryParameter); err != nil {
+			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the query parameter is invalid: %s", err.Error()))
+		}
+		if len(parameters.Project) > 0 && parameters.Project != projectQueryParameter {
+			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the path (%s) and the project name in the query parameter (%s) are different", parameters.Project, projectQueryParameter))
+		}
+		// In case the project name is provided in the query parameter, we should use it.
+		// We set it in the parameter as it is used for check permission and to get the list of the resource the user has access to.
+		parameters.Project = projectQueryParameter
+	}
 	if t.authz.IsEnabled() {
 		// When permission is activated, the list is filtered based on what the user has access to.
 		// It considered multiple different cases, so that's why it's treated in a separated function.
 		return t.listWhenPermissionIsActivated(ctx, parameters, query)
 	}
-	return t.metadataOrFullList(parameters, query)
+	return t.metadataOrFullList(query)
 }
 
 func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) (any, error) {
@@ -57,6 +69,7 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	if err != nil {
 		return nil, err
 	}
+
 	if permErr := t.checkPermissionList(ctx, parameters, scope); permErr != nil {
 		return nil, permErr
 	}
@@ -74,24 +87,24 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	// Special case if the user is getting the list of the project, as "project" is not considered has a global scope.
 	// More explanation about why it's not a global scope available here: https://github.com/perses/perses/blob/611b7993257dcadb18d48de945ad4def18889bec/pkg/model/api/v1/role/scope.go#L137-L138
 	if *scope == role.ProjectScope {
-		return t.listProjectWhenPermissionIsActivated(parameters, projects, q)
+		return t.listProjectWhenPermissionIsActivated(projects, q)
 	}
 
 	// In the case the request is done on a specific project, no need to compute resource for all other authorized projects.
 	if len(parameters.Project) > 0 {
-		return t.metadataOrFullList(parameters, q)
+		return t.metadataOrFullList(q)
 	}
 
 	// In case, there is one result; it can mean the user has global access to the resource across the project.
 	// Or it can mean he has access to only one project. If he has global access, then we should return the complete list.
 	if len(projects) == 1 && projects[0] == modelV1.WildcardProject {
-		return t.metadataOrFullList(parameters, q)
+		return t.metadataOrFullList(q)
 	}
 
 	result := make([]any, 0, len(projects))
 	asynchronousRequests := make([]async.Future[any], 0, len(projects))
 	for _, project := range projects {
-		asynchronousRequests = append(asynchronousRequests, async.Async(t.asyncMetadataOrFullList(parameters, project, q)))
+		asynchronousRequests = append(asynchronousRequests, async.Async(t.asyncMetadataOrFullList(project, q)))
 	}
 	for _, request := range asynchronousRequests {
 		listResult, requestErr := request.Await()
@@ -116,16 +129,16 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	return result, nil
 }
 
-func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiInterface.Parameters, projects []string, query V) (any, error) {
+func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(projects []string, query V) (any, error) {
 	// User has global access to all projects and should get the complete list.
 	if projects[0] == modelV1.WildcardProject {
-		return t.metadataOrFullList(parameters, query)
+		return t.metadataOrFullList(query)
 	}
 
 	// Last case, we want the list of the project that matches what the user has access to.
 	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
 	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
-	projectList, listErr := t.metadataOrFullList(parameters, query)
+	projectList, listErr := t.metadataOrFullList(query)
 	if listErr != nil {
 		return nil, listErr
 	}
@@ -162,26 +175,22 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiIn
 	return []any{}, nil
 }
 
-func (t *toolbox[T, K, V]) metadataOrFullList(parameters apiInterface.Parameters, query V) (any, error) {
+func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
 	if query.GetMetadataOnlyQueryParam() {
 		if query.IsRawMetadataQueryAllowed() {
-			return t.service.RawMetadataList(query, parameters)
+			return t.service.RawMetadataList(query)
 		}
-		return t.service.MetadataList(query, parameters)
+		return t.service.MetadataList(query)
 	}
 	if query.IsRawQueryAllowed() {
-		return t.service.RawList(query, parameters)
+		return t.service.RawList(query)
 	}
-	return t.service.List(query, parameters)
+	return t.service.List(query)
 }
 
-func (t *toolbox[T, K, V]) asyncMetadataOrFullList(parameters apiInterface.Parameters, project string, query V) func() (any, error) {
+func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
 	return func() (any, error) {
-		param, err := deep.Copy(parameters)
-		if err != nil {
-			return [][]byte{}, fmt.Errorf("unable to copy the parameters: %w", err)
-		}
-		param.Project = project
-		return t.metadataOrFullList(param, query)
+		query.SetProjectQueryParam(project)
+		return t.metadataOrFullList(query)
 	}
 }

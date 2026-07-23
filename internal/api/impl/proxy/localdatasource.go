@@ -26,12 +26,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec) error {
+func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
-	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(projectName, dtsName, name)
-	})
+	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, retrieveSecret)
 	if err != nil {
 		return err
 	}
@@ -56,7 +54,12 @@ func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {
 		dtsName = body.Spec.Display.Name
 	}
 
-	return e.proxyDashboardDatasource(ctx, projectName, dtsName, body.Spec)
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, body.Spec, func(name string) (*v1.SecretSpec, error) {
+		if err := e.checkPermission(ctx, projectName, role.SecretScope, role.ReadAction); err != nil {
+			return nil, err
+		}
+		return e.getProjectSecret(projectName, dtsName, name)
+	})
 }
 
 func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
@@ -73,7 +76,9 @@ func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts)
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts, func(name string) (*v1.SecretSpec, error) {
+		return e.getProjectSecret(projectName, dtsName, name)
+	})
 }
 
 func (e *endpoint) getDashboardDatasource(projectName string, dashboardName string, name string) (datasource.Spec, error) {
