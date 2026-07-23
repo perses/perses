@@ -13,10 +13,35 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 #### SQL Database default configuration changes
 
-The following SQL database config field default value changed to be aligned with driver: https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L97
+We have changed the behavior of the SQL database config regarding the default value of few fields. It has been done to follow the default behavior of the driver: https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L97
 
-allow_native_passwords: falseto true
-check_conn_liveness: falseto true
+If you do not use the SQL config, then this does not concern you. If you use the SQL config, here the fields that the default value have been changed:
+
+```yaml
+database:
+  sql:
+    allow_native_passwords: true # previously false
+    check_conn_liveness: true    # previously false
+```
+
+We also have added more field to the configuration to give you more facilities to customize the database connection:
+
+```yaml
+database:
+  sql:
+    # Maximum amount of time a connection may be reused. Keep it shorter than the server's wait_timeout
+    # to avoid reusing connections the server has already closed.
+    conn_max_lifetime: <duration> | default = 3m # Optional
+
+    # Maximum amount of time a connection may be idle before it is closed.
+    conn_max_idle_time: <duration> | default = 1m # Optional
+
+    # Maximum number of open connections to the database. A value <= 0 means unlimited.
+    max_open_conns: <int> # Optional
+
+    # Maximum number of connections in the idle connection pool. A value <= 0 keeps the Go default (2).
+    max_idle_conns: <int> # Optional
+```
 
 ### Upgrading from v0.52.0 to v0.53.0
 
