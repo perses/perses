@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -52,8 +53,56 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
+		claimMappings:        buildClaimMappings(conf),
 		accessKey:            key,
 	}, err
+}
+
+// providerKey uniquely identifies an OAuth/OIDC provider by kind and slug_id.
+type providerKey struct {
+	kind string
+	id   string
+}
+
+// claimRoleMapping holds a single resolved mapping from a claim value to a Perses role.
+type claimRoleMapping struct {
+	claimName  string
+	claimValue string
+	roleName   string
+	// project is empty for GlobalRole mappings; non-empty for project-scoped Role mappings.
+	project string
+}
+
+// buildClaimMappings indexes all claim→role mappings from the config for fast per-request lookup.
+func buildClaimMappings(conf config.Config) map[providerKey][]claimRoleMapping {
+	result := make(map[providerKey][]claimRoleMapping)
+	for _, p := range conf.Security.Authentication.Providers.OIDC {
+		key := providerKey{kind: utils.AuthnKindOIDC, id: p.SlugID}
+		for _, cc := range p.Claims {
+			for _, m := range cc.Mappings {
+				result[key] = append(result[key], claimRoleMapping{
+					claimName:  cc.ClaimName,
+					claimValue: m.ClaimValue,
+					roleName:   m.RoleName,
+					project:    m.Project,
+				})
+			}
+		}
+	}
+	for _, p := range conf.Security.Authentication.Providers.OAuth {
+		key := providerKey{kind: utils.AuthnKindOAuth, id: p.SlugID}
+		for _, cc := range p.Claims {
+			for _, m := range cc.Mappings {
+				result[key] = append(result[key], claimRoleMapping{
+					claimName:  cc.ClaimName,
+					claimValue: m.ClaimValue,
+					roleName:   m.RoleName,
+					project:    m.Project,
+				})
+			}
+		}
+	}
+	return result
 }
 
 // native is expecting a JWT token to extract the user information and validate its permissions.
@@ -68,6 +117,8 @@ type native struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	guestPermissions     []*v1Role.Permission
+	// claimMappings maps provider keys to their claim→role mappings, indexed at startup from config.
+	claimMappings map[providerKey][]claimRoleMapping
 	// mutex is used to protect the cache from concurrent access.
 	mutex sync.RWMutex
 }
@@ -176,6 +227,25 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		logrus.Error("failed to get username from context to list the user projects")
 		return nil, apiInterface.InternalError
 	}
+
+	// Claim-based check: if wildcard permission found via claims, short-circuit.
+	usr, _ := n.GetUser(ctx)
+	if claims, ok := usr.(*crypto.JWTClaims); ok {
+		claimPerms := n.claimPermissions(claims)
+		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
+			return []string{v1.WildcardProject}, nil
+		}
+		var claimProjects []string
+		for project, permList := range claimPerms {
+			if project != v1.WildcardProject && listHasPermission(permList, requestAction, requestScope) {
+				claimProjects = append(claimProjects, project)
+			}
+		}
+		if len(claimProjects) > 0 {
+			return claimProjects, nil
+		}
+	}
+
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
 	projectPermission := n.cache.permissions[username]
@@ -217,6 +287,17 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
 		return true
 	}
+	// Claim-based check (stateless, from JWT)
+	usr, _ := n.GetUser(ctx)
+	if claims, ok := usr.(*crypto.JWTClaims); ok {
+		claimPerms := n.claimPermissions(claims)
+		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
+			return true
+		}
+		if requestProject != v1.WildcardProject && listHasPermission(claimPerms[requestProject], requestAction, requestScope) {
+			return true
+		}
+	}
 	// Checking cached permissions
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
@@ -245,41 +326,50 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 	for project, projectPermissions := range n.cache.permissions[username] {
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
+	// Merge claim-based permissions
+	usr, _ := n.GetUser(ctx)
+	if claims, ok := usr.(*crypto.JWTClaims); ok {
+		for project, perms := range n.claimPermissions(claims) {
+			userPermissions[project] = append(userPermissions[project], perms...)
+		}
+	}
 	return userPermissions, nil
 }
 
 func (n *native) RefreshPermissions() error {
-	permissions, err := n.loadAllPermissions()
+	permissions, globalRoles, roles, err := n.loadAllPermissions()
 	if err != nil {
 		return err
 	}
 	n.mutex.Lock()
 	n.cache.permissions = permissions
+	n.cache.globalRoles = globalRoles
+	n.cache.roles = roles
 	n.mutex.Unlock()
 	return nil
 }
 
 // loadAllPermissions is loading all permissions for all users.
-func (n *native) loadAllPermissions() (usersPermissions, error) {
+func (n *native) loadAllPermissions() (usersPermissions, []*v1.GlobalRole, []*v1.Role, error) {
 	users, err := n.userDAO.List(&user.Query{})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	roles, err := n.roleDAO.List(&role.Query{})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	globalRoles, err := n.globalRoleDAO.List(&globalrole.Query{})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	roleBindings, err := n.roleBindingDAO.List(&rolebinding.Query{})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	globalRoleBindings, err := n.globalRoleBindingDAO.List(&globalrolebinding.Query{})
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Build cache
@@ -315,5 +405,55 @@ func (n *native) loadAllPermissions() (usersPermissions, error) {
 			}
 		}
 	}
-	return permissionBuild, nil
+	return permissionBuild, globalRoles, roles, nil
+}
+
+// claimPermissions resolves the permissions granted by a user's PersistedClaims based on
+// the provider's claim→role mappings defined in the config.
+// Returns a map of project → permissions (using v1.WildcardProject for GlobalRole mappings).
+// Returns nil when no matching mappings are found.
+func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role.Permission {
+	if claims == nil || len(claims.PersistedClaims) == 0 {
+		return nil
+	}
+	key := providerKey{kind: claims.ProviderKind, id: claims.ProviderID}
+	mappings, ok := n.claimMappings[key]
+	if !ok {
+		return nil
+	}
+
+	result := make(map[string][]*v1Role.Permission)
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	for _, m := range mappings {
+		claimValues := claims.PersistedClaims[m.claimName]
+		if !slices.Contains(claimValues, m.claimValue) {
+			continue
+		}
+		if m.project == "" {
+			// GlobalRole mapping
+			grole := findGlobalRole(n.cache.globalRoles, m.roleName)
+			if grole == nil {
+				logrus.Warningf("claim mapping references unknown GlobalRole %q", m.roleName)
+				continue
+			}
+			for i := range grole.Spec.Permissions {
+				result[v1.WildcardProject] = append(result[v1.WildcardProject], &grole.Spec.Permissions[i])
+			}
+		} else {
+			// Project-scoped Role mapping
+			prole := findRole(n.cache.roles, m.project, m.roleName)
+			if prole == nil {
+				logrus.Warningf("claim mapping references unknown Role %q in project %q", m.roleName, m.project)
+				continue
+			}
+			for i := range prole.Spec.Permissions {
+				result[m.project] = append(result[m.project], &prole.Spec.Permissions[i])
+			}
+		}
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
 }

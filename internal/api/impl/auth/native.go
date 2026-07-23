@@ -84,11 +84,11 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		ProviderKind: utils.AuthnKindNative,
 		ProviderID:   "", // no provider ID needed for native auth
 	}
-	accessToken, err := e.tokenManagement.accessToken(login, providerInfo, ctx.SetCookie)
+	accessToken, err := e.tokenManagement.accessToken(login, providerInfo, nil, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(login, providerInfo, ctx.SetCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(login, providerInfo, nil, ctx.SetCookie)
 	if err != nil {
 		return err
 	}

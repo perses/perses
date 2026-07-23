@@ -1,0 +1,64 @@
+# Manual test stack for claim-based role assignment (issue #3137).
+#
+# Services:
+#   keycloak  - identity provider, pre-loaded with the perses realm
+#   perses    - built from source in this repo
+#
+# Usage:
+#   docker compose -f dev/docker-compose.keycloak.yaml up --build --detach
+#   docker compose -f dev/docker-compose.keycloak.yaml logs -f
+#   docker compose -f dev/docker-compose.keycloak.yaml down -v
+#
+# Endpoints once running:
+#   Perses UI   http://localhost:8090
+#   Keycloak    http://localhost:8080  (admin / admin)
+
+name: perses-keycloak-test
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev --import-realm --http-enabled=true
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # Keycloak hostname v2 settings (required in Keycloak 25+).
+      # KC_HOSTNAME: browser-facing base URL embedded in tokens and discovery doc.
+      KC_HOSTNAME: http://localhost:8080
+      # Allow backchannel requests (Perses → Keycloak) to arrive via any hostname.
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/perses-realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/perses/.well-known/openid-configuration HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3 && grep -q '\"issuer\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  perses:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    command:
+      - "--config=/etc/perses/config.yaml"
+      - "--log.level=debug"
+    ports:
+      - "8090:8080"
+    # Make "localhost" resolve to the Docker host so that server-side token
+    # exchange calls to http://localhost:8080 (the Keycloak frontend URL
+    # embedded in the discovery doc) reach Keycloak via the published port.
+    extra_hosts:
+      - "localhost:host-gateway"
+    volumes:
+      - ./config.keycloak.yaml:/etc/perses/config.yaml:ro
+      - ./keycloak-provisioning:/etc/perses/provisioning:ro
+      - keycloak-db:/perses
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+volumes:
+  keycloak-db:

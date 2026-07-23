@@ -95,6 +95,50 @@ func (h *HTTP) Verify() error {
 	return nil
 }
 
+// ClaimMapping maps a single upstream token claim value to a Perses role.
+// When Project is empty, RoleName is resolved as a GlobalRole (global permissions).
+// When Project is non-empty, RoleName is resolved as a project-scoped Role within that project.
+type ClaimMapping struct {
+	ClaimValue string `json:"claim_value" yaml:"claim_value"`
+	RoleName   string `json:"role_name" yaml:"role_name"`
+	// Project is optional. When set, maps the claim value to a project-scoped Role.
+	// When empty, maps to a GlobalRole.
+	// +optional
+	Project string `json:"project,omitempty" yaml:"project,omitempty"`
+}
+
+func (c *ClaimMapping) Verify() error {
+	if c.ClaimValue == "" {
+		return errors.New("claim_mapping's `claim_value` is mandatory")
+	}
+	if c.RoleName == "" {
+		return errors.New("claim_mapping's `role_name` is mandatory")
+	}
+	return nil
+}
+
+// ProviderClaimConfig describes one claim field that Perses should persist
+// from the upstream access token, and optionally map to Perses roles.
+type ProviderClaimConfig struct {
+	// ClaimName is the JSON field name in the upstream access token (e.g. "roles", "groups").
+	ClaimName string `json:"claim_name" yaml:"claim_name"`
+	// Mappings maps individual claim values to Perses roles.
+	// +optional
+	Mappings []ClaimMapping `json:"mappings,omitempty" yaml:"mappings,omitempty"`
+}
+
+func (p *ProviderClaimConfig) Verify() error {
+	if p.ClaimName == "" {
+		return errors.New("provider_claim_config's `claim_name` is mandatory")
+	}
+	for i := range p.Mappings {
+		if err := p.Mappings[i].Verify(); err != nil {
+			return fmt.Errorf("invalid mapping in claim %q: %w", p.ClaimName, err)
+		}
+	}
+	return nil
+}
+
 type Provider struct {
 	SlugID            string         `json:"slug_id" yaml:"slug_id"`
 	Name              string         `json:"name" yaml:"name"`
@@ -106,6 +150,10 @@ type Provider struct {
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
 	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
 	HTTP              HTTP           `json:"http" yaml:"http"`
+	// Claims lists upstream token claim fields that Perses should persist in the
+	// Perses JWT and optionally map to Perses roles.
+	// +optional
+	Claims []ProviderClaimConfig `json:"claims,omitempty" yaml:"claims,omitempty"`
 }
 
 func (p *Provider) Verify() error {
@@ -127,6 +175,11 @@ func (p *Provider) Verify() error {
 			return fmt.Errorf("failed to read client_secret_file: %w", err)
 		}
 		p.ClientSecret = secret.Hidden(data)
+	}
+	for i := range p.Claims {
+		if err := p.Claims[i].Verify(); err != nil {
+			return fmt.Errorf("invalid claim config at index %d: %w", i, err)
+		}
 	}
 	return nil
 }

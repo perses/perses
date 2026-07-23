@@ -417,3 +417,105 @@ func NewOIDCProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OIDCPr
 
 	return server, conf
 }
+
+// NewOIDCProviderTestServerWithClaims is like NewOIDCProviderTestServer but the /token
+// endpoint returns tokens that carry the given extraClaims (e.g. map[string]any{"roles": []string{"admin"}}).
+// Use this to test claim→role mapping without modifying the standard mock server.
+func NewOIDCProviderTestServerWithClaims(t *testing.T, extraClaims map[string]any) (*httptest.Server, apiConfig.OIDCProvider) {
+	authPath := "/auth"
+	deviceAuthPath := "/device"
+	tokenPath := "/token"
+	userInfosPath := "/user_infos"
+	jwksPath := "/keys"
+	discoveryPath := "/.well-known/openid-configuration"
+	discoveryConfig := &oidc.DiscoveryConfiguration{}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if strings.HasPrefix(request.RequestURI, discoveryPath) {
+			body, err := json.Marshal(discoveryConfig)
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, authPath) {
+			_, err := writer.Write([]byte("Provider's Auth Endpoint"))
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, deviceAuthPath) {
+			body, err := json.Marshal(oauth2.DeviceAuthResponse{
+				DeviceCode:      "myCode",
+				UserCode:        "myUser",
+				VerificationURI: "myURL",
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, tokenPath) {
+			accessToken, _ := NewAccessTokenCustom(discoveryConfig.Issuer, validSubject, validAudience, validExpiration(), validJWTID, validClientID, validSkew, extraClaims)
+			idToken, _ := NewIDTokenCustom(discoveryConfig.Issuer, validSubject, validAudience, validExpiration(), validAuthTime(), validNonce, validACR, validAMR, validClientID, validSkew, "", extraClaims)
+			body, err := json.Marshal(oidc.AccessTokenResponse{
+				AccessToken: accessToken,
+				TokenType:   "Bearer",
+				IDToken:     idToken,
+				ExpiresIn:   250,
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, userInfosPath) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, err := writer.Write([]byte(`{"sub": "john.doeOIDC"}`))
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, jwksPath) {
+			body, err := json.Marshal(jose.JSONWebKeySet{Keys: []jose.JSONWebKey{WebKey.Public()}})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		t.Fatalf("An unexpected OIDC provider endpoint has been called : %s", request.RequestURI)
+	}))
+
+	authURL := common.MustParseURL(server.URL)
+	authURL.Path = authPath
+	deviceAuthURL := common.MustParseURL(server.URL)
+	deviceAuthURL.Path = deviceAuthPath
+	tokenURL := common.MustParseURL(server.URL)
+	tokenURL.Path = tokenPath
+	userInfosURL := common.MustParseURL(server.URL)
+	userInfosURL.Path = userInfosPath
+	jwksURL := common.MustParseURL(server.URL)
+	jwksURL.Path = jwksPath
+	discoveryConfig.Issuer = server.URL
+	discoveryConfig.AuthorizationEndpoint = authURL.String()
+	discoveryConfig.DeviceAuthorizationEndpoint = deviceAuthURL.String()
+	discoveryConfig.TokenEndpoint = tokenURL.String()
+	discoveryConfig.UserinfoEndpoint = userInfosURL.String()
+	discoveryConfig.JwksURI = jwksURL.String()
+
+	id := uuid.New().String()
+	conf := apiConfig.OIDCProvider{
+		Provider: apiConfig.Provider{
+			SlugID:       id,
+			Name:         id,
+			ClientID:     "clientID",
+			ClientSecret: "clientSecret",
+			RedirectURI:  common.URL{},
+		},
+		Issuer: *common.MustParseURL(server.URL),
+	}
+
+	return server, conf
+}
