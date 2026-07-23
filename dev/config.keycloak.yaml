@@ -5,12 +5,6 @@ security:
     provider:
       native:
         enable: true
-        # All authenticated users can read everything and create projects.
-        guest_permissions:
-          - actions: [read]
-            scopes: ["*"]
-          - actions: [create]
-            scopes: [Project]
   authentication:
     providers:
       enable_native: false
