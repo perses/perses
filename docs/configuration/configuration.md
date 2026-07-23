@@ -816,6 +816,12 @@ information: <string> # Optional
 
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
+
+# Defaults used when a user has not stored their own preference
+default_user_preferences:
+  timezone: <IANA timezone or "local"> # Optional, default = local
+  rows_per_page: <10 | 25 | 50 | 100> # Optional, default = 10
+  theme: <"light" | "dark"> # Optional, default = browser preference
 ```
 
 #### TimeRange config

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, getResourceDisplayName, useLocalStorage } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
@@ -31,7 +31,7 @@ import {
 } from '../../../context/Config';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
-import { UserPreferences } from '../../../model/userPreferences';
+import { useUserPreferences } from '../../../context/UserPreferences';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;
@@ -47,6 +47,7 @@ export interface GenericDashboardViewProps {
  * The View for displaying a Dashboard.
  */
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
+  const { userPreferences } = useUserPreferences();
   const {
     dashboardResource,
     onSave,
@@ -57,7 +58,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     isLeavingConfirmDialogEnabled = true,
   } = props;
   const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
-  const [userPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', { timezone: 'local' });
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();

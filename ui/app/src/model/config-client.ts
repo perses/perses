@@ -193,6 +193,13 @@ export interface FrontendConfig {
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   banner?: Banner;
+  default_user_preferences?: DefaultUserPreferences;
+}
+
+export interface DefaultUserPreferences {
+  timezone?: string;
+  rows_per_page?: number;
+  theme?: 'light' | 'dark';
 }
 
 export interface EphemeralDashboardConfig {
