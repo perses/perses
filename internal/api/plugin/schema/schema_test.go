@@ -133,6 +133,23 @@ func loadQueryPlugins(queryPath string, sch Schema, t *testing.T) {
 	loadPlugin(queryPath, modules, sch, t)
 }
 
+func loadAnnotationPlugins(annotationPath string, sch Schema, t *testing.T) {
+	modules := []v1.ModuleSpec{
+		{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindAnnotation,
+					Spec: module.PluginSpec{
+						Name: "FirstAnnotation",
+					},
+				},
+			},
+		},
+	}
+	loadPlugin(annotationPath, modules, sch, t)
+}
+
 func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
 	modules := []v1.ModuleSpec{
 		{
@@ -333,6 +350,77 @@ func TestValidatePanels(t *testing.T) {
 
 			err := s.ValidatePanels(test.dashboard.Spec.Panels)
 
+			if test.expectedErrorStr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.expectedErrorStr)
+			}
+		})
+	}
+}
+
+func TestValidatePanelsWithAnnotations(t *testing.T) {
+	s := New()
+	loadPanelPlugins("testdata/schemas/panels", s, t)
+	loadQueryPlugins("testdata/schemas/queries", s, t)
+	loadAnnotationPlugins("testdata/schemas/annotations", s, t)
+
+	validFirstPanel := loadPluginFromJSON("testdata/samples/panels/valid_first_panel.json", t)
+	validCustomQueries := loadQueriesFromJSON("testdata/samples/queries/valid_custom_queries.json", t)
+	validAnnotation := loadPluginFromJSON("testdata/samples/annotations/valid_first_annotation.json", t)
+	invalidAnnotation := loadPluginFromJSON("testdata/samples/annotations/invalid_kind_annotation.json", t)
+
+	disabled := false
+
+	panelWithAnnotations := func(annotations *dashboard.PanelAnnotations) map[string]*dashboard.Panel {
+		return map[string]*dashboard.Panel{
+			"MyPanel": {
+				Spec: dashboard.PanelSpec{
+					Plugin:      validFirstPanel,
+					Queries:     validCustomQueries,
+					Annotations: annotations,
+				},
+			},
+		}
+	}
+
+	testSuite := []struct {
+		title            string
+		panels           map[string]*dashboard.Panel
+		expectedErrorStr string
+	}{
+		{
+			title: "panel with a valid panel-local annotation definition",
+			panels: panelWithAnnotations(&dashboard.PanelAnnotations{
+				Definitions: []dashboard.AnnotationSpec{
+					{Display: dashboard.AnnotationDisplay{Name: "Deploys"}, Plugin: validAnnotation},
+				},
+			}),
+			expectedErrorStr: "",
+		},
+		{
+			title: "panel with an invalid panel-local annotation definition (unknown kind)",
+			panels: panelWithAnnotations(&dashboard.PanelAnnotations{
+				Definitions: []dashboard.AnnotationSpec{
+					{Display: dashboard.AnnotationDisplay{Name: "Deploys"}, Plugin: invalidAnnotation},
+				},
+			}),
+			expectedErrorStr: "schema not found for plugin UnknownAnnotation",
+		},
+		{
+			title:            "panel with only the toggle set and no definitions",
+			panels:           panelWithAnnotations(&dashboard.PanelAnnotations{Enabled: &disabled}),
+			expectedErrorStr: "",
+		},
+		{
+			title:            "panel without any annotations block",
+			panels:           panelWithAnnotations(nil),
+			expectedErrorStr: "",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := s.ValidatePanels(test.panels)
 			if test.expectedErrorStr == "" {
 				assert.NoError(t, err)
 			} else {
