@@ -40,6 +40,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/impl/v1/view"
+	"github.com/perses/perses/internal/api/impl/v1/watch"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
@@ -76,6 +77,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetAuthorization(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
 		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetAuthorization(), serviceManager.GetDashboard()),
+		watch.NewEndpoint(serviceManager.GetWatch(), serviceManager.GetAuthorization()),
 	}
 
 	if cfg.Security.Authorization.Provider.Native.Enable {

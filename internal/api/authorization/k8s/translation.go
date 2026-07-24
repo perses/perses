@@ -24,6 +24,7 @@ const (
 	k8sCreateAction   k8sAction = "create"
 	k8sUpdateAction   k8sAction = "patch"
 	k8sDeleteAction   k8sAction = "delete"
+	k8sWatchAction    k8sAction = "watch"
 	k8sWildcardAction k8sAction = "*"
 )
 
@@ -80,6 +81,8 @@ func getK8sAction(action v1Role.Action) k8sAction {
 		return k8sUpdateAction
 	case v1Role.DeleteAction:
 		return k8sDeleteAction
+	case v1Role.WatchAction:
+		return k8sWatchAction
 	case v1Role.WildcardAction:
 		return k8sWildcardAction
 	default: // not reachable
