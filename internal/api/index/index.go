@@ -40,6 +40,18 @@ type index[T api.Metadata] struct {
 	// fields is the list of string that has been collected when the index is created.
 	// It is used to know which fields are available for search.
 	fields []string
+	// search is the search engine that will be used to search through the fields.
+	search *search
+}
+
+func (idx *index[T]) match(text string) *SearchResult {
+	for _, field := range idx.fields {
+		result := idx.search.match(text, field)
+		if result != nil {
+			return result
+		}
+	}
+	return nil
 }
 
 type client struct {
