@@ -16,6 +16,8 @@ package config
 import (
 	"fmt"
 	"slices"
+	"time"
+	_ "time/tzdata"
 
 	"github.com/perses/spec/go/common"
 )
@@ -33,6 +35,13 @@ var defaultTimeRangeOptions = []common.DurationString{
 }
 
 var allowedRowsPerPage = []int{10, 25, 50, 100}
+
+type FrontendTheme string
+
+const (
+	DarkTheme  FrontendTheme = "dark"
+	LightTheme FrontendTheme = "light"
+)
 
 type Explorer struct {
 	Enable bool `json:"enable" yaml:"enable"`
@@ -66,19 +75,27 @@ type TimeRange struct {
 // DefaultUserPreferences contains the preferences used when the user has not
 // stored an explicit preference in their browser.
 type DefaultUserPreferences struct {
-	Timezone    string `json:"timezone,omitempty" yaml:"timezone,omitempty"`
-	RowsPerPage int    `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
-	Theme       string `json:"theme,omitempty" yaml:"theme,omitempty"`
+	Timezone    string        `json:"timezone,omitempty" yaml:"timezone,omitempty"`
+	RowsPerPage int           `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
+	Theme       FrontendTheme `json:"theme,omitempty" yaml:"theme,omitempty"`
 }
 
 func (p *DefaultUserPreferences) Verify() error {
+	if len(p.Timezone) > 0 && p.Timezone != "local" {
+		if _, err := time.LoadLocation(p.Timezone); err != nil {
+			return fmt.Errorf("invalid frontend.default_user_preferences.timezone %q: %w", p.Timezone, err)
+		}
+	}
 	if p.RowsPerPage < 0 {
 		return fmt.Errorf("frontend.default_user_preferences.rows_per_page cannot be negative")
 	}
 	if p.RowsPerPage != 0 && !slices.Contains(allowedRowsPerPage, p.RowsPerPage) {
 		return fmt.Errorf("frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100")
 	}
-	if p.Theme != "" && p.Theme != "light" && p.Theme != "dark" {
+	if len(p.Theme) == 0 {
+		p.Theme = LightTheme
+	}
+	if p.Theme != LightTheme && p.Theme != DarkTheme {
 		return fmt.Errorf("frontend.default_user_preferences.theme must be one of: light, dark")
 	}
 	return nil

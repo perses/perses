@@ -11,34 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
+import React, { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { useLocalStorage } from '@perses-dev/components';
 import { UserPreferences } from '../model/userPreferences';
 
 interface UserPreferencesContextType {
   userPreferences: UserPreferences;
-  setUserPreferences: (preferences: UserPreferences) => void;
+  updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
 }
 
 const USER_PREFERENCES_KEY = 'PERSES_USER_PREFERENCES';
 
-const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
+const UserPreferencesContext = createContext<UserPreferencesContextType>({
+  userPreferences: {},
+  updateUserPreferences: () => undefined,
+});
 
 export function UserPreferencesContextProvider(props: {
   children: React.ReactNode;
   defaultPreferences: UserPreferences;
 }): ReactElement {
-  const [storedPreferences, setUserPreferences] = useLocalStorage<UserPreferences | null>(USER_PREFERENCES_KEY, null);
-  const userPreferences = storedPreferences ?? props.defaultPreferences;
-  const contextValue = useMemo(() => ({ userPreferences, setUserPreferences }), [userPreferences, setUserPreferences]);
+  const [storedPreferences, setStoredPreferences] = useLocalStorage<UserPreferences | null>(USER_PREFERENCES_KEY, null);
+  const userPreferences = useMemo(
+    () => ({ ...props.defaultPreferences, ...storedPreferences }),
+    [props.defaultPreferences, storedPreferences]
+  );
+  const updateUserPreferences = useCallback(
+    (preferences: Partial<UserPreferences>): void => {
+      setStoredPreferences({ ...storedPreferences, ...preferences });
+    },
+    [setStoredPreferences, storedPreferences]
+  );
+  const contextValue = useMemo(
+    () => ({
+      userPreferences,
+      updateUserPreferences,
+    }),
+    [updateUserPreferences, userPreferences]
+  );
 
   return <UserPreferencesContext.Provider value={contextValue}>{props.children}</UserPreferencesContext.Provider>;
 }
 
 export function useUserPreferences(): UserPreferencesContextType {
-  const ctx = useContext(UserPreferencesContext);
-  if (ctx === undefined) {
-    throw new Error('No UserPreferencesContext found. Did you forget a Provider?');
-  }
-  return ctx;
+  return useContext(UserPreferencesContext);
 }

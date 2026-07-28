@@ -572,6 +572,11 @@ func TestDefaultUserPreferencesVerify(t *testing.T) {
 			preferences: DefaultUserPreferences{Timezone: "UTC", RowsPerPage: 25, Theme: "dark"},
 		},
 		{
+			name:        "invalid timezone",
+			preferences: DefaultUserPreferences{Timezone: "not-a-timezone"},
+			errMessage:  "invalid frontend.default_user_preferences.timezone",
+		},
+		{
 			name:        "invalid rows per page",
 			preferences: DefaultUserPreferences{RowsPerPage: -1},
 			errMessage:  "frontend.default_user_preferences.rows_per_page cannot be negative",
@@ -596,6 +601,75 @@ func TestDefaultUserPreferencesVerify(t *testing.T) {
 				return
 			}
 			assert.ErrorContains(t, err, test.errMessage)
+		})
+	}
+}
+
+func TestDefaultUserPreferencesVerifyDefaultsTheme(t *testing.T) {
+	preferences := DefaultUserPreferences{}
+
+	assert.NoError(t, preferences.Verify())
+	assert.Equal(t, LightTheme, preferences.Theme)
+}
+
+func TestResolveDefaultUserPreferences(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		expected   *DefaultUserPreferences
+		errMessage string
+	}{
+		{
+			name: "resolves IANA timezone and defaults theme",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: Europe/Berlin
+    rows_per_page: 50
+`,
+			expected: &DefaultUserPreferences{
+				Timezone:    "Europe/Berlin",
+				RowsPerPage: 50,
+				Theme:       LightTheme,
+			},
+		},
+		{
+			name: "resolves local timezone",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: local
+`,
+			expected: &DefaultUserPreferences{
+				Timezone: "local",
+				Theme:    LightTheme,
+			},
+		},
+		{
+			name: "rejects invalid timezone",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: not-a-timezone
+`,
+			errMessage: "invalid frontend.default_user_preferences.timezone",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Frontend.DefaultUserPreferences)
 		})
 	}
 }

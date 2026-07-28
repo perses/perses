@@ -37,9 +37,9 @@ jest.mock('@perses-dev/dashboards', () => ({
   TOGGLE_THEME_EVENT: 'toggle-theme',
 }));
 
-jest.mock('./Config', () => ({
-  useConfigContext: (): object => ({
-    config: { frontend: { default_user_preferences: { theme: mockServerTheme } } },
+jest.mock('../model/config-client', () => ({
+  useConfig: (): object => ({
+    data: { frontend: { default_user_preferences: { theme: mockServerTheme } } },
   }),
 }));
 

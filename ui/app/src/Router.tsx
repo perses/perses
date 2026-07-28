@@ -86,8 +86,8 @@ function AppProviders(): ReactElement {
             hotkeySequence: { timeout: 1000 },
           }}
         >
-          <ConfigContextProvider>
-            <DarkModeContextProvider>
+          <DarkModeContextProvider>
+            <ConfigContextProvider>
               <QueryParamProvider adapter={ReactRouter6Adapter}>
                 <NavHistoryProvider>
                   <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
@@ -97,8 +97,8 @@ function AppProviders(): ReactElement {
                   </SnackbarProvider>
                 </NavHistoryProvider>
               </QueryParamProvider>
-            </DarkModeContextProvider>
-          </ConfigContextProvider>
+            </ConfigContextProvider>
+          </DarkModeContextProvider>
         </HotkeysProvider>
       </QueryClientProvider>
     </CookiesProvider>

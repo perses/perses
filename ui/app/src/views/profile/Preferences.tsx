@@ -20,8 +20,8 @@ import { ProfileContainer } from './ProfileContainer';
 
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
-  const { userPreferences, setUserPreferences } = useUserPreferences();
-  const [timezone, setTimezone] = useState(userPreferences.timezone);
+  const { userPreferences, updateUserPreferences } = useUserPreferences();
+  const [timezone, setTimezone] = useState(userPreferences.timezone ?? 'local');
 
   const isTimezoneValid = (tz: string): boolean => {
     if (!tz) return false;
@@ -42,10 +42,10 @@ export const Preferences = (): ReactElement => {
         return;
       }
 
-      setUserPreferences({ ...userPreferences, timezone });
+      updateUserPreferences({ timezone });
       successSnackbar(`User-level timezone set to ${timezone}`);
     },
-    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences]
+    [timezone, errorSnackbar, successSnackbar, updateUserPreferences]
   );
 
   return (
