@@ -577,11 +577,6 @@ func TestDefaultUserPreferencesVerify(t *testing.T) {
 			errMessage:  "invalid frontend.default_user_preferences.timezone",
 		},
 		{
-			name:        "invalid rows per page",
-			preferences: DefaultUserPreferences{RowsPerPage: -1},
-			errMessage:  "frontend.default_user_preferences.rows_per_page cannot be negative",
-		},
-		{
 			name:        "unsupported rows per page",
 			preferences: DefaultUserPreferences{RowsPerPage: 20},
 			errMessage:  "frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100",
@@ -605,10 +600,11 @@ func TestDefaultUserPreferencesVerify(t *testing.T) {
 	}
 }
 
-func TestDefaultUserPreferencesVerifyDefaultsTheme(t *testing.T) {
+func TestDefaultUserPreferencesVerifyDefaults(t *testing.T) {
 	preferences := DefaultUserPreferences{}
 
 	assert.NoError(t, preferences.Verify())
+	assert.Equal(t, defaultRowsPerPage, preferences.RowsPerPage)
 	assert.Equal(t, LightTheme, preferences.Theme)
 }
 
@@ -641,8 +637,9 @@ frontend:
     timezone: local
 `,
 			expected: &DefaultUserPreferences{
-				Timezone: "local",
-				Theme:    LightTheme,
+				Timezone:    "local",
+				RowsPerPage: defaultRowsPerPage,
+				Theme:       LightTheme,
 			},
 		},
 		{

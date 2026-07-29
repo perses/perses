@@ -99,7 +99,7 @@ export function useIsKeyboardShortcutsEnabled(): boolean {
 
 export function useDefaultRowsPerPage(): number {
   const { config } = useConfigContext();
-  return config.frontend.default_user_preferences?.rows_per_page ?? 10;
+  return config.frontend.default_user_preferences?.rows_per_page ?? 25;
 }
 
 export function useIsEphemeralDashboardEnabled(): boolean {

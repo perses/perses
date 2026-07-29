@@ -34,9 +34,11 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"14d",
 }
 
-var allowedRowsPerPage = []int{10, 25, 50, 100}
-
 type FrontendTheme string
+
+const defaultRowsPerPage uint8 = 25
+
+var allowedRowsPerPage = []uint8{10, 25, 50, 100}
 
 const (
 	DarkTheme  FrontendTheme = "dark"
@@ -76,7 +78,7 @@ type TimeRange struct {
 // stored an explicit preference in their browser.
 type DefaultUserPreferences struct {
 	Timezone    string        `json:"timezone,omitempty" yaml:"timezone,omitempty"`
-	RowsPerPage int           `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
+	RowsPerPage uint8         `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
 	Theme       FrontendTheme `json:"theme,omitempty" yaml:"theme,omitempty"`
 }
 
@@ -86,10 +88,10 @@ func (p *DefaultUserPreferences) Verify() error {
 			return fmt.Errorf("invalid frontend.default_user_preferences.timezone %q: %w", p.Timezone, err)
 		}
 	}
-	if p.RowsPerPage < 0 {
-		return fmt.Errorf("frontend.default_user_preferences.rows_per_page cannot be negative")
+	if p.RowsPerPage == 0 {
+		p.RowsPerPage = defaultRowsPerPage
 	}
-	if p.RowsPerPage != 0 && !slices.Contains(allowedRowsPerPage, p.RowsPerPage) {
+	if !slices.Contains(allowedRowsPerPage, p.RowsPerPage) {
 		return fmt.Errorf("frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100")
 	}
 	if len(p.Theme) == 0 {
