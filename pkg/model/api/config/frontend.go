@@ -84,4 +84,6 @@ type Frontend struct {
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
+	// RepeatVariableMaxValues is the maximum number of values rendered per repeat variable. 0 disables the limit.
+	RepeatVariableMaxValues int `json:"repeat_variable_max_values,omitempty" yaml:"repeat_variable_max_values,omitempty"`
 }

@@ -28,6 +28,7 @@ import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
+  useRepeatVariableMaxValues,
 } from '../../../context/Config';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
@@ -61,6 +62,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+  const repeatVariableMaxValues = useRepeatVariableMaxValues();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -135,6 +137,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
                   userPreferenceTimezone={userPreferences.timezone}
+                  repeatVariableMaxValues={repeatVariableMaxValues}
                 />
               </UsageMetricsProvider>
             </ErrorBoundary>

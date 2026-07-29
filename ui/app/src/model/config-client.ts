@@ -193,6 +193,7 @@ export interface FrontendConfig {
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   banner?: Banner;
+  repeat_variable_max_values?: number;
 }
 
 export interface EphemeralDashboardConfig {
