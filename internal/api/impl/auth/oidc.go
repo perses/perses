@@ -448,7 +448,7 @@ func retrieveDeviceAccessToken(ctx context.Context, relyingParty *RelyingPartyWi
 	}
 
 	// Call the device access token endpoint
-	return client.CallDeviceAccessTokenEndpoint(ctx, req, relyingParty)
+	return client.CallDeviceAccessTokenEndpointWithAuthFn(ctx, req, relyingParty, nil)
 }
 
 // retrieveClientCredentialsToken exchanges the client credentials for an access token,
