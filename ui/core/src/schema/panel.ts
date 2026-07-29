@@ -19,6 +19,6 @@ export {
   buildPanelSpecSchema,
   panelDefinitionSchema,
   buildPanelDefinitionSchema,
-  panelEditorSchema,
-  buildPanelEditorSchema,
 } from '@perses-dev/spec';
+
+export { panelEditorSchema, buildPanelEditorSchema } from '@perses-dev/plugin-system';
