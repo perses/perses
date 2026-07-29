@@ -19,6 +19,7 @@ const jestConfig: Config.InitialOptions = {
   moduleNameMapper: {
     // spec is taken from node modules not from the local dir
     '^@perses-dev/spec$': '<rootDir>/../node_modules/@perses-dev/spec',
+    '^@perses-dev/plugin-system$': '<rootDir>/../node_modules/@perses-dev/plugin-system',
     ...shared.moduleNameMapper,
   },
   setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
