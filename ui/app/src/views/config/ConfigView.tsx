@@ -22,6 +22,7 @@ import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import PageHeader from '../../components/page-header/PageHeader';
 import { useConfigContext } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { useAnalytics } from '../../context/Analytics';
 import { PluginsList } from './PluginsList';
 
 interface TabPanelProps {
@@ -42,9 +43,12 @@ function TabPanel(props: TabPanelProps): ReactElement | null {
 function ConfigView(): ReactElement {
   const { config } = useConfigContext();
   const isMobileSize = useIsMobileSize();
+  const { trackEvent } = useAnalytics();
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number): void => {
+    const tabNames = ['Server Configuration', 'Installed Plugins'];
+    trackEvent('Tab Switched', { tab: tabNames[newValue], section: 'Configuration' });
     setTabIndex(newValue);
   };
 

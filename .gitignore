@@ -55,3 +55,6 @@ dev/kubernetes/local
 
 ui-sbom.cdx.json
 /**/*.sbom.spdx.json
+
+.yalc
+yalc.lock

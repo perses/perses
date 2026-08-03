@@ -32,6 +32,8 @@ import { useMigrate } from '../../model/migrate-client';
 import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';
+import { useAnalytics } from '../../context/Analytics';
+import { ImportMethod } from './ImportView';
 
 type Input = {
   name: string;
@@ -49,13 +51,15 @@ interface GrafanaLightDashboard {
 
 interface GrafanaFlowProps {
   dashboard: GrafanaLightDashboard;
+  importMethod?: ImportMethod;
 }
 
-function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
+function GrafanaFlow({ dashboard, importMethod }: GrafanaFlowProps): ReactElement {
   const migrateMutation = useMigrate();
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
+  const { trackEvent } = useAnalytics();
   const [projectName, setProjectName] = useState<string>('');
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
@@ -80,7 +84,23 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
       return;
     }
     dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    dashboardMutation.mutate(dashboard, {
+      onSuccess: () => {
+        trackEvent('Dashboard Imported', {
+          dashboard_type: 'grafana',
+          import_method: importMethod ?? 'unknown',
+          success: true,
+        });
+      },
+      onError: (err) => {
+        trackEvent('Dashboard Imported', {
+          dashboard_type: 'grafana',
+          import_method: importMethod ?? 'unknown',
+          success: false,
+          error: err.message,
+        });
+      },
+    });
   };
 
   if (error) {

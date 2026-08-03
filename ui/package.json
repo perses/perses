@@ -63,5 +63,9 @@
     "typedoc": "^0.25.8",
     "typescript": "5.4.5"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "dependencies": {
+    "@perses-dev/dashboards": "file:.yalc/@perses-dev/dashboards",
+    "perses-shared": "file:.yalc/perses-shared"
+  }
 }

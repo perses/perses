@@ -20,15 +20,19 @@ import { DashboardResource } from '@perses-dev/client';
 import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';
+import { useAnalytics } from '../../context/Analytics';
+import { ImportMethod } from './ImportView';
 
 interface PersesFlowProps {
   dashboard: DashboardResource;
+  importMethod?: ImportMethod;
 }
 
-function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
+function PersesFlow({ dashboard, importMethod }: PersesFlowProps): ReactElement {
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
+  const { trackEvent } = useAnalytics();
   const [projectName, setProjectName] = useState<string>('');
   const { data, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
@@ -37,7 +41,14 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
 
   const importOnClick = (): void => {
     dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    dashboardMutation.mutate(dashboard, {
+      onSuccess: () => {
+        trackEvent('Dashboard Imported', { dashboard_type: 'perses', import_method: importMethod ?? 'unknown', success: true });
+      },
+      onError: (err) => {
+        trackEvent('Dashboard Imported', { dashboard_type: 'perses', import_method: importMethod ?? 'unknown', success: false, error: err.message });
+      },
+    });
   };
 
   if (error) {

@@ -53,6 +53,7 @@ import { useCreateSecretMutation, useSecretList } from '../../model/secret-clien
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { useHasPermission } from '../../context/Authorization';
 import { useDashboardList } from '../../model/dashboard-client';
+import { useAnalytics } from '../../context/Analytics';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectEphemeralDashboards } from './tabs/ProjectEphemeralDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
@@ -416,6 +417,7 @@ interface DashboardVariableTabsProps {
 export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const { projectName, initialTab } = props;
   const { tab } = useParams();
+  const { trackEvent } = useAnalytics();
   const isAuthEnabled = useIsAuthEnabled();
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const isProjectVariableEnabled = useIsProjectVariableEnabled();
@@ -445,6 +447,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const hasVariableReadPermission = useHasPermission('read', projectName, 'Variable');
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string): void => {
+    trackEvent('Tab Switched', { tab: newTabIndex, project: projectName });
     setValue(newTabIndex);
     navigate(`/projects/${projectName}/${newTabIndex}`);
   };

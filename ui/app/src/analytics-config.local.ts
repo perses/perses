@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//export * from './analytics';
-export * from './constants';
-export * from './model';
-export * from './schema';
-export * from './utils';
+/**
+ * Local analytics configuration - NOT checked into git
+ *
+ * This file contains sensitive keys and is gitignored.
+ */
+
+export const SEGMENT_WRITE_KEY = 'qylQB4US91okwS4xtHIxtnka9FFHcC7g';

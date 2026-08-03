@@ -14,7 +14,7 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName, useLocalStorage } from '@perses-dev/components';
 import { DashboardSpec } from '@perses-dev/spec';
-import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
+import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard, AnalyticsProvider } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo } from 'react';
 import { DashboardResource } from '@perses-dev/client';
@@ -32,6 +32,7 @@ import {
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { PERSES_APP_CONFIG } from '../../../config';
 import { UserPreferences } from '../../../model/userPreferences';
+import { useAnalyticsTracker } from '../../../utils/analytics-tracker-adapter';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;
@@ -63,6 +64,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
+  const analyticsTracker = useAnalyticsTracker();
 
   // Collect the Project variables and setup external variables from it
   const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
@@ -111,31 +113,33 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                 project={project.metadata.name}
                 dashboard={dashboardResource.metadata.name}
               >
-                <ViewDashboard
-                  key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
-                  dashboardResource={dashboardResource}
-                  datasourceApi={datasourceApi}
-                  externalVariableDefinitions={externalVariableDefinitions}
-                  dashboardTitleComponent={
-                    <ProjectBreadcrumbs
-                      dashboardName={getResourceDisplayName(dashboardResource)}
-                      project={project}
-                      variant={breadcrumbVariant}
-                    />
-                  }
-                  onSave={onSave}
-                  onDiscard={onDiscard}
-                  isInitialVariableSticky={true}
-                  isReadonly={isReadonly}
-                  isAnnotationEnabled={true}
-                  isVariableEnabled={isLocalVariableEnabled}
-                  isDatasourceEnabled={isLocalDatasourceEnabled}
-                  disableShortcuts={!isKeyboardShortcutsEnabled}
-                  isEditing={isEditing}
-                  isCreating={isCreating}
-                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
-                  userPreferenceTimezone={userPreferences.timezone}
-                />
+                <AnalyticsProvider tracker={analyticsTracker}>
+                  <ViewDashboard
+                    key={`${dashboardResource.metadata.project}/${dashboardResource.metadata.name}`}
+                    dashboardResource={dashboardResource}
+                    datasourceApi={datasourceApi}
+                    externalVariableDefinitions={externalVariableDefinitions}
+                    dashboardTitleComponent={
+                      <ProjectBreadcrumbs
+                        dashboardName={getResourceDisplayName(dashboardResource)}
+                        project={project}
+                        variant={breadcrumbVariant}
+                      />
+                    }
+                    onSave={onSave}
+                    onDiscard={onDiscard}
+                    isInitialVariableSticky={true}
+                    isReadonly={isReadonly}
+                    isAnnotationEnabled={true}
+                    isVariableEnabled={isLocalVariableEnabled}
+                    isDatasourceEnabled={isLocalDatasourceEnabled}
+                    disableShortcuts={!isKeyboardShortcutsEnabled}
+                    isEditing={isEditing}
+                    isCreating={isCreating}
+                    isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                    userPreferenceTimezone={userPreferences.timezone}
+                  />
+                </AnalyticsProvider>
               </UsageMetricsProvider>
             </ErrorBoundary>
           </ValidationProvider>

@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//export * from './analytics';
-export * from './constants';
-export * from './model';
-export * from './schema';
-export * from './utils';
+// Public API
+export { configureAnalytics, trackEvent, trackPageView, identifyUser, resetAnalytics } from './analytics-api';
+
+// Types for implementing custom providers
+export type { AnalyticsProvider, EventProperties, UserTraits } from './analytics-spi';
+export type { AnalyticsConfig } from './analytics-registry';
+
+// Built-in providers
+export { ConsoleAnalyticsProvider } from './providers/console-analytics-provider';
+export {default as SegmentAnalyticsProvider} from './providers/segment-analytics-provider'

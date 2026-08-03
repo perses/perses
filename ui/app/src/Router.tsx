@@ -91,9 +91,12 @@ function AppProviders(): ReactElement {
               <QueryParamProvider adapter={ReactRouter6Adapter}>
                 <NavHistoryProvider>
                   <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    {/* Use the Analytics provider */}
+                    {/*<AnalyticsProvider config={PERSES_APP_CONFIG.analytics}>*/}
                     <AuthorizationProvider>
                       <App />
                     </AuthorizationProvider>
+                    {/*</AnalyticsProvider>*/}
                   </SnackbarProvider>
                 </NavHistoryProvider>
               </QueryParamProvider>

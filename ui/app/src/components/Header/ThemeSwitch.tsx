@@ -17,13 +17,17 @@ import Brightness4 from 'mdi-material-ui/Brightness4';
 import { IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { useDarkMode } from '../../context/DarkMode';
+import { useAnalytics } from '../../context/Analytics';
 
 export function ThemeSwitch(props: { isAuthEnabled: boolean }): ReactElement {
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const { exceptionSnackbar } = useSnackbar();
+  const { trackEvent } = useAnalytics();
   const handleDarkModeChange = (): void => {
+    const targetTheme = isDarkModeEnabled ? 'light' : 'dark';
     try {
       setDarkMode(!isDarkModeEnabled);
+      trackEvent('Theme Switched', { theme: targetTheme });
     } catch (e) {
       exceptionSnackbar(e);
     }
