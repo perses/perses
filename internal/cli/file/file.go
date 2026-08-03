@@ -14,6 +14,7 @@
 package file
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -189,15 +190,51 @@ func (u *unmarshaller) read() error {
 			objects = append(objects, object)
 		}
 	} else {
-		if yamlErr := yaml.Unmarshal(data, &objects); yamlErr != nil {
-			if yamlErr = yaml.Unmarshal(data, &object); yamlErr != nil {
-				return newReadFileErr(yamlErr)
-			}
-			objects = append(objects, object)
+		decodedObjects, decodeErr := decodeYAMLDocumentsAsObjects(data)
+		if decodeErr != nil {
+			return fmt.Errorf("unable to read file %q, format invalid: %w", u.file, decodeErr)
 		}
+		objects = decodedObjects
 	}
 	u.objects = objects
 	return nil
+}
+
+func decodeYAMLDocumentsAsObjects(data []byte) ([]map[string]any, error) {
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	var objects []map[string]any
+
+	for {
+		var document any
+		if err := decoder.Decode(&document); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, err
+		}
+
+		// Empty YAML documents (e.g. consecutive '---') are ignored.
+		if document == nil {
+			continue
+		}
+
+		switch doc := document.(type) {
+		case []any:
+			for i, item := range doc {
+				obj, ok := item.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("list item[%d] must be an object, got %T", i, item)
+				}
+				objects = append(objects, obj)
+			}
+		case map[string]any:
+			objects = append(objects, doc)
+		default:
+			return nil, fmt.Errorf("expected an object or list of objects, got %T", doc)
+		}
+	}
+
+	return objects, nil
 }
 
 func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
