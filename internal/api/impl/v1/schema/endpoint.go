@@ -102,7 +102,7 @@ func (e *endpoint) PluginList(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 	if !list.Exists() {
-		return apiinterface.NotFoundError
+		return ctx.Blob(http.StatusOK, contentType, []byte("{}"))
 	}
 	data, err := apiCue.Marshal(list)
 	if err != nil {

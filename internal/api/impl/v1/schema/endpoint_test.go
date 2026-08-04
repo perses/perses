@@ -141,9 +141,9 @@ func TestPluginListWithNoSchemas(t *testing.T) {
 	ctx, rec := newEchoContext(t, "/api/v1/schemas/plugins")
 	err := ep.PluginList(ctx)
 
-	require.Error(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "", rec.Body.String())
+	assert.Equal(t, "{}", rec.Body.String())
 }
 
 // PluginDefinition tests
