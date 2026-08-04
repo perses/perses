@@ -183,6 +183,7 @@ export interface Banner {
 export interface TimeRangeConfig {
   disable_custom?: boolean;
   disable_zoom?: boolean;
+  disable_auto_refresh?: boolean;
   options?: DurationString[];
 }
 

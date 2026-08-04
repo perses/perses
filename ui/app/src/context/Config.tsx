@@ -36,6 +36,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
       <TimeRangeSettingsProvider
         showCustom={!data.frontend.time_range?.disable_custom}
         showZoomButtons={!data.frontend.time_range?.disable_zoom}
+        disableAutoRefresh={!!data.frontend.time_range?.disable_auto_refresh}
         options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
       >
         {props.children}
