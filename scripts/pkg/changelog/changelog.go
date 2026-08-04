@@ -204,16 +204,27 @@ func Write(clog *Changelog, version string) {
 	fileScanner := bufio.NewScanner(f)
 	fileScanner.Split(bufio.ScanLines)
 	var buffer bytes.Buffer
-	i := 0
+	newSection := generateChangelog(clog, version)
+	injected := false
 	for fileScanner.Scan() {
-		buffer.WriteString(fileScanner.Text())
-		buffer.WriteString("\n")
-		i++
-		if i == 1 {
-			// inject the new changelog entries after the title
+		line := fileScanner.Text()
+		// Inject the new section just before the first version heading (## ...).
+		// This works whether or not the file has a top-level "# Changelog" title.
+		if !injected && strings.HasPrefix(line, "## ") {
+			buffer.WriteString(newSection)
 			buffer.WriteString("\n")
-			buffer.WriteString(generateChangelog(clog, version))
+			injected = true
 		}
+		buffer.WriteString(line)
+		buffer.WriteString("\n")
+	}
+	if !injected {
+		// No existing version heading found; prepend the new section.
+		content := buffer.String()
+		buffer.Reset()
+		buffer.WriteString(newSection)
+		buffer.WriteString("\n")
+		buffer.WriteString(content)
 	}
 	if closeErr := f.Close(); closeErr != nil {
 		logrus.WithError(closeErr).Fatal("unable to close the file CHANGELOG.md")
