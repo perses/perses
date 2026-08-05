@@ -245,7 +245,10 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 	}
 
 	// Claim-based check: if wildcard permission found via claims, short-circuit.
-	usr, _ := n.GetUser(ctx)
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		if claimProjects := projectsWithPermission(n.claimPermissions(claims), requestAction, requestScope); len(claimProjects) > 0 {
 			return claimProjects, nil
@@ -283,7 +286,10 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		return true
 	}
 	// Claim-based check (stateless, from JWT)
-	usr, _ := n.GetUser(ctx)
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return false
+	}
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		claimPerms := n.claimPermissions(claims)
 		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
@@ -322,7 +328,10 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 		userPermissions[project] = append(userPermissions[project], projectPermissions...)
 	}
 	// Merge claim-based permissions
-	usr, _ := n.GetUser(ctx)
+	usr, err := n.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		for project, perms := range n.claimPermissions(claims) {
 			userPermissions[project] = append(userPermissions[project], perms...)
