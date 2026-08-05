@@ -11,8 +11,37 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 ### Upgrading from v0.53.0 to v0.54.0
 
-No breaking changes have been introduced in this version. Therefore, you can upgrade to this version without any special
-action.
+#### SQL Database default configuration changes
+
+We have changed the behavior of the SQL database config regarding the default value of few fields. It has been done to follow the default behavior of the driver: https://github.com/go-sql-driver/mysql/blob/master/dsn.go#L97
+
+If you do not use the SQL config, then this does not concern you. If you use the SQL config, here the fields that the default value have been changed:
+
+```yaml
+database:
+  sql:
+    allow_native_passwords: true # previously false
+    check_conn_liveness: true    # previously false
+```
+
+We also have added more field to the configuration to give you more facilities to customize the database connection:
+
+```yaml
+database:
+  sql:
+    # Maximum amount of time a connection may be reused. Keep it shorter than the server's wait_timeout
+    # to avoid reusing connections the server has already closed.
+    conn_max_lifetime: <duration> | default = 3m # Optional
+
+    # Maximum amount of time a connection may be idle before it is closed.
+    conn_max_idle_time: <duration> | default = 1m # Optional
+
+    # Maximum number of open connections to the database. A value <= 0 means unlimited.
+    max_open_conns: <int> # Optional
+
+    # Maximum number of connections in the idle connection pool. A value <= 0 keeps the Go default (2).
+    max_idle_conns: <int> # Optional
+```
 
 ### Upgrading from v0.52.0 to v0.53.0
 
@@ -54,6 +83,134 @@ max_version -> maxVersion
 ## Plugin developer
 
 ### Upgrading from v0.53.0 to v0.54.0
+
+#### Core package deprecated
+
+We have deprecated the `core package` and accordingly moved all its types and functionalities into other packages including `spec`, `dashboards`, `components`, `plugin-system`, and `client`. We are planing to drop the `core package` completely in the subsequent release. Therefore, we kindly ask all contributors to avoid importing `core package` members, and instead use the relevant types from the mentioned packages. Furthermore, should your PRs already import `core` members, you should replace them with the relevant types from the mentioned packages. This also means that meanwhile we cease developing `core`, because as it has been already mentioned the subsequent release will drop core completely.
+
+The dependencies from `core` had been used in all repositories and different packages including `perses/perses` (the Perses app), `perses/plugins`, and `perses/shared`. Please note that the `shared` is the host of the of the `components`, `plugin-system`, `dashboards`, and `client` packages. The `spec` as its name suggests exposes the specifications and had no dependency to `core`. However, some of the core members have been moved to `spec` already.
+
+The following example shows the `Table` plugin and its dependencies at the moment
+
+```json
+    "@perses-dev/components": "^0.54.0-rc.1",
+    "@perses-dev/spec": "^0.2.0-rc.0",
+    "@perses-dev/plugin-system": "^0.54.0-rc.1",
+    "@perses-dev/dashboards": "^0.54.0-rc.1"
+```
+
+For instance, if you take a look at the imported members in `table\src\components\TablePanel.tsx` you find many types that used to be imported from `core`. Now, after this change the core has been replaced accordingly.
+
+```typeScript
+/* For example FormatOptions used to reside in core package 
+   But now it is taken from @perses-dev/components
+   Take a look at ui\core\src\model\units\units.ts
+   You will find FormatOptions
+   Now it is coming from 
+   components\src\model\units.ts
+*/
+import {
+  FormatOptions,
+  formatValue,
+  Table,
+  TableCellConfigs,
+  TableColumnConfig,
+  transformData,
+  useSelection,
+} from '@perses-dev/components';
+```
+You as the contributor need to make sure that no `core` dependency is used in your changes. If it has been used already, it should be simply replaced with its equivalent from the mentioned packages. This should be no challenge as most of the IDEs suggest substitutes. For example, in VSCODE, if you can remove the `core` dependency, the IDE will suggest the substitutes. Simply select the suggested import and it will be added to your file automatically.
+
+##### Plugin migration example (v0.53.1 to v0.54.0)
+
+Let's for example, take a closer look at **a** plugin and see how it was in `v0.53.1` and how it changed in `v0.54.0`. 
+The example has been inspired by the actual Table Plugin from the plugin repo.
+
+So here in `v0.53.1`, the following types have been imported from `@perses-dev/core`
+
+- `CalculationsMap`
+- `formatValue`
+- `QueryDataType`
+- `TimeSeriesData`
+- `transformData` 
+
+After migrating to `v0.54.0`, we need to replace them with the proper substitute from the relevant packages.
+
+```typeScript
+/* v0.53.1 */
+import { Table, TableCellConfigs, TableColumnConfig, useSelection } from '@perses-dev/components';
+/* @perses-dev/core */
+import { CalculationsMap, formatValue, QueryDataType, TimeSeriesData, transformData } from '@perses-dev/core';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import {
+  ActionOptions,
+  PanelData,
+  PanelProps,
+  replaceVariablesInString,
+  useAllVariableValues,
+  VariableStateMap,
+} from '@perses-dev/plugin-system';
+/* OTHER IMPORTED MEMBERS*/
+
+export const APlugin = (): ReactElement => {
+  /**
+   * THE PLUGIN LOGIC
+   */
+  return <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>{/* THE PLUGIN STRUCTURE */}</Box>;
+};
+
+```
+When moving to `v.0.54.0` **the plugin itself remains INTACT and you do NOT need to change anything**.
+The only thing that you need to do 
+
+- remove the core dependencies
+- find the relevant substitutes for the removed imported members
+
+So, in `v.0.54.0` **only the import section of the plugin has changed and the rest remain as it is**. **Why?** Because, the same type has been moved to a different package while the structure is intact. 
+
+```typeScript
+/* v0.54.0 */
+import {
+  formatValue,
+  Table,
+  TableCellConfigs,
+  TableColumnConfig,
+  transformData,
+  useSelection,
+} from '@perses-dev/components';
+import { useSelectionItemActions } from '@perses-dev/dashboards';
+import {
+  ActionOptions,
+  CalculationsMap,
+  PanelData,
+  PanelProps,
+  replaceVariablesInString,
+  useAllVariableValues,
+  VariableStateMap,
+} from '@perses-dev/plugin-system';
+import { QueryDataType, TimeSeriesData } from '@perses-dev/spec';
+/* OTHER IMPORTED MEMBERS*/
+
+export const APlugin = (): ReactElement => {
+  /**
+   * THE PLUGIN LOGIC
+   */
+  return <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>{/* THE PLUGIN STRUCTURE */}</Box>;
+};
+```
+
+The following table, shows how in this example the imports have changed after moving to `v0.54.0` from `v.053.1`
+
+| @perses-dev/core Types    | Types new package |
+| -------- | ------- |
+| CalculationsMap  | @perses-dev/plugin-system    |
+| formatValue | @perses-dev/components     |
+| transformData     | @perses-dev/components    |
+| QueryDataType    | @perses-dev/spec    |
+| TimeSeriesData    | @perses-dev/spec   |
+
+
+If you already working on a change that has added new members to the `core`, you need to move them to the proper package accordingly. Where your new type should reside depends on its usage. Please note that if the new introduced member has only internal `Perses App` usage, it should reside in the `perses/perses`.
 
 #### GO-SDK: Import path change
 

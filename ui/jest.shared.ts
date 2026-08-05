@@ -24,7 +24,10 @@ const config: Config.InitialOptions = {
   setupFiles: [resolve(__dirname, './jest.setup.ts')],
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
-    '^echarts/(.*)$': 'echarts',
+    // Preserve the subpath (e.g. echarts/core, echarts/charts) so tree-shaken named exports
+    // (BarChart, DatasetComponent, etc.) resolve correctly, instead of collapsing to the full
+    // `echarts` bundle which doesn't expose those named exports.
+    '^echarts/(.*)$': 'echarts/$1',
 
     // Use polyfill for jsdom environment
     '^use-resize-observer$': 'use-resize-observer/polyfilled',
@@ -37,7 +40,10 @@ const config: Config.InitialOptions = {
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(lodash-es|yaml|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror))',
+    // echarts and zrender ship their `echarts/core`, `echarts/charts`, `echarts/components`,
+    // `echarts/renderers` (and internal) entry points as ESM-only source, so they need to be
+    // transformed by Jest as well (rather than being treated as pre-compiled CJS).
+    'node_modules/(?!(lodash-es|yaml|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror|echarts|zrender))',
   ],
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the

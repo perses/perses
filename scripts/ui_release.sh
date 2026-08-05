@@ -9,14 +9,6 @@ cd ui/
 
 files=("../LICENSE" "../CHANGELOG.md")
 workspaces=$(jq -r '.workspaces[]' < package.json)
-publish_workspaces=$(for workspace in ${workspaces}; do 
-  # packages are private so we shouldn't try to publish them.
-  # TODO: see if we can do something smarter here by checking for "private" set
-  # to true in a given package's package.json.
-  if [[ "${workspace}" != "app" ]] && [[ "${workspace}" != "e2e" ]] && [[ "${workspace}" != "storybook" ]] && [[ "${workspace}" != "internal-utils" ]]; then
-    echo $workspace;
-  fi 
-done)
 
 function copy() {
   for file in "${files[@]}"; do
@@ -26,20 +18,6 @@ function copy() {
       fi
     done
   done
-}
-
-function publish() {
-  dry_run="${1}"
-  cmd="npm publish --access public"
-  if [[ "${dry_run}" == "dry-run" ]]; then
-    cmd+=" --dry-run"
-  fi
-  for workspace in ${publish_workspaces}; do
-    cd "${workspace}"
-    eval "${cmd}"
-    cd ../
-  done
-
 }
 
 function checkPackage() {
@@ -73,6 +51,8 @@ function clean() {
 }
 
 function bumpVersion() {
+  # TODO does not work since the move to the shared repository, we need to find a way to bump the version of all packages only in the monorepo
+  # See shared package for the solution
   version="${1}"
   if [[ "${version}" == v* ]]; then
     version="${version:1}"
@@ -106,40 +86,6 @@ function getBranchSnapshotName() {
   echo "$(echo "${branch}" | sed -E  's/\//-/')"
 }
 
-function snapshotVersion() {
-  # Use version 0.0.0 to keep snapshots at the bottom of the npm versions UI to 
-  # avoid confusion for consumers of the package. This also helps differentiate
-  # snapshots from the concept of prereleases.
-  version="0.0.0"
-  
-  branch="${1}"
-  sha="${2}"
-  shortSha=$(echo $sha | cut -c 1-7)
-
-  branchSnapshotName=$(getBranchSnapshotName $branch)
-  snapshotVersion="${version}-${branchSnapshotName}-${shortSha}"
-  echo "Creating snapshot ${snapshotVersion}"
-
-  # Save snapshot version
-  echo "${snapshotVersion}" > ../VERSION
-
-  bumpVersion "${snapshotVersion}"
-  checkPackage "${snapshotVersion}"
-}
-
-
-function publishSnapshot() {
-  branch="${1}"
-  tagName=$(getBranchSnapshotName $branch)
-
-  echo "Publishing snapshot to tag ${tagName}"
-  cmd="npm publish --access public --tag ${tagName}"
-  for workspace in ${publish_workspaces}; do
-    cd "${workspace}"
-    eval "${cmd}"
-    cd ../
-  done
-}
 
 function removeSnapshot() {
   branch="${1}"
@@ -157,10 +103,6 @@ if [[ "$1" == "--copy" ]]; then
   copy
 fi
 
-if [[ $1 == "--publish" ]]; then
-  publish "${@:2}"
-fi
-
 if [[ $1 == "--check-package" ]]; then
   checkPackage "${@:2}"
 fi
@@ -171,14 +113,6 @@ fi
 
 if [[ $1 == "--clean" ]]; then
   clean
-fi
-
-if [[ $1 == "--snapshot-version" ]]; then
-  snapshotVersion "${@:2}" "${@:3}"
-fi
-
-if [[ $1 == "--publish-snapshot" ]]; then
-  publishSnapshot "${@:2}"
 fi
 
 if [[ $1 == "--remove-snapshot" ]]; then

@@ -114,7 +114,7 @@ func (m *completeMigration) migratePanel(grafanaPanel Panel, useDefaultDatasourc
 	}
 	panelPlugin, panelMigrationIsEmpty, err := ExecutePanelScript(migrateScriptInstance.instance, grafanaPanel.RawMessage)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error migrating %s panel %q: %w", grafanaPanel.Type, grafanaPanel.Title, err)
 	}
 	if panelMigrationIsEmpty {
 		result.Spec.Plugin = defaultPanelPlugin
