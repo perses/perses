@@ -380,10 +380,16 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			e.logWithError(err).Error("Invalid or missing Authorization header")
 			return err
 		}
-		_, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), clientID, clientSecret)
+		token, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), clientID, clientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
 			return err
+		}
+		var accessClaims oidc.AccessTokenClaims
+		if _, parseErr := oidc.ParseToken(token.AccessToken, &accessClaims); parseErr != nil {
+			e.logWithError(parseErr).Warn("Failed to parse client credentials access token; proceeding without claims")
+		} else {
+			persistedClaims = extractPersistedClaims(accessClaims.Claims, e.claimConfigs)
 		}
 		//TODO: Probably not a good idea to use the client id as the subject, but what can we do with client credentials?
 		uInfo = &oidcUserInfo{Subject: clientID}
