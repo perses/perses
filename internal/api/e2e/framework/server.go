@@ -418,4 +418,3 @@ func NewOIDCProviderTestServer(t *testing.T, extraClaims map[string]any) (*httpt
 
 	return server, conf
 }
-
