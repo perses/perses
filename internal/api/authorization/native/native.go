@@ -337,7 +337,7 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 }
 
 func (n *native) RefreshPermissions() error {
-	permissions, globalRoles, roles, err := n.loadAllPermissions()
+	permissions, globalRoles, roles, err := n.loadAllPermissionsAndRoles()
 	if err != nil {
 		return err
 	}
@@ -349,8 +349,8 @@ func (n *native) RefreshPermissions() error {
 	return nil
 }
 
-// loadAllPermissions is loading all permissions for all users.
-func (n *native) loadAllPermissions() (usersPermissions, []*v1.GlobalRole, []*v1.Role, error) {
+// loadAllPermissionsAndRoles is loading all permissions for all users.
+func (n *native) loadAllPermissionsAndRoles() (usersPermissions, []*v1.GlobalRole, []*v1.Role, error) {
 	users, err := n.userDAO.List(&user.Query{})
 	if err != nil {
 		return nil, nil, nil, err
