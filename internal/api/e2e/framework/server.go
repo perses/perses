@@ -148,7 +148,7 @@ func createRoleAndBidingForAlice(t *testing.T, manager dependency.Manager) (*mod
 	globalRoleBinding := NewGlobalRoleBinding("admin")
 	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRoleBinding)
 	// Refresh the permissions to ensure Alice has the latest permissions
-	err := manager.Service().GetAuthorization().RefreshPermissions()
+	err := manager.Service().GetAuthorization().RefreshPermissionsAndRoles()
 	if err != nil {
 		t.Fatalf("failed to refresh permissions: %v", err)
 	}

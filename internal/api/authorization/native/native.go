@@ -336,7 +336,7 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 	return userPermissions, nil
 }
 
-func (n *native) RefreshPermissions() error {
+func (n *native) RefreshPermissionsAndRoles() error {
 	permissions, globalRoles, roles, err := n.loadAllPermissionsAndRoles()
 	if err != nil {
 		return err

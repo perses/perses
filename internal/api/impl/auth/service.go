@@ -114,7 +114,7 @@ func (s *service) syncUser(uInfo externalUserInfo) (*v1.User, error) {
 			return nil, err
 		}
 		// Refreshing RBAC cache as the user's associated role may be updated, which can add or remove permissions.
-		if err := s.authz.RefreshPermissions(); err != nil {
+		if err := s.authz.RefreshPermissionsAndRoles(); err != nil {
 			logrus.WithError(err).Error("failed to refresh RBAC cache")
 		}
 	} else if specHasChanged {

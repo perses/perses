@@ -442,8 +442,8 @@ func (k *k8sImpl) checkNamespaceAccess(ctx echo.Context, namespace string, user 
 	return decision, err
 }
 
-// RefreshPermissions implements [Authorization]
-func (k *k8sImpl) RefreshPermissions() error {
+// RefreshPermissionsAndRoles implements [Authorization]
+func (k *k8sImpl) RefreshPermissionsAndRoles() error {
 	return nil
 }
 
