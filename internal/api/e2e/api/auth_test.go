@@ -106,7 +106,7 @@ func TestAuth_OAuthProvider_AuthEndpoint(t *testing.T) {
 // Send a GET request to the /login endpoint of the provider, in order to be redirected.
 // So we expect just a 200 status with a fake body proving that it comes from the test provider.
 func TestAuth_OIDCProvider_AuthEndpoint(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -156,7 +156,7 @@ func TestAuth_OAuthProvider_CallbackEndpoint(t *testing.T) {
 // Unfortunately, we cannot verify the nominal case because state cookie secret cannot be guessed.
 // It's generated on start of the Perses backend.
 func TestAuth_OIDCProvider_CallbackEndpoint(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -212,7 +212,7 @@ func TestAuth_OAuthProvider_DeviceCode(t *testing.T) {
 // - on one hand by the user to go to the login page (user code + verification_uri)
 // - on the other hand by the CLI to poll the /token endpoint to know when the user logged in (device code)
 func TestAuth_OIDCProvider_DeviceCode(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -265,7 +265,7 @@ func TestAuth_OAuthProvider_Token_FromDeviceCode(t *testing.T) {
 // It uses device code and send it to the provider.
 // It uses as well the userinfo endpoint to sync the user.
 func TestAuth_OIDCProvider_Token_FromDeviceCode(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -326,7 +326,7 @@ func TestAuth_OAuthProvider_Token_FromClientCredentials(t *testing.T) {
 // It uses client credentials and send them to the provider.
 // It uses as well the userinfo endpoint to sync the user.
 func TestAuth_OIDCProvider_Token_FromClientCredentials(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -462,7 +462,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 // TestAuth_OIDCProvider_Token_WithLib
 // Test the client credentials mechanism using the golang oauth2 library.
 func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
@@ -543,7 +543,7 @@ func oidcDeviceCodeLogin(expect *httpexpect.Expect, slugID string) string {
 // TestAuth_OIDCProvider_ClaimGrantsGlobalRole verifies that a claim value mapped to a GlobalRole in the
 // provider config is honoured end-to-end: the user gets the GlobalRole's permissions without any DB RoleBinding.
 func TestAuth_OIDCProvider_ClaimGrantsGlobalRole(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, map[string]any{
 		"roles": []string{"admin"},
 	})
 	defer providerServer.Close()
@@ -594,7 +594,7 @@ func TestAuth_OIDCProvider_ClaimGrantsGlobalRole(t *testing.T) {
 // that does not match any mapping, no extra permissions are granted.
 func TestAuth_OIDCProvider_WrongClaimValue_NoExtraPermissions(t *testing.T) {
 	// Token carries "viewer" but only "admin" is mapped.
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, map[string]any{
 		"roles": []string{"viewer"},
 	})
 	defer providerServer.Close()
@@ -634,7 +634,7 @@ func TestAuth_OIDCProvider_WrongClaimValue_NoExtraPermissions(t *testing.T) {
 // TestAuth_OIDCProvider_ClaimGrantsProjectRole verifies that a claim mapped to a project-scoped Role
 // grants permissions only within that project and not globally.
 func TestAuth_OIDCProvider_ClaimGrantsProjectRole(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServerWithClaims(t, map[string]any{
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, map[string]any{
 		"roles": []string{"editor"},
 	})
 	defer providerServer.Close()
@@ -695,7 +695,7 @@ func TestAuth_OIDCProvider_ClaimGrantsProjectRole(t *testing.T) {
 // matching the configured mappings, no extra permissions are granted.
 func TestAuth_OIDCProvider_NoClaims_NoExtraPermissions(t *testing.T) {
 	// Standard mock — no extra claims in the token.
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	// Configure a mapping that would grant admin if the claim were present.
