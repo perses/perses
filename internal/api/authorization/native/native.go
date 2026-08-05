@@ -213,6 +213,22 @@ func (n *native) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	return echojwt.WithConfig(jwtMiddlewareConfig)
 }
 
+// projectsWithPermission returns the list of projects for which the given permission map grants
+// the requested action+scope. If the wildcard project has permission, it returns immediately
+// with [v1.WildcardProject]. Returns nil when no project grants the requested permission.
+func projectsWithPermission(projectPermissions map[string][]*v1Role.Permission, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+	if listHasPermission(projectPermissions[v1.WildcardProject], requestAction, requestScope) {
+		return []string{v1.WildcardProject}
+	}
+	var projects []string
+	for project, permList := range projectPermissions {
+		if project != v1.WildcardProject && listHasPermission(permList, requestAction, requestScope) {
+			projects = append(projects, project)
+		}
+	}
+	return projects
+}
+
 func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, requestScope v1Role.Scope) ([]string, error) {
 	if listHasPermission(n.guestPermissions, requestAction, requestScope) {
 		return []string{v1.WildcardProject}, nil
@@ -231,35 +247,14 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 	// Claim-based check: if wildcard permission found via claims, short-circuit.
 	usr, _ := n.GetUser(ctx)
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		claimPerms := n.claimPermissions(claims)
-		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
-			return []string{v1.WildcardProject}, nil
-		}
-		var claimProjects []string
-		for project, permList := range claimPerms {
-			if project != v1.WildcardProject && listHasPermission(permList, requestAction, requestScope) {
-				claimProjects = append(claimProjects, project)
-			}
-		}
-		if len(claimProjects) > 0 {
+		if claimProjects := projectsWithPermission(n.claimPermissions(claims), requestAction, requestScope); len(claimProjects) > 0 {
 			return claimProjects, nil
 		}
 	}
 
 	n.mutex.RLock()
 	defer n.mutex.RUnlock()
-	projectPermission := n.cache.permissions[username]
-	if globalPermissions, ok := projectPermission[v1.WildcardProject]; ok && listHasPermission(globalPermissions, requestAction, requestScope) {
-		return []string{v1.WildcardProject}, nil
-	}
-
-	var projects []string
-	for project, permList := range projectPermission {
-		if project != v1.WildcardProject && listHasPermission(permList, requestAction, requestScope) {
-			projects = append(projects, project)
-		}
-	}
-	return projects, nil
+	return projectsWithPermission(n.cache.permissions[username], requestAction, requestScope), nil
 }
 
 func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
