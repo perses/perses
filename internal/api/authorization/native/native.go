@@ -109,7 +109,7 @@ func buildClaimMappings(conf config.Config) map[providerKey][]claimRoleMapping {
 type native struct {
 	// The key used to sign the JWT token, it is expected to be the same as the one used in the crypto package.
 	accessKey []byte
-	// cache is used to store in memory the permissions of all users.
+	// cache is used to store in memory the permissions of all users and all the roles defined
 	cache                *cache
 	userDAO              user.DAO
 	roleDAO              role.DAO
