@@ -29,7 +29,11 @@ type Query interface {
 	// In case of global resource, this will return an empty string.
 	// In case of project resource, this will return the project name set in the query parameter or in the URL path.
 	GetProjectQueryParam() string
-	SetProjectQueryParam(project string)
+}
+
+type ProjectQuery interface {
+	Query
+	CloneWithProject(project string) ProjectQuery
 }
 
 type DAO interface {

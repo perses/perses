@@ -20,6 +20,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/async"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -193,8 +194,8 @@ func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
 }
 
 func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
+	projectQuery := any(query).(databaseModel.ProjectQuery).CloneWithProject(project).(V)
 	return func() (any, error) {
-		query.SetProjectQueryParam(project)
-		return t.metadataOrFullList(query)
+		return t.metadataOrFullList(projectQuery)
 	}
 }

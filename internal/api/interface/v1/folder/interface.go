@@ -49,8 +49,10 @@ func (q *Query) GetProjectQueryParam() string {
 	return q.Project
 }
 
-func (q *Query) SetProjectQueryParam(project string) {
-	q.Project = project
+func (q *Query) CloneWithProject(project string) databaseModel.ProjectQuery {
+	clone := *q
+	clone.Project = project
+	return &clone
 }
 
 type DAO interface {
