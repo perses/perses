@@ -15,6 +15,7 @@ package config
 
 import (
 	"fmt"
+	"net/http"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -24,12 +25,13 @@ type K8sAuth struct {
 	KubeconfigFile string `json:"kubeconfig,omitempty" yaml:"kubeconfig,omitempty"`
 }
 
-func (b *K8sAuth) GetToken() (string, error) {
+// WrapRoundTripper applies the authentication configured by Kubernetes without replacing the Perses transport.
+func (b *K8sAuth) WrapRoundTripper(roundTripper http.RoundTripper) (http.RoundTripper, error) {
 	kubeconfig, err := InitKubeConfig(b.KubeconfigFile)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return kubeconfig.BearerToken, nil
+	return rest.HTTPWrappersForConfig(kubeconfig, roundTripper)
 }
 
 // InitKubeConfig returns initialized config, allows local usage (outside cluster) based on provided kubeconfig or in-cluster
