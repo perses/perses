@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	secretBasicAuth     = `"basicAuth": {"username": "Magical", "password": "Girl"}`
-	secretAuthorization = `"authorization": {"type": "Bearer", "credentials": "token"}`
-	secretOAuth         = `"oauth": {"clientID": "id", "clientSecret": "secret", "tokenURL": "https://example.com/token"}`
+	basicAuthJSON     = `"basicAuth": {"username": "Magical", "password": "Girl"}`
+	authorizationJSON = `"authorization": {"type": "Bearer", "credentials": "token"}`
+	oauthJSON         = `"oauth": {"clientID": "id", "clientSecret": "secret", "tokenURL": "https://example.com/token"}`
 )
 
 func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
@@ -37,34 +37,34 @@ func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
 	}{
 		{
 			title: "only basicAuth",
-			jason: fmt.Sprintf(`{%s}`, secretBasicAuth),
+			jason: fmt.Sprintf(`{%s}`, basicAuthJSON),
 		},
 		{
 			title: "only authorization",
-			jason: fmt.Sprintf(`{%s}`, secretAuthorization),
+			jason: fmt.Sprintf(`{%s}`, authorizationJSON),
 		},
 		{
 			title: "only oauth",
-			jason: fmt.Sprintf(`{%s}`, secretOAuth),
+			jason: fmt.Sprintf(`{%s}`, oauthJSON),
 		},
 		{
 			title: "basicAuth and authorization",
-			jason: fmt.Sprintf(`{%s, %s}`, secretBasicAuth, secretAuthorization),
+			jason: fmt.Sprintf(`{%s, %s}`, basicAuthJSON, authorizationJSON),
 			err:   mutuallyExclusiveErr,
 		},
 		{
 			title: "basicAuth and oauth",
-			jason: fmt.Sprintf(`{%s, %s}`, secretBasicAuth, secretOAuth),
+			jason: fmt.Sprintf(`{%s, %s}`, basicAuthJSON, oauthJSON),
 			err:   mutuallyExclusiveErr,
 		},
 		{
 			title: "authorization and oauth",
-			jason: fmt.Sprintf(`{%s, %s}`, secretAuthorization, secretOAuth),
+			jason: fmt.Sprintf(`{%s, %s}`, authorizationJSON, oauthJSON),
 			err:   mutuallyExclusiveErr,
 		},
 		{
 			title: "basicAuth, authorization and oauth",
-			jason: fmt.Sprintf(`{%s, %s, %s}`, secretBasicAuth, secretAuthorization, secretOAuth),
+			jason: fmt.Sprintf(`{%s, %s, %s}`, basicAuthJSON, authorizationJSON, oauthJSON),
 			err:   mutuallyExclusiveErr,
 		},
 	}
