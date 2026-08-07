@@ -21,7 +21,7 @@ import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } f
 import IconButton from '@mui/material/IconButton';
 import Close from 'mdi-material-ui/Close';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
-import { isProjectMetadata, Resource } from '@perses-dev/client';
+import { isProjectMetadata, Resource, StatusError } from '@perses-dev/client';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useProjectList } from '../../../model/project-client';
@@ -42,12 +42,39 @@ interface ResourceListProps {
   isResources?: (type: ResourceType, available: boolean) => void;
 }
 
+function SearchErrorAlert({ title, error }: { title: string; error: StatusError }): ReactElement {
+  const detail = error.message?.trim() || 'Unknown error';
+
+  return (
+    <Box sx={{ margin: 1 }}>
+      <Alert
+        severity="error"
+        sx={{
+          alignItems: 'center',
+          '& .MuiAlert-message': {
+            display: 'flex',
+            alignItems: 'center',
+            padding: 0,
+          },
+        }}
+      >
+        {title}: {detail}
+      </Alert>
+    </Box>
+  );
+}
+
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const projectsQueryResult = useProjectList({ refetchOnMount: false });
+  const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
   const { query, onClick, isResources } = props;
+
+  if (projectListError) {
+    return <SearchErrorAlert title="Failed to load projects" error={projectListError} />;
+  }
+
   return (
     <SearchList
-      list={projectsQueryResult.data ?? []}
+      list={projectList ?? []}
       query={query}
       onClick={onClick}
       icon={Archive}
@@ -57,11 +84,18 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
+  const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
+    refetchOnMount: false,
+  });
   const { query, onClick, isResources } = props;
+
+  if (globalDatasourceListError) {
+    return <SearchErrorAlert title="Failed to load global datasources" error={globalDatasourceListError} />;
+  }
+
   return (
     <SearchList
-      list={globalDatasourceQueryResult.data ?? []}
+      list={globalDatasourceList ?? []}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
@@ -103,16 +137,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
     }
   }, [importantDashboards, dashboardList, query]);
 
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
+  const dashboardError = dashboardListError ?? importantDashboardsError;
+  if (dashboardError) {
+    return <SearchErrorAlert title="Failed to load dashboards" error={dashboardError} />;
+  }
 
   return dashboardListLoading || importantDashboardsLoading ? null : (
     <SearchList
@@ -127,11 +155,16 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
+  const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
   const { isResources, onClick, query } = props;
+
+  if (datasourceListError) {
+    return <SearchErrorAlert title="Failed to load datasources" error={datasourceListError} />;
+  }
+
   return (
     <SearchList
-      list={datasourceQueryResult.data ?? []}
+      list={datasourceList ?? []}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
