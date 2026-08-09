@@ -188,7 +188,7 @@ type Migration interface {
 	Load(pluginPath string, module v1.PluginModule) error
 	LoadDevPlugin(pluginPath string, module v1.PluginModule) error
 	UnLoadDevPlugin(module v1.PluginModule)
-	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error)
+	Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool, generateDashboardName bool) (*v1.Dashboard, error)
 }
 
 func New() Migration {
@@ -233,14 +233,25 @@ func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
 	}
 }
 
-func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool) (*v1.Dashboard, error) {
+func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDefaultDatasource bool, generateDashboardName bool) (*v1.Dashboard, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
+	// By default the Perses dashboard name (metadata.name) reuses the Grafana UID, which is often a
+	// cryptic auto-generated string. When generateDashboardName is enabled, we derive a more
+	// meaningful name from the dashboard title instead, the same way a brand-new dashboard is named.
+	// We keep the UID as a fallback in case the title is empty or only contains characters that get
+	// stripped away during the name generation.
+	name := grafanaDashboard.UID
+	if generateDashboardName {
+		if generatedName := generateMetadataName(grafanaDashboard.Title); len(generatedName) > 0 {
+			name = generatedName
+		}
+	}
 	result := &v1.Dashboard{
 		Kind: v1.KindDashboard,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: grafanaDashboard.UID,
+				Name: name,
 				Tags: set.New(grafanaDashboard.Tags...),
 			},
 		},

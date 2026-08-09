@@ -55,7 +55,7 @@ func (e *endpoint) Migrate(ctx echo.Context) error {
 	if err := json.Unmarshal(rawGrafanaDashboard, grafanaDashboard); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard, body.UseDefaultDatasource)
+	persesDashboard, err := e.migrationService.Migrate(grafanaDashboard, body.UseDefaultDatasource, body.GenerateDashboardName)
 	if err != nil {
 		return err
 	}

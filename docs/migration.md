@@ -71,6 +71,15 @@ Note: In case you would like to have the result as a K8s CustomResource, you can
     percli migrate -f grafana-dashboard.json --online --use-default-datasource -o json > perses-dashboard.json
     ```
 
+!!! tip
+    By default the migrated dashboard reuses the Grafana UID as its technical name (`metadata.name`),
+    which is often a cryptic auto-generated string. If you want the technical name to be generated from
+    the dashboard title instead, you can use the `--generate-dashboard-name` flag.
+
+    ```bash
+    percli migrate -f grafana-dashboard.json --online --generate-dashboard-name -o json > perses-dashboard.json
+    ```
+
 - You should check the unsupported migrations. For example, in case of a variable, you will get a static variable like this:
 
 ```json

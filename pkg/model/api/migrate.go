@@ -22,6 +22,9 @@ type Migrate struct {
 	Input                map[string]string `json:"input,omitempty"`
 	GrafanaDashboard     json.RawMessage   `json:"grafanaDashboard"`
 	UseDefaultDatasource bool              `json:"useDefaultDatasource,omitempty"`
+	// GenerateDashboardName generates the dashboard's technical name (metadata.name) from its
+	// title instead of reusing the Grafana UID.
+	GenerateDashboardName bool `json:"generateDashboardName,omitempty"`
 }
 
 func (m *Migrate) UnmarshalJSON(data []byte) error {

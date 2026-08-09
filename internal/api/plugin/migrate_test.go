@@ -75,7 +75,7 @@ func TestNoRegMigration(t *testing.T) {
 			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
-			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -128,7 +128,7 @@ func TestMig_Migrate(t *testing.T) {
 			if unmarshallErr := json.Unmarshal(input, grafanaDashboard); unmarshallErr != nil {
 				t.Fatal(unmarshallErr)
 			}
-			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -146,9 +146,33 @@ func TestMig_MigrateTags(t *testing.T) {
 		Tags:  []string{"ops", "prod", "ops"},
 	}
 
-	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false, false)
 	assert.NoError(t, err)
 	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
+}
+
+func TestMig_MigrateGenerateDashboardName(t *testing.T) {
+	pl := loadDefaultTestPlugins()
+	grafanaDashboard := &migrate.SimplifiedDashboard{
+		UID:   "aead1k2js",
+		Title: "My Awesome Dashboard",
+	}
+
+	// By default the Grafana UID is reused as the technical name.
+	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false, false)
+	assert.NoError(t, err)
+	assert.Equal(t, "aead1k2js", persesDashboard.Metadata.Name)
+
+	// When generateDashboardName is enabled, the technical name is derived from the title.
+	persesDashboard, err = pl.Migration().Migrate(grafanaDashboard, false, true)
+	assert.NoError(t, err)
+	assert.Equal(t, "My_Awesome_Dashboard", persesDashboard.Metadata.Name)
+
+	// When the title is empty, generateDashboardName falls back to the Grafana UID.
+	emptyTitleDashboard := &migrate.SimplifiedDashboard{UID: "aead1k2js", Title: ""}
+	persesDashboard, err = pl.Migration().Migrate(emptyTitleDashboard, false, true)
+	assert.NoError(t, err)
+	assert.Equal(t, "aead1k2js", persesDashboard.Metadata.Name)
 }
 
 func TestMigrateDashboardLinks(t *testing.T) {
@@ -225,7 +249,7 @@ func TestMigrateDashboardLinks(t *testing.T) {
 				Links: []migrate.GrafanaLink{tc.grafanaLink},
 			}
 
-			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false, false)
 			assert.NoError(t, err)
 			assert.NotNil(t, persesDashboard)
 			assert.Equal(t, tc.expectedLinks, persesDashboard.Spec.Links)

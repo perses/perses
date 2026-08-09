@@ -59,6 +59,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
   const [projectName, setProjectName] = useState<string>('');
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
+  const [generateDashboardName, setGenerateDashboardName] = useState(false);
   const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
@@ -122,6 +123,16 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
           }
           label="Use default datasource in Perses"
         />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={generateDashboardName}
+              onChange={(e) => setGenerateDashboardName(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Generate dashboard name from title"
+        />
         <Button
           fullWidth
           variant="contained"
@@ -132,6 +143,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
               input: grafanaInput,
               grafanaDashboard: dashboard ?? {},
               useDefaultDatasource: useDefaultDatasource,
+              generateDashboardName: generateDashboardName,
             });
           }}
         >
