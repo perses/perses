@@ -12,29 +12,17 @@
 // limitations under the License.
 
 import { Button, Container, Divider, Stack, Typography } from '@mui/material';
-import type { DashboardResource } from '@perses-dev/client';
-import { JSONEditor } from '@perses-dev/components';
+import { YAMLEditor } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
 import type { ChangeEvent, ReactElement } from 'react';
 import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
-import { getDashboardType } from './dashboard-type';
 import GrafanaFlow from './GrafanaFlow';
 import PersesFlow from './PersesFlow';
-
-type Dashboard = GrafanaDashboard | PersesDashboard | undefined;
-
-interface GrafanaDashboard {
-  kind: 'grafana';
-  data: Record<string, unknown>;
-}
-
-interface PersesDashboard {
-  kind: 'perses';
-  data: DashboardResource;
-}
+import type { Dashboard } from './parse-dashboard';
+import { parseDashboard } from './parse-dashboard';
 
 function ImportView(): ReactElement {
   const [dashboard, setDashboard] = useState<Dashboard>();
@@ -51,16 +39,8 @@ function ImportView(): ReactElement {
     }
   };
 
-  const completeDashboard = (dashboard: string | undefined): void => {
-    try {
-      const json = JSON.parse(dashboard ?? '{}');
-      setDashboard({
-        kind: getDashboardType(json),
-        data: json,
-      });
-    } catch (_) {
-      setDashboard(undefined);
-    }
+  const completeDashboard = (definition: string | undefined): void => {
+    setDashboard(parseDashboard(definition));
   };
 
   return (
@@ -74,17 +54,17 @@ function ImportView(): ReactElement {
           1. Provide a dashboard
         </Typography>
         <Button fullWidth startIcon={<Upload />} variant="outlined" component="label">
-          Upload JSON file
+          Upload JSON or YAML file
           <input type="file" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
         </Button>
         <Divider>OR</Divider>
-        <JSONEditor
+        <YAMLEditor
           value={dashboard?.data}
           onChange={(value: string) => completeDashboard(value)}
           minHeight="10rem"
           maxHeight="30rem"
           width="100%"
-          placeholder="Paste your Dashboard JSON here..."
+          placeholder="Paste your Dashboard JSON or YAML here..."
         />
         {dashboard !== undefined && dashboard.kind === 'grafana' && <GrafanaFlow dashboard={dashboard?.data} />}
         {dashboard !== undefined && dashboard.kind === 'perses' && <PersesFlow dashboard={dashboard?.data} />}
