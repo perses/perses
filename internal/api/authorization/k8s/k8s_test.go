@@ -15,6 +15,7 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -22,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 	authnv1 "k8s.io/api/authentication/v1"
@@ -235,6 +237,19 @@ func mockAuthorization(clientset *fake.Clientset) {
 
 			spec := sar.Spec
 			sar.Status.Allowed = false
+
+			// Handle impersonation SAR checks
+			if spec.ResourceAttributes != nil && spec.ResourceAttributes.Verb == "impersonate" && spec.ResourceAttributes.Resource == "users" {
+				// Only admin can impersonate
+				if spec.User == userAdmin {
+					sar.Status.Allowed = true
+				} else {
+					sar.Status.Allowed = false
+					sar.Status.Reason = fmt.Sprintf("Mock RBAC: user %s cannot impersonate", spec.User)
+				}
+				return true, sar, nil
+			}
+
 			// For users without full admin permissions to all namespaces, permission checks against
 			// namespace resources return `NoOpinion`. Mock it here as a denial
 			if spec.User != userAdmin && spec.ResourceAttributes.Resource == string(k8sProjectScope) {
@@ -308,12 +323,11 @@ func TestHasPermission(t *testing.T) {
 	mockK8s := newK8sMock(t)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
-	rec := httptest.NewRecorder()
 
 	testSuites := []struct {
 		title          string
 		user           string
+		impersonateAs  string
 		reqAction      v1Role.Action
 		reqProject     string
 		reqScope       v1Role.Scope
@@ -680,11 +694,53 @@ func TestHasPermission(t *testing.T) {
 			reqScope:       v1Role.VariableScope,
 			expectedResult: false,
 		},
+		// Impersonation tests
+		{
+			title:          "admin impersonating user0 gets user0's read dashboard perm in project0",
+			user:           userAdmin,
+			impersonateAs:  userZero,
+			reqAction:      v1Role.ReadAction,
+			reqProject:     projectZero,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "admin impersonating user0 denied create dashboard in project0 (user0 can't create)",
+			user:           userAdmin,
+			impersonateAs:  userZero,
+			reqAction:      v1Role.CreateAction,
+			reqProject:     projectZero,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "admin impersonating user1 denied read dashboard in project0 (user1 has no perms)",
+			user:           userAdmin,
+			impersonateAs:  userOne,
+			reqAction:      v1Role.ReadAction,
+			reqProject:     projectZero,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "admin impersonating user0 denied read dashboard in project1 (user0 only has project0)",
+			user:           userAdmin,
+			impersonateAs:  userZero,
+			reqAction:      v1Role.ReadAction,
+			reqProject:     projectOne,
+			reqScope:       v1Role.DashboardScope,
+			expectedResult: false,
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s-token", test.user))
+			if test.impersonateAs != "" {
+				req.Header.Set("Impersonate-User", test.impersonateAs)
+			}
+			rec := httptest.NewRecorder()
 			assert.Equal(t, test.expectedResult, mockK8s.HasPermission(e.NewContext(req, rec), test.reqAction, test.reqProject, test.reqScope))
 		})
 	}
@@ -694,8 +750,6 @@ func TestGetUserProjects(t *testing.T) {
 	mockK8s := newK8sMock(t)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
-	rec := httptest.NewRecorder()
 
 	testSuites := []struct {
 		title          string
@@ -882,7 +936,9 @@ func TestGetUserProjects(t *testing.T) {
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s-token", test.user))
+			rec := httptest.NewRecorder()
 			userProjects, err := mockK8s.GetUserProjects(e.NewContext(req, rec), v1Role.ReadAction, test.reqScope)
 			assert.NoError(t, err)
 			assert.Equal(t, test.expectedResult, userProjects)
@@ -894,12 +950,23 @@ func TestGetPermissions(t *testing.T) {
 	mockK8s := newK8sMock(t)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
-	rec := httptest.NewRecorder()
+
+	user0Perms := map[string][]*v1Role.Permission{"*": {
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
+	}, projectZero: {
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Secret"}},
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
+		{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Folder"}},
+	}}
+	user1Perms := map[string][]*v1Role.Permission{}
 
 	testSuites := []struct {
 		title          string
 		user           string
+		impersonateAs  string
 		expectedResult map[string][]*v1Role.Permission
 	}{
 		{
@@ -918,23 +985,14 @@ func TestGetPermissions(t *testing.T) {
 			}},
 		},
 		{
-			title: "user0 has readonly permissions in project0 and GlobalDatasource in all namespaces",
-			user:  userZero,
-			expectedResult: map[string][]*v1Role.Permission{"*": {
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"GlobalDatasource"}},
-			}, projectZero: {
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Dashboard"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Secret"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Variable"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"EphemeralDashboard"}},
-				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Folder"}},
-			}},
+			title:          "user0 has readonly permissions in project0 and GlobalDatasource in all namespaces",
+			user:           userZero,
+			expectedResult: user0Perms,
 		},
 		{
 			title:          "user1 has no permissions",
 			user:           userOne,
-			expectedResult: map[string][]*v1Role.Permission{},
+			expectedResult: user1Perms,
 		},
 		{
 			title: "user2 has read permissions in all namespaces and create permissions in project0",
@@ -971,14 +1029,103 @@ func TestGetPermissions(t *testing.T) {
 				{Actions: []v1Role.Action{"read"}, Scopes: []v1Role.Scope{"Datasource"}},
 			}},
 		},
+		// Impersonation tests
+		{
+			title:          "admin impersonating user0 gets user0 permissions",
+			user:           userAdmin,
+			impersonateAs:  userZero,
+			expectedResult: user0Perms,
+		},
+		{
+			title:          "admin impersonating user1 gets empty permissions",
+			user:           userAdmin,
+			impersonateAs:  userOne,
+			expectedResult: user1Perms,
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(""))
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s-token", test.user))
+			if test.impersonateAs != "" {
+				req.Header.Set("Impersonate-User", test.impersonateAs)
+			}
+			rec := httptest.NewRecorder()
 			userPermissions, err := mockK8s.GetPermissions(e.NewContext(req, rec))
 			assert.NoError(t, err)
 			assert.Equal(t, test.expectedResult, userPermissions)
+		})
+	}
+}
+
+func TestGetUserImpersonation(t *testing.T) {
+	mockK8s := newK8sMock(t)
+
+	e := echo.New()
+
+	testSuites := []struct {
+		title         string
+		callerToken   string
+		impersonateAs string
+		expectName    string
+		expectError   bool
+	}{
+		{
+			title:         "admin impersonating user0 returns user0 identity",
+			callerToken:   "admin-token",
+			impersonateAs: userZero,
+			expectName:    userZero,
+			expectError:   false,
+		},
+		{
+			title:         "admin impersonating user1 returns user1 identity",
+			callerToken:   "admin-token",
+			impersonateAs: userOne,
+			expectName:    userOne,
+			expectError:   false,
+		},
+		{
+			title:         "user0 trying to impersonate admin is forbidden",
+			callerToken:   "user0-token",
+			impersonateAs: userAdmin,
+			expectError:   true,
+		},
+		{
+			title:         "user1 trying to impersonate user0 is forbidden",
+			callerToken:   "user1-token",
+			impersonateAs: userZero,
+			expectError:   true,
+		},
+		{
+			title:       "no impersonate header returns caller identity",
+			callerToken: "admin-token",
+			expectName:  userAdmin,
+			expectError: false,
+		},
+	}
+
+	for _, test := range testSuites {
+		t.Run(test.title, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", test.callerToken))
+			if test.impersonateAs != "" {
+				req.Header.Set("Impersonate-User", test.impersonateAs)
+			}
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+
+			userResult, err := mockK8s.GetUser(ctx)
+			if test.expectError {
+				assert.Error(t, err)
+				assert.True(t, errors.Is(err, apiInterface.ForbiddenError))
+				assert.Nil(t, userResult)
+			} else {
+				assert.NoError(t, err)
+				k8sUser, castErr := getK8sUser(userResult)
+				assert.NoError(t, castErr)
+				assert.Equal(t, test.expectName, k8sUser.GetName())
+			}
 		})
 	}
 }
