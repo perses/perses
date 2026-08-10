@@ -21,7 +21,7 @@
 
 package v1
 
-import "github.com/perses/perses/cue/model/api/v1/variable"
+import "github.com/perses/spec/cue/dashboard/variable"
 
 #Variable: {
 	kind: #KindVariable @go(Kind)
