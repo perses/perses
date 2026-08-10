@@ -17,53 +17,33 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func newGlobalClient(kind v1.Kind, indexedKeys []string) *client {
-	return &client{
-		kind:        kind,
-		indexedKeys: indexedKeys,
-		idx:         make(map[string]index[*v1.Metadata]),
-		projectIdx:  make(map[string]map[string]index[*v1.ProjectMetadata]),
-	}
+// newDisabledAuthz returns an authorization.Authorization implementation with authorization disabled.
+// When authorization is disabled, the echo.Context parameter is never used by the implementation,
+// so tests can safely pass nil as the context when calling functions that require it.
+func newDisabledAuthz(t *testing.T) authorization.Authorization {
+	t.Helper()
+	authz, err := authorization.New(nil, nil, nil, nil, nil, config.Config{})
+	require.NoError(t, err)
+	require.False(t, authz.IsEnabled())
+	return authz
 }
 
 func TestClientAdd(t *testing.T) {
 	testsCases := []struct {
 		title              string
-		kind               v1.Kind
 		raw                json.RawMessage
 		indexedKeys        []string
-		expectedIdx        map[string]index[*v1.Metadata]
 		expectedProjectIdx map[string]map[string]index[*v1.ProjectMetadata]
 	}{
 		{
-			title: "add global resource",
-			kind:  v1.KindProject,
-			raw: json.RawMessage(`{
-		"kind": "Project",
-		"metadata": {
-			"name": "myproject"
-		},
-		"spec": {}
-	}`),
-			indexedKeys: []string{"metadata.name"},
-			expectedIdx: map[string]index[*v1.Metadata]{
-				"myproject": {
-					metadata: &v1.Metadata{
-						Name: "myproject",
-					},
-					displayName: "myproject",
-					fields:      []string{"myproject"},
-				},
-			},
-		},
-		{
 			title: "add project resource",
-			kind:  v1.KindDashboard,
 			raw: json.RawMessage(`{
 		"kind": "Dashboard",
 		"metadata": {
@@ -86,13 +66,13 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "mydashboard",
 						fields:      []string{"mydashboard", "myproject"},
+						search:      &search{},
 					},
 				},
 			},
 		},
 		{
 			title: "add dashboard with display name",
-			kind:  v1.KindDashboard,
 			raw: json.RawMessage(`{
 		"kind": "Dashboard",
 		"metadata": {
@@ -119,6 +99,7 @@ func TestClientAdd(t *testing.T) {
 						},
 						displayName: "My Fancy Dashboard",
 						fields:      []string{"mydashboard", "myproject", "My Fancy Dashboard"},
+						search:      &search{},
 					},
 				},
 			},
@@ -126,22 +107,16 @@ func TestClientAdd(t *testing.T) {
 	}
 	for _, tc := range testsCases {
 		t.Run(tc.title, func(t *testing.T) {
-			c := newGlobalClient(tc.kind, tc.indexedKeys)
+			c := newClient(tc.indexedKeys, newDisabledAuthz(t))
 			err := c.add(tc.raw)
 			require.NoError(t, err)
-			if v1.IsGlobal(tc.kind) {
-				assert.Equal(t, tc.expectedIdx, c.idx)
-				assert.Empty(t, c.projectIdx)
-			} else {
-				assert.Equal(t, tc.expectedProjectIdx, c.projectIdx)
-				assert.Empty(t, c.idx)
-			}
+			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
 		})
 	}
 }
 
 func Test_client_add_missingIndexedKeyProducesEmptyField(t *testing.T) {
-	c := newGlobalClient(v1.KindDashboard, []string{"metadata.name", "spec.unknown.field"})
+	c := newClient([]string{"metadata.name", "spec.unknown.field"}, newDisabledAuthz(t))
 
 	raw := json.RawMessage(`{
 		"kind": "Dashboard",
@@ -155,12 +130,12 @@ func Test_client_add_missingIndexedKeyProducesEmptyField(t *testing.T) {
 	err := c.add(raw)
 	require.NoError(t, err)
 
-	entry := c.projectIdx["myproject"]["mydashboard"]
+	entry := c.dashboards.idx["myproject"]["mydashboard"]
 	assert.Equal(t, []string{"mydashboard", ""}, entry.fields)
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
-	c := newGlobalClient(v1.KindDashboard, []string{"metadata.name"})
+	c := newClient([]string{"metadata.name"}, newDisabledAuthz(t))
 
 	rawA := json.RawMessage(`{
 		"kind": "Dashboard",
@@ -176,8 +151,72 @@ func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
 	require.NoError(t, c.add(rawA))
 	require.NoError(t, c.add(rawB))
 
-	require.Contains(t, c.projectIdx, "project-a")
-	require.Contains(t, c.projectIdx, "project-b")
-	assert.Contains(t, c.projectIdx["project-a"], "dashboard-a")
-	assert.Contains(t, c.projectIdx["project-b"], "dashboard-b")
+	require.Contains(t, c.dashboards.idx, "project-a")
+	require.Contains(t, c.dashboards.idx, "project-b")
+	assert.Contains(t, c.dashboards.idx["project-a"], "dashboard-a")
+	assert.Contains(t, c.dashboards.idx["project-b"], "dashboard-b")
+}
+
+// TestClientSearch_authorizationDisabled tests the client.search function when authorization is disabled.
+// When it is disabled, the ctx (echo.Context) is not used at all by the authorization service,
+// so we can safely pass nil as the context.
+func TestClientSearch_authorizationDisabled(t *testing.T) {
+	testsCases := []struct {
+		title         string
+		kind          v1.Kind
+		project       string
+		text          string
+		expectedNames []string
+	}{
+		{
+			title:         "search across all projects",
+			kind:          v1.KindDashboard,
+			project:       "",
+			text:          "node",
+			expectedNames: []string{"node-exporter", "node-cpu-usage"},
+		},
+		{
+			title:         "search filtered by project",
+			kind:          v1.KindDashboard,
+			project:       "project-a",
+			text:          "node",
+			expectedNames: []string{"node-exporter"},
+		},
+		{
+			title:         "search with no match returns empty slice",
+			kind:          v1.KindDashboard,
+			project:       "",
+			text:          "doesnotexist",
+			expectedNames: nil,
+		},
+		{
+			title:         "search with unsupported kind returns empty slice",
+			kind:          v1.KindProject,
+			project:       "",
+			text:          "node",
+			expectedNames: nil,
+		},
+	}
+	c := newClient([]string{"metadata.name"}, newDisabledAuthz(t))
+
+	docs := []json.RawMessage{
+		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "node-exporter", "project": "project-a"}, "spec": {}}`),
+		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "kube-state-metrics", "project": "project-a"}, "spec": {}}`),
+		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "node-cpu-usage", "project": "project-b"}, "spec": {}}`),
+	}
+	for _, d := range docs {
+		require.NoError(t, c.add(d))
+	}
+
+	for _, tc := range testsCases {
+		t.Run(tc.title, func(t *testing.T) {
+			results, err := c.search(nil, tc.kind, tc.project, tc.text)
+			require.NoError(t, err)
+			var names []string
+			for _, r := range results {
+				names = append(names, r.Original)
+			}
+			assert.ElementsMatch(t, tc.expectedNames, names)
+		})
+	}
 }
