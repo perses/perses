@@ -17,6 +17,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/v1/search"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,16 +28,16 @@ func TestSearchMatch(t *testing.T) {
 		excludedChars []string
 		query         string
 		txt           string
-		expected      *SearchResult
+		expected      *search.Result
 	}{
 		{
 			name:          "perfect match",
 			caseSensitive: true,
 			query:         "abc",
 			txt:           "abc",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "abc",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 0, To: 2},
 				},
 				Score: math.MaxUint64,
@@ -47,9 +48,9 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: false,
 			query:         "ABC",
 			txt:           "abc",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "abc",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 0, To: 2},
 				},
 				Score: math.MaxUint64,
@@ -74,9 +75,9 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "bd",
 			txt:           "abcd",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "abcd",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 1, To: 1},
 					{From: 3, To: 3},
 				},
@@ -88,9 +89,9 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "bac",
 			txt:           "babac",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "babac",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 2, To: 4},
 				},
 				Score: 9,
@@ -101,9 +102,9 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: false,
 			query:         "FUZ",
 			txt:           "fzduzf",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "fzduzf",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 0, To: 0},
 					{From: 3, To: 4},
 				},
@@ -116,9 +117,9 @@ func TestSearchMatch(t *testing.T) {
 			excludedChars: []string{"-"},
 			query:         "ab",
 			txt:           "a-b",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original: "a-b",
-				Intervals: []MatchingInterval{
+				Intervals: []search.MatchingInterval{
 					{From: 0, To: 0},
 					{From: 2, To: 2},
 				},
@@ -130,9 +131,9 @@ func TestSearchMatch(t *testing.T) {
 			caseSensitive: true,
 			query:         "",
 			txt:           "",
-			expected: &SearchResult{
+			expected: &search.Result{
 				Original:  "",
-				Intervals: []MatchingInterval{{From: 0, To: math.MaxUint64}},
+				Intervals: []search.MatchingInterval{{From: 0, To: math.MaxUint64}},
 				Score:     math.MaxUint64,
 			},
 		},
@@ -140,7 +141,7 @@ func TestSearchMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &search{
+			s := &matcher{
 				caseSensitive: tt.caseSensitive,
 				excludedChars: tt.excludedChars,
 			}
@@ -153,19 +154,19 @@ func TestSearchMatch(t *testing.T) {
 func TestScore(t *testing.T) {
 	tests := []struct {
 		title         string
-		intervals     []MatchingInterval
+		intervals     []search.MatchingInterval
 		txtLength     int
 		expectedScore uint64
 	}{
 		{
 			title:         "no intervals",
-			intervals:     []MatchingInterval{},
+			intervals:     []search.MatchingInterval{},
 			txtLength:     0,
 			expectedScore: 0,
 		},
 		{
 			title: "one interval with a size of one",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 0, To: 0},
 			},
 			txtLength:     2,
@@ -173,7 +174,7 @@ func TestScore(t *testing.T) {
 		},
 		{
 			title: "two intervals with a size of one",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 0, To: 0},
 				{From: 3, To: 3},
 			},
@@ -181,10 +182,10 @@ func TestScore(t *testing.T) {
 			expectedScore: 2,
 		},
 		{
-			// The interval starts at index 2, so getPreviousNonMatchingInterval returns
+			// The interval starts at index 2, so getPreviousNonsearch.MatchingInterval returns
 			// a leading gap of size 2. With a txtLength of 10, the penalty (2/10) rounds down to 0.
 			title: "interval not starting at the beginning of the text applies a leading gap penalty",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 2, To: 4},
 			},
 			txtLength:     10,
@@ -193,7 +194,7 @@ func TestScore(t *testing.T) {
 		{
 			// Score increases quadratically with the size of a contiguous interval.
 			title: "a single contiguous interval increases the score quadratically",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 0, To: 3},
 			},
 			txtLength:     4,
@@ -203,7 +204,7 @@ func TestScore(t *testing.T) {
 			// The gap between index 0 and index 5 has a size of 5, which is bigger than the
 			// txtLength (3), so the penalty (5/3 = 1) exceeds the gain (1^2 = 1) from the match itself.
 			title: "a gap bigger than the text length can bring the score down to zero",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 5, To: 5},
 			},
 			txtLength:     3,
@@ -213,7 +214,7 @@ func TestScore(t *testing.T) {
 			// The gap between the two intervals has a size of 9, at least as large as the txtLength (8),
 			// so it introduces a penalty of 1 that offsets part of the score gained from the second interval.
 			title: "a gap at least as large as the text length reduces the score by the penalty",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 0, To: 0},
 				{From: 10, To: 10},
 			},
@@ -224,7 +225,7 @@ func TestScore(t *testing.T) {
 			// Combines three intervals of size one, each separated by a small gap, none of which is
 			// large enough compared to txtLength to introduce a penalty.
 			title: "three intervals compound their gains without penalties",
-			intervals: []MatchingInterval{
+			intervals: []search.MatchingInterval{
 				{From: 0, To: 0},
 				{From: 4, To: 4},
 				{From: 9, To: 9},

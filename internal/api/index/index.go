@@ -39,6 +39,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/perses/perses/pkg/model/api/v1/search"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
@@ -69,13 +70,13 @@ type index[T api.Metadata] struct {
 	// fields is the list of string that has been collected when the index is created.
 	// It is used to know which fields are available for search.
 	fields []string
-	// search is the search engine that will be used to search through the fields.
-	search *search
+	// matcher is the search engine that will be used to search through the fields.
+	matcher *matcher
 }
 
-func (idx *index[T]) match(text string) *SearchResult {
+func (idx *index[T]) match(text string) *search.Result {
 	for _, field := range idx.fields {
-		result := idx.search.match(text, field)
+		result := idx.matcher.match(text, field)
 		if result != nil {
 			return result
 		}
@@ -131,7 +132,7 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 		metadata:    m,
 		fields:      fields,
 		displayName: displayName,
-		search:      &search{},
+		matcher:      &matcher{},
 	}
 	c.mutex.Lock()
 	projectIdx := c.idx[m.Project]
@@ -144,7 +145,7 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	return nil
 }
 
-func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*SearchResult, error) {
+func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*search.Result, error) {
 	var projectList []string
 	if len(project) != 0 {
 		if c.authz.IsEnabled() {
@@ -169,7 +170,7 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 		}
 		c.mutex.RUnlock()
 	}
-	var results []*SearchResult
+	var results []*search.Result
 	c.mutex.RLock()
 	for _, pr := range projectList {
 		projectIdx := c.idx[pr]
@@ -184,7 +185,7 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 	}
 	c.mutex.RUnlock()
 	if len(results) == 0 {
-		return make([]*SearchResult, 0), nil
+		return make([]*search.Result, 0), nil
 	}
 	return results, nil
 }
@@ -212,12 +213,12 @@ func (c *client) add(raw json.RawMessage) error {
 
 // search is searching through the index for the given kind and project.
 // The project parameter can be empty, in that case, the search will be done through all the projects.
-func (c *client) search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error) {
+func (c *client) search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.search(ctx, project, txt)
 	default:
 		logrus.Warnf("kind %s is not supported for searching", kind)
-		return make([]*SearchResult, 0), nil
+		return make([]*search.Result, 0), nil
 	}
 }
