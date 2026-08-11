@@ -27,6 +27,7 @@ import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
+  useIsLockModeAvailable,
 } from '../../../context/Config';
 import { useUserPreferences } from '../../../context/UserPreferences';
 import { useDatasourceApi } from '../../../model/datasource-api';
@@ -64,6 +65,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+  const isLockModeAvailable = useIsLockModeAvailable();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -134,6 +136,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isVariableEnabled={isLocalVariableEnabled}
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}
+                  isLockModeAvailable={isLockModeAvailable}
                   isEditing={isEditing}
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}

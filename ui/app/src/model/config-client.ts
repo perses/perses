@@ -196,6 +196,7 @@ export interface AutoRefreshConfig {
 
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
+  enable_lock_mode?: boolean;
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
