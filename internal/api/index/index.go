@@ -132,7 +132,7 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 		metadata:    m,
 		fields:      fields,
 		displayName: displayName,
-		matcher:      &matcher{},
+		matcher:     &matcher{},
 	}
 	c.mutex.Lock()
 	projectIdx := c.idx[m.Project]
