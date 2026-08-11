@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/async"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -194,8 +194,12 @@ func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
 }
 
 func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
-	projectQuery := any(query).(databaseModel.ProjectQuery).CloneWithProject(project).(V)
 	return func() (any, error) {
-		return t.metadataOrFullList(projectQuery)
+		q, err := deep.Copy(query)
+		if err != nil {
+			return nil, err
+		}
+		q.SetProjectQueryParam(project)
+		return t.metadataOrFullList(q)
 	}
 }
