@@ -104,9 +104,8 @@ func TestK8sLoginExecCredentialsRotate(t *testing.T) {
 	require.NoError(t, err)
 	tempDir := t.TempDir()
 	stateID := strconv.Itoa(os.Getpid())
-	stateFile := filepath.Join(os.TempDir(), "perses-k8s-exec-state-"+stateID)
+	stateFile := filepath.Join(tempDir, "perses-k8s-exec-state-"+stateID)
 	require.NoError(t, os.WriteFile(stateFile, []byte("0"), 0o600))
-	t.Cleanup(func() { require.NoError(t, os.Remove(stateFile)) })
 	kubeconfigFile := filepath.Join(tempDir, "config")
 	kubeconfig := clientcmdapi.Config{
 		Clusters: map[string]*clientcmdapi.Cluster{
@@ -120,6 +119,7 @@ func TestK8sLoginExecCredentialsRotate(t *testing.T) {
 				InteractiveMode: clientcmdapi.NeverExecInteractiveMode,
 				Env: []clientcmdapi.ExecEnvVar{
 					{Name: "PERSES_K8S_EXEC_PLUGIN", Value: "1"},
+					{Name: "PERSES_K8S_EXEC_STATE_DIR", Value: tempDir},
 					{Name: "PERSES_K8S_EXEC_STATE_ID", Value: stateID},
 				},
 			}},
@@ -162,15 +162,21 @@ func TestK8sExecCredentialPlugin(t *testing.T) {
 		fmt.Fprintln(os.Stderr, "invalid state ID")
 		os.Exit(1)
 	}
-	stateFile := filepath.Join(os.TempDir(), fmt.Sprintf("perses-k8s-exec-state-%d", stateID))
-	data, err := os.ReadFile(stateFile)
+	stateRoot, err := os.OpenRoot(os.Getenv("PERSES_K8S_EXEC_STATE_DIR"))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	defer func() { _ = stateRoot.Close() }()
+	stateFile := fmt.Sprintf("perses-k8s-exec-state-%d", stateID)
+	data, err := stateRoot.ReadFile(stateFile)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	count, _ := strconv.Atoi(string(data))
 	count++
-	if err := os.WriteFile(stateFile, []byte(strconv.Itoa(count)), 0o600); err != nil {
+	if err := stateRoot.WriteFile(stateFile, []byte(strconv.Itoa(count)), 0o600); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
