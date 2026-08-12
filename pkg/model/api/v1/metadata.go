@@ -24,10 +24,23 @@ import (
 	"github.com/perses/spec/go/common"
 )
 
+type MetadataSource string
+
+const (
+	ManualSource       MetadataSource = "manual"
+	ProvisioningSource MetadataSource = "provisioning"
+	DiscoverySource    MetadataSource = "discovery"
+)
+
 func NewMetadata(name string) *Metadata {
 	return &Metadata{
 		Name: name,
 	}
+}
+
+type DatasourceMetadata struct {
+	Metadata
+	Source MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
 }
 
 type Metadata struct {
