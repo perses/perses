@@ -35,6 +35,7 @@ import (
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	viewImpl "github.com/perses/perses/internal/api/impl/v1/view"
+	"github.com/perses/perses/internal/api/index"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -71,6 +72,7 @@ type ServiceManager interface {
 	GetGlobalSecret() globalsecret.Service
 	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
+	GetIndex() index.Client
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetPlugin() plugin.Plugin
@@ -98,6 +100,7 @@ type service struct {
 	globalSecret       globalsecret.Service
 	globalVariable     globalvariable.Service
 	health             health.Service
+	index              index.Client
 	jwt                crypto.JWT
 	migrate            migrate.Migration
 	plugin             plugin.Plugin
@@ -140,6 +143,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
+	indexService := index.New(conf.Search, authzService, dao.GetPersesDAO())
 
 	svc := &service{
 		authorization:      authzService,
@@ -154,6 +158,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		globalSecret:       globalSecret,
 		globalVariable:     globalVariableService,
 		health:             healthService,
+		index:              indexService,
 		jwt:                jwtService,
 		migrate:            migrateService,
 		plugin:             pluginService,
@@ -215,6 +220,10 @@ func (s *service) GetGlobalVariable() globalvariable.Service {
 
 func (s *service) GetHealth() health.Service {
 	return s.health
+}
+
+func (s *service) GetIndex() index.Client {
+	return s.index
 }
 
 func (s *service) GetJWT() crypto.JWT {

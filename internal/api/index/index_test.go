@@ -107,7 +107,7 @@ func TestClientAdd(t *testing.T) {
 	}
 	for _, tc := range testsCases {
 		t.Run(tc.title, func(t *testing.T) {
-			c := newClient(tc.indexedKeys, newDisabledAuthz(t))
+			c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: tc.indexedKeys}}, newDisabledAuthz(t), nil).(*client)
 			err := c.add(tc.raw)
 			require.NoError(t, err)
 			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
@@ -116,7 +116,7 @@ func TestClientAdd(t *testing.T) {
 }
 
 func Test_client_add_missingIndexedKeyProducesEmptyField(t *testing.T) {
-	c := newClient([]string{"metadata.name", "spec.unknown.field"}, newDisabledAuthz(t))
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.unknown.field"}}}, newDisabledAuthz(t), nil).(*client)
 
 	raw := json.RawMessage(`{
 		"kind": "Dashboard",
@@ -135,7 +135,7 @@ func Test_client_add_missingIndexedKeyProducesEmptyField(t *testing.T) {
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
-	c := newClient([]string{"metadata.name"}, newDisabledAuthz(t))
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 
 	rawA := json.RawMessage(`{
 		"kind": "Dashboard",
@@ -197,7 +197,7 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 			expectedNames: nil,
 		},
 	}
-	c := newClient([]string{"metadata.name"}, newDisabledAuthz(t))
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, newDisabledAuthz(t), nil).(*client)
 
 	docs := []json.RawMessage{
 		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "node-exporter", "project": "project-a"}, "spec": {}}`),
@@ -210,7 +210,7 @@ func TestClientSearch_authorizationDisabled(t *testing.T) {
 
 	for _, tc := range testsCases {
 		t.Run(tc.title, func(t *testing.T) {
-			results, err := c.search(nil, tc.kind, tc.project, tc.text)
+			results, err := c.Search(nil, tc.kind, tc.project, tc.text)
 			require.NoError(t, err)
 			var names []string
 			for _, r := range results {

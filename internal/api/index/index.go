@@ -35,8 +35,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/search"
@@ -84,12 +87,13 @@ func (idx *index[T]) match(text string) *search.Result {
 	return nil
 }
 
-func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization) *projectIndexer {
+func newProjectIndexer(indexedKeys []string, scope role.Scope, authz authorization.Authorization, matcher *matcher) *projectIndexer {
 	return &projectIndexer{
 		scope:       scope,
 		authz:       authz,
 		indexedKeys: indexedKeys,
 		idx:         make(map[string]map[string]index[*v1.ProjectMetadata]),
+		matcher:     matcher,
 	}
 }
 
@@ -108,6 +112,8 @@ type projectIndexer struct {
 	// idx is the index used for the resources that belongs to a project.
 	// The first key is the project name, the second key is the resource name.
 	idx map[string]map[string]index[*v1.ProjectMetadata]
+	// matcher is the search engine that will be used when creating a new index for a resource.
+	matcher *matcher
 	// mutex will protect the index.
 	mutex sync.RWMutex
 }
@@ -119,10 +125,13 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
 	var fields []string
 	for _, k := range c.indexedKeys {
-		fields = append(fields, customRaw.getField(k))
+		field := customRaw.getField(k)
+		if len(field) != 0 {
+			fields = append(fields, field)
+		}
 	}
-	var displayName string
-	displayName = customRaw.getDisplayName()
+
+	displayName := customRaw.getDisplayName()
 	rawMetadata := customRaw.getRawMetadata()
 	var m *v1.ProjectMetadata
 	if err := json.Unmarshal([]byte(rawMetadata), &m); err != nil {
@@ -132,7 +141,7 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 		metadata:    m,
 		fields:      fields,
 		displayName: displayName,
-		matcher:     &matcher{},
+		matcher:     c.matcher,
 	}
 	c.mutex.Lock()
 	projectIdx := c.idx[m.Project]
@@ -172,17 +181,30 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 	}
 	var results []*search.Result
 	c.mutex.RLock()
-	for _, pr := range projectList {
-		projectIdx := c.idx[pr]
-		if projectIdx == nil {
-			continue
+	// In case, there is one result; it can mean the user has global access to the resource across the project.
+	// Or it can mean he has access to only one project. If he has global access, then we should search through the whole list.
+	if len(projectList) == 1 && projectList[0] == v1.WildcardProject {
+		for _, projectIdx := range c.idx {
+			for _, idx := range projectIdx {
+				if result := idx.match(text); result != nil {
+					results = append(results, result)
+				}
+			}
 		}
-		for _, idx := range projectIdx {
-			if result := idx.match(text); result != nil {
-				results = append(results, result)
+	} else {
+		for _, pr := range projectList {
+			projectIdx := c.idx[pr]
+			if projectIdx == nil {
+				continue
+			}
+			for _, idx := range projectIdx {
+				if result := idx.match(text); result != nil {
+					results = append(results, result)
+				}
 			}
 		}
 	}
+
 	c.mutex.RUnlock()
 	if len(results) == 0 {
 		return make([]*search.Result, 0), nil
@@ -190,14 +212,27 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 	return results, nil
 }
 
-func newClient(indexedKeys []string, authz authorization.Authorization) *client {
+type Client interface {
+	// Search is searching through the index for the given kind and project.
+	// The project parameter can be empty, in that case, the search will be done through all the projects.
+	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error)
+	// Refresh is refreshing the index by reloading all the documents from the database.
+	Refresh() error
+}
+
+func New(conf config.Search, authz authorization.Authorization, dao model.DAO) Client {
 	return &client{
-		dashboards: newProjectIndexer(indexedKeys, role.DashboardScope, authz),
+		dashboards: newProjectIndexer(conf.IndexKeys.Dashboard, role.DashboardScope, authz, &matcher{
+			caseSensitive: false,
+			excludedChars: conf.ExcludedChars,
+		}),
+		dao: dao,
 	}
 }
 
 type client struct {
 	dashboards *projectIndexer
+	dao        model.DAO
 }
 
 func (c *client) add(raw json.RawMessage) error {
@@ -211,9 +246,7 @@ func (c *client) add(raw json.RawMessage) error {
 	}
 }
 
-// search is searching through the index for the given kind and project.
-// The project parameter can be empty, in that case, the search will be done through all the projects.
-func (c *client) search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error) {
+func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.search(ctx, project, txt)
@@ -221,4 +254,19 @@ func (c *client) search(ctx echo.Context, kind v1.Kind, project string, txt stri
 		logrus.Warnf("kind %s is not supported for searching", kind)
 		return make([]*search.Result, 0), nil
 	}
+}
+
+func (c *client) Refresh() error {
+	ch := make(chan json.RawMessage)
+	q := &dashboard.Query{}
+	var err error
+	go func() {
+		err = c.dao.StreamRaw(q, ch)
+	}()
+	for raw := range ch {
+		if addErr := c.add(raw); addErr != nil {
+			logrus.WithError(addErr).Error("failed to add document to index")
+		}
+	}
+	return err
 }

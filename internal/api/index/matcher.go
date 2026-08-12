@@ -36,6 +36,10 @@ func (m *matcher) match(query string, txt string) *search.Result {
 			Score: math.MaxUint64,
 		}
 	}
+	if len(localQuery) == 0 {
+		// if the query is empty, then we should not return any result.
+		return nil
+	}
 	var intervals []search.MatchingInterval
 	finalScore := uint64(0)
 	// The logic is the following:

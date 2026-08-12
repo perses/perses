@@ -137,6 +137,13 @@ func TestSearchMatch(t *testing.T) {
 				Score:     math.MaxUint64,
 			},
 		},
+		{
+			name:          "empty query with non-empty text produces no match",
+			caseSensitive: true,
+			query:         "",
+			txt:           "abc",
+			expected:      nil,
+		},
 	}
 
 	for _, tt := range tests {
