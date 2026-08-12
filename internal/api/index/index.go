@@ -81,6 +81,8 @@ func (idx *index[T]) match(text string) *search.Result {
 	for _, field := range idx.fields {
 		result := idx.matcher.match(text, field)
 		if result != nil {
+			result.Metadata = idx.metadata
+			result.DisplayName = idx.displayName
 			return result
 		}
 	}

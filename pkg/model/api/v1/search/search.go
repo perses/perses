@@ -1,5 +1,7 @@
 package search
 
+import "github.com/perses/perses/pkg/model/api"
+
 // MatchingInterval represents the start and the end position of the continuous characters that is matching the pattern.
 // For example, for the pattern `bc`, with the string `abcd`, the corresponding interval will be [{from: 1, to: 2}]
 // Another example, for the pattern `fuz`, with the string `fzduzf`, the corresponding intervals will be:
@@ -15,6 +17,10 @@ func (m MatchingInterval) Size() uint64 {
 }
 
 type Result struct {
+	// Metadata is the metadata of the resource that matches the query.
+	Metadata api.Metadata `json:"metadata" yaml:"metadata"`
+	// DisplayName is the string that will be used for the search display.
+	DisplayName string `json:"displayName" yaml:"displayName"`
 	// The original string that matches the query.
 	Original string `json:"original"`
 	// The list of intervals that match the query.
