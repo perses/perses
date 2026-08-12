@@ -49,15 +49,19 @@ import (
 
 type rawDocument json.RawMessage
 
-func (r rawDocument) getField(field string) string {
-	return gjson.GetBytes(r, field).String()
+func (r rawDocument) getField(field string) gjson.Result {
+	return gjson.GetBytes(r, field)
+}
+
+func (r rawDocument) getFields(field string) []gjson.Result {
+	return gjson.GetManyBytes(r, field)
 }
 
 func (r rawDocument) getDisplayName() string {
 	var displayName string
-	displayName = r.getField("spec.display.name")
+	displayName = r.getField("spec.display.name").String()
 	if len(displayName) == 0 {
-		displayName = r.getField("metadata.name")
+		displayName = r.getField("metadata.name").String()
 	}
 	return displayName
 }
@@ -127,9 +131,19 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	customRaw := rawDocument(raw)
 	var fields []string
 	for _, k := range c.indexedKeys {
-		field := customRaw.getField(k)
-		if len(field) != 0 {
-			fields = append(fields, field)
+		fs := customRaw.getFields(k)
+		for _, f := range fs {
+			if !f.Exists() {
+				continue
+			}
+			// Todo recursively index the fields if they are objects. For now, we are only indexing the string and array of string.
+			if f.IsArray() {
+				for _, r := range f.Array() {
+					fields = append(fields, r.String())
+				}
+			} else {
+				fields = append(fields, f.String())
+			}
 		}
 	}
 

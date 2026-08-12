@@ -65,8 +65,11 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "mydashboard",
-						fields:      []string{"mydashboard", "myproject"},
-						matcher:     &matcher{},
+						fields: []string{
+							"mydashboard",
+							"myproject",
+						},
+						matcher: &matcher{},
 					},
 				},
 			},
@@ -98,8 +101,112 @@ func TestClientAdd(t *testing.T) {
 							},
 						},
 						displayName: "My Fancy Dashboard",
-						fields:      []string{"mydashboard", "myproject", "My Fancy Dashboard"},
-						matcher:     &matcher{},
+						fields: []string{
+							"mydashboard",
+							"myproject",
+							"My Fancy Dashboard",
+						},
+						matcher: &matcher{},
+					},
+				},
+			},
+		},
+		{
+			title: "add dashboard with missing indexed key",
+			raw: json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {
+			"name": "mydashboard",
+			"project": "myproject"
+		},
+		"spec": {}
+	}`),
+			indexedKeys: []string{"metadata.name", "spec.unknown.field"},
+			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+				"myproject": {
+					"mydashboard": {
+						metadata: &v1.ProjectMetadata{
+							Metadata: v1.Metadata{
+								Name: "mydashboard",
+							},
+							ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+								Project: "myproject",
+							},
+						},
+						displayName: "mydashboard",
+						fields: []string{
+							"mydashboard",
+						},
+						matcher: &matcher{},
+					},
+				},
+			},
+		},
+		{
+			title: "add dashboard with array as indexed key",
+			raw: json.RawMessage(`{
+		"kind": "Dashboard",
+		"metadata": {
+			"name": "mydashboard",
+			"project": "myproject"
+		},
+		"spec": {
+          "panels": {
+            "MyPanel": {
+              "kind": "Panel",
+              "spec": {
+                "display": {
+                  "name": "simple line chart"
+                },
+                "plugin": {
+                  "kind": "TimeSeriesChart",
+                  "spec": {
+                    "showLegend": false,
+                    "lines": [
+                      "up"
+                    ]
+                  }
+                }
+              }
+            },
+            "MyOtherPanel": {
+              "kind": "Panel",
+              "spec": {
+                "display": {
+                  "name": "another line chart"
+                },
+                "plugin": {
+                  "kind": "TimeSeriesChart",
+                  "spec": {
+                    "showLegend": false,
+                    "lines": [
+                      "up"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+	}`),
+			indexedKeys: []string{"spec.panels.@dig:display.name"},
+			expectedProjectIdx: map[string]map[string]index[*v1.ProjectMetadata]{
+				"myproject": {
+					"mydashboard": {
+						metadata: &v1.ProjectMetadata{
+							Metadata: v1.Metadata{
+								Name: "mydashboard",
+							},
+							ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+								Project: "myproject",
+							},
+						},
+						displayName: "mydashboard",
+						fields: []string{
+							"simple line chart",
+							"another line chart",
+						},
+						matcher: &matcher{},
 					},
 				},
 			},
@@ -113,25 +220,6 @@ func TestClientAdd(t *testing.T) {
 			assert.Equal(t, tc.expectedProjectIdx, c.dashboards.idx)
 		})
 	}
-}
-
-func Test_client_add_missingIndexedKeyProducesEmptyField(t *testing.T) {
-	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name", "spec.unknown.field"}}}, newDisabledAuthz(t), nil).(*client)
-
-	raw := json.RawMessage(`{
-		"kind": "Dashboard",
-		"metadata": {
-			"name": "mydashboard",
-			"project": "myproject"
-		},
-		"spec": {}
-	}`)
-
-	err := c.add(raw)
-	require.NoError(t, err)
-
-	entry := c.dashboards.idx["myproject"]["mydashboard"]
-	assert.Equal(t, []string{"mydashboard", ""}, entry.fields)
 }
 
 func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
