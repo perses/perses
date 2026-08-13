@@ -20,39 +20,50 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTimeRange_VerifyDefaultsAreSorted(t *testing.T) {
-	tr := &TimeRange{}
-	assert.NoError(t, tr.Verify())
-	assert.Equal(t, defaultTimeRangeOptions, tr.Options)
-}
-
-func TestTimeRange_VerifySortsCustomOptions(t *testing.T) {
-	tr := &TimeRange{
-		Options: []common.DurationString{"1h", "5m", "7d", "30m"},
+func TestTimeRange_Verify(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		options         []common.DurationString
+		errMessage      string
+		expectedOptions []common.DurationString
+	}{
+		{
+			title:           "defaults are used and already sorted when no options are provided",
+			options:         nil,
+			expectedOptions: defaultTimeRangeOptions,
+		},
+		{
+			title:           "custom options are sorted ascending",
+			options:         []common.DurationString{"1h", "5m", "7d", "30m"},
+			expectedOptions: []common.DurationString{"5m", "30m", "1h", "7d"},
+		},
+		{
+			title:      "invalid option returns an error",
+			options:    []common.DurationString{"1h", "not-a-duration"},
+			errMessage: "not-a-duration",
+		},
+		{
+			title:           "already sorted options are kept as-is",
+			options:         []common.DurationString{"5m", "1h", "7d"},
+			expectedOptions: []common.DurationString{"5m", "1h", "7d"},
+		},
+		{
+			title:           "relative order of equivalent durations is kept",
+			options:         []common.DurationString{"60m", "1h", "5m"},
+			expectedOptions: []common.DurationString{"5m", "60m", "1h"},
+		},
 	}
-	assert.NoError(t, tr.Verify())
-	assert.Equal(t, []common.DurationString{"5m", "30m", "1h", "7d"}, tr.Options)
-}
 
-func TestTimeRange_VerifyRejectsInvalidOption(t *testing.T) {
-	tr := &TimeRange{
-		Options: []common.DurationString{"1h", "not-a-duration"},
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			tr := &TimeRange{Options: test.options}
+			err := tr.Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expectedOptions, tr.Options)
+			} else {
+				assert.ErrorContains(t, err, test.errMessage)
+			}
+		})
 	}
-	assert.Error(t, tr.Verify())
-}
-
-func TestTimeRange_VerifyKeepsAlreadySortedOptions(t *testing.T) {
-	tr := &TimeRange{
-		Options: []common.DurationString{"5m", "1h", "7d"},
-	}
-	assert.NoError(t, tr.Verify())
-	assert.Equal(t, []common.DurationString{"5m", "1h", "7d"}, tr.Options)
-}
-
-func TestTimeRange_VerifyKeepsRelativeOrderOfEquivalentDurations(t *testing.T) {
-	tr := &TimeRange{
-		Options: []common.DurationString{"60m", "1h", "5m"},
-	}
-	assert.NoError(t, tr.Verify())
-	assert.Equal(t, []common.DurationString{"5m", "60m", "1h"}, tr.Options)
 }
