@@ -40,7 +40,7 @@ We are providing an online demo available at **https://demo.perses.dev**, where 
    * The data model reached a stable point, and we are providing multiple panel types that should cover most of the monitoring & tracing use cases.
    * Authentication and authorization are available.
 2. On the GitOps aspect:
-   * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/cli.md)
+   * We provide a CLI that helps to interact with the API. A short doc is available [here](./docs/cli.md)
    * Two SDKs (in Golang and in Cuelang) are available for coding dashboards. See [Dashboard-as-Code](./docs/dac/getting-started.md) guide.
      These SDKs will likely evolve based on the feedback we receive. However, changes are expected to focus on adding utility functions rather than introducing breaking changes.
 3. A plugin architecture:
@@ -92,7 +92,7 @@ We have [a Homebrew tap](https://github.com/perses/homebrew-tap) so macOS and Li
 
 To build Perses from source code, You need:
 
-- Go [version 1.23 or greater](https://golang.org/doc/install).
+- Go [version 1.26 or greater](https://golang.org/doc/install).
 - NodeJS [version 22 or greater](https://nodejs.org/).
 - npm [version 10 or greater](https://www.npmjs.com/).
 
