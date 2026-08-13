@@ -356,6 +356,11 @@ security:
 				Provisioning: ProvisioningConfig{
 					Interval: common.Duration(defaultInterval),
 				},
+				Search: Search{
+					CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+					ExcludedChars:             nil,
+					IndexKeys:                 IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name"}},
+				},
 			},
 		},
 	}

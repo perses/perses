@@ -133,7 +133,7 @@ func TestSearchMatch(t *testing.T) {
 			txt:           "",
 			expected: &search.Result{
 				Original:  "",
-				Intervals: []search.MatchingInterval{{From: 0, To: math.MaxUint64}},
+				Intervals: []search.MatchingInterval{{From: 0, To: 0}},
 				Score:     math.MaxUint64,
 			},
 		},
@@ -162,7 +162,7 @@ func TestScore(t *testing.T) {
 	tests := []struct {
 		title         string
 		intervals     []search.MatchingInterval
-		txtLength     int
+		txtLength     uint64
 		expectedScore uint64
 	}{
 		{

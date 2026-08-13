@@ -1,3 +1,16 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package index
 
 import (
@@ -24,12 +37,19 @@ func (m *matcher) match(query string, txt string) *search.Result {
 	}
 	// in case it's a perfect match, no need to loop to find which char is matching
 	if localQuery == localTxt {
+		to := 0
+		if len(txt) > 0 {
+			to = len(txt) - 1
+		}
 		return &search.Result{
 			Original: txt,
 			Intervals: []search.MatchingInterval{
 				{
 					From: 0,
-					To:   uint64(len(txt) - 1),
+					// The convertion here is not a security issue.
+					// We are sure that the value is not negative because we are checking the length of the string before.
+					// So, the value will always be positive, and the conversion to uint64 is safe.
+					To: uint64(to), //nolint:gosec
 				},
 			},
 			// A perfect match get the maximum score, so it will be the first result in the list of results.
@@ -60,7 +80,7 @@ func (m *matcher) match(query string, txt string) *search.Result {
 			break
 		}
 		// On the opposite, if we are able to find a matching interval, we can compute the score and keep the best matching.
-		currentScore := score(matchingIntervals, len(txt))
+		currentScore := score(matchingIntervals, uint64(len(txt)))
 		if currentScore > finalScore {
 			intervals = matchingIntervals
 			finalScore = currentScore
@@ -98,15 +118,17 @@ func (m *matcher) generateMatchingIntervals(query string, txt string, idxTxt int
 		// If the current characters of the text and the query match, then we can create an interval and try to find the next characters that is matching.
 		if txt[i] == query[queryIdx] {
 			interval := search.MatchingInterval{
-				From: uint64(i),
-				To:   uint64(i),
+				// The convertion here is not a security issue.
+				// The value will always be positive, and the conversion to uint64 is safe.
+				From: uint64(i), //nolint:gosec
+				To:   uint64(i), //nolint:gosec
 			}
 			// We are trying to find the next characters that is matching, so we are incrementing both indexes.
 			i++
 			queryIdx++
 			// Here we are fast forwarding to the next characters that is not matching anymore. Until finding it, we are updating the interval and updating the indexes.
 			for j := i; j < len(txt) && queryIdx < len(query) && txt[j] == query[queryIdx]; j++ {
-				interval.To = uint64(j)
+				interval.To = uint64(j) //nolint:gosec
 				queryIdx++
 				i = j
 			}
@@ -148,14 +170,14 @@ func getPreviousNonMatchingInterval(intervals []search.MatchingInterval, interva
 //  2. Higher is a distance between the characters, higher it reduces the score.
 //     As an example, take the query 'abc', the following strings are sorted by the highest score
 //     abcdef > defabc > abec > defabec
-func score(matchingIntervals []search.MatchingInterval, txtSize int) uint64 {
-	result := 0
+func score(matchingIntervals []search.MatchingInterval, txtSize uint64) uint64 {
+	var result uint64 = 0
 	for i, interval := range matchingIntervals {
 		previousInterval := getPreviousNonMatchingInterval(matchingIntervals, i)
 		if previousInterval != nil {
-			result = result - int(previousInterval.Size())/txtSize
+			result = result - previousInterval.Size()/txtSize
 		}
-		result = result + int(math.Pow(float64(interval.Size()), 2))
+		result = result + uint64(math.Pow(float64(interval.Size()), 2))
 	}
-	return uint64(result)
+	return result
 }
