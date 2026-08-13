@@ -52,5 +52,19 @@ func (d *dao) Get(name string) (*v1.GlobalDatasource, error) {
 func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	var result []*v1.GlobalDatasource
 	err := d.client.Query(q, &result)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	// if no sources specified, return all
+	if q.Source == "" {
+		return result, nil
+	}
+	// filter results if source specified
+	var filteredResult []*v1.GlobalDatasource
+	for _, datasource := range result {
+		if datasource.Metadata.Source == q.Source {
+			filteredResult = append(filteredResult, datasource)
+		}
+	}
+	return filteredResult, nil
 }
