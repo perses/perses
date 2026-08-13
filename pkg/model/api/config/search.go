@@ -7,7 +7,7 @@ type IndexKeys struct {
 }
 
 type Search struct {
-	// CheckLatestUpdateInterval that checks if the index cache needs to be refreshed with db content. Only for SQL database setup.
+	// CheckLatestUpdateInterval is the interval when it checks if the index cache needs to be refreshed with db content. Only for SQL database setup.
 	CheckLatestUpdateInterval common.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// ExcludedChars is the list of characters that will be excluded from the search engine.
 	ExcludedChars []string  `json:"excluded_chars" yaml:"excluded_chars"`

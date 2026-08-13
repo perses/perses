@@ -132,6 +132,9 @@ frontend: <Frontend config> # Optional
 
 # The configuration to access and load the runtime plugins 
 plugin: <Plugin config> # Optional
+
+# The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
+search: <Search config> # Optional
 ```
 
 ### Security config
@@ -906,4 +909,28 @@ message: <string>
 
 # If set to true, the custom lint rule is disabled.
 disable: <bool> | default = false # Optional
+```
+
+### Search config
+
+```yaml
+# The interval when it checks if the index cache needs to be refreshed with db content. Only for SQL database setup.
+check_latest_update_interval: <duration> | default = 30s # Optional
+
+# The list of characters that will be excluded from the search engine.
+excluded_chars: <list of strings> # Optional
+
+# The keys used for indexing the resources in the search engine.
+# Adding more keys will allow to search for more attributes of the resources. 
+# For example, if you add "spec.display.name" in the list of keys, you will be able to search for a dashboard by its display name.
+# But the more keys you add, the more time it will take to index the resources and the more memory it will take to store the index. So be careful when adding keys.
+# Example of keys:
+# - "metadata.name": it will index the name of the resource (that was the default behavior before the search feature was added)
+# - "metadata.tags": it will index the tags of the resource (if it has any)
+# - "spec.display.name": it will index the display name of the resource (if it has one)
+# - "spec.panels.@dig:display.name": It will index the display name of all panels in a dashboard. The @dig is used to dig into the panels array and index the display name of each panel.
+# We are using gjson to find the value of the key in the resource. So you can use any valid gjson path to index the value you want.
+# Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+index_keys:
+  dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
 ```
