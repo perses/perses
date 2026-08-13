@@ -123,10 +123,11 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
+	indexService := index.New(conf.Search, authzService, dao.GetPersesDAO())
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, indexService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())
@@ -143,7 +144,6 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
-	indexService := index.New(conf.Search, authzService, dao.GetPersesDAO())
 
 	svc := &service{
 		authorization:      authzService,

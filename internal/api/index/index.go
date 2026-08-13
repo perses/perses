@@ -175,6 +175,18 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	return nil
 }
 
+func (c *projectIndexer) delete(metadata *v1.ProjectMetadata) {
+	c.mutex.Lock()
+	projectIdx := c.idx[metadata.Project]
+	if projectIdx != nil {
+		delete(projectIdx, metadata.Name)
+	}
+	if len(projectIdx) == 0 {
+		delete(c.idx, metadata.Project)
+	}
+	c.mutex.Unlock()
+}
+
 func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*search.Result, error) {
 	var projectList []string
 	if len(project) != 0 {
@@ -239,6 +251,10 @@ type Client interface {
 	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error)
 	// Refresh is refreshing the index by reloading all the documents from the database.
 	Refresh() error
+	// Add is adding a document to the index. If it already exists, it will be updated. If it doesn't exist, it will be created.
+	Add(entity api.Entity) error
+	// Delete is deleting a document from the index.
+	Delete(kind v1.Kind, metadata api.Metadata)
 }
 
 func New(conf config.Search, authz authorization.Authorization, dao model.DAO) Client {
@@ -264,6 +280,30 @@ func (c *client) add(raw json.RawMessage) error {
 	default:
 		logrus.Warnf("kind %s is not supported for indexing", kind)
 		return nil
+	}
+}
+
+func (c *client) Add(entity api.Entity) error {
+	kind := v1.Kind(entity.GetKind())
+	switch kind {
+	case v1.KindDashboard:
+		raw, err := json.Marshal(entity)
+		if err != nil {
+			return err
+		}
+		return c.dashboards.add(raw)
+	default:
+		logrus.Warnf("kind %s is not supported for indexing", kind)
+		return nil
+	}
+}
+
+func (c *client) Delete(kind v1.Kind, metadata api.Metadata) {
+	switch kind {
+	case v1.KindDashboard:
+		c.dashboards.delete(metadata.(*v1.ProjectMetadata))
+	default:
+		logrus.Warnf("kind %s is not supported for deleting", kind)
 	}
 }
 
