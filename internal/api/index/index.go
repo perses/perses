@@ -124,6 +124,23 @@ type projectIndexer struct {
 	mutex sync.RWMutex
 }
 
+func recursiveDeepExtractFields(fs []gjson.Result, fields *[]string) {
+	for _, f := range fs {
+		if !f.Exists() {
+			continue
+		}
+		if f.IsArray() {
+			recursiveDeepExtractFields(f.Array(), fields)
+		} else if f.IsObject() {
+			for _, v := range f.Map() {
+				recursiveDeepExtractFields([]gjson.Result{v}, fields)
+			}
+		} else {
+			*fields = append(*fields, f.String())
+		}
+	}
+}
+
 // add is adding a new document to the index.
 // The row will be used to find the various field to be indexed depending on the configuration.
 // We are treating the raw JSON instead of the struct because then we can index anything; and we don't need to deal with the Go struct.
@@ -132,19 +149,7 @@ func (c *projectIndexer) add(raw json.RawMessage) error {
 	var fields []string
 	for _, k := range c.indexedKeys {
 		fs := customRaw.getFields(k)
-		for _, f := range fs {
-			if !f.Exists() {
-				continue
-			}
-			// Todo recursively index the fields if they are objects. For now, we are only indexing the string and array of string.
-			if f.IsArray() {
-				for _, r := range f.Array() {
-					fields = append(fields, r.String())
-				}
-			} else {
-				fields = append(fields, f.String())
-			}
-		}
+		recursiveDeepExtractFields(fs, &fields)
 	}
 
 	displayName := customRaw.getDisplayName()
