@@ -144,12 +144,19 @@ type Schema interface {
 	GetSchema(name, version, registry string) (LoadSchema, bool)
 	GetInstance(kind plugin.Kind, name string) (*build.Instance, error)
 	GenerateDashboardSchema() (cue.Value, error)
+	// GetAllPluginSchemas returns all plugin schemas serialised as CUE bytes.
+	// Results are cached until the next plugin load/unload event.
+	GetAllPluginSchemas() (cue.Value, error)
+	// GetPluginSchema returns the CUE bytes for a single plugin schema.
+	// Results are cached until the next plugin load/unload event.
+	GetPluginSchema(name, version, registry string) (cue.Value, bool, error)
 }
 
 func New() Schema {
 	return &completeSchema{
-		sch:    newSch(),
-		devSch: newSch(),
+		sch:                newSch(),
+		devSch:             newSch(),
+		cachedPluginByName: make(map[string]cue.Value),
 	}
 }
 
@@ -158,17 +165,29 @@ type completeSchema struct {
 	sch    *sch
 	devSch *sch
 	mutex  sync.RWMutex
+
+	cachedDashboardSchema cue.Value
+	cachedPluginList      cue.Value
+	cachedPluginByName    map[string]cue.Value
+}
+
+func (s *completeSchema) invalidateCache() {
+	s.cachedDashboardSchema = cue.Value{}
+	s.cachedPluginList = cue.Value{}
+	s.cachedPluginByName = make(map[string]cue.Value)
 }
 
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	s.invalidateCache()
 	return s.sch.load(pluginPath, module)
 }
 
 func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	s.invalidateCache()
 	return s.devSch.load(pluginPath, module)
 }
 
@@ -178,6 +197,7 @@ func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
 	for _, p := range module.Spec.Plugins {
 		s.devSch.remove(p.Kind, p.Spec.Name, module.Metadata)
 	}
+	s.invalidateCache()
 }
 
 func (s *completeSchema) ValidateDatasource(plugin plugin.Plugin, dtsName string) error {
@@ -319,7 +339,10 @@ func (s *completeSchema) ValidateAnnotations(plugin plugin.Plugin, annoName stri
 func (s *completeSchema) GetAllSchemas() []LoadSchema {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
+	return s.getAllSchemasLocked()
+}
 
+func (s *completeSchema) getAllSchemasLocked() []LoadSchema {
 	var allSchemas []LoadSchema
 	allSchemasMap := map[string]LoadSchema{}
 
@@ -342,16 +365,17 @@ func (s *completeSchema) GetAllSchemas() []LoadSchema {
 func (s *completeSchema) GetSchema(name, version, registry string) (LoadSchema, bool) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
+	return s.getSchemaLocked(name, version, registry)
+}
+
+func (s *completeSchema) getSchemaLocked(name, version, registry string) (LoadSchema, bool) {
 	if ls, ok := s.devSch.getSchema(name, version, registry); ok {
 		return ls, true
 	}
 	return s.sch.getSchema(name, version, registry)
 }
 
-func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
+func (s *completeSchema) generateDashboardSchemaLocked() (cue.Value, error) {
 	ctx := cuecontext.New()
 	plugins := map[plugin.Kind]cue.Value{}
 	for _, kind := range []plugin.Kind{
@@ -369,6 +393,77 @@ func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
 		plugins[kind] = disjunction
 	}
 	return generateDashboardCueValue(ctx, plugins)
+}
+
+func (s *completeSchema) GenerateDashboardSchema() (cue.Value, error) {
+	s.mutex.RLock()
+	if s.cachedDashboardSchema.Exists() {
+		data := s.cachedDashboardSchema
+		s.mutex.RUnlock()
+		return data, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	val, err := s.generateDashboardSchemaLocked()
+	if err != nil {
+		return cue.Value{}, err
+	}
+	s.cachedDashboardSchema = val
+	return val, nil
+}
+
+func (s *completeSchema) GetAllPluginSchemas() (cue.Value, error) {
+	s.mutex.RLock()
+	if s.cachedPluginList.Exists() {
+		data := s.cachedPluginList
+		s.mutex.RUnlock()
+		return data, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	schemas := s.getAllSchemasLocked()
+	if len(schemas) == 0 {
+		s.cachedPluginList = cue.Value{}
+		return s.cachedPluginList, nil
+	}
+	ctx := cuecontext.New()
+	list, err := GenerateSchemaDefinitions(ctx, schemas)
+	if err != nil {
+		return cue.Value{}, err
+	}
+
+	s.cachedPluginList = list
+	return list, nil
+}
+
+func (s *completeSchema) GetPluginSchema(name, version, registry string) (cue.Value, bool, error) {
+	s.mutex.RLock()
+	if cached, ok := s.cachedPluginByName[name]; ok {
+		s.mutex.RUnlock()
+		return cached, true, nil
+	}
+	s.mutex.RUnlock()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if cached, ok := s.cachedPluginByName[name]; ok {
+		return cached, true, nil
+	}
+	ls, ok := s.getSchemaLocked(name, version, registry)
+	if !ok {
+		return cue.Value{}, false, nil
+	}
+	ctx := cuecontext.New()
+	list, err := GenerateSchemaDefinitions(ctx, []LoadSchema{ls})
+	if err != nil {
+		return cue.Value{}, false, err
+	}
+	s.cachedPluginByName[name] = list
+	return list, true, nil
 }
 
 func mergeSchemasByKind(main, dev []LoadSchema) []LoadSchema {
