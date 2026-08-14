@@ -14,6 +14,8 @@
 package service
 
 import (
+	"slices"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
@@ -34,10 +36,13 @@ type ApplyService struct {
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
+	var currentNames []string
 	for _, entity := range entities {
+		entity.Metadata.Source = v1.DiscoverySource
 		entity.GetMetadata().Flatten(a.caseSensitive)
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
+			currentNames = append(currentNames, entity.Metadata.Name)
 			continue
 		}
 
@@ -53,5 +58,23 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		if _, updateError := a.svc.Update(nil, entity, param); updateError != nil {
 			logrus.WithError(updateError).Errorf("unable to update the globaldatasource %q", entity.Metadata.Name)
 		}
+		currentNames = append(currentNames, entity.Metadata.Name)
 	}
+
+	foundDatasources, err := a.svc.List(&globaldatasource.Query{Source: v1.DiscoverySource})
+	if err != nil {
+		logrus.WithError(err).Error("unable to get discovered globaldatasources")
+	}
+	for _, ds := range foundDatasources {
+		if !slices.Contains(currentNames, ds.Metadata.Name) {
+			deleteParameters := apiInterface.Parameters{
+				Name: ds.Metadata.Name,
+			}
+			err = a.svc.Delete(nil, deleteParameters)
+			if err != nil {
+				logrus.WithError(err).Errorf("unable to delete the globaldatasource %q", ds.Metadata.Name)
+			}
+		}
+	}
+
 }
