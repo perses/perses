@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
@@ -141,6 +142,7 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			}, nil
 	case *modelV1.GlobalDatasource:
 		svc := p.serviceManager.GetGlobalDatasource()
+		entity.Metadata.Source = v1.ProvisioningSource
 		return func() (modelAPI.Entity, error) {
 				return svc.Create(nil, entity)
 			},
