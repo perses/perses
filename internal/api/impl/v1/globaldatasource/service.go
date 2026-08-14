@@ -62,7 +62,7 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
-	// Update the time contains in the entity
+	// Update the source and time contains in the entity
 	entity.Metadata.Source = v1.ManualSource
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
