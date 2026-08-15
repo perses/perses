@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
+import { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DashboardSelector } from '@perses-dev/spec';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
-import { DashboardSelector } from '@perses-dev/spec';
+
+import { useNavHistory } from '../../context/DashboardNavHistory';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import {
   AddFolderDialog,
@@ -26,7 +28,6 @@ import {
   EditFolderDialog,
 } from '../dialogs';
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
-import { useNavHistory } from '../../context/DashboardNavHistory';
 import DashboardTreeList from './DashboardTreeList';
 
 type editDashboardAction = { type: 'editDashboard'; target: DashboardResource };

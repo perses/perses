@@ -13,6 +13,7 @@
 
 import { VariableType } from '@perses-dev/client';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+
 import { ExternalVariableSource } from '../model/variables';
 
 export function buildProjectVariableDefinition(

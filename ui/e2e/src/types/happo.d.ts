@@ -22,6 +22,6 @@ declare module 'happo-playwright' {
   export function screenshot(
     page: Page,
     handleOrLocator: HandleOrLocator,
-    { component: string, variant: string }
+    options: { component: string; variant: string }
   ): Promise<void>;
 }

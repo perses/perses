@@ -13,11 +13,12 @@
 
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { NoDataOverlay, useSnackbar } from '@perses-dev/components';
-import { useMemo, useState } from 'react';
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { NoDataOverlay, useSnackbar } from '@perses-dev/components';
 import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
+
 import { DATA_GRID_SLOT_PROPS, DATA_GRID_STYLES, GridToolbar, PAGE_SIZE_OPTIONS } from '../../components/datagrid';
 import { PersesLoader } from '../../components/PersesLoader';
 import { usePlugins } from '../../model/plugin-client';

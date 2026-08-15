@@ -12,26 +12,27 @@
 // limitations under the License.
 
 import { Box, CircularProgress, Stack } from '@mui/material';
+import { DashboardResource } from '@perses-dev/client';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName, useLocalStorage } from '@perses-dev/components';
-import { DashboardSpec } from '@perses-dev/spec';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
+import { DashboardSpec } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
-import { DashboardResource } from '@perses-dev/client';
+
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
-import { useDatasourceApi } from '../../../model/datasource-api';
-import { useGlobalVariableList } from '../../../model/global-variable-client';
-import { useProject } from '../../../model/project-client';
-import { useVariableList } from '../../../model/variable-client';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
+import { PERSES_APP_CONFIG } from '../../../config';
 import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
 } from '../../../context/Config';
+import { useDatasourceApi } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../../model/global-variable-client';
+import { useProject } from '../../../model/project-client';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
-import { PERSES_APP_CONFIG } from '../../../config';
 import { UserPreferences } from '../../../model/userPreferences';
+import { useVariableList } from '../../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;

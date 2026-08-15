@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
 import {
   useMutation,
   UseMutationResult,
@@ -20,9 +21,9 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
-import { useNavHistory } from '../context/DashboardNavHistory';
+
 import { useImportantDashboardSelectors } from '../context/Config';
+import { useNavHistory } from '../context/DashboardNavHistory';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 

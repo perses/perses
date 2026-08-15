@@ -13,10 +13,11 @@
 
 import { Avatar, Box, Divider, Typography, useTheme } from '@mui/material';
 import { lazy, ReactElement, Suspense, useState } from 'react';
-import { useIsMobileSize } from '../../utils/browser-size';
+
 import { useAuthorizationContext } from '../../context/Authorization';
-import { ProfileSettings } from './ProfileSettings';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { Preferences } from './Preferences';
+import { ProfileSettings } from './ProfileSettings';
 
 export enum ProfileSections {
   AUTHENTICATION,

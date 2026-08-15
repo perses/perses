@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { CircularProgress, Stack } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { DashboardResource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { ReactElement, useCallback, useEffect } from 'react';
-import { DashboardResource } from '@perses-dev/client';
-import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
+import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
 import { HelperDashboardView } from './HelperDashboardView';
 
 /**

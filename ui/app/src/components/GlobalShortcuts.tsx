@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   useHotkeys,
   useHotkeySequences,
@@ -28,6 +26,9 @@ import {
   SHOW_SHORTCUTS_SHORTCUT,
   TOGGLE_THEME_SHORTCUT,
 } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { ExploreRoute, ProfileRoute } from '../model/route';
 
 /** Registers all global keyboard shortcuts. Requires HotkeysProvider and ScopeProvider. */

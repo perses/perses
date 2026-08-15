@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "sortImports": {},
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "**/dist",
+    "**/lib",
+    "**/*.md",
+    "**/*.mdx",
+    "**/mock-query-range.json",
+    "package-lock.json",
+    ".github/perses-ci",
+    ".github/perses-ci/**"
+  ]
+}

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { FolderResource } from '@perses-dev/client';
-import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
+
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
+import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';
 
 jest.mock('echarts', () => ({

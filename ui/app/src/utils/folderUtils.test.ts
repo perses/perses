@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { FolderItem } from '@perses-dev/client';
+
 import {
   collectDashboards,
   getSubFolderDeepCopy,

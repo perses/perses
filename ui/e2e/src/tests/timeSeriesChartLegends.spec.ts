@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
+
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
 import { DashboardResource } from '@perses-dev/dashboards';
+import { ConsoleMessage, test as testBase, expect } from '@playwright/test';
+
 import { AppHomePage, DashboardPage } from '../pages';
 
 type DashboardTestOptions = {
@@ -176,6 +177,7 @@ export const test = testBase.extend<DashboardTestOptions & DashboardTestFixtures
     const dashboardPage = new DashboardPage(page);
 
     // Use the fixture value in the test.
+    // oxlint-disable-next-line react/rules-of-hooks -- Playwright's fixture callback is not a React component.
     await use(dashboardPage);
 
     await dashboardPage.cleanupMockRequests();

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
 import { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import { useCallback } from 'react';
+
 import { PERSES_APP_CONFIG } from '../config';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';

@@ -13,15 +13,17 @@
 
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { Action, getMetadataProject, RoleBinding } from '@perses-dev/client';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
+import { GlobalProject } from '../../context/Authorization';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
-import { GlobalProject } from '../../context/Authorization';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   ListPropertiesWithCallbacks,
@@ -30,7 +32,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DeleteResourceDialog } from '../dialogs';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
 

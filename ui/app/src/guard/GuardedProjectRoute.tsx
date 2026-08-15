@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Await, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { ReactElement, Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
-import { useSnackbar } from '@perses-dev/components';
 import { ProjectResource } from '@perses-dev/client';
+import { useSnackbar } from '@perses-dev/components';
+import { ReactElement, Suspense, useEffect, useState } from 'react';
+import { Await, Outlet, useNavigate, useParams } from 'react-router-dom';
+
 import { getProject } from '../model/project-client';
 
 function GuardedProjectRoute(): ReactElement {

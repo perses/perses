@@ -24,14 +24,15 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import Archive from 'mdi-material-ui/Archive';
-import Magnify from 'mdi-material-ui/Magnify';
-import { Link as RouterLink } from 'react-router-dom';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
+import Magnify from 'mdi-material-ui/Magnify';
+import { ChangeEvent, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { ProjectWithDashboards, useProjectsWithDashboards } from '../../model/project-client';
 
 /**
  * Generate a color for a project based on its name.

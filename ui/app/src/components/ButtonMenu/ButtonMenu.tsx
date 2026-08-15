@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material';
-import { useState, useRef, ReactElement } from 'react';
 import MenuDown from 'mdi-material-ui/MenuDown';
+import { useState, useRef, ReactElement } from 'react';
 
 export interface ButtonMenuProps {
   children: JSX.Element[];

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
-import { Button, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, TextField } from '@mui/material';
 import { EphemeralDashboardResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/spec';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import { useUpdateEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import {
   updateEphemeralDashboardDialogValidationSchema,

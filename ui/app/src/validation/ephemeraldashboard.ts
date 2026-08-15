@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { useMemo } from 'react';
-import { durationValidationSchema } from '@perses-dev/spec';
 import { nameSchema } from '@perses-dev/client';
-import { generateMetadataName } from '../utils/metadata';
+import { durationValidationSchema } from '@perses-dev/spec';
+import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
+import { generateMetadataName } from '../utils/metadata';
 import { dashboardDisplayNameValidationSchema } from './dashboard';
 
 export const createEphemeralDashboardDialogValidationSchema = z.object({

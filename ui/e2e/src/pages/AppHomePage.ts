@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Page } from '@playwright/test';
+
 import { escapeRegExp } from '../utils';
 
 const recentDashboardListId = 'recent-dashboard-list';
