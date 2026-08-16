@@ -20,6 +20,12 @@ If you are new to Perses, please review the rest of this README first before sta
 - Install dependencies: `npm install`
 - Run tests: `npm run test`
 
+### Check React code health
+
+- Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`.
+- Run `npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in
+  GitHub Actions.
+
 ### Run end-to-end tests
 
 - Follow the instructions to start the Perses app.

@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "react", "react-perf", "jsx-a11y"],
+  "jsPlugins": [{ "name": "react-doctor", "specifier": "oxlint-plugin-react-doctor" }],
   "categories": {
     "correctness": "error",
     "suspicious": "warn",
@@ -36,6 +37,8 @@
     "react/no-unescaped-entities": "error",
     "react/exhaustive-deps": "error",
     "react/react-compiler": "warn",
+    "react-doctor/no-fetch-in-effect": "warn",
+    "react-doctor/no-derived-state": "warn",
     "react/jsx-curly-brace-presence": [
       "error",
       { "props": "never", "children": "never", "propElementValues": "always" }
