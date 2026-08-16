@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.ts,**/*.tsx"
+applyTo: '**/*.ts,**/*.tsx'
 ---
 
 # Perses UI quality instructions
