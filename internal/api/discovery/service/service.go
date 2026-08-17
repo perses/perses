@@ -23,22 +23,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(caseSensitive bool, svc globaldatasource.Service) *ApplyService {
+func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string) *ApplyService {
 	return &ApplyService{
 		caseSensitive: caseSensitive,
 		svc:           svc,
+		discoveryName: discoveryName,
 	}
 }
 
 type ApplyService struct {
 	caseSensitive bool
 	svc           globaldatasource.Service
+	discoveryName string
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	var currentNames []string
 	for _, entity := range entities {
 		entity.Metadata.Source = v1.DiscoverySource
+		entity.Metadata.DiscoveryName = a.discoveryName
 		entity.GetMetadata().Flatten(a.caseSensitive)
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
@@ -61,7 +64,11 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		currentNames = append(currentNames, entity.Metadata.Name)
 	}
 
-	foundDatasources, err := a.svc.List(&globaldatasource.Query{Source: v1.DiscoverySource})
+	foundDatasources, err := a.svc.List(
+		&globaldatasource.Query{
+			Source:        v1.DiscoverySource,
+			DiscoveryName: a.discoveryName,
+		})
 	if err != nil {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")
 	}
