@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tooltip } from '@mui/material';
+import { Box, Link, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { intlFormatDistance, add } from 'date-fns';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { EphemeralDashboardResource } from '@perses-dev/client';
@@ -124,7 +125,19 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       PROJECT_COL_DEF,
-      DISPLAY_NAME_COL_DEF,
+      {
+        ...DISPLAY_NAME_COL_DEF,
+        renderCell: (params): ReactElement => (
+          <Link
+            component={RouterLink}
+            to={`/projects/${params.row.project}/ephemeraldashboards/${params.row.name}`}
+            color="inherit"
+            underline="hover"
+          >
+            {params.row.displayName}
+          </Link>
+        ),
+      },
       VERSION_COL_DEF,
       {
         field: 'expireAt',

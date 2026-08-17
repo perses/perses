@@ -13,7 +13,6 @@
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import { memo, ReactElement, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import {
@@ -43,8 +42,6 @@ function NoEphemeralDashboardRowOverlay(): ReactElement {
 export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): ReactElement {
   const { columns, rows, initialState, hideToolbar, isLoading } = props;
 
-  const navigate = useNavigate();
-
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
     return {
@@ -56,7 +53,6 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
       <DataGrid
-        onRowClick={(params) => navigate(`/projects/${params.row.project}/ephemeraldashboards/${params.row.name}`)}
         rows={rows}
         columns={columns}
         getRowId={(row) => row.name}

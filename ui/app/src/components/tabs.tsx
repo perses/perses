@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps, Chip, Stack, Tab, Tabs, styled } from '@mui/material';
-import { ReactElement } from 'react';
+import { Box, BoxProps, Chip, Stack, Tab, TabProps, Tabs, styled } from '@mui/material';
+import { forwardRef, ReactElement } from 'react';
+import { Link as RouterLink, LinkProps } from 'react-router-dom';
 
 export const MENU_TABS_HEIGHT = '54px';
 
@@ -21,6 +22,16 @@ export const MenuTabs = styled(Tabs)({
 });
 
 export const MenuTab = styled(Tab)({
+  minHeight: MENU_TABS_HEIGHT,
+});
+
+export type MenuLinkTabProps = TabProps<typeof RouterLink, LinkProps>;
+
+export const MenuLinkTab = styled(
+  forwardRef<HTMLAnchorElement, MenuLinkTabProps>(function MenuLinkTab(props, ref) {
+    return <Tab {...props} ref={ref} component={RouterLink} />;
+  })
+)({
   minHeight: MENU_TABS_HEIGHT,
 });
 

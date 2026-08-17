@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
-import { useNavigate } from 'react-router-dom';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ShieldIcon from 'mdi-material-ui/Shield';
@@ -38,7 +37,7 @@ import {
   useIsGlobalVariableEnabled,
   useIsReadonly,
 } from '../../context/Config';
-import { MenuTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
+import { MenuLinkTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
 import { useCreateGlobalRoleBindingMutation, useGlobalRoleBindingList } from '../../model/global-rolebinding-client';
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
@@ -358,10 +357,9 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
   const isGlobalDatasourceEnabled = useIsGlobalDatasourceEnabled();
   const isGlobalVariableEnabled = useIsGlobalVariableEnabled();
 
-  const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
 
-  const [value, setValue] = useState((initialTab ?? variablesTabIndex).toLowerCase());
+  const value = (initialTab ?? variablesTabIndex).toLowerCase();
 
   // Fetch counts for tab badges
   const { data: globalVariables } = useGlobalVariableList();
@@ -378,10 +376,6 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
   const hasGlobalVariableReadPermission = useHasPermission('read', GlobalProject, 'GlobalVariable');
   const hasUserReadPermission = useHasPermission('read', GlobalProject, 'User');
 
-  const handleChange = (event: SyntheticEvent, newTabIndex: string): void => {
-    setValue(newTabIndex);
-    navigate(`/admin/${newTabIndex}`);
-  };
   return (
     <Box sx={{ width: '100%' }}>
       <Stack
@@ -400,67 +394,72 @@ export function AdminTabs(props: AdminTabsProps): ReactElement {
       >
         <MenuTabs
           value={value}
-          onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
           aria-label="Admin tabs"
         >
           {isGlobalVariableEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Global Variables" count={globalVariables?.length} />}
               icon={<CodeJsonIcon />}
               iconPosition="start"
               {...a11yProps(variablesTabIndex)}
               value={variablesTabIndex}
+              to={`/admin/${variablesTabIndex}`}
               disabled={!hasGlobalVariableReadPermission}
             />
           )}
           {isGlobalDatasourceEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Global Datasources" count={globalDatasources?.length} />}
               icon={<DatabaseIcon />}
               iconPosition="start"
               {...a11yProps(datasourcesTabIndex)}
               value={datasourcesTabIndex}
+              to={`/admin/${datasourcesTabIndex}`}
               disabled={!hasGlobalDatasourceReadPermission}
             />
           )}
-          <MenuTab
+          <MenuLinkTab
             label={<TabLabel label="Global Secrets" count={globalSecrets?.length} />}
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
+            to={`/admin/${secretsTabIndex}`}
             disabled={!hasGlobalSecretReadPermission}
           />
           {isAuthEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Global Roles" count={globalRoles?.length} />}
               icon={<ShieldIcon />}
               iconPosition="start"
               {...a11yProps(roleBindingsTabIndex)}
               value={rolesTabIndex}
+              to={`/admin/${rolesTabIndex}`}
               disabled={!hasGlobalRoleReadPermission}
             />
           )}
           {isAuthEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Global Role Bindings" count={globalRoleBindings?.length} />}
               icon={<ShieldAccountIcon />}
               iconPosition="start"
               {...a11yProps(roleBindingsTabIndex)}
               value={roleBindingsTabIndex}
+              to={`/admin/${roleBindingsTabIndex}`}
               disabled={!hasGlobalRoleBindingReadPermission}
             />
           )}
           {isAuthEnabled && (
-            <MenuTab
+            <MenuLinkTab
               label={<TabLabel label="Users" count={users?.length} />}
               icon={<AccountIcon />}
               iconPosition="start"
               {...a11yProps(usersTabIndex)}
               value={usersTabIndex}
+              to={`/admin/${usersTabIndex}`}
               disabled={!hasUserReadPermission}
             />
           )}
