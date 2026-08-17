@@ -12378,5 +12378,206 @@
       ],
       "duration": "1h"
     }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "tablayout",
+      "createdAt": "2026-05-14T00:00:00Z",
+      "updatedAt": "2026-05-14T18:12:53.465872Z",
+      "version": 17,
+      "project": "testing"
+    },
+    "spec": {
+      "panels": {
+        "15284a0c29804a4d9072eff692899f4d": {
+          "kind": "Panel",
+          "spec": {
+            "display": {},
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "go_gc_duration_seconds"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "3cbdd9d45df1456485430e0cf58c5648": {
+          "kind": "Panel",
+          "spec": {
+            "display": {},
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "rest"
+              }
+            }
+          }
+        },
+        "bdc061367d904a8a970180eb8b364b13": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Details Panel 1"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "up"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "panel1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Overview Panel"
+            },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "up"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "panel3": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Details Panel 2"
+            },
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "# More Details\nSecond details panel."
+              }
+            }
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Tabs",
+          "spec": {
+            "display": {
+              "title": "My Tab Group",
+              "collapse": {
+                "open": true
+              }
+            },
+            "tabs": [
+              {
+                "name": "Overview",
+                "items": [
+                  {
+                    "x": 0,
+                    "y": 0,
+                    "width": 13,
+                    "height": 6,
+                    "content": {
+                      "$ref": "#/spec/panels/panel1"
+                    }
+                  },
+                  {
+                    "x": 13,
+                    "y": 0,
+                    "width": 8,
+                    "height": 6,
+                    "content": {
+                      "$ref": "#/spec/panels/3cbdd9d45df1456485430e0cf58c5648"
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "Details",
+                "items": [
+                  {
+                    "x": 12,
+                    "y": 0,
+                    "width": 12,
+                    "height": 6,
+                    "content": {
+                      "$ref": "#/spec/panels/panel3"
+                    }
+                  },
+                  {
+                    "x": 0,
+                    "y": 0,
+                    "width": 12,
+                    "height": 6,
+                    "content": {
+                      "$ref": "#/spec/panels/bdc061367d904a8a970180eb8b364b13"
+                    }
+                  }
+                ]
+              }
+            ],
+            "defaultTab": 0
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "My Grid Group",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/15284a0c29804a4d9072eff692899f4d"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "variables": [],
+      "duration": "6h",
+      "refreshInterval": "0s",
+      "links": []
+    }
   }
 ]
