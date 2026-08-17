@@ -44,7 +44,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
         createVariableMutation.mutate(variable, {
           onSuccess: (createdVariable: VariableType) => {
             successSnackbar(
-              `Global Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`
+              `Global Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`,
             );
             resolve();
           },
@@ -55,7 +55,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createVariableMutation]
+    [exceptionSnackbar, successSnackbar, createVariableMutation],
   );
 
   const handleVariableUpdate = useCallback(
@@ -64,7 +64,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
         updateVariableMutation.mutate(variable, {
           onSuccess: (updatedVariable: VariableType) => {
             successSnackbar(
-              `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`
+              `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`,
             );
             resolve();
           },
@@ -75,7 +75,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateVariableMutation]
+    [exceptionSnackbar, successSnackbar, updateVariableMutation],
   );
 
   const handleVariableDelete = useCallback(
@@ -84,7 +84,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: VariableType) => {
             successSnackbar(
-              `Global Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
+              `Global Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`,
             );
             resolve();
           },
@@ -95,7 +95,7 @@ export function GlobalVariables(props: GlobalVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteVariableMutation]
+    [exceptionSnackbar, successSnackbar, deleteVariableMutation],
   );
 
   return (

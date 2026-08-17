@@ -144,7 +144,7 @@ async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: num
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },

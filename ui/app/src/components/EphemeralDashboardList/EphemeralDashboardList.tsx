@@ -54,16 +54,16 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
     (project: string, name: string) => {
       return ephemeralDashboardList.find(
         (ephemeralDashboard) =>
-          ephemeralDashboard.metadata.project === project && ephemeralDashboard.metadata.name === name
+          ephemeralDashboard.metadata.project === project && ephemeralDashboard.metadata.name === name,
       );
     },
-    [ephemeralDashboardList]
+    [ephemeralDashboardList],
   );
 
   const getExpirationDate = useCallback((ephemeralDashboard: EphemeralDashboardResource): string => {
     return add(
       ephemeralDashboard.metadata.updatedAt ? new Date(ephemeralDashboard.metadata.updatedAt) : new Date(),
-      parseDurationString(ephemeralDashboard.spec.ttl)
+      parseDurationString(ephemeralDashboard.spec.ttl),
     ).toISOString();
   }, []);
 
@@ -78,7 +78,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
           version: ephemeralDashboard.metadata.version,
           createdAt: ephemeralDashboard.metadata.createdAt,
           updatedAt: ephemeralDashboard.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [ephemeralDashboardList, getExpirationDate]);
 
@@ -93,7 +93,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
       setTargetedDashboard(getDashboard(project, name));
       setRenameEphemeralDashboardDialogStateOpened(true);
     },
-    [getDashboard]
+    [getDashboard],
   );
 
   const handleEphemeralDashboardDelete = useCallback(
@@ -111,7 +111,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteEphemeralDashboardMutation]
+    [exceptionSnackbar, successSnackbar, deleteEphemeralDashboardMutation],
   );
 
   const onDeleteButtonClick = useCallback(
@@ -119,7 +119,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
       setTargetedDashboard(getDashboard(project, name));
       setDeleteEphemeralDashboardDialogStateOpened(true);
     },
-    [getDashboard]
+    [getDashboard],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -170,7 +170,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
         ],
       },
     ],
-    [onRenameButtonClick, onDeleteButtonClick]
+    [onRenameButtonClick, onDeleteButtonClick],
   );
 
   return (

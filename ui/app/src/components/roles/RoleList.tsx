@@ -51,7 +51,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
     (name: string, project?: string) => {
       return data.find((role) => getMetadataProject(role.metadata) === project && role.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -63,7 +63,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
           version: role.metadata.version,
           createdAt: role.metadata.createdAt,
           updatedAt: role.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -81,7 +81,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
       }
       setRoleDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -90,7 +90,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
       setAction('read');
       setRoleDrawerOpened(true);
     },
-    [findRole]
+    [findRole],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -100,7 +100,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
       setAction('create');
       setRoleDrawerOpened(true);
     },
-    [findRole]
+    [findRole],
   );
 
   const handleEditButtonClick = useCallback(
@@ -110,7 +110,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
       setAction('update');
       setRoleDrawerOpened(true);
     },
-    [findRole]
+    [findRole],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -118,7 +118,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
       setTargetedRole(findRole(name, project));
       setDeleteRoleDialogOpened(true);
     },
-    [findRole]
+    [findRole],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -165,7 +165,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>):
         ],
       },
     ],
-    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

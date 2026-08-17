@@ -53,7 +53,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createSecretMutation]
+    [exceptionSnackbar, successSnackbar, createSecretMutation],
   );
 
   const handleSecretUpdate = useCallback(
@@ -71,7 +71,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateSecretMutation]
+    [exceptionSnackbar, successSnackbar, updateSecretMutation],
   );
 
   const handleSecretDelete = useCallback(
@@ -89,7 +89,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteSecretMutation]
+    [exceptionSnackbar, successSnackbar, deleteSecretMutation],
   );
 
   return (

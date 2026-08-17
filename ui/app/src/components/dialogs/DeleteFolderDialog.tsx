@@ -65,7 +65,7 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
       exceptionSnackbar(err);
       throw err;
     },
-    [exceptionSnackbar]
+    [exceptionSnackbar],
   );
 
   const handleFolderDelete = useCallback(() => {
@@ -85,7 +85,7 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
         {
           onSuccess: onSuccess,
           onError: onError,
-        }
+        },
       );
     }
   }, [deleteRoot, deleteFolderMutation, folder, onSuccess, onError, path, updateFolderMutation]);

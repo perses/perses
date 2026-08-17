@@ -62,7 +62,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
         onError: (err: Error) => {
           exceptionSnackbar(err);
         },
-      }
+      },
     );
   };
 

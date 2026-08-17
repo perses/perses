@@ -60,7 +60,7 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }): R
       isDarkModeEnabled,
       setDarkMode,
     }),
-    [isDarkModeEnabled, setDarkMode]
+    [isDarkModeEnabled, setDarkMode],
   );
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);

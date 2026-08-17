@@ -56,7 +56,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
     (name: string, project?: string) => {
       return data.find((variable: T) => getVariableProject(variable) === project && variable.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -71,7 +71,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
           version: variable.metadata.version,
           createdAt: variable.metadata.createdAt,
           updatedAt: variable.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -89,7 +89,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       }
       setVariableDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -98,7 +98,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('read');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleCopyVarNameButtonClick = useCallback(
@@ -106,7 +106,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       await navigator.clipboard.writeText(variableName);
       infoSnackbar('Variable copied to clipboard!');
     },
-    [infoSnackbar]
+    [infoSnackbar],
   );
 
   const handleEditButtonClick = useCallback(
@@ -116,7 +116,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('update');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -126,7 +126,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('create');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -134,7 +134,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setTargetedVariable(findVariable(name, project));
       setDeleteVariableDialogOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -208,7 +208,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
         ],
       },
     ],
-    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

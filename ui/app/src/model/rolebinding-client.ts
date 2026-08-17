@@ -101,7 +101,7 @@ export function useRoleBindingList(project?: string): UseQueryResult<RoleBinding
  * @param project
  */
 export function useCreateRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -125,7 +125,7 @@ export function useCreateRoleBindingMutation(
  * @param project
  */
 export function useUpdateRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -151,7 +151,7 @@ export function useUpdateRoleBindingMutation(
  * @param project
  */
 export function useDeleteRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

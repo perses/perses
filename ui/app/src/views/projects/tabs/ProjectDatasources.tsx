@@ -56,7 +56,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation],
   );
 
   const handleDatasourceUpdate = useCallback(
@@ -75,7 +75,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, updateDatasourceMutation],
   );
 
   const handleDatasourceDelete = useCallback(
@@ -94,7 +94,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation],
   );
 
   return (

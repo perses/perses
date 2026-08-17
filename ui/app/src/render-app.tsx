@@ -28,6 +28,6 @@ export function renderApp(container: Element | null): void {
   root.render(
     <React.StrictMode>
       <Router />
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }

@@ -26,7 +26,7 @@ function renderCell(props: NameCellProps): ReturnType<typeof render> {
       <ThemeProvider theme={theme}>
         <NameCell {...props} />
       </ThemeProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 

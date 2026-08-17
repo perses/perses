@@ -14,6 +14,18 @@
       "dependsOn": [],
       "outputs": []
     },
+    "lint:ci": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "//#format:root": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#format:root:check": {
+      "cache": false,
+      "outputs": []
+    },
     "start": {
       // Make sure all packages are built once before starting watch mode
       "dependsOn": ["^build"],

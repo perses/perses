@@ -18,7 +18,7 @@ import { ExternalVariableSource } from '../model/variables';
 
 export function buildProjectVariableDefinition(
   projectName: string,
-  variables: VariableType[]
+  variables: VariableType[],
 ): ExternalVariableDefinition {
   return {
     editLink: `/projects/${projectName}/variables`,
@@ -48,7 +48,7 @@ export function buildGlobalVariableDefinition(variables: VariableType[]): Extern
  */
 function buildExternalVariableDefinition(
   source: ExternalVariableSource,
-  variables: VariableType[]
+  variables: VariableType[],
 ): ExternalVariableDefinition {
   return {
     source: source,

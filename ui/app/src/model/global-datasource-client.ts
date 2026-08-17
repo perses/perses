@@ -95,7 +95,7 @@ export function useGlobalDatasource(name: string): UseQueryResult<GlobalDatasour
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasourceList(
-  options?: GlobalDatasourceListOptions
+  options?: GlobalDatasourceListOptions,
 ): UseQueryResult<GlobalDatasourceResource[], StatusError> {
   return useQuery<GlobalDatasourceResource[], StatusError>({
     queryKey: buildQueryKey({ resource }),

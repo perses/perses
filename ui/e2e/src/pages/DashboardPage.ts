@@ -311,7 +311,7 @@ export class DashboardPage {
    */
   async editPanel(
     panelNameOrPanel: PanelNameOrPanel,
-    callback: (panelEditor: PanelEditor) => Promise<void>
+    callback: (panelEditor: PanelEditor) => Promise<void>,
   ): Promise<void> {
     const panel = this.getPanelByNameOrSelf(panelNameOrPanel);
 

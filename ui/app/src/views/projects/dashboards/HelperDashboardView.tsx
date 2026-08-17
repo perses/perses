@@ -74,7 +74,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
       buildProjectVariableDefinition(dashboardResource.metadata.project, projectVars ?? []),
       buildGlobalVariableDefinition(globalVars ?? []),
     ],
-    [dashboardResource, projectVars, globalVars]
+    [dashboardResource, projectVars, globalVars],
   );
 
   if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {

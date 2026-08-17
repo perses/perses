@@ -35,10 +35,10 @@ export function useProjectValidationSchema(): z.Schema {
     return createProjectDialogValidationSchema.refine(
       (schema) => {
         return !(projects.data ?? []).some(
-          (project) => project.metadata.name === generateMetadataName(schema.projectName)
+          (project) => project.metadata.name === generateMetadataName(schema.projectName),
         );
       },
-      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] })
+      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] }),
     );
   }, [projects.data]);
 }

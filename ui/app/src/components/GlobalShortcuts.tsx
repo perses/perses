@@ -57,7 +57,7 @@ export function GlobalShortcuts(): ReactElement | null {
       sequence: requireShortcutSequence(def),
       callback,
       options: buildShortcutOptions(def, true),
-    }))
+    })),
   );
 
   useHotkeys(
@@ -65,7 +65,7 @@ export function GlobalShortcuts(): ReactElement | null {
       hotkey: requireShortcutHotkey(shortcutDef),
       callback: (): void => dispatchShortcutEvent(requireShortcutEvent(shortcutDef)),
       options: buildShortcutOptions(shortcutDef, true),
-    }))
+    })),
   );
 
   return null;

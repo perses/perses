@@ -101,7 +101,7 @@ export function useSecretList(project?: string): UseQueryResult<SecretResource[]
  * @param project
  */
 export function useCreateSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -125,7 +125,7 @@ export function useCreateSecretMutation(
  * @param project
  */
 export function useUpdateSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -151,7 +151,7 @@ export function useUpdateSecretMutation(
  * @param project
  */
 export function useDeleteSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

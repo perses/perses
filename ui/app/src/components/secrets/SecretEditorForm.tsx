@@ -546,7 +546,7 @@ export function SecretEditorForm({
                             ...acc,
                             [key]: value,
                           }),
-                          {}
+                          {},
                         );
                       field.onChange(newParams);
                     };
@@ -557,7 +557,7 @@ export function SecretEditorForm({
                           ...acc,
                           [key === oldKey ? newKey : key]: val,
                         }),
-                        {}
+                        {},
                       );
                       field.onChange(newParams);
                     };
@@ -579,7 +579,7 @@ export function SecretEditorForm({
                       const currentValues = params[key] || [];
                       updateParamValue(
                         key,
-                        currentValues.filter((_, index) => index !== indexToRemove)
+                        currentValues.filter((_, index) => index !== indexToRemove),
                       );
                     };
 

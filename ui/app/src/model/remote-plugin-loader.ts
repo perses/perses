@@ -19,6 +19,6 @@ import { PERSES_APP_CONFIG } from '../config';
 export function useRemotePluginLoader(): PluginLoader {
   return useMemo(
     () => remotePluginLoader({ baseURL: PERSES_APP_CONFIG.api_prefix, apiPrefix: PERSES_APP_CONFIG.api_prefix }),
-    []
+    [],
   );
 }

@@ -166,7 +166,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         }
       }
     },
-    [dashboardList, dashboardsMap, folderList]
+    [dashboardList, dashboardsMap, folderList],
   );
 
   const handleRenameButtonClick = openDialog('editDashboard');
@@ -206,7 +206,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         }
       }
     },
-    [navigate, activeDialog]
+    [navigate, activeDialog],
   );
 
   const handleDashboardDelete = useCallback(
@@ -224,7 +224,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteDashboardMutation]
+    [exceptionSnackbar, successSnackbar, deleteDashboardMutation],
   );
 
   return (

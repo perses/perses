@@ -96,7 +96,7 @@ function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched'], en
 
 function getTagDisplayValues(
   tags: string[] | undefined,
-  matchingTagValues: string[]
+  matchingTagValues: string[],
 ): {
   normalizedMatchingTags: Set<string>;
   visibleTags: string[];
@@ -180,7 +180,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
         const matchingTagValues = getMatchingTagValues(search.matched, Boolean(query));
         const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
           search.original.metadata.tags,
-          matchingTagValues
+          matchingTagValues,
         );
 
         const projectName = isProjectMetadata(search.original.metadata) ? search.original.metadata.project : undefined;

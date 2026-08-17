@@ -34,7 +34,7 @@ function GuardedProjectRoute(): ReactElement {
         exceptionSnackbar(err);
         navigate('/');
         throw err;
-      })
+      }),
     );
   }, [exceptionSnackbar, navigate, projectName]);
 

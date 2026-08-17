@@ -143,7 +143,7 @@ function HelperExploreView(): ReactElement {
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
     () => [buildGlobalVariableDefinition(globalVars ?? [])],
-    [globalVars]
+    [globalVars],
   );
 
   const exploreTitleComponent = useMemo(() => {

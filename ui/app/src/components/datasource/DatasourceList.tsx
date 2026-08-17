@@ -52,10 +52,10 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   const findDatasource = useCallback(
     (name: string, project?: string) => {
       return data.find(
-        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name
+        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name,
       );
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -71,7 +71,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
           version: datasource.metadata.version,
           createdAt: datasource.metadata.createdAt,
           updatedAt: datasource.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -90,7 +90,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
 
       setDatasourceDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -99,7 +99,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('read');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleEditButtonClick = useCallback(
@@ -109,7 +109,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('update');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -119,7 +119,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('create');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -127,7 +127,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setTargetedDatasource(findDatasource(name, project));
       setDeleteDatasourceDialogOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -189,7 +189,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         ],
       },
     ],
-    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

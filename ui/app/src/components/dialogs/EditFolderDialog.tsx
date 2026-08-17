@@ -70,7 +70,7 @@ export const EditFolderDialog = ({
 
   const dashboardsInSiblingFolders: string[] = useMemo(
     () => collectDashboards(folder.spec.items, true, (name) => !dashboardNamesInFolder.includes(name)),
-    [dashboardNamesInFolder, folder.spec.items]
+    [dashboardNamesInFolder, folder.spec.items],
   );
 
   const options = useMemo(
@@ -78,7 +78,7 @@ export const EditFolderDialog = ({
       [...dashboards.values()]
         .filter((s) => !dashboardsInSiblingFolders.includes(s.name))
         .map((d) => ({ label: d.displayName, name: d.name })),
-    [dashboardsInSiblingFolders, dashboards]
+    [dashboardsInSiblingFolders, dashboards],
   );
 
   const form = useForm<EditFolderValidationType>({

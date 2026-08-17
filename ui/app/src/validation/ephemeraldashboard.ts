@@ -44,14 +44,14 @@ export function useEphemeralDashboardValidationSchema(projectName?: string): z.Z
             (dashboard) =>
               dashboard.metadata.project === schema.projectName &&
               dashboard.metadata.name === generateMetadataName(schema.dashboardName) &&
-              dashboard.spec.ttl === schema.ttl
+              dashboard.spec.ttl === schema.ttl,
           ).length === 0
         );
       },
       (schema) => ({
         message: `Ephemeral Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
         path: ['dashboardName'],
-      })
+      }),
     );
   }, [dashboards.data]);
 }

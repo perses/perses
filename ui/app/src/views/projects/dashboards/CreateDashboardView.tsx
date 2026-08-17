@@ -77,7 +77,7 @@ function CreateDashboardView(): ReactElement | null {
       return createDashboardMutation.mutateAsync(data, {
         onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
+            `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`,
           );
           navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
         },
@@ -88,7 +88,7 @@ function CreateDashboardView(): ReactElement | null {
         },
       });
     },
-    [createDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
+    [createDashboardMutation, exceptionSnackbar, navigate, successSnackbar],
   );
 
   const handleDashboardDiscard = useCallback(() => {

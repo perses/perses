@@ -187,7 +187,7 @@ function Router(): ReactElement {
       },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
-    { basename: PERSES_APP_CONFIG.api_prefix }
+    { basename: PERSES_APP_CONFIG.api_prefix },
   );
 
   return (

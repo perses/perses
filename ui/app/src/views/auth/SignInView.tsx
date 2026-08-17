@@ -42,7 +42,7 @@ function SignInView(): ReactElement {
         onError: (err) => {
           exceptionSnackbar(err);
         },
-      }
+      },
     );
   };
 

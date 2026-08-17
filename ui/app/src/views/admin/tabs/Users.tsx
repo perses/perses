@@ -53,7 +53,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createUserMutation]
+    [exceptionSnackbar, successSnackbar, createUserMutation],
   );
 
   const handleUserUpdate = useCallback(
@@ -71,7 +71,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateUserMutation]
+    [exceptionSnackbar, successSnackbar, updateUserMutation],
   );
 
   const handleUserDelete = useCallback(
@@ -89,7 +89,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteUserMutation]
+    [exceptionSnackbar, successSnackbar, deleteUserMutation],
   );
 
   return (

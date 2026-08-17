@@ -50,7 +50,7 @@ export const CreateFolderDialog = ({
 
   const options = useMemo(
     () => [...(dashboards?.values() ?? [])].map((d) => ({ label: getResourceDisplayName(d), name: d.metadata.name })),
-    [dashboards]
+    [dashboards],
   );
 
   const form = useForm<CreateFolderValidationType>({

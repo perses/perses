@@ -114,7 +114,7 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },
@@ -135,7 +135,7 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },

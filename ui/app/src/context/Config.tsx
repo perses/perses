@@ -138,7 +138,7 @@ export function useInformation(): string {
 
   const html = useMemo(
     () => marked.parse(config.frontend.information ?? '', { gfm: true, async: false }),
-    [config.frontend.information]
+    [config.frontend.information],
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
@@ -148,7 +148,7 @@ export function useBanner(): Banner | undefined {
 
   const html = useMemo(
     () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
-    [config.frontend.banner?.message]
+    [config.frontend.banner?.message],
   );
 
   const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);

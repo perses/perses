@@ -74,7 +74,7 @@ export function useDashboardCreateAllowedProjects(): ProjectResource[] {
   return (data ?? []).filter(
     (project) =>
       permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
-      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard')
+      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
   );
 }
 
@@ -111,7 +111,7 @@ function permissionListHasPermission(permissions: Permission[], requestAction: A
   return permissions.some(
     (permission) =>
       permission.actions.some((action) => action === requestAction || action === '*') &&
-      permission.scopes.some((scope) => scope === requestScope || scope === '*')
+      permission.scopes.some((scope) => scope === requestScope || scope === '*'),
   );
 }
 

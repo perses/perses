@@ -48,7 +48,7 @@ export const Preferences = (): ReactElement => {
       setUserPreferences({ ...userPreferences, timezone });
       successSnackbar(`User-level timezone set to ${timezone}`);
     },
-    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences]
+    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences],
   );
 
   return (

@@ -95,7 +95,7 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
         const highlight = !!importantDashboards.some(
           (importantDashboard) =>
             importantDashboard.metadata.name === d.metadata.name &&
-            importantDashboard.metadata.project === d.metadata.project
+            importantDashboard.metadata.project === d.metadata.project,
         );
         return { ...d, highlight };
       });

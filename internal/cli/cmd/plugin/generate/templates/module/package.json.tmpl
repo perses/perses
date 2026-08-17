@@ -9,6 +9,7 @@
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file .swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "lint": "oxlint src",
+    "lint:ci": "oxlint src",
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt",
     "format:check": "oxfmt --check",

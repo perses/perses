@@ -44,7 +44,7 @@ function SignUpView(): ReactElement {
         onError: (err) => {
           exceptionSnackbar(err);
         },
-      }
+      },
     );
   };
 

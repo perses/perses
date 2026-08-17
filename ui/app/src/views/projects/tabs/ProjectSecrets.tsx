@@ -54,7 +54,7 @@ export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createSecretMutation]
+    [exceptionSnackbar, successSnackbar, createSecretMutation],
   );
 
   const handleSecretUpdate = useCallback(
@@ -72,7 +72,7 @@ export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateSecretMutation]
+    [exceptionSnackbar, successSnackbar, updateSecretMutation],
   );
 
   const handleSecretDelete = useCallback(
@@ -90,7 +90,7 @@ export function ProjectSecrets(props: ProjectSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteSecretMutation]
+    [exceptionSnackbar, successSnackbar, deleteSecretMutation],
   );
 
   return (

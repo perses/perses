@@ -56,7 +56,7 @@ function ProjectView(): ReactElement {
           exceptionSnackbar(err);
           throw err;
         },
-      }
+      },
     );
   }
 
@@ -73,7 +73,7 @@ function ProjectView(): ReactElement {
           exceptionSnackbar(err);
           throw err;
         },
-      }
+      },
     );
   }
 

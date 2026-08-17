@@ -41,7 +41,7 @@ function DashboardView(): ReactElement | null {
   const navHistoryDispatch = useNavHistoryDispatch();
   useEffect(
     () => navHistoryDispatch({ project: projectName, name: dashboardName }),
-    [navHistoryDispatch, projectName, dashboardName]
+    [navHistoryDispatch, projectName, dashboardName],
   );
 
   const handleDashboardSave = useCallback(
@@ -52,7 +52,7 @@ function DashboardView(): ReactElement | null {
       return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`
+            `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`,
           );
           return updatedDashboard;
         },
@@ -62,7 +62,7 @@ function DashboardView(): ReactElement | null {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDashboardMutation]
+    [exceptionSnackbar, successSnackbar, updateDashboardMutation],
   );
 
   if (isLoading) {

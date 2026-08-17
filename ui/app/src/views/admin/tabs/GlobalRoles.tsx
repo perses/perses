@@ -53,7 +53,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleMutation]
+    [exceptionSnackbar, successSnackbar, createRoleMutation],
   );
 
   const handleGlobalRoleUpdate = useCallback(
@@ -71,7 +71,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleMutation],
   );
 
   const handleGlobalRoleDelete = useCallback(
@@ -89,7 +89,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleMutation],
   );
 
   return (

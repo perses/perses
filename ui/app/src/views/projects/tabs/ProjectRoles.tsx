@@ -54,7 +54,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleMutation]
+    [exceptionSnackbar, successSnackbar, createRoleMutation],
   );
 
   const handleRoleUpdate = useCallback(
@@ -72,7 +72,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleMutation],
   );
 
   const handleRoleDelete = useCallback(
@@ -90,7 +90,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleMutation],
   );
 
   return (

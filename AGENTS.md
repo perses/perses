@@ -9,8 +9,8 @@ contracts compatible.
 Before editing:
 
 - Read `CONTRIBUTING.md` for DCO and pull-request conventions.
-- Read `docs/ui-package-architecture.md` before moving UI responsibilities between repositories or packages.
-- For TypeScript or React work, also follow `.github/instructions/ui.instructions.md`.
+- Read `ui/ARCHITECTURE.md` before moving UI responsibilities between repositories or packages.
+- For TypeScript or React work, also follow `STYLEGUIDE.md`.
 - For UI application structure and established patterns, read `ui/README.md` and `ui/ui-guidelines.md`.
 
 ## Architecture map
@@ -67,8 +67,9 @@ For Go or CUE changes, select the checks relevant to the affected layer:
 make checkformat
 make checkunused
 go test ./path/to/affected/package/...
-golangci-lint run --timeout 5m
+make checkstyle
 make cue-eval
+make build
 ```
 
 `make test` and integration targets perform generation and may require downloaded default plugins, CUE, Prometheus, or

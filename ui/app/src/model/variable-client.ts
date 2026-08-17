@@ -101,7 +101,7 @@ export function useVariableList(project?: string): UseQueryResult<VariableResour
  * @param project
  */
 export function useCreateVariableMutation(
-  project: string
+  project: string,
 ): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -125,7 +125,7 @@ export function useCreateVariableMutation(
  * @param project
  */
 export function useUpdateVariableMutation(
-  project: string
+  project: string,
 ): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -151,7 +151,7 @@ export function useUpdateVariableMutation(
  * @param project
  */
 export function useDeleteVariableMutation(
-  project: string
+  project: string,
 ): UseMutationResult<VariableResource, StatusError, VariableResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

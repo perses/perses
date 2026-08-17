@@ -83,11 +83,11 @@ function CreateEphemeralDashboardView(): ReactElement | null {
         onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(
-              createdEphemeralDashboard
-            )} has been successfully created`
+              createdEphemeralDashboard,
+            )} has been successfully created`,
           );
           navigate(
-            `/projects/${createdEphemeralDashboard.metadata.project}/ephemeralDashboards/${createdEphemeralDashboard.metadata.name}`
+            `/projects/${createdEphemeralDashboard.metadata.project}/ephemeralDashboards/${createdEphemeralDashboard.metadata.name}`,
           );
         },
         onError: (err) => {
@@ -97,7 +97,7 @@ function CreateEphemeralDashboardView(): ReactElement | null {
         },
       });
     },
-    [createEphemeralDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
+    [createEphemeralDashboardMutation, exceptionSnackbar, navigate, successSnackbar],
   );
 
   const handleEphemeralDashboardDiscard = useCallback(() => {

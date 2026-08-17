@@ -101,7 +101,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation],
   );
 
   const handleGlobalRoleCreation = useCallback(
@@ -117,7 +117,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalRoleMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalRoleMutation],
   );
 
   const handleGlobalRoleBindingCreation = useCallback(
@@ -133,7 +133,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation],
   );
 
   const handleGlobalSecretCreation = useCallback(
@@ -149,7 +149,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalSecretMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalSecretMutation],
   );
 
   const handleGlobalVariableCreation = useCallback(
@@ -157,7 +157,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
       createGlobalVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: GlobalVariableResource) => {
           successSnackbar(
-            `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`
+            `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`,
           );
           setVariableDrawerOpened(false);
         },
@@ -167,7 +167,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalVariableMutation],
   );
 
   switch (index) {

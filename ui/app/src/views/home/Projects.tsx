@@ -236,14 +236,14 @@ export function Projects(): ReactElement {
           dashboards: row.dashboards.filter(
             (dashboard) =>
               dashboard.metadata.name.toLowerCase().includes(query) ||
-              dashboard.spec.display?.name?.toLowerCase().includes(query)
+              dashboard.spec.display?.name?.toLowerCase().includes(query),
           ),
         }))
         .filter(
           (row) =>
             row.project.metadata.name?.toLowerCase().includes(query) ||
             row.project.spec?.display?.name?.toLowerCase().includes(query) ||
-            row.dashboards.length > 0
+            row.dashboards.length > 0,
         );
     } else {
       return allProjectRows;

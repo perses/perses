@@ -113,7 +113,7 @@ export function useDatasourceList(options: DatasourceListOptions): UseQueryResul
  * @param project
  */
 export function useCreateDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -137,7 +137,7 @@ export function useCreateDatasourceMutation(
  * @param project
  */
 export function useUpdateDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -163,7 +163,7 @@ export function useUpdateDatasourceMutation(
  * @param project
  */
 export function useDeleteDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

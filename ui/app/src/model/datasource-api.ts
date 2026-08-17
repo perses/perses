@@ -60,7 +60,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const getGlobalDatasource = useCallback(
@@ -78,7 +78,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
   const listDatasources = useCallback(
@@ -96,7 +96,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const listGlobalDatasources = useCallback(
@@ -111,7 +111,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
   return {

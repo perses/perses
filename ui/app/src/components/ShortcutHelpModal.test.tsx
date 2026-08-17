@@ -48,7 +48,7 @@ function renderModal(): ReturnType<typeof render> {
   return render(
     <ThemeProvider theme={theme}>
       <ShortcutHelpModal />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -115,7 +115,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'dashboard',
           },
         },
-      }
+      },
     );
 
     renderModal();
@@ -225,7 +225,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'panel',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({
@@ -300,7 +300,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'global',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({

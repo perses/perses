@@ -72,7 +72,7 @@ function DashboardTreeList({
   const isMobileSize = useIsMobileSize();
   const getTableHeight = useCallback(
     () => (isMobileSize ? 500 : (Math.max(window.innerHeight - 350, 300) ?? 300)),
-    [isMobileSize]
+    [isMobileSize],
   );
   const [height, setHeight] = useState(getTableHeight());
   useEffect(() => {
@@ -93,12 +93,12 @@ function DashboardTreeList({
       (
         rowA: RowWithOriginal<DashboardTreeTableRow>,
         rowB: RowWithOriginal<DashboardTreeTableRow>,
-        columnId: string
+        columnId: string,
       ): number => {
         const isDesc = sorting.find((s) => s.id === columnId)?.desc ?? false;
         return sortDashboardTableStringColumn(rowA, rowB, accessorKey, isDesc);
       },
-    [sorting]
+    [sorting],
   );
 
   const columns = useMemo<Array<TableColumnConfig<DashboardTreeTableRow>>>(
@@ -296,7 +296,7 @@ function DashboardTreeList({
       handleEditFolderButtonClick,
       handleRenameButtonClick,
       sortStringColumn,
-    ]
+    ],
   );
 
   if (isLoading) {

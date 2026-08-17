@@ -68,7 +68,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
                   ],
                   startTimeMs: mockNow - 6 * 60 * 60 * 1000,
                   endTimeMs: mockNow,
-                })
+                }),
               ),
             },
           },

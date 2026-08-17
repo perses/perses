@@ -45,7 +45,7 @@ function EphemeralDashboardView(): ReactElement | null {
   const navHistoryDispatch = useNavHistoryDispatch();
   useEffect(
     () => navHistoryDispatch({ project: projectName, name: ephemeralDashboardName }),
-    [navHistoryDispatch, projectName, ephemeralDashboardName]
+    [navHistoryDispatch, projectName, ephemeralDashboardName],
   );
 
   const handleEphemeralDashboardSave = useCallback(
@@ -62,8 +62,8 @@ function EphemeralDashboardView(): ReactElement | null {
         onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(
-              updatedEphemeralDashboard
-            )} has been successfully updated`
+              updatedEphemeralDashboard,
+            )} has been successfully updated`,
           );
           return updatedEphemeralDashboard;
         },
@@ -73,7 +73,7 @@ function EphemeralDashboardView(): ReactElement | null {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation]
+    [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation],
   );
 
   if (isLoading) {

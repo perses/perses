@@ -54,7 +54,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation],
   );
 
   const handleRoleBindingUpdate = useCallback(
@@ -72,7 +72,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleBindingMutation],
   );
 
   const handleRoleBindingDelete = useCallback(
@@ -90,7 +90,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleBindingMutation],
   );
 
   return (

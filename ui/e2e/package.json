@@ -11,6 +11,7 @@
     "e2e:watch": "chokidar src/tests/**/**.ts -c 'playwright test {path}'",
     "e2e:ci": "playwright test --config=src/config/ci.playwright.config.ts",
     "lint": "oxlint src",
+    "lint:ci": "oxlint src",
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {

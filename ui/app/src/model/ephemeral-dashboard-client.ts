@@ -24,7 +24,7 @@ export const resource = 'ephemeraldashboards';
  * Will automatically invalidate ephemeral dashboards and force the get query to be executed again.
  */
 export function useCreateEphemeralDashboardMutation(
-  onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown
+  onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown,
 ): UseMutationResult<EphemeralDashboardResource, StatusError, EphemeralDashboardResource> {
   const queryClient = useQueryClient();
 
@@ -94,7 +94,7 @@ export function useDeleteEphemeralDashboardMutation(): UseMutationResult<
  */
 export function useEphemeralDashboard(
   project: string,
-  name: string
+  name: string,
 ): UseQueryResult<EphemeralDashboardResource, StatusError> {
   return useQuery<EphemeralDashboardResource, StatusError>({
     queryKey: [resource, project, name],

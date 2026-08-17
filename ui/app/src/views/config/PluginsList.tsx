@@ -124,7 +124,7 @@ export function PluginsList(): ReactElement {
         ),
       },
     ],
-    []
+    [],
   );
 
   if (isLoading || pluginModules === undefined) {

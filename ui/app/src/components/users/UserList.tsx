@@ -50,7 +50,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
     (name: string) => {
       return data.find((user) => user.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -63,7 +63,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
           version: user.metadata.version,
           createdAt: user.metadata.createdAt,
           updatedAt: user.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -81,7 +81,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       }
       setUserDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -90,7 +90,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('read');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -100,7 +100,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('create');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleEditButtonClick = useCallback(
@@ -110,7 +110,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('update');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -118,7 +118,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setTargetedUser(findUser(name));
       setDeleteUserDialogOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -178,7 +178,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
         ],
       },
     ],
-    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

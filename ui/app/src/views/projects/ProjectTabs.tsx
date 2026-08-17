@@ -120,7 +120,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation],
   );
 
   const handleRoleCreation = useCallback(
@@ -136,7 +136,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createRoleMutation]
+    [exceptionSnackbar, successSnackbar, createRoleMutation],
   );
 
   const handleRoleBindingCreation = useCallback(
@@ -152,7 +152,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation],
   );
 
   const handleSecretCreation = useCallback(
@@ -168,7 +168,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createSecretMutation]
+    [exceptionSnackbar, successSnackbar, createSecretMutation],
   );
 
   const handleVariableCreation = useCallback(
@@ -184,7 +184,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps): ReactEleme
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createVariableMutation]
+    [exceptionSnackbar, successSnackbar, createVariableMutation],
   );
 
   switch (index) {

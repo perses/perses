@@ -24,7 +24,7 @@ export const editFolderDialogValidationSchema = z.object({
     z.object({
       name: z.string(),
       label: z.string(),
-    })
+    }),
   ),
   name: z.string().min(1, 'Name is required'),
 });
@@ -34,7 +34,7 @@ export const createFolderDialogValidationSchema = z.object({
     z.object({
       name: z.string(),
       label: z.string(),
-    })
+    }),
   ),
   name: z.string().min(1, 'Name is required'),
 });
@@ -87,7 +87,7 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
       (schema) => ({
         message: `Folder name '${schema.name}' already exists in '${projectName}' project!`,
         path: ['name'],
-      })
+      }),
     );
 
     return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
@@ -111,7 +111,7 @@ export function useAddFolderValidationSchema(items: FolderItem[], path: string[]
       (data) => ({
         message: `A folder named '${data.name}' already exists at this level!`,
         path: ['name'],
-      })
+      }),
     );
   }, [items, path]);
 }

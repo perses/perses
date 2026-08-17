@@ -73,7 +73,7 @@ graph TD
 
 - **`@perses-dev/spec`**: canonical TypeScript types for dashboard specs, panel definitions, variables, datasources, and
   query results. This is the language-neutral contract Perses is built around. Source: [
-  `perses/spec`](https://github.com/perses/spec). See [Open specification](./concepts/open-specification.md).
+  `perses/spec`](https://github.com/perses/spec). See [Open specification](../docs/concepts/open-specification.md).
 - **`@perses-dev/client`**: shared HTTP and API helpers used by UI packages when talking to the Perses backend.
 - **`@perses-dev/core`** (deprecated): legacy shared types and helpers still consumed by the app and temporarily exposed
   to plugins through module federation. Do not use in new code — prefer `@perses-dev/spec` and `@perses-dev/client`.
@@ -117,7 +117,7 @@ in `@perses-dev/plugin-system`.
 ### Embedding Perses in another React app
 
 Integrators can depend directly on published packages such as `@perses-dev/dashboards`, `@perses-dev/plugin-system`, and
-`@perses-dev/components` without pulling in the full app. See [Embedding panels](./embedding-panels.md).
+`@perses-dev/components` without pulling in the full app. See [Embedding panels](../docs/embedding-panels.md).
 
 ### Dashboard-as-Code and the backend
 
@@ -139,9 +139,9 @@ For more day-to-day commands and workspace layout, see [ui/README.md](https://gi
 
 ## Related documentation
 
-- [Open specification](./concepts/open-specification.md)
-- [Plugin concept](./concepts/plugin.md)
-- [Embedding panels](./embedding-panels.md)
+- [Open specification](../docs/concepts/open-specification.md)
+- [Plugin concept](../docs/concepts/plugin.md)
+- [Embedding panels](../docs/embedding-panels.md)
 - [UI README](https://github.com/perses/perses/blob/main/ui/README.md)
 - [Spec repository](https://github.com/perses/spec)
 - [Shared libraries README](https://github.com/perses/shared)

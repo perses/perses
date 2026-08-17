@@ -61,7 +61,7 @@ export function SecretList<T extends Secret>({
     (name: string, project?: string) => {
       return data.find((secret: T) => getMetadataProject(secret.metadata) === project && secret.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -78,7 +78,7 @@ export function SecretList<T extends Secret>({
           createdAt: secret.metadata.createdAt,
           updatedAt: secret.metadata.updatedAt,
           noAuth: !secret.spec.basicAuth && !secret.spec.authorization,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -92,7 +92,7 @@ export function SecretList<T extends Secret>({
       await navigator.clipboard.writeText(secretName);
       infoSnackbar('Secret copied to clipboard!');
     },
-    [infoSnackbar]
+    [infoSnackbar],
   );
 
   const handleSecretSave = useCallback(
@@ -104,7 +104,7 @@ export function SecretList<T extends Secret>({
       }
       setSecretDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -113,7 +113,7 @@ export function SecretList<T extends Secret>({
       setAction('read');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -123,7 +123,7 @@ export function SecretList<T extends Secret>({
       setAction('create');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleEditButtonClick = useCallback(
@@ -133,7 +133,7 @@ export function SecretList<T extends Secret>({
       setAction('update');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -141,7 +141,7 @@ export function SecretList<T extends Secret>({
       setTargetedSecret(findSecret(name, project));
       setDeleteSecretDialogOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -229,7 +229,7 @@ export function SecretList<T extends Secret>({
         ],
       },
     ],
-    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

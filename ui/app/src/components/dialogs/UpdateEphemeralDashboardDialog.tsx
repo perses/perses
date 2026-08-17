@@ -64,8 +64,8 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
       onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
         successSnackbar(
           `Ephemeral Dashboard ${getResourceExtendedDisplayName(
-            updatedEphemeralDashboard
-          )} has been successfully updated`
+            updatedEphemeralDashboard,
+          )} has been successfully updated`,
         );
         onClose();
         if (onSuccess) {

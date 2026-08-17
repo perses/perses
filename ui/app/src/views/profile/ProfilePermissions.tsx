@@ -39,9 +39,9 @@ const ProfilePermissions = (): ReactElement => {
         Object.keys(permissions || {}).map((key) => ({
           key,
           permissions: permissions?.[key] || [],
-        }))
+        })),
       ),
-    [permissions]
+    [permissions],
   );
 
   const handleAccordingOnChange = (key: string): void => {
@@ -153,7 +153,7 @@ const ProfilePermissions = (): ReactElement => {
                           </Box>
                         </TableCell>
                       </TableRow>
-                    ) : null
+                    ) : null,
                   )}
                 </TableBody>
               </Table>
