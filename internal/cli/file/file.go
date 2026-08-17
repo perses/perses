@@ -185,14 +185,14 @@ func (u *unmarshaller) read() error {
 	if u.isJSON {
 		if jsonErr := json.Unmarshal(data, &objects); jsonErr != nil {
 			if jsonErr = json.Unmarshal(data, &object); jsonErr != nil {
-				return newReadFileErr(jsonErr)
+				return newReadFileErr(u.file, jsonErr)
 			}
 			objects = append(objects, object)
 		}
 	} else {
 		decodedObjects, decodeErr := decodeYAMLDocumentsAsObjects(data)
 		if decodeErr != nil {
-			return fmt.Errorf("unable to read file %q, format invalid: %w", u.file, decodeErr)
+			return newReadFileErr(u.file, decodeErr)
 		}
 		objects = decodedObjects
 	}

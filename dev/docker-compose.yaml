@@ -3,6 +3,7 @@
 # TO RUN WITH PROMETHEUS AND TEMPO: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile tempo up --detach
 # TO RUN WITH LOKI: docker-compose --file dev/docker-compose.yaml --profile loki up --detach
 # TO RUN WITH ALERTMANAGER: docker-compose --file dev/docker-compose.yaml --profile prometheus --profile alertmanager up --detach
+# TO RUN WITH PYROSCOPE: docker-compose --file dev/docker-compose.yaml --profile pyroscope up --detach
 
 name: 'perses-dev'
 services:
@@ -156,6 +157,27 @@ services:
     depends_on:
       - tempo
     profiles: [tempo]
+
+  # Continuous profiling backend
+  pyroscope:
+    image: grafana/pyroscope:1.14.0
+    ports:
+      - '4040:4040'
+    profiles: [pyroscope]
+
+  # Generate fake profiling data by scraping pprof endpoints and pushing them to Pyroscope
+  pyroscope-generator:
+    image: grafana/alloy:v1.11.0
+    volumes:
+      - ./extra/alloy-pyroscope.alloy:/etc/alloy/config.alloy
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    depends_on:
+      - pyroscope
+    profiles: [pyroscope]
 
 volumes:
   tempo-data:

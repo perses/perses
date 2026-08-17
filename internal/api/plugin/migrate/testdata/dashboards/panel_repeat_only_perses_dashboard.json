@@ -1,0 +1,81 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "panel-repeat-only-test",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Panel Repeat Only Dashboard"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "value1",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "SomeVariable",
+            "spec": {
+              "values": [
+                "value1",
+                "value2"
+              ]
+            }
+          },
+          "name": "myVar"
+        }
+      }
+    ],
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Repeated Panel"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "iwas": "timeseries",
+              "expr": "not found"
+            }
+          }
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Panel Group 1"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              },
+              "repeatVariable": {
+                "value": "myVar",
+                "alignment": "horizontal"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}

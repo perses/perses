@@ -11,32 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+package model
 
-import (
-	"encoding/json"
-	"fmt"
-	"os"
-
-	"github.com/perses/perses/internal/cli/read"
-)
-
-func readAndDetect(file string) (data []byte, isJSON bool, err error) {
-	if file == "-" {
-		data, err = read.FromStdout()
-	} else {
-		data, err = os.ReadFile(file) //nolint
-	}
-
-	if err != nil {
-		return
-	}
-
-	// detecting file format
-	isJSON = json.Unmarshal(data, &json.RawMessage{}) == nil
-	return
-}
-
-func newReadFileErr(file string, err error) error {
-	return fmt.Errorf("unable to read file %q, format invalid: %w", file, err)
-}
+kind: "FirstAnnotation"
+spec: close({
+	query: string
+})
