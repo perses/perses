@@ -40,7 +40,8 @@ func NewMetadata(name string) *Metadata {
 
 type DatasourceMetadata struct {
 	Metadata
-	Source MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
+	Source        MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
+	DiscoveryName string         `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
 }
 
 type Metadata struct {

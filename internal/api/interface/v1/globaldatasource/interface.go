@@ -27,8 +27,9 @@ type Query struct {
 	// Kind is the type of the datasource.
 	Kind string `query:"kind"`
 	// Default will filter the list of datasource and return only the default datasource, whatever the kind of the datasource is.
-	Default *bool             `query:"default"`
-	Source  v1.MetadataSource `query:"source"`
+	Default       *bool             `query:"default"`
+	Source        v1.MetadataSource `query:"source"`
+	DiscoveryName string            `query:"discovery_name"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {
