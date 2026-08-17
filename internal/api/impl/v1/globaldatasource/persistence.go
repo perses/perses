@@ -55,9 +55,13 @@ func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	if err != nil {
 		return nil, err
 	}
-	// if no sources specified, return all
+	return applyListFilter(result, q), nil
+}
+
+func applyListFilter(result []*v1.GlobalDatasource, q *globaldatasource.Query) []*v1.GlobalDatasource {
+	// if no source specified, return all
 	if q.Source == "" {
-		return result, nil
+		return result
 	}
 	var filteredResult []*v1.GlobalDatasource
 	for _, datasource := range result {
@@ -70,5 +74,5 @@ func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 			filteredResult = append(filteredResult, datasource)
 		}
 	}
-	return filteredResult, nil
+	return filteredResult
 }

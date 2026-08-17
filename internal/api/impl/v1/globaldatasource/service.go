@@ -62,8 +62,11 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
-	// Update the source and time contains in the entity
-	entity.Metadata.Source = v1.ManualSource
+	// Update the source and time contains in the entity.
+	// Only stamp ManualSource if the caller hasn't already set a source (e.g. discovery or provisioning).
+	if entity.Metadata.Source == "" {
+		entity.Metadata.Source = v1.ManualSource
+	}
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
