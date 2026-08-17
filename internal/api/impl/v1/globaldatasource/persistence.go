@@ -59,9 +59,13 @@ func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	if q.Source == "" {
 		return result, nil
 	}
-	// filter results if source specified
 	var filteredResult []*v1.GlobalDatasource
 	for _, datasource := range result {
+		// filter results for discovery name, if specified
+		if q.DiscoveryName != "" && q.DiscoveryName != datasource.Metadata.DiscoveryName {
+			continue
+		}
+		// filter results for source
 		if datasource.Metadata.Source == q.Source {
 			filteredResult = append(filteredResult, datasource)
 		}
