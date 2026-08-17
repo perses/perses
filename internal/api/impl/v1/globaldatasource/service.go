@@ -95,7 +95,7 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Pa
 	if err != nil {
 		return nil, err
 	}
-	entity.Metadata.Metadata.Update(oldEntity.Metadata.Metadata)
+	entity.Metadata.Update(oldEntity.Metadata.Metadata)
 	if updateErr := s.dao.Update(entity); updateErr != nil {
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
