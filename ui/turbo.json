@@ -14,10 +14,6 @@
       "dependsOn": [],
       "outputs": []
     },
-    "lint:ci": {
-      "dependsOn": [],
-      "outputs": []
-    },
     "//#format:root": {
       "cache": false,
       "outputs": []

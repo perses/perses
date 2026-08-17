@@ -10,7 +10,6 @@
     "type-check": "tsc --noEmit",
     "test": "cross-env TZ=UTC jest",
     "lint": "oxlint src",
-    "lint:ci": "oxlint src",
     "lint:fix": "oxlint --fix src",
     "analyze": "rspack build --analyze"
   },

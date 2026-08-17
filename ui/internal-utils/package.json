@@ -7,7 +7,6 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "lint": "oxlint src",
-    "lint:ci": "oxlint src",
     "lint:fix": "oxlint --fix src"
   }
 }

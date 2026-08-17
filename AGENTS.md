@@ -52,7 +52,7 @@ For UI changes, run from `ui/`:
 
 ```sh
 npm ci
-npm run lint:ci
+npm run lint
 npm run format:check
 npm run type-check
 npm run test

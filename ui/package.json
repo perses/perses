@@ -7,7 +7,6 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "lint:ci": "turbo run lint:ci",
     "lint:fix": "turbo run lint -- --fix",
     "format": "turbo run format:root",
     "format:check": "turbo run format:root:check",
