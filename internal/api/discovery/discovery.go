@@ -24,8 +24,8 @@ import (
 
 func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensitive bool) ([]taskhelper.Helper, error) {
 	var helpers []taskhelper.Helper
-	svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource())
 	for _, c := range cfg.Datasource.Global.Discovery {
+		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name)
 		var helper taskhelper.Helper
 		var err error
 		if c.HTTPDiscovery != nil {
