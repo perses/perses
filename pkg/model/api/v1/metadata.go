@@ -39,9 +39,53 @@ func NewMetadata(name string) *Metadata {
 }
 
 type DatasourceMetadata struct {
-	Metadata
+	Metadata      `json:",inline" yaml:",inline"`
 	Source        MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
 	DiscoveryName string         `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
+}
+
+// UnmarshalJSON is needed to correctly populate both the embedded Metadata fields
+// and the DatasourceMetadata-specific fields (Source, DiscoveryName).
+func (dm *DatasourceMetadata) UnmarshalJSON(data []byte) error {
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	// Parse Source and DiscoveryName separately to avoid infinite recursion.
+	var extra struct {
+		Source        MetadataSource `json:"source,omitempty"`
+		DiscoveryName string         `json:"discovery_name,omitempty"`
+	}
+	if err := json.Unmarshal(data, &extra); err != nil {
+		return err
+	}
+
+	dm.Metadata = metadataTmp
+	dm.Source = extra.Source
+	dm.DiscoveryName = extra.DiscoveryName
+	return nil
+}
+
+// UnmarshalYAML is needed for the same reason as UnmarshalJSON.
+func (dm *DatasourceMetadata) UnmarshalYAML(unmarshal func(any) error) error {
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	var extra struct {
+		Source        MetadataSource `yaml:"source,omitempty"`
+		DiscoveryName string         `yaml:"discovery_name,omitempty"`
+	}
+	if err := unmarshal(&extra); err != nil {
+		return err
+	}
+
+	dm.Metadata = metadataTmp
+	dm.Source = extra.Source
+	dm.DiscoveryName = extra.DiscoveryName
+	return nil
 }
 
 type Metadata struct {
