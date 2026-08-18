@@ -19,7 +19,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import { FormEditorProps } from '../form-drawers';
@@ -41,7 +41,7 @@ export function UserEditorForm({
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
-    const result = { ...initialValue };
+    const result = structuredClone(initialValue);
     if (result.spec.nativeProvider?.password) result.spec.nativeProvider.password = '';
     if (result.spec.oauthProviders === undefined) result.spec.oauthProviders = [];
     return result;
@@ -58,7 +58,7 @@ export function UserEditorForm({
     defaultValues: initialUserClean,
   });
 
-  const { spec } = form.watch();
+  const spec = useWatch({ control: form.control, name: 'spec' });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

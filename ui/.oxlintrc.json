@@ -36,7 +36,7 @@
     "react/jsx-no-useless-fragment": "warn",
     "react/no-unescaped-entities": "error",
     "react/exhaustive-deps": "error",
-    "react/react-compiler": "warn",
+    "react/react-compiler": "error",
     "react-doctor/no-fetch-in-effect": "warn",
     "react-doctor/no-derived-state": "warn",
     "react/jsx-curly-brace-presence": [

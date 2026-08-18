@@ -37,8 +37,9 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
   });
 
   const importOnClick = (): void => {
-    dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    const dashboardToCreate = structuredClone(dashboard);
+    dashboardToCreate.metadata.project = projectName;
+    dashboardMutation.mutate(dashboardToCreate);
   };
 
   if (error) {

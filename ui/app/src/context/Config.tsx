@@ -157,23 +157,24 @@ export function useInformation(): string {
 
 export function useBanner(): Banner | undefined {
   const { config } = useConfigContext();
+  const bannerConfig = config.frontend.banner;
 
   const html = useMemo(
-    () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
-    [config.frontend.banner?.message],
+    () => marked.parse(bannerConfig?.message ?? '', { gfm: true, async: false }),
+    [bannerConfig?.message],
   );
 
   const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);
 
   const banner = useMemo(() => {
-    if (!config.frontend.banner?.message || !config.frontend.banner?.severity) {
+    if (!bannerConfig?.message || !bannerConfig.severity) {
       return undefined;
     }
     return {
-      severity: config.frontend.banner.severity,
+      severity: bannerConfig.severity,
       message: sanitizedHtml,
     };
-  }, [config.frontend.banner?.message, config.frontend.banner?.severity, sanitizedHtml]);
+  }, [bannerConfig, sanitizedHtml]);
 
   return banner;
 }

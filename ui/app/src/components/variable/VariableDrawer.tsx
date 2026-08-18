@@ -55,10 +55,11 @@ export function VariableDrawer<T extends VariableType>({
   }, [variable]);
 
   const handleSave = (definition: VariableDefinition): void => {
-    variable.spec = definition;
-    variable.metadata.name = definition.spec.name;
+    const updatedVariable = structuredClone(variable);
+    updatedVariable.spec = definition;
+    updatedVariable.metadata.name = definition.spec.name;
     if (onSave) {
-      onSave(variable);
+      onSave(updatedVariable);
     }
   };
 

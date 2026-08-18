@@ -44,10 +44,11 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   const handleSave = (def: DatasourceDefinition): void => {
-    datasource.spec = def.spec;
-    datasource.metadata.name = def.name;
+    const updatedDatasource = structuredClone(datasource);
+    updatedDatasource.spec = def.spec;
+    updatedDatasource.metadata.name = def.name;
     if (onSave) {
-      onSave(datasource);
+      onSave(updatedDatasource);
     }
   };
 

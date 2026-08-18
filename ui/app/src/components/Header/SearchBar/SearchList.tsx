@@ -16,7 +16,7 @@ import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsear
 import { isProjectMetadata, Resource } from '@perses-dev/client';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
-import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';
@@ -46,6 +46,11 @@ const matchedTagChipSx = {
 
 type SearchItem = Resource & { highlight?: boolean };
 type SearchMatch = NonNullable<KVSearchResult<SearchItem>['matched']>[number];
+interface PaginationState {
+  list: SearchItem[];
+  query: string;
+  size: number;
+}
 
 function buildBoxSearchKey(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
@@ -130,8 +135,9 @@ export interface SearchListProps {
 export function SearchList(props: SearchListProps): ReactElement | null {
   const { list, query, onClick, icon: Icon, chip, buildRouting: customBuildRouting, isResource } = props;
 
-  const [currentSizeList, setCurrentSizeList] = useState<number>(SIZE_LIST);
-  const kvSearch = useRef(new KVSearch<Resource>(kvSearchConfig)).current;
+  const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
+  const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
+  const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
     if (!query && list?.[0]?.kind === 'Dashboard') {
@@ -145,12 +151,6 @@ export function SearchList(props: SearchListProps): ReactElement | null {
     }
     return kvSearch.filter(query, list);
   }, [kvSearch, list, query]);
-
-  useEffect(() => {
-    // Reset the size of the filtered list when query or the actual list change.
-    // Otherwise, we would keep the old size that can have been changed using the button to see more data.
-    setCurrentSizeList(SIZE_LIST);
-  }, [query, list]);
 
   useEffect(() => {
     isResource?.(!!filteredList.length);
@@ -256,7 +256,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
         );
       })}
       {filteredList.length > currentSizeList && (
-        <Button onClick={() => setCurrentSizeList(currentSizeList + 10)}> see more...</Button>
+        <Button onClick={() => setPagination({ list, query, size: currentSizeList + SIZE_LIST })}> see more...</Button>
       )}
     </Box>
   );

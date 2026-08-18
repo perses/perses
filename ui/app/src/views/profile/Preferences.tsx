@@ -19,21 +19,21 @@ import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
 import { useUserPreferences } from '../../context/UserPreferences';
 import { ProfileContainer } from './ProfileContainer';
 
+function isTimezoneValid(timezone: string): boolean {
+  if (!timezone) return false;
+  if (timezone.toLowerCase() === 'local') return true;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
   const { userPreferences, updateUserPreferences } = useUserPreferences();
   const [timezone, setTimezone] = useState(userPreferences.timezone ?? 'local');
-
-  const isTimezoneValid = (tz: string): boolean => {
-    if (!tz) return false;
-    if (tz.toLowerCase() === 'local') return true;
-    try {
-      Intl.DateTimeFormat(undefined, { timeZone: tz });
-      return true;
-    } catch {
-      return false;
-    }
-  };
 
   const submitHandler: FormEventHandler<HTMLFormElement> = useCallback(
     (e): void => {
