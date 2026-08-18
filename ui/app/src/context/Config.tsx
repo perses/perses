@@ -182,3 +182,8 @@ export function useIsDelegatedAuthnProviderEnabled(): boolean {
   const { config } = useConfigContext();
   return !!config.security.authentication.providers.kubernetes?.enable;
 }
+
+export function useRepeatVariableMaxValues(): number {
+  const { config } = useConfigContext();
+  return config.frontend.repeat_variable_max_values ?? 0;
+}

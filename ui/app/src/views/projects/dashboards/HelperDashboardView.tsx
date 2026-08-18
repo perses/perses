@@ -25,6 +25,7 @@ import {
   useIsKeyboardShortcutsEnabled,
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
+  useRepeatVariableMaxValues,
 } from '../../../context/Config';
 import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
@@ -62,6 +63,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();
+  const repeatVariableMaxValues = useRepeatVariableMaxValues();
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
 
@@ -136,6 +138,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
                   userPreferenceTimezone={userPreferences.timezone}
+                  repeatVariableMaxValues={repeatVariableMaxValues}
                 />
               </UsageMetricsProvider>
             </ErrorBoundary>
