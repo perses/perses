@@ -35,12 +35,15 @@ type Result struct {
 	// DisplayName is the string that will be used for the search display.
 	DisplayName string `json:"displayName" yaml:"displayName"`
 	// The original string that matches the query.
-	Original string `json:"original"`
+	// It can be empty if the query is empty.
+	Original string `json:"original,omitempty"`
 	// The list of intervals that match the query.
-	Intervals []MatchingInterval `json:"intervals"`
+	// It can be empty if the query is empty.
+	Intervals []MatchingInterval `json:"intervals,omitempty"`
 	// Score is the score of the match, the higher the score, the better the match.
 	// When there is a perfect match, then the number is infinite.
-	Score uint64 `json:"score"`
+	// It can be equal to 0 if the query is empty.
+	Score uint64 `json:"score,omitempty"`
 }
 
 type Query struct {

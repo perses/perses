@@ -46,7 +46,13 @@ func (e *endpoint) Dashboard(ctx echo.Context) error {
 	if err := ctx.Bind(q); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
-	result, err := e.index.Search(ctx, v1.KindDashboard, q.Project, q.Query)
+	var result any
+	var err error
+	if q.Query == "" {
+		result, err = e.index.List(ctx, v1.KindDashboard, q.Project)
+	} else {
+		result, err = e.index.Search(ctx, v1.KindDashboard, q.Project, q.Query)
+	}
 	if err != nil {
 		return err
 	}

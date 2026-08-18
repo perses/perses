@@ -187,7 +187,7 @@ func (c *projectIndexer) delete(metadata *v1.ProjectMetadata) {
 	c.mutex.Unlock()
 }
 
-func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*search.Result, error) {
+func (c *projectIndexer) collect(ctx echo.Context, project string, collector func(idx index[*v1.ProjectMetadata]) *search.Result) ([]*search.Result, error) {
 	var projectList []string
 	if len(project) != 0 {
 		if c.authz.IsEnabled() {
@@ -214,12 +214,13 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 	}
 	var results []*search.Result
 	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	// In case, there is one result; it can mean the user has global access to the resource across the project.
 	// Or it can mean he has access to only one project. If he has global access, then we should search through the whole list.
 	if len(projectList) == 1 && projectList[0] == v1.WildcardProject {
 		for _, projectIdx := range c.idx {
 			for _, idx := range projectIdx {
-				if result := idx.match(text); result != nil {
+				if result := collector(idx); result != nil {
 					results = append(results, result)
 				}
 			}
@@ -231,21 +232,37 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 				continue
 			}
 			for _, idx := range projectIdx {
-				if result := idx.match(text); result != nil {
+				if result := collector(idx); result != nil {
 					results = append(results, result)
 				}
 			}
 		}
 	}
-
-	c.mutex.RUnlock()
 	if len(results) == 0 {
 		return make([]*search.Result, 0), nil
 	}
 	return results, nil
 }
 
+func (c *projectIndexer) list(ctx echo.Context, project string) ([]*search.Result, error) {
+	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *search.Result {
+		return &search.Result{
+			Metadata:    idx.metadata,
+			DisplayName: idx.displayName,
+		}
+	})
+}
+
+func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*search.Result, error) {
+	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *search.Result {
+		return idx.match(text)
+	})
+}
+
 type Client interface {
+	// List is listing all the documents in the index for the given kind and project.
+	// The project parameter can be empty, in that case, the list will be done through all the projects.
+	List(ctx echo.Context, kind v1.Kind, project string) ([]*search.Result, error)
 	// Search is searching through the index for the given kind and project.
 	// The project parameter can be empty, in that case, the search will be done through all the projects.
 	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error)
@@ -313,6 +330,16 @@ func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt stri
 		return c.dashboards.search(ctx, project, txt)
 	default:
 		logrus.Warnf("kind %s is not supported for searching", kind)
+		return make([]*search.Result, 0), nil
+	}
+}
+
+func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*search.Result, error) {
+	switch kind {
+	case v1.KindDashboard:
+		return c.dashboards.list(ctx, project)
+	default:
+		logrus.Warnf("kind %s is not supported for listing", kind)
 		return make([]*search.Result, 0), nil
 	}
 }
