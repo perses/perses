@@ -52,7 +52,6 @@ func (dm *DatasourceMetadata) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// Parse Source and DiscoveryName separately to avoid infinite recursion.
 	var extra struct {
 		Source        MetadataSource `json:"source,omitempty"`
 		DiscoveryName string         `json:"discovery_name,omitempty"`
@@ -67,7 +66,6 @@ func (dm *DatasourceMetadata) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML is needed for the same reason as UnmarshalJSON.
 func (dm *DatasourceMetadata) UnmarshalYAML(unmarshal func(any) error) error {
 	var metadataTmp Metadata
 	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
