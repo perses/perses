@@ -9,8 +9,8 @@
     "build": "rspack build",
     "type-check": "tsc --noEmit",
     "test": "cross-env TZ=UTC jest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src",
     "analyze": "rspack build --analyze"
   },
   "dependencies": {

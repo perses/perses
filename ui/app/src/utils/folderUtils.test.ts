@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { FolderItem } from '@perses-dev/client';
+
 import {
   collectDashboards,
   getSubFolderDeepCopy,
@@ -491,7 +492,7 @@ describe('insertSubFolder', () => {
 
   it('throws when a folder with the same name already exists', () => {
     expect(() => insertSubFolder(makeTree(), ['A'], { kind: 'Folder', name: 'B' })).toThrow(
-      'Folder "B" already exists'
+      'Folder "B" already exists',
     );
   });
 

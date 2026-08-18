@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
 import { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import { useCallback } from 'react';
+
 import { PERSES_APP_CONFIG } from '../config';
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
@@ -59,7 +60,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const getGlobalDatasource = useCallback(
@@ -77,7 +78,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
   const listDatasources = useCallback(
@@ -95,7 +96,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const listGlobalDatasources = useCallback(
@@ -110,7 +111,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
   return {

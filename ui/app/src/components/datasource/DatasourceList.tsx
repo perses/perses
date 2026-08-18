@@ -13,15 +13,17 @@
 
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { getResourceDisplayName } from '@perses-dev/components';
 import { Action, Datasource, getMetadataProject } from '@perses-dev/client';
-import { useIsReadonly } from '../../context/Config';
+import { getResourceDisplayName } from '@perses-dev/components';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
+import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   DESCRIPTION_COL_DEF,
@@ -31,7 +33,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DeleteResourceDialog } from '../dialogs';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 
@@ -51,10 +52,10 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
   const findDatasource = useCallback(
     (name: string, project?: string) => {
       return data.find(
-        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name
+        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name,
       );
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -70,7 +71,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
           version: datasource.metadata.version,
           createdAt: datasource.metadata.createdAt,
           updatedAt: datasource.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -89,7 +90,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
 
       setDatasourceDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -98,7 +99,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('read');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleEditButtonClick = useCallback(
@@ -108,7 +109,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('update');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -118,7 +119,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setAction('create');
       setDatasourceDrawerOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -126,7 +127,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
       setTargetedDatasource(findDatasource(name, project));
       setDeleteDatasourceDialogOpened(true);
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -188,7 +189,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         ],
       },
     ],
-    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

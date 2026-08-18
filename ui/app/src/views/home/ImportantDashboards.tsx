@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
+import { intlFormatDistance } from 'date-fns';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
-import { intlFormatDistance } from 'date-fns';
 import { ReactElement, useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { useImportantDashboardList } from '../../model/dashboard-client';
-import { useConfig } from '../../model/config-client';
+
 import { EmptyState } from '../../components/EmptyState/EmptyState';
+import { useConfig } from '../../model/config-client';
+import { useImportantDashboardList } from '../../model/dashboard-client';
 
 export function ImportantDashboards(): ReactElement {
   const { data: config } = useConfig();
@@ -101,7 +102,6 @@ export function ImportantDashboards(): ReactElement {
                   <Box
                     component={RouterLink}
                     to={`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`}
-                    role="row"
                     aria-label={`${dashboard.metadata.project} ${dashboard.metadata.name}`}
                     sx={{
                       display: 'flex',

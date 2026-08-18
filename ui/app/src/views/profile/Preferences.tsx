@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
-import PreferenceIcon from 'mdi-material-ui/MapClock';
 import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
 import { TimeZoneSelector, useLocalStorage, useSnackbar } from '@perses-dev/components';
+import PreferenceIcon from 'mdi-material-ui/MapClock';
+import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
+
 import { UserPreferences } from '../../model/userPreferences';
 import { ProfileContainer } from './ProfileContainer';
 
@@ -47,7 +48,7 @@ export const Preferences = (): ReactElement => {
       setUserPreferences({ ...userPreferences, timezone });
       successSnackbar(`User-level timezone set to ${timezone}`);
     },
-    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences]
+    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences],
   );
 
   return (

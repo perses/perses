@@ -13,15 +13,16 @@
 
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { Action, UserResource } from '@perses-dev/client';
-import { DeleteResourceDialog } from '../dialogs';
-import { useIsReadonly } from '../../context/Config';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
+import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   ListPropertiesWithCallbacks,
@@ -49,7 +50,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
     (name: string) => {
       return data.find((user) => user.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -62,7 +63,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
           version: user.metadata.version,
           createdAt: user.metadata.createdAt,
           updatedAt: user.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -80,7 +81,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       }
       setUserDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -89,7 +90,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('read');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -99,7 +100,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('create');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleEditButtonClick = useCallback(
@@ -109,7 +110,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setAction('update');
       setUserDrawerOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -117,7 +118,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
       setTargetedUser(findUser(name));
       setDeleteUserDialogOpened(true);
     },
-    [findUser]
+    [findUser],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -177,7 +178,7 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>): Reac
         ],
       },
     ],
-    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

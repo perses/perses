@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
-import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
 import { FolderItem, FolderResource } from '@perses-dev/client';
-import { editFolderDialogValidationSchema, EditFolderValidationType } from '../../validation';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import { useUpdateFolderMutation } from '../../model/folder-client';
 import { collectDashboards, getSubFolderDeepCopy, replaceSubFolder } from '../../utils/folderUtils';
+import { editFolderDialogValidationSchema, EditFolderValidationType } from '../../validation';
 import { DashboardListRow } from '../DashboardList/DashboardList';
 
 export interface EditFolderDialogProps {
@@ -69,7 +70,7 @@ export const EditFolderDialog = ({
 
   const dashboardsInSiblingFolders: string[] = useMemo(
     () => collectDashboards(folder.spec.items, true, (name) => !dashboardNamesInFolder.includes(name)),
-    [dashboardNamesInFolder, folder.spec.items]
+    [dashboardNamesInFolder, folder.spec.items],
   );
 
   const options = useMemo(
@@ -77,7 +78,7 @@ export const EditFolderDialog = ({
       [...dashboards.values()]
         .filter((s) => !dashboardsInSiblingFolders.includes(s.name))
         .map((d) => ({ label: d.displayName, name: d.name })),
-    [dashboardsInSiblingFolders, dashboards]
+    [dashboardsInSiblingFolders, dashboards],
   );
 
   const form = useForm<EditFolderValidationType>({

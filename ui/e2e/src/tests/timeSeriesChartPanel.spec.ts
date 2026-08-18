@@ -15,6 +15,7 @@ import {
   mockTimeSeriesResponseWithStableValue,
   mockTimeSeriesResponseWithNullValues,
 } from '@perses-dev/internal-utils';
+
 import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 
@@ -55,7 +56,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                   ],
                   startTimeMs: mockNow - 6 * 60 * 60 * 1000,
                   endTimeMs: mockNow,
-                })
+                }),
               ),
             },
           },
@@ -67,7 +68,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                 mockTimeSeriesResponseWithNullValues({
                   startTimeMs: mockNow - 6 * 60 * 60 * 1000,
                   endTimeMs: mockNow,
-                })
+                }),
               ),
             },
           },
@@ -104,7 +105,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
                 ],
                 startTimeMs: mockNow - 6 * 60 * 60 * 1000,
                 endTimeMs: mockNow,
-              })
+              }),
             ),
           },
         },
