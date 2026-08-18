@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	apiInterface "github.com/perses/perses/internal/api/interface"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -117,12 +117,12 @@ func makeEntity(name string) *v1.GlobalDatasource {
 	}
 }
 
-func storeEntity(name string, source v1.MetadataSource, discoveryName string) *v1.GlobalDatasource {
+func storeEntity(name string, discoveryName string) *v1.GlobalDatasource {
 	return &v1.GlobalDatasource{
 		Kind: v1.KindGlobalDatasource,
 		Metadata: v1.DatasourceMetadata{
 			Metadata:      v1.Metadata{Name: name},
-			Source:        source,
+			Source:        v1.DiscoverySource,
 			DiscoveryName: discoveryName,
 		},
 		Spec: datasourceSpec.Spec{},
@@ -157,9 +157,9 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 func TestApply_DeletesStaleEntriesScopedToDiscovery(t *testing.T) {
 	// Pre-populate: kube-prod owns ds-a1 and ds-a2; kube-staging owns ds-b1.
 	fake := newFakeService(
-		storeEntity("ds-a1", v1.DiscoverySource, "kube-prod"),
-		storeEntity("ds-a2", v1.DiscoverySource, "kube-prod"),
-		storeEntity("ds-b1", v1.DiscoverySource, "kube-staging"),
+		storeEntity("ds-a1", "kube-prod"),
+		storeEntity("ds-a2", "kube-prod"),
+		storeEntity("ds-b1", "kube-staging"),
 	)
 	svc := New(false, fake, "kube-prod")
 
@@ -172,8 +172,8 @@ func TestApply_DeletesStaleEntriesScopedToDiscovery(t *testing.T) {
 
 func TestApply_NoDeleteWhenListErrors(t *testing.T) {
 	fake := newFakeService(
-		storeEntity("ds-a1", v1.DiscoverySource, "kube-prod"),
-		storeEntity("ds-a2", v1.DiscoverySource, "kube-prod"),
+		storeEntity("ds-a1", "kube-prod"),
+		storeEntity("ds-a2", "kube-prod"),
 	)
 	fake.listError = fmt.Errorf("database unavailable")
 	svc := New(false, fake, "kube-prod")
