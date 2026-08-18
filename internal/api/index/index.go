@@ -42,7 +42,6 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	"github.com/perses/perses/pkg/model/api/v1/search"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
@@ -81,7 +80,7 @@ type index[T api.Metadata] struct {
 	matcher *matcher
 }
 
-func (idx *index[T]) match(text string) *search.Result {
+func (idx *index[T]) match(text string) *SearchResult {
 	for _, field := range idx.fields {
 		result := idx.matcher.match(text, field)
 		if result != nil {
@@ -187,7 +186,7 @@ func (c *projectIndexer) delete(metadata *v1.ProjectMetadata) {
 	c.mutex.Unlock()
 }
 
-func (c *projectIndexer) collect(ctx echo.Context, project string, collector func(idx index[*v1.ProjectMetadata]) *search.Result) ([]*search.Result, error) {
+func (c *projectIndexer) collect(ctx echo.Context, project string, collector func(idx index[*v1.ProjectMetadata]) *SearchResult) ([]*SearchResult, error) {
 	var projectList []string
 	if len(project) != 0 {
 		if c.authz.IsEnabled() {
@@ -212,7 +211,7 @@ func (c *projectIndexer) collect(ctx echo.Context, project string, collector fun
 		}
 		c.mutex.RUnlock()
 	}
-	var results []*search.Result
+	var results []*SearchResult
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	// In case, there is one result; it can mean the user has global access to the resource across the project.
@@ -239,22 +238,22 @@ func (c *projectIndexer) collect(ctx echo.Context, project string, collector fun
 		}
 	}
 	if len(results) == 0 {
-		return make([]*search.Result, 0), nil
+		return make([]*SearchResult, 0), nil
 	}
 	return results, nil
 }
 
-func (c *projectIndexer) list(ctx echo.Context, project string) ([]*search.Result, error) {
-	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *search.Result {
-		return &search.Result{
+func (c *projectIndexer) list(ctx echo.Context, project string) ([]*SearchResult, error) {
+	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
+		return &SearchResult{
 			Metadata:    idx.metadata,
 			DisplayName: idx.displayName,
 		}
 	})
 }
 
-func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*search.Result, error) {
-	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *search.Result {
+func (c *projectIndexer) search(ctx echo.Context, project string, text string) ([]*SearchResult, error) {
+	return c.collect(ctx, project, func(idx index[*v1.ProjectMetadata]) *SearchResult {
 		return idx.match(text)
 	})
 }
@@ -262,10 +261,10 @@ func (c *projectIndexer) search(ctx echo.Context, project string, text string) (
 type Client interface {
 	// List is listing all the documents in the index for the given kind and project.
 	// The project parameter can be empty, in that case, the list will be done through all the projects.
-	List(ctx echo.Context, kind v1.Kind, project string) ([]*search.Result, error)
+	List(ctx echo.Context, kind v1.Kind, project string) ([]*SearchResult, error)
 	// Search is searching through the index for the given kind and project.
 	// The project parameter can be empty, in that case, the search will be done through all the projects.
-	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error)
+	Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error)
 	// Refresh is refreshing the index by reloading all the documents from the database.
 	Refresh() error
 	// Add is adding a document to the index. If it already exists, it will be updated. If it doesn't exist, it will be created.
@@ -324,23 +323,23 @@ func (c *client) Delete(kind v1.Kind, metadata api.Metadata) {
 	}
 }
 
-func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*search.Result, error) {
+func (c *client) Search(ctx echo.Context, kind v1.Kind, project string, txt string) ([]*SearchResult, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.search(ctx, project, txt)
 	default:
 		logrus.Warnf("kind %s is not supported for searching", kind)
-		return make([]*search.Result, 0), nil
+		return make([]*SearchResult, 0), nil
 	}
 }
 
-func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*search.Result, error) {
+func (c *client) List(ctx echo.Context, kind v1.Kind, project string) ([]*SearchResult, error) {
 	switch kind {
 	case v1.KindDashboard:
 		return c.dashboards.list(ctx, project)
 	default:
 		logrus.Warnf("kind %s is not supported for listing", kind)
-		return make([]*search.Result, 0), nil
+		return make([]*SearchResult, 0), nil
 	}
 }
 

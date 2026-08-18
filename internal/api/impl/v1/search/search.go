@@ -23,7 +23,6 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/search"
 )
 
 type endpoint struct {
@@ -42,11 +41,11 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 }
 
 func (e *endpoint) Dashboard(ctx echo.Context) error {
-	q := &search.Query{}
+	q := &index.Query{}
 	if err := ctx.Bind(q); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
-	var result any
+	var result []*index.SearchResult
 	var err error
 	if q.Query == "" {
 		result, err = e.index.List(ctx, v1.KindDashboard, q.Project)
