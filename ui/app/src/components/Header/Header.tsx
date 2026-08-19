@@ -26,6 +26,7 @@ import { SearchBar } from './SearchBar/SearchBar';
 import BrandLogo from '../logo/BrandLogo';
 import { AppDrawer } from './AppDrawer';
 import { useCookies } from 'react-cookie';
+import { useShowBilling } from '../../model/auth-client';
 import { activeOrganization } from '../../constants/auth-token';
 
 export default function Header(): JSX.Element {
@@ -34,6 +35,7 @@ export default function Header(): JSX.Element {
   const isAuthEnabled = useIsAuthEnabled();
   const IsExplorerEnabled = useIsExplorerEnabled();
   const [cookies] = useCookies([activeOrganization]);
+  const showBilling = useShowBilling();
 
   const hasPartialPermission = useHasPartialPermission(['read'], GlobalProject, [
     'GlobalDatasource',
@@ -90,7 +92,9 @@ export default function Header(): JSX.Element {
             gap: 1,
           }}
         >
-          {isAuthEnabled && <AppDrawer activeOrganization={cookies[activeOrganization]} />}
+          {isAuthEnabled && (
+            <AppDrawer activeOrganization={cookies[activeOrganization]} showBilling={showBilling} />
+          )}
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Box>
       </Toolbar>

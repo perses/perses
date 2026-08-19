@@ -28,6 +28,7 @@ export interface Branding {
   primaryColor?: string;
   runMode?: string;
   showAppTag?: boolean;
+  isOfflineInstaller?: boolean;
 }
 
 type BrandingOptions = Omit<UseQueryOptions<Branding, StatusError>, 'queryKey' | 'queryFn'>;
@@ -40,6 +41,15 @@ export function useBranding(options?: BrandingOptions): UseQueryResult<Branding,
     },
     ...options,
   });
+}
+
+export function useBrandingFromCache(): Branding | undefined {
+  const { data } = useQuery<Branding, StatusError>({
+    queryKey: [resource],
+    queryFn: fetchBranding,
+    enabled: false,
+  });
+  return data;
 }
 
 export function fetchBranding(): Promise<Branding> {

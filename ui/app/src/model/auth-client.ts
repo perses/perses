@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { useQueryParam } from 'use-query-params';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodGET, HTTPMethodPOST } from './http';
+import { useBrandingFromCache } from './branding-client';
 import { activeOrganization } from '../constants/auth-token';
 
 const authResource = 'auth';
@@ -27,6 +28,7 @@ const iLikeAce = 'i_like_ace';
 const iLikeBytebuilders = 'i_like_bytebuilders';
 const redirectQueryParam = 'rd';
 const cookieRefreshTime = 500;
+const platformOrganizationsResource = '/api/v1/user/settings/organizations';
 
 export interface NativeAuthBody {
   login: string;
@@ -89,10 +91,7 @@ export function useIsAccessTokenExist(): boolean {
   return hasAuthCookie;
 }
 
-/**
- * Get the redirect path from URL's query params.
- * This is used to retrieve the original path that a user desired before being redirected to the login page.
- */
+
 export function useRedirectQueryParam(): string {
   const [path] = useQueryParam<string | undefined>(redirectQueryParam);
   return path ?? '/';
@@ -153,12 +152,58 @@ export function useOrganizationList(user: string | undefined): UseQueryResult<Or
   });
 }
 
+export interface PlatformOrganization {
+  id: number;
+  username: string;
+  full_name?: string;
+  avatar_url?: string;
+  description?: string;
+  website?: string;
+  location?: string;
+  rancherManagementClusterEndPoint?: string;
+  visibility?: string;
+  orgType?: number;
+}
+
+export function usePlatformOrganizationList(): UseQueryResult<PlatformOrganization[] | null> {
+  return useQuery<PlatformOrganization[] | null>({
+    queryKey: [platformOrganizationsResource],
+    queryFn: async () => {
+      const response = await getPlatformOrganizations();
+      if (!response.ok) {
+        throw new Error(`Failed to fetch platform organizations: ${response.statusText}`);
+      }
+      return response.json();
+    },
+  });
+}
+
+export function getPlatformOrganizations(): Promise<Response> {
+  const url = window.location.origin + platformOrganizationsResource;
+  return fetch(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+const BILLING_ORG_TYPE = 6;
+
+export function useShowBilling(): boolean {
+  const [cookies] = useCookies([activeOrganization]);
+  const { data: organizations } = usePlatformOrganizationList();
+  // Reuse the branding already loaded by the app rather than requesting it again.
+  const branding = useBrandingFromCache();
+
+  const activeOrg = cookies[activeOrganization];
+  if (!activeOrg || branding?.isOfflineInstaller !== true) {
+    return false;
+  }
+  return (organizations ?? []).some((org) => org.username === activeOrg && org.orgType === BILLING_ORG_TYPE);
+}
+
 export function useAuthToken(): UseQueryResult<Payload | null> {
   const [cookies] = useCookies();
   const partialToken = cookies[jwtPayload];
-  // useJWT need a complete token (including a signature) to be able to decode it.
-  // It doesn't need the accurate signature to decode the payload.
-  // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
   return useQuery({
     queryKey: ['jwt'],

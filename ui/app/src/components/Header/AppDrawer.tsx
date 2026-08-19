@@ -22,6 +22,7 @@ export interface AppDrawerProps {
   activeOrganization?: string;
   rootDomain?: string;
   activeOrgType?: number;
+  showBilling?: boolean;
 }
 
 const DEFAULT_APPS = [
@@ -83,6 +84,7 @@ export function AppDrawer(props: AppDrawerProps): ReactElement {
     activeOrganization = '',
     rootDomain = window.location.hostname,
     activeOrgType = 0,
+    showBilling = false,
   } = props;
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -129,6 +131,7 @@ export function AppDrawer(props: AppDrawerProps): ReactElement {
     return appList
       .filter((app) => {
         if (app.name === currentApp) return false;
+        if (app.name === 'billing' && showBilling) return true;
         const selfHostList = ['billing', 'selfhost', 'learn'];
         if (isSelfHosted && selfHostList.includes(app.name)) return false;
         return true;
@@ -137,7 +140,7 @@ export function AppDrawer(props: AppDrawerProps): ReactElement {
         ...app,
         url: getUrl(app),
       }));
-  }, [appList, currentApp, isSelfHosted, baseUrl]);
+  }, [appList, currentApp, isSelfHosted, baseUrl, showBilling]);
 
   const handleClick = (name: string) => {
     if (name === 'grafana') {
