@@ -47,7 +47,7 @@ export function NavHistoryProvider(props: { children: React.ReactNode }): ReactE
 
 function historyReducer(
   history: DashboardNavHistoryItem[],
-  resource: { project: string; name: string } | { type: 'remove'; project: string; name: string }
+  resource: { project: string; name: string } | { type: 'remove'; project: string; name: string },
 ): DashboardNavHistoryItem[] {
   // Handle remove action
   if ('type' in resource && resource.type === 'remove') {

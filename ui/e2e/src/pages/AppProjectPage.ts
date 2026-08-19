@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Locator, Page } from '@playwright/test';
+
 import { escapeRegExp } from '../utils';
 import { DatasourceEditor } from './DatasourceEditor';
-import { VariableEditor } from './VariableEditor';
 import { SecretEditor } from './SecretEditor';
+import { VariableEditor } from './VariableEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
 

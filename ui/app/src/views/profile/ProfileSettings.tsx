@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
-import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import React, { ReactElement } from 'react';
+
 import { ProfileSections } from './ProfileView';
 
 interface IAccountSettingItem {
@@ -79,8 +80,7 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
           </Box>
           <List>
             {s.items.map((i) => (
-              <ListItem
-                role="button"
+              <ListItemButton
                 key={i.view}
                 onClick={() => handleViewChange(i.view)}
                 sx={{
@@ -103,7 +103,7 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
                     {i.title}
                   </Typography>
                 </ListItemText>
-              </ListItem>
+              </ListItemButton>
             ))}
           </List>
         </React.Fragment>

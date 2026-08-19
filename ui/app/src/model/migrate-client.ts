@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, UseMutationResult } from '@tanstack/react-query';
 import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
-import buildURL from './url-builder';
+import { useMutation, UseMutationResult } from '@tanstack/react-query';
+
 import { HTTPHeader, HTTPMethodPOST } from './http';
+import buildURL from './url-builder';
 
 const resource = 'migrate';
 

@@ -87,7 +87,7 @@ export function mockTimeSeriesResponseWithStableValue({
           return [timestamp, value];
         }),
       };
-    })
+    }),
   );
 }
 

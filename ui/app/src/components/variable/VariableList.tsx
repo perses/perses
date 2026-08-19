@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import { Action, getVariableProject, VariableType } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { Action, getVariableProject, VariableType } from '@perses-dev/client';
-import { useIsReadonly } from '../../context/Config';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
+import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   DESCRIPTION_COL_DEF,
@@ -33,7 +35,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DeleteResourceDialog } from '../dialogs';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';
 
@@ -55,7 +56,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
     (name: string, project?: string) => {
       return data.find((variable: T) => getVariableProject(variable) === project && variable.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -70,7 +71,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
           version: variable.metadata.version,
           createdAt: variable.metadata.createdAt,
           updatedAt: variable.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -88,7 +89,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       }
       setVariableDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -97,7 +98,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('read');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleCopyVarNameButtonClick = useCallback(
@@ -105,7 +106,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       await navigator.clipboard.writeText(variableName);
       infoSnackbar('Variable copied to clipboard!');
     },
-    [infoSnackbar]
+    [infoSnackbar],
   );
 
   const handleEditButtonClick = useCallback(
@@ -115,7 +116,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('update');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -125,7 +126,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setAction('create');
       setVariableDrawerOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -133,7 +134,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
       setTargetedVariable(findVariable(name, project));
       setDeleteVariableDialogOpened(true);
     },
-    [findVariable]
+    [findVariable],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -207,7 +208,7 @@ export function VariableList<T extends VariableType>(props: ListPropertiesWithCa
         ],
       },
     ],
-    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

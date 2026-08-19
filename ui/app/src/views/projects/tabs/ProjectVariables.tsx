@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
-import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { VariableResource, VariableType } from '@perses-dev/client';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { ReactElement, useCallback } from 'react';
+
 import { VariableList } from '../../../components/variable/VariableList';
 import {
   useCreateVariableMutation,
@@ -44,7 +45,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
         createVariableMutation.mutate(variable, {
           onSuccess: (createdVariable: VariableResource) => {
             successSnackbar(
-              `Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`
+              `Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`,
             );
             resolve();
           },
@@ -55,7 +56,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createVariableMutation]
+    [exceptionSnackbar, successSnackbar, createVariableMutation],
   );
 
   const handleVariableUpdate = useCallback(
@@ -64,7 +65,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
         updateVariableMutation.mutate(variable, {
           onSuccess: (updatedVariable: VariableResource) => {
             successSnackbar(
-              `Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`
+              `Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`,
             );
             resolve();
           },
@@ -75,7 +76,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateVariableMutation]
+    [exceptionSnackbar, successSnackbar, updateVariableMutation],
   );
 
   const handleVariableDelete = useCallback(
@@ -84,7 +85,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: VariableType) => {
             successSnackbar(
-              `Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
+              `Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`,
             );
             resolve();
           },
@@ -95,7 +96,7 @@ export function ProjectVariables(props: ProjectVariablesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteVariableMutation]
+    [exceptionSnackbar, successSnackbar, deleteVariableMutation],
   );
 
   return (

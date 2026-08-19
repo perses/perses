@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { useMemo } from 'react';
-import { durationValidationSchema } from '@perses-dev/spec';
 import { nameSchema } from '@perses-dev/client';
-import { generateMetadataName } from '../utils/metadata';
+import { durationValidationSchema } from '@perses-dev/spec';
+import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
+import { generateMetadataName } from '../utils/metadata';
 import { dashboardDisplayNameValidationSchema } from './dashboard';
 
 export const createEphemeralDashboardDialogValidationSchema = z.object({
@@ -43,14 +44,14 @@ export function useEphemeralDashboardValidationSchema(projectName?: string): z.Z
             (dashboard) =>
               dashboard.metadata.project === schema.projectName &&
               dashboard.metadata.name === generateMetadataName(schema.dashboardName) &&
-              dashboard.spec.ttl === schema.ttl
+              dashboard.spec.ttl === schema.ttl,
           ).length === 0
         );
       },
       (schema) => ({
         message: `Ephemeral Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
         path: ['dashboardName'],
-      })
+      }),
     );
   }, [dashboards.data]);
 }

@@ -11,24 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
+import { FolderResource } from '@perses-dev/client';
 import { fireEvent, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { ReactElement, useCallback } from 'react';
+
+import { DashboardListRow } from './DashboardList';
 import DashboardTreeList from './DashboardTreeList';
 
-jest.mock('@perses-dev/components', () => ({
-  Table: ({
-    pagination,
-    onPaginationChange,
-  }: {
-    pagination: { pageIndex: number; pageSize: number };
-    onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
-  }): ReactElement => (
+interface MockTableProps {
+  pagination: { pageIndex: number; pageSize: number };
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
+}
+
+function MockTable({ pagination, onPaginationChange }: MockTableProps): ReactElement {
+  const showTenRows = useCallback((): void => onPaginationChange({ pageIndex: 0, pageSize: 10 }), [onPaginationChange]);
+  return (
     <>
-      <span data-testid="page-size">{pagination.pageSize}</span>
-      <button onClick={() => onPaginationChange({ pageIndex: 0, pageSize: 10 })}>Show 10 rows</button>
+      <span>Rows per page: {pagination.pageSize}</span>
+      <button type="button" onClick={showTenRows}>
+        Show 10 rows
+      </button>
     </>
-  ),
+  );
+}
+
+jest.mock('@perses-dev/components', () => ({
+  Table: MockTable,
 }));
 
 jest.mock('../../context/Config', () => ({
@@ -40,19 +48,21 @@ jest.mock('../../utils/browser-size', () => ({
 }));
 
 const noopHandler = (): (() => void) => () => undefined;
+const emptyFolderList: FolderResource[] = [];
+const emptyDashboardsMap = new Map<string, Map<string, DashboardListRow>>();
 
 function renderDashboardTreeList(): void {
   render(
     <DashboardTreeList
-      folderList={[]}
-      dashboardsMap={new Map()}
+      folderList={emptyFolderList}
+      dashboardsMap={emptyDashboardsMap}
       handleRenameButtonClick={noopHandler}
       handleDuplicateButtonClick={noopHandler}
       handleDeleteButtonClick={noopHandler}
       handleEditFolderButtonClick={noopHandler}
       handleAddFolderButtonClick={noopHandler}
       handleDeleteFolderButtonClick={noopHandler}
-    />
+    />,
   );
 }
 
@@ -60,7 +70,7 @@ describe('DashboardTreeList', () => {
   it('uses the configured default rows per page for its initial pagination', () => {
     renderDashboardTreeList();
 
-    expect(screen.getByTestId('page-size')).toHaveTextContent('50');
+    expect(screen.queryByText('Rows per page: 50')).not.toBeNull();
   });
 
   it('allows the user to change the rows per page after initialization', () => {
@@ -68,6 +78,6 @@ describe('DashboardTreeList', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Show 10 rows' }));
 
-    expect(screen.getByTestId('page-size')).toHaveTextContent('10');
+    expect(screen.queryByText('Rows per page: 10')).not.toBeNull();
   });
 });

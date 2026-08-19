@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { ReactElement, ReactNode } from 'react';
+
 import { DarkModeContextProvider, useDarkMode } from './DarkMode';
 
 let mockStoredDarkMode: boolean | null = null;
@@ -60,10 +60,10 @@ describe('DarkModeContextProvider', () => {
     render(
       <DarkModeContextProvider>
         <DarkModeConsumer />
-      </DarkModeContextProvider>
+      </DarkModeContextProvider>,
     );
 
-    expect(screen.getByText('dark')).toBeInTheDocument();
+    expect(screen.queryByText('dark')).not.toBeNull();
   });
 
   it('gives a stored user preference precedence over the server default', () => {
@@ -72,10 +72,10 @@ describe('DarkModeContextProvider', () => {
     render(
       <DarkModeContextProvider>
         <DarkModeConsumer />
-      </DarkModeContextProvider>
+      </DarkModeContextProvider>,
     );
 
-    expect(screen.getByText('light')).toBeInTheDocument();
+    expect(screen.queryByText('light')).not.toBeNull();
   });
 
   it('uses the browser preference when neither user nor server preferences exist', () => {
@@ -83,9 +83,9 @@ describe('DarkModeContextProvider', () => {
     render(
       <DarkModeContextProvider>
         <DarkModeConsumer />
-      </DarkModeContextProvider>
+      </DarkModeContextProvider>,
     );
 
-    expect(screen.getByText('dark')).toBeInTheDocument();
+    expect(screen.queryByText('dark')).not.toBeNull();
   });
 });

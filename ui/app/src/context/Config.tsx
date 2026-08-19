@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
+import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { DashboardSelector, DurationString } from '@perses-dev/spec';
-import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import React, { createContext, ReactElement, useContext, useMemo } from 'react';
+
 import { PersesLoader } from '../components/PersesLoader';
+import { Banner, ConfigModel, useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
@@ -29,14 +30,16 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
+  const defaultPreferences = useMemo(
+    () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
+    [data?.frontend.default_user_preferences?.timezone],
+  );
   if (isLoading || data === undefined) {
     return <PersesLoader />;
   }
   return (
     <ConfigContext.Provider value={{ config: data }}>
-      <UserPreferencesContextProvider
-        defaultPreferences={{ timezone: data.frontend.default_user_preferences?.timezone ?? 'local' }}
-      >
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
         <TimeRangeSettingsProvider
           showCustom={!data.frontend.time_range?.disable_custom}
           showZoomButtons={!data.frontend.time_range?.disable_zoom}
@@ -147,7 +150,7 @@ export function useInformation(): string {
 
   const html = useMemo(
     () => marked.parse(config.frontend.information ?? '', { gfm: true, async: false }),
-    [config.frontend.information]
+    [config.frontend.information],
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
@@ -157,7 +160,7 @@ export function useBanner(): Banner | undefined {
 
   const html = useMemo(
     () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
-    [config.frontend.banner?.message]
+    [config.frontend.banner?.message],
   );
 
   const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);

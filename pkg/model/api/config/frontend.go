@@ -107,7 +107,44 @@ func (t *TimeRange) Verify() error {
 	if len(t.Options) == 0 {
 		t.Options = defaultTimeRangeOptions
 	}
+	sortedOptions, err := sortTimeRangeOptions(t.Options)
+	if err != nil {
+		return err
+	}
+	t.Options = sortedOptions
 	return nil
+}
+
+// sortTimeRangeOptions returns the given duration options sorted in ascending order,
+// so that the time range dropdown in the UI is always displayed from shortest to longest.
+func sortTimeRangeOptions(options []common.DurationString) ([]common.DurationString, error) {
+	type parsedOption struct {
+		raw      common.DurationString
+		duration common.Duration
+	}
+	parsedOptions := make([]parsedOption, 0, len(options))
+	for _, opt := range options {
+		duration, err := common.ParseDuration(string(opt))
+		if err != nil {
+			return nil, fmt.Errorf("invalid frontend.time_range.options value '%s': %w", opt, err)
+		}
+		parsedOptions = append(parsedOptions, parsedOption{raw: opt, duration: duration})
+	}
+	slices.SortStableFunc(parsedOptions, func(a, b parsedOption) int {
+		switch {
+		case a.duration < b.duration:
+			return -1
+		case a.duration > b.duration:
+			return 1
+		default:
+			return 0
+		}
+	})
+	sorted := make([]common.DurationString, len(parsedOptions))
+	for i, opt := range parsedOptions {
+		sorted[i] = opt.raw
+	}
+	return sorted, nil
 }
 
 type Frontend struct {

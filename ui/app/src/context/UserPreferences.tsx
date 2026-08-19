@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { useLocalStorage } from '@perses-dev/components';
+import React, { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
+
 import { UserPreferences } from '../model/userPreferences';
 
 interface UserPreferencesContextType {
@@ -34,20 +35,20 @@ export function UserPreferencesContextProvider(props: {
   const [storedPreferences, setStoredPreferences] = useLocalStorage<UserPreferences | null>(USER_PREFERENCES_KEY, null);
   const userPreferences = useMemo(
     () => ({ ...props.defaultPreferences, ...storedPreferences }),
-    [props.defaultPreferences, storedPreferences]
+    [props.defaultPreferences, storedPreferences],
   );
   const updateUserPreferences = useCallback(
     (preferences: Partial<UserPreferences>): void => {
       setStoredPreferences({ ...storedPreferences, ...preferences });
     },
-    [setStoredPreferences, storedPreferences]
+    [setStoredPreferences, storedPreferences],
   );
   const contextValue = useMemo(
     () => ({
       userPreferences,
       updateUserPreferences,
     }),
-    [updateUserPreferences, userPreferences]
+    [updateUserPreferences, userPreferences],
   );
 
   return <UserPreferencesContext.Provider value={contextValue}>{props.children}</UserPreferencesContext.Provider>;

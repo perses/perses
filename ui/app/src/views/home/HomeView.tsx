@@ -12,18 +12,19 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
+import { ProjectResource } from '@perses-dev/client';
+import { DashboardSelector } from '@perses-dev/spec';
 import { ReactElement, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DashboardSelector } from '@perses-dev/spec';
-import { ProjectResource } from '@perses-dev/client';
+
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
-import { useIsMobileSize } from '../../utils/browser-size';
 import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
 import { useIsEphemeralDashboardEnabled, useHasImportantDashboards } from '../../context/Config';
-import { RecentDashboards } from './RecentDashboards';
-import { Projects } from './Projects';
-import { ImportantDashboards } from './ImportantDashboards';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { HomeViewHeroSection } from './HomeViewHeroSection';
+import { ImportantDashboards } from './ImportantDashboards';
+import { Projects } from './Projects';
+import { RecentDashboards } from './RecentDashboards';
 
 function HomeView(): ReactElement {
   // Navigate to the project page if the project has been successfully added

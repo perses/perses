@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, ReactElement, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
+import { memo, ReactElement, useMemo } from 'react';
+
+import { useDefaultRowsPerPage } from '../../context/Config';
 import {
   CommonRow,
   getDataGridInitialStateSortByName,
@@ -24,7 +26,6 @@ import {
   DATA_GRID_STYLES,
   DATA_GRID_SLOT_PROPS,
 } from '../datagrid';
-import { useDefaultRowsPerPage } from '../../context/Config';
 
 // https://mui.com/x/react-data-grid/performance/
 const MemoizedRow = memo(GridRow);
@@ -47,7 +48,7 @@ export function RoleBindingDataGrid(props: DataGridPropertiesWithCallback<Row>):
   const mergedInitialState = useMemo(() => {
     return {
       ...getDataGridInitialStateSortByName(defaultRowsPerPage),
-      ...(initialState || {}),
+      ...initialState,
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
 

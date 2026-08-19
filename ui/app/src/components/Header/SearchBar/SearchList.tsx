@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
-import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Theme, Typography } from '@mui/material';
+import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
+import { isProjectMetadata, Resource } from '@perses-dev/client';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
+import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { isProjectMetadata, Resource } from '@perses-dev/client';
+
 import { ProjectRoute } from '../../../model/route';
 
 const kvSearchConfig: KVSearchConfiguration = {
@@ -95,7 +96,7 @@ function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched'], en
 
 function getTagDisplayValues(
   tags: string[] | undefined,
-  matchingTagValues: string[]
+  matchingTagValues: string[],
 ): {
   normalizedMatchingTags: Set<string>;
   visibleTags: string[];
@@ -179,7 +180,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
         const matchingTagValues = getMatchingTagValues(search.matched, Boolean(query));
         const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
           search.original.metadata.tags,
-          matchingTagValues
+          matchingTagValues,
         );
 
         const projectName = isProjectMetadata(search.original.metadata) ? search.original.metadata.project : undefined;

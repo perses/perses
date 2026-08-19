@@ -1,30 +1,73 @@
 # Changelog
 
-## 0.54.0-rc.1 / 2026-07-21
+## 0.54.0 / 2026-07-29
 
-This release candidate is mainly here to revert the schema endpoint feature that was introduced in 0.54.0-rc.0.
-We revert it because it implies to upgrade cuelang to v0.17 which includes some regression that impacts the dashboard migration.
-See https://github.com/perses/perses/issues/4272 for more information.
+Welcome in the v0.54.0 release !
+
+First of all this release includes several security fixes that patches some breach in the permission system included in Perses,
+so we strongly recommend to upgrade to this version as soon as possible.
+
+Then, you will be happy to know that this release includes new plugins: Jaeger, GreptimeDB, Splunk, LogExplorer, AlertManager and OpenSearch.
+
+As adding more plugins is increasing the size of the container image, likely we will remove some of them in future
+release.
+It does not mean we will remove the support for these plugins, it is just we won't include them into the default image.
+You will have to add them manually.
+The drop will occur once we are able to provide a good way to add plugins to an existing installation without having to
+rebuild the image.
+In the meantime, if you don't want to use these plugins, you can choose to enable or disable them by configuration.
+
+We are also happy to announce it includes the long awaited sub-folder system to better organize your dashboards and improve the
+accessibility by adding keyboard shortcuts.
+
+This release is also the last release for the package `@perses-dev/core` that is now deprecated.
+For that we are introducing two new packages `@perses-dev/spec` and `@perses-dev/client`.
+
+- `@perses-dev/spec` contains the dashboard and datasource specifications.
+- `@perses-dev/client` contains the client to interact with the Perses API.
+
+The code from `@perses-dev/core` has been dispatched in these these two packages and in others (like `@perses-dev/plugin-system` and `@perses-dev/components`) to better separate the concerns and make it easier to maintain.
+
+Finally, thank you to all the contributor who made this release possible,
+you are more and more, and we are really happy to see the community growing and contributing to make Perses better and
+better!
 
 ### Core & UI
 
-- [BreakingChange] Revert " Exposing complete dashboard and plugin CUE schema endpoint" (#4279)
-- [BUGFIX] Fix health error with SQL database (#4274)
-
-### Plugins improvements
-
-- [BUGFIX] Table: use last data point instead of first in buildRawTableData (perses/plugins#736)
-- [BUGFIX] Loki: dispatch to instant query when context.mode is instant (perses/plugins#737)
-
-## 0.54.0-rc.0 / 2026-07-16
-
-### Core & UI
-
-- [SECURITY] Unvalidated project parameter enables filesystem path traversal (CVE-2026-63199) ([75e5471040cc](https://github.com/perses/perses-ghsa-4227-9989-jrhx/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
-- [SECURITY] Missing authorization in datasource proxy allows cross-scope secret disclosure ([2368c9ef4eb0a](https://github.com/perses/perses/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
-- [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4031)
+- [SECURITY] Unvalidated project parameter enables filesystem path traversal ([CVE-2026-63445](https://github.com/perses/perses/security/advisories/GHSA-vr5f-w35q-98jp)) ([75e5471040cc](https://github.com/perses/perses/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
+- [SECURITY] Missing authorization in datasource proxy allows cross-scope secret disclosure ([CVE-2026-63199](https://github.com/perses/perses/security/advisories/GHSA-4227-9989-jrhx)) ([2368c9ef4eb0a](https://github.com/perses/perses/commit/2368c9ef4eb0a70fbca5df69aa20e595821ab625))
+- [SECURITY] API: Fix miss-usage of project query param ([CVE-2026-63458](https://github.com/perses/perses/security/advisories/GHSA-cjgj-2fwf-4c2w)) [8015fb](https://github.com/perses/perses/commit/8015fb340bdc625953e73a7a688be5b939159540)
+- [FEATURE] Add user preference (#4170) (#4184)
+- [FEATURE] Add annotation support (#4040)
+- [FEATURE] Add tags display with chips in DashboardTreeList (#4115)
+- [FEATURE] Implement NoItems representation in DashboardTreeList and related components (#4116)
+- [FEATURE] Add alert and silence query kinds (#4047)
+- [FEATURE] By configuration, enable or disable plugins (#4084)
+- [FEATURE] Manage a sub-folder system (#3966) (#4065)
+- [FEATURE] Keyboard shortcut (#4019)
 - [ENHANCEMENT] Plugin: prevent path injection when extracting the plugins file (#4230)
 - [ENHANCEMENT] Updated migrateQuery to catch ambiguous plugin matches during migration (#4139)
+- [ENHANCEMENT] Improve migrating panel error (#4293)
+- [ENHANCEMENT] Migrate G2P dashboard links (#4173)
+- [ENHANCEMENT] Expose perses_dashboard_render_time_seconds metric as a dual classic + native histogram (#4145)
+- [ENHANCEMENT] Allow decrypt secret in DB with "authenticated" mode AEAD for future backward compatibility (#4056)
+- [ENHANCEMENT] Migrate Grafana row repeat to Perses grid layout repeatVariable (#4079)
+- [ENHANCEMENT] Remove flat dashboard view, keep only tree view (#4066)
+- [ENHANCEMENT] Allow to load versioned plugins (#4064)
+- [ENHANCEMENT] `dac setup`: generate example file for Go setup too (#3986)
+- [ENHANCEMENT] `percli apply`: add new flag `--create-project` (#3987)
+- [ENHANCEMENT] Add e2e test coverage for SearchBar (#3928)
+- [ENHANCEMENT] GO-SDK: Add custom panel group option to allow customized panel alignment (#3997)
+- [ENHANCEMENT] Log incorrectly sized encryption key size (#3999)
+- [ENHANCEMENT] Publish container images to quay.io (#3934)
+- [ENHANCEMENT] UI: simplify breadcrumbs and restore page header hierarchy (#4010)
+- [ENHANCEMENT] UI: aligning configuration page layout with admin and projects (#4011)
+- [ENHANCEMENT] UI: Improving visual hierarchy (#3985)
+- [ENHANCEMENT] UI: refactor project and admin page (#3996)
+- [ENHANCEMENT] Add SBOM files to releases (#3956)
+- [BUGFIX] Fix health error with SQL database (#4274)
+- [BUGFIX] Downgrade zitadel/oidc to 3.45.4 to keep support with hydra (#4303)
+- [BUGFIX] Lowercase project query parameter when case-sensitive configuration is not activated (#4297)
 - [BUGFIX] Accept temperature and date units in go-sdk Format validation (#4266)
 - [BUGFIX] CUE: fix wrong collapse value (#4183)
 - [BUGFIX] Apply default AuthorizerDenyTTL in kubernetes authz provider (#4246)
@@ -45,37 +88,6 @@ See https://github.com/perses/perses/issues/4272 for more information.
 - [BUGFIX] Set PERSES_CLI env on the Windows plugin dev server (#4241)
 - [BUGFIX] Auth: fake latency when user does not exist (#4232)
 - [BUGFIX] Discovery: fix k8s service discovery when no port is declared (#4231)
-- [DOC] Add native provider authentication bash and CLI snippets (#4254)
-- [DOC] Fix typo in Dashboard API docs (#4253)
-- [DOC] Fix broken Go SDK examples in http-proxy.md (#4243)
-- [DOC] Fix stale panel group defaults in go-sdk doc (#4240)
-- [DOC] Fix dialog JSDoc @param names to match props (#4242)
-- [DOC] Fix invalid `time.minutes` in go-sdk RefreshInterval example (#4237)
-- [DOC] Fix TimeseriesChart import path in query builder example (#4238)
-- [DOC] Fix panel Title example to use panel.Title (#4235)
-- [DOC] Schema configuration is deprecated (#4226)
-- [DOC] Fix Kubernetes SD example to use service_type key (#4223)
-
-### Plugins improvements
-
-- [FEATURE] Add new plugin : OpenSearch (perses/plugins#641)
-- [ENHANCEMENT] TimeseriesChart : Add negative y axis support (perses/plugins#696)
-- [BREAKINGCHANGE] Tempo: remove workaround for Tempo versions before 2.6.0 (perses/plugins#728)
-- [BREAKINGCHANGE] Tempo: Use Query V2 API and surface API (warning) messages (perses/plugins#726)
-- [BUGFIX] Pyroscope: fix timerange (perses/plugins#725)
-- [BUGFIX] Loki query migration incorrectly matching non-Loki datasources (perses/plugins#682)
-- [BUGFIX] Remove selectedMode from timeseries series config (perses/plugins#722)
-- [DOC] Table: fix format modifier syntax in dynamic links example (perses/plugins#727)
-
-## 0.54.0-beta.3 / 2026-07-03
-
-### Core & UI
-
-- [SECURITY] API: Fix miss-usage of project query param [8015fb](https://github.com/perses/perses/commit/8015fb340bdc625953e73a7a688be5b939159540)
-- [FEATURE] pass the user pereferences tz to ViewDashboard (#4184)
-- [FEATURE] add user prefrence (#4170)
-- [ENHANCEMENT] bump shared and plugins versions and add alertmanager plugin (#4205)
-- [ENHANCEMENT] migrate G2P dashboard links (#4173)
 - [BUGFIX] Schema: Fix race condition when validating schemas (#4192)
 - [BUGFIX] Fix wrong minimum version and maximum version assignment (#4191)
 - [BUGFIX] Migrate: enforce checking the grafana variable sort value (#4190)
@@ -87,115 +99,47 @@ See https://github.com/perses/perses/issues/4272 for more information.
 - [BUGFIX] CLI/plugin generate: Fix plugin template using new import (#4153)
 - [BUGFIX] Go SDK set PanelGroup collapse properly (#4150)
 - [BUGFIX] CLI: skip non-main Go packages when building a directory (#4174)
-- [DOC] remove Go Report Card badge (#4201)
+- [BUGFIX] Fix parsing log level in logrus builder (#4138)
+- [BUGFIX] Fix `percli get user` panic when users exist (#4092)
+- [BUGFIX] Fix native logout not working with api_prefix set (#4089)
+- [BUGFIX] Fix some error message when password/credentials files config missing (#4078)
+- [BUGFIX] Set correct ContentLength for request body (#4007)
+- [BUGFIX] Fix navigation to a dashboard from a dashboard (#3971)
+- [BUGFIX] Remove tag characters restrictions (#3959)
+- [BUGFIX] Set specific Content-Type for static UI resources (#3988)
+- [BUGFIX] UI: fallback to metadata.name when project spec or display name is missing (#3998)
+- [DOC] Add native provider authentication bash and CLI snippets (#4254)
+- [DOC] Fix typo in Dashboard API docs (#4253)
+- [DOC] Fix broken Go SDK examples in http-proxy.md (#4243)
+- [DOC] Fix stale panel group defaults in go-sdk doc (#4240)
+- [DOC] Fix dialog JSDoc @param names to match props (#4242)
+- [DOC] Fix invalid `time.minutes` in go-sdk RefreshInterval example (#4237)
+- [DOC] Fix TimeseriesChart import path in query builder example (#4238)
+- [DOC] Fix panel Title example to use panel.Title (#4235)
+- [DOC] Schema configuration is deprecated (#4226)
+- [DOC] Fix Kubernetes SD example to use service_type key (#4223)
 - [DOC] Add documentation for folder feature (#4118)
 - [DOC] Fix go-sdk doc about the listvariable (#4167)
 - [DOC] Add upgrade guide for go-sdk (#4166)
 - [DOC] Complete doc around the tag (#4164)
-- [DOC] [DOCUMENTATION] Add PromQL builder mention (#4207)
-
-### Plugins improvements
-
-- [FEATURE] LogTable: add logs table CSV export action (perses/plugins#697)
-- [FEATURE] Prometheus & TimeseriesChart: Add annotation support (perses/plugins#642)
-- [FEATURE] AlertManager: add alert manager plugin (perses/plugins#647)
-- [ENHANCEMENT] TracingGanttChart: show UTC time on hover (perses/plugins#714)
-- [ENHANCEMENT] Tempo Explorer: retain selected timezone when clicking … (perses/plugins#715)
-- [ENHANCEMENT] TraceTable: use timezone setting from TimeRangeSelector (perses/plugins#713)
-- [ENHANCEMENT] ScatterChart: make axis and tooltip timezone aware (perses/plugins#712)
-- [ENHANCEMENT] TimeSeriesChart: add query name support for query settings (perses/plugins#585)
-- [ENHANCEMENT] TracingGanttChart: make trace header bar responsive (perses/plugins#717)
-- [BUGFIX] Table: fix cellSettings not applied when table column filters are active (perses/plugins#688)
-- [BUGFIX] Table: fix cellSettings not applied for columns with no data in any query (perses/plugins#700)
-- [BUGFIX] PieChart & BarChart: set shortValues according to the unit (perses/plugins#716)
-- [DOC] GreptimeDB: Add GreptimeDB plugin docs (perses/plugins#686)
-
-## 0.54.0-beta.2 / 2026-06-19
-
-### Core & UI
-
-- [FEATURE] Add annotation support (#4040)
-- [FEATURE] Add tags display with chips in DashboardTreeList (#4115)
-- [FEATURE] Implement NoItems representation in DashboardTreeList and related components (#4116)
-- [FEATURE] Add alert and silence query kinds (#4047)
-- [FEATURE] Add LogExplorer plugin (#4148)
-- [ENHANCEMENT] Expose perses_dashboard_render_time_seconds metric as a dual classic + native histogram (#4145)
-- [BUGFIX] Fix parsing log level in logrus builder (#4138)
+- [DOC] Add PromQL builder mention (#4207)
 - [DOC] Document Perses UI package architecture (#4119)
-
-### Plugins improvements
-
-- [BUGFIX] Table: table column filter values (perses/plugins#679)
-- [BUGFIX] Prometheus: fix variable interpolation in label value query (perses/plugins#675)
-
-## 0.54.0-beta.1 / 2026-06-04
-
-Due to some issues with goreleaser and cuelang the previous version has not been properly released, we had to release a
-new version containing the fix to unlock goreleaser and cuelang releases.
-
-These changes do not have any impact on the end users.
-
-## 0.54.0-beta.0 / 2026-06-03
-
-This is the first release of the v0.54.0 beta series.
-
-It includes new plugins: Jaeger, GreptimeDB and Splunk.
-As adding more plugins is increasing the size of the container image, likely we will remove some of them in future
-release.
-It does not mean we will remove the support for these plugins, it is just we won't include them into the default image.
-You will have to add them manually.
-The drop will occur once we are able to provide a good way to add plugins to an existing installation without having to
-rebuild the image.
-In the meantime, if you don't want to use these plugins, you can choose to enable or disable them by configuration.
-
-This release also includes the long awaited sub-folder system to better organize your dashboards and improve the
-accessibility by adding keyboard shortcuts.
-
-As this is a beta release, it may contain bugs and breaking changes. We recommend to test it in a non-production
-environment before upgrading.
-
-Finally, thank you to all the contributor who made this release possible,
-you are more and more, and we are really happy to see the community growing and contributing to make Perses better and
-better!
-
-### Core & UI
-
-- [FEATURE] By configuration, enable or disable plugins (#4084)
-- [FEATURE] Manage a sub-folder system (#3966) (#4065)
-- [FEATURE] Keyboard shortcut (#4019)
-- [FEATURE] Add new plugin: Jaeger, GreptimeDB and Splunk
-- [ENHANCEMENT] Allow decrypt secret in DB with "authenticated" mode AEAD for future backward compatibility (#4056)
-- [ENHANCEMENT] migrate Grafana row repeat to Perses grid layout repeatVariable (#4079)
-- [ENHANCEMENT] Remove flat dashboard view, keep only tree view (#4066)
-- [ENHANCEMENT] allow to load versioned plugins (#4064)
-- [ENHANCEMENT] `dac setup`: generate example file for Go setup too (#3986)
-- [ENHANCEMENT] `percli apply`: add new flag `--create-project` (#3987)
-- [ENHANCEMENT] Add e2e test coverage for SearchBar (#3928)
-- [ENHANCEMENT] go-sdk: Add custom panel group option to allow customized panel alignment (#3997)
-- [ENHANCEMENT] Log incorrectly sized encryption key size (#3999)
-- [ENHANCEMENT] Publish container images to quay.io (#3934)
-- [ENHANCEMENT] UI: simplify breadcrumbs and restore page header hierarchy (#4010)
-- [ENHANCEMENT] UI: aligning configuration page layout with admin and projects (#4011)
-- [ENHANCEMENT] UI: Improving visual hierarchy (#3985)
-- [ENHANCEMENT] UI: refactor project and admin page (#3996)
-- [ENHANCEMENT] Add SBOM files to releases (#3956)
-- [BUGFIX] Fix `percli get user` panic when users exist (#4092)
-- [BUGFIX] Fix native logout not working with api_prefix set (#4089)
-- [BUGFIX] Fix some error message when password/credentials files config missing (#4078)
-- [BUGFIX] set correct ContentLength for request body (#4007)
-- [BUGFIX] Fix navigation to a dashboard from a dashboard (#3971)
-- [BUGFIX] remove tag characters restrictions (#3959)
-- [BUGFIX] Set specific Content-Type for static UI resources (#3988)
-- [BUGFIX] UI: fallback to metadata.name when project spec or display name is missing (#3998)
 - [DOC] Add timezone resolution documentation (#4061)
 - [DOC] Add getting started page documentation (#3931)
 - [DOC] Describe generation of encryption keys (#4000)
 - [DOC] Fix authorization provider documentation (#3980)
 - [DOC] Adds comprehensive documentation for Perses Prometheus instrumentation, focusing on the custom dashboard usage metrics. (#4062)
-- [DOCS]: improve the migration documentation (#4036)
+- [DOC] improve the migration documentation (#4036)
 
 ### Plugins improvements
 
+- [FEATURE] Add new plugin : LogExplorer (#4148)
+- [FEATURE] Add new plugin : OpenSearch (perses/plugins#641)
+- [FEATURE] Add new plugin : AlertManager (perses/plugins#647)
+- [FEATURE] Add new plugin : Jaeger
+- [FEATURE] Add new plugin : GreptimeDB
+- [FEATURE] Add new plugin : Splunk
+- [FEATURE] LogTable: add logs table CSV export action (perses/plugins#697)
 - [FEATURE] Table: add search bar to column filter dropdown (perses/plugins#635)
 - [FEATURE] Table: add DataLink support to Go SDK (perses/plugins#631)
 - [FEATURE] LogsTable: add Grafana migration script (perses/plugins#622)
@@ -204,24 +148,45 @@ better!
 - [FEATURE] Loki: add query migration script for log queries (perses/plugins#634)
 - [FEATURE] TracingGanttChart: add search functionality (perses/plugins#661)
 - [FEATURE] Prometheus: add request headers and query params interpolation (perses/plugins#638)
+- [FEATURE] Prometheus & TimeseriesChart: Add annotation support (perses/plugins#642)
+- [ENHANCEMENT] TimeseriesChart : Add negative y axis support (perses/plugins#696)
+- [ENHANCEMENT] TracingGanttChart: show UTC time on hover (perses/plugins#714)
+- [ENHANCEMENT] Tempo Explorer: retain selected timezone when clicking … (perses/plugins#715)
+- [ENHANCEMENT] Tempo: allow variable replacement on queries (perses/plugins#621)
+- [ENHANCEMENT] ScatterChart: make axis and tooltip timezone aware (perses/plugins#712)
+- [ENHANCEMENT] TimeSeriesChart: add query name support for query settings (perses/plugins#585)
+- [ENHANCEMENT] TracingGanttChart: make trace header bar responsive (perses/plugins#717)
 - [ENHANCEMENT] Table: improve migration (perses/plugins#654)
 - [ENHANCEMENT] TraceTable: enable word wrap on spans and start time columns (perses/plugins#655)
+- [ENHANCEMENT] TraceTable: use timezone setting from TimeRangeSelector (perses/plugins#713)
 - [ENHANCEMENT] TracingGanttChart: show span kind, status and scope in attribute pane (perses/plugins#617)
 - [ENHANCEMENT] TracingGanttChart: show error message if panel query is a search query instead of a single trace (perses/plugins#537)
 - [ENHANCEMENT] TracingGanttChart: support span attributes with type double (perses/plugins#421)
 - [ENHANCEMENT] TracingGanttChart: add number of events and links in tab (perses/plugins#341)
 - [ENHANCEMENT] TimeSeriesChart: query settings: support all format attributes (perses/plugins#643)
 - [ENHANCEMENT] TimeSeriesChart: support migration of unit overrides (perses/plugins#616)
-- [ENHANCEMENT] allow variable replacement on tempo queries (perses/plugins#621)
-- [BUGFIX] Partial table cell settings - gauge chart and range function (perses/plugins#645)
-- [BUGFIX] table go-sdk: fix Density constant values (perses/plugins#653)
+- [BREAKINGCHANGE] Tempo: remove workaround for Tempo versions before 2.6.0 (perses/plugins#728)
+- [BREAKINGCHANGE] Tempo: Use Query V2 API and surface API (warning) messages (perses/plugins#726)
+- [BUGFIX] Table: use last data point instead of first in buildRawTableData (perses/plugins#736)
+- [BUGFIX] Pyroscope: fix timerange (perses/plugins#725)
+- [BUGFIX] Loki: dispatch to instant query when context.mode is instant (perses/plugins#737)
+- [BUGFIX] Loki query migration incorrectly matching non-Loki datasources (perses/plugins#682)
+- [BUGFIX] Loki: parse text errors from API to display errors correctly (perses/plugins#649)
+- [BUGFIX] Remove selectedMode from timeseries series config (perses/plugins#722)
+- [BUGFIX] Table: fix cellSettings not applied when table column filters are active (perses/plugins#688)
+- [BUGFIX] Table: fix cellSettings not applied for columns with no data in any query (perses/plugins#700)
+- [BUGFIX] Table: fix Density constant values in go-sdk (perses/plugins#653)
 - [BUGFIX] Table: don't fail migration on duplicated rename (perses/plugins#624)
-- [BUGFIX] parse text errors from Loki api to display errors correctly (perses/plugins#649)
+- [BUGFIX] PieChart & BarChart: set shortValues according to the unit (perses/plugins#716)
+- [BUGFIX] Table: table column filter values (perses/plugins#679)
+- [BUGFIX] Partial table cell settings - gauge chart and range function (perses/plugins#645)
 - [BUGFIX] TracingGanttChart: fix attribute pane resizing (perses/plugins#636)
 - [BUGFIX] TimeSeriesChart: don't fail migration on undefined refId (perses/plugins#623)
 - [BUGFIX] TimeSeriesChart: Grafana migration: handle string value for fillOpacity params (perses/plugins#610)
 - [BUGFIX] TimeSeriesChart: Grafana migration: don't fail on undefined calcs (perses/plugins#603)
+- [BUGFIX] Prometheus: fix variable interpolation in label value query (perses/plugins#675)
 - [BUGFIX] PrometheusTimeSeriesQuery: Grafana migration: don't match non-prom queries when type is set (perses/plugins#632)
+- [DOC] Table: fix format modifier syntax in dynamic links example (perses/plugins#727)
 
 ## 0.53.1 / 2026-03-11
 

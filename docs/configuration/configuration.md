@@ -486,7 +486,7 @@ file: <Database file config> # Optional
 sql: <Database SQL config> # Optional
 ```
 
-#### Database_file config
+#### Database File config
 
 ```yaml
 # The path to the folder containing the database
@@ -501,6 +501,11 @@ case_sensitive: <string> | default = false # Optional
 ```
 
 #### Database SQL config
+
+This is the configuration to connect to a SQL database. Note that Perses will create the tables needed to store the data if they do not exist. The database user must have the rights to create tables.
+
+!!! warning
+    PostgreSQL is not supported. Prefer to use MySQL or MariaDB.
 
 ```yaml
 # TLS configuration.

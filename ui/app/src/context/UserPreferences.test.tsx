@@ -11,13 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { ReactElement, useCallback } from 'react';
+
 import { UserPreferences } from '../model/userPreferences';
 import { UserPreferencesContextProvider, useUserPreferences } from './UserPreferences';
 
 const mockSetLocalStorage = jest.fn();
+const defaultPreferences: UserPreferences = { timezone: 'UTC' };
+const defaultPreferencesWithFutureField: UserPreferences & { futurePreference: string } = {
+  timezone: 'UTC',
+  futurePreference: 'server-default',
+};
 
 jest.mock('@perses-dev/components', () => ({
   useLocalStorage: (key: string, defaultValue: unknown): [unknown, jest.Mock] => {
@@ -28,10 +33,16 @@ jest.mock('@perses-dev/components', () => ({
 
 function PreferencesConsumer(): ReactElement {
   const { userPreferences, updateUserPreferences } = useUserPreferences();
+  const saveTimezone = useCallback(
+    (): void => updateUserPreferences({ timezone: 'Europe/Berlin' }),
+    [updateUserPreferences],
+  );
   return (
     <>
-      <span data-testid="timezone">{userPreferences.timezone}</span>
-      <button onClick={() => updateUserPreferences({ timezone: 'Europe/Berlin' })}>Save timezone</button>
+      <output aria-label="Timezone">{userPreferences.timezone}</output>
+      <button type="button" onClick={saveTimezone}>
+        Save timezone
+      </button>
     </>
   );
 }
@@ -45,52 +56,48 @@ describe('UserPreferencesContextProvider', () => {
   it('returns empty preferences when no provider exists', () => {
     render(<PreferencesConsumer />);
 
-    expect(screen.getByTestId('timezone')).toBeEmptyDOMElement();
+    expect(screen.getByRole('status', { name: 'Timezone' }).textContent).toBe('');
   });
 
   it('uses the server default when no user preference is stored', () => {
     render(
-      <UserPreferencesContextProvider defaultPreferences={{ timezone: 'UTC' }}>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
         <PreferencesConsumer />
-      </UserPreferencesContextProvider>
+      </UserPreferencesContextProvider>,
     );
 
-    expect(screen.getByTestId('timezone')).toHaveTextContent('UTC');
+    expect(screen.getByRole('status', { name: 'Timezone' }).textContent).toBe('UTC');
   });
 
   it('gives a stored user preference precedence over the server default', () => {
     window.localStorage.setItem('PERSES_USER_PREFERENCES', JSON.stringify({ timezone: 'Europe/Berlin' }));
 
     render(
-      <UserPreferencesContextProvider defaultPreferences={{ timezone: 'UTC' }}>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
         <PreferencesConsumer />
-      </UserPreferencesContextProvider>
+      </UserPreferencesContextProvider>,
     );
 
-    expect(screen.getByTestId('timezone')).toHaveTextContent('Europe/Berlin');
+    expect(screen.getByRole('status', { name: 'Timezone' }).textContent).toBe('Europe/Berlin');
   });
 
   it('merges missing stored fields with server defaults', () => {
     window.localStorage.setItem('PERSES_USER_PREFERENCES', JSON.stringify({}));
 
     render(
-      <UserPreferencesContextProvider defaultPreferences={{ timezone: 'UTC' }}>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
         <PreferencesConsumer />
-      </UserPreferencesContextProvider>
+      </UserPreferencesContextProvider>,
     );
 
-    expect(screen.getByTestId('timezone')).toHaveTextContent('UTC');
+    expect(screen.getByRole('status', { name: 'Timezone' }).textContent).toBe('UTC');
   });
 
   it('updates stored preferences without persisting resolved defaults', () => {
-    const defaultPreferences: UserPreferences & { futurePreference: string } = {
-      timezone: 'UTC',
-      futurePreference: 'server-default',
-    };
     render(
-      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferencesWithFutureField}>
         <PreferencesConsumer />
-      </UserPreferencesContextProvider>
+      </UserPreferencesContextProvider>,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Save timezone' }));
 

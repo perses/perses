@@ -13,15 +13,17 @@
 
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import { EphemeralDashboardResource } from '@perses-dev/client';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { parseDurationString } from '@perses-dev/spec';
+import { intlFormatDistance, add } from 'date-fns';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
-import { intlFormatDistance, add } from 'date-fns';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { EphemeralDashboardResource } from '@perses-dev/client';
-import { parseDurationString } from '@perses-dev/spec';
-import { DeleteResourceDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
+
+import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { DeleteResourceDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
 import {
   CREATED_AT_COL_DEF,
   DISPLAY_NAME_COL_DEF,
@@ -30,7 +32,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import { EphemeralDashboardDataGrid, Row } from './EphemeralDashboardDataGrid';
 
 export interface EphemeralDashboardListProperties extends ListProperties {
@@ -53,16 +54,16 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
     (project: string, name: string) => {
       return ephemeralDashboardList.find(
         (ephemeralDashboard) =>
-          ephemeralDashboard.metadata.project === project && ephemeralDashboard.metadata.name === name
+          ephemeralDashboard.metadata.project === project && ephemeralDashboard.metadata.name === name,
       );
     },
-    [ephemeralDashboardList]
+    [ephemeralDashboardList],
   );
 
   const getExpirationDate = useCallback((ephemeralDashboard: EphemeralDashboardResource): string => {
     return add(
       ephemeralDashboard.metadata.updatedAt ? new Date(ephemeralDashboard.metadata.updatedAt) : new Date(),
-      parseDurationString(ephemeralDashboard.spec.ttl)
+      parseDurationString(ephemeralDashboard.spec.ttl),
     ).toISOString();
   }, []);
 
@@ -77,7 +78,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
           version: ephemeralDashboard.metadata.version,
           createdAt: ephemeralDashboard.metadata.createdAt,
           updatedAt: ephemeralDashboard.metadata.updatedAt,
-        }) as Row
+        }) as Row,
     );
   }, [ephemeralDashboardList, getExpirationDate]);
 
@@ -92,7 +93,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
       setTargetedDashboard(getDashboard(project, name));
       setRenameEphemeralDashboardDialogStateOpened(true);
     },
-    [getDashboard]
+    [getDashboard],
   );
 
   const handleEphemeralDashboardDelete = useCallback(
@@ -110,7 +111,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteEphemeralDashboardMutation]
+    [exceptionSnackbar, successSnackbar, deleteEphemeralDashboardMutation],
   );
 
   const onDeleteButtonClick = useCallback(
@@ -118,7 +119,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
       setTargetedDashboard(getDashboard(project, name));
       setDeleteEphemeralDashboardDialogStateOpened(true);
     },
-    [getDashboard]
+    [getDashboard],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -169,7 +170,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
         ],
       },
     ],
-    [onRenameButtonClick, onDeleteButtonClick]
+    [onRenameButtonClick, onDeleteButtonClick],
   );
 
   return (

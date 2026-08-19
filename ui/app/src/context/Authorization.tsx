@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
 import { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
-import { useUserPermissions } from '../model/user-client';
-import { useProjectList } from '../model/project-client';
-import { enableRefreshFetch } from '../model/fetch';
+import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
+
 import { useUsername } from '../model/auth/auth-client';
+import { enableRefreshFetch } from '../model/fetch';
+import { useProjectList } from '../model/project-client';
+import { useUserPermissions } from '../model/user-client';
 import { useIsDelegatedAuthnProviderEnabled, useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
@@ -73,7 +74,7 @@ export function useDashboardCreateAllowedProjects(): ProjectResource[] {
   return (data ?? []).filter(
     (project) =>
       permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
-      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard')
+      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
   );
 }
 
@@ -110,7 +111,7 @@ function permissionListHasPermission(permissions: Permission[], requestAction: A
   return permissions.some(
     (permission) =>
       permission.actions.some((action) => action === requestAction || action === '*') &&
-      permission.scopes.some((scope) => scope === requestScope || scope === '*')
+      permission.scopes.some((scope) => scope === requestScope || scope === '*'),
   );
 }
 

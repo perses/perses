@@ -22,7 +22,7 @@ import { Locator } from '@playwright/test';
 export async function selectMenuItem(
   container: Locator,
   selectName: string | RegExp,
-  itemName: string | RegExp
+  itemName: string | RegExp,
 ): Promise<void> {
   await container
     .getByRole('combobox', {

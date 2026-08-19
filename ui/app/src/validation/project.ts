@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
 import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useProjectList } from '../model/project-client';
 import { generateMetadataName } from '../utils/metadata';
 
@@ -34,10 +35,10 @@ export function useProjectValidationSchema(): z.Schema {
     return createProjectDialogValidationSchema.refine(
       (schema) => {
         return !(projects.data ?? []).some(
-          (project) => project.metadata.name === generateMetadataName(schema.projectName)
+          (project) => project.metadata.name === generateMetadataName(schema.projectName),
         );
       },
-      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] })
+      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] }),
     );
   }, [projects.data]);
 }

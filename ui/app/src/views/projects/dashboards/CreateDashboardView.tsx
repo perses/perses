@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { DashboardResource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/dashboards';
-import { ReactElement, useCallback, useState } from 'react';
 import { DashboardSpec } from '@perses-dev/spec';
-import { DashboardResource } from '@perses-dev/client';
+import { ReactElement, useCallback, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -76,7 +77,7 @@ function CreateDashboardView(): ReactElement | null {
       return createDashboardMutation.mutateAsync(data, {
         onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
+            `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`,
           );
           navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
         },
@@ -87,7 +88,7 @@ function CreateDashboardView(): ReactElement | null {
         },
       });
     },
-    [createDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
+    [createDashboardMutation, exceptionSnackbar, navigate, successSnackbar],
   );
 
   const handleDashboardDiscard = useCallback(() => {

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
 import {
   useMutation,
   UseMutationResult,
@@ -20,9 +21,9 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
-import { useNavHistory } from '../context/DashboardNavHistory';
+
 import { useImportantDashboardSelectors } from '../context/Config';
+import { useNavHistory } from '../context/DashboardNavHistory';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 
@@ -38,7 +39,7 @@ type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], StatusErro
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
 export function useCreateDashboardMutation(
-  onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown
+  onSuccess?: (data: DashboardResource, variables: DashboardResource) => Promise<unknown> | unknown,
 ): UseMutationResult<DashboardResource, StatusError, DashboardResource> {
   const queryClient = useQueryClient();
 
@@ -92,7 +93,7 @@ export interface DatedDashboards {
  */
 export function useRecentDashboardList(
   project?: string,
-  maxSize?: number
+  maxSize?: number,
 ): {
   isLoading: false | true;
   data: DatedDashboards[];
@@ -108,7 +109,7 @@ export function useRecentDashboardList(
     (history ?? []).forEach((historyItem) => {
       const dashboard = (data ?? []).find(
         (dashboard) =>
-          historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name
+          historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name,
       );
       if (dashboard) {
         result.push({ dashboard: dashboard, date: historyItem.date });
@@ -141,7 +142,8 @@ export function useImportantDashboardList(project?: string): {
     const result: DashboardResource[] = [];
     importantDashboardSelectors.forEach((selector) => {
       const dashboard = (dashboards ?? []).find(
-        (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
+        (dashboard) =>
+          selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name,
       );
       if (dashboard) {
         result.push(dashboard);
