@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
+import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { DashboardSelector, DurationString } from '@perses-dev/spec';
-import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import React, { createContext, ReactElement, useContext, useMemo } from 'react';
+
 import { PersesLoader } from '../components/PersesLoader';
+import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -28,16 +30,26 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
-  if (isLoading || data === undefined) {
+  const contextValue = useMemo<ConfigContextType | undefined>(() => (data ? { config: data } : undefined), [data]);
+  const defaultPreferences = useMemo(
+    () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
+    [data?.frontend.default_user_preferences?.timezone],
+  );
+  const timeRangeOptions = useMemo(
+    () => data?.frontend.time_range?.options?.map((option: DurationString) => buildRelativeTimeOption(option)),
+    [data?.frontend.time_range?.options],
+  );
+
+  if (isLoading || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
   }
   return (
-    <ConfigContext.Provider value={{ config: data }}>
+    <ConfigContext.Provider value={contextValue}>
       <TimeRangeSettingsProvider
         showCustom={!data.frontend.time_range?.disable_custom}
         showZoomButtons={!data.frontend.time_range?.disable_zoom}
         disableAutoRefresh={!!data.frontend.time_range?.disable_auto_refresh}
-        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+        options={timeRangeOptions}
       >
         {props.children}
       </TimeRangeSettingsProvider>
@@ -93,6 +105,11 @@ export function useIsKeyboardShortcutsEnabled(): boolean {
   return config.frontend.enable_keyboard_shortcuts ?? true;
 }
 
+export function useDefaultRowsPerPage(): number {
+  const { config } = useConfigContext();
+  return config.frontend.default_user_preferences?.rows_per_page ?? 25;
+}
+
 export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
   return config.ephemeral_dashboard.enable;
@@ -138,30 +155,31 @@ export function useInformation(): string {
 
   const html = useMemo(
     () => marked.parse(config.frontend.information ?? '', { gfm: true, async: false }),
-    [config.frontend.information]
+    [config.frontend.information],
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
 
 export function useBanner(): Banner | undefined {
   const { config } = useConfigContext();
+  const bannerConfig = config.frontend.banner;
 
   const html = useMemo(
-    () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
-    [config.frontend.banner?.message]
+    () => marked.parse(bannerConfig?.message ?? '', { gfm: true, async: false }),
+    [bannerConfig?.message],
   );
 
   const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);
 
   const banner = useMemo(() => {
-    if (!config.frontend.banner?.message || !config.frontend.banner?.severity) {
+    if (!bannerConfig?.message || !bannerConfig.severity) {
       return undefined;
     }
     return {
-      severity: config.frontend.banner.severity,
+      severity: bannerConfig.severity,
       message: sanitizedHtml,
     };
-  }, [config.frontend.banner?.message, config.frontend.banner?.severity, sanitizedHtml]);
+  }, [bannerConfig, sanitizedHtml]);
 
   return banner;
 }

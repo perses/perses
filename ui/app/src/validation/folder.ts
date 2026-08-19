@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { useMemo } from 'react';
 import { FolderItem } from '@perses-dev/client';
+import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useFolderList } from '../model/folder-client';
 import { getSubFolderRef } from '../utils/folderUtils';
 import { generateMetadataName } from '../utils/metadata';
@@ -23,7 +24,7 @@ export const editFolderDialogValidationSchema = z.object({
     z.object({
       name: z.string(),
       label: z.string(),
-    })
+    }),
   ),
   name: z.string().min(1, 'Name is required'),
 });
@@ -33,7 +34,7 @@ export const createFolderDialogValidationSchema = z.object({
     z.object({
       name: z.string(),
       label: z.string(),
-    })
+    }),
   ),
   name: z.string().min(1, 'Name is required'),
 });
@@ -86,7 +87,7 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
       (schema) => ({
         message: `Folder name '${schema.name}' already exists in '${projectName}' project!`,
         path: ['name'],
-      })
+      }),
     );
 
     return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
@@ -110,7 +111,7 @@ export function useAddFolderValidationSchema(items: FolderItem[], path: string[]
       (data) => ({
         message: `A folder named '${data.name}' already exists at this level!`,
         path: ['name'],
-      })
+      }),
     );
   }, [items, path]);
 }

@@ -239,6 +239,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     }
   },
   "frontend": {
+    "default_user_preferences": {
+      "timezone": "UTC",
+      "rows_per_page": 25,
+      "theme": "dark"
+    },
     "important_dashboards": [
       {
         "project": "perses",
@@ -336,6 +341,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					DefaultUserPreferences: &DefaultUserPreferences{
+						Timezone:    "UTC",
+						RowsPerPage: 25,
+						Theme:       "dark",
+					},
 				},
 				Plugin: Plugin{
 					Path:        "plugins",
@@ -415,6 +425,10 @@ provisioning:
   - "dev/data"
 
 frontend:
+  default_user_preferences:
+    timezone: UTC
+    rows_per_page: 25
+    theme: dark
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"
@@ -510,6 +524,11 @@ plugin:
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					DefaultUserPreferences: &DefaultUserPreferences{
+						Timezone:    "UTC",
+						RowsPerPage: 25,
+						Theme:       "dark",
+					},
 				},
 				Plugin: Plugin{
 					Path:         "custom/plugins",
@@ -538,6 +557,116 @@ plugin:
 				Verify())
 			assert.NoError(t, c.Verify())
 			assert.Equal(t, test.result, c)
+		})
+	}
+}
+
+func TestDefaultUserPreferencesVerify(t *testing.T) {
+	testSuite := []struct {
+		name        string
+		preferences DefaultUserPreferences
+		errMessage  string
+	}{
+		{
+			name:        "valid preferences",
+			preferences: DefaultUserPreferences{Timezone: "UTC", RowsPerPage: 25, Theme: "dark"},
+		},
+		{
+			name:        "invalid timezone",
+			preferences: DefaultUserPreferences{Timezone: "not-a-timezone"},
+			errMessage:  "invalid frontend.default_user_preferences.timezone",
+		},
+		{
+			name:        "unsupported rows per page",
+			preferences: DefaultUserPreferences{RowsPerPage: 20},
+			errMessage:  "frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100",
+		},
+		{
+			name:        "invalid theme",
+			preferences: DefaultUserPreferences{Theme: "system"},
+			errMessage:  "frontend.default_user_preferences.theme must be one of: light, dark",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.preferences.Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+				return
+			}
+			assert.ErrorContains(t, err, test.errMessage)
+		})
+	}
+}
+
+func TestDefaultUserPreferencesVerifyDefaults(t *testing.T) {
+	preferences := DefaultUserPreferences{}
+
+	assert.NoError(t, preferences.Verify())
+	assert.Equal(t, defaultRowsPerPage, preferences.RowsPerPage)
+	assert.Equal(t, LightTheme, preferences.Theme)
+}
+
+func TestResolveDefaultUserPreferences(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		expected   *DefaultUserPreferences
+		errMessage string
+	}{
+		{
+			name: "resolves IANA timezone and defaults theme",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: Europe/Berlin
+    rows_per_page: 50
+`,
+			expected: &DefaultUserPreferences{
+				Timezone:    "Europe/Berlin",
+				RowsPerPage: 50,
+				Theme:       LightTheme,
+			},
+		},
+		{
+			name: "resolves local timezone",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: local
+`,
+			expected: &DefaultUserPreferences{
+				Timezone:    "local",
+				RowsPerPage: defaultRowsPerPage,
+				Theme:       LightTheme,
+			},
+		},
+		{
+			name: "rejects invalid timezone",
+			configData: `
+frontend:
+  default_user_preferences:
+    timezone: not-a-timezone
+`,
+			errMessage: "invalid frontend.default_user_preferences.timezone",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Frontend.DefaultUserPreferences)
 		})
 	}
 }

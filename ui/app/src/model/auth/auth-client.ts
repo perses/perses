@@ -13,8 +13,9 @@
 
 import { fetch } from '@perses-dev/client';
 import { useQueryParam } from 'use-query-params';
-import buildURL from '../url-builder';
+
 import { HTTPHeader, HTTPMethodPOST } from '../http';
+import buildURL from '../url-builder';
 import { useCurrentUser } from '../user-client';
 
 export const authResource = 'auth';

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useSnackbar } from '@perses-dev/components';
-import Brightness5 from 'mdi-material-ui/Brightness5';
-import Brightness4 from 'mdi-material-ui/Brightness4';
 import { IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';
+import { useSnackbar } from '@perses-dev/components';
+import Brightness4 from 'mdi-material-ui/Brightness4';
+import Brightness5 from 'mdi-material-ui/Brightness5';
 import React, { ReactElement } from 'react';
+
 import { useDarkMode } from '../../context/DarkMode';
 
 export function ThemeSwitch(props: { isAuthEnabled: boolean }): ReactElement {

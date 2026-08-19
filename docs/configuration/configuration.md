@@ -821,6 +821,12 @@ information: <string> # Optional
 
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
+
+# Defaults used when a user has not selected their own preference
+default_user_preferences:
+  timezone: <IANA timezone or "local"> # Optional, default = local
+  rows_per_page: <10 | 25 | 50 | 100> # Optional, default = 25
+  theme: <"light" | "dark"> # Optional, default = light
 ```
 
 #### TimeRange config
@@ -833,7 +839,7 @@ options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d",
 disable_custom:  <bool> | default = false # Optional
 # Allow you to disable the zoom actions (extend or half current time range)
 disable_zoom:  <bool> | default = false # Optional
-# Allow you to disable dashboard auto-refresh (dropdown greyed out; refreshInterval and ?refresh= ignored)
+# Allow you to disable dashboard auto-refresh (refresh interval picker hidden; refreshInterval and ?refresh= ignored)
 disable_auto_refresh:  <bool> | default = false # Optional
 ```
 

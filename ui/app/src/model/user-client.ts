@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { useCookies } from 'react-cookie';
-import { useEffect, useState } from 'react';
 import { fetchJson, Permission, StatusError, UserResource } from '@perses-dev/client';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useCookies } from 'react-cookie';
+
 import { useIsAuthEnabled } from '../context/Config';
-import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildQueryKey from './querykey-builder';
+import buildURL from './url-builder';
 
 export const userResource = 'users';
 export const whoamiResource = 'user/whoami';

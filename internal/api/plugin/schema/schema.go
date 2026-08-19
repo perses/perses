@@ -205,6 +205,15 @@ func (s *completeSchema) ValidatePanels(panels map[string]*dashboard.Panel) erro
 				errs = append(errs, fmt.Errorf("panel %q: %w", panelName, err))
 			}
 		}
+		for i, annotation := range panel.Spec.Annotations {
+			name := annotation.Display.Name
+			if name == "" {
+				name = fmt.Sprintf("n°%d", i+1)
+			}
+			if err := s.ValidateAnnotations(annotation.Plugin, name); err != nil {
+				errs = append(errs, fmt.Errorf("panel %q: %w", panelName, err))
+			}
+		}
 	}
 	if len(errs) == 0 {
 		logrus.Debug("All panels are valid")

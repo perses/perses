@@ -22,16 +22,16 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import Import from 'mdi-material-ui/Import';
-import { useNavigate } from 'react-router-dom';
-
 import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
+import Import from 'mdi-material-ui/Import';
+import { ReactElement, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { useIsReadonly } from '../../context/Config';
+import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useMigrate } from '../../model/migrate-client';
 import { useProjectList } from '../../model/project-client';
-import { useCreateDashboardMutation } from '../../model/dashboard-client';
-import { useIsReadonly } from '../../context/Config';
 
 type Input = {
   name: string;
@@ -57,30 +57,27 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
-  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
+  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>(() =>
+    Object.fromEntries(dashboard.__inputs?.map((input) => [input.name, input.value ?? '']) ?? []),
+  );
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
   const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
-  // initialize the map with the provided input values if exist
-  dashboard?.__inputs?.map((input) => {
-    grafanaInput[input.name] = input.value ?? '';
-  });
-
   const setInput = (key: string, value: string): void => {
-    grafanaInput[key] = value;
-    setGrafanaInput(grafanaInput);
+    setGrafanaInput((currentInput) => ({ ...currentInput, [key]: value }));
   };
 
   const importOnClick = (): void => {
-    const dashboard = migrateMutation.data;
-    if (dashboard === undefined) {
+    const migratedDashboard = migrateMutation.data;
+    if (migratedDashboard === undefined) {
       return;
     }
-    dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    const dashboardToCreate = structuredClone(migratedDashboard);
+    dashboardToCreate.metadata.project = projectName;
+    dashboardMutation.mutate(dashboardToCreate);
   };
 
   if (error) {
@@ -89,20 +86,22 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
 
   return (
     <>
-      {// When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
-      // The code below provide the possibility to the user to provide the list of the input value.
-      // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
-      dashboard?.__inputs?.map((input, index) => {
-        return (
-          <TextField
-            key={`input-${index}`}
-            label={input.name}
-            defaultValue={input.value ?? ''}
-            variant="outlined"
-            onBlur={(e) => setInput(input.name, e.target.value)}
-          />
-        );
-      })}
+      {
+        // When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
+        // The code below provide the possibility to the user to provide the list of the input value.
+        // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
+        dashboard?.__inputs?.map((input, index) => {
+          return (
+            <TextField
+              key={`input-${index}`}
+              label={input.name}
+              defaultValue={input.value ?? ''}
+              variant="outlined"
+              onBlur={(e) => setInput(input.name, e.target.value)}
+            />
+          );
+        })
+      }
 
       <Alert variant="outlined" severity="warning">
         <Typography>

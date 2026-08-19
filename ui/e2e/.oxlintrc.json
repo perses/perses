@@ -1,0 +1,38 @@
+{
+  "$schema": "../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../.oxlintrc.json"],
+  "plugins": [],
+  "jsPlugins": [
+    {
+      "name": "playwright",
+      "specifier": "eslint-plugin-playwright"
+    }
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "jest": true,
+    "node": true,
+    "browser": true
+  },
+  "rules": {
+    "no-empty-pattern": "off",
+    "playwright/missing-playwright-await": "error",
+    "playwright/no-page-pause": "warn",
+    "playwright/no-element-handle": "warn",
+    "playwright/no-eval": "warn",
+    "playwright/no-focused-test": "error",
+    "playwright/no-skipped-test": "warn",
+    "playwright/no-wait-for-timeout": "warn",
+    "playwright/no-force-option": "warn",
+    "playwright/max-nested-describe": "warn",
+    "playwright/no-conditional-in-test": "warn",
+    "playwright/no-useless-not": "warn",
+    "playwright/valid-expect": "error"
+  }
+}

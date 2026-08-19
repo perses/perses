@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { Duration } from 'date-fns';
 import { fetchJson, Permission, StatusError } from '@perses-dev/client';
 import { DashboardSelector, DurationString } from '@perses-dev/spec';
+import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { Duration } from 'date-fns';
+
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -194,6 +195,13 @@ export interface FrontendConfig {
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
   banner?: Banner;
+  default_user_preferences?: DefaultUserPreferences;
+}
+
+export interface DefaultUserPreferences {
+  timezone?: string;
+  rows_per_page?: number;
+  theme?: 'light' | 'dark';
 }
 
 export interface EphemeralDashboardConfig {

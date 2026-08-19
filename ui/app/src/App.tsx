@@ -12,16 +12,17 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { Outlet, useLocation } from 'react-router-dom';
-import { ReactElement, Suspense } from 'react';
 import { ReactRouterProvider } from '@perses-dev/plugin-system';
-import Header from './components/Header/Header';
+import { ReactElement, Suspense } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+
 import Footer from './components/Footer';
 import { GlobalShortcuts } from './components/GlobalShortcuts';
-import { ShortcutHelpModal } from './components/ShortcutHelpModal';
-import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
+import Header from './components/Header/Header';
 import { PersesLoader } from './components/PersesLoader';
+import { ShortcutHelpModal } from './components/ShortcutHelpModal';
 import { useIsKeyboardShortcutsEnabled } from './context/Config';
+import { DelegatedAuthnErrorRoute, SignInRoute, SignUpRoute } from './model/route';
 import './i18n/i18n';
 
 function isDashboardViewRoute(pathname: string): boolean {

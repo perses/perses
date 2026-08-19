@@ -281,6 +281,17 @@ func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDa
 	return links
 }
 
+func buildRepeatVariable(value string, direction string, maxPerRow *int) *dashboard.RepeatVariable {
+	rv := &dashboard.RepeatVariable{Value: value, MaxPer: maxPerRow}
+	switch direction {
+	case "v":
+		rv.Alignment = dashboard.RepeatVariableAlignmentVertical
+	default:
+		rv.Alignment = dashboard.RepeatVariableAlignmentHorizontal
+	}
+	return rv
+}
+
 func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
 	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
@@ -300,7 +311,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 
 	for i, panel := range grafanaDashboard.Panels {
 		if panel.Type != grafanaPanelRowType {
-			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
+			item := dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
 				X:      int(panel.GridPosition.X),
@@ -309,7 +320,11 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					Ref:  fmt.Sprintf("#/spec/panels/%d", i),
 					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
 				},
-			})
+			}
+			if panel.Repeat != "" {
+				item.RepeatVariable = buildRepeatVariable(panel.Repeat, panel.RepeatDirection, panel.MaxPerRow)
+			}
+			orphansGridSpec.Items = append(orphansGridSpec.Items, item)
 		} else {
 			gridSpec := &dashboard.GridLayoutSpec{
 				Display: &dashboard.GridLayoutDisplay{
@@ -325,7 +340,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				Spec: gridSpec,
 			}
 			for j, innerPanel := range panel.Panels {
-				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
+				item := dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
 					X:      int(innerPanel.GridPosition.X),
@@ -334,7 +349,11 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
 						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
 					},
-				})
+				}
+				if innerPanel.Repeat != "" {
+					item.RepeatVariable = buildRepeatVariable(innerPanel.Repeat, innerPanel.RepeatDirection, innerPanel.MaxPerRow)
+				}
+				gridSpec.Items = append(gridSpec.Items, item)
 			}
 			if len(gridSpec.Items) > 0 {
 				result = append(result, grid)
