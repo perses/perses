@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
-import { useSnackbar } from '@perses-dev/components';
 import { GlobalRoleResource, Role } from '@perses-dev/client';
+import { useSnackbar } from '@perses-dev/components';
+import { ReactElement, useCallback } from 'react';
+
 import { RoleList } from '../../../components/roles/RoleList';
 import {
   useCreateGlobalRoleMutation,
@@ -52,7 +53,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleMutation]
+    [exceptionSnackbar, successSnackbar, createRoleMutation],
   );
 
   const handleGlobalRoleUpdate = useCallback(
@@ -70,7 +71,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleMutation],
   );
 
   const handleGlobalRoleDelete = useCallback(
@@ -88,7 +89,7 @@ export function GlobalRoles(props: GlobalRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleMutation],
   );
 
   return (

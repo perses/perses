@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { fetchJson, SecretResource, StatusError } from '@perses-dev/client';
-import buildURL from './url-builder';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
+import buildURL from './url-builder';
 
 export const resource = 'secrets';
 
@@ -100,7 +101,7 @@ export function useSecretList(project?: string): UseQueryResult<SecretResource[]
  * @param project
  */
 export function useCreateSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -124,7 +125,7 @@ export function useCreateSecretMutation(
  * @param project
  */
 export function useUpdateSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -150,7 +151,7 @@ export function useUpdateSecretMutation(
  * @param project
  */
 export function useDeleteSecretMutation(
-  project: string
+  project: string,
 ): UseMutationResult<SecretResource, StatusError, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

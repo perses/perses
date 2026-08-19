@@ -15,6 +15,7 @@ import { Box, CircularProgress, Link, Theme } from '@mui/material';
 import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import Github from 'mdi-material-ui/Github';
 import { ReactElement } from 'react';
+
 import { useHealth } from '../model/health-client';
 
 const style: SxProps<Theme> = {

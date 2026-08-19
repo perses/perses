@@ -11,30 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
-import PreferenceIcon from 'mdi-material-ui/MapClock';
 import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
-import { TimeZoneSelector, useLocalStorage, useSnackbar } from '@perses-dev/components';
-import { UserPreferences } from '../../model/userPreferences';
+import { TimeZoneSelector, useSnackbar } from '@perses-dev/components';
+import PreferenceIcon from 'mdi-material-ui/MapClock';
+import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
+
+import { useUserPreferences } from '../../context/UserPreferences';
 import { ProfileContainer } from './ProfileContainer';
+
+function isTimezoneValid(timezone: string): boolean {
+  if (!timezone) return false;
+  if (timezone.toLowerCase() === 'local') return true;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
-  const [userPreferences, setUserPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', {
-    timezone: 'local',
-  });
-  const [timezone, setTimezone] = useState(userPreferences.timezone);
-
-  const isTimezoneValid = (tz: string): boolean => {
-    if (!tz) return false;
-    if (tz.toLowerCase() === 'local') return true;
-    try {
-      Intl.DateTimeFormat(undefined, { timeZone: tz });
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  const { userPreferences, updateUserPreferences } = useUserPreferences();
+  const [timezone, setTimezone] = useState(userPreferences.timezone ?? 'local');
 
   const submitHandler: FormEventHandler<HTMLFormElement> = useCallback(
     (e): void => {
@@ -44,10 +43,10 @@ export const Preferences = (): ReactElement => {
         return;
       }
 
-      setUserPreferences({ ...userPreferences, timezone });
+      updateUserPreferences({ timezone });
       successSnackbar(`User-level timezone set to ${timezone}`);
     },
-    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences]
+    [timezone, errorSnackbar, successSnackbar, updateUserPreferences],
   );
 
   return (

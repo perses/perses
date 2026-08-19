@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 // Mock registrations used by the dashboard exports
 const mockHotkeys: Array<{ hotkey: string; options: { meta: Record<string, string> } }> = [];
@@ -48,7 +48,7 @@ function renderModal(): ReturnType<typeof render> {
   return render(
     <ThemeProvider theme={theme}>
       <ShortcutHelpModal />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -115,7 +115,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'dashboard',
           },
         },
-      }
+      },
     );
 
     renderModal();
@@ -225,7 +225,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'panel',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({
@@ -300,7 +300,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'global',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({

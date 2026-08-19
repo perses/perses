@@ -12,19 +12,19 @@
 // limitations under the License.
 
 import { Accordion, AccordionDetails, Chip, AccordionSummary, Box, Typography } from '@mui/material';
-
-import { ReactElement, useMemo, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
-import { useUserPermissions } from '../../model/user-client';
+import ShieldAccount from 'mdi-material-ui/ShieldAccount';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { useAuthorizationContext } from '../../context/Authorization';
+import { useUserPermissions } from '../../model/user-client';
 import { normalizePermissions } from './profile-permissions-utils';
 import { ProfileContainer } from './ProfileContainer';
 
@@ -39,9 +39,9 @@ const ProfilePermissions = (): ReactElement => {
         Object.keys(permissions || {}).map((key) => ({
           key,
           permissions: permissions?.[key] || [],
-        }))
+        })),
       ),
-    [permissions]
+    [permissions],
   );
 
   const handleAccordingOnChange = (key: string): void => {
@@ -153,7 +153,7 @@ const ProfilePermissions = (): ReactElement => {
                           </Box>
                         </TableCell>
                       </TableRow>
-                    ) : null
+                    ) : null,
                   )}
                 </TableBody>
               </Table>

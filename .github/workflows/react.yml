@@ -29,6 +29,7 @@ jobs:
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run lint
+      - run: cd ./ui && npm run format:check
   type_check:
     name: "type check"
     runs-on: ubuntu-latest

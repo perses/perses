@@ -12,16 +12,17 @@
 // limitations under the License.
 
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
-import { ReactElement } from 'react';
-import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
+import { alpha } from '@mui/material/styles';
+import { ProjectResource } from '@perses-dev/client';
 import PlusIcon from 'mdi-material-ui/Plus';
 import UploadIcon from 'mdi-material-ui/Upload';
-import { alpha } from '@mui/material/styles';
+import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
+import { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { ProjectResource } from '@perses-dev/client';
+
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
-import { ImportRoute } from '../../model/route';
 import { useInformation } from '../../context/Config';
+import { ImportRoute } from '../../model/route';
 
 interface HomeViewHeroSectionProps {
   userProjects: ProjectResource[];

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Datasource, DatasourceDefinition } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
-import { Datasource, DatasourceDefinition } from '@perses-dev/client';
+
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
-import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
@@ -43,10 +44,11 @@ export function DatasourceDrawer<T extends Datasource>({
   };
 
   const handleSave = (def: DatasourceDefinition): void => {
-    datasource.spec = def.spec;
-    datasource.metadata.name = def.name;
+    const updatedDatasource = structuredClone(datasource);
+    updatedDatasource.spec = def.spec;
+    updatedDatasource.metadata.name = def.name;
     if (onSave) {
-      onSave(datasource);
+      onSave(updatedDatasource);
     }
   };
 

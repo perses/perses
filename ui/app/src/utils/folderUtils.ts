@@ -273,7 +273,7 @@ export function replaceSubFolder(items: FolderItem[], path: string[], replacemen
 export function collectDashboards(
   folderItems: FolderItem[] | undefined,
   deep: boolean = true,
-  filter?: (name: string) => boolean
+  filter?: (name: string) => boolean,
 ): string[] {
   if (!folderItems) {
     return [];

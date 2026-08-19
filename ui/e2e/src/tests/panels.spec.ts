@@ -125,7 +125,7 @@ test.describe('Dashboard: Panels', () => {
     // The test will fail with the previous expect, so this conditional is not
     // introducing risk. Doing this to provide a type guard, so the the previous
     // viewport can be used when not null.
-    // eslint-disable-next-line playwright/no-conditional-in-test
+    // oxlint-disable-next-line playwright/no-conditional-in-test
     if (previousViewport) {
       await page.setViewportSize({
         width: 600,

@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, ReactElement, useMemo } from 'react';
+import { DataGrid, GridRow, GridColumnHeaders, GridRowParams } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
+import { memo, ReactElement, useCallback, useMemo } from 'react';
+
+import { useDefaultRowsPerPage } from '../../context/Config';
 import {
   CommonRow,
-  DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME,
+  getDataGridInitialStateSortByDisplayName,
   GridToolbar,
   DataGridPropertiesWithCallback,
   PAGE_SIZE_OPTIONS,
@@ -41,35 +43,41 @@ function NoVariableRowOverlay(): ReactElement {
   return <NoDataOverlay resource="variables" />;
 }
 
+const getRowId = (row: Row): string => row.name;
+const SLOTS = {
+  toolbar: GridToolbar,
+  row: MemoizedRow,
+  columnHeaders: MemoizedColumnHeaders,
+  noRowsOverlay: NoVariableRowOverlay,
+};
+const SLOTS_HIDDEN_TOOLBAR = { noRowsOverlay: NoVariableRowOverlay };
+
 export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
   const { columns, rows, onRowClick, initialState, hideToolbar, isLoading } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
     return {
-      ...DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME,
-      ...(initialState ?? {}),
+      ...getDataGridInitialStateSortByDisplayName(defaultRowsPerPage),
+      ...initialState,
     } as GridInitialStateCommunity;
-  }, [initialState]);
+  }, [defaultRowsPerPage, initialState]);
+
+  const handleRowClick = useCallback(
+    (params: GridRowParams<Row>): void => onRowClick(params.row.name, params.row.project),
+    [onRowClick],
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
       <DataGrid
-        onRowClick={(params) => onRowClick(params.row.name, params.row.project)}
+        onRowClick={handleRowClick}
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.name}
+        getRowId={getRowId}
         loading={isLoading}
-        slots={
-          hideToolbar
-            ? { noRowsOverlay: NoVariableRowOverlay }
-            : {
-                toolbar: GridToolbar,
-                row: MemoizedRow,
-                columnHeaders: MemoizedColumnHeaders,
-                noRowsOverlay: NoVariableRowOverlay,
-              }
-        }
+        slots={hideToolbar ? SLOTS_HIDDEN_TOOLBAR : SLOTS}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
         slotProps={DATA_GRID_SLOT_PROPS}
