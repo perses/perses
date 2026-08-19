@@ -26,6 +26,7 @@ type K8sAuth struct {
 }
 
 // WrapRoundTripper applies the authentication configured by Kubernetes without replacing the Perses transport.
+// Cert-based kubeconfigs are not applied here, so those requests send no credentials and fail with 401.
 func (b *K8sAuth) WrapRoundTripper(roundTripper http.RoundTripper) (http.RoundTripper, error) {
 	kubeconfig, err := InitKubeConfig(b.KubeconfigFile)
 	if err != nil {

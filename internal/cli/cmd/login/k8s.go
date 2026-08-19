@@ -27,6 +27,7 @@ import (
 type k8sLogin struct {
 	apiClient          api.ClientInterface
 	kubeconfigLocation string
+	baseTransport      http.RoundTripper
 }
 
 func NewK8sLogin(apiClient api.ClientInterface, kubeconfigLocation string) *k8sLogin {
@@ -43,12 +44,14 @@ func (k *k8sLogin) Login() (*oauth2.Token, error) {
 		httpClient = &http.Client{Timeout: http.DefaultClient.Timeout}
 		restClient.Client = httpClient
 	}
-	roundTripper := httpClient.Transport
-	if roundTripper == nil {
-		roundTripper = http.DefaultTransport
+	if k.baseTransport == nil {
+		k.baseTransport = httpClient.Transport
+		if k.baseTransport == nil {
+			k.baseTransport = http.DefaultTransport
+		}
 	}
 
-	roundTripper, err := (&config.K8sAuth{KubeconfigFile: k.kubeconfigLocation}).WrapRoundTripper(roundTripper)
+	roundTripper, err := (&config.K8sAuth{KubeconfigFile: k.kubeconfigLocation}).WrapRoundTripper(k.baseTransport)
 	if err != nil {
 		return nil, err
 	}

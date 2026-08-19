@@ -152,6 +152,64 @@ func TestK8sLoginExecCredentialsRotate(t *testing.T) {
 	}
 }
 
+func TestK8sLoginRefreshDoesNotStackWrappers(t *testing.T) {
+	authorizations := make(chan string, 8)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorizations <- r.Header.Get("Authorization")
+		_, _ = w.Write([]byte("{}"))
+	}))
+	t.Cleanup(server.Close)
+
+	executable, err := os.Executable()
+	require.NoError(t, err)
+	tempDir := t.TempDir()
+	stateID := strconv.Itoa(os.Getpid())
+	stateFile := filepath.Join(tempDir, "perses-k8s-exec-state-"+stateID)
+	require.NoError(t, os.WriteFile(stateFile, []byte("0"), 0o600))
+	kubeconfigFile := filepath.Join(tempDir, "config")
+	kubeconfig := clientcmdapi.Config{
+		Clusters: map[string]*clientcmdapi.Cluster{
+			"cluster": {Server: "https://kubernetes.example"},
+		},
+		AuthInfos: map[string]*clientcmdapi.AuthInfo{
+			"user": {Exec: &clientcmdapi.ExecConfig{
+				APIVersion:      "client.authentication.k8s.io/v1",
+				Command:         executable,
+				Args:            []string{"-test.run=^TestK8sExecCredentialPlugin$"},
+				InteractiveMode: clientcmdapi.NeverExecInteractiveMode,
+				Env: []clientcmdapi.ExecEnvVar{
+					{Name: "PERSES_K8S_EXEC_PLUGIN", Value: "1"},
+					{Name: "PERSES_K8S_EXEC_STATE_DIR", Value: tempDir},
+					{Name: "PERSES_K8S_EXEC_STATE_ID", Value: stateID},
+				},
+			}},
+		},
+		Contexts: map[string]*clientcmdapi.Context{
+			"context": {Cluster: "cluster", AuthInfo: "user"},
+		},
+		CurrentContext: "context",
+	}
+	require.NoError(t, clientcmd.WriteToFile(kubeconfig, kubeconfigFile))
+
+	baseURL := common.MustParseURL(server.URL)
+	loginClient, err := clientConfig.NewRESTClient(clientConfig.RestConfigClient{URL: baseURL})
+	require.NoError(t, err)
+	k8s := NewK8sLogin(api.NewWithClient(loginClient), kubeconfigFile)
+	_, err = k8s.Login()
+	require.NoError(t, err)
+	_, err = k8s.Refresh()
+	require.NoError(t, err)
+	_, err = k8s.Refresh()
+	require.NoError(t, err)
+
+	// Login + 2 Refresh each issue one WhoAmI. Stacked HTTPWrappersForConfig
+	// layers would invoke the exec plugin once per wrap (1+2+3=6).
+	require.Equal(t, 3, len(authorizations))
+	for i := 1; i <= 3; i++ {
+		require.Equal(t, fmt.Sprintf("Bearer token-%d", i), <-authorizations)
+	}
+}
+
 func TestK8sExecCredentialPlugin(t *testing.T) {
 	if os.Getenv("PERSES_K8S_EXEC_PLUGIN") != "1" {
 		return
