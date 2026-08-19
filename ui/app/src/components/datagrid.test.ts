@@ -11,6 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export type UserPreferences = {
-  timezone?: string;
-};
+import { getDataGridInitialStateSortByDisplayName, getDataGridInitialStateSortByName } from './datagrid';
+
+describe('data grid defaults', () => {
+  it('uses the configured page size in initial state', () => {
+    expect(getDataGridInitialStateSortByName(25).pagination?.paginationModel?.pageSize).toBe(25);
+    expect(getDataGridInitialStateSortByDisplayName(50).pagination?.paginationModel?.pageSize).toBe(50);
+  });
+});

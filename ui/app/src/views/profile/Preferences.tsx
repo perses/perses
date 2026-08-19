@@ -12,19 +12,17 @@
 // limitations under the License.
 
 import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
-import { TimeZoneSelector, useLocalStorage, useSnackbar } from '@perses-dev/components';
+import { TimeZoneSelector, useSnackbar } from '@perses-dev/components';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
 import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
 
-import { UserPreferences } from '../../model/userPreferences';
+import { useUserPreferences } from '../../context/UserPreferences';
 import { ProfileContainer } from './ProfileContainer';
 
 export const Preferences = (): ReactElement => {
   const { successSnackbar, errorSnackbar } = useSnackbar();
-  const [userPreferences, setUserPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', {
-    timezone: 'local',
-  });
-  const [timezone, setTimezone] = useState(userPreferences.timezone);
+  const { userPreferences, updateUserPreferences } = useUserPreferences();
+  const [timezone, setTimezone] = useState(userPreferences.timezone ?? 'local');
 
   const isTimezoneValid = (tz: string): boolean => {
     if (!tz) return false;
@@ -45,10 +43,10 @@ export const Preferences = (): ReactElement => {
         return;
       }
 
-      setUserPreferences({ ...userPreferences, timezone });
+      updateUserPreferences({ timezone });
       successSnackbar(`User-level timezone set to ${timezone}`);
     },
-    [userPreferences, timezone, errorSnackbar, successSnackbar, setUserPreferences],
+    [timezone, errorSnackbar, successSnackbar, updateUserPreferences],
   );
 
   return (

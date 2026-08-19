@@ -16,9 +16,10 @@ import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateComm
 import { NoDataOverlay } from '@perses-dev/components';
 import { memo, ReactElement, useMemo } from 'react';
 
+import { useDefaultRowsPerPage } from '../../context/Config';
 import {
   CommonRow,
-  DATA_GRID_INITIAL_STATE_SORT_BY_NAME,
+  getDataGridInitialStateSortByName,
   GridToolbar,
   DataGridPropertiesWithCallback,
   PAGE_SIZE_OPTIONS,
@@ -40,15 +41,16 @@ function NoRoleBindingRowOverlay(): ReactElement {
 }
 
 export function RoleBindingDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
   const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
     return {
-      ...DATA_GRID_INITIAL_STATE_SORT_BY_NAME,
+      ...getDataGridInitialStateSortByName(defaultRowsPerPage),
       ...initialState,
     } as GridInitialStateCommunity;
-  }, [initialState]);
+  }, [defaultRowsPerPage, initialState]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>

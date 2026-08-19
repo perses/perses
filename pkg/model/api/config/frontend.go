@@ -16,6 +16,8 @@ package config
 import (
 	"fmt"
 	"slices"
+	"time"
+	_ "time/tzdata"
 
 	"github.com/perses/spec/go/common"
 )
@@ -31,6 +33,17 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"7d",
 	"14d",
 }
+
+type FrontendTheme string
+
+const defaultRowsPerPage uint8 = 25
+
+var allowedRowsPerPage = []uint8{10, 25, 50, 100}
+
+const (
+	DarkTheme  FrontendTheme = "dark"
+	LightTheme FrontendTheme = "light"
+)
 
 type Explorer struct {
 	Enable bool `json:"enable" yaml:"enable"`
@@ -59,6 +72,35 @@ type TimeRange struct {
 	DisableCustomTimeRange bool                    `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
 	DisableZoomTimeRange   bool                    `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
 	Options                []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+// DefaultUserPreferences contains the preferences used when the user has not
+// stored an explicit preference in their browser.
+type DefaultUserPreferences struct {
+	Timezone    string        `json:"timezone,omitempty" yaml:"timezone,omitempty"`
+	RowsPerPage uint8         `json:"rows_per_page,omitempty" yaml:"rows_per_page,omitempty"`
+	Theme       FrontendTheme `json:"theme,omitempty" yaml:"theme,omitempty"`
+}
+
+func (p *DefaultUserPreferences) Verify() error {
+	if len(p.Timezone) > 0 && p.Timezone != "local" {
+		if _, err := time.LoadLocation(p.Timezone); err != nil {
+			return fmt.Errorf("invalid frontend.default_user_preferences.timezone %q: %w", p.Timezone, err)
+		}
+	}
+	if p.RowsPerPage == 0 {
+		p.RowsPerPage = defaultRowsPerPage
+	}
+	if !slices.Contains(allowedRowsPerPage, p.RowsPerPage) {
+		return fmt.Errorf("frontend.default_user_preferences.rows_per_page must be one of: 10, 25, 50, 100")
+	}
+	if len(p.Theme) == 0 {
+		p.Theme = LightTheme
+	}
+	if p.Theme != LightTheme && p.Theme != DarkTheme {
+		return fmt.Errorf("frontend.default_user_preferences.theme must be one of: light, dark")
+	}
+	return nil
 }
 
 func (t *TimeRange) Verify() error {
@@ -121,4 +163,6 @@ type Frontend struct {
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
+	// DefaultUserPreferences contains server-wide defaults for user preferences.
+	DefaultUserPreferences *DefaultUserPreferences `json:"default_user_preferences,omitempty" yaml:"default_user_preferences,omitempty"`
 }

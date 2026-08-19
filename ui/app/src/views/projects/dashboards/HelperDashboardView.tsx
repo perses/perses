@@ -13,7 +13,7 @@
 
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { DashboardResource } from '@perses-dev/client';
-import { ErrorAlert, ErrorBoundary, getResourceDisplayName, useLocalStorage } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { DashboardSpec } from '@perses-dev/spec';
@@ -26,11 +26,11 @@ import {
   useIsLocalDatasourceEnabled,
   useIsLocalVariableEnabled,
 } from '../../../context/Config';
+import { useUserPreferences } from '../../../context/UserPreferences';
 import { useDatasourceApi } from '../../../model/datasource-api';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
-import { UserPreferences } from '../../../model/userPreferences';
 import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
@@ -48,6 +48,7 @@ export interface GenericDashboardViewProps {
  * The View for displaying a Dashboard.
  */
 export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
+  const { userPreferences } = useUserPreferences();
   const {
     dashboardResource,
     onSave,
@@ -58,7 +59,6 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     isLeavingConfirmDialogEnabled = true,
   } = props;
   const breadcrumbVariant = isEditing || isCreating ? 'workspace' : 'default';
-  const [userPreferences] = useLocalStorage<UserPreferences>('PERSES_USER_PREFERENCES', { timezone: 'local' });
   const isLocalDatasourceEnabled = useIsLocalDatasourceEnabled();
   const isLocalVariableEnabled = useIsLocalVariableEnabled();
   const isKeyboardShortcutsEnabled = useIsKeyboardShortcutsEnabled();

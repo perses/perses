@@ -20,6 +20,7 @@ import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
 import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -29,18 +30,24 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
+  const defaultPreferences = useMemo(
+    () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
+    [data?.frontend.default_user_preferences?.timezone],
+  );
   if (isLoading || data === undefined) {
     return <PersesLoader />;
   }
   return (
     <ConfigContext.Provider value={{ config: data }}>
-      <TimeRangeSettingsProvider
-        showCustom={!data.frontend.time_range?.disable_custom}
-        showZoomButtons={!data.frontend.time_range?.disable_zoom}
-        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
-      >
-        {props.children}
-      </TimeRangeSettingsProvider>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
+        <TimeRangeSettingsProvider
+          showCustom={!data.frontend.time_range?.disable_custom}
+          showZoomButtons={!data.frontend.time_range?.disable_zoom}
+          options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+        >
+          {props.children}
+        </TimeRangeSettingsProvider>
+      </UserPreferencesContextProvider>
     </ConfigContext.Provider>
   );
 }
@@ -91,6 +98,11 @@ export function useIsExplorerEnabled(): boolean {
 export function useIsKeyboardShortcutsEnabled(): boolean {
   const { config } = useConfigContext();
   return config.frontend.enable_keyboard_shortcuts ?? true;
+}
+
+export function useDefaultRowsPerPage(): number {
+  const { config } = useConfigContext();
+  return config.frontend.default_user_preferences?.rows_per_page ?? 25;
 }
 
 export function useIsEphemeralDashboardEnabled(): boolean {
