@@ -32,6 +32,7 @@ import (
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
+	watchImpl "github.com/perses/perses/internal/api/impl/v1/watch"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -48,6 +49,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/interface/v1/watch"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
@@ -69,6 +71,7 @@ type PersistenceManager interface {
 	GetSecret() secret.DAO
 	GetUser() user.DAO
 	GetVariable() variable.DAO
+	GetWatch() watch.DAOWatcher
 }
 
 type persistence struct {
@@ -90,6 +93,7 @@ type persistence struct {
 	secret             secret.DAO
 	user               user.DAO
 	variable           variable.DAO
+	watch              watch.DAOWatcher
 }
 
 func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
@@ -97,6 +101,8 @@ func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	if err != nil {
 		return nil, err
 	}
+	daoWatcher := watchImpl.NewDAOWatcher()
+	persesDAO.SetWatcher(daoWatcher)
 	dashboardDAO := dashboardImpl.NewDAO(persesDAO)
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
 	ephemeralDashboardDAO := ephemeralDashboardImpl.NewDAO(persesDAO)
@@ -131,6 +137,7 @@ func newPersistenceManager(conf config.Database) (PersistenceManager, error) {
 		secret:             secretDAO,
 		user:               userDAO,
 		variable:           variableDAO,
+		watch:              daoWatcher,
 	}, nil
 }
 
@@ -200,4 +207,8 @@ func (p *persistence) GetUser() user.DAO {
 
 func (p *persistence) GetVariable() variable.DAO {
 	return p.variable
+}
+
+func (p *persistence) GetWatch() watch.DAOWatcher {
+	return p.watch
 }

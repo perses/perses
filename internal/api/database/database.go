@@ -23,16 +23,19 @@ import (
 	databaseFile "github.com/perses/perses/internal/api/database/file"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/database/sql"
+	watchapi "github.com/perses/perses/internal/api/interface/v1/watch"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 )
 
 type dao struct {
 	databaseModel.DAO
-	client databaseModel.DAO
+	client  databaseModel.DAO
+	watcher watchapi.EventPublisher
 }
 
 func (d *dao) Close() error {
@@ -46,10 +49,22 @@ func (d *dao) IsCaseSensitive() bool {
 	return d.client.IsCaseSensitive()
 }
 func (d *dao) Create(entity modelAPI.Entity) error {
-	return d.client.Create(entity)
+	if err := d.client.Create(entity); err != nil {
+		return err
+	}
+	if d.watcher != nil {
+		d.watcher.Publish(modelV1.NewWatchEventFromEntity(entity, role.CreateAction))
+	}
+	return nil
 }
 func (d *dao) Upsert(entity modelAPI.Entity) error {
-	return d.client.Upsert(entity)
+	if err := d.client.Upsert(entity); err != nil {
+		return err
+	}
+	if d.watcher != nil {
+		d.watcher.Publish(modelV1.NewWatchEventFromEntity(entity, role.UpdateAction))
+	}
+	return nil
 }
 func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
 	return d.client.Get(kind, metadata, entity)
@@ -74,7 +89,13 @@ func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]
 	return result, nil
 }
 func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
-	return d.client.Delete(kind, metadata)
+	if err := d.client.Delete(kind, metadata); err != nil {
+		return err
+	}
+	if d.watcher != nil {
+		d.watcher.Publish(modelV1.NewDeleteWatchEvent(kind, metadata))
+	}
+	return nil
 }
 func (d *dao) DeleteByQuery(query databaseModel.Query) error {
 	return d.client.DeleteByQuery(query)
@@ -86,7 +107,11 @@ func (d *dao) GetLatestUpdateTime(kind []modelV1.Kind) (*string, error) {
 	return d.client.GetLatestUpdateTime(kind)
 }
 
-func New(conf config.Database) (databaseModel.DAO, error) {
+func (d *dao) SetWatcher(watcher watchapi.EventPublisher) {
+	d.watcher = watcher
+}
+
+func New(conf config.Database) (databaseModel.WatchableDAO, error) {
 	var client databaseModel.DAO
 	if conf.File != nil {
 		client = &databaseFile.DAO{

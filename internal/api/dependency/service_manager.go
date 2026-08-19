@@ -35,6 +35,7 @@ import (
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	viewImpl "github.com/perses/perses/internal/api/impl/v1/view"
+	watchImpl "github.com/perses/perses/internal/api/impl/v1/watch"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -52,6 +53,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
+	"github.com/perses/perses/internal/api/interface/v1/watch"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -82,6 +84,7 @@ type ServiceManager interface {
 	GetUser() user.Service
 	GetVariable() variable.Service
 	GetView() view.Service
+	GetWatch() watch.Service
 }
 
 type service struct {
@@ -109,6 +112,7 @@ type service struct {
 	user               user.Service
 	variable           variable.Service
 	view               view.Service
+	watch              watch.Service
 }
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
@@ -140,6 +144,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
+	watchService := watchImpl.NewService(dao.GetWatch())
 
 	svc := &service{
 		authorization:      authzService,
@@ -165,6 +170,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		user:               userService,
 		variable:           variableService,
 		view:               viewService,
+		watch:              watchService,
 	}
 	return svc, nil
 }
@@ -259,4 +265,8 @@ func (s *service) GetVariable() variable.Service {
 
 func (s *service) GetView() view.Service {
 	return s.view
+}
+
+func (s *service) GetWatch() watch.Service {
+	return s.watch
 }

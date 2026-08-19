@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"io"
 
+	watchapi "github.com/perses/perses/internal/api/interface/v1/watch"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -50,4 +51,9 @@ type DAO interface {
 	DeleteByQuery(query Query) error
 	HealthCheck() bool
 	GetLatestUpdateTime(kind []modelV1.Kind) (*string, error)
+}
+
+type WatchableDAO interface {
+	DAO
+	SetWatcher(watchDAO watchapi.EventPublisher)
 }
