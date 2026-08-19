@@ -1,0 +1,284 @@
+MANUAL TEST GUIDE — Claim-Based Role Assignment (issue #3137)
+=============================================================
+
+OVERVIEW
+--------
+This guide verifies that Perses correctly maps Keycloak realm roles to Perses
+roles via the `claims` configuration, embeds them in the Perses JWT, and
+enforces them at request time — without any database RoleBindings.
+
+The stack is defined in dev/docker-compose.keycloak.yaml:
+  - Keycloak:latest on http://localhost:8080  (admin UI: admin / admin)
+  - Perses (built from source) on http://localhost:8090
+
+Four test users are pre-created in the Keycloak "perses" realm:
+
+  USERNAME  PASSWORD  KEYCLOAK ROLE          EXPECTED PERSES PERMISSIONS
+  --------  --------  ---------------------  ----------------------------
+  alice     alice     perses-admin           Full access (GlobalRole admin)
+  bob       bob       perses-viewer          Read-only  (GlobalRole viewer)
+  carol     carol     perses-platform-editor Read/write in project "platform" only
+  dave      dave      perses-unknown         Guest-only (warning logged, no mapped role)
+
+Keycloak adds a `roles` array claim to every ID token. Perses reads it,
+stores it in the JWT under `prc`, and resolves permissions at request time.
+
+
+PREREQUISITES
+-------------
+  - Docker + Docker Compose v2
+  - Git working tree on branch issue-3137-token-roles (the implementation branch)
+  - Ports 8080 and 8090 free on localhost
+  - curl and a base64 decoder available (or use jwt.io)
+
+
+STARTING THE STACK
+------------------
+From the repository root:
+
+  docker compose -f dev/docker-compose.keycloak.yaml up --build --detach
+
+The first run builds Perses from source (this takes a few minutes).
+Subsequent runs reuse the image unless you pass --build again.
+
+Wait until both services are healthy:
+
+  docker compose -f dev/docker-compose.keycloak.yaml ps
+
+You should see both services as "healthy" or "running".
+
+To tail logs:
+
+  docker compose -f dev/docker-compose.keycloak.yaml logs -f
+
+To stop and discard data:
+
+  docker compose -f dev/docker-compose.keycloak.yaml down -v
+
+
+A NOTE ON THE ISSUER URL
+------------------------
+Keycloak issues tokens with an `iss` claim of http://keycloak:8080/realms/perses
+(the Docker internal hostname). Perses validates tokens against this same issuer.
+
+The browser redirects go to http://localhost:8090 (Perses) and
+http://localhost:8080 (Keycloak). These work because both ports are published
+on localhost. If you deploy behind a reverse proxy, update `issuer` and
+`redirect_uri` in dev/config.keycloak.yaml accordingly.
+
+
+TEST 1 — Alice (perses-admin) has full write access
+----------------------------------------------------
+1. Open http://localhost:8090 in a browser.
+2. Click "Sign in with Keycloak" (or the Keycloak provider button).
+3. Log in as alice / alice.
+4. After redirect, open the browser DevTools > Application > Cookies.
+5. Copy the value of the "jwtPayload" cookie. It is "header.payload" (two
+   base64url segments separated by a dot). Decode the second segment:
+
+     echo "<payload_segment>" | base64 -d  2>/dev/null | python3 -m json.tool
+     # or paste the full cookie at https://jwt.io
+
+   EXPECTED: the decoded payload contains:
+     "pkd": "oidc",
+     "pid": "keycloak",
+     "prc": { "roles": ["perses-admin"] }
+
+6. Create a project via the UI or with curl:
+
+     TOKEN="<jwtPayload_cookie>.<jwtSignature_cookie>"
+     curl -s -X POST http://localhost:8090/api/v1/projects \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{"kind":"Project","metadata":{"name":"test-alice"},"spec":{}}'
+
+   EXPECTED: HTTP 200/201. Alice's perses-admin role maps to GlobalRole "admin"
+   which has actions:["*"] scopes:["*"], granting full access.
+
+7. Delete the project:
+
+     curl -s -X DELETE http://localhost:8090/api/v1/projects/test-alice \
+       -H "Authorization: Bearer $TOKEN"
+
+   EXPECTED: HTTP 200.
+
+
+TEST 2 — Bob (perses-viewer) can read but not write
+----------------------------------------------------
+1. Log out, then log in as bob / bob.
+2. Decode the jwtPayload cookie.
+
+   EXPECTED: "prc": { "roles": ["perses-viewer"] }
+
+3. List projects (read):
+
+     TOKEN="<bob_token>"
+     curl -s http://localhost:8090/api/v1/projects \
+       -H "Authorization: Bearer $TOKEN"
+
+   EXPECTED: HTTP 200 with the project list.
+
+4. Try to create a project (write):
+
+     curl -s -o /dev/null -w "%{http_code}" \
+       -X POST http://localhost:8090/api/v1/projects \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{"kind":"Project","metadata":{"name":"bob-project"},"spec":{}}'
+
+   EXPECTED: HTTP 403. The viewer GlobalRole only has actions:["read"].
+
+5. Try to delete any project:
+
+   EXPECTED: HTTP 403.
+
+
+TEST 3 — Token refresh preserves claims
+---------------------------------------
+While logged in as alice:
+
+1. Copy the jwtRefreshToken cookie value.
+
+2. Call the refresh endpoint:
+
+     curl -s -X POST http://localhost:8090/api/auth/refresh \
+       -H "Content-Type: application/json" \
+       -d '{"refreshToken":"<jwtRefreshToken_value>"}'
+
+   The response contains a new AccessToken.
+
+3. Decode the payload segment of the new access token.
+
+   EXPECTED: "prc": { "roles": ["perses-admin"] } is still present.
+   The refresh endpoint reads PersistedClaims from the refresh token and
+   copies them to the new access token without re-querying Keycloak.
+
+
+TEST 4 — Carol (perses-platform-editor) has project-scoped access only
+-----------------------------------------------------------------------
+1. Log out, log in as carol / carol.
+2. Decode the jwtPayload cookie.
+
+   EXPECTED: "prc": { "roles": ["perses-platform-editor"] }
+
+   The mapping in config.keycloak.yaml resolves this to Role "editor"
+   in project "platform" (read/create/update/delete on Dashboard, Datasource,
+   Variable, Folder — no global permissions).
+
+3. Read dashboards in the platform project:
+
+     TOKEN="<carol_token>"
+     curl -s http://localhost:8090/api/v1/projects/platform/dashboards \
+       -H "Authorization: Bearer $TOKEN"
+
+   EXPECTED: HTTP 200.
+
+4. Create a dashboard in platform:
+
+     curl -s -o /dev/null -w "%{http_code}" \
+       -X POST http://localhost:8090/api/v1/projects/platform/dashboards \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{
+         "kind": "Dashboard",
+         "metadata": { "name": "test-dash", "project": "platform" },
+         "spec": { "duration": "1h", "layouts": [], "panels": {} }
+       }'
+
+   EXPECTED: HTTP 200/201.
+
+5. Try to write to a different project (carol has no permissions there):
+
+     curl -s -o /dev/null -w "%{http_code}" \
+       -X POST http://localhost:8090/api/v1/projects/other/dashboards \
+       -H "Authorization: Bearer $TOKEN" \
+       -H "Content-Type: application/json" \
+       -d '{
+         "kind": "Dashboard",
+         "metadata": { "name": "test-dash", "project": "other" },
+         "spec": { "duration": "1h", "layouts": [], "panels": {} }
+       }'
+
+   EXPECTED: HTTP 403 (project "other" does not exist or carol has no access).
+
+6. Try to read global roles (requires a global scope):
+
+     curl -s -o /dev/null -w "%{http_code}" \
+       http://localhost:8090/api/v1/globalroles \
+       -H "Authorization: Bearer $TOKEN"
+
+   EXPECTED: HTTP 403. The editor Role only covers project-scoped resources;
+   GlobalRole is a global scope and requires a GlobalRole mapping.
+
+7. Try to create a project (requires global Project write):
+
+   EXPECTED: HTTP 403. Guest permissions allow creating projects, but the
+   guest_permissions in config.keycloak.yaml include "create Project", so
+   this will actually return 200/201. To verify project-scoped isolation more
+   precisely, remove the "create Project" guest permission and retry.
+
+
+TEST 5 — Dave (perses-unknown) triggers a warning log and gets no extra permissions
+------------------------------------------------------------------------------------
+1. Log out, log in as dave / dave.
+2. Decode the jwtPayload cookie.
+
+   EXPECTED: "prc": { "roles": ["perses-unknown"] }
+
+3. Try to create a project:
+
+   EXPECTED: HTTP 403 (beyond guest permissions dave has nothing).
+
+4. Check Perses logs:
+
+     docker compose -f dev/docker-compose.keycloak.yaml logs perses | grep "nonexistent-role"
+
+   EXPECTED: a line containing:
+     "claim mapping references unknown GlobalRole \"nonexistent-role\""
+
+   This confirms the warning path in claimPermissions() fires correctly and
+   the unknown mapping is silently skipped rather than panicking.
+
+
+QUICK REFERENCE — getting a bearer token with curl (no browser)
+---------------------------------------------------------------
+Keycloak's directAccessGrants (Resource Owner Password Credentials) flow is
+enabled on perses-client for convenience in testing:
+
+  KC=http://localhost:8080/realms/perses/protocol/openid-connect/token
+
+  # Alice
+  RESPONSE=$(curl -s -X POST "$KC" \
+    -d "client_id=perses-client" \
+    -d "client_secret=perses-secret" \
+    -d "grant_type=password" \
+    -d "username=alice" \
+    -d "password=alice" \
+    -d "scope=openid email profile")
+
+  KC_TOKEN=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id_token'])")
+  echo "Keycloak id_token: $KC_TOKEN"
+
+Then log in through Perses OIDC flow via browser to get Perses cookies, or
+use the device code / token endpoint from the Perses API. The bearer token
+shown in the curl examples above is the Perses JWT (from the jwtPayload +
+jwtSignature cookies), not the Keycloak token.
+
+
+FILES CREATED BY THIS TEST SETUP
+---------------------------------
+  dev/docker-compose.keycloak.yaml     Docker Compose stack definition
+  dev/keycloak-realm.json              Keycloak realm import (users, roles, client, mapper)
+  dev/config.keycloak.yaml             Perses configuration with claims mappings
+  dev/keycloak-provisioning/
+    1-globalroles.json                 GlobalRoles: admin (wildcard), viewer (read-only)
+    2-projects.json                    Project: platform
+    3-roles.json                       Role: editor in project platform
+
+
+TEARING DOWN
+------------
+  docker compose -f dev/docker-compose.keycloak.yaml down -v
+
+The -v flag removes the named volume (keycloak-db) so the next run starts
+with a clean database.

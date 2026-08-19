@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "Role",
+    "metadata": {
+      "name": "editor",
+      "project": "platform"
+    },
+    "spec": {
+      "permissions": [
+        {
+          "actions": ["read", "create", "update", "delete"],
+          "scopes": ["Dashboard", "Datasource", "Variable", "Folder"]
+        }
+      ]
+    }
+  }
+]

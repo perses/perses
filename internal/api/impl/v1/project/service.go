@@ -119,7 +119,7 @@ func (s *service) createProjectRoleAndRoleBinding(ctx echo.Context, projectName 
 			return fmt.Errorf("failed to create owner role binding: %e", err)
 		}
 	}
-	return s.authz.RefreshPermissions()
+	return s.authz.RefreshPermissionsAndRoles()
 }
 
 func (s *service) Update(_ echo.Context, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
@@ -179,7 +179,7 @@ func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) err
 		return err
 	}
 	if s.authz.IsEnabled() {
-		if err := s.authz.RefreshPermissions(); err != nil {
+		if err := s.authz.RefreshPermissionsAndRoles(); err != nil {
 			return err
 		}
 	}

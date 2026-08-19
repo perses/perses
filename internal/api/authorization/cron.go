@@ -55,7 +55,7 @@ func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
 		logrus.Debugf("refreshing rbac cache, previous last refresh time %v", r.lastRefreshTime)
-		if err := r.authz.RefreshPermissions(); err != nil {
+		if err := r.authz.RefreshPermissionsAndRoles(); err != nil {
 			logrus.WithError(err).Error("failed to refresh cache")
 			return nil
 		}

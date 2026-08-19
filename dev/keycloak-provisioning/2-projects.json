@@ -1,0 +1,13 @@
+[
+  {
+    "kind": "Project",
+    "metadata": {
+      "name": "platform"
+    },
+    "spec": {
+      "display": {
+        "name": "Platform"
+      }
+    }
+  }
+]
