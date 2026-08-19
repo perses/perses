@@ -44,6 +44,8 @@ func (*listAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.
 	return []string{"project-1", "project-2"}, nil
 }
 
+// synchronizedDashboardService parks every list goroutine inside RawList so the
+// test can inspect the query objects while both project lists are in flight.
 type synchronizedDashboardService struct {
 	dashboard.Service
 	entered chan *dashboard.Query
@@ -53,10 +55,19 @@ type synchronizedDashboardService struct {
 func (s *synchronizedDashboardService) RawList(query *dashboard.Query) ([]json.RawMessage, error) {
 	s.entered <- query
 	<-s.release
+	// Echo this query's project so the test can check each goroutine listed its
+	// own project instead of a shared last-write-wins value.
 	result, err := json.Marshal(query.Project)
 	return []json.RawMessage{result}, err
 }
 
+// TestListAcrossAuthorizedProjects proves each authorized project gets its own
+// query copy. listWhenPermissionIsActivated fans out one goroutine per project
+// from GetUserProjects. The old code called SetProjectQueryParam on the same
+// *dashboard.Query from every goroutine, so the project name raced. The barrier
+// waits until both RawList calls are inside the service at once, then checks
+// they received different query pointers, left the caller's query untouched,
+// and returned both projects.
 func TestListAcrossAuthorizedProjects(t *testing.T) {
 	service := &synchronizedDashboardService{
 		entered: make(chan *dashboard.Query, 2),
@@ -77,6 +88,8 @@ func TestListAcrossAuthorizedProjects(t *testing.T) {
 		responseCh <- response{value: value, err: err}
 	}()
 
+	// Wait until both project lists have entered RawList. A shared query would
+	// already have been mutated by both goroutines at this point.
 	firstQuery := <-service.entered
 	secondQuery := <-service.entered
 	close(service.release)
