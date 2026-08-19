@@ -57,30 +57,27 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
-  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
+  const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>(() =>
+    Object.fromEntries(dashboard.__inputs?.map((input) => [input.name, input.value ?? '']) ?? []),
+  );
   const [useDefaultDatasource, setUseDefaultDatasource] = useState(false);
   const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
-  // initialize the map with the provided input values if exist
-  dashboard?.__inputs?.map((input) => {
-    grafanaInput[input.name] = input.value ?? '';
-  });
-
   const setInput = (key: string, value: string): void => {
-    grafanaInput[key] = value;
-    setGrafanaInput(grafanaInput);
+    setGrafanaInput((currentInput) => ({ ...currentInput, [key]: value }));
   };
 
   const importOnClick = (): void => {
-    const dashboard = migrateMutation.data;
-    if (dashboard === undefined) {
+    const migratedDashboard = migrateMutation.data;
+    if (migratedDashboard === undefined) {
       return;
     }
-    dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    const dashboardToCreate = structuredClone(migratedDashboard);
+    dashboardToCreate.metadata.project = projectName;
+    dashboardMutation.mutate(dashboardToCreate);
   };
 
   if (error) {

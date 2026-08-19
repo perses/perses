@@ -12,39 +12,41 @@
 // limitations under the License.
 
 import { LinearProgress } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement, Suspense, useEffect, useState } from 'react';
-import { Await, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { ReactElement, useEffect } from 'react';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
-import { getProject } from '../model/project-client';
+import { useProject } from '../model/project-client';
+
+interface ProjectRouteContentProps {
+  projectName: string;
+}
+
+function ProjectRouteContent({ projectName }: ProjectRouteContentProps): ReactElement {
+  const navigate = useNavigate();
+  const { exceptionSnackbar } = useSnackbar();
+  const { error, isLoading } = useProject(projectName);
+
+  useEffect(() => {
+    if (error) {
+      exceptionSnackbar(error);
+      navigate('/');
+    }
+  }, [error, exceptionSnackbar, navigate]);
+
+  if (isLoading || error) {
+    return <LinearProgress />;
+  }
+
+  return <Outlet />;
+}
 
 function GuardedProjectRoute(): ReactElement {
   const { projectName } = useParams();
-  const navigate = useNavigate();
-  const { exceptionSnackbar } = useSnackbar();
-  const [projectPromise, setProjectPromise] = useState<Promise<ProjectResource>>();
-
-  useEffect(() => {
-    if (projectName === undefined || projectName === '') {
-      return;
-    }
-    setProjectPromise(
-      getProject(projectName).catch((err) => {
-        exceptionSnackbar(err);
-        navigate('/');
-        throw err;
-      }),
-    );
-  }, [exceptionSnackbar, navigate, projectName]);
-
-  return (
-    <Suspense fallback={<LinearProgress />}>
-      <Await resolve={projectPromise}>
-        <Outlet />
-      </Await>
-    </Suspense>
-  );
+  if (projectName === undefined || projectName === '') {
+    return <Outlet />;
+  }
+  return <ProjectRouteContent projectName={projectName} />;
 }
 
 export default GuardedProjectRoute;

@@ -13,7 +13,7 @@
 
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material';
 import MenuDown from 'mdi-material-ui/MenuDown';
-import { useState, useRef, ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 
 export interface ButtonMenuProps {
   children: JSX.Element[];
@@ -27,7 +27,7 @@ const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
   const primary = children[0];
   const menuEntries = children.slice(1);
   const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const [anchorElement, setAnchorElement] = useState<HTMLDivElement | null>(null);
 
   const handleToggle = (): void => {
     setOpen((prevOpen) => !prevOpen);
@@ -35,7 +35,7 @@ const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
 
   return (
     <>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="split button">
+      <ButtonGroup variant="contained" ref={setAnchorElement} aria-label="split button">
         {primary}
         <Button size="small" aria-expanded={open ? 'true' : undefined} aria-haspopup="menu" onClick={handleToggle}>
           <MenuDown />
@@ -46,7 +46,7 @@ const ButtonMenu = ({ children }: ButtonMenuProps): ReactElement => {
           zIndex: 1,
         }}
         open={open}
-        anchorEl={anchorRef.current}
+        anchorEl={anchorElement}
         transition
         disablePortal
       >
