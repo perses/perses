@@ -17,7 +17,7 @@
 import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import Gitlab from 'mdi-material-ui/Gitlab';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo } from 'react';
 import * as React from 'react';
 import {
   AmazonLoginButton,
@@ -144,17 +144,20 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const config = useConfigContext();
   const theme = useTheme();
   const isNativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
-  const oauthProviders = (config.config?.security?.authentication?.providers?.oauth || []).map((provider) => ({
-    path: `oauth/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.auth_url),
-  }));
-  const oidcProviders = (config.config?.security?.authentication?.providers?.oidc || []).map((provider) => ({
-    path: `oidc/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.issuer),
-  }));
-  const socialProviders = [...oidcProviders, ...oauthProviders];
+  const providers = config.config.security.authentication.providers;
+  const socialProviders = useMemo(() => {
+    const oauthProviders = (providers.oauth || []).map((provider) => ({
+      path: `oauth/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.auth_url),
+    }));
+    const oidcProviders = (providers.oidc || []).map((provider) => ({
+      path: `oidc/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.issuer),
+    }));
+    return [...oidcProviders, ...oauthProviders];
+  }, [providers.oauth, providers.oidc, theme]);
   const path = useRedirectQueryParam();
 
   return (

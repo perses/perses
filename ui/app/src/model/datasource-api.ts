@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { PERSES_APP_CONFIG } from '../config';
 import { useDatasourceList } from './datasource-client';
@@ -114,11 +114,14 @@ export function useDatasourceApi(): DatasourceApi {
     [globalDatasources, isGlobalDatasourcesPending],
   );
 
-  return {
-    getDatasource,
-    getGlobalDatasource,
-    listDatasources,
-    listGlobalDatasources,
-    buildProxyUrl: buildProxyUrl,
-  };
+  return useMemo(
+    () => ({
+      getDatasource,
+      getGlobalDatasource,
+      listDatasources,
+      listGlobalDatasources,
+      buildProxyUrl,
+    }),
+    [getDatasource, getGlobalDatasource, listDatasources, listGlobalDatasources],
+  );
 }

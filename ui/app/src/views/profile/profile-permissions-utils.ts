@@ -13,6 +13,12 @@
 
 import { Action, Scope } from '@perses-dev/client';
 
+export enum ProfileSections {
+  AUTHENTICATION,
+  PERMISSIONS,
+  PREFERENCES,
+}
+
 export interface IFlatPermission {
   key: string;
   permissions: Array<{

@@ -17,13 +17,8 @@ import { lazy, ReactElement, Suspense, useState } from 'react';
 import { useAuthorizationContext } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { Preferences } from './Preferences';
+import { ProfileSections } from './profile-permissions-utils';
 import { ProfileSettings } from './ProfileSettings';
-
-export enum ProfileSections {
-  AUTHENTICATION,
-  PERMISSIONS,
-  PREFERENCES,
-}
 
 const ProfilePermissions = lazy(() => import('./ProfilePermissions'));
 

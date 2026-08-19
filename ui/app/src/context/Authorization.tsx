@@ -42,18 +42,16 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
 
   const username = useUsername();
   const { data } = useUserPermissions(username);
-  const userPermissions: Record<string, Permission[]> = useMemo(() => {
-    if (!data) {
-      return {};
-    }
-    return data;
-  }, [data]);
-
-  return (
-    <AuthorizationContext.Provider value={{ enabled, username, userPermissions }}>
-      {props.children}
-    </AuthorizationContext.Provider>
+  const contextValue: AuthorizationContext = useMemo(
+    () => ({
+      enabled,
+      username,
+      userPermissions: data ?? {},
+    }),
+    [data, enabled, username],
   );
+
+  return <AuthorizationContext.Provider value={contextValue}>{props.children}</AuthorizationContext.Provider>;
 }
 
 export function useAuthorizationContext(): AuthorizationContext {

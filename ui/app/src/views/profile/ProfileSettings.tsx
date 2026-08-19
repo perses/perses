@@ -16,7 +16,7 @@ import PreferenceIcon from 'mdi-material-ui/MapClock';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import React, { ReactElement } from 'react';
 
-import { ProfileSections } from './ProfileView';
+import { ProfileSections } from './profile-permissions-utils';
 
 interface IAccountSettingItem {
   title: string;
@@ -34,22 +34,22 @@ interface IProps {
   selectedView: ProfileSections;
 }
 
+const accountSettingsItems: IAccountSettingItem[] = [
+  {
+    title: 'Permissions and roles',
+    view: ProfileSections.PERMISSIONS,
+    icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
+  },
+  {
+    title: 'Preferences',
+    view: ProfileSections.PREFERENCES,
+    icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
+  },
+];
+
+const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
+
 export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): ReactElement => {
-  const accountSettingsItems: IAccountSettingItem[] = [
-    {
-      title: 'Permissions and roles',
-      view: ProfileSections.PERMISSIONS,
-      icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
-    },
-    {
-      title: 'Preferences',
-      view: ProfileSections.PREFERENCES,
-      icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
-    },
-  ];
-
-  const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
-
   const handleViewChange = (view: ProfileSections): void => {
     setSelectedView(view);
   };

@@ -30,20 +30,26 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
+  const contextValue = useMemo<ConfigContextType | undefined>(() => (data ? { config: data } : undefined), [data]);
   const defaultPreferences = useMemo(
     () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
     [data?.frontend.default_user_preferences?.timezone],
   );
-  if (isLoading || data === undefined) {
+  const timeRangeOptions = useMemo(
+    () => data?.frontend.time_range?.options?.map((option: DurationString) => buildRelativeTimeOption(option)),
+    [data?.frontend.time_range?.options],
+  );
+
+  if (isLoading || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
   }
   return (
-    <ConfigContext.Provider value={{ config: data }}>
+    <ConfigContext.Provider value={contextValue}>
       <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
         <TimeRangeSettingsProvider
           showCustom={!data.frontend.time_range?.disable_custom}
           showZoomButtons={!data.frontend.time_range?.disable_zoom}
-          options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+          options={timeRangeOptions}
         >
           {props.children}
         </TimeRangeSettingsProvider>

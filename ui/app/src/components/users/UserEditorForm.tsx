@@ -58,7 +58,7 @@ export function UserEditorForm({
     defaultValues: initialUserClean,
   });
 
-  const spec = useWatch({ control: form.control, name: 'spec' });
+  const nativeProvider = useWatch({ control: form.control, name: 'spec.nativeProvider' });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -183,7 +183,7 @@ export function UserEditorForm({
           <Typography variant="h1" mb={2}>
             Native Provider
           </Typography>
-          {spec.nativeProvider?.password === undefined ? (
+          {nativeProvider?.password === undefined ? (
             <IconButton
               disabled={isReadonly || action === 'read'}
               style={{ width: 'fit-content', height: 'fit-content' }}
