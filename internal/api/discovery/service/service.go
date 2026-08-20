@@ -21,21 +21,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(caseSensitive bool, svc globaldatasource.Service) *ApplyService {
+func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string, defaultFlag bool) *ApplyService {
 	return &ApplyService{
 		caseSensitive: caseSensitive,
 		svc:           svc,
+		discoveryName: discoveryName,
+		defaultFlag:   defaultFlag,
 	}
 }
 
 type ApplyService struct {
 	caseSensitive bool
 	svc           globaldatasource.Service
+	discoveryName string
+	// Default flag taken from config
+	defaultFlag bool
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	for _, entity := range entities {
 		entity.GetMetadata().Flatten(a.caseSensitive)
+		// setting the default flag from config
+		entity.Spec.Default = a.defaultFlag
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
 			continue
