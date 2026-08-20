@@ -21,7 +21,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
+const (
 	defaultCacheInterval                   = time.Second * 30
 	DefaultKubernetesAuthorizationAllowTTL = time.Minute * 5
 	DefaultKubernetesAuthorizationDenyTTL  = time.Second * 30

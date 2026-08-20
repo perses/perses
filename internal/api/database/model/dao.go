@@ -46,6 +46,9 @@ type DAO interface {
 	Query(query Query, slice any) error
 	RawQuery(query Query) ([]json.RawMessage, error)
 	RawMetadataQuery(query Query, kind modelV1.Kind) ([]json.RawMessage, error)
+	// StreamRaw streams the raw resources matching the type of the resources. It sends each raw resource to the provided channel.
+	// The channel is closed when the streaming is finished or if an error occurs. The method returns an error if the streaming fails.
+	StreamRaw(query Query, ch chan<- json.RawMessage) error
 	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error
 	DeleteByQuery(query Query) error
 	HealthCheck() bool
