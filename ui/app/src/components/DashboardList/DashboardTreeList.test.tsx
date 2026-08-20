@@ -14,6 +14,7 @@
 import { FolderResource } from '@perses-dev/client';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactElement, useCallback } from 'react';
+import { vi } from 'vitest';
 
 import { DashboardListRow } from './DashboardList';
 import DashboardTreeList from './DashboardTreeList';
@@ -35,15 +36,15 @@ function MockTable({ pagination, onPaginationChange }: MockTableProps): ReactEle
   );
 }
 
-jest.mock('@perses-dev/components', () => ({
+vi.mock('@perses-dev/components', () => ({
   Table: MockTable,
 }));
 
-jest.mock('../../context/Config', () => ({
+vi.mock('../../context/Config', () => ({
   useDefaultRowsPerPage: (): number => 50,
 }));
 
-jest.mock('../../utils/browser-size', () => ({
+vi.mock('../../utils/browser-size', () => ({
   useIsMobileSize: (): boolean => false,
 }));
 

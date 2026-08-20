@@ -11,14 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
+import { mergeConfig } from 'vitest/config';
 
-import shared from '../jest.shared';
+import shared from '../vitest.shared';
 
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-
-  setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
-};
-
-export default jestConfig;
+export default mergeConfig(shared, {});

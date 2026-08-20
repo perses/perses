@@ -13,19 +13,20 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactElement, useCallback } from 'react';
+import { Mock, vi } from 'vitest';
 
 import { UserPreferences } from '../model/userPreferences';
 import { UserPreferencesContextProvider, useUserPreferences } from './UserPreferences';
 
-const mockSetLocalStorage = jest.fn();
+const mockSetLocalStorage = vi.fn();
 const defaultPreferences: UserPreferences = { timezone: 'UTC' };
 const defaultPreferencesWithFutureField: UserPreferences & { futurePreference: string } = {
   timezone: 'UTC',
   futurePreference: 'server-default',
 };
 
-jest.mock('@perses-dev/components', () => ({
-  useLocalStorage: (key: string, defaultValue: unknown): [unknown, jest.Mock] => {
+vi.mock('@perses-dev/components', () => ({
+  useLocalStorage: (key: string, defaultValue: unknown): [unknown, Mock] => {
     const storedValue = window.localStorage.getItem(key);
     return [storedValue === null ? defaultValue : JSON.parse(storedValue), mockSetLocalStorage];
   },
