@@ -165,7 +165,7 @@ const mapFolderItemsToTableRow = (
       }
     })
     .filter((row): row is DashboardTreeTableRow => row !== undefined)
-    .sort((a, b) => compareFolderFirst(a.kind, b.kind));
+    .toSorted((a, b) => compareFolderFirst(a.kind, b.kind));
 
   if (!rows || rows.length === 0) {
     return [noItemsRow(project, parentPath)];

@@ -178,7 +178,7 @@ function PermissionControl({ control, index, action }: PermissionControl): React
       return PROJECT_SCOPES;
     } else {
       // Else GlobalRole
-      return PROJECT_SCOPES.concat(GLOBAL_SCOPES).sort();
+      return PROJECT_SCOPES.concat(GLOBAL_SCOPES).toSorted();
     }
   }, [kind]);
 
