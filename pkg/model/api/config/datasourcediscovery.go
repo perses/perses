@@ -100,6 +100,8 @@ type GlobalDatasourceDiscovery struct {
 	// Kubernetes SD configurations allow retrieving global datasource from Kubernetes' REST API
 	// and always staying synchronized with the cluster state.
 	KubernetesDiscovery *KubernetesDiscovery `json:"kubernetes_sd,omitempty" yaml:"kubernetes_sd,omitempty"`
+	// Marks the discovered datasource as default
+	Default bool `json:"default,omitempty" yaml:"default,omitempty"`
 }
 
 func (g *GlobalDatasourceDiscovery) Verify() error {
