@@ -24,10 +24,6 @@ export default defineConfig({
       // Use polyfill for jsdom environment
       { find: 'use-resize-observer', replacement: 'use-resize-observer/polyfilled' },
 
-      // Tell Vitest where other Perses packages live since it doesn't know about project references.
-      // Exclude `spec` and `dashboards` since they live outside of the perses/ui workspace.
-      { find: /^@perses-dev\/(?!spec|dashboards|components|client)(.*)$/, replacement: resolve(__dirname, '$1/src') },
-
       // Configure Vitest to handle stylesheets
       { find: /\.(css|less)$/, replacement: resolve(__dirname, './stylesMock.js') },
     ],
