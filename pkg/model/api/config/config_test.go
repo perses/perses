@@ -92,6 +92,9 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "plugin": {
     "enable_dev": false
+  },
+  "search": {
+    "index_keys": {}
   }
 }`,
 		},
@@ -165,6 +168,15 @@ func TestJSONMarshalConfig(t *testing.T) {
       "plugins-archive"
     ],
     "enable_dev": false
+  },
+  "search": {
+    "check_latest_update_interval": "30s",
+    "index_keys": {
+      "dashboard": [
+        "metadata.name",
+        "spec.display.name"
+      ]
+    }
   }
 }`,
 		},
@@ -543,6 +555,11 @@ plugin:
 				EphemeralDashboard: EphemeralDashboard{
 					Enable:          false,
 					CleanupInterval: common.Duration(2 * time.Hour),
+				},
+				Search: Search{
+					CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+					ExcludedChars:             nil,
+					IndexKeys:                 IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name"}},
 				},
 			},
 		},
