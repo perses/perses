@@ -32,7 +32,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { CreateDashboardDialog, CreateFolderDialog } from '../../components/dialogs';
+import { CreateDashboardDialog } from '../../components/dialogs/CreateDashboardDialog';
+import { CreateFolderDialog } from '../../components/dialogs/CreateFolderDialog';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
@@ -46,11 +47,11 @@ import {
   useIsProjectVariableEnabled,
   useIsReadonly,
 } from '../../context/Config';
-import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateDatasourceMutation, useDatasourceList } from '../../model/datasource-client';
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { useCreateRoleBindingMutation, useRoleBindingList } from '../../model/rolebinding-client';
+import { useSearchDashboards } from '../../model/search-client';
 import { useCreateSecretMutation, useSecretList } from '../../model/secret-client';
 import { useCreateVariableMutation, useVariableList } from '../../model/variable-client';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -428,7 +429,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps): ReactElement {
   const hasEphemeralDashboards = (data ?? []).length > 0;
 
   // Fetch counts for tab badges
-  const { data: dashboards } = useDashboardList({ project: projectName, metadataOnly: true });
+  const { data: dashboards } = useSearchDashboards(projectName);
   const { data: variables } = useVariableList(projectName);
   const { data: datasources } = useDatasourceList({ project: projectName });
   const { data: secrets } = useSecretList(projectName);
