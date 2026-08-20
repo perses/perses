@@ -45,14 +45,16 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
   }
   return (
     <ConfigContext.Provider value={contextValue}>
-      <TimeRangeSettingsProvider
-        showCustom={!data.frontend.time_range?.disable_custom}
-        showZoomButtons={!data.frontend.time_range?.disable_zoom}
-        disableAutoRefresh={!!data.frontend.time_range?.disable_auto_refresh}
-        options={timeRangeOptions}
-      >
-        {props.children}
-      </TimeRangeSettingsProvider>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
+        <TimeRangeSettingsProvider
+          showCustom={!data.frontend.time_range?.disable_custom}
+          showZoomButtons={!data.frontend.time_range?.disable_zoom}
+          disableAutoRefresh={!!data.frontend.time_range?.disable_auto_refresh}
+          options={timeRangeOptions}
+        >
+          {props.children}
+        </TimeRangeSettingsProvider>
+      </UserPreferencesContextProvider>
     </ConfigContext.Provider>
   );
 }
