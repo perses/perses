@@ -25,7 +25,11 @@ import (
 func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensitive bool) ([]taskhelper.Helper, error) {
 	var helpers []taskhelper.Helper
 	for _, c := range cfg.Datasource.Global.Discovery {
-		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, c.Default)
+		var defaultFlag bool
+		if c.KubernetesDiscovery != nil {
+			defaultFlag = c.KubernetesDiscovery.Default
+		}
+		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, defaultFlag)
 		var helper taskhelper.Helper
 		var err error
 		if c.HTTPDiscovery != nil {
