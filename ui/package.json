@@ -50,8 +50,6 @@
     "react-refresh": "^0.16.0",
     "rimraf": "^6.1.0",
     "swc-loader": "^0.2.6",
-    "terser-webpack-plugin": "^5.3.11",
-    "ts-node": "^10.9.2",
     "turbo": "^2.3.4",
     "typedoc": "^0.28.20",
     "typescript": "5.9.3",
