@@ -59,12 +59,17 @@ export function useCreateDashboardMutation(
  * Used to get a dashboard in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource, StatusError> {
+export function useDashboard(
+  project: string,
+  name: string,
+  enabled: boolean = true,
+): UseQueryResult<DashboardResource, StatusError> {
   return useQuery<DashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getDashboard(project, name);
     },
+    enabled,
   });
 }
 
