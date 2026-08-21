@@ -12,26 +12,27 @@
 // limitations under the License.
 
 import { FolderResource } from '@perses-dev/client';
+import { vi } from 'vitest';
 
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
 import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';
 
-jest.mock('echarts', () => ({
-  use: jest.fn(),
-  init: jest.fn(() => ({
-    setOption: jest.fn(),
-    resize: jest.fn(),
-    dispose: jest.fn(),
+vi.mock('echarts', () => ({
+  use: vi.fn(),
+  init: vi.fn(() => ({
+    setOption: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
   })),
 }));
 
-jest.mock('echarts/core', () => ({
-  use: jest.fn(),
-  init: jest.fn(() => ({
-    setOption: jest.fn(),
-    resize: jest.fn(),
-    dispose: jest.fn(),
+vi.mock('echarts/core', () => ({
+  use: vi.fn(),
+  init: vi.fn(() => ({
+    setOption: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
   })),
 }));
 

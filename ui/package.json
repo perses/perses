@@ -30,22 +30,18 @@
     "internal-utils"
   ],
   "devDependencies": {
-    "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.15.33",
-    "@swc/jest": "^0.2.39",
     "@testing-library/dom": "^10.1.0",
-    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^30.0.0",
     "@types/node": "^22.13.1",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^5.0.4",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^4.0.3",
-    "jest": "^30.4.2",
-    "jest-environment-jsdom": "^30.4.1",
+    "jsdom": "^27.0.0",
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
     "oxlint-plugin-react-doctor": "0.9.12",
@@ -54,11 +50,10 @@
     "react-refresh": "^0.16.0",
     "rimraf": "^6.1.0",
     "swc-loader": "^0.2.6",
-    "terser-webpack-plugin": "^5.3.11",
-    "ts-node": "^10.9.2",
     "turbo": "^2.3.4",
     "typedoc": "^0.28.20",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.1.11"
   },
   "packageManager": "npm@10.9.2"
 }

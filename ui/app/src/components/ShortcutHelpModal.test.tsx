@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 // Mock registrations used by the dashboard exports
 const mockHotkeys: Array<{ hotkey: string; options: { meta: Record<string, string> } }> = [];
@@ -23,7 +24,7 @@ const mockSequences: Array<{ sequence: string[]; options: { meta: Record<string,
 // since it resolves outside the perses/ui workspace.
 const SHOW_SHORTCUTS_EVENT = 'perses:show-shortcuts';
 
-jest.mock('@perses-dev/dashboards', () => ({
+vi.mock('@perses-dev/dashboards', () => ({
   SHORTCUT_CATEGORY_LABELS: {
     global: 'Global',
     'time-range': 'Time Range',
