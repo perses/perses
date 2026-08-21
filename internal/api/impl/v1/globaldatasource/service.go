@@ -62,7 +62,11 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
-	// Update the time contains in the entity
+	// Update the source and time contains in the entity.
+	// Only stamp ManualSource if the caller hasn't already set a source (e.g. discovery or provisioning).
+	if entity.Metadata.Source == "" {
+		entity.Metadata.Source = v1.ManualSource
+	}
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
@@ -94,7 +98,7 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Pa
 	if err != nil {
 		return nil, err
 	}
-	entity.Metadata.Update(oldEntity.Metadata)
+	entity.Metadata.Update(oldEntity.Metadata.Metadata)
 	if updateErr := s.dao.Update(entity); updateErr != nil {
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalDatasource %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr

@@ -24,10 +24,66 @@ import (
 	"github.com/perses/spec/go/common"
 )
 
+type MetadataSource string
+
+const (
+	ManualSource       MetadataSource = "manual"
+	ProvisioningSource MetadataSource = "provisioning"
+	DiscoverySource    MetadataSource = "discovery"
+)
+
 func NewMetadata(name string) *Metadata {
 	return &Metadata{
 		Name: name,
 	}
+}
+
+type DatasourceMetadata struct {
+	Metadata      `json:",inline" yaml:",inline"`
+	Source        MetadataSource `json:"source,omitempty" yaml:"source,omitempty"`
+	DiscoveryName string         `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
+}
+
+// UnmarshalJSON is needed to correctly populate both the embedded Metadata fields
+// and the DatasourceMetadata-specific fields (Source, DiscoveryName).
+func (dm *DatasourceMetadata) UnmarshalJSON(data []byte) error {
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	var extra struct {
+		Source        MetadataSource `json:"source,omitempty"`
+		DiscoveryName string         `json:"discovery_name,omitempty"`
+	}
+	if err := json.Unmarshal(data, &extra); err != nil {
+		return err
+	}
+
+	dm.Metadata = metadataTmp
+	dm.Source = extra.Source
+	dm.DiscoveryName = extra.DiscoveryName
+	return nil
+}
+
+func (dm *DatasourceMetadata) UnmarshalYAML(unmarshal func(any) error) error {
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	var extra struct {
+		Source        MetadataSource `yaml:"source,omitempty"`
+		DiscoveryName string         `yaml:"discovery_name,omitempty"`
+	}
+	if err := unmarshal(&extra); err != nil {
+		return err
+	}
+
+	dm.Metadata = metadataTmp
+	dm.Source = extra.Source
+	dm.DiscoveryName = extra.DiscoveryName
+	return nil
 }
 
 type Metadata struct {
