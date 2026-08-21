@@ -151,6 +151,241 @@ func TestParseAndFormatEntry(t *testing.T) {
 	}
 }
 
+func TestFormatGitLogEntry(t *testing.T) {
+	testSuite := []struct {
+		title    string
+		hash     string
+		subject  string
+		body     string
+		expected string
+	}{
+		{
+			title:    "commit entry is unchanged",
+			hash:     "f19355e87558177e6ad77d45bdd070fe99d62db6",
+			subject:  "[ENHANCEMENT] visual options and reset btn ux feedback (#850)",
+			expected: "f19355e87558177e6ad77d45bdd070fe99d62db6 [ENHANCEMENT] visual options and reset btn ux feedback (#850)",
+		},
+		{
+			title:   "merge pull request uses body title",
+			hash:    "6efcbec6538cec7bb674510ade1657a8f0292b24",
+			subject: "Merge pull request #439 from contributor/feat/bump-perses-0.54.0",
+			body: `[FEATURE] update perses dependency to v0.54.0
+
+Additional context.`,
+			expected: "6efcbec6538cec7bb674510ade1657a8f0292b24 [FEATURE] update perses dependency to v0.54.0 (#439)",
+		},
+		{
+			title:    "merge pull request does not duplicate PR number",
+			hash:     "28b82ced25c856799594bea0c733bede85bca18a",
+			subject:  "Merge pull request #456 from contributor/add-priority-class-name",
+			body:     "[FEATURE] add priorityClassName to Perses spec (#456)",
+			expected: "28b82ced25c856799594bea0c733bede85bca18a [FEATURE] add priorityClassName to Perses spec (#456)",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			assert.Equal(t, test.expected, formatGitLogEntry(test.hash, test.subject, test.body))
+		})
+	}
+}
+
+func TestMergePullRequestNumber(t *testing.T) {
+	testSuite := []struct {
+		title          string
+		subject        string
+		expectedNumber string
+		expectedFound  bool
+	}{
+		{
+			title:          "GitHub merge commit",
+			subject:        "Merge pull request #428 from contributor/metrics-label",
+			expectedNumber: "428",
+			expectedFound:  true,
+		},
+		{
+			title:          "case insensitive",
+			subject:        "merge pull request #456 from contributor/add-priority-class-name",
+			expectedNumber: "456",
+			expectedFound:  true,
+		},
+		{
+			title:         "missing pull request number",
+			subject:       "Merge pull request # from repository/feature",
+			expectedFound: false,
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			number, found := mergePullRequestNumber(test.subject)
+			assert.Equal(t, test.expectedNumber, number)
+			assert.Equal(t, test.expectedFound, found)
+		})
+	}
+}
+
+func TestParseGitLogEntries(t *testing.T) {
+	gitLogs := []byte("ad29ece\x00base head\x00Merge pull request #428 from contributor/metrics-label\x00[ENHANCEMENT] Use specific reason labels in reconciliation error metrics\n\nAdditional context.\x1e")
+
+	assert.Equal(t, []gitLogEntry{
+		{
+			hash:    "ad29ece",
+			parents: "base head",
+			subject: "Merge pull request #428 from contributor/metrics-label",
+			body: `[ENHANCEMENT] Use specific reason labels in reconciliation error metrics
+
+Additional context.`,
+		},
+	}, parseGitLogEntries(gitLogs))
+}
+
+func TestGroupPullRequestEntries(t *testing.T) {
+	testSuite := []struct {
+		title              string
+		gitLogEntries      []gitLogEntry
+		pullRequestEntries []gitLogEntry
+		expectedEntries    []string
+		expectedChangelog  *Changelog
+	}{
+		{
+			title: "single kind PR is represented by its title",
+			gitLogEntries: []gitLogEntry{
+				{
+					hash:    "ad29ece08bb51cafa80df458ba0c79bc8f7ebaf9",
+					parents: "base head",
+					subject: "Merge pull request #428 from contributor/metrics-label",
+					body:    "[ENHANCEMENT] Use specific reason labels in reconciliation error metrics",
+				},
+				{
+					hash:    "15dd438928adc01edc8d116f25bd5bcef10203f6",
+					subject: "[ENHANCEMENT] Add promtool to managed tools and run alert tests in CI",
+				},
+				{
+					hash:    "e8d54754549de7d1dcf7f90da6094b9d56ab7804",
+					subject: "[ENHANCEMENT Use specific reason labels in reconciliation error metrics",
+				},
+			},
+			pullRequestEntries: []gitLogEntry{
+				{
+					hash:    "15dd438928adc01edc8d116f25bd5bcef10203f6",
+					subject: "[ENHANCEMENT] Add promtool to managed tools and run alert tests in CI",
+				},
+				{
+					hash:    "e8d54754549de7d1dcf7f90da6094b9d56ab7804",
+					subject: "[ENHANCEMENT Use specific reason labels in reconciliation error metrics",
+				},
+			},
+			expectedEntries: []string{
+				"ad29ece08bb51cafa80df458ba0c79bc8f7ebaf9 [ENHANCEMENT] Use specific reason labels in reconciliation error metrics (#428)",
+			},
+			expectedChangelog: &Changelog{
+				Enhancements: []string{"Use specific reason labels in reconciliation error metrics (#428)"},
+			},
+		},
+		{
+			title: "multi kind PR retains its commit entries",
+			gitLogEntries: []gitLogEntry{
+				{
+					hash:    "6efcbec6538cec7bb674510ade1657a8f0292b24",
+					parents: "base head",
+					subject: "Merge pull request #439 from repository/multi-kind",
+					body:    "[FEATURE] Add mixed changes",
+				},
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+				{
+					hash:    "2348638d368dceda261775ff72badc74c56649b1",
+					subject: "[BUGFIX] Fix related behavior",
+				},
+			},
+			pullRequestEntries: []gitLogEntry{
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+				{
+					hash:    "2348638d368dceda261775ff72badc74c56649b1",
+					subject: "[BUGFIX] Fix related behavior",
+				},
+			},
+			expectedEntries: []string{
+				"6efcbec6538cec7bb674510ade1657a8f0292b24 Merge pull request #439 from repository/multi-kind",
+				"1b4e5f19c48b1a260749a047efb844a0d6af7b5d [FEATURE] Add user-facing feature",
+				"2348638d368dceda261775ff72badc74c56649b1 [BUGFIX] Fix related behavior",
+			},
+			expectedChangelog: &Changelog{
+				Features: []string{"Add user-facing feature"},
+				BugFixes: []string{"Fix related behavior"},
+			},
+		},
+		{
+			title: "uncategorized merge retains existing ignore behavior",
+			gitLogEntries: []gitLogEntry{
+				{
+					hash:    "9b35947a2e3ed969dae2cbd0e248096305249c57",
+					parents: "base head",
+					subject: "Merge pull request #4323 from repository/release/v0.54",
+					body:    "Merge back release v0.54.0 to main",
+				},
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+			},
+			pullRequestEntries: []gitLogEntry{
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+			},
+			expectedEntries: []string{
+				"9b35947a2e3ed969dae2cbd0e248096305249c57 Merge pull request #4323 from repository/release/v0.54",
+				"1b4e5f19c48b1a260749a047efb844a0d6af7b5d [FEATURE] Add user-facing feature",
+			},
+			expectedChangelog: &Changelog{
+				Features: []string{"Add user-facing feature"},
+			},
+		},
+		{
+			title: "merge without a body retains existing ignore behavior",
+			gitLogEntries: []gitLogEntry{
+				{
+					hash:    "b5c64544efc4e4c71e0e6853de70d334a806a522",
+					parents: "base head",
+					subject: "Merge pull request #4324 from repository/feature",
+				},
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+			},
+			pullRequestEntries: []gitLogEntry{
+				{
+					hash:    "1b4e5f19c48b1a260749a047efb844a0d6af7b5d",
+					subject: "[FEATURE] Add user-facing feature",
+				},
+			},
+			expectedEntries: []string{
+				"b5c64544efc4e4c71e0e6853de70d334a806a522 Merge pull request #4324 from repository/feature",
+				"1b4e5f19c48b1a260749a047efb844a0d6af7b5d [FEATURE] Add user-facing feature",
+			},
+			expectedChangelog: &Changelog{
+				Features: []string{"Add user-facing feature"},
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			entries := groupPullRequestEntries(test.gitLogEntries, func(string) []gitLogEntry {
+				return test.pullRequestEntries
+			})
+			assert.Equal(t, test.expectedEntries, entries)
+			assert.Equal(t, test.expectedChangelog, New(entries))
+		})
+	}
+}
+
 func TestGenerateChangelog(t *testing.T) {
 	now := time.Now()
 	title := fmt.Sprintf("## 0.20.0 / %s", now.Format("2006-01-02"))
