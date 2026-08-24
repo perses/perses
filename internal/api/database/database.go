@@ -57,21 +57,35 @@ func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 func (d *dao) Query(query databaseModel.Query, slice any) error {
 	return d.client.Query(query, slice)
 }
+func (d *dao) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
+	return d.client.StreamRaw(query, ch)
+}
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
-	return d.client.RawQuery(query)
+	ch := make(chan json.RawMessage)
+	var err error
+	go func() {
+		err = d.StreamRaw(query, ch)
+	}()
+	result := make([]json.RawMessage, 0)
+	for data := range ch {
+		result = append(result, data)
+	}
+	return result, err
 }
 func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
-	raws, err := d.client.RawQuery(query)
-	if err != nil {
-		return nil, err
-	}
-	// now let's extract the metadata and the kind
-	result := make([]json.RawMessage, 0, len(raws))
-	for _, raw := range raws {
+	ch := make(chan json.RawMessage)
+	var err error
+	go func() {
+		// Using the StreamRaw method to get the raw data in a stream will reduce the cost of memory allocation
+		// and improve performance when the number of resources is large.
+		err = d.StreamRaw(query, ch)
+	}()
+	result := make([]json.RawMessage, 0)
+	for raw := range ch {
 		metadata := gjson.GetBytes(raw, "metadata").String()
 		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
-	return result, nil
+	return result, err
 }
 func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return d.client.Delete(kind, metadata)

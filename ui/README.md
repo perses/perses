@@ -14,7 +14,7 @@ If you are new to Perses, please review the rest of this README first before sta
 - Start the Perses app: `npm run start`
 - Open the app: http://localhost:3000/
 
-### Run Jest tests
+### Run Vitest tests
 
 - Change to the `ui` directory.
 - Install dependencies: `npm install`

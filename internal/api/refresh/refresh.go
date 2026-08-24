@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package authorization
+package refresh
 
 import (
 	"context"
@@ -23,19 +23,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewPermissionRefreshCronTask(authz Authorization, persesDAO model.DAO) async.SimpleTask {
-	return &rbacTask{authz: authz, persesDAO: persesDAO}
+func New(persesDAO model.DAO, refresh func() error, listToCheck []modelV1.Kind) async.SimpleTask {
+	return &task{persesDAO: persesDAO, refresh: refresh, listToCheck: listToCheck}
 }
 
-type rbacTask struct {
+type task struct {
 	async.SimpleTask
-	authz           Authorization
+	refresh         func() error
 	persesDAO       model.DAO
 	lastRefreshTime time.Time
+	listToCheck     []modelV1.Kind
 }
 
-func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
-	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime([]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding})
+func (r *task) Execute(_ context.Context, _ context.CancelFunc) error {
+	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime(r.listToCheck)
 	if err != nil {
 		logrus.WithError(err).Error("failed to retrieve last update time")
 		return nil
@@ -54,9 +55,9 @@ func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 	}
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
-		logrus.Debugf("refreshing rbac cache, previous last refresh time %v", r.lastRefreshTime)
-		if err := r.authz.RefreshPermissions(); err != nil {
-			logrus.WithError(err).Error("failed to refresh cache")
+		logrus.Debugf("refreshing cache, previous last refresh time %v", r.lastRefreshTime)
+		if refreshErr := r.refresh(); refreshErr != nil {
+			logrus.WithError(refreshErr).Error("failed to refresh cache")
 			return nil
 		}
 		r.lastRefreshTime = lastUpdateTimeParsed
@@ -64,6 +65,6 @@ func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 	return nil
 }
 
-func (r *rbacTask) String() string {
-	return "rbac refresh cache"
+func (r *task) String() string {
+	return "refresh task"
 }

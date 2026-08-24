@@ -8,7 +8,7 @@
     "start": "cross-env NODE_ENV=development rspack serve",
     "build": "rspack build",
     "type-check": "tsc --noEmit",
-    "test": "cross-env TZ=UTC jest",
+    "test": "cross-env TZ=UTC vitest run",
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src",
     "analyze": "rspack build --analyze"

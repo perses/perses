@@ -16,7 +16,7 @@ package login
 import (
 	"io"
 
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"golang.org/x/oauth2"

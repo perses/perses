@@ -19,6 +19,7 @@ import (
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
@@ -40,9 +41,10 @@ type service struct {
 	isDatasourceDisable bool
 	isVariableDisable   bool
 	customRules         []*config.CustomLintRule
+	index               index.Client
 }
 
-func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, indexClient index.Client) dashboard.Service {
 	return &service{
 		dao:                 dao,
 		globalVarDAO:        globalVarDAO,
@@ -51,6 +53,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
+		index:               indexClient,
 	}
 }
 
@@ -72,6 +75,10 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
+	}
+	// Add the dashboard to the index
+	if err := s.index.Add(entity); err != nil {
+		logrus.WithError(err).Errorf("unable to add the dashboard %q to the index", entity.Metadata.Name)
 	}
 	return entity, nil
 }
@@ -111,11 +118,27 @@ func (s *service) update(entity *v1.Dashboard, parameters apiInterface.Parameter
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the dashboard %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	// Update the dashboard in the index
+	if indexErr := s.index.Add(entity); indexErr != nil {
+		logrus.WithError(indexErr).Errorf("unable to update the dashboard %q in the index", entity.Metadata.Name)
+	}
 	return entity, nil
 }
 
 func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Project, parameters.Name)
+	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
+		return err
+	}
+	// Remove the dashboard from the index
+	s.index.Delete(v1.KindDashboard, &v1.ProjectMetadata{
+		Metadata: v1.Metadata{
+			Name: parameters.Name,
+		},
+		ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+			Project: parameters.Project,
+		},
+	})
+	return nil
 }
 
 func (s *service) Get(parameters apiInterface.Parameters) (*v1.Dashboard, error) {

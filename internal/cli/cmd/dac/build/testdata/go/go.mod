@@ -8,7 +8,7 @@ require (
 	github.com/perses/perses v0.54.0-rc.1
 	github.com/perses/plugins/prometheus v0.58.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.1
+	github.com/perses/spec v0.3.0-beta.4
 )
 
 require (
