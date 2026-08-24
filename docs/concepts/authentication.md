@@ -145,7 +145,7 @@ security:
 1. At login, Perses extracts the configured claim values from the upstream access token (or ID token for OIDC).
 2. The extracted values are embedded in the Perses session JWT.
 3. On every request, Perses evaluates the claim→role mappings and resolves the corresponding permissions — stateless, no extra database lookup.
-4. Resolved permissions are additive with any explicit `RoleBinding`/`GlobalRoleBinding` the user may have.
+4. Resolved permissions are **additive** with any explicit `RoleBinding`/`GlobalRoleBinding` the user may have — permissions from both sources are merged, never reduced. For example, if a user is mapped to the `admin` GlobalRole by a claim but only has an `editor` `GlobalRoleBinding` in the database, the user will hold the full set of permissions from **both** roles.
 
 ### `claims` field reference
 
@@ -159,6 +159,8 @@ security:
 > Multi-valued claims (arrays) are supported — if any value in the array matches a mapping, the role is granted.
 
 > **Note:** The referenced roles must already exist in Perses. Claim mappings do not create roles automatically.
+
+> **Revocation Semantics:** Claims are captured once at login and persisted in the refresh token. Each subsequent refresh re-carries the **same** claim snapshot into the new token without re-querying the identity provider. As a result, if an operator removes a user's claim at the identity provider (e.g., removes them from an LDAP group), that user will retain the derived Perses roles until their refresh token chain expires and they are forced to re-login — which may never happen for an active user. This is a structural property of how Perses sessions work and differs from `RoleBinding`/`GlobalRoleBinding`, which are evaluated live against the database on every request. To tighten the revocation window, operators can lower `access_token_ttl` and `refresh_token_ttl` in the authentication config. See [#3891](https://github.com/perses/perses/issues/3891) for discussion on re-fetching claims from the identity provider on refresh.
 
 ### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (`authorization_code`)
 
