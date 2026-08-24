@@ -288,6 +288,7 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	// Claim-based check (stateless, from JWT)
 	usr, err := n.GetUser(ctx)
 	if err != nil {
+		logrus.WithError(err).Error("unable to retrieve user from context")
 		return false
 	}
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
