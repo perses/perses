@@ -14,7 +14,7 @@
 package service
 
 import (
-	"slices"
+	"strings"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -22,6 +22,15 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
+
+func containsDatasource(sources []string, name string) bool {
+	for _, ds := range sources {
+		if strings.EqualFold(ds, name) {
+			return true
+		}
+	}
+	return false
+}
 
 func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string) *ApplyService {
 	return &ApplyService{
@@ -73,7 +82,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")
 	}
 	for _, ds := range foundDatasources {
-		if !slices.Contains(currentNames, ds.Metadata.Name) {
+		if !containsDatasource(currentNames, ds.Metadata.Name) {
 			deleteParameters := apiInterface.Parameters{
 				Name: ds.Metadata.Name,
 			}
