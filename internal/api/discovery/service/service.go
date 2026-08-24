@@ -32,11 +32,12 @@ func containsDatasource(sources []string, name string) bool {
 	return false
 }
 
-func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string) *ApplyService {
+func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string, discoveryType v1.DiscoveryType) *ApplyService {
 	return &ApplyService{
 		caseSensitive: caseSensitive,
 		svc:           svc,
 		discoveryName: discoveryName,
+		discoveryType: discoveryType,
 	}
 }
 
@@ -44,6 +45,7 @@ type ApplyService struct {
 	caseSensitive bool
 	svc           globaldatasource.Service
 	discoveryName string
+	discoveryType v1.DiscoveryType
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
@@ -51,6 +53,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	for _, entity := range entities {
 		entity.Metadata.Source = v1.DiscoverySource
 		entity.Metadata.DiscoveryName = a.discoveryName
+		entity.Metadata.DiscoveryType = a.discoveryType
 		entity.GetMetadata().Flatten(a.caseSensitive)
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
