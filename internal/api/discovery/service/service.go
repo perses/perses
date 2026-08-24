@@ -49,6 +49,10 @@ type ApplyService struct {
 }
 
 func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
+	if len(entities) == 0 {
+		return
+	}
+
 	var currentNames []string
 	for _, entity := range entities {
 		entity.Metadata.Source = v1.DiscoverySource
