@@ -84,6 +84,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		&globaldatasource.Query{
 			Source:        v1.DiscoverySource,
 			DiscoveryName: a.discoveryName,
+			DiscoveryType: a.discoveryType,
 		})
 	if err != nil {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")

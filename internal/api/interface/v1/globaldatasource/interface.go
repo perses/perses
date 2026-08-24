@@ -30,6 +30,7 @@ type Query struct {
 	Default       *bool             `query:"default"`
 	Source        v1.MetadataSource `query:"source"`
 	DiscoveryName string            `query:"discovery_name"`
+	DiscoveryType v1.DiscoveryType  `query:"discovery_type"`
 }
 
 func (q *Query) GetMetadataOnlyQueryParam() bool {
