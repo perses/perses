@@ -11,9 +11,17 @@ package v1
 	#ProvisioningSource |
 	#DiscoverySource
 
+#DiscoveryType: string // #enumDiscoveryType
+
+#enumDiscoveryType:
+	#KubernetesType |
+	#HTTPType
+
 #ManualSource:       #MetadataSource & "manual"
 #ProvisioningSource: #MetadataSource & "provisioning"
 #DiscoverySource:    #MetadataSource & "discovery"
+#KubernetesType:     #DiscoveryType & "kubernetes"
+#HTTPType:           #DiscoveryType & "http"
 
 #DatasourceMetadata: _
 
