@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { resolve } from 'path';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+
+const uiRoot = fileURLToPath(new URL('.', import.meta.url));
 
 // Common Vitest configuration shared across packages
 export default defineConfig({
@@ -23,14 +26,11 @@ export default defineConfig({
     alias: [
       // Use polyfill for jsdom environment
       { find: 'use-resize-observer', replacement: 'use-resize-observer/polyfilled' },
-
-      // Configure Vitest to handle stylesheets
-      { find: /\.(css|less)$/, replacement: resolve(__dirname, './stylesMock.js') },
     ],
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: [resolve(__dirname, './vitest.setup.ts')],
+    setupFiles: [resolve(uiRoot, './vitest.setup.ts')],
   },
 });

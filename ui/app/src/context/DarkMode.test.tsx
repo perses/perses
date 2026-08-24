@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { ReactElement, ReactNode } from 'react';
-import { Mock, vi } from 'vitest';
+import type { ReactElement, ReactNode } from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { DarkModeContextProvider, useDarkMode } from './DarkMode';
 

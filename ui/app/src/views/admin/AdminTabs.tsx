@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import {
+import type {
   GlobalDatasourceResource,
   GlobalRoleBindingResource,
   GlobalRoleResource,
@@ -26,10 +26,12 @@ import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
 import ShieldIcon from 'mdi-material-ui/Shield';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
-import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import type { CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';

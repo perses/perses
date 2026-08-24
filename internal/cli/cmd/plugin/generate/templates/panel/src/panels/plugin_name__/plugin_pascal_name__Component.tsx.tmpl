@@ -1,5 +1,5 @@
-import { ReactElement } from "react";
-import { {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
+import type { ReactElement } from "react";
+import type { {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
 
 export function {{ .PluginPascalName }}Component(props: {{ .PluginPascalName }}Props): ReactElement | null {
   const { queryResults, spec } = props;

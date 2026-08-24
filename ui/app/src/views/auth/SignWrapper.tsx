@@ -14,10 +14,12 @@
 /* TODO: @Gladorme check social button types */
 /* oxlint-disable typescript/explicit-function-return-type */
 
-import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { alpha, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import Gitlab from 'mdi-material-ui/Gitlab';
-import { ReactElement, ReactNode, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useMemo } from 'react';
 import * as React from 'react';
 import {
   AmazonLoginButton,

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as v8 from 'node:v8';
+
 // jsdom does not implement structuredClone; polyfill it with the Node.js built-in.
 if (typeof globalThis.structuredClone === 'undefined') {
-  const v8 = require('v8') as typeof import('v8');
   globalThis.structuredClone = <T>(val: T): T => v8.deserialize(v8.serialize(val)) as T;
 }

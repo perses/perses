@@ -2,6 +2,7 @@
   "name": "@perses-dev/app",
   "version": "0.54.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "clean": "rimraf dist/",
     "start:shared": "cross-env NODE_ENV=development SHARED_DEV=true rspack serve",

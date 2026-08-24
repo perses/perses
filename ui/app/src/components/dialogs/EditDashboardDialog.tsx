@@ -13,13 +13,16 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useEffect } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
-import { editDashboardDialogValidationSchema, EditDashboardValidationType } from '../../validation';
+import type { EditDashboardValidationType } from '../../validation';
+import { editDashboardDialogValidationSchema } from '../../validation';
 
 interface EditDashboardDialogProps {
   dashboard: DashboardResource;

@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { CircularProgress, Stack } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useIsReadonly } from '../../../context/Config';

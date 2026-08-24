@@ -14,7 +14,8 @@
 import { SnackbarProvider } from '@perses-dev/components';
 import { HotkeysProvider } from '@perses-dev/dashboards';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { lazy, ReactElement, Suspense } from 'react';
+import type { ReactElement } from 'react';
+import { lazy, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';

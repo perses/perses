@@ -13,17 +13,16 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, TextField } from '@mui/material';
-import { EphemeralDashboardResource } from '@perses-dev/client';
+import type { EphemeralDashboardResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { DurationString } from '@perses-dev/spec';
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { DurationString } from '@perses-dev/spec';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useUpdateEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
-import {
-  updateEphemeralDashboardDialogValidationSchema,
-  UpdateEphemeralDashboardValidationType,
-} from '../../validation';
+import type { UpdateEphemeralDashboardValidationType } from '../../validation';
+import { updateEphemeralDashboardDialogValidationSchema } from '../../validation';
 
 interface UpdateEphemeralDashboardDialog {
   ephemeralDashboard: EphemeralDashboardResource;

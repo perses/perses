@@ -2,6 +2,7 @@
   "name": "@perses-dev/e2e",
   "version": "0.54.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "e2e": "npm run e2e:local",
     "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
