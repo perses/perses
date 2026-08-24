@@ -116,6 +116,16 @@ func TestMig_Migrate(t *testing.T) {
 			inputGrafanaDashboardFile:   "row_repeat_grafana_dashboard.json",
 			expectedPersesDashboardFile: "row_repeat_perses_dashboard.json",
 		},
+		{
+			title:                       "dashboard with panel-level repeat should set repeatVariable on grid items",
+			inputGrafanaDashboardFile:   "panel_repeat_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_repeat_perses_dashboard.json",
+		},
+		{
+			title:                       "dashboard with panel repeat and no direction defaults to horizontal alignment",
+			inputGrafanaDashboardFile:   "panel_repeat_only_grafana_dashboard.json",
+			expectedPersesDashboardFile: "panel_repeat_only_perses_dashboard.json",
+		},
 	}
 
 	pl := loadDefaultTestPlugins()

@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { Divider, LinearProgress, Stack } from '@mui/material';
+import { ErrorAlert, useSnackbar } from '@perses-dev/components';
 import * as React from 'react';
 import { ReactElement, useEffect } from 'react';
-import { ErrorAlert, useSnackbar } from '@perses-dev/components';
 import { useNavigate } from 'react-router-dom';
-import { useRedirectQueryParam } from '../../model/auth/auth-client';
+
 import { useDarkMode } from '../../context/DarkMode';
-import { useIsLaptopSize } from '../../utils/browser-size';
+import { useRedirectQueryParam } from '../../model/auth/auth-client';
 import { useCurrentUser } from '../../model/user-client';
+import { useIsLaptopSize } from '../../utils/browser-size';
 import { PersesLogo } from './SignWrapper';
 
 function DelegatedAuthnErrorView(): ReactElement {

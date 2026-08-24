@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { CircularProgress, Stack } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { DashboardResource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { ReactElement, useCallback, useEffect } from 'react';
-import { DashboardResource } from '@perses-dev/client';
-import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
+import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
 import { HelperDashboardView } from './HelperDashboardView';
 
 /**
@@ -40,7 +41,7 @@ function DashboardView(): ReactElement | null {
   const navHistoryDispatch = useNavHistoryDispatch();
   useEffect(
     () => navHistoryDispatch({ project: projectName, name: dashboardName }),
-    [navHistoryDispatch, projectName, dashboardName]
+    [navHistoryDispatch, projectName, dashboardName],
   );
 
   const handleDashboardSave = useCallback(
@@ -51,7 +52,7 @@ function DashboardView(): ReactElement | null {
       return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`
+            `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`,
           );
           return updatedDashboard;
         },
@@ -61,7 +62,7 @@ function DashboardView(): ReactElement | null {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDashboardMutation]
+    [exceptionSnackbar, successSnackbar, updateDashboardMutation],
   );
 
   if (isLoading) {

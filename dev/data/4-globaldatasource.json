@@ -116,5 +116,43 @@
         }
       }
     }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "PyroscopeLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "PyroscopeDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "allowedEndpoints": [
+                {
+                  "endpointPattern": "/pyroscope/render",
+                  "method": "GET"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/ProfileTypes",
+                  "method": "POST"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/LabelNames",
+                  "method": "POST"
+                },
+                {
+                  "endpointPattern": "/querier.v1.QuerierService/LabelValues",
+                  "method": "POST"
+                }
+              ],
+              "url": "http://localhost:4040"
+            }
+          }
+        }
+      }
+    }
   }
 ]

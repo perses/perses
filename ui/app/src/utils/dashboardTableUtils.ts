@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { intlFormatDistance } from 'date-fns';
-import { getResourceDisplayName } from '@perses-dev/components';
 import { FolderItem, FolderResource } from '@perses-dev/client';
-import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
+import { getResourceDisplayName } from '@perses-dev/components';
+import { intlFormatDistance } from 'date-fns';
+
 import { DashboardListRow } from '../components/DashboardList/DashboardList';
+import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 
 export interface RowWithOriginal<TData> {
   original: TData;
@@ -30,7 +31,7 @@ export function sortDashboardTableStringColumn(
   rowA: RowWithOriginal<DashboardTreeTableRow>,
   rowB: RowWithOriginal<DashboardTreeTableRow>,
   field: 'displayName' | 'project',
-  isDesc: boolean
+  isDesc: boolean,
 ): number {
   const a = rowA.original;
   const b = rowB.original;
@@ -70,7 +71,7 @@ export function formatAbsoluteTime(value: Date | undefined): string {
  */
 export const buildTableRows = (
   folderList: FolderResource[],
-  dashboardsMap: Map<string, Map<string, DashboardListRow>>
+  dashboardsMap: Map<string, Map<string, DashboardListRow>>,
 ): DashboardTreeTableRow[] => {
   const dashboardsMapCopy = copyDashboardsMap(dashboardsMap);
   const tableRows = mapToTableData(folderList ?? [], dashboardsMapCopy);
@@ -82,13 +83,13 @@ export const buildTableRows = (
 };
 
 const copyDashboardsMap = (
-  dashboardsMap: Map<string, Map<string, DashboardListRow>>
+  dashboardsMap: Map<string, Map<string, DashboardListRow>>,
 ): Map<string, Map<string, DashboardListRow & { inFolder?: boolean }>> => {
   return new Map(
     [...dashboardsMap.entries()].map(([project, inner]): [string, Map<string, DashboardListRow>] => [
       project,
       new Map(inner),
-    ])
+    ]),
   );
 };
 
@@ -112,7 +113,7 @@ const mapToTableRow = (dashboardResource: DashboardListRow, path: string[]): Das
 
 const mapToTableData = (
   folderList: FolderResource[],
-  dashboardMap: Map<string, Map<string, DashboardListRow>>
+  dashboardMap: Map<string, Map<string, DashboardListRow>>,
 ): DashboardTreeTableRow[] => {
   return folderList.map((folder) => {
     const project = folder.metadata.project;
@@ -135,7 +136,7 @@ const mapFolderItemsToTableRow = (
   folderItems: FolderItem[] | undefined,
   dashboardMap: Map<string, DashboardListRow & { inFolder?: boolean }>,
   project: string,
-  parentPath: string[]
+  parentPath: string[],
 ): DashboardTreeTableRow[] => {
   const rows = folderItems
     ?.map((item) => {

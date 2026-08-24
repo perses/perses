@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, ReactElement, useState } from 'react';
-import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Secret } from '@perses-dev/client';
-import { DrawerProps } from '../form-drawers';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { Dispatch, ReactElement, useState } from 'react';
+
 import { DeleteResourceDialog } from '../dialogs';
+import { DrawerProps } from '../form-drawers';
 import { SecretEditorForm } from './SecretEditorForm';
 
 interface SecretDrawerProps<T extends Secret> extends DrawerProps<T> {

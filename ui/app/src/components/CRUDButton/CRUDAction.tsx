@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
 import { Action, Scope } from '@perses-dev/client';
-import { useIsReadonly } from '../../context/Config';
+import { ReactElement } from 'react';
+
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
+import { useIsReadonly } from '../../context/Config';
 
 export interface CRUDActionProps {
   action?: Action;

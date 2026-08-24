@@ -30,6 +30,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
+	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/apis/apiserver"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -127,6 +128,15 @@ func (k *k8sImpl) GetUser(ctx echo.Context) (any, error) {
 		return nil, fmt.Errorf("request unable to be authenticated")
 	}
 
+	impersonateUser := ctx.Request().Header.Get("Impersonate-User")
+	if impersonateUser != "" {
+		if err := k.checkImpersonationPermission(ctx.Request().Context(), res.User, impersonateUser); err != nil {
+			return nil, err
+		}
+		logrus.Infof("user %s impersonating user %s", res.User.GetName(), impersonateUser)
+		return &user.DefaultInfo{Name: impersonateUser}, nil
+	}
+
 	return res.User, nil
 }
 
@@ -180,6 +190,9 @@ func (k *k8sImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			_, err := k.GetUser(ctx)
 			if err != nil {
 				logrus.Error(err.Error())
+				if errors.Is(err, apiInterface.ForbiddenError) {
+					return err
+				}
 				return apiInterface.HandleUnauthorizedError("invalid authorization header")
 			}
 
@@ -493,6 +506,32 @@ func getK8sUser(userStruct any) (user.Info, error) {
 	}
 	logrus.Errorf("invalid struct type passed representing the user in kubernetes provider: %T", userStruct)
 	return nil, fmt.Errorf("unable to convert user struct to k8s user interface")
+}
+
+func (k *k8sImpl) checkImpersonationPermission(ctx context.Context, caller user.Info, targetUser string) error {
+	sar := &authv1.SubjectAccessReview{
+		Spec: authv1.SubjectAccessReviewSpec{
+			User:   caller.GetName(),
+			Groups: caller.GetGroups(),
+			ResourceAttributes: &authv1.ResourceAttributes{
+				Verb:     "impersonate",
+				Group:    "",
+				Resource: "users",
+				Name:     targetUser,
+			},
+		},
+	}
+
+	result, err := k.kubeClient.AuthorizationV1().SubjectAccessReviews().Create(ctx, sar, metav1.CreateOptions{})
+	if err != nil {
+		return fmt.Errorf("%w: failed to check impersonation permission: %s", apiInterface.ForbiddenError, err.Error())
+	}
+
+	if !result.Status.Allowed {
+		return fmt.Errorf("%w: user %s is not allowed to impersonate user %s", apiInterface.ForbiddenError, caller.GetName(), targetUser)
+	}
+
+	return nil
 }
 
 // newAuthorizer creates an authorizer compatible with the kubelet's needs

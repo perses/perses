@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import '@testing-library/jest-dom/vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+
 import { NameCell, NameCellProps } from './NameCell';
 
 const theme = createTheme();
@@ -25,7 +27,7 @@ function renderCell(props: NameCellProps): ReturnType<typeof render> {
       <ThemeProvider theme={theme}>
         <NameCell {...props} />
       </ThemeProvider>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -74,7 +76,7 @@ describe('NameCell – Folder', () => {
   });
 
   it('calls onToggleExpanded when the button is clicked', () => {
-    const onToggle = jest.fn();
+    const onToggle = vi.fn();
     renderCell({
       kind: 'Folder',
       depth: 0,

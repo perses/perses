@@ -12,14 +12,16 @@
 // limitations under the License.
 
 import { Box, Chip, CircularProgress, Stack } from '@mui/material';
-import { Table, TableColumnConfig } from '@perses-dev/components';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
-import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { FolderResource } from '@perses-dev/client';
-import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
+import { Table, TableColumnConfig } from '@perses-dev/components';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useDefaultRowsPerPage } from '../../context/Config';
+import { useIsMobileSize } from '../../utils/browser-size';
 import {
   buildTableRows,
   formatAbsoluteTime,
@@ -27,9 +29,9 @@ import {
   RowWithOriginal,
   sortDashboardTableStringColumn,
 } from '../../utils/dashboardTableUtils';
-import { useIsMobileSize } from '../../utils/browser-size';
-import { NameCell } from './NameCell';
+import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
 import { DashboardListRow } from './DashboardList';
+import { NameCell } from './NameCell';
 
 export interface DashboardTreeTableRow {
   kind: 'Folder' | 'Dashboard' | 'NoItems';
@@ -68,12 +70,13 @@ function DashboardTreeList({
   handleDeleteFolderButtonClick,
   isLoading,
 }: DashboardTreeTableProps): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
   const isMobileSize = useIsMobileSize();
   const getTableHeight = useCallback(
     () => (isMobileSize ? 500 : (Math.max(window.innerHeight - 350, 300) ?? 300)),
-    [isMobileSize]
+    [isMobileSize],
   );
-  const [height, setHeight] = useState(getTableHeight());
+  const [height, setHeight] = useState(getTableHeight);
   useEffect(() => {
     const handleResize = (): void => setHeight(() => getTableHeight());
     window.addEventListener('resize', handleResize);
@@ -85,19 +88,19 @@ function DashboardTreeList({
   }, [folderList, dashboardsMap]);
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
 
   const sortStringColumn = useCallback(
     (accessorKey: 'project' | 'displayName') =>
       (
         rowA: RowWithOriginal<DashboardTreeTableRow>,
         rowB: RowWithOriginal<DashboardTreeTableRow>,
-        columnId: string
+        columnId: string,
       ): number => {
         const isDesc = sorting.find((s) => s.id === columnId)?.desc ?? false;
         return sortDashboardTableStringColumn(rowA, rowB, accessorKey, isDesc);
       },
-    [sorting]
+    [sorting],
   );
 
   const columns = useMemo<Array<TableColumnConfig<DashboardTreeTableRow>>>(
@@ -295,7 +298,7 @@ function DashboardTreeList({
       handleEditFolderButtonClick,
       handleRenameButtonClick,
       sortStringColumn,
-    ]
+    ],
   );
 
   if (isLoading) {

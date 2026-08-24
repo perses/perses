@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getVariableProject, VariableType } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceStoreProvider, VariableDefinition, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import {
@@ -21,15 +22,17 @@ import {
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
 import { ReactElement, useMemo, useState } from 'react';
-import { getVariableProject, VariableType } from '@perses-dev/client';
+
 import { useDatasourceApi } from '../../model/datasource-api';
+import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../form-drawers';
-import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 
 interface VariableDrawerProps<T extends VariableType> extends DrawerProps<T> {
   variable: T;
 }
+
+const INITIAL_VARIABLE_DEFINITIONS: VariableDefinition[] = [];
 
 export function VariableDrawer<T extends VariableType>({
   variable,
@@ -54,10 +57,11 @@ export function VariableDrawer<T extends VariableType>({
   }, [variable]);
 
   const handleSave = (definition: VariableDefinition): void => {
-    variable.spec = definition;
-    variable.metadata.name = definition.spec.name;
+    const updatedVariable = structuredClone(variable);
+    updatedVariable.spec = definition;
+    updatedVariable.metadata.name = definition.spec.name;
     if (onSave) {
-      onSave(variable);
+      onSave(updatedVariable);
     }
   };
 
@@ -76,7 +80,7 @@ export function VariableDrawer<T extends VariableType>({
           <ValidationProvider>
             <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
               <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-                <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
+                <VariableProviderWithQueryParams initialVariableDefinitions={INITIAL_VARIABLE_DEFINITIONS}>
                   <VariableEditorForm
                     initialVariableDefinition={variableDef}
                     action={action}

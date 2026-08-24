@@ -12,22 +12,23 @@
 // limitations under the License.
 
 import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
-import Magnify from 'mdi-material-ui/Magnify';
-import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import Archive from 'mdi-material-ui/Archive';
-import DatabaseIcon from 'mdi-material-ui/Database';
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
-import Close from 'mdi-material-ui/Close';
-import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
 import { isProjectMetadata, Resource } from '@perses-dev/client';
-import { useIsMobileSize } from '../../../utils/browser-size';
+import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
+import Archive from 'mdi-material-ui/Archive';
+import Close from 'mdi-material-ui/Close';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
+import Magnify from 'mdi-material-ui/Magnify';
+import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
-import { useProjectList } from '../../../model/project-client';
-import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
+import { useProjectList } from '../../../model/project-client';
+import { AdminRoute, ProjectRoute } from '../../../model/route';
+import { useIsMobileSize } from '../../../utils/browser-size';
 import { SearchList } from './SearchList';
 
 function shortcutDisplay(): string {
@@ -45,13 +46,17 @@ interface ResourceListProps {
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
   const { query, onClick, isResources } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('projects', isAvailable),
+    [isResources],
+  );
   return (
     <SearchList
       list={projectsQueryResult.data ?? []}
       query={query}
       onClick={onClick}
       icon={Archive}
-      isResource={(isAvailable) => isResources?.('projects', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -59,6 +64,10 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
 function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
   const { query, onClick, isResources } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
+    [isResources],
+  );
   return (
     <SearchList
       list={globalDatasourceQueryResult.data ?? []}
@@ -66,7 +75,7 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={DatabaseIcon}
       buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={(isAvailable) => isResources?.('globalDatasources', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -87,15 +96,20 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   } = useImportantDashboardList();
 
   const { query, isResources, onClick } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
+    [isResources],
+  );
 
   const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
     if (query.length && dashboardList) {
+      const importantDashboardKeys = new Set(
+        importantDashboards.map(
+          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
+        ),
+      );
       return dashboardList.map((d) => {
-        const highlight = !!importantDashboards.some(
-          (importantDashboard) =>
-            importantDashboard.metadata.name === d.metadata.name &&
-            importantDashboard.metadata.project === d.metadata.project
-        );
+        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
         return { ...d, highlight };
       });
     } else {
@@ -121,7 +135,7 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
-      isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -129,6 +143,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
   const { isResources, onClick, query } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
+    [isResources],
+  );
   return (
     <SearchList
       list={datasourceQueryResult.data ?? []}
@@ -139,7 +157,7 @@ function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
       buildRouting={(resource) =>
         `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
       }
-      isResource={(isAvailable) => isResources?.('datasources', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -167,9 +185,9 @@ export function SearchBar(): ReactElement {
     datasources: false,
   });
 
-  function handleIsResourceAvailable(type: ResourceType, available: boolean): void {
+  const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
-  }
+  }, []);
 
   const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
   const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
@@ -221,7 +239,7 @@ export function SearchBar(): ReactElement {
         >
           <TextField
             size="medium"
-            /* eslint-disable-next-line jsx-a11y/no-autofocus */
+            /* oxlint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus={true}
             inputRef={handleSearchInputRef}
             variant="outlined"

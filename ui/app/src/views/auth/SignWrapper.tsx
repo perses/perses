@@ -12,11 +12,13 @@
 // limitations under the License.
 
 /* TODO: @Gladorme check social button types */
-/* eslint @typescript-eslint/explicit-function-return-type: 0 */
-/* typescript-eslint/explicit-module-boundary-types: 0 */
+/* oxlint-disable typescript/explicit-function-return-type */
 
 import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import Bitbucket from 'mdi-material-ui/Bitbucket';
+import Gitlab from 'mdi-material-ui/Gitlab';
+import { ReactElement, ReactNode, useMemo } from 'react';
+import * as React from 'react';
 import {
   AmazonLoginButton,
   AppleLoginButton,
@@ -39,16 +41,14 @@ import {
   YahooLoginButton,
   ZaloLoginButton,
 } from 'react-social-login-buttons';
-import * as React from 'react';
-import Gitlab from 'mdi-material-ui/Gitlab';
-import Bitbucket from 'mdi-material-ui/Bitbucket';
-import { useDarkMode } from '../../context/DarkMode';
-import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
+
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
-import { useIsLaptopSize } from '../../utils/browser-size';
+import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
+import { useIsLaptopSize } from '../../utils/browser-size';
 
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.
@@ -144,17 +144,20 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
   const config = useConfigContext();
   const theme = useTheme();
   const isNativeAuthnProviderEnabled = useIsNativeAuthnProviderEnabled();
-  const oauthProviders = (config.config?.security?.authentication?.providers?.oauth || []).map((provider) => ({
-    path: `oauth/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.auth_url),
-  }));
-  const oidcProviders = (config.config?.security?.authentication?.providers?.oidc || []).map((provider) => ({
-    path: `oidc/${provider.slug_id}`,
-    name: provider.name,
-    button: computeSocialButtonFromURL(theme, provider.issuer),
-  }));
-  const socialProviders = [...oidcProviders, ...oauthProviders];
+  const providers = config.config.security.authentication.providers;
+  const socialProviders = useMemo(() => {
+    const oauthProviders = (providers.oauth || []).map((provider) => ({
+      path: `oauth/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.auth_url),
+    }));
+    const oidcProviders = (providers.oidc || []).map((provider) => ({
+      path: `oidc/${provider.slug_id}`,
+      name: provider.name,
+      button: computeSocialButtonFromURL(theme, provider.issuer),
+    }));
+    return [...oidcProviders, ...oauthProviders];
+  }, [providers.oauth, providers.oidc, theme]);
   const path = useRedirectQueryParam();
 
   return (

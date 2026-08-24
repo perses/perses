@@ -1,0 +1,57 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "react", "react-perf", "jsx-a11y"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "jest": true,
+    "node": true,
+    "browser": true
+  },
+  "rules": {
+    "typescript/explicit-function-return-type": "error",
+    "typescript/explicit-module-boundary-types": "error",
+    "typescript/array-type": ["error", { "default": "array-simple" }],
+    "eqeqeq": ["error", "always"],
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-nested-ternary": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/rules-of-hooks": "error",
+    "react/checked-requires-onchange-or-readonly": "error",
+    "react/display-name": "error",
+    "react/jsx-no-target-blank": "error",
+    "react/jsx-no-useless-fragment": "warn",
+    "react/no-unescaped-entities": "error",
+    "react/exhaustive-deps": "error",
+    "react/react-compiler": "warn",
+    "react/jsx-curly-brace-presence": [
+      "error",
+      { "props": "never", "children": "never", "propElementValues": "always" }
+    ],
+    "import/no-duplicates": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["mdi-material-ui", "!mdi-material-ui/"],
+            "message": "Please use the default import from the icon file directly rather than using a named import.\n\nGood:\nimport IconName from 'mdi-material-ui/IconName';\n\nBad:\nimport { IconName } from 'mdi-material-ui';"
+          }
+        ]
+      }
+    ]
+  },
+  "ignorePatterns": ["**/dist", "**/lib"]
+}
