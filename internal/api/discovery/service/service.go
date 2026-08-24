@@ -87,6 +87,7 @@ func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 		})
 	if err != nil {
 		logrus.WithError(err).Error("unable to get discovered globaldatasources")
+		return
 	}
 	for _, ds := range foundDatasources {
 		if !containsDatasource(currentNames, ds.Metadata.Name) {
