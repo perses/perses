@@ -78,7 +78,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	// Enable the refresh of the RBAC permissions if the native provider is enabled.
 	if conf.Security.Authorization.Provider.Native.Enable {
 		rbacTask := refresh.New(persesDAO,
-			dependencyManager.Service().GetAuthorization().RefreshPermissions,
+			dependencyManager.Service().GetAuthorization().RefreshPermissionsAndRoles,
 			[]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding},
 		)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.Provider.Native.CheckLatestUpdateInterval), rbacTask)
