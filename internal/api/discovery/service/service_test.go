@@ -79,13 +79,16 @@ func (f *fakeGlobalDatasourceService) List(q *globaldatasource.Query) ([]*v1.Glo
 	for _, ds := range f.store {
 		result = append(result, ds)
 	}
-	// apply the same source + discoveryName filter that persistence.go applies
+	// apply the same filters that persistence.go applies
 	if q.Source == "" {
 		return result, nil
 	}
 	var filtered []*v1.GlobalDatasource
 	for _, ds := range result {
 		if q.DiscoveryName != "" && ds.Metadata.DiscoveryName != q.DiscoveryName {
+			continue
+		}
+		if q.DiscoveryType != "" && ds.Metadata.DiscoveryType != q.DiscoveryType {
 			continue
 		}
 		if ds.Metadata.Source == q.Source {
@@ -124,6 +127,7 @@ func storeEntity(name string, discoveryName string) *v1.GlobalDatasource {
 			Metadata:      v1.Metadata{Name: name},
 			Source:        v1.DiscoverySource,
 			DiscoveryName: discoveryName,
+			DiscoveryType: v1.KubernetesType,
 		},
 		Spec: datasourceSpec.Spec{},
 	}
@@ -141,7 +145,7 @@ func storeNames(svc *fakeGlobalDatasourceService) []string {
 
 func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 	fake := newFakeService()
-	svc := New(false, fake, "kube-prod")
+	svc := New(false, fake, "kube-prod", v1.KubernetesType)
 
 	svc.Apply([]*v1.GlobalDatasource{makeEntity("ds-a1"), makeEntity("ds-a2")})
 
@@ -151,6 +155,7 @@ func TestApply_StampsSourceAndDiscoveryName(t *testing.T) {
 		require.True(t, ok)
 		assert.Equal(t, v1.DiscoverySource, ds.Metadata.Source)
 		assert.Equal(t, "kube-prod", ds.Metadata.DiscoveryName)
+		assert.Equal(t, v1.KubernetesType, ds.Metadata.DiscoveryType)
 	}
 }
 
@@ -161,7 +166,7 @@ func TestApply_DeletesStaleEntriesScopedToDiscovery(t *testing.T) {
 		storeEntity("ds-a2", "kube-prod"),
 		storeEntity("ds-b1", "kube-staging"),
 	)
-	svc := New(false, fake, "kube-prod")
+	svc := New(false, fake, "kube-prod", v1.KubernetesType)
 
 	// kube-prod's new result contains only ds-a1 — ds-a2 has disappeared.
 	svc.Apply([]*v1.GlobalDatasource{makeEntity("ds-a1")})
@@ -176,7 +181,7 @@ func TestApply_NoDeleteWhenListErrors(t *testing.T) {
 		storeEntity("ds-a2", "kube-prod"),
 	)
 	fake.listError = fmt.Errorf("database unavailable")
-	svc := New(false, fake, "kube-prod")
+	svc := New(false, fake, "kube-prod", v1.KubernetesType)
 
 	// Apply with an empty list — without the guard, this would delete everything.
 	svc.Apply([]*v1.GlobalDatasource{})
