@@ -16,6 +16,7 @@ package auth
 import (
 	"strings"
 
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -45,4 +46,37 @@ type externalUserInfo interface {
 
 func buildLoginFromEmail(email string) string {
 	return strings.Split(email, "@")[0]
+}
+
+// extractPersistedClaims reads the configured claim names from rawClaims and returns
+// a map suitable for embedding into the Perses JWT.
+// Claim values that are string arrays or single strings are both handled.
+// Returns nil when claimConfigs is empty or no configured claim names are present.
+func extractPersistedClaims(rawClaims map[string]any, claimConfigs []config.ProviderClaimConfig) map[string][]string {
+	if len(claimConfigs) == 0 || len(rawClaims) == 0 {
+		return nil
+	}
+	result := make(map[string][]string)
+	for _, cc := range claimConfigs {
+		val, ok := rawClaims[cc.ClaimName]
+		if !ok {
+			continue
+		}
+		switch v := val.(type) {
+		case []any:
+			for _, item := range v {
+				if s, ok := item.(string); ok {
+					result[cc.ClaimName] = append(result[cc.ClaimName], s)
+				}
+			}
+		case string:
+			if v != "" {
+				result[cc.ClaimName] = []string{v}
+			}
+		}
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
 }

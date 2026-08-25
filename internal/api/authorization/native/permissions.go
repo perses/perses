@@ -37,6 +37,8 @@ func (p usersPermissions) addEntry(user string, project string, permission *v1Ro
 
 type cache struct {
 	permissions usersPermissions
+	globalRoles []*v1.GlobalRole
+	roles       []*v1.Role
 }
 
 func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {

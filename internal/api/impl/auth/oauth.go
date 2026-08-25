@@ -138,6 +138,7 @@ type oAuthEndpoint struct {
 	authURL         url.URL
 	svc             service
 	loginProps      []string
+	claimConfigs    []config.ProviderClaimConfig
 	apiPrefix       string
 }
 
@@ -192,6 +193,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao, authz: authz},
 		loginProps:      loginProps,
+		claimConfigs:    provider.Claims,
 		apiPrefix:       apiPrefix,
 	}, nil
 }
@@ -373,7 +375,8 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return err
 	}
 
-	_, err = e.performUserSync(uInfo, ctx.SetCookie)
+	persistedClaims := extractPersistedClaims(uInfo.(*oauthUserInfo).RawProperties, e.claimConfigs)
+	_, err = e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -443,7 +446,8 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 		return err
 	}
 
-	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
+	persistedClaims := extractPersistedClaims(uInfo.(*oauthUserInfo).RawProperties, e.claimConfigs)
+	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -451,7 +455,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
+func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
@@ -464,12 +468,12 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 		ProviderKind: utils.AuthnKindOAuth,
 		ProviderID:   e.slugID,
 	}
-	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, setCookie)
+	accessToken, err := e.tokenManagement.accessToken(username, providerInfo, persistedClaims, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
 		return nil, err
 	}
-	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, setCookie)
+	refreshToken, err := e.tokenManagement.refreshToken(username, providerInfo, persistedClaims, setCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err
