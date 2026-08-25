@@ -75,12 +75,12 @@ type Authorization interface {
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
 	GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error)
-	// RefreshPermissions refreshes the permissions.
+	// RefreshPermissionsAndRoles refreshes the permissions and roles.
 	// We know this method is relative to the implementation and should not appear in the interface.
-	// This is convenient to have it here when the implementation is keeping the permissions in memory.
+	// This is convenient to have it here when the implementation is keeping the permissions and roles in memory.
 	// And since it is a single method, it does not hurt to have it in the interface as it is straight forward to implement it if it's unnecessary.
 	// Just return nil.
-	RefreshPermissions() error
+	RefreshPermissionsAndRoles() error
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
