@@ -13,6 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { ReactElement, ReactNode } from 'react';
+import { Mock, vi } from 'vitest';
 
 import { DarkModeContextProvider, useDarkMode } from './DarkMode';
 
@@ -20,24 +21,24 @@ let mockStoredDarkMode: boolean | null = null;
 let mockServerTheme: 'light' | 'dark' | undefined;
 let mockBrowserPrefersDarkMode = false;
 
-jest.mock('@mui/material', () => ({
+vi.mock('@mui/material', () => ({
   CssBaseline: (): null => null,
   ThemeProvider: (props: { children: ReactNode }): ReactNode => props.children,
   useMediaQuery: (): boolean => mockBrowserPrefersDarkMode,
 }));
 
-jest.mock('@perses-dev/components', () => ({
+vi.mock('@perses-dev/components', () => ({
   ChartsProvider: (props: { children: ReactNode }): ReactNode => props.children,
   generateChartsTheme: (): Record<string, never> => ({}),
   getTheme: (): Record<string, never> => ({}),
-  useLocalStorage: (): [boolean | null, jest.Mock] => [mockStoredDarkMode, jest.fn()],
+  useLocalStorage: (): [boolean | null, Mock] => [mockStoredDarkMode, vi.fn()],
 }));
 
-jest.mock('@perses-dev/dashboards', () => ({
+vi.mock('@perses-dev/dashboards', () => ({
   TOGGLE_THEME_EVENT: 'toggle-theme',
 }));
 
-jest.mock('../model/config-client', () => ({
+vi.mock('../model/config-client', () => ({
   useConfig: (): object => ({
     data: { frontend: { default_user_preferences: { theme: mockServerTheme } } },
   }),

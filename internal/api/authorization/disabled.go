@@ -67,6 +67,6 @@ func (r *disabledImpl) GetPermissions(_ echo.Context) (map[string][]*v1Role.Perm
 	return nil, nil
 }
 
-func (r *disabledImpl) RefreshPermissions() error {
+func (r *disabledImpl) RefreshPermissionsAndRoles() error {
 	return nil
 }

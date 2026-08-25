@@ -69,7 +69,7 @@ successfully logged in %s
 }
 
 func TestLoginOIDC(t *testing.T) {
-	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t)
+	providerServer, providerConfig := e2eframework.NewOIDCProviderTestServer(t, nil)
 	defer providerServer.Close()
 
 	conf := e2eframework.DefaultAuthConfig()
