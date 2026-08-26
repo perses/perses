@@ -181,7 +181,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	accessToken, err := e.tokenManagement.accessToken(claims.Subject, claims.ProviderInfo, ctx.SetCookie)
+	accessToken, err := e.tokenManagement.accessToken(claims.Subject, claims.ProviderInfo, claims.PersistedClaims, ctx.SetCookie)
 	if err != nil {
 		return err
 	}

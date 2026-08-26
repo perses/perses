@@ -17,13 +17,5 @@
     "declaration": true,
     "declarationMap": true,
     "pretty": true
-  },
-  // For builds that use ts-node to compile the configs (e.g. webpack, jest)
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs",
-      "target": "es2023",
-      "esModuleInterop": true
-    }
   }
 }

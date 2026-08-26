@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/perses/perses/internal/api/utils"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"

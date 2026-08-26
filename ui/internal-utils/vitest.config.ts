@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import shared from '../jest.shared';
+import { mergeConfig } from 'vitest/config';
 
-export default shared;
+import shared from '../vitest.shared';
+
+export default mergeConfig(shared, {});
