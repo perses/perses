@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { buildProxyUrl } from './datasource-api';
+import { buildProxyUrl } from '@perses-dev/client';
 
 interface TestData {
   input: {
@@ -36,7 +36,11 @@ describe('buildProxyUrl', () => {
     },
     {
       title: 'should build dashboard datasource proxy url',
-      input: { project: 'projectA', dashboard: 'dashboardA', name: 'datasourceA' },
+      input: {
+        project: 'projectA',
+        dashboard: 'dashboardA',
+        name: 'datasourceA',
+      },
       expected: '/proxy/projects/projectA/dashboards/dashboardA/datasources/datasourceA',
     },
   ])('$title', (data: TestData) => {
