@@ -49,7 +49,7 @@
 - name: "Tempo"
   version: "0.60.0-beta.0"
 - name: "TimeSeriesChart"
-  version: "0.15.0-beta.0"
+  version: "0.14.0-beta.1"
 - name: "TimeSeriesTable"
   version: "0.13.0-beta.0"
 - name: "TraceTable"
