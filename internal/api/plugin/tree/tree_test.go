@@ -106,6 +106,38 @@ func TestTree_Add(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:     "non-prefixed versions resolve highest as latest",
+			baseTree: nil,
+			treeParameter: []treeParameter{
+				{"schema", module.Metadata{Version: "0.1.0", Registry: ""}, "inst-0.1.0"},
+				{"schema", module.Metadata{Version: "0.3.0", Registry: ""}, "inst-0.3.0"},
+				{"schema", module.Metadata{Version: "0.2.0", Registry: ""}, "inst-0.2.0"},
+			},
+			expectedTree: Tree[any]{
+				node{name: "schema", registry: plugin.DefaultRegistry}: {
+					"0.1.0":  "inst-0.1.0",
+					"0.3.0":  "inst-0.3.0",
+					"0.2.0":  "inst-0.2.0",
+					"latest": "inst-0.3.0",
+				},
+			},
+		},
+		{
+			name:     "pre-release is not latest",
+			baseTree: nil,
+			treeParameter: []treeParameter{
+				{"LogExplorer", module.Metadata{Version: "0.1.0", Registry: ""}, "inst-final"},
+				{"LogExplorer", module.Metadata{Version: "0.1.0-rc.1", Registry: ""}, "inst-rc"},
+			},
+			expectedTree: Tree[any]{
+				node{name: "LogExplorer", registry: plugin.DefaultRegistry}: {
+					"0.1.0":      "inst-final",
+					"0.1.0-rc.1": "inst-rc",
+					"latest":     "inst-final",
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
