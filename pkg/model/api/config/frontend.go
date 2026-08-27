@@ -152,6 +152,9 @@ type Frontend struct {
 	Disable bool `json:"disable" yaml:"disable"`
 	// EnableKeyboardShortcuts enables keyboard shortcuts in the UI. Defaults to true when omitted.
 	EnableKeyboardShortcuts *bool `json:"enable_keyboard_shortcuts,omitempty" yaml:"enable_keyboard_shortcuts,omitempty"`
+	// EnablePluginVersioning enables the dashboard "lock" button that pins every plugin to its latest available
+	// version. Defaults to false (feature hidden) when omitted.
+	EnableLockMode bool `json:"enable_lock_mode,omitempty" yaml:"enable_lock_mode,omitempty"`
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
