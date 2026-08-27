@@ -25,10 +25,10 @@ export function buildProxyUrl({
 }: {
   project?: string;
   dashboard?: string;
-  name?: string;
+  name: string;
 }): string {
   const basePath = PERSES_APP_CONFIG.api_prefix;
-  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name ?? '')}`;
+  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
   if (dashboard) {
     url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
   }

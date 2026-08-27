@@ -56,7 +56,6 @@ export class PanelEditor {
   }
 
   async selectGroup(groupName: string): Promise<void> {
-    await this.selectTab('Layout');
     await selectMenuItem(this.container, 'Group', groupName);
 
     await expect(this.container.getByLabel('Group', { exact: false })).toHaveText(groupName);
