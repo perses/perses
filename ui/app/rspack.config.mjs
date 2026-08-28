@@ -83,6 +83,16 @@ export default defineConfig({
   },
   module: {
     rules: [
+      // Dependencies shipping ESM (`"type": "module"`) have their requests treated as fully
+      // specified, which breaks extensionless deep imports into CommonJS-only packages such as
+      // `mdi-material-ui/Refresh` or `lodash/merge`. Relax the requirement so the resolver falls
+      // back to extension resolution for those requests.
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
       {
         test: /\.css$/,
         type: 'css',
