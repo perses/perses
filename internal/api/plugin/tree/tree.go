@@ -14,10 +14,19 @@
 package tree
 
 import (
+	"strings"
+
 	"github.com/perses/spec/go/module"
 	"github.com/perses/spec/go/plugin"
 	"golang.org/x/mod/semver"
 )
+
+func canonicalVersion(version string) string {
+	if !strings.HasPrefix(version, "v") {
+		return "v" + version
+	}
+	return version
+}
 
 type node struct {
 	name     string
@@ -127,7 +136,7 @@ func (t Tree[T]) isLatest(key node, version string) bool {
 		if v == plugin.LatestVersion {
 			continue
 		}
-		if semver.Compare(version, v) < 0 {
+		if semver.Compare(canonicalVersion(version), canonicalVersion(v)) < 0 {
 			return false
 		}
 	}
@@ -140,7 +149,7 @@ func (t Tree[T]) getLatestVersion(key node) string {
 		if v == plugin.LatestVersion {
 			continue
 		}
-		if semver.Compare(currentVersion, v) < 0 {
+		if semver.Compare(canonicalVersion(currentVersion), canonicalVersion(v)) < 0 {
 			currentVersion = v
 		}
 	}

@@ -35,6 +35,7 @@ const sharedAliases = {
   '@perses-dev/components': resolve(sharedPackagesPath, 'components/src'),
   '@perses-dev/dashboards': resolve(sharedPackagesPath, 'dashboards/src'),
   '@perses-dev/plugin-system': resolve(sharedPackagesPath, 'plugin-system/src'),
+  '@perses-dev/client': resolve(sharedPackagesPath, 'client/src'),
 
   // packages only in shared node_modules
   zustand: resolve(sharedNodeModulesPath, 'zustand'),
