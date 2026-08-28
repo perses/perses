@@ -84,7 +84,7 @@ func newTestDatasource(name string) *v1.GlobalDatasource {
 
 func TestApplyService_SetDefaultFlagTrue(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, "discovery-a", true)
+	applySvc := New(false, mockSvc, true)
 
 	ds := newTestDatasource("prometheus-1")
 	entities := []*v1.GlobalDatasource{ds}
@@ -98,7 +98,7 @@ func TestApplyService_SetDefaultFlagTrue(t *testing.T) {
 
 func TestApplyService_SetDefaultFlagFalse(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, "discovery-b", false)
+	applySvc := New(false, mockSvc, false)
 
 	ds := newTestDatasource("loki-1")
 	entities := []*v1.GlobalDatasource{ds}
@@ -112,7 +112,7 @@ func TestApplyService_SetDefaultFlagFalse(t *testing.T) {
 
 func TestApplyService_MultipleEntitiesWithDefaultTrue(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, "discovery-default", true)
+	applySvc := New(false, mockSvc, true)
 
 	entities := []*v1.GlobalDatasource{
 		newTestDatasource("prometheus-1"),
