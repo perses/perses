@@ -29,7 +29,7 @@ func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensit
 		if c.KubernetesDiscovery != nil {
 			defaultFlag = c.KubernetesDiscovery.Default
 		}
-		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), c.Name, defaultFlag)
+		svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource(), defaultFlag)
 		var helper taskhelper.Helper
 		var err error
 		if c.HTTPDiscovery != nil {
