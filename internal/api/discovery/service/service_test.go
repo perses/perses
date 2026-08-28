@@ -127,5 +127,3 @@ func TestApplyService_MultipleEntitiesWithDefaultTrue(t *testing.T) {
 		assert.Equal(t, true, created.Spec.Default, "datasource %d should have default=true", i)
 	}
 }
-
-
