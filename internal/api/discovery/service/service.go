@@ -21,11 +21,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string, defaultFlag bool) *ApplyService {
+func New(caseSensitive bool, svc globaldatasource.Service, defaultFlag bool) *ApplyService {
 	return &ApplyService{
 		caseSensitive: caseSensitive,
 		svc:           svc,
-		discoveryName: discoveryName,
 		defaultFlag:   defaultFlag,
 	}
 }
@@ -33,7 +32,6 @@ func New(caseSensitive bool, svc globaldatasource.Service, discoveryName string,
 type ApplyService struct {
 	caseSensitive bool
 	svc           globaldatasource.Service
-	discoveryName string
 	// Default flag taken from config
 	defaultFlag bool
 }
