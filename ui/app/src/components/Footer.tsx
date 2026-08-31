@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Theme } from '@mui/material';
 import { Box, CircularProgress, Link } from '@mui/material';
-import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import type { SxProps, Theme } from '@mui/material/styles';
 import Github from 'mdi-material-ui/Github';
 import type { ReactElement } from 'react';
 

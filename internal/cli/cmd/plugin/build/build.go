@@ -34,8 +34,8 @@ import (
 
 type option struct {
 	persesCMD.Option
-	skipNPMBuild              bool
-	skipNPMInstall            bool
+	skipPNPMBuild             bool
+	skipPNPMInstall           bool
 	archiveFormat             archive.Format
 	cfg                       config.PluginConfig
 	initialCFG                config.PluginConfig
@@ -80,8 +80,8 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	// First step: run npm to build the frontend part.
-	if err := o.executeNPMSteps(); err != nil {
+	// First step: run pnpm to build the frontend part.
+	if err := o.executePNPMSteps(); err != nil {
 		return err
 	}
 	// Check if the required files are present
@@ -186,8 +186,8 @@ func NewCMD() *cobra.Command {
 		Use:   "build",
 		Short: "Build the plugin.",
 		Long: `The command will build the plugin by following these steps:
-- Run npm ci to install the frontend dependencies. If the node_modules folder already exists, it will skip this step. As a best effort, it will also check if the node_modules folder exists in the root folder of the plugin (if it is a npm workspace / monorepo) and skip the step if it exists.
-- Run npm run build to build the frontend
+- Run pnpm install --frozen-lockfile to install the frontend dependencies. If the node_modules folder already exists, it will skip this step. As a best effort, it will also check if the node_modules folder exists in the root folder of the plugin (if it is a pnpm workspace / monorepo) and skip the step if it exists.
+- Run pnpm build to build the frontend
 - Vendor all cue dependencies if the plugin requires a schema
 - Create the archive with the following files:
   - package.json: required to get the type of the plugin and the name
@@ -201,8 +201,8 @@ func NewCMD() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
-	cmd.Flags().BoolVar(&o.skipNPMBuild, "skip.npm-build", false, "The command will run `npm run build` to ensure the frontend is built before creating the archive. If you want to skip this step, you can use this flag.")
-	cmd.Flags().BoolVar(&o.skipNPMInstall, "skip.npm-install", false, "The command will run `npm ci` if it doesn't find the node_modules folder. If you want to skip this step, you can use this flag.")
+	cmd.Flags().BoolVar(&o.skipPNPMBuild, "skip.pnpm-build", false, "The command will run `pnpm build` to ensure the frontend is built before creating the archive. If you want to skip this step, you can use this flag.")
+	cmd.Flags().BoolVar(&o.skipPNPMInstall, "skip.pnpm-install", false, "The command will run `pnpm install --frozen-lockfile` if it doesn't find the node_modules folder. If you want to skip this step, you can use this flag.")
 	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag ---plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
 

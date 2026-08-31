@@ -5,11 +5,11 @@ for example in */;
 do
   pushd $example
 
-  npm install |& tee out.log
+  pnpm install |& tee out.log
   if grep -q ERESOLVE out.log; then
     exit 1
   fi
-  npm run build
+  pnpm build
 
   popd
 done

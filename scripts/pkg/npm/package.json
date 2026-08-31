@@ -1,7 +1,7 @@
 {
   "name": "perses-test",
-  "description": "Package.json for testing purposes",
   "version": "0.1.0",
+  "description": "Package.json for testing purposes",
   "workspaces": [
     "foo",
     "bar",
@@ -12,5 +12,5 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "pnpm@12.1.0"
 }

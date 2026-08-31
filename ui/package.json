@@ -6,7 +6,7 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
   },
   "scripts": {
     "build": "turbo run build",
@@ -20,14 +20,14 @@
     "type-check": "turbo run type-check",
     "start": "turbo run start",
     "clean": "turbo run clean",
-    "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
+    "reinstall": "pnpm clean && rm -rf **/node_modules && pnpm install",
     "clear-turbo-cache": "rimraf ./.turbo/cache",
     "e2e": "turbo run e2e:local",
     "e2e:debug": "turbo run e2e -- --debug",
     "e2e:ci": "turbo run e2e:ci",
-    "e2e:ci:stream": "npm run e2e:ci --workspace=@perses-dev/e2e",
+    "e2e:ci:stream": "pnpm --filter @perses-dev/e2e e2e:ci",
     "typedoc": "typedoc",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
     "app",
@@ -60,5 +60,5 @@
     "typescript": "5.9.3",
     "vitest": "^4.1.11"
   },
-  "packageManager": "npm@11.17.0"
+  "packageManager": "pnpm@12.1.0"
 }

@@ -1,0 +1,13 @@
+packages:
+  - app
+  - e2e
+  - internal-utils
+
+linkWorkspacePackages: true
+
+nodeLinker: hoisted
+
+allowBuilds:
+  '@swc/core': true
+  core-js: false
+  esbuild: true

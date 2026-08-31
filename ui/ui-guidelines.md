@@ -21,7 +21,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
     [React Doctor plugin](https://www.react.doctor/docs/configuration/eslint-and-oxlint-plugins), and
     [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)
   - Language: [TypeScript](https://www.typescriptlang.org/) (with a few exceptions for things like config files)
-  - Package manager: [npm](https://docs.npmjs.com/) with [workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces)
+  - Package manager: [pnpm](https://pnpm.io/) with [workspaces](https://pnpm.io/workspaces)
 - Core UI and component libraries
   - UI library: [React](https://react.dev/)
   - Component library: [@mui/material](https://mui.com/material-ui/getting-started/overview/), [@mui/x-date-pickers](https://mui.com/x/react-date-pickers/getting-started/)
@@ -111,7 +111,7 @@ are reflected in how the packages are organized. There is some variability from 
   React Doctor's Oxlint plugin adds React-specific correctness and maintainability checks to the same lint command.
   - Exceptions can be made on a case-by-case basis using `oxlint-disable-next-line` and a comment that communicates the reason for the exception.
   - We prefer `error` (instead of `warn`) for Oxlint rules because it makes it easier to catch and enforce linting issues.
-- Run `npm run doctor` for the full React Doctor project scan. GitHub Actions runs the same broader analysis on pull
+- Run `pnpm doctor` for the full React Doctor project scan. GitHub Actions runs the same broader analysis on pull
   requests and pushes to `main`.
 - Typescript is used to provide a stronger guarantee of correctness across the
   application. Please avoid using escape hatches like `any`, prefer using `unknown`

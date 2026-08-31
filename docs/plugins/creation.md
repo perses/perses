@@ -93,7 +93,7 @@ Check the [CLI documentation](../cli.md) for more details.
 
 - Create a new plugin module and plugin using the `percli plugin generate` command. This will create a new folder with the required structure and files.
   - Optionally, add more plugins to the module using the same command. This will edit and add the necessary files, keeping the required plugin module structure.
-- Install the required dependencies using `npm install`.
+- Install the required dependencies using `pnpm install`.
 
 ### Implement
 

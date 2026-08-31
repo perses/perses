@@ -43,8 +43,8 @@ all: clean build
 .PHONY: bump-version
 bump-version:
 	./scripts/ui_release.sh --bump-version "${VERSION}"
-	cd ui/ && npm install
-	git add "./ui/package-lock.json" "./**/package.json"
+	cd ui/ && pnpm install
+	git add "./ui/pnpm-lock.yaml" "./**/package.json"
 
 .PHONY: tag
 tag:
@@ -76,7 +76,7 @@ checkstyle:
 .PHONY: checklint
 checklint:
 	@echo ">> Check TS code style"
-	cd ui && npm run lint
+	cd ui && pnpm lint
 
 .PHONY: checklicense
 checklicense:
@@ -170,7 +170,7 @@ build-api: generate
 .PHONY: build-ui
 build-ui:
 	@echo ">> Build the Perses UI"
-	cd ./ui && npm install $(NPM_INSTALL_FLAGS) && npm run build
+	cd ./ui && pnpm install $(PNPM_INSTALL_FLAGS) && pnpm build
 
 .PHONY: build-cli
 build-cli:
@@ -202,7 +202,7 @@ clean:
 	rm -rf ./bin
 	rm -rf EXTRACTED_CHANGELOG.md
 	./scripts/ui_release.sh --clean
-	cd ./ui && npm run clean
+	cd ./ui && pnpm clean
 
 .PHONY: update-go-deps
 update-go-deps:
@@ -211,15 +211,15 @@ update-go-deps:
 		$(GO) get -d $$m; \
 	done
 
-.PHONY: update-npm-deps
-update-npm-deps:
-	@echo ">> Update npm dependencies"
-	./scripts/npm-deps.sh "minor"
+.PHONY: update-pnpm-deps
+update-pnpm-deps:
+	@echo ">> Update pnpm dependencies"
+	bash ./scripts/pnpm-deps.sh "minor"
 
-.PHONY: upgrade-npm-deps
-upgrade-npm-deps:
-	@echo ">> Upgrade npm dependencies"
-	./scripts/npm-deps.sh "latest"
+.PHONY: upgrade-pnpm-deps
+upgrade-pnpm-deps:
+	@echo ">> Upgrade pnpm dependencies"
+	bash ./scripts/pnpm-deps.sh "latest"
 
 .PHONY: update-helm-readme
 update-helm-readme:

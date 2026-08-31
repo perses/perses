@@ -4,11 +4,11 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
   },
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build": "pnpm build-mf && concurrently \"pnpm build:esm\" \"pnpm build:types\"",
     "build-mf": "rsbuild build",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file .swcrc",
     "build:types": "tsc --project tsconfig.build.json",
@@ -70,7 +70,7 @@
     "mf-manifest.json",
     "mf-stats.json"
   ],
-  "packageManager": "npm@11.17.0",
+  "packageManager": "pnpm@12.1.0",
   "perses": {
     "metadata": {
       "name": "{{.ModulePascalName}}",
