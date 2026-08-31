@@ -17,7 +17,7 @@ import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perse
 import { ReactElement, useMemo, useState } from 'react';
 
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
-import { DeleteResourceDialog } from '../dialogs';
+import { DeleteResourceDialog } from '../dialogs/DeleteResourceDialog';
 import { DrawerProps } from '../form-drawers';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
