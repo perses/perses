@@ -71,8 +71,11 @@ func (b *Banner) Verify() error {
 type TimeRange struct {
 	DisableCustomTimeRange bool                    `json:"disable_custom,omitempty" yaml:"disable_custom,omitempty"`
 	DisableZoomTimeRange   bool                    `json:"disable_zoom,omitempty" yaml:"disable_zoom,omitempty"`
-	DisableAutoRefresh     bool                    `json:"disable_auto_refresh,omitempty" yaml:"disable_auto_refresh,omitempty"`
 	Options                []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+type AutoRefresh struct {
+	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty"`
 }
 
 // DefaultUserPreferences contains the preferences used when the user has not
@@ -162,6 +165,8 @@ type Frontend struct {
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	// AutoRefresh contains the auto-refresh configuration for dashboards
+	AutoRefresh *AutoRefresh `json:"auto_refresh,omitempty" yaml:"auto_refresh,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
 	// DefaultUserPreferences contains server-wide defaults for user preferences.

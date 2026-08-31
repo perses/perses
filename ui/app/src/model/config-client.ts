@@ -184,8 +184,11 @@ export interface Banner {
 export interface TimeRangeConfig {
   disable_custom?: boolean;
   disable_zoom?: boolean;
-  disable_auto_refresh?: boolean;
   options?: DurationString[];
+}
+
+export interface AutoRefreshConfig {
+  disable?: boolean;
 }
 
 export interface FrontendConfig {
@@ -194,6 +197,7 @@ export interface FrontendConfig {
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
+  auto_refresh?: AutoRefreshConfig;
   banner?: Banner;
   default_user_preferences?: DefaultUserPreferences;
 }
