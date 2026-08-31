@@ -8,7 +8,7 @@ require (
 	github.com/perses/perses v0.54.0-rc.1
 	github.com/perses/plugins/prometheus v0.58.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.4
+	github.com/perses/spec v0.3.0-beta.5
 )
 
 require (
@@ -27,7 +27,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.70.1 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
-	github.com/zitadel/oidc/v3 v3.49.2 // indirect
+	github.com/zitadel/oidc/v3 v3.49.4 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/net v0.57.0 // indirect
