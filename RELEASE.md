@@ -7,10 +7,11 @@ the [Prometheus release process](https://github.com/prometheus/prometheus/blob/m
 
 We are starting a new release cycle every 3 months.
 
-| release series | date of first beta-release (year-month-day) | release shepherd                       |
-|----------------|---------------------------------------------|----------------------------------------|
-| v0.55          | 2026-09-14                                  | Celian Garcia (GitHub: @celian-garcia) |
-| v0.56          | 2027-01-04                                  | **volunteer welcome**                  |
+| release series | date of first beta-release (year-month-day) | release shepherd                                  |
+|----------------|---------------------------------------------|---------------------------------------------------|
+| v0.55          | 2026-09-14                                  | Celian Garcia (GitHub: @celian-garcia)            |
+| v0.56          | 2027-01-04                                  | Akshay Iyyadurai Balasundaram (GitHub: @ibakshay) |
+| v0.57          | 2027-04-05                                  | **volunteer welcome**                             |
 
 Note: Ideally you will finish the release cycle at most one month after the first `beta-release`.
 
