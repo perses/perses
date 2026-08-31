@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@perses-dev/internal-utils": "0.54.0",
-    "@playwright/test": "^1.54.2",
+    "@playwright/test": "^1.58.2",
     "chokidar-cli": "^3.0.0",
     "eslint-plugin-playwright": "^2.11.0",
     "react": "^18.3.0",
