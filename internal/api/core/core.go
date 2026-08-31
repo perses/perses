@@ -21,14 +21,15 @@ import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/perses/common/app"
-	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/api/discovery"
 	"github.com/perses/perses/internal/api/provisioning"
+	"github.com/perses/perses/internal/api/refresh"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/ui"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -56,6 +57,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.WithTimerTasks(time.Duration(conf.EphemeralDashboard.CleanupInterval), ephemeralDashboardsCleaner)
 	}
 
+	// Enable the provisioning of the resources from the folders defined in the configuration file.
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask, provisioningWatcher := provisioning.New(dependencyManager.Service(), conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
@@ -63,6 +65,8 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 			runner.WithTasks(provisioningWatcher)
 		}
 	}
+
+	// Enable the discovery of the datasources.
 	if len(conf.Datasource.Global.Discovery) > 0 {
 		datasourceDiscoveryTasks, sdErr := discovery.New(conf, dependencyManager.Service(), persesDAO.IsCaseSensitive())
 		if sdErr != nil {
@@ -70,10 +74,18 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}
 		runner.WithTaskHelpers(datasourceDiscoveryTasks...)
 	}
+
+	// Enable the refresh of the RBAC permissions if the native provider is enabled.
 	if conf.Security.Authorization.Provider.Native.Enable {
-		rbacTask := authorization.NewPermissionRefreshCronTask(dependencyManager.Service().GetAuthorization(), persesDAO)
+		rbacTask := refresh.New(persesDAO,
+			dependencyManager.Service().GetAuthorization().RefreshPermissionsAndRoles,
+			[]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding},
+		)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.Provider.Native.CheckLatestUpdateInterval), rbacTask)
 	}
+
+	// Enable the refresh of the search index.
+	runner.WithTimerTasks(time.Duration(conf.Search.CheckLatestUpdateInterval), refresh.New(persesDAO, dependencyManager.Service().GetIndex().Refresh, []modelV1.Kind{modelV1.KindDashboard}))
 
 	// Extract the plugin archives and load the plugins.
 	// Loading plugin is not mandatory, so we don't return an error if the plugin can't be loaded.
@@ -98,6 +110,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 				// When serving the plugins from a dev server, we don't want to compress the response since it's already compressed by rsbuild.
 				(conf.Plugin.EnableDev && strings.HasPrefix(c.Request().URL.Path, fmt.Sprintf("%s/plugins", conf.APIPrefix)))
 		}).
+		PreMiddleware(echoMiddleware.Decompress()).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(dependencyManager.Service().GetProject()))
 	if !conf.Frontend.Disable {

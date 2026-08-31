@@ -12,5 +12,5 @@
 // limitations under the License.
 
 export type UserPreferences = {
-  timezone: string;
+  timezone?: string;
 };

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
+
 import { test } from '../fixtures/dashboardTest';
 import { DashboardPage } from '../pages';
 import { waitForStableCanvas } from '../utils';
@@ -113,7 +114,7 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },
@@ -134,7 +135,7 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },

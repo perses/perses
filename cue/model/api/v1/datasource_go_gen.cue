@@ -4,19 +4,7 @@
 
 package v1
 
-import "github.com/perses/perses/cue/model/api/v1/common"
-
 #DatasourceInterface: _
-
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/datasource.Spec
-#DatasourceSpec: {
-	display?: null | common.#Display @go(Display,*common.Display)
-	default:  bool                   @go(Default)
-
-	// Plugin will contain the datasource configuration.
-	// The data typed is available in Cue.
-	plugin: common.#Plugin @go(Plugin)
-}
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.
 // Any Dashboard can reference it.

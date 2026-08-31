@@ -13,8 +13,9 @@
 
 import { Stack } from '@mui/material';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
-import { useParams } from 'react-router-dom';
 import { ReactElement } from 'react';
+import { useParams } from 'react-router-dom';
+
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import PageHeader from '../../components/page-header/PageHeader';
 import { useIsMobileSize } from '../../utils/browser-size';

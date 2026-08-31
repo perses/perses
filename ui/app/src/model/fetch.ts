@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { StatusError } from '@perses-dev/client';
+
 import { refreshToken } from './auth/auth-client';
 
 const JWT_COOKIES = ['jwtPayload', 'jwtSignature', 'jwtRefreshToken'];
+let isRefreshFetchEnabled = false;
 
 // Delete a cookie by setting its expiration date to the past
 function deleteCookie(name: string): void {
@@ -22,6 +24,10 @@ function deleteCookie(name: string): void {
 }
 
 export function enableRefreshFetch(): void {
+  if (isRefreshFetchEnabled) {
+    return;
+  }
+  isRefreshFetchEnabled = true;
   globalThis.fetch = new Proxy(globalThis.fetch, {
     apply: async function (target, that, args: Parameters<typeof globalThis.fetch>): Promise<Response> {
       return target

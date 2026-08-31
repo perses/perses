@@ -1,0 +1,144 @@
+{
+  "id": null,
+  "uid": "panel-repeat-test",
+  "title": "Panel Repeat Dashboard",
+  "tags": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "exotic-tsdb",
+        "uid": "my-monitoring-db"
+      },
+      "description": "An orphan panel repeated by variable",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {},
+      "repeat": "otherVar",
+      "repeatDirection": "v",
+      "targets": [
+        {
+          "datasource": {
+            "type": "exotic-tsdb",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "up",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Orphan Repeated Panel",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 2,
+      "panels": [],
+      "title": "My Row",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "exotic-tsdb",
+        "uid": "my-monitoring-db"
+      },
+      "description": "A panel repeated by variable inside a row",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 3,
+      "options": {},
+      "repeat": "myVar",
+      "repeatDirection": "h",
+      "maxPerRow": 3,
+      "targets": [
+        {
+          "datasource": {
+            "type": "exotic-tsdb",
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "up",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Repeated Panel",
+      "type": "timeseries"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "value1",
+          "value": "value1"
+        },
+        "name": "myVar",
+        "options": [
+          {
+            "selected": true,
+            "text": "value1",
+            "value": "value1"
+          },
+          {
+            "selected": false,
+            "text": "value2",
+            "value": "value2"
+          }
+        ],
+        "query": "value1,value2",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "a",
+          "value": "a"
+        },
+        "name": "otherVar",
+        "options": [
+          {
+            "selected": true,
+            "text": "a",
+            "value": "a"
+          },
+          {
+            "selected": false,
+            "text": "b",
+            "value": "b"
+          }
+        ],
+        "query": "a,b",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "schemaVersion": 41,
+  "version": 1
+}

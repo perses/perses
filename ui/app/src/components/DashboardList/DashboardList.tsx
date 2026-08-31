@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
+import { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DashboardSelector } from '@perses-dev/spec';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
-import { DashboardSelector } from '@perses-dev/spec';
+
+import { useNavHistory } from '../../context/DashboardNavHistory';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import {
   AddFolderDialog,
@@ -26,7 +28,6 @@ import {
   EditFolderDialog,
 } from '../dialogs';
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
-import { useNavHistory } from '../../context/DashboardNavHistory';
 import DashboardTreeList from './DashboardTreeList';
 
 type editDashboardAction = { type: 'editDashboard'; target: DashboardResource };
@@ -165,15 +166,15 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         }
       }
     },
-    [dashboardList, dashboardsMap, folderList]
+    [dashboardList, dashboardsMap, folderList],
   );
 
-  const handleRenameButtonClick = openDialog('editDashboard');
-  const handleDuplicateButtonClick = openDialog('duplicateDashboard');
-  const handleDeleteButtonClick = openDialog('deleteDashboard');
-  const handleEditFolderButtonClick = openDialog('editFolder');
-  const handleAddFolderButtonClick = openDialog('addFolder');
-  const handleDeleteFolderButtonClick = openDialog('deleteFolder');
+  const handleRenameButtonClick = useMemo(() => openDialog('editDashboard'), [openDialog]);
+  const handleDuplicateButtonClick = useMemo(() => openDialog('duplicateDashboard'), [openDialog]);
+  const handleDeleteButtonClick = useMemo(() => openDialog('deleteDashboard'), [openDialog]);
+  const handleEditFolderButtonClick = useMemo(() => openDialog('editFolder'), [openDialog]);
+  const handleAddFolderButtonClick = useMemo(() => openDialog('addFolder'), [openDialog]);
+  const handleDeleteFolderButtonClick = useMemo(() => openDialog('deleteFolder'), [openDialog]);
 
   const closeDialog = useCallback(() => setActiveDialog({ type: 'none' }), []);
 
@@ -205,7 +206,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         }
       }
     },
-    [navigate, activeDialog]
+    [navigate, activeDialog],
   );
 
   const handleDashboardDelete = useCallback(
@@ -223,7 +224,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteDashboardMutation]
+    [exceptionSnackbar, successSnackbar, deleteDashboardMutation],
   );
 
   return (

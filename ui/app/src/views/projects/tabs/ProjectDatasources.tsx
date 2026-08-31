@@ -12,16 +12,17 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
+import { DatasourceResource } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import { ReactElement, useCallback } from 'react';
-import { DatasourceResource } from '@perses-dev/client';
+
+import { DatasourceList } from '../../../components/datasource/DatasourceList';
 import {
   useCreateDatasourceMutation,
   useDatasourceList,
   useDeleteDatasourceMutation,
   useUpdateDatasourceMutation,
 } from '../../../model/datasource-client';
-import { DatasourceList } from '../../../components/datasource/DatasourceList';
 
 interface ProjectDatasourcesProps {
   projectName: string;
@@ -55,7 +56,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation],
   );
 
   const handleDatasourceUpdate = useCallback(
@@ -74,7 +75,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, updateDatasourceMutation],
   );
 
   const handleDatasourceDelete = useCallback(
@@ -93,7 +94,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps): ReactElement
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation],
   );
 
   return (

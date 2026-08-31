@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
-import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
-import { ProfileSections } from './ProfileView';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import React, { ReactElement } from 'react';
+
+import { ProfileSections } from './profile-permissions-utils';
 
 interface IAccountSettingItem {
   title: string;
@@ -33,22 +34,22 @@ interface IProps {
   selectedView: ProfileSections;
 }
 
+const accountSettingsItems: IAccountSettingItem[] = [
+  {
+    title: 'Permissions and roles',
+    view: ProfileSections.PERMISSIONS,
+    icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
+  },
+  {
+    title: 'Preferences',
+    view: ProfileSections.PREFERENCES,
+    icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
+  },
+];
+
+const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
+
 export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): ReactElement => {
-  const accountSettingsItems: IAccountSettingItem[] = [
-    {
-      title: 'Permissions and roles',
-      view: ProfileSections.PERMISSIONS,
-      icon: <ShieldAccountIcon sx={{ fontSize: 24 }} />,
-    },
-    {
-      title: 'Preferences',
-      view: ProfileSections.PREFERENCES,
-      icon: <PreferenceIcon sx={{ fontSize: 24 }} />,
-    },
-  ];
-
-  const settings: ISettingItems[] = [{ title: 'Account settings', items: accountSettingsItems }];
-
   const handleViewChange = (view: ProfileSections): void => {
     setSelectedView(view);
   };
@@ -79,8 +80,7 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
           </Box>
           <List>
             {s.items.map((i) => (
-              <ListItem
-                role="button"
+              <ListItemButton
                 key={i.view}
                 onClick={() => handleViewChange(i.view)}
                 sx={{
@@ -103,7 +103,7 @@ export const ProfileSettings = ({ selectedView, setSelectedView }: IProps): Reac
                     {i.title}
                   </Typography>
                 </ListItemText>
-              </ListItem>
+              </ListItemButton>
             ))}
           </List>
         </React.Fragment>

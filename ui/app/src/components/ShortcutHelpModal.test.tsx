@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import '@testing-library/jest-dom/vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 // Mock registrations used by the dashboard exports
 const mockHotkeys: Array<{ hotkey: string; options: { meta: Record<string, string> } }> = [];
@@ -23,7 +24,7 @@ const mockSequences: Array<{ sequence: string[]; options: { meta: Record<string,
 // since it resolves outside the perses/ui workspace.
 const SHOW_SHORTCUTS_EVENT = 'perses:show-shortcuts';
 
-jest.mock('@perses-dev/dashboards', () => ({
+vi.mock('@perses-dev/dashboards', () => ({
   SHORTCUT_CATEGORY_LABELS: {
     global: 'Global',
     'time-range': 'Time Range',
@@ -48,7 +49,7 @@ function renderModal(): ReturnType<typeof render> {
   return render(
     <ThemeProvider theme={theme}>
       <ShortcutHelpModal />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 }
 
@@ -115,7 +116,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'dashboard',
           },
         },
-      }
+      },
     );
 
     renderModal();
@@ -225,7 +226,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'panel',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({
@@ -300,7 +301,7 @@ describe('ShortcutHelpModal', () => {
             scope: 'global',
           },
         },
-      }
+      },
     );
 
     mockSequences.push({

@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
-import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
 import { DashboardResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 import { editDashboardDialogValidationSchema, EditDashboardValidationType } from '../../validation';
 
@@ -132,8 +133,8 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
                     onChange={(_, newValue) =>
                       field.onChange(
                         Array.from(
-                          new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
-                        )
+                          new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0)),
+                        ),
                       )
                     }
                     renderTags={(value, getTagProps) =>

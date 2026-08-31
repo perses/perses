@@ -1,12 +1,12 @@
 {
   "name": "@perses-dev/internal-utils",
-  "version": "0.54.0-rc.1",
+  "version": "0.54.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "npm run lint -- --fix"
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
   }
 }

@@ -16,7 +16,9 @@ package toolbox
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -46,6 +48,9 @@ func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
 func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
 	projectQueryParameter := query.GetProjectQueryParam()
 	if len(projectQueryParameter) > 0 {
+		if !t.caseSensitive {
+			projectQueryParameter = strings.ToLower(projectQueryParameter)
+		}
 		if err := common.ValidateID(projectQueryParameter); err != nil {
 			return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("the project name in the query parameter is invalid: %s", err.Error()))
 		}
@@ -190,7 +195,11 @@ func (t *toolbox[T, K, V]) metadataOrFullList(query V) (any, error) {
 
 func (t *toolbox[T, K, V]) asyncMetadataOrFullList(project string, query V) func() (any, error) {
 	return func() (any, error) {
-		query.SetProjectQueryParam(project)
-		return t.metadataOrFullList(query)
+		q, err := deep.Copy(query)
+		if err != nil {
+			return nil, err
+		}
+		q.SetProjectQueryParam(project)
+		return t.metadataOrFullList(q)
 	}
 }

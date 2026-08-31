@@ -13,16 +13,12 @@
 
 import { Avatar, Box, Divider, Typography, useTheme } from '@mui/material';
 import { lazy, ReactElement, Suspense, useState } from 'react';
-import { useIsMobileSize } from '../../utils/browser-size';
-import { useAuthorizationContext } from '../../context/Authorization';
-import { ProfileSettings } from './ProfileSettings';
-import { Preferences } from './Preferences';
 
-export enum ProfileSections {
-  AUTHENTICATION,
-  PERMISSIONS,
-  PREFERENCES,
-}
+import { useAuthorizationContext } from '../../context/Authorization';
+import { useIsMobileSize } from '../../utils/browser-size';
+import { Preferences } from './Preferences';
+import { ProfileSections } from './profile-permissions-utils';
+import { ProfileSettings } from './ProfileSettings';
 
 const ProfilePermissions = lazy(() => import('./ProfilePermissions'));
 

@@ -11,16 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import '@testing-library/jest-dom/vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
+
 import ProfileView from './ProfileView';
 
-jest.mock('@perses-dev/components', () => ({
+vi.mock('@perses-dev/components', () => ({
   EChart: (): JSX.Element | null => null,
 }));
 
-jest.mock('../../context/Authorization', () => ({
+vi.mock('../../context/Authorization', () => ({
   useAuthorizationContext: (): { username: string } => ({
     username: 'admin',
   }),
@@ -39,7 +41,7 @@ const permissionMockData: Record<string, Array<{ actions: string[]; scopes: stri
   ],
 };
 
-jest.mock('../../model/user-client', () => ({
+vi.mock('../../model/user-client', () => ({
   useUserPermissions: (): { data: Record<string, object[]> } => ({
     data: permissionMockData,
   }),
@@ -50,7 +52,7 @@ beforeEach(() => {
   render(
     <ThemeProvider theme={theme}>
       <ProfileView />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 });
 

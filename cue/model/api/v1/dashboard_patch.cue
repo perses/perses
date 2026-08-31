@@ -22,31 +22,11 @@
 package v1
 
 import (
-	"github.com/perses/perses/cue/model/api/v1/common"
-	"github.com/perses/perses/cue/model/api/v1/dashboard"
+	"github.com/perses/spec/cue/dashboard"
 )
-
-#Panel: {
-	kind: "Panel"
-}
-
-#DashboardSpec: {
-	display?: common.#Display @go(Display)
-	datasources?: {
-		[string]: #DatasourceSpec @go(Datasources)
-	}
-	variables?: [...dashboard.#Variable] @go(Variables,[]Variable)
-	panels: {
-		[string]: #Panel @go(Panels)
-	}
-	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
-	duration:         common.#DurationString | *"1h" @go(Duration)
-	refreshInterval?: common.#DurationString         @go(RefreshInterval)
-	links?: [...#Link] @go(Links,[]Link)
-}
 
 #Dashboard: {
 	kind:     #KindDashboard   @go(Kind)
 	metadata: #ProjectMetadata @go(Metadata)
-	spec:     #DashboardSpec   @go(Spec)
+	spec:     dashboard.#Spec  @go(Spec)
 }

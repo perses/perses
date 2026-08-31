@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useCallback, useMemo } from 'react';
-import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { FolderResource } from '@perses-dev/client';
-import { withoutSubFolder, getSubFolderRef } from '../../utils/folderUtils';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { DispatchWithoutAction, ReactElement, useCallback, useMemo } from 'react';
+
 import { useDeleteFolderMutation, useUpdateFolderMutation } from '../../model/folder-client';
+import { withoutSubFolder, getSubFolderRef } from '../../utils/folderUtils';
 import { DeleteDialog } from './DeleteDialog';
 
 interface DeleteFolderDialogProps {
@@ -64,7 +65,7 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
       exceptionSnackbar(err);
       throw err;
     },
-    [exceptionSnackbar]
+    [exceptionSnackbar],
   );
 
   const handleFolderDelete = useCallback(() => {
@@ -84,7 +85,7 @@ export function DeleteFolderDialog({ folder, open, onClose, path }: DeleteFolder
         {
           onSuccess: onSuccess,
           onError: onError,
-        }
+        },
       );
     }
   }, [deleteRoot, deleteFolderMutation, folder, onSuccess, onError, path, updateFolderMutation]);
