@@ -3,6 +3,18 @@
 This page describes the release processes. It's inspired from
 the [Prometheus release process](https://github.com/prometheus/prometheus/blob/main/RELEASE.md)
 
+## Release schedule
+
+We are starting a new release cycle every 3 months.
+
+| release series | date of first beta-release (year-month-day) | release shepherd                                  |
+|----------------|---------------------------------------------|---------------------------------------------------|
+| v0.55          | 2026-09-14                                  | Celian Garcia (GitHub: @celian-garcia)            |
+| v0.56          | 2027-01-04                                  | Akshay Iyyadurai Balasundaram (GitHub: @ibakshay) |
+| v0.57          | 2027-04-05                                  | **volunteer welcome**                             |
+
+Note: Ideally you will finish the release cycle at most one month after the first `beta-release`.
+
 ## How to cut an individual release
 
 ### Branch management and versioning strategy
@@ -11,45 +23,58 @@ We use [Semantic Versioning](https://semver.org/).
 
 The current flow is to merge new features and bugfixes into the main branch.
 
-As we are in early stage of the project, we don't intend to maintain previous version. Only the last version will be
-patched if we estimate it requires an urgent patch that cannot wait for the next minor release.
+We don't intend to maintain previous version. Only the last version will be patched if we estimate it requires an urgent
+patch that cannot wait for the next minor release.
 
-### 0. Updating dependencies
+### 0. Understand the dependency of Perses
 
-We are using dependabot to keep up to date our dependencies (of Go or npm).
+Perses is depending on multiple dependencies but the one that you will need to manage are coming from the repository
+`perses/spec` and `perses/shared`.
 
-In case you would like to update manually the dependencies :
+So before creating a new version of Perses, you may have to update first this internal dependency.
 
-#### Updating Go dependencies
+Also note that for each minor release we are updating the plugins. So you will probably have to upgrade the plugin as
+well.
 
-```bash
-make update-go-deps
-git add go.mod go.sum
-git commit -m "Update Go dependencies"
-```
+To be able to release the plugins, please read
+the [documentation](https://github.com/perses/plugins/blob/main/RELEASE.md).
 
-### Updating npm dependencies
+Note:
 
-```bash
-make update-npm-deps
-git add ./ui/package-lock.json ./**/package.json
-git commit -m "Update npm dependencies"
-```
-
-Note: in case you feel it, you can also upgrade the npm dependencies to their latest release (major or minor)
-with `make upgrade-npm-deps`
+1. The specification is following its own versioning as it is unrelated from Perses. You can see Perses as an example of
+   how the specification can be used.
+2. The version of the shared packages is synchronized with Perses. This is done in order to tell with which version
+   Perses is compatible without having to maintain a compatibility matrix.
 
 ### 1. Prepare your release
 
 #### Create a release branch
 
-Create a branch that follows the naming pattern `release/v<X.Y>` (no patch version!) and includes the changes you intend to release (usually the latest from `main`). Push it to Github. You will use this branch as the base in the next step.
+For a new release cycle, you will need first to create a release branch based on the latest commit from the `main`
+branch.
 
-> ⚠️ Release candidates and patch releases for any given major or minor release happen in the same `release/v<major>.<minor>` branch. Do not create `release/<version>` for patch or release candidate releases.
+The branch created has to follow the naming pattern `release/v<X.Y>` (no patch version!) and includes the changes you
+intend to release (usually the latest from `main`). Push it to GitHub. You will use this branch as the base in the next
+step.
+
+> ⚠️ Release candidates and patch releases for any given major or minor release happen in the same
+> `release/v<major>.<minor>` branch. Do not create `release/<version>` for patch or release candidate releases.
+
+For the version of a release cycle, start with the version `v0.X.Y-beta.0`.
+
+Note for the release shepherd:
+
+- To simplify the work and the coordination around the release, when you are still cutting beta release, you can simply
+  merge the branch `main` into the release branch.
+- When you will reach the release candidate release, you will have to stop to do that to avoid introducing new features
+  or enhancements that might cause instability and delay the final release. Instead, you need to ask to contributors or
+  maintainers to target the release branch when opening a PR that is fixing a bug.
+- Only bugfixes can be accepted when you are cutting release candidate.
 
 #### Create a PR with the changes
 
-- Create a branch based on the release branch `release/v<X.Y>` you just created in the step above. This branch should use the naming pattern `<yourname>/release-v<major>.<minor>.<patch>`.
+- Create a branch based on the release branch `release/v<X.Y>` you just created in the step above. This branch should
+  use the naming pattern `<yourname>/release-v<major>.<minor>.<patch>`.
 - Update the file `VERSION` with the new version to be created.
 - Generate `CHANGELOG.md` updates based on git history:
 
@@ -58,28 +83,32 @@ Create a branch that follows the naming pattern `release/v<X.Y>` (no patch versi
   ```
 - Review the generated `CHANGELOG.md` for valid output. Things to check include:
   - Entries in the `CHANGELOG.md` are meant to be in this order:
+    * `[SECURITY]`
     * `[FEATURE]`
     * `[ENHANCEMENT]`
     * `[BUGFIX]`
     * `[BREAKINGCHANGE]`
   - Entries that map to a pull request should include a pull request number.
-  - As we have many libraries we publish, it's better if you also put a clear indication about what library is affected by
-    these changes.
-  - Consumers understand how to handle breaking changes either through the messaging in the changelog or through the linked pull requests.
+  - As we have many libraries we publish, it's better if you also put a clear indication about what library is
+    affected by these changes.
+  - Consumers understand how to handle breaking changes either through the messaging in the changelog or through the
+    linked pull requests.
+- Add to the generated `CHANGELOG.md` the entries coming from the different plugins updated.
 - Update the `package.json` files for all packages with the corresponding version:
 
   ```bash
   make bump-version
   ```
-- Push the branch to Github and create a pull request with the release branch as the base. This gives others the opportunity to chime in on the release,
-  in general, and on the addition to the changelog, in particular.
+- Push the branch to GitHub and create a pull request with the release branch as the base. This gives others the
+  opportunity to chime in on the release, in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
 - Address any necessary feedback.
 - Once the pull request is approved, merge it into the release branch.
 
 ### 2. Create release tag and validate release
 
-- Pull down the latest updates to the release branch on your local machine to ensure you have the updates from the previous step.
+- Pull down the latest updates to the release branch on your local machine to ensure you have the updates from the
+  previous step.
 - Tag the new release via the following commands:
 
   ```bash
@@ -90,61 +119,50 @@ Create a branch that follows the naming pattern `release/v<X.Y>` (no patch versi
 
 Signing a tag with a GPG key is appreciated, but in case you can't add a GPG key to your Github account using the
 following [procedure](https://docs.github.com/en/authentication/managing-commit-signature-verification), you can replace
-the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing. If you are using a newer Mac and hit an error like "gpg failed to sign the data fatal: failed to write commit object," see [this Stack Overflow question](https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0/40066889#40066889) for assistance.
+the `-s` flag by `-a` flag of the git tag command to only annotate the tag without signing. If you are using a newer Mac
+and hit an error like "gpg failed to sign the data fatal: failed to write commit object,"
+see [this Stack Overflow question](https://stackoverflow.com/questions/39494631/gpg-failed-to-sign-the-data-fatal-failed-to-write-commit-object-git-2-10-0/40066889#40066889)
+for assistance.
 
-Once a tag is created, an automated release process for this tag is triggered via Github Actions. This automated process includes:
-- Publishing new versions of the UI libraries to npm.
+Once a tag is created, an automated release process for this tag is triggered via Github Actions. This automated process
+includes:
+
+- Publishing cuelang libs.
 - Building new go binaries and docker images.
 - Publishing the docker images to Docker Hub.
-- Creating a new Github release that uses the changelog as the release notes and provides tarballs with the latest go binaries.
+- Creating a new GitHub release that uses the changelog as the release notes and provides tarballs with the latest go
+  binaries.
 - Generating and attaching SBOM (Software Bill of Materials) artifacts to the Github release:
-  - `perses_<version>_<os>_<arch>.tar.gz.sbom.spdx.json` — SPDX JSON SBOM for each Go release archive, generated by [syft](https://github.com/anchore/syft) via GoReleaser.
+  - `perses_<version>_<os>_<arch>.tar.gz.sbom.spdx.json` — SPDX JSON SBOM for each Go release archive, generated
+    by [syft](https://github.com/anchore/syft) via GoReleaser.
   - `perses_<version>_source.tar.gz.sbom.spdx.json` — SPDX JSON SBOM for the source tarball.
-  - `ui-sbom.cdx.json` — CycloneDX JSON SBOM covering all npm dependencies of the React frontend, generated by [@cyclonedx/cyclonedx-npm](https://github.com/CycloneDX/cyclonedx-node-npm).
+  - `ui-sbom.cdx.json` — CycloneDX JSON SBOM covering all npm dependencies of the React frontend, generated
+    by [@cyclonedx/cyclonedx-npm](https://github.com/CycloneDX/cyclonedx-node-npm).
 
-Please verify that the Github Actions complete successfully. Once they are completed, check that everything looks good in the new Github Release. If you realize we need to adjust something in the release notes, you can edit it directly in the Github UI.
+Please verify that the GitHub Actions complete successfully. Once they are completed, check that everything looks good
+in the new GitHub Release. If you realize we need to adjust something in the release notes, you can edit it directly in
+the GitHub UI.
 
 ### 3. Merge the release into `main`
 
-It can be helpful to leave the release branch up for a little while in case we need to create a patch release to address bugs or minor issues with the release you just made.
+The release branch cannot be deleted in order to be able to create a patch release. This is needed to address bugs or
+minor issues with the release you just made.
 
-Once the release branch is no longer needed, you should open a new PR based on `main` to merge those changes. When this PR is approved, merge it into `main` :warning: **using the "merge pull request" option, not "squash and merge"** (the latter would delete the commit needed for the release tag, which can lead to problems).
+During the release cycle, specially when cutting release candidate, you will have to merge the release branch into main
+in order to have the bugfixes back to main.
 
-## How to cut a UI snapshot release
+1. You can simply open a pull request to merge the release branch into main. This is only acceptable if there is no
+   conflict.
+2. In case you have conflict, you will have to create another branch based on the release branch, released the conflict
+   and then open a PR with your branch and target `main`.
 
-Occasionally, it is helpful to test a packaged version of the UI to validate specific functionality before cutting a
-real release. Where there are difficulties doing this via tools like `npm link` and `npm pack` because of complexities
-with workspaces, a maintainer can create a "snapshot" release of the UI.
+When this PR is approved, merge it into `main` :warning: **using the "merge pull request" option, not "squash and
+merge"**.
 
-### Limits of snapshot releases
+At anymoment, you **MUST NOT** squash the release branch into `main` because you will make the release commit disappear,
+and trust me you want to be able to find back the commit that has been tagged in the GitHub history.
 
-- **DO NOT** merge snapshot branches into `main`. They are intended only as a tool for testing.
-- **DO NOT** recommend using snapshot branches in production code. They are intended to be ephemeral for testing
-  purposes.
+### 4. Find a new shepherd for the next release cycle
 
-### Creating a snapshot branch
-
-The creation of snapshots is automated by Github actions based on branch naming schemes.
-
-- Create a branch following the naming scheme `snapshot/tag-name` (e.g. `snapshot/theme-updates`) with the changes you
-  want to test. The `tag-name` should be short and kebab-case because it will be used as part of a version name and tag
-  name in npm.
-- Github actions will build the UI and release a version named `0.0.0-snapshot-tag-name-SHA` at a tag
-  named `snapshot-tag-name` where `tag-name` comes from your branch name and `SHA` is a short version of the git sha for
-  the latest commit on the branch.
-  - We use `0.0.0` as the version prefix to keep snapshots at the bottom of the npm versions UI to avoid confusion for
-    consumers of the package. This also helps differentiate snapshots from the concept of prereleases, which we do not
-    currently provide, but may add in the future.
-- Github actions will release a new version with the latest sha each time you push to the snapshot branch.
-
-### Using a snapshot branch
-
-- Install the snapshot branch for all relevant packages using the `snapshot-NAME` tag (
-  e.g. `npm install --save-exact @perses-dev/core@snapshot-theme-updates`). Recommend using `--save-exact` to avoid
-  inconsistencies with how snapshot version names may match using `^`.
-
-### Removing a snapshot
-
-- Delete the branch.
-- Github actions will automatically remove the tag from npm. The version will still show up in the "version history"
-  section of npm.
+Once you have finally reached the final release (congratulation btw!), you will have to find someone to manage the next
+release cycle and set the date of the next release.
