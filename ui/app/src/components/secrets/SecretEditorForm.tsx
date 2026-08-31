@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { BoxProps } from '@mui/material';
 import {
   Box,
-  BoxProps,
   Button,
   Divider,
   FormControl,
@@ -32,14 +32,17 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/client';
+import type { Secret, SecretsEditorSchemaType } from '@perses-dev/client';
+import { secretsEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import PlusIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 const noAuthIndex = 'noAuth';
 const basicAuthIndex = 'basicAuth';

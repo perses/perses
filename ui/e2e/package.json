@@ -2,6 +2,7 @@
   "name": "@perses-dev/e2e",
   "version": "0.54.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "e2e": "npm run e2e:local",
     "e2e:local": "playwright test --config=src/config/local.playwright.config.ts",
@@ -14,7 +15,7 @@
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
-    "@perses-dev/dashboards": "^0.55.0-beta.3",
+    "@perses-dev/dashboards": "^0.55.0-beta.6",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },

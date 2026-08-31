@@ -11,12 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Chip, Theme, Typography } from '@mui/material';
-import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
-import { isProjectMetadata, Resource } from '@perses-dev/client';
+import type { Theme } from '@mui/material';
+import { Box, Button, Chip, Typography } from '@mui/material';
+import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
+import { KVSearch } from '@nexucis/kvsearch';
+import type { Resource } from '@perses-dev/client';
+import { isProjectMetadata } from '@perses-dev/client';
 import Archive from 'mdi-material-ui/Archive';
 import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
-import { ReactElement, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { ProjectRoute } from '../../../model/route';

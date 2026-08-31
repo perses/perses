@@ -13,15 +13,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Box, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/client';
+import type { RoleBinding } from '@perses-dev/client';
+import { roleBindingsEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import React, { ReactElement, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import type { ReactElement } from 'react';
+import React, { useMemo, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import { useUserList } from '../../model/user-client';
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
   roleSuggestions: string[];

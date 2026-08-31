@@ -12,25 +12,27 @@
 // limitations under the License.
 
 import { Box, Chip, CircularProgress, Stack } from '@mui/material';
-import { FolderResource } from '@perses-dev/client';
-import { Table, TableColumnConfig } from '@perses-dev/components';
+import type { FolderResource } from '@perses-dev/client';
+import type { TableColumnConfig } from '@perses-dev/components';
+import { Table } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDefaultRowsPerPage } from '../../context/Config';
 import { useIsMobileSize } from '../../utils/browser-size';
+import type { RowWithOriginal } from '../../utils/dashboardTableUtils';
 import {
   buildTableRows,
   formatAbsoluteTime,
   formatRelativeTime,
-  RowWithOriginal,
   sortDashboardTableStringColumn,
 } from '../../utils/dashboardTableUtils';
 import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
-import { DashboardListRow } from './DashboardList';
+import type { DashboardListRow } from './DashboardList';
 import { NameCell } from './NameCell';
 
 export interface DashboardTreeTableRow {

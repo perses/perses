@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, Permission, StatusError, UserResource } from '@perses-dev/client';
-import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import type { Permission, StatusError, UserResource } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 

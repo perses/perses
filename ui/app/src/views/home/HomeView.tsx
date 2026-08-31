@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
-import { DashboardSelector } from '@perses-dev/spec';
-import { ReactElement, useState } from 'react';
+import type { ProjectResource } from '@perses-dev/client';
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';

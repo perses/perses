@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
+import type { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 import { useUsername } from '../model/auth/auth-client';
 import { enableRefreshFetch } from '../model/fetch';

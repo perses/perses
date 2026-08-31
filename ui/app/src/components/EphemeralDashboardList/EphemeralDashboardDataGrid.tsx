@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataGrid, GridRow, GridColumnHeaders, GridRowParams } from '@mui/x-data-grid';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import type { GridRowParams } from '@mui/x-data-grid';
+import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
+import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
-import { memo, ReactElement, useCallback, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useDefaultRowsPerPage } from '../../context/Config';
+import type { DataGridProperties, CommonRow } from '../datagrid';
 import {
-  DataGridProperties,
-  CommonRow,
   getDataGridInitialStateSortByDisplayName,
   GridToolbar,
   PAGE_SIZE_OPTIONS,

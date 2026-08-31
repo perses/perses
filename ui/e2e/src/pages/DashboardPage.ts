@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { expect, Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import { Panel } from './Panel';
 import { PanelEditor } from './PanelEditor';

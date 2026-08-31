@@ -23,18 +23,16 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
-import { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
+import type { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName } from '@perses-dev/components';
-import { DashboardSelector } from '@perses-dev/spec';
-import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useCallback, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
-import {
-  CreateDashboardValidationType,
-  CreateEphemeralDashboardValidationType,
-  useDashboardValidationSchema,
-  useEphemeralDashboardValidationSchema,
-} from '../../validation';
+import type { CreateDashboardValidationType, CreateEphemeralDashboardValidationType } from '../../validation';
+import { useDashboardValidationSchema, useEphemeralDashboardValidationSchema } from '../../validation';
 
 interface CreateDashboardProps {
   open: boolean;

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import { waitForAnimations } from '../utils';
-import { Panel } from './Panel';
+import type { Panel } from './Panel';
 
 /**
  * Panel group on a dashboard page.

@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { buildProxyUrl, DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import type { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import { buildProxyUrl } from '@perses-dev/client';
 import { useCallback, useMemo } from 'react';
 
 import { useDatasourceList } from './datasource-client';

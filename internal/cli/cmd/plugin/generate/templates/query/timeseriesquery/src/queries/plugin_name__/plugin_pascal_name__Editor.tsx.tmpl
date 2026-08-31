@@ -1,6 +1,8 @@
-import { DatasourceSelect, DatasourceSelectProps, isVariableDatasource, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement, useEffect, useState } from 'react';
-import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { DatasourceSelectProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DatasourceSelect, isVariableDatasource } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 import { DATASOURCE_KIND, DEFAULT_DATASOURCE } from './constants';
 
 type {{ .PluginPascalName }}EditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
