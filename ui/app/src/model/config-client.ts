@@ -187,12 +187,17 @@ export interface TimeRangeConfig {
   options?: DurationString[];
 }
 
+export interface AutoRefreshConfig {
+  disable?: boolean;
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
+  auto_refresh?: AutoRefreshConfig;
   banner?: Banner;
   default_user_preferences?: DefaultUserPreferences;
 }

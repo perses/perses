@@ -14,7 +14,7 @@
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
-    "@perses-dev/dashboards": "^0.55.0-beta.2",
+    "@perses-dev/dashboards": "^0.55.0-beta.3",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },
@@ -23,7 +23,7 @@
     "@playwright/test": "^1.54.2",
     "chokidar-cli": "^3.0.0",
     "eslint-plugin-playwright": "^2.11.0",
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   }
 }
