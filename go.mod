@@ -1,6 +1,6 @@
 module github.com/perses/perses
 
-go 1.26.5
+go 1.27.0
 
 // This directive help to improve the performance of golangci-lint by ignoring the node_modules directory of the ui module
 // golangci-lint is using the go build system to determine which files to lint, and the node_modules directory contains a lot of files that are not relevant for the linting process, and can cause performance issues.
