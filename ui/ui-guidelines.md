@@ -15,8 +15,8 @@ here as UI code can vary significantly from feature to feature.
 Below is a list of notable tooling that is used throughout the Perses UI.
 
 - Development utilities
-  - Monorepo management: [turborepo](https://turbo.build/)
-  - Code compiling: [swc](https://swc.rs/) (used for libraries), [webpack](https://webpack.js.org/) (used for applications)
+  - Monorepo management: [pnpm workspaces](https://pnpm.io/workspaces)
+  - Code compiling: [swc](https://swc.rs/) (used for libraries), [Rspack](https://rspack.rs/) (used for applications)
   - Code linting/formatting: [Oxlint](https://oxc.rs/docs/guide/usage/linter) with the
     [React Doctor plugin](https://www.react.doctor/docs/configuration/eslint-and-oxlint-plugins), and
     [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)

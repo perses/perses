@@ -35,7 +35,7 @@ const config: PlaywrightTestConfig = {
   // local devlopment for two reasons. (1) During local development, people are
   // more likely to want to keep longer-running dev servers across test runs and
   // other development activities. (2) Playwright struggles to fully clean up
-  // all the processes started by turborepo, so you can easily end up with a
+  // all the processes started by workspace-wide development commands, so you can easily end up with a
   // lot of zombie node processes on your machine that are annoying to clean up.
   webServer: [],
 

@@ -126,7 +126,7 @@ Integrators can depend directly on published packages such as `@perses-dev/dashb
 
 ## Local development
 
-The `perses/perses` and `perses/shared` repositories are separate pnpm workspaces managed with Turborepo. During UI
+The `perses/perses` and `perses/shared` repositories are separate pnpm workspaces. During UI
 development you usually:
 
 1. Install dependencies in `perses/ui`.

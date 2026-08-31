@@ -36,7 +36,7 @@ If you are new to Perses, please review the rest of this README first before sta
 
 The UI is split across multiple npm packages so features can be embedded and extended independently. For a full overview of each package, how they relate, and the dependency graph, see [UI package architecture](./ARCHITECTURE.md).
 
-The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
+The UI-based code for Perses is organized as a pnpm workspace.
 
 The root `package.json` in `ui` has
 [pnpm workspaces](https://pnpm.io/workspaces) enabled, so running `pnpm install` will install
@@ -44,7 +44,7 @@ dependencies for all packages and add symlinks to the local versions for package
 workspace. The root `package.json` also contains `devDependencies` that are commonly used across multiple packages in
 the workspace.
 
-Perses is broken up in to a number of separate packages to allow for flexibility when embedding functionality. You can generate a graph of the dependencies by using the [turbo cli's `--graph` option](https://turbo.build/repo/docs/reference/command-line-reference#--graph). For example, `pnpm start -- --graph=graph.svg` will output a graph of the dependencies of the `start` command in SVG format.
+Perses is broken up into separate packages to allow flexibility when embedding functionality. Run `pnpm -r list --depth -1` to list the packages in the workspace, and see [UI package architecture](./ARCHITECTURE.md) for their relationships.
 
 ### Applications
 
