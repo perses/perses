@@ -32,5 +32,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: [resolve(uiRoot, './vitest.setup.ts')],
+    server: {
+      deps: {
+        // Shared packages now ship ESM with extensionless imports into CommonJS dependencies.
+        // Keep them in Vite's module graph so its resolver can handle those imports.
+        inline: [/@perses-dev\//, /lodash/, /mdi-material-ui/],
+      },
+    },
   },
 });

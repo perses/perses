@@ -84,11 +84,13 @@ export default defineConfig({
   module: {
     rules: [
       // Dependencies shipping ESM (`"type": "module"`) have their requests treated as fully
-      // specified, which breaks extensionless deep imports into CommonJS-only packages such as
-      // `mdi-material-ui/Refresh` or `lodash/merge`. Relax the requirement so the resolver falls
-      // back to extension resolution for those requests.
+      // specified and their `require()` calls left untouched. Shared packages use extensionless
+      // deep imports and the plugin runtime uses `require()` to register dependencies with module
+      // federation. Treat JavaScript dependencies as auto modules so Rspack resolves both forms
+      // instead of emitting browser-side `require()` calls.
       {
         test: /\.m?js$/,
+        type: 'javascript/auto',
         resolve: {
           fullySpecified: false,
         },
