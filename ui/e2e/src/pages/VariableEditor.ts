@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import { selectMenuItem, waitForAnimations } from '../utils';
 

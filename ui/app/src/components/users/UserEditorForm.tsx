@@ -13,16 +13,19 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/client';
+import type { Action, UserEditorSchemaType, UserResource } from '@perses-dev/client';
+import { userSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import type { ReactElement } from 'react';
+import { Fragment, useMemo, useState } from 'react';
+import type { Control, SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 type UserEditorFormProps = FormEditorProps<UserResource>;
 

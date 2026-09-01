@@ -13,14 +13,17 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/client';
+import type { Action, Role } from '@perses-dev/client';
+import { ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, rolesEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import type { ReactElement } from 'react';
+import { Fragment, useMemo, useState } from 'react';
+import type { Control, SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 type RoleEditorFormProps = FormEditorProps<Role>;
 

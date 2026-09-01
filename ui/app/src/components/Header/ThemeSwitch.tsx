@@ -15,7 +15,8 @@ import { IconButton, ListItemIcon, MenuItem, Tooltip } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import Brightness4 from 'mdi-material-ui/Brightness4';
 import Brightness5 from 'mdi-material-ui/Brightness5';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import { useDarkMode } from '../../context/DarkMode';
 

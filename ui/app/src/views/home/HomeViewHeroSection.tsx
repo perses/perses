@@ -13,11 +13,11 @@
 
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import PlusIcon from 'mdi-material-ui/Plus';
 import UploadIcon from 'mdi-material-ui/Upload';
 import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';

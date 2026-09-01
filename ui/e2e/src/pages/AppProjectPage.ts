@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { escapeRegExp } from '../utils';
 import { DatasourceEditor } from './DatasourceEditor';

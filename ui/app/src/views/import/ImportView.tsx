@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Button, Container, Divider, Stack, Typography } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { JSONEditor } from '@perses-dev/components';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
-import { ChangeEvent, ReactElement, useState } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
+import { useState } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
 import GrafanaFlow from './GrafanaFlow';

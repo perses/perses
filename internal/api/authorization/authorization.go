@@ -40,7 +40,7 @@ type Authorization interface {
 	// You should consider the case where the context can be empty and that the function can be called from an anonymous endpoint.
 	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
 	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
-	// If it is not the case, you should return an error. All further functions are dependant on the results of theses decisions.
+	// If it is not the case, you should return an error. All further functions are dependent on the results of these decisions.
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)

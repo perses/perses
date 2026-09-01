@@ -2,6 +2,7 @@
   "name": "@perses-dev/internal-utils",
   "version": "0.54.0",
   "private": true,
+  "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {

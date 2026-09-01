@@ -8,7 +8,7 @@ When you try now to create some dashboards you will see a "Load failed" error me
 
 ## Diagnostics
 
-When you use the browser inspector and look at the JavaScript console output you will find the error message: "Fetch API cannot load http://:9009/prometheus/api/v1/guery_range due to access control checks."
+When you use the browser inspector and look at the JavaScript console output you will find the error message: "Fetch API cannot load http://:9009/prometheus/api/v1/query_range due to access control checks."
 
 ![Screenshot from the fetch API error message using a HTTP datasource](https://github.com/user-attachments/assets/27b745f4-dccc-4112-bf2d-6b88cf23d0a1 "Fetch API error message")
 

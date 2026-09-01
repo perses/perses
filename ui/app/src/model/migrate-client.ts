@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, fetchJson, StatusError } from '@perses-dev/client';
-import { useMutation, UseMutationResult } from '@tanstack/react-query';
+import type { DashboardResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
 import { HTTPHeader, HTTPMethodPOST } from './http';
 import buildURL from './url-builder';

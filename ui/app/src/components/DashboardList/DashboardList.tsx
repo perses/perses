@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import { DashboardResource, EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
+import type { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { DashboardSelector, DurationString } from '@perses-dev/spec';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useNavHistory } from '../../context/DashboardNavHistory';
 import { useDashboard, useDeleteDashboardMutation } from '../../model/dashboard-client';
-import { SearchProjectResource } from '../../model/search-client';
+import type { SearchProjectResource } from '../../model/search-client';
 import { AddFolderDialog } from '../dialogs/AddFolderDialog';
 import { CreateDashboardDialog } from '../dialogs/CreateDashboardDialog';
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';

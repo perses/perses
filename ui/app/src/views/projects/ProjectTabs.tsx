@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import {
+import type {
   DatasourceResource,
   RoleBindingResource,
   RoleResource,
@@ -20,17 +20,19 @@ import {
   VariableResource,
 } from '@perses-dev/client';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { DashboardSelector } from '@perses-dev/spec';
+import type { DashboardSelector } from '@perses-dev/spec';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
 import ShieldIcon from 'mdi-material-ui/Shield';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ReactElement, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import type { CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { CreateDashboardDialog } from '../../components/dialogs/CreateDashboardDialog';
 import { CreateFolderDialog } from '../../components/dialogs/CreateFolderDialog';

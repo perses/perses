@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, Permission, StatusError } from '@perses-dev/client';
-import { DashboardSelector, DurationString } from '@perses-dev/spec';
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { Duration } from 'date-fns';
+import type { Permission, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { Duration } from 'date-fns';
 
 import buildURL from './url-builder';
 
@@ -187,12 +189,17 @@ export interface TimeRangeConfig {
   options?: DurationString[];
 }
 
+export interface AutoRefreshConfig {
+  disable?: boolean;
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
+  auto_refresh?: AutoRefreshConfig;
   banner?: Banner;
   default_user_preferences?: DefaultUserPreferences;
 }

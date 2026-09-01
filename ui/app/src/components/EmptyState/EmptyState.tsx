@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, SxProps, Theme, Typography } from '@mui/material';
-import { ReactElement } from 'react';
+import type { SxProps, Theme } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import type { ReactElement } from 'react';
 
 interface EmptyStateProps {
   icon: ReactElement;

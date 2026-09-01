@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem } from '@perses-dev/client';
+import type { FolderItem } from '@perses-dev/client';
 import { useMemo } from 'react';
 import { z } from 'zod';
 
@@ -104,10 +104,10 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
 export function useAddFolderValidationSchema(items: FolderItem[], path: string[]): z.ZodSchema {
   return useMemo(() => {
     const siblings = path.length === 0 ? items : (getSubFolderRef(items, path).items ?? []);
-    const siblingFolderNames = siblings.filter((s) => s.kind === 'Folder').map((s) => s.name.toLowerCase());
+    const siblingFolderNames = new Set(siblings.filter((s) => s.kind === 'Folder').map((s) => s.name.toLowerCase()));
 
     return editFolderDialogValidationSchema.refine(
-      (data) => !siblingFolderNames.includes(data.name.toLowerCase()),
+      (data) => !siblingFolderNames.has(data.name.toLowerCase()),
       (data) => ({
         message: `A folder named '${data.name}' already exists at this level!`,
         path: ['name'],

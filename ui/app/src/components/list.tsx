@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Box, Chip, Tooltip } from '@mui/material';
-import { GridColDef, GridFilterInputValue, GridFilterItem, GridFilterOperator } from '@mui/x-data-grid';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { DispatchWithPromise } from '@perses-dev/components';
+import type { GridColDef, GridFilterItem, GridFilterOperator } from '@mui/x-data-grid';
+import { GridFilterInputValue } from '@mui/x-data-grid';
+import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import type { DispatchWithPromise } from '@perses-dev/components';
 
 import { formatAbsoluteTime, formatRelativeTime } from '../utils/dashboardTableUtils';
 

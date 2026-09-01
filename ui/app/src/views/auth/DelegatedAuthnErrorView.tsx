@@ -14,7 +14,8 @@
 import { Divider, LinearProgress, Stack } from '@mui/material';
 import { ErrorAlert, useSnackbar } from '@perses-dev/components';
 import * as React from 'react';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useDarkMode } from '../../context/DarkMode';

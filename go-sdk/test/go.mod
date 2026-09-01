@@ -1,6 +1,6 @@
 module dac-test
 
-go 1.26.5
+go 1.27.0
 
 replace github.com/perses/perses => ../../ // Use current version
 
@@ -10,8 +10,8 @@ require (
 	github.com/perses/plugins/staticlistvariable v0.9.0
 	github.com/perses/plugins/table v0.13.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.4
-	github.com/stretchr/testify v1.12.0
+	github.com/perses/spec v0.3.0-beta.5
+	github.com/stretchr/testify v1.12.1
 )
 
 require (
@@ -30,10 +30,11 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.70.1 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
-	github.com/zitadel/oidc/v3 v3.49.2 // indirect
+	github.com/zitadel/oidc/v3 v3.49.4 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect

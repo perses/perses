@@ -14,7 +14,8 @@
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 import { ProfileSections } from './profile-permissions-utils';
 

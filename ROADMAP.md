@@ -24,8 +24,3 @@ An integrated alert view is under consideration for future releases. This featur
 the current roadmap items.
 
 Interested in contributing? Start by opening a discussion with your design proposal.
-
-## Dropping support for React 17
-
-We are planning to drop support for React 17 the 15th of July 2026. It will help us to keep our dependencies up to date
-and to be able to use libraries that only support React 18 and above.

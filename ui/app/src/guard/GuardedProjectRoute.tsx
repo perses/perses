@@ -13,7 +13,8 @@
 
 import { LinearProgress } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 
 import { useProject } from '../model/project-client';

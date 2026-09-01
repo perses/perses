@@ -1,11 +1,15 @@
 {
   "name": "@{{ .ModuleOrg }}/{{.ModuleName}}",
   "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
   "scripts": {
     "dev": "rsbuild dev",
     "build": "npm run build-mf && concurrently \"npm:build:*\"",
     "build-mf": "rsbuild build",
-    "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file .cjs.swcrc",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file .swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "lint": "oxlint src",
@@ -15,7 +19,7 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
-  "main": "lib/cjs/index.js",
+  "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "devDependencies": {
@@ -43,12 +47,12 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^3.2.0",
-    "@perses-dev/components": "^0.54.0-beta.9",
-    "@perses-dev/client": "^0.54.0-beta.9",
-    "@perses-dev/dashboards": "^0.54.0-beta.9",
-    "@perses-dev/explore": "^0.54.0-beta.9",
-    "@perses-dev/plugin-system": "^0.54.0-beta.9",
-     "@perses-dev/spec": "^0.2.0-beta.6",
+    "@perses-dev/components": "^0.55.0-beta.6",
+    "@perses-dev/client": "^0.55.0-beta.6",
+    "@perses-dev/dashboards": "^0.55.0-beta.6",
+    "@perses-dev/explore": "^0.55.0-beta.6",
+    "@perses-dev/plugin-system": "^0.55.0-beta.6",
+    "@perses-dev/spec": "^0.3.0-beta.5",
     "@tanstack/react-query": "^4.39.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
@@ -66,6 +70,7 @@
     "mf-manifest.json",
     "mf-stats.json"
   ],
+  "packageManager": "npm@11.17.0",
   "perses": {
     "metadata": {
       "name": "{{.ModulePascalName}}",

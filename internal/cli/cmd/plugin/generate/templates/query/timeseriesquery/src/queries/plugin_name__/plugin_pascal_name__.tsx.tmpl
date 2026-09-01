@@ -1,7 +1,8 @@
-import { TimeSeriesQueryPlugin, parseVariables } from '@perses-dev/plugin-system';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
 import { getTimeSeriesData } from './get-time-series-data';
 import { {{ .PluginPascalName }}Editor } from './{{ .PluginPascalName }}Editor';
-import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 
 export const {{ .PluginPascalName }}: TimeSeriesQueryPlugin<{{ .PluginPascalName }}Spec> = {
   getTimeSeriesData,

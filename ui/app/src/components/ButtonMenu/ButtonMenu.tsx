@@ -13,7 +13,8 @@
 
 import { Button, ButtonGroup, ClickAwayListener, Grow, MenuList, Paper, Popper } from '@mui/material';
 import MenuDown from 'mdi-material-ui/MenuDown';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 export interface ButtonMenuProps {
   children: JSX.Element[];

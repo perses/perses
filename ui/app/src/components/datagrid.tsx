@@ -12,16 +12,15 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
+import type { GridColDef, GridValidRowModel } from '@mui/x-data-grid';
 import {
-  GridColDef,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
-  GridValidRowModel,
 } from '@mui/x-data-grid';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { ReactElement } from 'react';
+import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import type { ReactElement } from 'react';
 
 export const getDataGridInitialStateSortByName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {

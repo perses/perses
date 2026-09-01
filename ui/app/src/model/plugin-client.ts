@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, StatusError } from '@perses-dev/client';
-import { PluginModuleResource } from '@perses-dev/plugin-system';
-import { UseQueryOptions, UseQueryResult, useQuery } from '@tanstack/react-query';
+import type { StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import buildURL from './url-builder';
 

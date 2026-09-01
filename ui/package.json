@@ -3,6 +3,11 @@
   "description": "Monorepo for the Perses UI",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
@@ -34,7 +39,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/node": "^22.13.1",
+    "@types/node": "^24.13.3",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "^5.0.4",
@@ -45,8 +50,8 @@
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
     "oxlint-plugin-react-doctor": "0.9.12",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "react-refresh": "^0.16.0",
     "rimraf": "^6.1.0",
     "swc-loader": "^0.2.6",
@@ -55,5 +60,5 @@
     "typescript": "5.9.3",
     "vitest": "^4.1.11"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@11.17.0"
 }
