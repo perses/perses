@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, ProjectMetadata, StatusError } from '@perses-dev/client';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { fetchJson } from '@perses-dev/client';
+import type { ProjectMetadata, StatusError } from '@perses-dev/client';
+import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 
 import { HTTPHeader, HTTPMethodGET } from './http';
 import buildURL from './url-builder';
