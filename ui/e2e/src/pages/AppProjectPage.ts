@@ -100,7 +100,8 @@ export class AppProjectPage {
     const nameInput = this.createDashboardDialog.getByRole('textbox', {
       name: 'Name',
     });
-    await nameInput.type(name);
+    await nameInput.fill(name);
+    await nameInput.blur();
 
     await this.createDashboardDialog.getByRole('button', { name: 'Add' }).click();
   }
