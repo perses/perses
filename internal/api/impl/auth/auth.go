@@ -98,6 +98,7 @@ type authEndpoint interface {
 	GetAuthKind() string
 	GetSlugID() string
 	GetExtraProviderLogoutHandler() echo.HandlerFunc
+	RefreshOIDCToken(ctx echo.Context)
 }
 
 type endpoint struct {
@@ -185,6 +186,15 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Refresh the OIDC token if the provider supports it
+	for _, ep := range e.endpoints {
+		if ep.GetAuthKind() == claims.ProviderKind && ep.GetSlugID() == claims.ProviderID {
+			ep.RefreshOIDCToken(ctx)
+			break
+		}
+	}
+
 	return ctx.JSON(http.StatusOK, oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -196,6 +206,8 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 func (e *endpoint) logout(ctx echo.Context) error {
 	jwtHeaderPayloadCookie, signatureCookie := e.jwt.DeleteAccessTokenCookie()
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
+	ctx.SetCookie(e.jwt.DeleteOIDCTokenCookie())
+	ctx.SetCookie(e.jwt.DeleteOIDCRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
 

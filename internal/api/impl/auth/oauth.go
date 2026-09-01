@@ -376,7 +376,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	}
 
 	persistedClaims := extractPersistedClaims(uInfo.(*oauthUserInfo).RawProperties, e.claimConfigs)
-	_, err = e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
+	_, err = e.performUserSync(uInfo, persistedClaims, ctx.SetCookie, token)
 	if err != nil {
 		return err
 	}
@@ -447,7 +447,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	}
 
 	persistedClaims := extractPersistedClaims(uInfo.(*oauthUserInfo).RawProperties, e.claimConfigs)
-	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie)
+	resp, err := e.performUserSync(uInfo, persistedClaims, ctx.SetCookie, accessToken)
 	if err != nil {
 		return err
 	}
@@ -455,7 +455,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
+func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie), oidcToken *oauth2.Token) (*oauth2.Token, error) {
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
@@ -477,6 +477,16 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, persistedClai
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return nil, err
+	}
+
+	// Store the upstream OIDC token and refresh token for oauthPassThru datasource proxy support
+	if oidcToken != nil && oidcToken.AccessToken != "" {
+		oidcCookie := e.tokenManagement.jwt.CreateOIDCTokenCookie(oidcToken)
+		setCookie(oidcCookie)
+		if oidcToken.RefreshToken != "" {
+			oidcRefreshCookie := e.tokenManagement.jwt.CreateOIDCRefreshTokenCookie(oidcToken.RefreshToken)
+			setCookie(oidcRefreshCookie)
+		}
 	}
 
 	return &oauth2.Token{
@@ -603,6 +613,37 @@ func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token
 	}
 
 	return &userInfos, nil
+}
+
+// RefreshOIDCToken refreshes the OAuth token using the stored refresh token and updates the cookies.
+// It returns nil if no refresh token is available or if the refresh fails.
+func (e *oAuthEndpoint) RefreshOIDCToken(ctx echo.Context) {
+	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyOIDCRefreshToken)
+	if err != nil {
+		// No OIDC refresh token stored, nothing to refresh
+		return
+	}
+	refreshToken := refreshTokenCookie.Value
+	if refreshToken == "" {
+		return
+	}
+
+	providerCtx := e.newQueryContext(ctx)
+	tokenSource := e.conf.TokenSource(providerCtx, &oauth2.Token{RefreshToken: refreshToken})
+	newToken, err := tokenSource.Token()
+	if err != nil {
+		e.logWithError(err).Warn("Failed to refresh OAuth token; clearing OIDC cookies")
+		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCTokenCookie())
+		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCRefreshTokenCookie())
+		return
+	}
+
+	ctx.SetCookie(e.tokenManagement.jwt.CreateOIDCTokenCookie(newToken))
+
+	// Update refresh token cookie if a new refresh token was issued
+	if newToken.RefreshToken != "" && newToken.RefreshToken != refreshToken {
+		ctx.SetCookie(e.tokenManagement.jwt.CreateOIDCRefreshTokenCookie(newToken.RefreshToken))
+	}
 }
 
 // logWithError is a little logrus helper to log with given error and the provider slugID.

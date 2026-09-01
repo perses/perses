@@ -21,13 +21,16 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/perses/perses/pkg/model/api/config"
+	"golang.org/x/oauth2"
 )
 
 const (
-	CookieKeyJWTPayload   = "jwtPayload"
-	CookieKeyJWTSignature = "jwtSignature"
-	CookieKeyRefreshToken = "jwtRefreshToken"
-	cookiePath            = "/"
+	CookieKeyJWTPayload       = "jwtPayload"
+	CookieKeyJWTSignature     = "jwtSignature"
+	CookieKeyRefreshToken     = "jwtRefreshToken"
+	CookieKeyOIDCToken        = "oidcToken"
+	CookieKeyOIDCRefreshToken = "oidcRefreshToken"
+	cookiePath                = "/"
 )
 
 type ProviderInfo struct {
@@ -71,6 +74,12 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
+	// OIDC Token Cookie stores the token from external IDP, to help implement a grafana feature OAuthPassThru.
+	// this token will be passed to datasources/globalDatasources when secret.OAuthPassThru set to true.
+	CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie
+	DeleteOIDCTokenCookie() *http.Cookie
+	CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie
+	DeleteOIDCRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTClaims, error)
 	GetExpiresIn() int64
 }
@@ -157,6 +166,60 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyRefreshToken,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+}
+
+func (j *jwtImpl) CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie {
+	expiry := token.Expiry
+	if expiry.IsZero() {
+		expiry = time.Now().Add(j.accessTokenTTL)
+	}
+	maxAge := int(time.Until(expiry).Seconds())
+	if maxAge < 0 {
+		maxAge = 0
+	}
+	return &http.Cookie{
+		Name:     CookieKeyOIDCToken,
+		Value:    token.AccessToken,
+		Path:     cookiePath,
+		MaxAge:   maxAge,
+		Expires:  expiry,
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
+	}
+}
+
+func (j *jwtImpl) DeleteOIDCTokenCookie() *http.Cookie {
+	return &http.Cookie{
+		Name:     CookieKeyOIDCToken,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+}
+
+func (j *jwtImpl) CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie {
+	return &http.Cookie{
+		Name:     CookieKeyOIDCRefreshToken,
+		Value:    refreshToken,
+		Path:     cookiePath,
+		MaxAge:   int(j.refreshTokenTTL.Seconds()),
+		Expires:  time.Now().Add(j.refreshTokenTTL),
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
+	}
+}
+
+func (j *jwtImpl) DeleteOIDCRefreshTokenCookie() *http.Cookie {
+	return &http.Cookie{
+		Name:     CookieKeyOIDCRefreshToken,
 		Value:    "",
 		Path:     cookiePath,
 		MaxAge:   -1,

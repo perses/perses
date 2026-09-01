@@ -80,3 +80,56 @@ func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
 		})
 	}
 }
+
+func TestUnmarshalJSONSecretSpecOAuthPassThru(t *testing.T) {
+	testSuite := []struct {
+		title   string
+		jason   string
+		wantErr bool
+		errMsg  string
+	}{
+		{
+			title:   "oauthPassThru only",
+			jason:   `{"oauthPassThru": true}`,
+			wantErr: false,
+		},
+		{
+			title:   "oauthPassThru false is valid",
+			jason:   `{"oauthPassThru": false}`,
+			wantErr: false,
+		},
+		{
+			title:   "oauthPassThru with basicAuth is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, basicAuthJSON),
+			wantErr: true,
+			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+		},
+		{
+			title:   "oauthPassThru with authorization is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, authorizationJSON),
+			wantErr: true,
+			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+		},
+		{
+			title:   "oauthPassThru with oauth is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, oauthJSON),
+			wantErr: true,
+			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			result := &SecretSpec{}
+			err := json.Unmarshal([]byte(test.jason), result)
+			if test.wantErr {
+				assert.Error(t, err)
+				assert.Equal(t, test.errMsg, err.Error())
+			} else {
+				assert.NoError(t, err)
+				if test.jason == `{"oauthPassThru": true}` {
+					assert.True(t, result.OAuthPassThru)
+				}
+			}
+		})
+	}
+}

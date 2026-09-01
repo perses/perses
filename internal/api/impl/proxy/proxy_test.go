@@ -21,6 +21,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
@@ -299,4 +301,69 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, token)
 	assert.Equal(t, "secret-token", token.AccessToken)
+}
+
+func TestHTTPProxy_setupAuthentication_OAuthPassThru(t *testing.T) {
+	testSuite := []struct {
+		name          string
+		secret        *v1.SecretSpec
+		oidcCookie    string
+		expectedAuth  string
+		expectError   bool
+		errorContains string
+	}{
+		{
+			name:         "oauthPassThru forwards oidc token from cookie",
+			secret:       &v1.SecretSpec{OAuthPassThru: true},
+			oidcCookie:   "original-oidc-token",
+			expectedAuth: "Bearer original-oidc-token",
+		},
+		{
+			name:          "oauthPassThru with no oidc cookie returns error",
+			secret:        &v1.SecretSpec{OAuthPassThru: true},
+			oidcCookie:    "",
+			expectError:   true,
+			errorContains: "OAuthPassThru",
+		},
+		{
+			name:         "oauthPassThru false does not set auth header",
+			secret:       &v1.SecretSpec{OAuthPassThru: false},
+			oidcCookie:   "original-oidc-token",
+			expectedAuth: "",
+		},
+		{
+			name:         "nil secret does nothing",
+			secret:       nil,
+			oidcCookie:   "original-oidc-token",
+			expectedAuth: "",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			h := &httpProxy{
+				secret: test.secret,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
+			if test.oidcCookie != "" {
+				req.AddCookie(&http.Cookie{
+					Name:  crypto.CookieKeyOIDCToken,
+					Value: test.oidcCookie,
+				})
+			}
+
+			err := h.setupAuthentication(req)
+			if test.expectError {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), test.errorContains)
+			} else {
+				require.NoError(t, err)
+				if test.expectedAuth != "" {
+					assert.Equal(t, test.expectedAuth, req.Header.Get(echo.HeaderAuthorization))
+				} else {
+					assert.Empty(t, req.Header.Get(echo.HeaderAuthorization))
+				}
+			}
+		})
+	}
 }

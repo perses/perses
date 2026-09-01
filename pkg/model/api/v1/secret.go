@@ -29,6 +29,10 @@ type SecretSpec struct {
 	OAuth *secret.OAuth `json:"oauth,omitempty" yaml:"oauth,omitempty"`
 	// TLSConfig to use to connect to the targets.
 	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	// OAuthPassThru when true forwards the incoming user's OAuth/OIDC access token to the upstream datasource
+	// using an Authorization: Bearer header. This is only applicable for proxy-type datasources (HTTP proxy and SQL proxy).
+	// When enabled, the user's token is used instead of any static auth configured in basicAuth, authorization, or oauth.
+	OAuthPassThru bool `json:"oauthPassThru,omitempty" yaml:"oauthPassThru,omitempty"`
 }
 
 func (s *SecretSpec) UnmarshalJSON(data []byte) error {
@@ -70,6 +74,9 @@ func (s *SecretSpec) validate() error {
 	}
 	if nbAuthConfigured > 1 {
 		return fmt.Errorf("basicAuth, authorization and oauth are mutually exclusive, use one of them")
+	}
+	if s.OAuthPassThru && nbAuthConfigured > 0 {
+		return fmt.Errorf("oauthPassThru cannot be used together with basicAuth, authorization, or oauth")
 	}
 	return nil
 }
