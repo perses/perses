@@ -3,3 +3,4 @@ nodeLinker: hoisted
 allowBuilds:
   '@swc/core': true
   core-js: false
+  esbuild: true
