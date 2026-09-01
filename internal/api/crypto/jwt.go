@@ -182,7 +182,7 @@ func (j *jwtImpl) CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie {
 	if maxAge < 0 {
 		maxAge = 0
 	}
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyOIDCToken,
 		Value:    token.AccessToken,
 		Path:     cookiePath,
@@ -195,17 +195,19 @@ func (j *jwtImpl) CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie {
 }
 
 func (j *jwtImpl) DeleteOIDCTokenCookie() *http.Cookie {
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyOIDCToken,
 		Value:    "",
 		Path:     cookiePath,
 		MaxAge:   -1,
+		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 }
 
 func (j *jwtImpl) CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie {
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyOIDCRefreshToken,
 		Value:    refreshToken,
 		Path:     cookiePath,
@@ -218,12 +220,14 @@ func (j *jwtImpl) CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie
 }
 
 func (j *jwtImpl) DeleteOIDCRefreshTokenCookie() *http.Cookie {
-	return &http.Cookie{
+	return &http.Cookie{ //nolint:gosec
 		Name:     CookieKeyOIDCRefreshToken,
 		Value:    "",
 		Path:     cookiePath,
 		MaxAge:   -1,
+		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 }
 

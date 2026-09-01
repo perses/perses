@@ -367,7 +367,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			AccessToken:  resp.AccessToken,
 			RefreshToken: resp.RefreshToken,
 			TokenType:    resp.TokenType,
-			Expiry:       time.Now().Add(time.Duration(resp.ExpiresIn) * time.Second),
+			Expiry: time.Now().Add(time.Duration(int64(resp.ExpiresIn)) * time.Second), //nolint:gosec // G115: OAuth expires_in values never overflow int64
 		}
 		idClaims, err := rp.VerifyTokens[*oidc.IDTokenClaims](ctx.Request().Context(), resp.AccessToken, resp.IDToken, e.deviceCodeRelyingParty.IDTokenVerifier())
 		if err != nil {
