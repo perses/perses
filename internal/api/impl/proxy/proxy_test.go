@@ -346,7 +346,7 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThru(t *testing.T) {
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 			if test.oidcCookie != "" {
-				req.AddCookie(&http.Cookie{
+				req.AddCookie(&http.Cookie{ //nolint:gosec
 					Name:  crypto.CookieKeyOIDCToken,
 					Value: test.oidcCookie,
 				})
