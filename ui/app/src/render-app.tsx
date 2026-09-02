@@ -11,10 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as PersesClient from '@perses-dev/client';
+import * as PersesComponents from '@perses-dev/components';
+import * as PersesDashboards from '@perses-dev/dashboards';
+import * as PersesExplore from '@perses-dev/explore';
+import * as PersesPluginSystem from '@perses-dev/plugin-system';
+import { registerHostSharedModules } from '@perses-dev/plugin-system';
+import * as PersesSpec from '@perses-dev/spec';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import Router from './Router';
+
+// Provide the host's already-loaded perses packages to the plugin runtime as synchronous
+// Module Federation singletons.
+registerHostSharedModules({
+  '@perses-dev/spec': PersesSpec,
+  '@perses-dev/client': PersesClient,
+  '@perses-dev/components': PersesComponents,
+  '@perses-dev/plugin-system': PersesPluginSystem,
+  '@perses-dev/explore': PersesExplore,
+  '@perses-dev/dashboards': PersesDashboards,
+});
+
 /**
  * Renders the Perses application in the target container.
  */
