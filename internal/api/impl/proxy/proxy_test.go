@@ -303,7 +303,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	assert.Equal(t, "secret-token", token.AccessToken)
 }
 
-func TestHTTPProxy_setupAuthentication_OAuthPassThru(t *testing.T) {
+func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 	testSuite := []struct {
 		name          string
 		secret        *v1.SecretSpec
@@ -314,20 +314,20 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThru(t *testing.T) {
 	}{
 		{
 			name:         "oauthPassThru forwards oidc token from cookie",
-			secret:       &v1.SecretSpec{OAuthPassThru: true},
+			secret:       &v1.SecretSpec{OAuthPassThrough: true},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "Bearer original-oidc-token",
 		},
 		{
 			name:          "oauthPassThru with no oidc cookie returns error",
-			secret:        &v1.SecretSpec{OAuthPassThru: true},
+			secret:        &v1.SecretSpec{OAuthPassThrough: true},
 			oidcCookie:    "",
 			expectError:   true,
-			errorContains: "OAuthPassThru",
+			errorContains: "OAuthPassThrough",
 		},
 		{
 			name:         "oauthPassThru false does not set auth header",
-			secret:       &v1.SecretSpec{OAuthPassThru: false},
+			secret:       &v1.SecretSpec{OAuthPassThrough: false},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "",
 		},
@@ -351,8 +351,10 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThru(t *testing.T) {
 					Value: test.oidcCookie,
 				})
 			}
+			rec := httptest.NewRecorder()
+			c := echo.New().NewContext(req, rec)
 
-			err := h.setupAuthentication(req)
+			err := h.setupAuthentication(c)
 			if test.expectError {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.errorContains)

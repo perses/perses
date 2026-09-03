@@ -74,8 +74,8 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
-	// OIDC Token Cookie stores the token from external IDP, to help implement a grafana feature OAuthPassThru.
-	// this token will be passed to datasources/globalDatasources when secret.OAuthPassThru set to true.
+	// OIDC Token Cookie stores the token from external IDP, to help implement a grafana feature OAuthPassThrough.
+	// this token will be passed to datasources/globalDatasources when secret.OAuthPassThrough set to true.
 	CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie
 	DeleteOIDCTokenCookie() *http.Cookie
 	CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie

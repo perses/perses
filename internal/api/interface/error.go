@@ -28,6 +28,26 @@ type PersesError struct {
 	message string
 }
 
+// UserVisibleError represents an error that should be surfaced directly to the user
+// with a descriptive message (e.g. missing OAuth token for OAuthPassThrough). It maps to HTTP 400.
+type UserVisibleError struct {
+	message string
+}
+
+func (e *UserVisibleError) Error() string {
+	return e.message
+}
+
+// Is allows errors.Is matching against UserVisibleError instances.
+func (e *UserVisibleError) Is(target error) bool {
+	_, ok := target.(*UserVisibleError)
+	return ok
+}
+
+func HandleUserVisibleError(msg string) error {
+	return &UserVisibleError{message: msg}
+}
+
 func (e *PersesError) Error() string {
 	return e.message
 }

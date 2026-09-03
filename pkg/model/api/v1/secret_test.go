@@ -81,7 +81,7 @@ func TestUnmarshalJSONSecretSpecMutuallyExclusiveAuth(t *testing.T) {
 	}
 }
 
-func TestUnmarshalJSONSecretSpecOAuthPassThru(t *testing.T) {
+func TestUnmarshalJSONSecretSpecOAuthPassThrough(t *testing.T) {
 	testSuite := []struct {
 		title   string
 		jason   string
@@ -127,7 +127,7 @@ func TestUnmarshalJSONSecretSpecOAuthPassThru(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if test.jason == `{"oauthPassThru": true}` {
-					assert.True(t, result.OAuthPassThru)
+					assert.True(t, result.OAuthPassThrough)
 				}
 			}
 		})
