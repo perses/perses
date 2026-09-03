@@ -91,7 +91,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		)
 	}
 
-	authEndpoint, err := authendpoint.New(
+	authEndpoint, tokenRefresher, err := authendpoint.New(
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
 		serviceManager.GetAuthorization(),
@@ -112,7 +112,8 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
-			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetAuthorization()),
+			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetAuthorization(),
+			tokenRefresher),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),

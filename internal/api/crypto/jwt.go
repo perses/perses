@@ -20,9 +20,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/pkg/model/api/config"
 	"golang.org/x/oauth2"
 )
+
+// TokenRefresher is a function that attempts to refresh the upstream OIDC/OAuth token
+// using the stored refresh token. It should set new cookies on success or clear them on failure.
+type TokenRefresher func(ctx echo.Context)
 
 const (
 	CookieKeyJWTPayload       = "jwtPayload"
