@@ -479,7 +479,7 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, persistedClai
 		return nil, err
 	}
 
-	// Store the upstream OIDC token and refresh token for oauthPassThru datasource proxy support
+	// Store the upstream OIDC token and refresh token for oauthPassThrough datasource proxy support
 	if oidcToken != nil && oidcToken.AccessToken != "" {
 		oidcCookie := e.tokenManagement.jwt.CreateOIDCTokenCookie(oidcToken)
 		setCookie(oidcCookie)
