@@ -594,7 +594,7 @@ func (s *sqlProxy) setupAuthentication() error {
 	}
 
 	if s.secret.OAuthPassThrough {
-		logrus.Warnf("oauthPassThru is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
+		logrus.Warnf("oauthPassThrough is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
 	}
 
 	basicAuth := s.secret.BasicAuth
