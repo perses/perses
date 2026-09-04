@@ -296,9 +296,9 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
-		var dsConfigErr *apiinterface.UserVisibleError
-		if errors.As(err, &dsConfigErr) {
-			return echo.NewHTTPError(http.StatusBadRequest, dsConfigErr.Error())
+		var echoHttpErr *echo.HTTPError
+		if errors.As(err, &echoHttpErr) {
+			return echoHttpErr
 		}
 		return apiinterface.InternalError
 	}
@@ -390,7 +390,7 @@ func (h *httpProxy) setupAuthentication(c echo.Context) error {
 				}
 			}
 			if errors.Is(err, http.ErrNoCookie) {
-				return apiinterface.HandleUserVisibleError(fmt.Sprintf(
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf(
 					"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
 					h.datasourceName,
 				))
@@ -594,7 +594,7 @@ func (s *sqlProxy) setupAuthentication() error {
 	}
 
 	if s.secret.OAuthPassThrough {
-		logrus.Warnf("oauthPassThru is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
+		logrus.Warnf("oauthPassThrough is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
 	}
 
 	basicAuth := s.secret.BasicAuth

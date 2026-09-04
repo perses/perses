@@ -89,32 +89,32 @@ func TestUnmarshalJSONSecretSpecOAuthPassThrough(t *testing.T) {
 		errMsg  string
 	}{
 		{
-			title:   "oauthPassThru only",
-			jason:   `{"oauthPassThru": true}`,
+			title:   "oauthPassThrough only",
+			jason:   `{"oauthPassThrough": true}`,
 			wantErr: false,
 		},
 		{
-			title:   "oauthPassThru false is valid",
-			jason:   `{"oauthPassThru": false}`,
+			title:   "oauthPassThrough false is valid",
+			jason:   `{"oauthPassThrough": false}`,
 			wantErr: false,
 		},
 		{
-			title:   "oauthPassThru with basicAuth is invalid",
-			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, basicAuthJSON),
+			title:   "oauthPassThrough with basicAuth is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThrough": true}`, basicAuthJSON),
 			wantErr: true,
-			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+			errMsg:  "oauthPassThrough cannot be used together with basicAuth, authorization, or oauth",
 		},
 		{
-			title:   "oauthPassThru with authorization is invalid",
-			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, authorizationJSON),
+			title:   "oauthPassThrough with authorization is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThrough": true}`, authorizationJSON),
 			wantErr: true,
-			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+			errMsg:  "oauthPassThrough cannot be used together with basicAuth, authorization, or oauth",
 		},
 		{
-			title:   "oauthPassThru with oauth is invalid",
-			jason:   fmt.Sprintf(`{%s, "oauthPassThru": true}`, oauthJSON),
+			title:   "oauthPassThrough with oauth is invalid",
+			jason:   fmt.Sprintf(`{%s, "oauthPassThrough": true}`, oauthJSON),
 			wantErr: true,
-			errMsg:  "oauthPassThru cannot be used together with basicAuth, authorization, or oauth",
+			errMsg:  "oauthPassThrough cannot be used together with basicAuth, authorization, or oauth",
 		},
 	}
 	for _, test := range testSuite {
@@ -126,7 +126,7 @@ func TestUnmarshalJSONSecretSpecOAuthPassThrough(t *testing.T) {
 				assert.Equal(t, test.errMsg, err.Error())
 			} else {
 				assert.NoError(t, err)
-				if test.jason == `{"oauthPassThru": true}` {
+				if test.jason == `{"OAuthPassThrough": true}` {
 					assert.True(t, result.OAuthPassThrough)
 				}
 			}

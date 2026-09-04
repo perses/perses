@@ -313,20 +313,20 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name:         "oauthPassThru forwards oidc token from cookie",
+			name:         "oauthPassThrough forwards oidc token from cookie",
 			secret:       &v1.SecretSpec{OAuthPassThrough: true},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "Bearer original-oidc-token",
 		},
 		{
-			name:          "oauthPassThru with no oidc cookie returns error",
+			name:          "oauthPassThrough with no oidc cookie returns error",
 			secret:        &v1.SecretSpec{OAuthPassThrough: true},
 			oidcCookie:    "",
 			expectError:   true,
 			errorContains: "OAuthPassThrough",
 		},
 		{
-			name:         "oauthPassThru false does not set auth header",
+			name:         "oauthPassThrough false does not set auth header",
 			secret:       &v1.SecretSpec{OAuthPassThrough: false},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "",

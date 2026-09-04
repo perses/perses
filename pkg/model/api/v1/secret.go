@@ -76,7 +76,7 @@ func (s *SecretSpec) validate() error {
 		return fmt.Errorf("basicAuth, authorization and oauth are mutually exclusive, use one of them")
 	}
 	if s.OAuthPassThrough && nbAuthConfigured > 0 {
-		return fmt.Errorf("oauthPassThru cannot be used together with basicAuth, authorization, or oauth")
+		return fmt.Errorf("oauthPassThrough cannot be used together with basicAuth, authorization, or oauth")
 	}
 	return nil
 }
