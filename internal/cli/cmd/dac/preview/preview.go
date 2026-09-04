@@ -63,13 +63,14 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	opt.OutputOption
-	dashboards   []*modelV1.Dashboard
-	writer       io.Writer
-	errWriter    io.Writer
-	apiClient    api.ClientInterface
-	ttl          common.Duration
-	ttlAsAString string
-	prefix       string
+	dashboards    []*modelV1.Dashboard
+	writer        io.Writer
+	errWriter     io.Writer
+	apiClient     api.ClientInterface
+	ttl           common.Duration
+	ttlAsAString  string
+	prefix        string
+	createProject bool
 }
 
 func (o *option) Complete(args []string) error {
@@ -108,12 +109,7 @@ func (o *option) Execute() error {
 			dashboard.Spec.Display.Name = fmt.Sprintf("%s-%s", o.prefix, dashboard.Spec.Display.Name)
 		}
 		ephemeralDashboard := newEphemeralDashboard(project, name, o.ttl, dashboard)
-		svc, svcErr := service.New(modelV1.KindEphemeralDashboard, project, o.apiClient)
-		if svcErr != nil {
-			return svcErr
-		}
-
-		if upsertError := service.Upsert(svc, ephemeralDashboard); upsertError != nil {
+		if upsertError := service.UpsertWithProjectCreation(o.apiClient, modelV1.KindEphemeralDashboard, project, ephemeralDashboard, o.createProject); upsertError != nil {
 			return upsertError
 		}
 		response = append(response, o.buildPreviewResponse(dashboard, ephemeralDashboard))
@@ -200,5 +196,6 @@ percli dac preview -d ./build
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	cmd.Flags().StringVar(&o.ttlAsAString, "ttl", "1d", "Time To Live of the dashboard preview")
 	cmd.Flags().StringVar(&o.prefix, "prefix", "", "If provided, it is used to prefix the dashboard preview name")
+	cmd.Flags().BoolVar(&o.createProject, "create-project", false, "If present, the command creates the resolved target project when the preview fails because the project does not exist, then retries once")
 	return cmd
 }

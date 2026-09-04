@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -50,6 +51,55 @@ func Upsert(svc Service, entity modelAPI.Entity) error {
 	}
 	_, updateErr := svc.UpdateResource(entity)
 	return updateErr
+}
+
+// UpsertWithProjectCreation behaves like Upsert, except that, when createProject is true and the upsert fails
+// because the target project doesn't exist, it will create the project and retry the upsert once.
+func UpsertWithProjectCreation(apiClient api.ClientInterface, kind modelV1.Kind, project string, entity modelAPI.Entity, createProject bool) error {
+	svc, svcErr := New(kind, project, apiClient)
+	if svcErr != nil {
+		return svcErr
+	}
+	upsertErr := Upsert(svc, entity)
+	if upsertErr == nil {
+		return nil
+	}
+	if !isProjectDoesNotExistError(upsertErr) || !createProject || modelV1.IsGlobal(kind) {
+		return upsertErr
+	}
+	if err := createProjectIfMissing(apiClient, project); err != nil {
+		return err
+	}
+	// Retry once the original request against the newly created project.
+	return Upsert(svc, entity)
+}
+
+func createProjectIfMissing(apiClient api.ClientInterface, project string) error {
+	if len(project) == 0 {
+		return fmt.Errorf("unable to create missing project: project is not set")
+	}
+	projectSvc, projectSvcErr := New(modelV1.KindProject, "", apiClient)
+	if projectSvcErr != nil {
+		return projectSvcErr
+	}
+	projectEntity := &modelV1.Project{
+		Kind: modelV1.KindProject,
+		Metadata: modelV1.Metadata{
+			Name: project,
+		},
+	}
+	if _, err := projectSvc.CreateResource(projectEntity); err != nil && !errors.Is(err, perseshttp.ConflictError) {
+		return err
+	}
+	return nil
+}
+
+func isProjectDoesNotExistError(err error) bool {
+	var requestErr *perseshttp.RequestError
+	if !errors.As(err, &requestErr) {
+		return false
+	}
+	return apiInterface.IsProjectDoesNotExistErrorMessage(requestErr.Message)
 }
 
 type Service interface {
