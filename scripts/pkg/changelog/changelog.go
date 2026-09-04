@@ -35,6 +35,12 @@ const (
 	doc            = "DOC"
 )
 
+const (
+	gitLogFieldSeparator  = "\x00"
+	gitLogRecordSeparator = "\x1e"
+	gitLogFormat          = "--pretty=format:%h%x00%P%x00%s%x00%b%x1e"
+)
+
 // kind represents the type of change.
 type kind int
 
@@ -47,6 +53,13 @@ const (
 	KindToBeIgnored
 	kindDoc
 )
+
+type gitLogEntry struct {
+	hash    string
+	parents string
+	subject string
+	body    string
+}
 
 func getStringInBetweenTwoString(str string, startS string, endS string) (result string, found bool) {
 	s := strings.Index(str, startS)
@@ -124,6 +137,139 @@ func parseAndFormatEntry(entry string) (kind, string) {
 	return catalogKind, strings.TrimSpace(strings.ReplaceAll(newEntry, fmt.Sprintf("[%s]", catalogEntry), ""))
 }
 
+func mergePullRequestNumber(subject string) (string, bool) {
+	const prefix = "merge pull request #"
+	lowerSubject := strings.ToLower(subject)
+	if !strings.HasPrefix(lowerSubject, prefix) {
+		return "", false
+	}
+	rest := subject[len(prefix):]
+	end := 0
+	for _, r := range rest {
+		if r < '0' || r > '9' {
+			break
+		}
+		end++
+	}
+	if end == 0 {
+		return "", false
+	}
+	return rest[:end], true
+}
+
+func firstNonEmptyLine(text string) string {
+	for _, line := range strings.Split(text, "\n") {
+		if trimmedLine := strings.TrimSpace(line); trimmedLine != "" {
+			return trimmedLine
+		}
+	}
+	return ""
+}
+
+func formatGitLogEntry(hash, subject, body string) string {
+	message := subject
+	if number, ok := mergePullRequestNumber(subject); ok {
+		if title := firstNonEmptyLine(body); title != "" {
+			message = title
+			if !strings.Contains(message, fmt.Sprintf("(#%s)", number)) {
+				message = fmt.Sprintf("%s (#%s)", message, number)
+			}
+		}
+	}
+	return fmt.Sprintf("%s %s", hash, message)
+}
+
+func (g gitLogEntry) raw() string {
+	return fmt.Sprintf("%s %s", g.hash, g.subject)
+}
+
+func (g gitLogEntry) pullRequestEntry() string {
+	return formatGitLogEntry(g.hash, g.subject, g.body)
+}
+
+func parseGitLogEntries(gitLogs []byte) []gitLogEntry {
+	records := strings.Split(string(gitLogs), gitLogRecordSeparator)
+	entries := make([]gitLogEntry, 0, len(records))
+	for _, record := range records {
+		record = strings.Trim(record, "\n")
+		if strings.TrimSpace(record) == "" {
+			continue
+		}
+		fields := strings.SplitN(record, gitLogFieldSeparator, 4)
+		if len(fields) < 4 {
+			continue
+		}
+		entries = append(entries, gitLogEntry{
+			hash:    fields[0],
+			parents: fields[1],
+			subject: fields[2],
+			body:    fields[3],
+		})
+	}
+	return entries
+}
+
+func getGitLogEntries(revisionRange string) []gitLogEntry {
+	// nolint: gosec
+	gitLogs, err := exec.Command("git", "log", revisionRange, gitLogFormat, "--no-decorate").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the git logs")
+	}
+	return parseGitLogEntries(gitLogs)
+}
+
+func shouldGroupPullRequest(mergeEntry gitLogEntry, pullRequestEntries []gitLogEntry) bool {
+	mergeKind, _ := parseAndFormatEntry(mergeEntry.pullRequestEntry())
+	if mergeKind == kindUnknown || mergeKind == KindToBeIgnored {
+		return false
+	}
+	for _, entry := range pullRequestEntries {
+		entryKind, _ := parseAndFormatEntry(entry.raw())
+		if entryKind == KindToBeIgnored || entryKind == kindUnknown {
+			continue
+		}
+		if entryKind != mergeKind {
+			return false
+		}
+	}
+	return true
+}
+
+func groupPullRequestEntries(gitLogEntries []gitLogEntry, getPullRequestEntries func(string) []gitLogEntry) []string {
+	groupedCommits := map[string]struct{}{}
+	groupedMergeEntries := map[string]string{}
+	for _, entry := range gitLogEntries {
+		if _, ok := mergePullRequestNumber(entry.subject); !ok {
+			continue
+		}
+		parents := strings.Fields(entry.parents)
+		if len(parents) < 2 {
+			continue
+		}
+		pullRequestEntries := getPullRequestEntries(fmt.Sprintf("%s..%s", parents[0], parents[1]))
+		if !shouldGroupPullRequest(entry, pullRequestEntries) {
+			continue
+		}
+		groupedMergeEntries[entry.hash] = entry.pullRequestEntry()
+		for _, pullRequestEntry := range pullRequestEntries {
+			groupedCommits[pullRequestEntry.hash] = struct{}{}
+		}
+	}
+
+	entries := make([]string, 0, len(gitLogEntries))
+	for _, entry := range gitLogEntries {
+		if _, ok := groupedCommits[entry.hash]; ok {
+			continue
+		}
+		if groupedEntry, ok := groupedMergeEntries[entry.hash]; ok {
+			entries = append(entries, groupedEntry)
+			continue
+		}
+		entries = append(entries, entry.raw())
+	}
+	return entries
+}
+
 func InjectEntries(buffer *bytes.Buffer, entries []string, catalogEntry string) {
 	for _, entry := range entries {
 		buffer.WriteString(fmt.Sprintf("- %s %s\n", formatChangelogCategory(catalogEntry), entry)) //nolint: staticcheck
@@ -131,16 +277,8 @@ func InjectEntries(buffer *bytes.Buffer, entries []string, catalogEntry string) 
 }
 
 func GetGitLogs(previousVersion string) []string {
-	// nolint: gosec
-	gitLogs, err := exec.Command("git", "log", fmt.Sprintf("%s...HEAD", previousVersion), "--pretty=oneline", "--no-decorate").Output()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the git logs")
-	}
-	entries := strings.Split(string(gitLogs), "\n")
-	if lastLine := entries[len(entries)-1]; strings.TrimSpace(lastLine) == "" {
-		entries = entries[0 : len(entries)-1]
-	}
-	return entries
+	gitLogEntries := getGitLogEntries(fmt.Sprintf("%s...HEAD", previousVersion))
+	return groupPullRequestEntries(gitLogEntries, getGitLogEntries)
 }
 
 type Changelog struct {
