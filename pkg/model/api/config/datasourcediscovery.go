@@ -72,6 +72,8 @@ type KubernetesDiscovery struct {
 	PodConfiguration KubePodDiscovery `json:"pod_configuration,omitempty" yaml:"pod_configuration,omitempty"`
 	// The labels used to filter the list of resource when contacting the Kubernetes API.
 	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	// Marks the discovered datasource as default
+	Default bool `json:"default,omitempty" yaml:"default,omitempty"`
 }
 
 func (d *KubernetesDiscovery) Verify() error {
