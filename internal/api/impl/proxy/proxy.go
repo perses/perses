@@ -123,27 +123,30 @@ func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
 const unsavedDatasourceDefaultName = "unsaved-datasource"
 
 type endpoint struct {
-	cfg          config.DatasourceConfig
-	dashboard    dashboard.DAO
-	secret       secret.DAO
-	globalSecret globalsecret.DAO
-	dts          datasource.DAO
-	globalDTS    globaldatasource.DAO
-	crypto       crypto.Crypto
-	authz        authorization.Authorization
+	cfg            config.DatasourceConfig
+	dashboard      dashboard.DAO
+	secret         secret.DAO
+	globalSecret   globalsecret.DAO
+	dts            datasource.DAO
+	globalDTS      globaldatasource.DAO
+	crypto         crypto.Crypto
+	authz          authorization.Authorization
+	tokenRefresher crypto.TokenRefresher
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
-	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, authz authorization.Authorization) route.Endpoint {
+	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, authz authorization.Authorization,
+	tokenRefresher crypto.TokenRefresher) route.Endpoint {
 	return &endpoint{
-		cfg:          cfg,
-		dashboard:    dashboardDAO,
-		secret:       secretDAO,
-		globalSecret: globalSecretDAO,
-		dts:          dtsDAO,
-		globalDTS:    globalDtsDAO,
-		crypto:       crypto,
-		authz:        authz,
+		cfg:            cfg,
+		dashboard:      dashboardDAO,
+		secret:         secretDAO,
+		globalSecret:   globalSecretDAO,
+		dts:            dtsDAO,
+		globalDTS:      globalDtsDAO,
+		crypto:         crypto,
+		authz:          authz,
+		tokenRefresher: tokenRefresher,
 	}
 }
 
@@ -194,7 +197,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -231,6 +234,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			datasourceName: datasourceName,
 			path:           path,
 			secret:         scrt,
+			tokenRefresher: tokenRefresher,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -264,6 +268,7 @@ type httpProxy struct {
 	secret         *v1.SecretSpec
 	datasourceName string
 	path           string
+	tokenRefresher crypto.TokenRefresher
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -291,6 +296,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
+		var echoHttpErr *echo.HTTPError
+		if errors.As(err, &echoHttpErr) {
+			return echoHttpErr
+		}
 		return apiinterface.InternalError
 	}
 
@@ -359,11 +368,35 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	return h.setupAuthentication(req)
+	return h.setupAuthentication(c)
 }
 
-func (h *httpProxy) setupAuthentication(req *http.Request) error {
+func (h *httpProxy) setupAuthentication(c echo.Context) error {
 	if h.secret == nil {
+		return nil
+	}
+	req := c.Request()
+	if h.secret.OAuthPassThrough {
+		oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
+		if errors.Is(err, http.ErrNoCookie) {
+			// OIDC token cookie is missing. It may have expired while the Perses session
+			// was still valid. Attempt to refresh using the stored OIDC refresh token
+			// before giving up.
+			if h.tokenRefresher != nil {
+				if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
+					h.tokenRefresher(c)
+					// Re-read the OIDC token cookie after the refresh attempt.
+					oidcCookie, err = c.Cookie(crypto.CookieKeyOIDCToken)
+				}
+			}
+			if errors.Is(err, http.ErrNoCookie) {
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf(
+					"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
+					h.datasourceName,
+				))
+			}
+		}
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oidcCookie.Value))
 		return nil
 	}
 	basicAuth := h.secret.BasicAuth
@@ -558,6 +591,10 @@ func (s *sqlProxy) serve(c echo.Context) error {
 func (s *sqlProxy) setupAuthentication() error {
 	if s.secret == nil {
 		return nil
+	}
+
+	if s.secret.OAuthPassThrough {
+		logrus.Warnf("oauthPassThrough is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
 	}
 
 	basicAuth := s.secret.BasicAuth

@@ -29,7 +29,7 @@ import (
 func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
-	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, retrieveSecret)
+	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, retrieveSecret, e.tokenRefresher)
 	if err != nil {
 		return err
 	}
