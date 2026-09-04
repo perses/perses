@@ -203,6 +203,11 @@ func NewCMD() *cobra.Command {
 	cmd.Flags().StringVar((*string)(&o.archiveFormat), "archive-format", string(archive.TARgz), "The archive format. Supported format are: tar.gz, tar, zip")
 	cmd.Flags().BoolVar(&o.skipPNPMBuild, "skip.pnpm-build", false, "The command will run `pnpm build` to ensure the frontend is built before creating the archive. If you want to skip this step, you can use this flag.")
 	cmd.Flags().BoolVar(&o.skipPNPMInstall, "skip.pnpm-install", false, "The command will run `pnpm install --frozen-lockfile` if it doesn't find the node_modules folder. If you want to skip this step, you can use this flag.")
+	// Deprecated aliases kept so existing CI pipelines using the npm-era flags keep working.
+	cmd.Flags().BoolVar(&o.skipPNPMBuild, "skip.npm-build", false, "")
+	_ = cmd.Flags().MarkDeprecated("skip.npm-build", "use --skip.pnpm-build instead")
+	cmd.Flags().BoolVar(&o.skipPNPMInstall, "skip.npm-install", false, "")
+	_ = cmd.Flags().MarkDeprecated("skip.npm-install", "use --skip.pnpm-install instead")
 	cmd.Flags().StringVar(&o.cfgPath, "config", "", "Relative path to the configuration file. It is relative, because it will use as a root path the one set with the flag ---plugin.path. By default, the command will look for a file named 'perses_plugin_config.yaml'")
 	cmd.Flags().StringVar(&o.pluginPath, "plugin.path", "", "Path to the plugin. By default, the command will look at the folder where the command is running.")
 

@@ -11,6 +11,5 @@
     "@types/react-dom": "^18.3.5",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
-  },
-  "packageManager": "pnpm@12.1.0"
+  }
 }

@@ -8,7 +8,6 @@
 *.sublime-workspace
 .zed/*
 __debug*
-.turbo/
 
 # IDE - VSCode
 .vscode/*

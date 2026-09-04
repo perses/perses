@@ -67,6 +67,5 @@
     "typedoc": "^0.28.20",
     "typescript": "5.9.3",
     "vitest": "^4.1.11"
-  },
-  "packageManager": "pnpm@12.1.0"
+  }
 }
