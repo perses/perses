@@ -76,7 +76,7 @@ export function useDashboardValidationSchema(projectName?: string): DashboardVal
     }
 
     if (!dashboards?.length)
-      return { schema: createDashboardDialogValidationSchema, isSchemaLoading: true, hasSchemaError: false };
+      return { schema: createDashboardDialogValidationSchema, isSchemaLoading: false, hasSchemaError: false };
 
     const refinedSchema = createDashboardDialogValidationSchema.refine(
       (schema) => {
