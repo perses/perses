@@ -188,7 +188,7 @@ importers:
         specifier: ^11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
       '@hookform/resolvers':
-        specifier: ^3.2.0
+        specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.87.0(react@18.3.1))
       '@mui/material':
         specifier: ^6.1.10
@@ -221,10 +221,10 @@ importers:
         specifier: ^0.3.0-beta.5
         version: 0.3.0-beta.5
       '@tanstack/react-query':
-        specifier: ^4.39.1
+        specifier: ^4.44.0
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       date-fns:
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: 4.4.0
       dompurify:
         specifier: ^3.4.11
@@ -236,16 +236,16 @@ importers:
         specifier: ^3.0.2
         version: 3.0.6
       immer:
-        specifier: ^10.1.1
+        specifier: ^10.2.0
         version: 10.2.0
       lodash:
-        specifier: ^4.17.21
+        specifier: ^4.18.1
         version: 4.18.1
       marked:
         specifier: ^15.0.7
         version: 15.0.12
       mdi-material-ui:
-        specifier: ^7.9.2
+        specifier: ^7.9.4
         version: 7.9.4(@mui/material@6.5.0(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.0
@@ -260,13 +260,13 @@ importers:
         specifier: ^3.1.4
         version: 3.1.4(react@18.3.1)
       react-hook-form:
-        specifier: ^7.52.2
+        specifier: ^7.76.0
         version: 7.87.0(react@18.3.1)
       react-i18next:
         specifier: ^15.6.0
         version: 15.7.4(i18next@25.10.10(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
       react-router-dom:
-        specifier: ^6.30.3
+        specifier: ^6.30.4
         version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-social-login-buttons:
         specifier: ^3.9.1
@@ -309,7 +309,7 @@ importers:
         specifier: ^0.55.0-beta.6
         version: 0.55.0-beta.6(ee615a552b79781660aa0e03d47754f5)
       date-fns:
-        specifier: ^4.1.0
+        specifier: ^4.2.1
         version: 4.4.0
       date-fns-tz:
         specifier: ^3.2.0
