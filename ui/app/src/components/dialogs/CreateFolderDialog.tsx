@@ -14,17 +14,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
 import type { FolderItem, FolderResource } from '@perses-dev/client';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { Dialog, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { useMemo } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
-import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateFolderMutation } from '../../model/folder-client';
+import { useSearchDashboards } from '../../model/search-client';
 import { generateMetadataName } from '../../utils/metadata';
-import type { CreateFolderValidationType } from '../../validation';
-import { useFolderValidationSchema } from '../../validation';
+import type { CreateFolderValidationType } from '../../validation/folder';
+import { useFolderValidationSchema } from '../../validation/folder';
 
 export interface CreateFolderDialogProps {
   projectName: string;
@@ -47,12 +47,12 @@ export const CreateFolderDialog = ({
   onSuccess,
 }: CreateFolderDialogProps): ReactElement => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const { data: dashboards } = useDashboardList({ project: projectName });
+  const { data: dashboards } = useSearchDashboards(projectName);
   const createFolderMutation = useCreateFolderMutation();
   const { schema, isSchemaLoading } = useFolderValidationSchema(projectName);
 
   const options = useMemo(
-    () => [...(dashboards?.values() ?? [])].map((d) => ({ label: getResourceDisplayName(d), name: d.metadata.name })),
+    () => [...(dashboards?.values() ?? [])].map((d) => ({ label: d.displayName, name: d.metadata.name })),
     [dashboards],
   );
 

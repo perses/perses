@@ -11,29 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
-import type { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import { Button, CircularProgress, Stack } from '@mui/material';
+import type { EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
+import { Dialog, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import type { DashboardSelector } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useNavHistory } from '../../context/DashboardNavHistory';
-import { useDeleteDashboardMutation } from '../../model/dashboard-client';
-import {
-  AddFolderDialog,
-  CreateDashboardDialog,
-  DeleteResourceDialog,
-  EditDashboardDialog,
-  EditFolderDialog,
-} from '../dialogs';
+import type { PartialDashboardResource } from '../../model/dashboard-client';
+import { useDashboard, useDeleteDashboardMutation } from '../../model/dashboard-client';
+import type { SearchProjectResource } from '../../model/search-client';
+import { AddFolderDialog } from '../dialogs/AddFolderDialog';
+import { CreateDashboardDialog } from '../dialogs/CreateDashboardDialog';
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
+import { DeleteResourceDialog } from '../dialogs/DeleteResourceDialog';
+import { EditDashboardDialog } from '../dialogs/EditDashboardDialog';
+import { EditFolderDialog } from '../dialogs/EditFolderDialog';
 import DashboardTreeList from './DashboardTreeList';
 
-type editDashboardAction = { type: 'editDashboard'; target: DashboardResource };
-type duplicateDashboardAction = { type: 'duplicateDashboard'; target: DashboardResource };
-type deleteDashboardAction = { type: 'deleteDashboard'; target: DashboardResource };
+type editDashboardAction = { type: 'editDashboard'; target: SearchProjectResource };
+type duplicateDashboardAction = { type: 'duplicateDashboard'; target: SearchProjectResource };
+type deleteDashboardAction = { type: 'deleteDashboard'; target: SearchProjectResource };
 type deleteFolderAction = { type: 'deleteFolder'; target: FolderResource; path: string[] };
 type editFolderAction = {
   type: 'editFolder';
@@ -70,7 +70,7 @@ export interface DashboardListRow {
 }
 
 export interface DashboardListProperties {
-  dashboardList: DashboardResource[];
+  dashboardList: SearchProjectResource[];
   folderList: FolderResource[];
   isLoading: boolean;
   isEphemeralDashboardEnabled: boolean;
@@ -96,7 +96,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         index,
         project: dashboard.metadata.project,
         name: dashboard.metadata.name,
-        displayName: getResourceDisplayName(dashboard),
+        displayName: dashboard.displayName,
         version: dashboard.metadata.version ?? 0,
         createdAt: dashboard.metadata.createdAt ?? '',
         updatedAt: dashboard.metadata.updatedAt ?? '',
@@ -117,6 +117,28 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   }, [dashboardsRows]);
 
   const [activeDialog, setActiveDialog] = useState<openDialogAction>({ type: 'none' });
+
+  const duplicateDashboardTarget = activeDialog.type === 'duplicateDashboard' ? activeDialog.target : undefined;
+  const {
+    data: duplicateDashboardData,
+    isLoading: isDuplicateDashboardLoading,
+    error: duplicateDashboardError,
+  } = useDashboard(
+    duplicateDashboardTarget?.metadata.project ?? '',
+    duplicateDashboardTarget?.metadata.name ?? '',
+    !!duplicateDashboardTarget,
+  );
+
+  const editDashboardTarget = activeDialog.type === 'editDashboard' ? activeDialog.target : undefined;
+  const {
+    data: editDashboardData,
+    isLoading: isEditDashboardLoading,
+    error: editDashboardError,
+  } = useDashboard(
+    editDashboardTarget?.metadata.project ?? '',
+    editDashboardTarget?.metadata.name ?? '',
+    !!editDashboardTarget,
+  );
 
   const openDialog = useCallback(
     (dialog: openDialogActionType) => (project: string, name: string, path?: string[]) => (): void => {
@@ -181,14 +203,14 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
 
   const handleDashboardDuplication = useCallback(
     (dashboardInfo: DashboardSelector | EphemeralDashboardInfo) => {
-      if (activeDialog.type === 'duplicateDashboard') {
+      if (activeDialog.type === 'duplicateDashboard' && duplicateDashboardData) {
         const targetedDashboard = activeDialog.target;
         if ('ttl' in dashboardInfo) {
           navigate(`/projects/${targetedDashboard.metadata.project}/ephemeraldashboard/new`, {
             state: {
               name: dashboardInfo.dashboard,
               spec: {
-                ...targetedDashboard.spec,
+                ...duplicateDashboardData.spec,
                 ttl: dashboardInfo.ttl,
                 display: { name: dashboardInfo.dashboard },
               },
@@ -199,7 +221,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
             state: {
               name: dashboardInfo.dashboard,
               spec: {
-                ...targetedDashboard.spec,
+                ...duplicateDashboardData.spec,
                 display: { name: dashboardInfo.dashboard },
               },
             },
@@ -207,14 +229,14 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         }
       }
     },
-    [navigate, activeDialog],
+    [navigate, activeDialog, duplicateDashboardData],
   );
 
   const handleDashboardDelete = useCallback(
-    (dashboard: DashboardResource): Promise<void> =>
+    (dashboard: PartialDashboardResource): Promise<void> =>
       new Promise((resolve, reject) => {
         deleteDashboardMutation.mutate(dashboard, {
-          onSuccess: (deletedDashboard: DashboardResource) => {
+          onSuccess: (deletedDashboard: PartialDashboardResource) => {
             successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
             resolve();
           },
@@ -241,20 +263,45 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
         isLoading={isLoading}
       />
-      {activeDialog.type === 'editDashboard' && (
+      {((activeDialog.type === 'editDashboard' && isEditDashboardLoading) ||
+        (activeDialog.type === 'duplicateDashboard' && isDuplicateDashboardLoading)) && (
+        <Dialog open onClose={closeDialog} aria-labelledby="loading-dialog" fullWidth={true}>
+          <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
+          <Dialog.Content sx={{ width: '100%' }}>
+            <Stack alignItems="center" justifyContent="center">
+              <CircularProgress />
+            </Stack>
+          </Dialog.Content>
+        </Dialog>
+      )}
+      {((activeDialog.type === 'editDashboard' && editDashboardError) ||
+        (activeDialog.type === 'duplicateDashboard' && duplicateDashboardError)) && (
+        <Dialog open onClose={closeDialog} aria-labelledby="error-dialog" fullWidth={true}>
+          <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
+          <Dialog.Content sx={{ width: '100%' }}>
+            {`Failed to load the dashboard: ${(editDashboardError ?? duplicateDashboardError)?.message}`}
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button variant="outlined" color="secondary" onClick={closeDialog}>
+              Close
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      )}
+      {activeDialog.type === 'editDashboard' && editDashboardData && (
         <EditDashboardDialog
           open={activeDialog.type === 'editDashboard'}
-          dashboard={activeDialog.target}
+          dashboard={editDashboardData}
           onClose={closeDialog}
         />
       )}
-      {activeDialog.type === 'duplicateDashboard' && (
+      {activeDialog.type === 'duplicateDashboard' && duplicateDashboardData && (
         <CreateDashboardDialog
           open={activeDialog.type === 'duplicateDashboard'}
           projects={[{ kind: 'Project', metadata: { name: activeDialog.target.metadata.project }, spec: {} }]}
           hideProjectSelect={true}
           mode="duplicate"
-          name={getResourceDisplayName(activeDialog.target)}
+          name={activeDialog.target.displayName}
           onSuccess={handleDashboardDuplication}
           onClose={closeDialog}
           isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
@@ -263,7 +310,10 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       {activeDialog.type === 'deleteDashboard' && (
         <DeleteResourceDialog
           open={activeDialog.type === 'deleteDashboard'}
-          resource={activeDialog.target}
+          resource={{
+            kind: 'Dashboard',
+            metadata: activeDialog.target.metadata,
+          }}
           onSubmit={(v) => handleDashboardDelete(v).then(closeDialog)}
           onClose={closeDialog}
         />
