@@ -9,22 +9,22 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@mui/material": "^6",
-    "@perses-dev/components": "latest",
+    "@mui/material": "^6.1.10",
+    "@perses-dev/components": "^0.55.0-beta.6",
     "@perses-dev/core": "latest",
-    "@perses-dev/dashboards": "latest",
-    "@perses-dev/plugin-system": "latest",
+    "@perses-dev/dashboards": "^0.55.0-beta.6",
+    "@perses-dev/plugin-system": "^0.55.0-beta.6",
     "@perses-dev/prometheus-plugin": "latest",
     "@perses-dev/timeseries-chart-plugin": "latest",
-    "@tanstack/react-query": "^4",
-    "react": "^18",
-    "react-dom": "^18"
+    "@tanstack/react-query": "^4.44.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   },
   "devDependencies": {
-    "@rsbuild/core": "^1.5.4",
-    "@rsbuild/plugin-react": "^1.4.0",
+    "@rsbuild/core": "^1.6.7",
+    "@rsbuild/plugin-react": "^1.4.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "typescript": "^5.9.2"
+    "typescript": "5.9.3"
   }
 }

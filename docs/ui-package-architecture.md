@@ -126,14 +126,14 @@ Integrators can depend directly on published packages such as `@perses-dev/dashb
 
 ## Local development
 
-The `perses/perses` and `perses/shared` repositories are separate npm workspaces managed with Turborepo. During UI
+The `perses/perses` and `perses/shared` repositories are separate pnpm workspaces. During UI
 development you usually:
 
 1. Install dependencies in `perses/ui`.
 2. Clone `perses/shared` as a sibling directory.
 3. Link shared packages into the app using the script documented in
    the [shared repository README](https://github.com/perses/shared#linking-with-local-projects).
-4. Run `npm run start:shared` from `ui/app` to use linked packages with hot reload.
+4. Run `pnpm start:shared` from `ui/app` to use linked packages with hot reload.
 
 For more day-to-day commands and workspace layout, see [ui/README.md](https://github.com/perses/perses/blob/main/ui/README.md).
 

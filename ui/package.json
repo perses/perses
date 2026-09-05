@@ -6,28 +6,39 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.0.0",
+      "onFail": "ignore"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24",
+      "onFail": "download"
+    }
   },
   "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "format": "turbo run format:root",
-    "format:check": "turbo run format:root:check",
+    "build": "pnpm run clean && pnpm -r --if-present run build",
+    "test": "pnpm -r --parallel --if-present run test",
+    "lint": "pnpm -r --parallel --if-present run lint",
+    "lint:fix": "pnpm -r --parallel --if-present run lint:fix",
+    "format": "pnpm run format:root",
+    "format:check": "pnpm run format:root:check",
     "format:root": "oxfmt",
     "format:root:check": "oxfmt --check",
-    "type-check": "turbo run type-check",
-    "start": "turbo run start",
-    "clean": "turbo run clean",
-    "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
-    "clear-turbo-cache": "rimraf ./.turbo/cache",
-    "e2e": "turbo run e2e:local",
-    "e2e:debug": "turbo run e2e -- --debug",
-    "e2e:ci": "turbo run e2e:ci",
-    "e2e:ci:stream": "npm run e2e:ci --workspace=@perses-dev/e2e",
+    "type-check": "pnpm -r --parallel --if-present run type-check",
+    "start": "pnpm -r --parallel --if-present run start",
+    "clean": "pnpm -r --parallel --if-present run clean",
+    "reinstall": "pnpm clean && rm -rf **/node_modules && pnpm install",
+    "e2e": "pnpm --filter @perses-dev/e2e run e2e:local",
+    "e2e:debug": "pnpm --filter @perses-dev/e2e run e2e:debug",
+    "e2e:ci": "pnpm --filter @perses-dev/e2e run e2e:ci",
+    "e2e:ci:stream": "pnpm --filter @perses-dev/e2e run e2e:ci",
     "typedoc": "typedoc",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
     "app",
@@ -35,17 +46,16 @@
     "internal-utils"
   ],
   "devDependencies": {
-    "@testing-library/dom": "^10.1.0",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/node": "^24.13.3",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^5.0.4",
-    "concurrently": "^9.1.2",
-    "cross-env": "^7.0.3",
-    "esbuild-loader": "^4.0.3",
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
     "jsdom": "^27.0.0",
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
@@ -55,10 +65,8 @@
     "react-refresh": "^0.16.0",
     "rimraf": "^6.1.0",
     "swc-loader": "^0.2.6",
-    "turbo": "^2.3.4",
     "typedoc": "^0.28.20",
     "typescript": "5.9.3",
     "vitest": "^4.1.11"
-  },
-  "packageManager": "npm@11.17.0"
+  }
 }

@@ -27,7 +27,7 @@ function checkPackage() {
   fi
   for workspace in ${workspaces}; do
     cd "${workspace}"
-    package_version=$(npm run env | grep npm_package_version | cut -d= -f2-)
+    package_version=$(jq -r '.version' package.json)
     if [ "${version}" != "${package_version}" ]; then
       echo "version of ${workspace} is not the correct one"
       echo "expected one: ${version}"
@@ -68,7 +68,7 @@ function bumpVersion() {
   done
 
   # increase the version on all packages
-  npm version "${version}" --workspaces
+  pnpm --recursive version "${version}" --no-git-tag-version
 }
 
 # Validates branch name and extracts snapshot name from it.
@@ -94,7 +94,7 @@ function removeSnapshot() {
   echo "Removing snapshot for tag ${tagName}"
   for workspace in ${publish_workspaces}; do
     cd "${workspace}"
-    eval "npm dist-tag rm @perses-dev/${workspace} ${tagName}"
+    pnpm dist-tag remove "@perses-dev/${workspace}" "${tagName}"
     cd ../
   done
 }

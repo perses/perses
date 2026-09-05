@@ -22,14 +22,19 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: install deps
-        run: cd ./ui && npm ci
-      - run: cd ./ui && npm run lint
-      - run: cd ./ui && npm run format:check
+        run: cd ./ui && pnpm install --frozen-lockfile
+      - run: cd ./ui && pnpm lint
+      - run: cd ./ui && pnpm format:check
   type_check:
     name: "type check"
     runs-on: ubuntu-latest
@@ -37,13 +42,18 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: install deps
-        run: cd ./ui && npm ci
-      - run: cd ./ui && npm run type-check
+        run: cd ./ui && pnpm install --frozen-lockfile
+      - run: cd ./ui && pnpm type-check
   test:
     name: "unit test"
     runs-on: ubuntu-latest
@@ -51,10 +61,15 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: install deps
-        run: cd ./ui && npm ci
-      - run: cd ./ui && npm run test
+        run: cd ./ui && pnpm install --frozen-lockfile
+      - run: cd ./ui && pnpm test

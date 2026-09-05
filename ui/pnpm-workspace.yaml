@@ -1,0 +1,18 @@
+packages:
+  - app
+  - e2e
+  - internal-utils
+
+linkWorkspacePackages: true
+
+nodeLinker: hoisted
+
+allowBuilds:
+  '@swc/core': true
+  core-js: false
+  esbuild: true
+
+# Our own packages are bumped right after release; do not hold them back by the 1-day
+# default minimumReleaseAge (which otherwise silently keeps the previous version).
+minimumReleaseAgeExclude:
+  - '@perses-dev/*'

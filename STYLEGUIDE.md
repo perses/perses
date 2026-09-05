@@ -61,7 +61,7 @@ touch without expanding the task into unrelated cleanup.
   queries; use test IDs only as a last resort.
 - Use Playwright for critical end-to-end flows or browser behavior that unit/integration tests cannot cover.
 - Run a focused test while iterating, then the affected workspace's type-check and test commands.
-- Before completion, run repository-level `npm run lint`, `npm run format:check`, and `npm run type-check`.
+- Before completion, run repository-level `pnpm lint`, `pnpm format:check`, and `pnpm type-check`.
 - Oxfmt owns formatting and import sorting. Do not manually fight its output.
 - A lint suppression must be narrow, name the rule, and include a nearby explanation of why the exception is necessary.
   Do not enable type-aware linting or change lint configuration unless the task explicitly concerns repository tooling.

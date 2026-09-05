@@ -22,6 +22,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -45,15 +50,15 @@ jobs:
 
       - name: Install UI deps
         working-directory: ./ui
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Build the app and all packages
         working-directory: ./ui
-        run: npm run build
+        run: pnpm build
 
       - name: Generate frontend SBOM (CycloneDX)
         if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
         working-directory: ./ui
-        run: npx @cyclonedx/cyclonedx-npm --output-file ../ui-sbom.cdx.json --output-format JSON
+        run: pnpm sbom --sbom-format cyclonedx --sbom-type application --out ../ui-sbom.cdx.json
       - name: store frontend SBOM
         if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
         uses: actions/upload-artifact@v7
@@ -76,14 +81,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: Install UI deps
-        run: cd ./ui && npm install
+        run: cd ./ui && pnpm install --frozen-lockfile
       - name: Build the typedoc docs
-        run: cd ./ui && npm run build && npm run typedoc
+        run: cd ./ui && pnpm build && pnpm typedoc
       - name: store typedoc build
         uses: actions/upload-artifact@v7
         with:

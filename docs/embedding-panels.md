@@ -6,7 +6,7 @@ application.
 !!! info
     We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
 
-## Getting started (npm example)
+## Getting started (pnpm example)
 
 > These UI libraries now live in the [`perses/shared`](https://github.com/perses/shared) repository. If you need to link them locally for development, follow the instructions in that repo.
 
@@ -16,7 +16,7 @@ application.
 
 # Install Perses dependencies
 # Note: React 19 is not supported yet
-npm i --save @perses-dev/components \
+pnpm add @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/timeseries-chart-plugin \
   @perses-dev/prometheus-plugin @perses-dev/dashboards \
   @tanstack/react-query \

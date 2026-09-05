@@ -99,7 +99,7 @@ func newDevServer(pluginName, pluginPath, rsbuildScriptName string, writer, errW
 }
 
 func (d *devserver) Execute(ctx context.Context, _ context.CancelFunc) error {
-	cmd := exec.CommandContext(ctx, "npm", "run", d.rsbuildScriptName)
+	cmd := exec.CommandContext(ctx, "pnpm", d.rsbuildScriptName)
 	cmd.Stdout = d.writer
 	cmd.Stderr = d.errWriter
 	cmd.Dir = d.pluginPath

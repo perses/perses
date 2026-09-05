@@ -1,5 +1,7 @@
 FROM node:24 AS node-builder
 WORKDIR /app
+# pnpm then self-manages to the exact version pinned in ui/pnpm-lock.yaml
+RUN npm install -g pnpm@12
 COPY ui ui
 COPY Makefile Makefile
 RUN make build-ui

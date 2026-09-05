@@ -10,41 +10,41 @@ If you are new to Perses, please review the rest of this README first before sta
 
 - Start the backend server in development mode by running this script from the project root: `./scripts/api_backend_dev.sh`
 - Change to the `ui` directory.
-- Install dependencies: `npm install`
-- Start the Perses app: `npm run start`
+- Install dependencies: `pnpm install`
+- Start the Perses app: `pnpm start`
 - Open the app: http://localhost:3000/
 
 ### Run Vitest tests
 
 - Change to the `ui` directory.
-- Install dependencies: `npm install`
-- Run tests: `npm run test`
+- Install dependencies: `pnpm install`
+- Run tests: `pnpm test`
 
 ### Check React code health
 
-- Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`.
-- Run `npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in
+- Run `pnpm lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`.
+- Run `pnpm doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in
   GitHub Actions.
 
 ### Run end-to-end tests
 
 - Follow the instructions to start the Perses app.
 - Change to the `ui` directory.
-- Run the end-to-end tests from the command line: `npm run e2e`
+- Run the end-to-end tests from the command line: `pnpm e2e`
 
 ## Package organization
 
 The UI is split across multiple npm packages so features can be embedded and extended independently. For a full overview of each package, how they relate, and the dependency graph, see [UI package architecture](./ARCHITECTURE.md).
 
-The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
+The UI-based code for Perses is organized as a pnpm workspace.
 
 The root `package.json` in `ui` has
-[NPM workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces) enabled, so running `npm install` will install
+[pnpm workspaces](https://pnpm.io/workspaces) enabled, so running `pnpm install` will install
 dependencies for all packages and add symlinks to the local versions for packages that depend on other packages in the
 workspace. The root `package.json` also contains `devDependencies` that are commonly used across multiple packages in
 the workspace.
 
-Perses is broken up in to a number of separate packages to allow for flexibility when embedding functionality. You can generate a graph of the dependencies by using the [turbo cli's `--graph` option](https://turbo.build/repo/docs/reference/command-line-reference#--graph). For example, `npm run start -- --graph=graph.svg` will output a graph of the dependencies of the `start` command in SVG format.
+Perses is broken up into separate packages to allow flexibility when embedding functionality. Run `pnpm -r list --depth -1` to list the packages in the workspace, and see [UI package architecture](./ARCHITECTURE.md) for their relationships.
 
 ### Applications
 
@@ -76,27 +76,24 @@ approach to development in the UI. You'll need to have the following installed l
 
 - [Node.js](https://nodejs.org/) v24 or higher: we suggest using [NVM](https://github.com/nvm-sh/nvm) for installing
   and managing versions.
-- [NPM](https://npmjs.com/) v11 or higher: a version of `npm` that supports workspaces (use
-  `npm --version` to check your version locally)
+- [pnpm](https://pnpm.io/installation) v12 (use `pnpm --version` to check your version locally)
 
 ## Running Scripts
 
-You can use the `-w ${WORKSPACE_NAME}` flag of `npm run` to run scripts inside
-workspace packages from this root folder. For example, to start the main app,
-you would run:
+You can use pnpm's `--filter ${WORKSPACE_NAME}` option to run scripts inside workspace packages from this root folder.
+For example, to start the main app, you would run:
 
 ```sh
-npm run start -w app
+pnpm --filter app start
 ```
 
-Keep in mind that since `npm install` symlinks to other local packages in the workspace, you may need to build some
+Keep in mind that since `pnpm install` symlinks to other local packages in the workspace, you may need to build some
 packages first locally before they will be available to the local packages that depend on them (e.g. you need to build
 `core` before building/running `app` locally).
 
-You can also run a script across all packages in the workspace using NPM's
-`--workspaces` flag.
+You can also run a script across all packages in the workspace using pnpm's `--recursive` option.
 
-Note: If you are trying to run the app (`npm run start -w app`), you may need to
+Note: If you are trying to run the app (`pnpm --filter app start`), you may need to
 first [setup a local backend server](https://github.com/perses/perses/blob/main/CONTRIBUTING.md).
 
 ## Troubleshooting
@@ -104,7 +101,7 @@ first [setup a local backend server](https://github.com/perses/perses/blob/main/
 ### I am getting build errors. What do I do?
 
 Occasionally, after switching branches or installing new dependencies, your environment may start throwing build errors.
-To fix, try clearing all dist folders by running `npm run clean` in the ui folder (before rerunning `npm start`).
+To fix, try clearing all dist folders by running `pnpm clean` in the ui folder (before rerunning `pnpm start`).
 
-If this does not work, `npm run reinstall` can be used to remove all `node_modules` folders and clear the `dist`
+If this does not work, `pnpm reinstall` can be used to remove all `node_modules` folders and clear the `dist`
 folders.

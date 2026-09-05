@@ -23,28 +23,33 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          working-directory: ./ui
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           enable_go: true
-          nvmrc_path: './ui/.nvmrc'
+          nvmrc_path: "./ui/.nvmrc"
       - name: start dev environment
         uses: hoverkraft-tech/compose-action@v3.1.0
         with:
           compose-file: ./dev/docker-compose.e2e.yaml
       - name: Install UI deps
         working-directory: ./ui
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Build the app and all packages
         working-directory: ./ui
-        run: npm run build
+        run: pnpm build
       - name: Install Playwright Browsers
         working-directory: ./ui
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run Playwright tests
         working-directory: ./ui
         timeout-minutes: 15
-        run: npm run e2e:ci:stream
+        run: pnpm e2e:ci:stream
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -53,8 +58,8 @@ jobs:
             ui/e2e/playwright-report/
             ui/e2e/test-results/
       # - name: Create tarballs of all packages
-      #   run: cd ./ui && npm pack -ws
+      #   run: cd ./ui && pnpm --recursive pack
       # - name: Replace Perses dependencies in examples folder with built packages
-      #   run: for example in ./examples/*/; do (cd "$example"; npm install ../../ui/perses-dev-*.tgz); done
+      #   run: for example in ./examples/*/; do (cd "$example"; pnpm add ../../ui/perses-dev-*.tgz); done
       # - name: Verify all examples build successfully
       #   run: cd ./examples && ./test.sh

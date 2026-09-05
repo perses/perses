@@ -136,8 +136,8 @@ includes:
   - `perses_<version>_<os>_<arch>.tar.gz.sbom.spdx.json` — SPDX JSON SBOM for each Go release archive, generated
     by [syft](https://github.com/anchore/syft) via GoReleaser.
   - `perses_<version>_source.tar.gz.sbom.spdx.json` — SPDX JSON SBOM for the source tarball.
-  - `ui-sbom.cdx.json` — CycloneDX JSON SBOM covering all npm dependencies of the React frontend, generated
-    by [@cyclonedx/cyclonedx-npm](https://github.com/CycloneDX/cyclonedx-node-npm).
+  - `ui-sbom.cdx.json` — CycloneDX JSON SBOM covering all JavaScript dependencies of the React frontend, generated
+    by [`pnpm sbom`](https://pnpm.io/cli/sbom).
 
 Please verify that the GitHub Actions complete successfully. Once they are completed, check that everything looks good
 in the new GitHub Release. If you realize we need to adjust something in the release notes, you can edit it directly in

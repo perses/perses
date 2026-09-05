@@ -13,14 +13,16 @@
 
 import type { BreadcrumbsProps as MUIBreadcrumbsProps } from '@mui/material';
 import { Breadcrumbs as MUIBreadcrumbs, Link, styled, Stack, Typography } from '@mui/material';
-import type { SxProps, SystemStyleObject, Theme } from '@mui/system';
+import type { SxProps, Theme } from '@mui/material/styles';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 export type BreadcrumbVariant = 'default' | 'workspace';
 
-function getBreadcrumbSx(variant: BreadcrumbVariant): SystemStyleObject<Theme> {
+type BreadcrumbStyleObject = Exclude<SxProps<Theme>, readonly unknown[] | ((theme: Theme) => unknown)>;
+
+function getBreadcrumbSx(variant: BreadcrumbVariant): BreadcrumbStyleObject {
   if (variant === 'workspace') {
     return {
       color: 'primary.contrastText',

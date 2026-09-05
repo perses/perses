@@ -1,18 +1,27 @@
 {
   "name": "@perses-dev/timeseries-chart-plugin",
   "version": "0.13.0-rc.0",
-  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/plugins/blob/main/README.md",
+  "bugs": {
+    "url": "https://github.com/perses/plugins/issues"
+  },
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/perses/plugins.git"
   },
-  "bugs": {
-    "url": "https://github.com/perses/plugins/issues"
-  },
+  "files": [
+    "lib/**/*",
+    "__mf/**/*",
+    "mf-manifest.json",
+    "mf-stats.json"
+  ],
+  "main": "lib/cjs/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "dev": "rsbuild dev",
-    "build": "npm run build-mf && concurrently \"npm:build:*\"",
+    "build": "pnpm build-mf && concurrently \"pnpm build:esm\" \"pnpm build:types\"",
     "build-mf": "rsbuild build",
     "build:cjs": "swc ./src -d dist/lib/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist/lib --strip-leading-paths --config-file ../.swcrc",
@@ -21,9 +30,6 @@
     "test": "cross-env LC_ALL=C TZ=UTC jest",
     "type-check": "tsc --noEmit"
   },
-  "main": "lib/cjs/index.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
   "dependencies": {
     "color-hash": "^2.0.2"
   },
@@ -38,18 +44,12 @@
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "5.5.0",
+    "immer": "^10.1.1",
     "lodash": "^4.17.21",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "use-resize-observer": "^9.0.0",
-    "immer": "^10.1.1"
+    "use-resize-observer": "^9.0.0"
   },
-  "files": [
-    "lib/**/*",
-    "__mf/**/*",
-    "mf-manifest.json",
-    "mf-stats.json"
-  ],
   "perses": {
     "plugins": [
       {

@@ -212,7 +212,7 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 // routerMiddleware is here to serve properly the React app.
 //
 // As React is creating a single page application, it embeds its own router, which allows you to navigate in the UI without reloading it.
-// For example, if you run the UI separately (with npm start), you will be able to access a dashboard using the URL http://localhost:3000/projects/perses/dashboards/<name>.
+// For example, if you run the UI separately (with pnpm start), you will be able to access a dashboard using the URL http://localhost:3000/projects/perses/dashboards/<name>.
 // But this is not working anymore when the UI is embedded in the binary, because then the echo router has no idea that the route /projects/:projectID/* is a React Route.
 //
 // Another problem that comes when you want to embed a UI in a binary is to be able to serve every single static file.
