@@ -12,11 +12,7 @@ allowBuilds:
   core-js: false
   esbuild: true
 
-# Any pnpm matching devEngines.packageManager is fine: do not switch to the exact
-# version recorded in pnpm-lock.yaml (the switch is also broken in pnpm 12.3.x).
-pmOnFail: ignore
-
 # Our own packages are bumped right after release; do not hold them back by the 1-day
 # default minimumReleaseAge (which otherwise silently keeps the previous version).
 minimumReleaseAgeExclude:
-  - "@perses-dev/*"
+  - '@perses-dev/*'
