@@ -23,11 +23,15 @@ import type { ReactElement } from 'react';
 import { Fragment, useMemo, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import type { FormEditorProps } from '../form-drawers';
 
 type UserEditorFormProps = FormEditorProps<UserResource>;
+
+// The client schema exposes unknown input; keep form values typed and validate through the full schema.
+const formSchema = z.transform((value: UserEditorSchemaType): unknown => value).pipe(userSchema);
 
 export function UserEditorForm({
   initialValue,
@@ -56,7 +60,7 @@ export function UserEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<UserEditorSchemaType>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(formSchema),
     mode: 'onBlur',
     defaultValues: initialUserClean,
   });

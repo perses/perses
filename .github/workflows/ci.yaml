@@ -81,7 +81,7 @@ jobs:
           enable_npm: true
           nvmrc_path: "./ui/.nvmrc"
       - name: Install UI deps
-        run: cd ./ui && npm install
+        run: cd ./ui && npm ci && npm ci --prefix docs
       - name: Build the typedoc docs
         run: cd ./ui && npm run build && npm run typedoc
       - name: store typedoc build

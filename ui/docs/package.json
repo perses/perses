@@ -1,0 +1,13 @@
+{
+  "name": "@perses-dev/docs",
+  "version": "0.54.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typedoc": "typedoc --options ../typedoc.json"
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.20",
+    "typescript": "5.9.3"
+  }
+}
