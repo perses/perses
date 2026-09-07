@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -359,7 +360,31 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	return h.setupAuthentication(req)
+	if err := h.setupAuthentication(req); err != nil {
+		return err
+	}
+	h.filterHeaders(req.Header)
+	return nil
+}
+
+// filterHeaders applies the policy after configured headers and authentication have been added.
+func (h *httpProxy) filterHeaders(headers http.Header) {
+	isAllowed := func(name string) bool {
+		matches := func(header string) bool { return strings.EqualFold(header, name) }
+		if len(h.config.AllowHeaders) > 0 {
+			return slices.ContainsFunc(h.config.AllowHeaders, matches)
+		}
+		return !slices.ContainsFunc(h.config.DropHeaders, matches)
+	}
+	for name := range headers {
+		if !isAllowed(name) {
+			delete(headers, name)
+		}
+	}
+	if !isAllowed(echo.HeaderXForwardedFor) {
+		// A nil value tells ReverseProxy not to add X-Forwarded-For again.
+		headers[echo.HeaderXForwardedFor] = nil
+	}
 }
 
 func (h *httpProxy) setupAuthentication(req *http.Request) error {
