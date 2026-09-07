@@ -11,15 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Chip, CircularProgress, Stack } from '@mui/material';
+import { Box, Chip, CircularProgress, Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import type { FolderResource } from '@perses-dev/client';
 import type { TableColumnConfig } from '@perses-dev/components';
-import { Table } from '@perses-dev/components';
+import { Table, useLocalStorage } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import AddFolderOutlineIcon from 'mdi-material-ui/FolderPlusOutline';
+import FormatListNumberedIcon from 'mdi-material-ui/FormatListNumbered';
+import InfinityIcon from 'mdi-material-ui/Infinity';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import type { ReactElement, ReactNode } from 'react';
+import type { MouseEvent, ReactElement, ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDefaultRowsPerPage } from '../../context/Config';
@@ -34,6 +36,15 @@ import {
 import { CRUDIconButton } from '../CRUDButton/CRUDIconButton';
 import type { DashboardListRow } from './DashboardList';
 import { NameCell } from './NameCell';
+
+// How the dashboard list renders its rows: classic pagination (default) or
+// infinite scrolling, i.e. all rows in a single virtualized scroll area.
+type DashboardListDisplayMode = 'pagination' | 'infinite';
+
+const DASHBOARD_LIST_DISPLAY_MODE_KEY = 'PERSES_DASHBOARD_LIST_DISPLAY_MODE';
+
+// Keep the segmented control readable: normal casing and a small gap between icon and label.
+const DISPLAY_MODE_TOGGLE_BUTTON_SX = { textTransform: 'none', gap: 0.5, px: 1.5 } as const;
 
 export interface DashboardTreeTableRow {
   kind: 'Folder' | 'Dashboard' | 'NoItems';
@@ -91,6 +102,22 @@ function DashboardTreeList({
 
   const [sorting, setSorting] = useState([{ id: 'name', desc: false }]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultRowsPerPage });
+
+  // Persist the user's preferred display mode so it survives reloads and navigation.
+  const [displayMode, setDisplayMode] = useLocalStorage<DashboardListDisplayMode>(
+    DASHBOARD_LIST_DISPLAY_MODE_KEY,
+    'pagination',
+  );
+  const isInfiniteScroll = displayMode === 'infinite';
+  const handleDisplayModeChange = useCallback(
+    (_: MouseEvent<HTMLElement>, value: DashboardListDisplayMode | null): void => {
+      // `value` is null when the already-selected button is clicked; keep a selection in that case.
+      if (value !== null) {
+        setDisplayMode(value);
+      }
+    },
+    [setDisplayMode],
+  );
 
   const sortStringColumn = useCallback(
     (accessorKey: 'project' | 'displayName') =>
@@ -319,23 +346,45 @@ function DashboardTreeList({
   }
 
   return (
-    <Table
-      data={rows}
-      columns={columns}
-      getRowId={(row) => `${row.project}/${row.path.join('/')}/${row.name}/${row.kind}`}
-      height={height}
-      width="100%"
-      sorting={sorting}
-      onSortingChange={setSorting}
-      pagination={pagination}
-      onPaginationChange={setPagination}
-      getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
-      hiddenColumns={['project', 'version']}
-      tableToolbarConfig={{
-        isSearchEnabled: true,
-        isColumnFilterEnabled: true,
-      }}
-    />
+    <Stack spacing={1} width="100%">
+      <Stack direction="row" justifyContent="flex-end" pt={1}>
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={displayMode}
+          onChange={handleDisplayModeChange}
+          aria-label="dashboard list display mode"
+        >
+          <ToggleButton value="pagination" sx={DISPLAY_MODE_TOGGLE_BUTTON_SX}>
+            <FormatListNumberedIcon fontSize="small" />
+            Pages
+          </ToggleButton>
+          <ToggleButton value="infinite" sx={DISPLAY_MODE_TOGGLE_BUTTON_SX}>
+            <InfinityIcon fontSize="small" />
+            Infinite
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
+      <Table
+        data={rows}
+        columns={columns}
+        getRowId={(row) => `${row.project}/${row.path.join('/')}/${row.name}/${row.kind}`}
+        height={height}
+        width="100%"
+        sorting={sorting}
+        onSortingChange={setSorting}
+        // When infinite scrolling is enabled, omitting `pagination` makes the (virtualized) Table
+        // render every row in a single scroll area instead of paginating.
+        pagination={isInfiniteScroll ? undefined : pagination}
+        onPaginationChange={isInfiniteScroll ? undefined : setPagination}
+        getSubRows={(row: DashboardTreeTableRow): DashboardTreeTableRow[] | undefined => row.children}
+        hiddenColumns={['project', 'version']}
+        tableToolbarConfig={{
+          isSearchEnabled: true,
+          isColumnFilterEnabled: true,
+        }}
+      />
+    </Stack>
   );
 }
 

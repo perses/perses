@@ -21,25 +21,36 @@ import type { DashboardListRow } from './DashboardList';
 import DashboardTreeList from './DashboardTreeList';
 
 interface MockTableProps {
-  pagination: { pageIndex: number; pageSize: number };
-  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
+  pagination?: { pageIndex: number; pageSize: number };
+  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
 function MockTable({ pagination, onPaginationChange }: MockTableProps): ReactElement {
-  const showTenRows = useCallback((): void => onPaginationChange({ pageIndex: 0, pageSize: 10 }), [onPaginationChange]);
+  const showTenRows = useCallback(
+    (): void => onPaginationChange?.({ pageIndex: 0, pageSize: 10 }),
+    [onPaginationChange],
+  );
   return (
     <>
-      <span>Rows per page: {pagination.pageSize}</span>
-      <button type="button" onClick={showTenRows}>
-        Show 10 rows
-      </button>
+      {/* In infinite scrolling mode the Table receives no pagination. */}
+      <span>Rows per page: {pagination ? pagination.pageSize : 'all'}</span>
+      {onPaginationChange && (
+        <button type="button" onClick={showTenRows}>
+          Show 10 rows
+        </button>
+      )}
     </>
   );
 }
 
-vi.mock('@perses-dev/components', () => ({
-  Table: MockTable,
-}));
+vi.mock('@perses-dev/components', async () => {
+  const { useState } = await import('react');
+  return {
+    Table: MockTable,
+    // Back the persisted display mode with local component state for the test.
+    useLocalStorage: <T,>(_key: string, initialValue: T): [T, (value: T) => void] => useState(initialValue),
+  };
+});
 
 vi.mock('../../context/Config', () => ({
   useDefaultRowsPerPage: (): number => 50,
@@ -81,5 +92,32 @@ describe('DashboardTreeList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show 10 rows' }));
 
     expect(screen.queryByText('Rows per page: 10')).not.toBeNull();
+  });
+
+  it('paginates by default', () => {
+    renderDashboardTreeList();
+
+    expect(screen.queryByText('Rows per page: 50')).not.toBeNull();
+    expect(screen.queryByText('Rows per page: all')).toBeNull();
+  });
+
+  it('disables pagination when switching to infinite scrolling', () => {
+    renderDashboardTreeList();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Infinite' }));
+
+    expect(screen.queryByText('Rows per page: all')).not.toBeNull();
+    // The pagination control is no longer rendered without a pagination callback.
+    expect(screen.queryByRole('button', { name: 'Show 10 rows' })).toBeNull();
+  });
+
+  it('restores pagination when switching back from infinite scrolling', () => {
+    renderDashboardTreeList();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Infinite' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Pages' }));
+
+    expect(screen.queryByText('Rows per page: 50')).not.toBeNull();
+    expect(screen.queryByText('Rows per page: all')).toBeNull();
   });
 });
