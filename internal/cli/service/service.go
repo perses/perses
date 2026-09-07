@@ -64,6 +64,8 @@ func UpsertWithProjectCreation(apiClient api.ClientInterface, kind modelV1.Kind,
 	if upsertErr == nil {
 		return nil
 	}
+	// If the upsert failed because the project doesn't exist and we are allowed to create the project,
+	// attempt to create the project and retry the upsert.
 	if !isProjectDoesNotExistError(upsertErr) || !createProject || modelV1.IsGlobal(kind) {
 		return upsertErr
 	}
