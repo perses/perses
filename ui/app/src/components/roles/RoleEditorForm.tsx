@@ -29,6 +29,7 @@ import type { FormEditorProps } from '../form-drawers';
 type RoleEditorFormProps = FormEditorProps<Role>;
 
 // The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
 const formSchema = z.transform((value: Role): unknown => value).pipe(rolesEditorSchema);
 
 export function RoleEditorForm({

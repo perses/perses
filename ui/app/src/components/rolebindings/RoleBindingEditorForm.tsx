@@ -32,6 +32,7 @@ interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
 }
 
 // The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
 const formSchema = z.transform((value: RoleBinding): unknown => value).pipe(roleBindingsEditorSchema);
 
 export function RoleBindingEditorForm({
