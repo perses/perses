@@ -31,7 +31,11 @@ import { useCallback, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
-import type { CreateDashboardValidationType, CreateEphemeralDashboardValidationType } from '../../validation';
+import type {
+  CreateDashboardValidationInput,
+  CreateDashboardValidationType,
+  CreateEphemeralDashboardValidationType,
+} from '../../validation';
 import { useDashboardValidationSchema, useEphemeralDashboardValidationSchema } from '../../validation';
 
 interface CreateDashboardProps {
@@ -109,7 +113,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
   const { schema: dashboardSchemaValidation, isSchemaLoading: isDashboardSchemaValidationLoading } =
     useDashboardValidationSchema(projects[0]?.metadata.name);
 
-  const dashboardForm = useForm<CreateDashboardValidationType>({
+  const dashboardForm = useForm<CreateDashboardValidationInput, unknown, CreateDashboardValidationType>({
     resolver: dashboardSchemaValidation ? zodResolver(dashboardSchemaValidation) : undefined,
     mode: 'onBlur',
     defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', tags: [] },

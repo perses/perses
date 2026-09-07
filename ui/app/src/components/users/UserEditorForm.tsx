@@ -25,9 +25,12 @@ import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
+import { formSchema } from '../../validation/formSchema';
 import type { FormEditorProps } from '../form-drawers';
 
 type UserEditorFormProps = FormEditorProps<UserResource>;
+
+const validationSchema = formSchema(userSchema);
 
 export function UserEditorForm({
   initialValue,
@@ -56,7 +59,7 @@ export function UserEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<UserEditorSchemaType>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(validationSchema),
     mode: 'onBlur',
     defaultValues: initialUserClean,
   });

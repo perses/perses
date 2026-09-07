@@ -21,7 +21,7 @@ import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
-import type { EditDashboardValidationType } from '../../validation';
+import type { EditDashboardValidationInput, EditDashboardValidationType } from '../../validation';
 import { editDashboardDialogValidationSchema } from '../../validation';
 
 interface EditDashboardDialogProps {
@@ -40,7 +40,7 @@ interface EditDashboardDialogProps {
  */
 export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactElement => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const form = useForm<EditDashboardValidationType>({
+  const form = useForm<EditDashboardValidationInput, unknown, EditDashboardValidationType>({
     resolver: zodResolver(editDashboardDialogValidationSchema),
     mode: 'onBlur',
     defaultValues: {

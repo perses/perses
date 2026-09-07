@@ -26,13 +26,14 @@
     "e2e:debug": "turbo run e2e -- --debug",
     "e2e:ci": "turbo run e2e:ci",
     "e2e:ci:stream": "npm run e2e:ci --workspace=@perses-dev/e2e",
-    "typedoc": "typedoc",
+    "typedoc": "npm exec -w @perses-dev/typedoc-tools -- typedoc --options ../typedoc.json",
     "doctor": "npx react-doctor@latest"
   },
   "workspaces": [
     "app",
     "e2e",
-    "internal-utils"
+    "internal-utils",
+    "typedoc-tools"
   ],
   "devDependencies": {
     "@testing-library/dom": "^10.1.0",
@@ -56,9 +57,16 @@
     "rimraf": "^6.1.0",
     "swc-loader": "^0.2.6",
     "turbo": "^2.3.4",
-    "typedoc": "^0.28.20",
-    "typescript": "5.9.3",
+    "typescript": "7.0.2",
     "vitest": "^4.1.11"
   },
-  "packageManager": "npm@11.17.0"
+  "packageManager": "npm@11.17.0",
+  "overrides": {
+    "i18next": {
+      "typescript": "$typescript"
+    },
+    "react-i18next": {
+      "typescript": "$typescript"
+    }
+  }
 }

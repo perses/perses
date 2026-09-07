@@ -68,6 +68,11 @@ The `core` package remains part of this repository and is consumed by the app an
 The following packages are internal tooling that assists with development of the Perses UI. These are not published and are not intended for use outside of the project.
 
 - [`e2e`](./e2e): End-to-end tests.
+- [`typedoc-tools`](./typedoc-tools): TypeDoc and its compatible TypeScript compiler, used by `npm run typedoc`.
+
+Application type-checks use TypeScript 7. TypeDoc runs separately with TypeScript 6 because it requires the older
+compiler API. The root package also overrides the optional TypeScript peers of `i18next` and `react-i18next` to use
+the application compiler; these packages do not execute the compiler themselves.
 
 ## Development Environment
 

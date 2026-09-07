@@ -24,11 +24,14 @@ import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
 import { useUserList } from '../../model/user-client';
+import { formSchema } from '../../validation/formSchema';
 import type { FormEditorProps } from '../form-drawers';
 
 interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
   roleSuggestions: string[];
 }
+
+const validationSchema = formSchema(roleBindingsEditorSchema);
 
 export function RoleBindingEditorForm({
   initialValue,
@@ -47,7 +50,7 @@ export function RoleBindingEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<RoleBinding>({
-    resolver: zodResolver(roleBindingsEditorSchema),
+    resolver: zodResolver(validationSchema),
     mode: 'onBlur',
     defaultValues: initialValue,
   });

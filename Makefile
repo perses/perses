@@ -18,7 +18,7 @@ GOFMT                 ?= $(GO)fmt
 MDOX                  ?= mdox
 # docs/ is imported by perses/website and rendered with MkDocs Material.
 # mdox formats GitHub Flavored Markdown and can break MkDocs-specific syntax.
-MDOX_MD_FILES_CMD     = find . -name '*.md' -not -path "./docs/*" -not -path "./.github/perses-ci/*" -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -print
+MDOX_MD_FILES_CMD     = find . -name '*.md' -not -path "./docs/*" -not -path "./.github/perses-ci/*" -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*" -not -path "./ui/storybook/node_modules/*" -not -path "./ui/typedoc-tools/node_modules/*" -print
 GOOS                  ?= $(shell $(GO) env GOOS)
 GOARCH                ?= $(shell $(GO) env GOARCH)
 GOHOSTOS              ?= $(shell $(GO) env GOHOSTOS)

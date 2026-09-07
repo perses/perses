@@ -23,9 +23,12 @@ import { Fragment, useMemo, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 
+import { formSchema } from '../../validation/formSchema';
 import type { FormEditorProps } from '../form-drawers';
 
 type RoleEditorFormProps = FormEditorProps<Role>;
+
+const validationSchema = formSchema(rolesEditorSchema);
 
 export function RoleEditorForm({
   initialValue,
@@ -43,7 +46,7 @@ export function RoleEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<Role>({
-    resolver: zodResolver(rolesEditorSchema),
+    resolver: zodResolver(validationSchema),
     mode: 'onBlur',
     defaultValues: initialValue,
   });

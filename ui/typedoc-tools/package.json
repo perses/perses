@@ -1,0 +1,9 @@
+{
+  "name": "@perses-dev/typedoc-tools",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "typedoc": "^0.28.20",
+    "typescript": "6.0.3"
+  }
+}
