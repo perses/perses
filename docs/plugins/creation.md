@@ -12,6 +12,8 @@ Perses supports the following types of plugins:
   tables, or any other type of visualization.
 - **Variable**: A variable plugin is a plugin that can be used to create variables that can be used in queries. It can be used to
   fill data into dropdowns or replace variables in queries. Requires a schema to validate the data model.
+- **Annotation**: An annotation plugin is a plugin that can be used to fetch events from a datasource and overlay them on
+  the panels of a dashboard. Requires a schema to validate the data model.
 - **Explore**: An explore plugin is a plugin that can be used to create an explore view. It can be used to create a view that allows
   users to explore data in a specific way. It is a special type of panel plugin that is used in the explore view.
 
@@ -80,7 +82,7 @@ Perses CLI (`percli`) has a plugin option that helps you create and manage your 
   - `--module.org`: The organization name on which the plugin module will be created, useful for publishing the plugin. This is required only when the module does not exist, ignored otherwise.
   - `--plugin.name`: The plugin name. A pascal case and kebab case variants will be generated inside the templates. If a plugin with the same name already exists, it will be overwritten.
   - `--plugin.type`: The plugin type can be one of
-    `Datasource`, `TimeSeriesQuery` , `TraceQuery`, `ProfileQuery`, `LogQuery`, `Variable`, `Panel`, or `Explore`.
+    `Datasource`, `TimeSeriesQuery` , `TraceQuery`, `ProfileQuery`, `LogQuery`, `Variable`, `Annotation`, `Panel`, or `Explore`.
   - `--plugin.display-name`: The more human name of the plugin to be used in the UI. If not provided, the plugin name will be used.
   - `[<plugin module directory>]`: The plugin module directory is optional and the current directory will be used if not provided.
 - `percli plugin build`: Build the plugin module and create the archive file.
@@ -123,6 +125,11 @@ The implementation is mostly similar across all plugin types.
   - Edit the JSON example of the schema in the same folder.
 - To enable Grafana migration, create a `schemas/variables/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
 - Implement your variable as a React component located in the `src/variables/<plugin-name>` folder.
+
+#### Annotation plugin
+
+- Edit the CUE schema file in the `schemas/annotations/<plugin-name>` folder to define the data model of your plugin. This schema must belong to the `model` package.
+- Implement your annotation as a React component located in the `src/annotations/<plugin-name>` folder.
 
 #### Panel plugin
 
