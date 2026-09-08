@@ -361,10 +361,7 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 		}
 	}
 	h.filterHeaders(req.Header)
-	if err := h.setupAuthentication(req); err != nil {
-		return err
-	}
-	return nil
+	return h.setupAuthentication(req)
 }
 
 // filterHeaders applies the policy after configured headers have been set, just before authentication have been added.
