@@ -45,6 +45,16 @@ Then, if a secret is associated with the datasource, Perses will retrieve the se
 inject the secret in the request.
 Finally, Perses will forward the request to the datasource and return the response to the client.
 
+The HTTP proxy spec supports two optional request header policies:
+
+* `allowHeaders`: forward only the listed headers.
+* `dropHeaders`: remove the listed headers and forward the others.
+
+Header names are matched case-insensitively, and all values of retained headers are preserved.
+An empty list leaves headers unchanged. Only one list can be configured.
+Filtering happens after configured headers, but before secret authentication. No need to allow `Authorization`, as it will be injected after filtering.
+Excluding `X-Forwarded-For` also prevents the reverse proxy from adding it.
+
 ```mermaid
 sequenceDiagram
     actor client as Client
