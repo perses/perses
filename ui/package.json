@@ -26,7 +26,6 @@
     "e2e:debug": "turbo run e2e -- --debug",
     "e2e:ci": "turbo run e2e:ci",
     "e2e:ci:stream": "npm run e2e:ci --workspace=@perses-dev/e2e",
-    "typedoc": "npm run typedoc --prefix docs",
     "doctor": "npx react-doctor@latest"
   },
   "workspaces": [

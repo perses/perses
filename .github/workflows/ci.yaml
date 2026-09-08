@@ -69,27 +69,6 @@ jobs:
             ui/**/dist
             !ui/node_modules
 
-  build-typedoc:
-    name: "build-typedoc"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_npm: true
-          nvmrc_path: "./ui/.nvmrc"
-      - name: Install UI deps
-        run: cd ./ui && npm ci && npm ci --prefix docs
-      - name: Build the typedoc docs
-        run: cd ./ui && npm run build && npm run typedoc
-      - name: store typedoc build
-        uses: actions/upload-artifact@v7
-        with:
-          name: typedoc
-          path: ui/typedoc
-
   build:
     name: "go and github release"
     needs: "build-frontend"

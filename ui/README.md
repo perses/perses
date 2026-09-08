@@ -68,9 +68,6 @@ The `core` package remains part of this repository and is consumed by the app an
 The following packages are internal tooling that assists with development of the Perses UI. These are not published and are not intended for use outside of the project.
 
 - [`e2e`](./e2e): End-to-end tests.
-- [`docs`](./docs): TypeDoc tooling with its own TypeScript 6.0.3 dependency, isolated from the UI's TypeScript 7.
-  This package is installed separately: run `npm ci --prefix docs`, then `npm run typedoc` from `ui/`
-  to generate documentation in `ui/typedoc`.
 
 ## Development Environment
 
