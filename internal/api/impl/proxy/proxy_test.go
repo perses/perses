@@ -322,6 +322,17 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 			allow: []string{"X-Missing"},
 			want:  http.Header{"Authorization": {"Bearer datasource-token"}, "X-Forwarded-For": nil},
 		},
+		{
+			name:  "if drop and allow are both set, drop must be ignored",
+			allow: []string{"aCcEpT", "ACCEPT", "x-configured", "X-Missing"},
+			drop:  []string{"Accept"},
+			want: http.Header{
+				"Accept":          {"application/json", "text/plain"},
+				"Authorization":   {"Bearer datasource-token"},
+				"X-Configured":    {"configured-value"},
+				"X-Forwarded-For": nil,
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource", nil)

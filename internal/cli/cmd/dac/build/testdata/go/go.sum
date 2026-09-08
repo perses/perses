@@ -31,8 +31,7 @@ github.com/perses/plugins/prometheus v0.58.0 h1:9bJYloepRXUcFzPf30/bt6jU8Nj4CCPK
 github.com/perses/plugins/prometheus v0.58.0/go.mod h1:oBDxlUgQvrSRVPqFIG8+nMLDticPrUdrj8y0YnZDyp0=
 github.com/perses/plugins/timeserieschart v0.13.0 h1:FQqAAqXyaLsoLeZocoh0mhIj9GASXxqbHDC8h6DNqTU=
 github.com/perses/plugins/timeserieschart v0.13.0/go.mod h1:nfSKLYdmxVEUgkHUzcBFzGpymr3f7BA6ivCH9xXG9co=
-github.com/perses/spec v0.3.0-beta.5 h1:r3ktLiavfa5xwKZLco+UYnvN8TlzImPyXIYwgR6b8lI=
-github.com/perses/spec v0.3.0-beta.5/go.mod h1:59e1hXXkr/fO/89LiSf6gfAYioeYYikWy00BAkI7CKw=
+github.com/perses/spec v0.3.0-beta.7 h1:kqrglvxkyTj/I0p57aVArHZ7T54mXQ391ETMXMk/yd8=
 github.com/perses/spec v0.3.0-beta.7/go.mod h1:p08A4KJtH/7yP/nWdf7As/l0RE74kTYLKIP/8mvqC9E=
 github.com/prometheus/client_golang v1.24.1 h1:JnJkREXzWxUdCuPFpIWZiPispT9xVV59uiuyR2bPlnU=
 github.com/prometheus/client_golang v1.24.1/go.mod h1:F+oSRECHg4sse5ucfYpYDeIv/hu68Zo0uoHKetWnzcE=

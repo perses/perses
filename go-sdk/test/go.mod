@@ -5,7 +5,7 @@ go 1.27.1
 replace github.com/perses/perses => ../../ // Use current version
 
 require (
-	github.com/perses/perses v0.54.0-rc.1
+	github.com/perses/perses v0.54.0
 	github.com/perses/plugins/prometheus v0.58.0
 	github.com/perses/plugins/staticlistvariable v0.9.0
 	github.com/perses/plugins/table v0.13.0
