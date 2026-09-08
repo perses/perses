@@ -360,14 +360,14 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
+	h.filterHeaders(req.Header)
 	if err := h.setupAuthentication(req); err != nil {
 		return err
 	}
-	h.filterHeaders(req.Header)
 	return nil
 }
 
-// filterHeaders applies the policy after configured headers and authentication have been added.
+// filterHeaders applies the policy after configured headers have been set, just before authentication have been added.
 func (h *httpProxy) filterHeaders(headers http.Header) {
 	isAllowed := func(name string) bool {
 		matches := func(header string) bool { return strings.EqualFold(header, name) }

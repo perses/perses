@@ -1,6 +1,6 @@
 module dac-test
 
-go 1.27.0
+go 1.27.1
 
 replace github.com/perses/perses => ../../ // Use current version
 
@@ -10,7 +10,7 @@ require (
 	github.com/perses/plugins/staticlistvariable v0.9.0
 	github.com/perses/plugins/table v0.13.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.5
+	github.com/perses/spec v0.3.0-beta.7
 	github.com/stretchr/testify v1.12.1
 )
 

@@ -284,8 +284,6 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 	droppedHeaders.Del("Referer")
 	droppedHeaders.Del("X-Configured")
 	droppedHeaders[echo.HeaderXForwardedFor] = nil
-	withoutAuth := defaultHeaders.Clone()
-	withoutAuth.Del("Authorization")
 
 	for _, test := range []struct {
 		name  string
@@ -300,6 +298,7 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 			allow: []string{"aCcEpT", "ACCEPT", "x-configured", "X-Missing"},
 			want: http.Header{
 				"Accept":          {"application/json", "text/plain"},
+				"Authorization":   {"Bearer datasource-token"},
 				"X-Configured":    {"configured-value"},
 				"X-Forwarded-For": nil,
 			},
@@ -317,11 +316,11 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 				"X-Forwarded-For": nil,
 			},
 		},
-		{name: "drop secret authentication", drop: []string{"AUTHORIZATION"}, want: withoutAuth},
+		{name: "drop secret authentication", drop: []string{"AUTHORIZATION"}, want: defaultHeaders},
 		{
 			name:  "allow only absent headers",
 			allow: []string{"X-Missing"},
-			want:  http.Header{"X-Forwarded-For": nil},
+			want:  http.Header{"Authorization": {"Bearer datasource-token"}, "X-Forwarded-For": nil},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
