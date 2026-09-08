@@ -38,6 +38,12 @@ func (d HTTPDiscovery) MarshalJSON() ([]byte, error) {
 	return json.Marshal(cfg)
 }
 
+type DiscoveryDefault struct {
+	Enable      bool              `json:"enable,omitempty" yaml:"enable,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty" yaml:"annotations,omitempty"`
+}
+
 type KubeServiceDiscovery struct {
 	// If set to true, Perses server will discovery the service
 	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
@@ -73,7 +79,7 @@ type KubernetesDiscovery struct {
 	// The labels used to filter the list of resource when contacting the Kubernetes API.
 	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
 	// Marks the discovered datasource as default
-	Default bool `json:"default,omitempty" yaml:"default,omitempty"`
+	Default DiscoveryDefault `json:"default,omitempty" yaml:"default,omitempty"`
 }
 
 func (d *KubernetesDiscovery) Verify() error {
