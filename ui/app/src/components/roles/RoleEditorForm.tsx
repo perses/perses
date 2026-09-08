@@ -22,10 +22,15 @@ import type { ReactElement } from 'react';
 import { Fragment, useMemo, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { z } from 'zod';
 
 import type { FormEditorProps } from '../form-drawers';
 
 type RoleEditorFormProps = FormEditorProps<Role>;
+
+// The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
+const formSchema = z.transform((value: Role): unknown => value).pipe(rolesEditorSchema);
 
 export function RoleEditorForm({
   initialValue,
@@ -43,7 +48,7 @@ export function RoleEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<Role>({
-    resolver: zodResolver(rolesEditorSchema),
+    resolver: zodResolver(formSchema),
     mode: 'onBlur',
     defaultValues: initialValue,
   });

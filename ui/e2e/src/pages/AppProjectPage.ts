@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import { escapeRegExp } from '../utils';
 import { DatasourceEditor } from './DatasourceEditor';
@@ -98,11 +99,18 @@ export class AppProjectPage {
     await this.addDashboardButton.click();
 
     const nameInput = this.createDashboardDialog.getByRole('textbox', {
-      name: 'Name',
+      name: 'Dashboard Name',
+      exact: true,
     });
-    await nameInput.type(name);
+    await nameInput.fill(name);
 
-    await this.createDashboardDialog.getByRole('button', { name: 'Add' }).click();
+    // Trigger onBlur validation before Playwright waits for the submit button to become enabled.
+    await nameInput.press('Tab');
+
+    const addButton = this.createDashboardDialog.getByRole('button', { name: 'Add', exact: true });
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
+    await expect(this.createDashboardDialog).toBeHidden();
   }
 
   /**
