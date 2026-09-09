@@ -47,7 +47,7 @@ func TestResolvePassword(t *testing.T) {
 		},
 		{
 			name:      "invalid bcrypt hash rejected",
-			np:        v1.NativeProvider{PasswordHash: "not-a-bcrypt-hash"},
+			np:        v1.NativeProvider{PasswordHash: "not-a-bcrypt-hash"}, //nolint:gosec // G101: test value, not a real credential
 			username:  "charlie",
 			wantErr:   true,
 			errSubstr: "not a valid bcrypt hash",
