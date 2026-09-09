@@ -47,6 +47,7 @@ import {
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
+import { PERSES_APP_CONFIG } from '../../config';
 import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
@@ -194,7 +195,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
               fullWidth={true}
               style={{ fontSize: '1em' }}
               onClick={() => {
-                window.location.href = `/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
+                window.location.href = `${PERSES_APP_CONFIG.api_prefix}/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
               }}
             >
               Sign in with {provider.name}
