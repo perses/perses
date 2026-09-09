@@ -852,7 +852,7 @@ disable_zoom:  <bool> | default = false # Optional
 ```yaml
 # Allow you to disable dashboard auto-refresh (refresh interval picker hidden; refreshInterval and ?refresh= ignored)
 disable:  <bool> | default = false # Optional
-# Use duration format. The display will be computed automatically. Eg: "5s: will be display "5 seconds"
+# Use duration format. The display will be computed automatically. Eg: "5s: will be display "5 seconds" 0s value means Off
 options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 ```
 

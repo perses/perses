@@ -34,6 +34,15 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"14d",
 }
 
+var defaultAutoRefreshOptions = []common.DurationString{
+	"0s",
+	"5s",
+	"10s",
+	"15s",
+	"30s",
+	"60s",
+}
+
 type FrontendTheme string
 
 const defaultRowsPerPage uint8 = 25
@@ -77,6 +86,13 @@ type TimeRange struct {
 type AutoRefresh struct {
 	Disable bool                    `json:"disable,omitempty" yaml:"disable,omitempty"`
 	Options []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+func (p *AutoRefresh) Verify() error {
+	if len(p.Options) == 0 {
+		p.Options = defaultAutoRefreshOptions
+	}
+	return nil
 }
 
 // DefaultUserPreferences contains the preferences used when the user has not
