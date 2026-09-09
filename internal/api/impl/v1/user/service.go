@@ -181,5 +181,5 @@ func resolvePassword(np v1.NativeProvider, username string) (string, error) {
 		}
 		return string(hash), nil
 	}
-	return "", apiInterface.HandleBadRequestError("password or passwordHash must be provided")
+	return "", nil
 }
