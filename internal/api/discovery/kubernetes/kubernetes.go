@@ -115,7 +115,7 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.WithError(err).Error("failed to decode schema")
 		return nil
 	}
-	result, err := d.discovery.discover(decodedSchema)
+	resources, err := d.discovery.discover(decodedSchema)
 	if err != nil {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil
@@ -125,7 +125,11 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.WithError(err).Errorf("failed to resolve default datasource for kube discovery %q", d.name)
 		return nil
 	}
-	d.svc.Apply(result, defaultName)
+	var entities []*v1.GlobalDatasource
+	for _, r := range resources {
+		entities = append(entities, r.datasource)
+	}
+	d.svc.Apply(entities, defaultName)
 	return nil
 }
 
