@@ -30,6 +30,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -79,22 +80,24 @@ func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *co
 	}
 
 	sd := &discovery{
-		cfg:       cfg,
-		svc:       svc,
-		schema:    schema,
-		name:      discoveryName,
-		discovery: d,
+		cfg:        cfg,
+		svc:        svc,
+		schema:     schema,
+		name:       discoveryName,
+		discovery:  d,
+		kubeClient: kubeClient,
 	}
 	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
 }
 
 type discovery struct {
 	async.SimpleTask
-	cfg       *config.KubernetesDiscovery
-	discovery clientDiscovery
-	svc       *service.ApplyService
-	schema    schema.Schema
-	name      string
+	cfg        *config.KubernetesDiscovery
+	discovery  clientDiscovery
+	svc        *service.ApplyService
+	schema     schema.Schema
+	name       string
+	kubeClient kubernetes.Interface
 }
 
 func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
@@ -108,8 +111,54 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil
 	}
-	d.svc.Apply(result)
+	defaultName, err := d.resolveDefaultName()
+	if err != nil {
+		logrus.WithError(err).Errorf("failed to resolve default datasource for kube discovery %q", d.name)
+		return nil
+	}
+	d.svc.Apply(result, defaultName)
 	return nil
+}
+
+// resolveDefaultName returns the generated name (namespace.name) of the first Kubernetes resource
+// matching Default.Labels and Default.Annotations, or empty string if Default.Enable is false or no match is found.
+func (d *discovery) resolveDefaultName() (string, error) {
+	if !d.cfg.Default.Enable {
+		return "", nil
+	}
+	labelSelector := buildLabelSelector(d.cfg.Default.Labels)
+	if d.cfg.ServiceConfiguration.Enable {
+		response, err := d.kubeClient.CoreV1().Services(d.cfg.Namespace).List(context.Background(), metav1.ListOptions{LabelSelector: labelSelector})
+		if err != nil {
+			return "", err
+		}
+		for _, svc := range response.Items {
+			if matchesAnnotations(svc.Annotations, d.cfg.Default.Annotations) {
+				return fmt.Sprintf("%s.%s", svc.Namespace, svc.Name), nil
+			}
+		}
+	} else {
+		response, err := d.kubeClient.CoreV1().Pods(d.cfg.Namespace).List(context.Background(), metav1.ListOptions{LabelSelector: labelSelector})
+		if err != nil {
+			return "", err
+		}
+		for _, pod := range response.Items {
+			if matchesAnnotations(pod.Annotations, d.cfg.Default.Annotations) {
+				return fmt.Sprintf("%s.%s", pod.Namespace, pod.Name), nil
+			}
+		}
+	}
+	return "", nil
+}
+
+// matchesAnnotations returns true if all key/value pairs in required are present in actual.
+func matchesAnnotations(actual, required map[string]string) bool {
+	for k, v := range required {
+		if actual[k] != v {
+			return false
+		}
+	}
+	return true
 }
 
 func (d *discovery) String() string {
