@@ -49,8 +49,17 @@ func buildLabelSelector(labels map[string]string) string {
 	return strings.Join(builder, ",")
 }
 
+// discoveredDatasource pairs a converted GlobalDatasource with the raw Kubernetes
+// labels and annotations from the originating resource, so that default
+// resolution can filter within the already-fetched set without a second API call.
+type discoveredDatasource struct {
+	datasource  *v1.GlobalDatasource
+	labels      map[string]string
+	annotations map[string]string
+}
+
 type clientDiscovery interface {
-	discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error)
+	discover(decodedSchema []*cuetils.Node) ([]*discoveredDatasource, error)
 }
 
 func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schema schema.Schema) (taskhelper.Helper, error) {
