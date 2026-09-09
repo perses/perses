@@ -82,37 +82,43 @@ func newTestDatasource(name string) *v1.GlobalDatasource {
 	return ds
 }
 
-func TestApplyService_SetDefaultFlagTrue(t *testing.T) {
+func TestApplyService_EnableFalse(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, true)
+	applySvc := New(false, mockSvc)
 
-	ds := newTestDatasource("prometheus-1")
-	entities := []*v1.GlobalDatasource{ds}
+	entities := []*v1.GlobalDatasource{
+		newTestDatasource("prometheus-1"),
+		newTestDatasource("prometheus-2"),
+	}
 
-	applySvc.Apply(entities)
+	applySvc.Apply(entities, "")
 
-	require.Equal(t, 1, len(mockSvc.createdEntities), "should have created one datasource")
-	assert.Equal(t, true, mockSvc.createdEntities[0].Spec.Default, "default should be set to true")
-	assert.Equal(t, "prometheus-1", mockSvc.createdEntities[0].Metadata.Name)
+	require.Equal(t, 2, len(mockSvc.createdEntities))
+	for _, e := range mockSvc.createdEntities {
+		assert.False(t, e.Spec.Default)
+	}
 }
 
-func TestApplyService_SetDefaultFlagFalse(t *testing.T) {
+func TestApplyService_NoMatch(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, false)
+	applySvc := New(false, mockSvc)
 
-	ds := newTestDatasource("loki-1")
-	entities := []*v1.GlobalDatasource{ds}
+	entities := []*v1.GlobalDatasource{
+		newTestDatasource("prometheus-1"),
+		newTestDatasource("prometheus-2"),
+	}
 
-	applySvc.Apply(entities)
+	applySvc.Apply(entities, "no-such-datasource")
 
-	require.Equal(t, 1, len(mockSvc.createdEntities), "should have created one datasource")
-	assert.Equal(t, false, mockSvc.createdEntities[0].Spec.Default, "default should be set to false")
-	assert.Equal(t, "loki-1", mockSvc.createdEntities[0].Metadata.Name)
+	require.Equal(t, 2, len(mockSvc.createdEntities))
+	for _, e := range mockSvc.createdEntities {
+		assert.False(t, e.Spec.Default)
+	}
 }
 
-func TestApplyService_MultipleEntitiesWithDefaultTrue(t *testing.T) {
+func TestApplyService_SingleMatch(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc, true)
+	applySvc := New(false, mockSvc)
 
 	entities := []*v1.GlobalDatasource{
 		newTestDatasource("prometheus-1"),
@@ -120,10 +126,24 @@ func TestApplyService_MultipleEntitiesWithDefaultTrue(t *testing.T) {
 		newTestDatasource("prometheus-3"),
 	}
 
-	applySvc.Apply(entities)
+	applySvc.Apply(entities, "prometheus-2")
 
-	require.Equal(t, 3, len(mockSvc.createdEntities), "should have created three datasources")
-	for i, created := range mockSvc.createdEntities {
-		assert.Equal(t, true, created.Spec.Default, "datasource %d should have default=true", i)
+	require.Equal(t, 3, len(mockSvc.createdEntities))
+	assert.False(t, mockSvc.createdEntities[0].Spec.Default)
+	assert.True(t, mockSvc.createdEntities[1].Spec.Default)
+	assert.False(t, mockSvc.createdEntities[2].Spec.Default)
+}
+
+func TestApplyService_DefaultNameNotInList(t *testing.T) {
+	mockSvc := &mockGlobalDatasourceService{}
+	applySvc := New(false, mockSvc)
+
+	entities := []*v1.GlobalDatasource{
+		newTestDatasource("prometheus-1"),
 	}
+
+	applySvc.Apply(entities, "prometheus-99")
+
+	require.Equal(t, 1, len(mockSvc.createdEntities))
+	assert.False(t, mockSvc.createdEntities[0].Spec.Default)
 }
