@@ -49,8 +49,7 @@ func buildLabelSelector(labels map[string]string) string {
 }
 
 // discoveredDatasource pairs a converted GlobalDatasource with the raw Kubernetes
-// labels and annotations from the originating resource, so that default
-// resolution can filter within the already-fetched set without a second API call.
+// labels and annotations from the originating resource
 type discoveredDatasource struct {
 	datasource  *v1.GlobalDatasource
 	labels      map[string]string
