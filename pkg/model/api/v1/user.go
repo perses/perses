@@ -26,6 +26,12 @@ const WildcardProject = "*"
 
 type NativeProvider struct {
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+	// PasswordHash accepts a pre-computed bcrypt hash instead of a plaintext password.
+	// When set, the hash is stored directly without re-hashing.
+	// This is useful for provisioning users from configuration files without exposing
+	// cleartext passwords (e.g. in Kubernetes ConfigMaps).
+	// Mutually exclusive with Password.
+	PasswordHash string `json:"passwordHash,omitempty" yaml:"passwordHash,omitempty"`
 }
 
 type OAuthProvider struct {
@@ -76,7 +82,11 @@ func (u *User) validate() error {
 	if u.Kind != KindUser {
 		return fmt.Errorf("invalid kind: '%s' for a User type", u.Kind)
 	}
-	if len(u.Spec.NativeProvider.Password) > 0 && len(u.Spec.OauthProviders) > 0 {
+	if len(u.Spec.NativeProvider.Password) > 0 && len(u.Spec.NativeProvider.PasswordHash) > 0 {
+		return fmt.Errorf("password and passwordHash are mutually exclusive, use one of them")
+	}
+	hasNativeCredentials := len(u.Spec.NativeProvider.Password) > 0 || len(u.Spec.NativeProvider.PasswordHash) > 0
+	if hasNativeCredentials && len(u.Spec.OauthProviders) > 0 {
 		return fmt.Errorf("nativeProvider and oauthProviders are mutually exclusive, use one of them")
 	}
 	return nil
