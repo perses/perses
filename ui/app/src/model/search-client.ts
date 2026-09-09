@@ -29,7 +29,8 @@ export function useSearchDashboards(
   searchQuery?: string,
 ): UseQueryResult<SearchProjectResource[], StatusError> {
   return useQuery<SearchProjectResource[], StatusError>({
-    queryKey: ['search/dashboards', project, searchQuery],
+    // The queryKey contains the key dashboards and not simply the resource `search/dashboards` to ensure it is invalidated when a dashboard is created or deleted
+    queryKey: ['dashboards', 'search', project, searchQuery],
     queryFn: () => searchDashboards(project, searchQuery),
   });
 }

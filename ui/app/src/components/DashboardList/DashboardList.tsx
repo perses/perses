@@ -313,6 +313,12 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           resource={{
             kind: 'Dashboard',
             metadata: activeDialog.target.metadata,
+            spec:
+              // If the display name is the same as the metadata name, we don't need to pass it to the delete dialog, otherwise we need to pass it.
+              // It will preserve the display name in the delete dialog and show it to the user.
+              activeDialog.target.displayName === activeDialog.target.metadata.name
+                ? undefined
+                : { display: { name: activeDialog.target.displayName } },
           }}
           onSubmit={(v) => handleDashboardDelete(v).then(closeDialog)}
           onClose={closeDialog}
