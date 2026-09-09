@@ -191,6 +191,7 @@ export interface TimeRangeConfig {
 
 export interface AutoRefreshConfig {
   disable?: boolean;
+  options?: DurationString[];
 }
 
 export interface FrontendConfig {
