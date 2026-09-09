@@ -75,7 +75,8 @@ type TimeRange struct {
 }
 
 type AutoRefresh struct {
-	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Disable bool                    `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Options []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 // DefaultUserPreferences contains the preferences used when the user has not
