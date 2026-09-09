@@ -1,6 +1,6 @@
 module github.com/perses/perses
 
-go 1.27.0
+go 1.27.1
 
 // This directive help to improve the performance of golangci-lint by ignoring the node_modules directory of the ui module
 // golangci-lint is using the go build system to determine which files to lint, and the node_modules directory contains a lot of files that are not relevant for the linting process, and can cause performance issues.
@@ -18,7 +18,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gavv/httpexpect/v2 v2.17.0
 	github.com/go-jose/go-jose/v4 v4.1.4
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/cel-go v0.31.0
 	github.com/google/uuid v1.6.0
@@ -33,10 +33,10 @@ require (
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/perses/common v0.31.2
-	github.com/perses/spec v0.3.0-beta.5
+	github.com/perses/spec v0.3.0-beta.7
 	github.com/prometheus/client_golang v1.24.1
-	github.com/prometheus/client_model v0.6.2
-	github.com/prometheus/common v0.70.1
+	github.com/prometheus/client_model v0.6.3
+	github.com/prometheus/common v0.71.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.20.0
 	github.com/sirupsen/logrus v1.10.2
@@ -44,7 +44,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	github.com/tidwall/gjson v1.19.0
 	github.com/zitadel/oidc/v3 v3.49.4
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/mod v0.40.0
 	golang.org/x/oauth2 v0.36.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -247,7 +247,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260630182238-925bb5da69e7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260630182238-925bb5da69e7 // indirect
 	google.golang.org/grpc v1.82.1 // indirect
-	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect

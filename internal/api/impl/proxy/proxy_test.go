@@ -16,6 +16,7 @@ package proxy
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"encoding/pem"
 	"net/http"
 	"net/http/httptest"
@@ -25,6 +26,8 @@ import (
 	"github.com/perses/perses/internal/api/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
+	"github.com/perses/spec/go/common"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -260,6 +263,148 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 				assert.NoError(t, err)
 				require.NotNil(t, db)
 				_ = db.Close()
+			}
+		})
+	}
+}
+
+func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
+	defaultHeaders := http.Header{
+		"Accept":            {"application/json", "text/plain"},
+		"Authorization":     {"Bearer datasource-token"},
+		"Cookie":            {"session=client-session"},
+		"Origin":            {"https://configured.example.com"},
+		"Referer":           {"https://perses.example.com/dashboard"},
+		"X-Configured":      {"configured-value"},
+		"X-Forwarded-For":   {"192.0.2.2"},
+		"X-Forwarded-Proto": {"http"},
+		"X-Real-Ip":         {"192.0.2.2"},
+	}
+	droppedHeaders := defaultHeaders.Clone()
+	droppedHeaders.Del("Origin")
+	droppedHeaders.Del("Referer")
+	droppedHeaders.Del("X-Configured")
+	droppedHeaders[echo.HeaderXForwardedFor] = nil
+
+	for _, test := range []struct {
+		name  string
+		allow []string
+		drop  []string
+		want  http.Header
+	}{
+		{name: "no policy", want: defaultHeaders},
+		{name: "empty policies", allow: []string{}, drop: []string{}, want: defaultHeaders},
+		{
+			name:  "allow names ignore case and preserve multiple values without adding missing headers",
+			allow: []string{"aCcEpT", "ACCEPT", "x-configured", "X-Missing"},
+			want: http.Header{
+				"Accept":          {"application/json", "text/plain"},
+				"Authorization":   {"Bearer datasource-token"},
+				"X-Configured":    {"configured-value"},
+				"X-Forwarded-For": nil,
+			},
+		},
+		{
+			name: "drop incoming and configured headers ignoring case",
+			drop: []string{"oRiGiN", "REFERER", "x-configured", "x-forwarded-for", "X-Missing"},
+			want: droppedHeaders,
+		},
+		{
+			name:  "allow secret authentication explicitly",
+			allow: []string{"authorization"},
+			want: http.Header{
+				"Authorization":   {"Bearer datasource-token"},
+				"X-Forwarded-For": nil,
+			},
+		},
+		{name: "drop secret authentication", drop: []string{"AUTHORIZATION"}, want: defaultHeaders},
+		{
+			name:  "allow only absent headers",
+			allow: []string{"X-Missing"},
+			want:  http.Header{"Authorization": {"Bearer datasource-token"}, "X-Forwarded-For": nil},
+		},
+		{
+			name:  "if drop and allow are both set, drop must be ignored",
+			allow: []string{"aCcEpT", "ACCEPT", "x-configured", "X-Missing"},
+			drop:  []string{"Accept"},
+			want: http.Header{
+				"Accept":          {"application/json", "text/plain"},
+				"Authorization":   {"Bearer datasource-token"},
+				"X-Configured":    {"configured-value"},
+				"X-Forwarded-For": nil,
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource", nil)
+			req.Header = http.Header{
+				"Accept":          {"application/json", "text/plain"},
+				"Authorization":   {"Bearer client-token"},
+				"Cookie":          {"session=client-session"},
+				"Origin":          {"https://perses.example.com"},
+				"Referer":         {"https://perses.example.com/dashboard"},
+				"X-Forwarded-For": {"192.0.2.2"},
+			}
+			h := &httpProxy{
+				config: &datasourceHTTP.Config{
+					URL: common.MustParseURL("https://datasource.example.com"),
+					Headers: map[string]string{
+						"Origin":       "https://configured.example.com",
+						"X-Configured": "configured-value",
+					},
+					AllowHeaders: test.allow,
+					DropHeaders:  test.drop,
+				},
+				secret: &v1.SecretSpec{Authorization: secretModel.NewBearerToken("datasource-token")},
+			}
+			ctx := echo.New().NewContext(req, httptest.NewRecorder())
+			require.NoError(t, h.prepareRequest(ctx))
+			assert.Equal(t, test.want, req.Header)
+			assert.Equal(t, "datasource.example.com", req.Host)
+		})
+	}
+}
+
+func TestHTTPProxy_serve_headerPolicies(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+
+	for _, test := range []struct {
+		name             string
+		allow            []string
+		drop             []string
+		wantForwardedFor string
+	}{
+		{name: "default forwards client IP", wantForwardedFor: "192.0.2.1"},
+		{name: "allow excludes forwarded IP", allow: []string{"accept"}},
+		{name: "drop excludes forwarded IP", drop: []string{"x-forwarded-for", "origin"}},
+		{name: "allow includes forwarded IP", allow: []string{"accept", "x-forwarded-for"}, wantForwardedFor: "192.0.2.1"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			h := &httpProxy{
+				config: &datasourceHTTP.Config{
+					URL:          common.MustParseURL(server.URL),
+					AllowHeaders: test.allow,
+					DropHeaders:  test.drop,
+				},
+				path: "/query",
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/query", nil)
+			req.RemoteAddr = "192.0.2.1:1234"
+			req.Header["Accept"] = []string{"application/json", "text/plain"}
+			req.Header.Set("Origin", "https://perses.example.com")
+			rec := httptest.NewRecorder()
+			require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+			require.Equal(t, http.StatusOK, rec.Code)
+			var headers http.Header
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+			assert.Equal(t, []string{"application/json", "text/plain"}, headers.Values("Accept"))
+			assert.Equal(t, test.wantForwardedFor, headers.Get("X-Forwarded-For"))
+			if len(test.allow) > 0 || len(test.drop) > 0 {
+				assert.NotContains(t, headers, "Origin")
 			}
 		})
 	}

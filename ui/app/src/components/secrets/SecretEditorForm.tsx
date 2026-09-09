@@ -41,6 +41,7 @@ import type { ReactElement, SyntheticEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
+import type { z } from 'zod';
 
 import type { FormEditorProps } from '../form-drawers';
 
@@ -94,7 +95,7 @@ export function SecretEditorForm({
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<SecretsEditorSchemaType>({
+  const form = useForm<z.input<typeof secretsEditorSchema>, unknown, SecretsEditorSchemaType>({
     resolver: zodResolver(secretsEditorSchema),
     mode: 'onChange',
     defaultValues: initialSecretClean,

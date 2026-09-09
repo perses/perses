@@ -43,7 +43,7 @@ export type EditFolderValidationType = z.infer<typeof editFolderDialogValidation
 export type CreateFolderValidationType = z.infer<typeof createFolderDialogValidationSchema>;
 
 export interface FolderValidationSchema {
-  schema?: z.ZodSchema;
+  schema?: typeof createFolderDialogValidationSchema;
   isSchemaLoading: boolean;
   hasSchemaError: boolean;
 }
@@ -73,22 +73,28 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
     }
 
     if (!folders?.length)
-      return { schema: createFolderDialogValidationSchema, isSchemaLoading: false, hasSchemaError: false };
+      return {
+        schema: createFolderDialogValidationSchema,
+        isSchemaLoading: false,
+        hasSchemaError: false,
+      };
 
-    const refinedSchema = createFolderDialogValidationSchema.refine(
-      (schema) => {
-        return !(folders ?? []).some((folder) => {
+    const refinedSchema = createFolderDialogValidationSchema.superRefine((schema, ctx) => {
+      if (
+        (folders ?? []).some((folder) => {
           return (
             folder.metadata.project.toLowerCase() === (projectName ?? '').toLowerCase() &&
             folder.metadata.name.toLowerCase() === generateMetadataName(schema.name.toLowerCase())
           );
+        })
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Folder name '${schema.name}' already exists in '${projectName}' project!`,
+          path: ['name'],
         });
-      },
-      (schema) => ({
-        message: `Folder name '${schema.name}' already exists in '${projectName}' project!`,
-        path: ['name'],
-      }),
-    );
+      }
+    });
 
     return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
   }, [folders, isFoldersLoading, isError, projectName]);
@@ -101,17 +107,22 @@ export function useFolderValidationSchema(projectName?: string): FolderValidatio
  * @param items - Root items array of the {@link FolderResource} being edited.
  * @param path - Ordered folder names leading to the parent of the new sub-folder. Pass `[]` for root level.
  */
-export function useAddFolderValidationSchema(items: FolderItem[], path: string[]): z.ZodSchema {
+export function useAddFolderValidationSchema(
+  items: FolderItem[],
+  path: string[],
+): typeof editFolderDialogValidationSchema {
   return useMemo(() => {
     const siblings = path.length === 0 ? items : (getSubFolderRef(items, path).items ?? []);
     const siblingFolderNames = new Set(siblings.filter((s) => s.kind === 'Folder').map((s) => s.name.toLowerCase()));
 
-    return editFolderDialogValidationSchema.refine(
-      (data) => !siblingFolderNames.has(data.name.toLowerCase()),
-      (data) => ({
-        message: `A folder named '${data.name}' already exists at this level!`,
-        path: ['name'],
-      }),
-    );
+    return editFolderDialogValidationSchema.superRefine((data, ctx) => {
+      if (siblingFolderNames.has(data.name.toLowerCase())) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `A folder named '${data.name}' already exists at this level!`,
+          path: ['name'],
+        });
+      }
+    });
   }, [items, path]);
 }
