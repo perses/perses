@@ -394,7 +394,9 @@ func (h *httpProxy) filterHeaders(headers http.Header) {
 }
 
 func (h *httpProxy) setupAuthentication(c echo.Context) error {
-
+	if h.config.OauthPassthrough {
+		return h.setupOAuthPassthrough(c)
+	}
 	if h.secret == nil {
 		return nil
 	}
@@ -402,29 +404,6 @@ func (h *httpProxy) setupAuthentication(c echo.Context) error {
 	req := c.Request()
 	h.filterHeaders(req.Header)
 
-	if h.secret.OAuthPassThrough {
-		oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
-		if errors.Is(err, http.ErrNoCookie) {
-			// OIDC token cookie is missing. It may have expired while the Perses session
-			// was still valid. Attempt to refresh using the stored OIDC refresh token
-			// before giving up.
-			if h.tokenRefresher != nil {
-				if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
-					h.tokenRefresher(c)
-					// Re-read the OIDC token cookie after the refresh attempt.
-					oidcCookie, err = c.Cookie(crypto.CookieKeyOIDCToken)
-				}
-			}
-			if errors.Is(err, http.ErrNoCookie) {
-				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf(
-					"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
-					h.datasourceName,
-				))
-			}
-		}
-		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oidcCookie.Value))
-		return nil
-	}
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
 		password, err := basicAuth.GetPassword()
@@ -450,6 +429,32 @@ func (h *httpProxy) setupAuthentication(c echo.Context) error {
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token.AccessToken))
 	}
 
+	return nil
+}
+
+func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
+	oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
+	if errors.Is(err, http.ErrNoCookie) {
+		// OIDC token cookie is missing. It may have expired while the Perses session
+		// was still valid. Attempt to refresh using the stored OIDC refresh token
+		// before giving up.
+		if h.tokenRefresher != nil {
+			if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
+				h.tokenRefresher(c)
+				// Re-read the OIDC token cookie after the refresh attempt.
+				oidcCookie, err = c.Cookie(crypto.CookieKeyOIDCToken)
+			}
+		}
+		if errors.Is(err, http.ErrNoCookie) {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf(
+				"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
+				h.datasourceName,
+			))
+		}
+	}
+
+	req := c.Request()
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oidcCookie.Value))
 	return nil
 }
 
@@ -617,10 +622,6 @@ func (s *sqlProxy) serve(c echo.Context) error {
 func (s *sqlProxy) setupAuthentication() error {
 	if s.secret == nil {
 		return nil
-	}
-
-	if s.secret.OAuthPassThrough {
-		logrus.Warnf("oauthPassThrough is configured for SQL datasource %s but is not supported for SQL proxy; only HTTP proxy supports passing user tokens", s.name)
 	}
 
 	basicAuth := s.secret.BasicAuth

@@ -451,7 +451,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 	testSuite := []struct {
 		name          string
-		secret        *v1.SecretSpec
+		config        *datasourceHTTP.Config
 		oidcCookie    string
 		expectedAuth  string
 		expectError   bool
@@ -459,26 +459,26 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 	}{
 		{
 			name:         "oauthPassThrough forwards oidc token from cookie",
-			secret:       &v1.SecretSpec{OAuthPassThrough: true},
+			config:       &datasourceHTTP.Config{OauthPassthrough: true},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "Bearer original-oidc-token",
 		},
 		{
 			name:          "oauthPassThrough with no oidc cookie returns error",
-			secret:        &v1.SecretSpec{OAuthPassThrough: true},
+			config:        &datasourceHTTP.Config{OauthPassthrough: true},
 			oidcCookie:    "",
 			expectError:   true,
 			errorContains: "OAuthPassThrough",
 		},
 		{
 			name:         "oauthPassThrough false does not set auth header",
-			secret:       &v1.SecretSpec{OAuthPassThrough: false},
+			config:       &datasourceHTTP.Config{OauthPassthrough: false},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "",
 		},
 		{
-			name:         "nil secret does nothing",
-			secret:       nil,
+			name:         "nil config does nothing",
+			config:       &datasourceHTTP.Config{},
 			oidcCookie:   "original-oidc-token",
 			expectedAuth: "",
 		},
@@ -487,7 +487,7 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
 			h := &httpProxy{
-				secret: test.secret,
+				config: test.config,
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 			if test.oidcCookie != "" {
