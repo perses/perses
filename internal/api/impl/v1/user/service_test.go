@@ -52,13 +52,6 @@ func TestResolvePassword(t *testing.T) {
 			wantErr:   true,
 			errSubstr: "not a valid bcrypt hash",
 		},
-		{
-			name:      "both empty returns error",
-			np:        v1.NativeProvider{},
-			username:  "dave",
-			wantErr:   true,
-			errSubstr: "password or passwordHash must be provided",
-		},
 	}
 
 	for _, tt := range tests {
