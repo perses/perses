@@ -17,40 +17,63 @@ import (
 	"testing"
 
 	"github.com/perses/perses/internal/api/crypto"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestResolvePassword_Plaintext(t *testing.T) {
-	result, err := resolvePassword("mypassword", "", "alice")
-	require.NoError(t, err)
-	// The result should be a valid bcrypt hash.
-	assert.True(t, crypto.IsValidBcryptHash(result))
-	// The hash should verify against the original password.
-	assert.True(t, crypto.ComparePasswords(result, "mypassword"))
-}
-
-func TestResolvePassword_PreHashedBcrypt(t *testing.T) {
-	// Pre-compute a bcrypt hash.
-	hash, err := crypto.HashAndSalt([]byte("secretpassword"))
+func TestResolvePassword(t *testing.T) {
+	precomputedHash, err := crypto.HashAndSalt([]byte("secretpassword"))
 	require.NoError(t, err)
 
-	result, err := resolvePassword("", string(hash), "bob")
-	require.NoError(t, err)
-	// The hash should be stored as-is (no re-hashing).
-	assert.Equal(t, string(hash), result)
-	// And it should still verify against the original password.
-	assert.True(t, crypto.ComparePasswords(result, "secretpassword"))
-}
+	tests := []struct {
+		name      string
+		np        v1.NativeProvider
+		username  string
+		wantErr   bool
+		errSubstr string
+		wantHash  string
+	}{
+		{
+			name:     "plaintext password is hashed",
+			np:       v1.NativeProvider{Password: "mypassword"},
+			username: "alice",
+		},
+		{
+			name:     "pre-hashed bcrypt stored as-is",
+			np:       v1.NativeProvider{PasswordHash: string(precomputedHash)},
+			username: "bob",
+			wantHash: string(precomputedHash),
+		},
+		{
+			name:      "invalid bcrypt hash rejected",
+			np:        v1.NativeProvider{PasswordHash: "not-a-bcrypt-hash"},
+			username:  "charlie",
+			wantErr:   true,
+			errSubstr: "not a valid bcrypt hash",
+		},
+		{
+			name:      "both empty returns error",
+			np:        v1.NativeProvider{},
+			username:  "dave",
+			wantErr:   true,
+			errSubstr: "password or passwordHash must be provided",
+		},
+	}
 
-func TestResolvePassword_InvalidBcryptHash(t *testing.T) {
-	_, err := resolvePassword("", "not-a-bcrypt-hash", "charlie")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "not a valid bcrypt hash")
-}
-
-func TestResolvePassword_BothEmpty(t *testing.T) {
-	_, err := resolvePassword("", "", "dave")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "password or passwordHash must be provided")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := resolvePassword(tt.np, tt.username)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errSubstr)
+				return
+			}
+			require.NoError(t, err)
+			assert.True(t, crypto.IsValidBcryptHash(result))
+			if tt.wantHash != "" {
+				assert.Equal(t, tt.wantHash, result)
+			}
+		})
+	}
 }

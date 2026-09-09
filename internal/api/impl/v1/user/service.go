@@ -53,7 +53,7 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	// resolve the password: either hash a plaintext password or accept a pre-computed bcrypt hash
-	hashedPassword, err := resolvePassword(entity.Spec.NativeProvider.Password, entity.Spec.NativeProvider.PasswordHash, entity.Metadata.Name)
+	hashedPassword, err := resolvePassword(entity.Spec.NativeProvider, entity.Metadata.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*
 	entity.Metadata.Update(oldEntity.Metadata)
 	// in case the user updated his password, then we should hash it again, otherwise the old password should be kept
 	if len(entity.Spec.NativeProvider.Password) > 0 || len(entity.Spec.NativeProvider.PasswordHash) > 0 {
-		hashedPassword, hashErr := resolvePassword(entity.Spec.NativeProvider.Password, entity.Spec.NativeProvider.PasswordHash, entity.Metadata.Name)
+		hashedPassword, hashErr := resolvePassword(entity.Spec.NativeProvider, entity.Metadata.Name)
 		if hashErr != nil {
 			return nil, hashErr
 		}
@@ -166,21 +166,20 @@ func (s *service) RawMetadataList(q *user.Query) ([]json.RawMessage, error) {
 // Exactly one of password (plaintext) or passwordHash (pre-computed bcrypt)
 // must be non-empty. The model-level validation already enforces mutual
 // exclusivity, so this function only needs to handle the two valid cases.
-func resolvePassword(password, passwordHash, username string) (string, error) {
-	switch {
-	case len(passwordHash) > 0:
-		if !crypto.IsValidBcryptHash(passwordHash) {
-			return "", fmt.Errorf("%w: passwordHash is not a valid bcrypt hash", apiInterface.BadRequestError)
+func resolvePassword(np v1.NativeProvider, username string) (string, error) {
+	if len(np.PasswordHash) > 0 {
+		if !crypto.IsValidBcryptHash(np.PasswordHash) {
+			return "", apiInterface.HandleBadRequestError("passwordHash is not a valid bcrypt hash")
 		}
-		return passwordHash, nil
-	case len(password) > 0:
-		hash, err := crypto.HashAndSalt([]byte(password))
+		return np.PasswordHash, nil
+	}
+	if len(np.Password) > 0 {
+		hash, err := crypto.HashAndSalt([]byte(np.Password))
 		if err != nil {
 			logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %q", username)
 			return "", apiInterface.InternalError
 		}
 		return string(hash), nil
-	default:
-		return "", fmt.Errorf("%w: password or passwordHash must be provided", apiInterface.BadRequestError)
 	}
+	return "", apiInterface.HandleBadRequestError("password or passwordHash must be provided")
 }
