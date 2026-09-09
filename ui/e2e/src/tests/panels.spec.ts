@@ -62,6 +62,7 @@ test.describe('Dashboard: Panels', () => {
 
     await dashboardPage.startEditing();
     await dashboardPage.editPanel('Markdown Example Zero', async (panelEditor) => {
+      await panelEditor.selectTab('Layout');
       await panelEditor.selectGroup('Row 2');
     });
 

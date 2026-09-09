@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import mockRangeQuery from '../../data/mock-query-range.json';
+import mockRangeQuery from '../../data/mock-query-range.json' with { type: 'json' };
 
 type ExampleMetric = {
   __name__?: string;

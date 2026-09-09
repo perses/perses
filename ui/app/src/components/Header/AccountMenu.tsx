@@ -15,7 +15,8 @@ import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material
 import AccountBox from 'mdi-material-ui/AccountBox';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
-import { MouseEvent, ReactElement, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { PERSES_APP_CONFIG } from '../../config';

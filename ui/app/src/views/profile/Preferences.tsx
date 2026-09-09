@@ -14,7 +14,8 @@
 import { Box, Button, FormControl, InputLabel, Stack } from '@mui/material';
 import { TimeZoneSelector, useSnackbar } from '@perses-dev/components';
 import PreferenceIcon from 'mdi-material-ui/MapClock';
-import { FormEventHandler, ReactElement, useCallback, useState } from 'react';
+import type { FormEventHandler, ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useUserPreferences } from '../../context/UserPreferences';
 import { ProfileContainer } from './ProfileContainer';

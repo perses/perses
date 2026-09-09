@@ -1,6 +1,7 @@
-import { AnnotationData } from '@perses-dev/spec';
-import { AnnotationContext, replaceVariables } from '@perses-dev/plugin-system';
-import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { AnnotationData } from '@perses-dev/spec';
+import type { AnnotationContext } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 
 export const getAnnotationData = async (
   spec: {{ .PluginPascalName }}Spec,

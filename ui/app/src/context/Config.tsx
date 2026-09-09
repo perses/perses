@@ -13,13 +13,15 @@
 
 import { buildRelativeTimeOption } from '@perses-dev/components';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
-import { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { DashboardSelector, DurationString } from '@perses-dev/spec';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import type { Banner, ConfigModel } from '../model/config-client';
+import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
@@ -49,6 +51,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
         <TimeRangeSettingsProvider
           showCustom={!data.frontend.time_range?.disable_custom}
           showZoomButtons={!data.frontend.time_range?.disable_zoom}
+          disableAutoRefresh={!!data.frontend.auto_refresh?.disable}
           options={timeRangeOptions}
         >
           {props.children}

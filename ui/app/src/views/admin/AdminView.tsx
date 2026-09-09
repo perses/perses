@@ -13,7 +13,7 @@
 
 import { Stack } from '@mui/material';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useParams } from 'react-router-dom';
 
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem, FolderResource } from '@perses-dev/client';
+import type { FolderItem, FolderResource } from '@perses-dev/client';
 import { getResourceDisplayName } from '@perses-dev/components';
 import { intlFormatDistance } from 'date-fns';
 
-import { DashboardListRow } from '../components/DashboardList/DashboardList';
+import type { DashboardListRow } from '../components/DashboardList/DashboardList';
 import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 
 export interface RowWithOriginal<TData> {
@@ -165,7 +165,7 @@ const mapFolderItemsToTableRow = (
       }
     })
     .filter((row): row is DashboardTreeTableRow => row !== undefined)
-    .sort((a, b) => compareFolderFirst(a.kind, b.kind));
+    .toSorted((a, b) => compareFolderFirst(a.kind, b.kind));
 
   if (!rows || rows.length === 0) {
     return [noItemsRow(project, parentPath)];

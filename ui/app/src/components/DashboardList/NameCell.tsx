@@ -17,10 +17,10 @@ import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import FolderOpenOutlineIcon from 'mdi-material-ui/FolderOpenOutline';
 import FolderOutlineIcon from 'mdi-material-ui/FolderOutline';
 import ViewDashboardOutlineIcon from 'mdi-material-ui/ViewDashboardOutline';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { DashboardTreeTableRow } from './DashboardTreeList';
+import type { DashboardTreeTableRow } from './DashboardTreeList';
 
 export interface NameCellProps {
   kind: DashboardTreeTableRow['kind'];

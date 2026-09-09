@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getVariableProject, VariableType } from '@perses-dev/client';
+import type { VariableType } from '@perses-dev/client';
+import { getVariableProject } from '@perses-dev/client';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DatasourceStoreProvider, VariableDefinition, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
+import type { VariableDefinition } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import {
   PluginRegistry,
   TimeRangeProviderWithQueryParams,
@@ -21,12 +23,13 @@ import {
   VariableEditorForm,
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
-import { ReactElement, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useDatasourceApi } from '../../model/datasource-api';
 import { useRemotePluginLoader } from '../../model/remote-plugin-loader';
 import { DeleteResourceDialog } from '../dialogs';
-import { DrawerProps } from '../form-drawers';
+import type { DrawerProps } from '../form-drawers';
 
 interface VariableDrawerProps<T extends VariableType> extends DrawerProps<T> {
   variable: T;

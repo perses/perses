@@ -12,16 +12,17 @@
 // limitations under the License.
 
 import { CircularProgress, Menu, MenuItem, Stack, ListItemIcon, ListItemText } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/components';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import type { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { useQueryClient } from '@tanstack/react-query';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import Compass from 'mdi-material-ui/Compass';
-import React, { ReactElement, useEffect, useMemo, MouseEvent, useState } from 'react';
+import type { ReactElement, MouseEvent } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 
 import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';

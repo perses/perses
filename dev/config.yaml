@@ -41,6 +41,8 @@ frontend:
     - project: "perses"
       dashboard: "Demo"
     - project: "perses"
+      dashboard: "ThreeSignals"
+    - project: "perses"
       dashboard: "NodeExporter"
     - project: "perses"
       dashboard: "Benchmark"

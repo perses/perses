@@ -16,7 +16,8 @@ import Cog from 'mdi-material-ui/Cog';
 import Compass from 'mdi-material-ui/Compass';
 import Menu from 'mdi-material-ui/Menu';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
-import React, { MouseEvent, ReactElement, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import React, { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';

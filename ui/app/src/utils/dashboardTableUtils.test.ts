@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource } from '@perses-dev/client';
+import type { FolderResource } from '@perses-dev/client';
 import { vi } from 'vitest';
 
-import { DashboardListRow } from '../components/DashboardList/DashboardList';
-import { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
+import type { DashboardListRow } from '../components/DashboardList/DashboardList';
+import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';
 
 vi.mock('echarts', () => ({

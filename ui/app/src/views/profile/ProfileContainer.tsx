@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Divider, Typography } from '@mui/material';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 export interface IProps {
   title: string;

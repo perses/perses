@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, IconButtonProps, Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
+import type { IconButtonProps } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
+import type { ReactElement } from 'react';
 
-import { CRUDAction, CRUDActionProps } from './CRUDAction';
+import type { CRUDActionProps } from './CRUDAction';
+import { CRUDAction } from './CRUDAction';
 
 export interface CRUDIconButtonProps extends Omit<IconButtonProps, 'action'>, Omit<CRUDActionProps, 'render'> {
   label: string;

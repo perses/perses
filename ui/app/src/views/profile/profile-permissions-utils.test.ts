@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { normalizePermissions, IFlatPermission } from './profile-permissions-utils';
+import type { IFlatPermission } from './profile-permissions-utils';
+import { normalizePermissions } from './profile-permissions-utils';
 
 describe('ProfilePermissionsUtils', () => {
   describe('With redundant actions and scopes', () => {

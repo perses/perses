@@ -1,6 +1,7 @@
-import { TimeSeriesData, TimeSeries } from '@perses-dev/spec';
-import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
-import { {{ .PluginPascalName }}Spec, DatasourceQueryResponse } from './{{ .PluginName }}-types';
+import type { TimeSeriesData, TimeSeries } from '@perses-dev/spec';
+import type { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { replaceVariables } from '@perses-dev/plugin-system';
+import type { {{ .PluginPascalName }}Spec, DatasourceQueryResponse } from './{{ .PluginName }}-types';
 import { DEFAULT_DATASOURCE } from './constants';
 
 function buildTimeSeries(response?: DatasourceQueryResponse): TimeSeries[] {

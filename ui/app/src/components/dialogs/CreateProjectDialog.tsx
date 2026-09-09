@@ -13,14 +13,16 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, TextField } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName, useSnackbar } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 
 import { useCreateProjectMutation } from '../../model/project-client';
 import { generateMetadataName } from '../../utils/metadata';
-import { CreateProjectValidationType, useProjectValidationSchema } from '../../validation';
+import type { CreateProjectValidationType } from '../../validation';
+import { useProjectValidationSchema } from '../../validation';
 
 interface CreateProjectDialogProps {
   open: boolean;

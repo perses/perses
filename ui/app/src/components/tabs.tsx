@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps, Chip, Stack, Tab, Tabs, styled } from '@mui/material';
-import { ReactElement } from 'react';
+import type { BoxProps } from '@mui/material';
+import { Box, Chip, Stack, Tab, Tabs, styled } from '@mui/material';
+import type { ReactElement } from 'react';
 
 export const MENU_TABS_HEIGHT = '54px';
 
