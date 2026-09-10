@@ -141,6 +141,7 @@ func (p *provisioningService) getService(object modelAPI.Entity, parameters apiI
 			}, nil
 	case *modelV1.GlobalDatasource:
 		svc := p.serviceManager.GetGlobalDatasource()
+		entity.Metadata.Source = modelV1.ProvisioningSource
 		return func() (modelAPI.Entity, error) {
 				return svc.Create(nil, entity)
 			},

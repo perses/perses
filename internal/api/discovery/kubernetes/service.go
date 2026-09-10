@@ -81,8 +81,10 @@ func (d *serviceDiscovery) serviceToGlobalDatasource(svc corev1.Service, decoded
 
 	return &v1.GlobalDatasource{
 		Kind: v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{
-			Name: fmt.Sprintf("%s.%s", svc.Namespace, svc.Name),
+		Metadata: v1.DatasourceMetadata{
+			Metadata: v1.Metadata{
+				Name: fmt.Sprintf("%s.%s", svc.Namespace, svc.Name),
+			},
 		},
 		Spec: datasource.Spec{
 			Plugin: plugin,
