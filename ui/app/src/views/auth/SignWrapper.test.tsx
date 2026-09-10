@@ -49,9 +49,9 @@ vi.mock('../../context/Config', () => ({
 }));
 
 vi.mock('../../model/auth/auth-client', () => ({
-  // Mirrors the real implementation's `absolute` option closely enough to exercise SignWrapper's usage of it:
+  // Mirrors the real implementation's `absolute` param closely enough to exercise SignWrapper's usage of it:
   // when there is no `rd` query param, the absolute (browser-redirect-bound) path falls back to `api_prefix`.
-  useRedirectQueryParam: (options?: { absolute?: boolean }): string => (options?.absolute ? '/perses' : '/'),
+  useRedirectQueryParam: (absolute?: boolean): string => (absolute ? '/perses' : '/'),
   buildRedirectQueryString: (path: string): string => `rd=${encodeURIComponent(path)}`,
 }));
 

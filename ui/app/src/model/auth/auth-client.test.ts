@@ -41,9 +41,7 @@ describe('useRedirectQueryParam', () => {
     mockUseQueryParam.mockReturnValue(['/dashboards/my-dashboard']);
 
     expect(renderHook(() => useRedirectQueryParam()).result.current).toEqual('/dashboards/my-dashboard');
-    expect(renderHook(() => useRedirectQueryParam({ absolute: true })).result.current).toEqual(
-      '/dashboards/my-dashboard',
-    );
+    expect(renderHook(() => useRedirectQueryParam(true)).result.current).toEqual('/dashboards/my-dashboard');
   });
 
   it('falls back to "/" by default when no rd query param is present, regardless of api_prefix', () => {
@@ -59,7 +57,7 @@ describe('useRedirectQueryParam', () => {
     mockApiPrefix.current = '/perses';
     mockUseQueryParam.mockReturnValue([undefined]);
 
-    const { result } = renderHook(() => useRedirectQueryParam({ absolute: true }));
+    const { result } = renderHook(() => useRedirectQueryParam(true));
 
     expect(result.current).toEqual('/perses');
   });
@@ -68,7 +66,7 @@ describe('useRedirectQueryParam', () => {
     mockApiPrefix.current = '';
     mockUseQueryParam.mockReturnValue([undefined]);
 
-    const { result } = renderHook(() => useRedirectQueryParam({ absolute: true }));
+    const { result } = renderHook(() => useRedirectQueryParam(true));
 
     expect(result.current).toEqual('/');
   });
