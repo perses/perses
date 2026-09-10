@@ -6,6 +6,7 @@ In Perses, the following object types are available as plugins:
 - [Datasource](./datasource.md)
 - Query
 - [Variable](./variable.md)
+- Annotation
 - Explorer
 
 The goal with this is to eventually empower users to seamlessly enhance Perses' native capabilities through custom
@@ -15,6 +16,7 @@ plugins, allowing them to:
 - Add datasource plugins to access data from new types of sources.
 - Add query plugins to retrieve data from supported sources in additional ways.
 - Add variable plugins to build variables for supported sources in additional ways.
+- Add annotation plugins to fetch events from supported sources and overlay them on the panels of a dashboard.
 - Add explorer view to customize the explorer page.
 
 While Panel plugins are relatively self-sufficient, a datasource plugin requires one or more corresponding query and/or
