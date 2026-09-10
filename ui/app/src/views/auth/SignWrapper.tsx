@@ -161,7 +161,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
     }));
     return [...oidcProviders, ...oauthProviders];
   }, [providers.oauth, providers.oidc, theme]);
-  const path = useRedirectQueryParam();
+  const path = useRedirectQueryParam({ absolute: true });
 
   return (
     <Stack

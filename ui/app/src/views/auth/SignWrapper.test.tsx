@@ -49,7 +49,9 @@ vi.mock('../../context/Config', () => ({
 }));
 
 vi.mock('../../model/auth/auth-client', () => ({
-  useRedirectQueryParam: (): string => '/',
+  // Mirrors the real implementation's `absolute` option closely enough to exercise SignWrapper's usage of it:
+  // when there is no `rd` query param, the absolute (browser-redirect-bound) path falls back to `api_prefix`.
+  useRedirectQueryParam: (options?: { absolute?: boolean }): string => (options?.absolute ? '/perses' : '/'),
   buildRedirectQueryString: (path: string): string => `rd=${encodeURIComponent(path)}`,
 }));
 
@@ -69,6 +71,8 @@ describe('SignWrapper', () => {
 
     fireEvent.click(screen.getByText('Sign in with Keycloak'));
 
-    expect(window.location.href).toEqual('/perses/api/auth/providers/oidc/keycloak/login?rd=%2F');
+    // rd must carry the absolute path (including api_prefix), since the backend's OIDC redirect is a raw
+    // browser navigation that doesn't go through React Router's basename resolution.
+    expect(window.location.href).toEqual('/perses/api/auth/providers/oidc/keycloak/login?rd=%2Fperses');
   });
 });
