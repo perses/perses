@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { buildRelativeTimeOption } from '@perses-dev/components';
+import type { TimeOption } from '@perses-dev/components';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import type { DashboardSelector, DurationString } from '@perses-dev/spec';
 import DOMPurify from 'dompurify';
@@ -37,10 +38,22 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
     () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
     [data?.frontend.default_user_preferences?.timezone],
   );
+
   const timeRangeOptions = useMemo(
     () => data?.frontend.time_range?.options?.map((option: DurationString) => buildRelativeTimeOption(option)),
     [data?.frontend.time_range?.options],
   );
+
+  const autoRefreshOptions = useMemo((): TimeOption[] | undefined => {
+    return data?.frontend.auto_refresh?.options?.map((option: DurationString) => {
+      const timeOption = buildRelativeTimeOption(option);
+      /**
+       * `Last` does not make sense for refresh interval. It should be either `Every` or string.empty
+       * TODO: .replace should be removed when the buildRelativeTimeOption is fixed in the shared package (In progress)
+       */
+      return { ...timeOption, display: timeOption.display.replace('Last ', '') };
+    });
+  }, [data?.frontend.auto_refresh?.options]);
 
   if (isLoading || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
@@ -53,6 +66,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
           showZoomButtons={!data.frontend.time_range?.disable_zoom}
           disableAutoRefresh={!!data.frontend.auto_refresh?.disable}
           options={timeRangeOptions}
+          autoRefreshIntervalOptions={autoRefreshOptions}
         >
           {props.children}
         </TimeRangeSettingsProvider>
