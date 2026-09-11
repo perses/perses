@@ -38,8 +38,10 @@ const (
 	DaysUnit               TimeUnit        = "days"
 	WeeksUnit              TimeUnit        = "weeks"
 	MonthsUnit             TimeUnit        = "months"
-	YearsUnit              TimeUnit        = "years"
-	PercentUnit            PercentageUnit  = "percent"
+	YearsUnit TimeUnit = "years"
+	// DtDhmsUnit formats a duration in seconds as "D d HH:MM:SS".
+	DtDhmsUnit         TimeUnit       = "dtdhms"
+	PercentUnit        PercentageUnit = "percent"
 	PercentDecimalUnit     PercentageUnit  = "percent-decimal"
 	DecimalUnit            string          = "decimal"
 	BinaryBitsUnit         BytesUnit       = "bits"
@@ -59,8 +61,33 @@ const (
 	RecordsPerSecondsUnit  ThroughputUnit  = "records/sec"
 	RequestsPerSecondsUnit ThroughputUnit  = "requests/sec"
 	RowsPerSecondsUnit     ThroughputUnit  = "rows/sec"
-	WritesPerSecondsUnit   ThroughputUnit  = "writes/sec"
-	AustralianDollarUnit   CurrencyUnit    = "aud"
+	WritesPerSecondsUnit ThroughputUnit = "writes/sec"
+	// Additional rate units (unit string = display suffix).
+	TpsUnit              ThroughputUnit = "tps"
+	TracesPerSecUnit     ThroughputUnit = "trc/s"
+	TrxPerSecUnit        ThroughputUnit = "trx/s"
+	EventsSlashSUnit     ThroughputUnit = "e/s"
+	OpSlashSUnit         ThroughputUnit = "op/s"
+	OpsSlashSUnit        ThroughputUnit = "ops/s"
+	MsgSlashSUnit        ThroughputUnit = "msg/s"
+	MsgPerSecUnit        ThroughputUnit = "msg/sec"
+	ErrorsPerSecUnit     ThroughputUnit = "errors/s"
+	CallsPerSecUnit      ThroughputUnit = "calls/s"
+	QpsUnit              ThroughputUnit = "qps"
+	DropPerSecUnit       ThroughputUnit = "drop/s"
+	RejectPerSecUnit     ThroughputUnit = "reject/s"
+	RequestsSlashSUnit   ThroughputUnit = "requests/s"
+	FlowsPerSecUnit      ThroughputUnit = "flows/s"
+	FailPerSecUnit       ThroughputUnit = "fail/sec"
+	TimeoutPerSecUnit    ThroughputUnit = "to/s"
+	ContentionPerSecUnit ThroughputUnit = "c/s"
+	GcPerSecUnit         ThroughputUnit = "gc/s"
+	TokensPerSecUnit     ThroughputUnit = "tk/s"
+	CxnPerSecUnit        ThroughputUnit = "cxn/s"
+	CountTpsUnit         ThroughputUnit = "count:tps"
+	CountTracesPerSUnit  ThroughputUnit = "count:traces/s"
+	CountMsgPerSUnit     ThroughputUnit = "count:msg/s"
+	AustralianDollarUnit CurrencyUnit   = "aud"
 	CanadianDollarUnit     CurrencyUnit    = "cad"
 	SwissFrancUnit         CurrencyUnit    = "chf"
 	RenminbiUnit           CurrencyUnit    = "cny"
@@ -130,11 +157,18 @@ func (f *Format) validate() error {
 	switch *f.Unit {
 	case string(NanoSecondsUnit), string(MicroSecondsUnit), string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
-		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBitsUnit), string(DecimalBitsUnit), string(BinaryBytesUnit), string(DecimalBytesUnit),
+		string(YearsUnit), string(DtDhmsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, string(BinaryBitsUnit), string(DecimalBitsUnit), string(BinaryBytesUnit), string(DecimalBytesUnit),
 		string(BitsPerSecondsUnit), string(BitsDecPerSecondsUnit), string(BytesPerSecondsUnit), string(BytesDecPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
-		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit), string(AustralianDollarUnit), string(CanadianDollarUnit),
+		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit),
+		string(TpsUnit), string(TracesPerSecUnit), string(TrxPerSecUnit), string(EventsSlashSUnit),
+		string(OpSlashSUnit), string(OpsSlashSUnit), string(MsgSlashSUnit), string(MsgPerSecUnit),
+		string(ErrorsPerSecUnit), string(CallsPerSecUnit), string(QpsUnit), string(DropPerSecUnit),
+		string(RejectPerSecUnit), string(RequestsSlashSUnit), string(FlowsPerSecUnit), string(FailPerSecUnit),
+		string(TimeoutPerSecUnit), string(ContentionPerSecUnit), string(GcPerSecUnit), string(TokensPerSecUnit),
+		string(CxnPerSecUnit), string(CountTpsUnit), string(CountTracesPerSUnit), string(CountMsgPerSUnit),
+		string(AustralianDollarUnit), string(CanadianDollarUnit),
 		string(SwissFrancUnit), string(RenminbiUnit), string(EuroUnit), string(PoundUnit),
 		string(HongKongDollarUnit), string(IndianRupeeUniit), string(YenUnit), string(SouthKoreanWonUnit),
 		string(NorwegianKroneUnit), string(NewZealandDollarUnit), string(SwedishKronaDollarUnit), string(SingaporeDollarUnit), string(USDollarUnit),
