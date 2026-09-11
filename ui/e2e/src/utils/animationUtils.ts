@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 /**
  * Wait for all animations to complete on the specified element. Useful for

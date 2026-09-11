@@ -12,28 +12,31 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { Action, Datasource, getMetadataProject } from '@perses-dev/client';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { Action, Datasource } from '@perses-dev/client';
+import { getMetadataProject } from '@perses-dev/client';
 import { getResourceDisplayName } from '@perses-dev/components';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { GlobalProject } from '../../context/Authorization';
 import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog } from '../dialogs';
+import type { ListPropertiesWithCallbacks } from '../list';
 import {
   CREATED_AT_COL_DEF,
   DESCRIPTION_COL_DEF,
   DISPLAY_NAME_COL_DEF,
-  ListPropertiesWithCallbacks,
   PROJECT_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
+import type { Row } from './DatasourceDataGrid';
+import { DatasourceDataGrid } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 
 /**

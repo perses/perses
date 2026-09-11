@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderResource } from '@perses-dev/client';
+import type { FolderResource } from '@perses-dev/client';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 import { vi } from 'vitest';
 
-import { DashboardListRow } from './DashboardList';
+import type { DashboardListRow } from './DashboardList';
 import DashboardTreeList from './DashboardTreeList';
 
 interface MockTableProps {

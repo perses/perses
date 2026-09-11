@@ -13,7 +13,8 @@
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import { useIsSignUpDisable } from '../../context/Config';

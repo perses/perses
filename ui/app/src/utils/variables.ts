@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableType } from '@perses-dev/client';
-import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import type { VariableType } from '@perses-dev/client';
+import type { ExternalVariableDefinition } from '@perses-dev/dashboards';
 
-import { ExternalVariableSource } from '../model/variables';
+import type { ExternalVariableSource } from '../model/variables';
 
 export function buildProjectVariableDefinition(
   projectName: string,

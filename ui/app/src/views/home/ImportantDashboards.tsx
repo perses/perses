@@ -15,7 +15,8 @@ import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } 
 import { intlFormatDistance } from 'date-fns';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';

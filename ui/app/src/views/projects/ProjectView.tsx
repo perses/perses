@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Box, Stack, CircularProgress } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import React, { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';

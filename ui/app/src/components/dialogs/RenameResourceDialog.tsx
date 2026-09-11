@@ -13,9 +13,9 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, TextField } from '@mui/material';
-import { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource } from '@perses-dev/client';
 import { Dialog } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 

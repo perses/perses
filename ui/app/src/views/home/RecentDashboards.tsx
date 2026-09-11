@@ -18,7 +18,8 @@ import Archive from 'mdi-material-ui/Archive';
 import Close from 'mdi-material-ui/Close';
 import HistoryIcon from 'mdi-material-ui/History';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
-import { ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';

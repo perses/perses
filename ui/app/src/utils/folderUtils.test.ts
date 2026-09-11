@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem } from '@perses-dev/client';
+import type { FolderItem } from '@perses-dev/client';
 
 import {
   collectDashboards,

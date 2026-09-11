@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { useLocalStorage } from '@perses-dev/components';
-import React, { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 
-import { UserPreferences } from '../model/userPreferences';
+import type { UserPreferences } from '../model/userPreferences';
 
 interface UserPreferencesContextType {
   userPreferences: UserPreferences;

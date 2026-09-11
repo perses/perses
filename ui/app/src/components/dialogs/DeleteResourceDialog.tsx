@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Resource } from '@perses-dev/client';
+import type { Resource } from '@perses-dev/client';
 import { getResourceExtendedDisplayName } from '@perses-dev/components';
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 
 import { DeleteDialog } from './DeleteDialog';
 

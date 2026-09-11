@@ -13,7 +13,8 @@
 
 import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { isProjectMetadata, Resource } from '@perses-dev/client';
+import type { Resource } from '@perses-dev/client';
+import { isProjectMetadata } from '@perses-dev/client';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
 import Archive from 'mdi-material-ui/Archive';
 import Close from 'mdi-material-ui/Close';
@@ -21,7 +22,8 @@ import DatabaseIcon from 'mdi-material-ui/Database';
 import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import Magnify from 'mdi-material-ui/Magnify';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useDatasourceList } from '../../../model/datasource-client';

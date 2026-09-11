@@ -61,19 +61,49 @@ When formatting dates, the following options are available:
 - **`timeZone`**: The timezone to use for formatting (default: browser's timezone)
 - **`referenceTime`**: Reference time for relative formatting (default: current time)
 
-## Future Enhancements
+## Resolution hierarchy
 
-Perses plans to support a multi-level timezone configuration system. The following levels are expected (in order of precedence, highest to lowest):
+Timezone configuration follows this precedence (highest to lowest):
 
-1. **Panel-Level**: Timezone specified directly on a panel
-2. **Dashboard-Level**: Timezone specified for an entire dashboard
+1. **Panel-Level**: Timezone specified directly on a panel (when supported by the plugin)
+2. **Dashboard-Level**: `spec.timezone` on the dashboard resource
 3. **User Preference**: User's personal timezone preference set in their profile
-4. **Project-Level**: Default timezone for a project
-5. **Global Configuration**: System-wide default configured on the Perses server
-6. **Browser Default**: Fallback to the browser's detected timezone
+4. **Server default**: `frontend.default_user_preferences.timezone` (and related global config)
+5. **Browser Default**: Fallback to the browser's detected timezone
 
-!!! note
-    These configuration levels are still being developed. This document will be updated as the feature evolves.
+### Dashboard-level (`spec.timezone`)
+
+Set an IANA timezone name on the dashboard so all users see the same wall clock (e.g. ops dashboards in GMT/UTC):
+
+| Value | Meaning |
+|-------|---------|
+| omitted / `""` | inherit lower levels |
+| `"local"` | browser local timezone |
+| `"UTC"` | UTC (GMT) |
+| `"Europe/Paris"`, … | any valid IANA zone |
+
+#### Dashboard-as-Code (Go SDK)
+
+```go
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+)
+
+builder, err := dashboard.New("SpaceView",
+	dashboard.ProjectName("irt"),
+	dashboard.Duration(/* … */),
+	dashboard.Timezone("UTC"), // GMT wall clock for all viewers
+)
+```
+
+The field is stored on the dashboard JSON/YAML as:
+
+```yaml
+spec:
+  timezone: UTC
+```
+
+Validation accepts `""`, `"local"`, or any name loadable by the Go `time` package (`time.LoadLocation`).
 
 ## Best Practices
 

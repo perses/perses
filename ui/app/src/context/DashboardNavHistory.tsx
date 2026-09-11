@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, Dispatch, ReactElement, useContext, useReducer } from 'react';
+import type { Dispatch, ReactElement } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
 const PERSES_DASHBOARD_NAV_HISTORY_KEY = 'PERSES_DASHBOARD_NAV_HISTORY';
 

@@ -46,7 +46,7 @@ func ParseSameSite(s string) (SameSite, error) {
 	case SameSiteStrictMode:
 		return SameSite(http.SameSiteStrictMode), nil
 	default:
-		return 0, fmt.Errorf("cookie same_site %q mode not knowm", s)
+		return 0, fmt.Errorf("cookie same_site %q mode not known", s)
 	}
 }
 

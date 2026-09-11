@@ -12,25 +12,22 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { Action, UserResource } from '@perses-dev/client';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { Action, UserResource } from '@perses-dev/client';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { GlobalProject } from '../../context/Authorization';
 import { useIsReadonly } from '../../context/Config';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog } from '../dialogs';
-import {
-  CREATED_AT_COL_DEF,
-  ListPropertiesWithCallbacks,
-  NAME_COL_DEF,
-  UPDATED_AT_COL_DEF,
-  VERSION_COL_DEF,
-} from '../list';
-import { UserDataGrid, Row } from './UserDataGrid';
+import type { ListPropertiesWithCallbacks } from '../list';
+import { CREATED_AT_COL_DEF, NAME_COL_DEF, UPDATED_AT_COL_DEF, VERSION_COL_DEF } from '../list';
+import type { Row } from './UserDataGrid';
+import { UserDataGrid } from './UserDataGrid';
 import { UserDrawer } from './UserDrawer';
 
 /**

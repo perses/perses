@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { Avatar, Box, Divider, Typography, useTheme } from '@mui/material';
-import { lazy, ReactElement, Suspense, useState } from 'react';
+import type { ReactElement } from 'react';
+import { lazy, Suspense, useState } from 'react';
 
 import { useAuthorizationContext } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';

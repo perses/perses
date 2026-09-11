@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { useIsMobileSize } from '../../utils/browser-size';
-import { BreadcrumbVariant, Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
+import type { BreadcrumbVariant } from './breadcrumbs';
+import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface AppBreadcrumbsProps {
   rootPageName: string;

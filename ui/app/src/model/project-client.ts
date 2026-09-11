@@ -11,15 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, fetchJson, ProjectResource, StatusError } from '@perses-dev/client';
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query';
+import type { DashboardResource, ProjectResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { resource as dashboardResource, useDashboardList } from './dashboard-client';

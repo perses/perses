@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -92,7 +92,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -112,7 +112,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -123,12 +123,17 @@ jobs:
         with:
           name: plugins
           path: plugins-archive
-      - uses: ikalnytskyi/action-setup-postgres@v8
+      - name: "cache postgres installation"
+        uses: actions/cache@v4
+        id: pg-cache
         with:
-          username: user
-          password: password
-          database: perses
-          postgres-version: 17
+          path: postgres
+          key: postgres-windows-17.4-1
+      - name: "install postgres"
+        if: steps.pg-cache.outputs.cache-hit != 'true'
+        run: sh scripts/windows/postgres/download.sh
+      - name: "start postgres"
+        run: sh scripts/windows/postgres/run.sh
       - name: "install prometheus"
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
@@ -164,7 +169,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -183,7 +188,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -195,7 +200,7 @@ jobs:
         uses: golangci/golangci-lint-action@v9.3.0
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v2.12.1
+          version: v2.13.2
           args: --timeout 5m
   validate-dev-data:
     name: validate CUE schemas
@@ -204,7 +209,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -222,7 +227,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v7
-      - uses: perses/github-actions@v0.12.0
+      - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true

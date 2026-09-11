@@ -14,10 +14,12 @@
 /* TODO: @Gladorme check social button types */
 /* oxlint-disable typescript/explicit-function-return-type */
 
-import { alpha, Divider, Stack, Theme, useTheme } from '@mui/material';
+import type { Theme } from '@mui/material';
+import { alpha, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import Gitlab from 'mdi-material-ui/Gitlab';
-import { ReactElement, ReactNode, useMemo } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { useMemo } from 'react';
 import * as React from 'react';
 import {
   AmazonLoginButton,
@@ -45,6 +47,7 @@ import {
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
+import { PERSES_APP_CONFIG } from '../../config';
 import { useConfigContext, useIsNativeAuthnProviderEnabled } from '../../context/Config';
 import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
@@ -158,7 +161,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
     }));
     return [...oidcProviders, ...oauthProviders];
   }, [providers.oauth, providers.oidc, theme]);
-  const path = useRedirectQueryParam();
+  const path = useRedirectQueryParam(true);
 
   return (
     <Stack
@@ -192,7 +195,7 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
               fullWidth={true}
               style={{ fontSize: '1em' }}
               onClick={() => {
-                window.location.href = `/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
+                window.location.href = `${PERSES_APP_CONFIG.api_prefix}/api/auth/providers/${provider.path}/login?${buildRedirectQueryString(path)}`;
               }}
             >
               Sign in with {provider.name}

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 const recentDashboardListId = 'recent-dashboard-list';
 

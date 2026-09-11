@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { GlobalRoleBindingResource, RoleBinding } from '@perses-dev/client';
+import type { GlobalRoleBindingResource, RoleBinding } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 
 import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
 import {

@@ -52,17 +52,14 @@ func (s *service) Create(_ echo.Context, entity *v1.User) (*v1.PublicUser, error
 func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
-	// check that the password is correctly filled
-	if len(entity.Spec.NativeProvider.Password) == 0 {
-		return nil, fmt.Errorf("%w: password cannot be empty", apiInterface.BadRequestError)
-	}
-	hash, err := crypto.HashAndSalt([]byte(entity.Spec.NativeProvider.Password))
+	// resolve the password: either hash a plaintext password or accept a pre-computed bcrypt hash
+	hashedPassword, err := resolvePassword(entity.Spec.NativeProvider, entity.Metadata.Name)
 	if err != nil {
-		logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %s", entity.Metadata.Name)
-		return nil, apiInterface.InternalError
+		return nil, err
 	}
-	// save the hash in the password field
-	entity.Spec.NativeProvider.Password = string(hash)
+	// save the hash in the password field and clear the passwordHash field
+	entity.Spec.NativeProvider.Password = hashedPassword
+	entity.Spec.NativeProvider.PasswordHash = ""
 	if createErr := s.dao.Create(entity); createErr != nil {
 		return nil, createErr
 	}
@@ -93,13 +90,13 @@ func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*
 	}
 	entity.Metadata.Update(oldEntity.Metadata)
 	// in case the user updated his password, then we should hash it again, otherwise the old password should be kept
-	if len(entity.Spec.NativeProvider.Password) > 0 {
-		hash, hashErr := crypto.HashAndSalt([]byte(entity.Spec.NativeProvider.Password))
+	if len(entity.Spec.NativeProvider.Password) > 0 || len(entity.Spec.NativeProvider.PasswordHash) > 0 {
+		hashedPassword, hashErr := resolvePassword(entity.Spec.NativeProvider, entity.Metadata.Name)
 		if hashErr != nil {
-			logrus.WithError(hashErr).Errorf("unable to generate the hash for the password of the user %q", entity.Metadata.Name)
 			return nil, hashErr
 		}
-		entity.Spec.NativeProvider.Password = string(hash)
+		entity.Spec.NativeProvider.Password = hashedPassword
+		entity.Spec.NativeProvider.PasswordHash = ""
 	} else {
 		entity.Spec.NativeProvider.Password = oldEntity.Spec.NativeProvider.Password
 	}
@@ -163,4 +160,26 @@ func (s *service) MetadataList(q *user.Query) ([]api.Entity, error) {
 
 func (s *service) RawMetadataList(q *user.Query) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
+}
+
+// resolvePassword returns the bcrypt hash to store for a user.
+// Exactly one of password (plaintext) or passwordHash (pre-computed bcrypt)
+// must be non-empty. The model-level validation already enforces mutual
+// exclusivity, so this function only needs to handle the two valid cases.
+func resolvePassword(np v1.NativeProvider, username string) (string, error) {
+	if len(np.PasswordHash) > 0 {
+		if !crypto.IsValidBcryptHash(np.PasswordHash) {
+			return "", apiInterface.HandleBadRequestError("passwordHash is not a valid bcrypt hash")
+		}
+		return np.PasswordHash, nil
+	}
+	if len(np.Password) > 0 {
+		hash, err := crypto.HashAndSalt([]byte(np.Password))
+		if err != nil {
+			logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %q", username)
+			return "", apiInterface.InternalError
+		}
+		return string(hash), nil
+	}
+	return "", nil
 }

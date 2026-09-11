@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Alert, Autocomplete, Button, Stack, TextField, Typography } from '@mui/material';
-import { DashboardResource } from '@perses-dev/client';
+import type { DashboardResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
 import Import from 'mdi-material-ui/Import';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useIsReadonly } from '../../context/Config';

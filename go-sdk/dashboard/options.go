@@ -105,6 +105,35 @@ func Duration(seconds time.Duration) Option {
 	}
 }
 
+// Timezone sets Spec.Timezone on the dashboard.
+//
+// Accepted values:
+//   - "" (empty): leave unset so lower-priority defaults apply
+//   - "local": use the browser's local timezone
+//   - any IANA timezone name (e.g. "UTC", "Europe/Paris", "America/New_York")
+//
+// When set, this value takes precedence over user preference, server default, and browser local
+// in the timezone resolution hierarchy. See docs/concepts/timezone.md.
+func Timezone(tz string) Option {
+	return func(builder *Builder) error {
+		if err := validateDashboardTimezone(tz); err != nil {
+			return err
+		}
+		builder.Dashboard.Spec.Timezone = tz
+		return nil
+	}
+}
+
+func validateDashboardTimezone(tz string) error {
+	if tz == "" || tz == "local" {
+		return nil
+	}
+	if _, err := time.LoadLocation(tz); err != nil {
+		return fmt.Errorf("invalid timezone %q: %w", tz, err)
+	}
+	return nil
+}
+
 func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 	return func(builder *Builder) error {
 		r, err := panelgroup.New(title, options...)

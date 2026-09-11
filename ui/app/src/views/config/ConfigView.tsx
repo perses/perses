@@ -15,7 +15,8 @@ import { Stack, Box } from '@mui/material';
 import { JSONEditor } from '@perses-dev/components';
 import Cog from 'mdi-material-ui/Cog';
 import Puzzle from 'mdi-material-ui/Puzzle';
-import { ReactElement, useState } from 'react';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import PageHeader from '../../components/page-header/PageHeader';
