@@ -123,12 +123,16 @@ jobs:
         with:
           name: plugins
           path: plugins-archive
-      - uses: ikalnytskyi/action-setup-postgres@v8
+      - uses: actions/cache@v4
+        id: pg-cache
         with:
-          username: user
-          password: password
-          database: perses
-          postgres-version: 17
+          path: postgres
+          key: postgres-windows-17.4-1
+      - name: "install postgres"
+        if: steps.pg-cache.outputs.cache-hit != 'true'
+        run: sh scripts/windows/postgres/download.sh
+      - name: "start postgres"
+        run: sh scripts/windows/postgres/run.sh
       - name: "install prometheus"
         run: sh scripts/download-prometheus.sh
       - name: "start prometheus"
