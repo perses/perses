@@ -14,6 +14,9 @@ port=${POSTGRES_PORT:-5432}
 bin=postgres/bin
 data=postgres/data
 
+# start by removing any previous data directory, to ensure a clean state.
+rm -rf "${data}"
+
 # Write the password in a file so initdb doesn't prompt for it.
 pwfile=$(mktemp)
 echo "${password}" > "${pwfile}"

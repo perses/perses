@@ -123,7 +123,8 @@ jobs:
         with:
           name: plugins
           path: plugins-archive
-      - uses: actions/cache@v4
+      - name: "cache postgres installation"
+        uses: actions/cache@v4
         id: pg-cache
         with:
           path: postgres
