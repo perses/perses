@@ -16,6 +16,8 @@ package kubesd
 import (
 	"testing"
 
+	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -58,4 +60,84 @@ func TestBuildLabelSelector(t *testing.T) {
 			assert.Equal(t, test.expected, result)
 		})
 	}
+}
+
+func newDiscoveredDatasource(name string, labels, annotations map[string]string) *discoveredDatasource {
+	return &discoveredDatasource{
+		datasource:  &v1.GlobalDatasource{Metadata: v1.Metadata{Name: name}},
+		labels:      labels,
+		annotations: annotations,
+	}
+}
+
+func TestResolveDefaultName_Disabled(t *testing.T) {
+	d := &discovery{
+		cfg: &config.KubernetesDiscovery{
+			Default: config.DiscoveryDefault{Enable: false},
+		},
+	}
+	resources := []*discoveredDatasource{
+		newDiscoveredDatasource("ns.prometheus", map[string]string{"app": "prometheus"}, nil),
+	}
+	assert.Equal(t, "", d.resolveDefaultName(resources))
+}
+
+func TestResolveDefaultName_NoMatch(t *testing.T) {
+	d := &discovery{
+		cfg: &config.KubernetesDiscovery{
+			Default: config.DiscoveryDefault{
+				Enable: true,
+				Labels: map[string]string{"app": "prometheus"},
+			},
+		},
+	}
+	resources := []*discoveredDatasource{
+		newDiscoveredDatasource("ns.other", map[string]string{"app": "other"}, nil),
+	}
+	assert.Equal(t, "", d.resolveDefaultName(resources))
+}
+
+func TestResolveDefaultName_FirstMatch(t *testing.T) {
+	d := &discovery{
+		cfg: &config.KubernetesDiscovery{
+			Default: config.DiscoveryDefault{
+				Enable: true,
+				Labels: map[string]string{"app": "prometheus"},
+			},
+		},
+	}
+	resources := []*discoveredDatasource{
+		newDiscoveredDatasource("ns.prometheus-1", map[string]string{"app": "prometheus"}, nil),
+		newDiscoveredDatasource("ns.prometheus-2", map[string]string{"app": "prometheus"}, nil),
+	}
+	assert.Equal(t, "ns.prometheus-1", d.resolveDefaultName(resources))
+}
+
+func TestResolveDefaultName_AnnotationFilter(t *testing.T) {
+	d := &discovery{
+		cfg: &config.KubernetesDiscovery{
+			Default: config.DiscoveryDefault{
+				Enable:      true,
+				Labels:      map[string]string{"app": "prometheus"},
+				Annotations: map[string]string{"default": "true"},
+			},
+		},
+	}
+	resources := []*discoveredDatasource{
+		newDiscoveredDatasource("ns.prometheus-1", map[string]string{"app": "prometheus"}, map[string]string{"default": "false"}),
+		newDiscoveredDatasource("ns.prometheus-2", map[string]string{"app": "prometheus"}, map[string]string{"default": "true"}),
+	}
+	assert.Equal(t, "ns.prometheus-2", d.resolveDefaultName(resources))
+}
+
+func TestResolveDefaultName_EmptyResources(t *testing.T) {
+	d := &discovery{
+		cfg: &config.KubernetesDiscovery{
+			Default: config.DiscoveryDefault{
+				Enable: true,
+				Labels: map[string]string{"app": "prometheus"},
+			},
+		},
+	}
+	assert.Equal(t, "", d.resolveDefaultName(nil))
 }

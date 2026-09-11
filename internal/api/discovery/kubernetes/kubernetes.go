@@ -48,8 +48,16 @@ func buildLabelSelector(labels map[string]string) string {
 	return strings.Join(builder, ",")
 }
 
+// discoveredDatasource pairs a converted GlobalDatasource with the raw Kubernetes
+// labels and annotations from the originating resource
+type discoveredDatasource struct {
+	datasource  *v1.GlobalDatasource
+	labels      map[string]string
+	annotations map[string]string
+}
+
 type clientDiscovery interface {
-	discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error)
+	discover(decodedSchema []*cuetils.Node) ([]*discoveredDatasource, error)
 }
 
 func NewDiscovery(discoveryName string, refreshInterval common.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schema schema.Schema) (taskhelper.Helper, error) {
@@ -103,13 +111,53 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.WithError(err).Error("failed to decode schema")
 		return nil
 	}
-	result, err := d.discovery.discover(decodedSchema)
+	resources, err := d.discovery.discover(decodedSchema)
 	if err != nil {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil
 	}
-	d.svc.Apply(result)
+	defaultName := d.resolveDefaultName(resources)
+	var entities []*v1.GlobalDatasource
+	for _, r := range resources {
+		entities = append(entities, r.datasource)
+	}
+	d.svc.Apply(entities, defaultName)
 	return nil
+}
+
+// resolveDefaultName returns the name of the first discovered datasource whose
+// labels and annotations match Default.Labels and Default.Annotations.
+// Returns empty string if Default.Enable is false or no match is found.
+func (d *discovery) resolveDefaultName(resources []*discoveredDatasource) string {
+	if !d.cfg.Default.Enable {
+		return ""
+	}
+	for _, r := range resources {
+		if matchesLabels(r.labels, d.cfg.Default.Labels) && matchesAnnotations(r.annotations, d.cfg.Default.Annotations) {
+			return r.datasource.Metadata.Name
+		}
+	}
+	return ""
+}
+
+// matchesLabels returns true if all key/value pairs in required are present in actual.
+func matchesLabels(actual, required map[string]string) bool {
+	for k, v := range required {
+		if actual[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+// matchesAnnotations returns true if all key/value pairs in required are present in actual.
+func matchesAnnotations(actual, required map[string]string) bool {
+	for k, v := range required {
+		if actual[k] != v {
+			return false
+		}
+	}
+	return true
 }
 
 func (d *discovery) String() string {

@@ -59,7 +59,7 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.Errorf("failed to execute http discovery %q: %v", d.name, err)
 		return nil
 	}
-	d.svc.Apply(result)
+	d.svc.Apply(result, "")
 	return nil
 }
 

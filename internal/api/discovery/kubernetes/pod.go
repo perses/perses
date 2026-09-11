@@ -37,19 +37,23 @@ type podDiscovery struct {
 	kubeClient    *kubernetes.Clientset
 }
 
-func (d *podDiscovery) discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error) {
+func (d *podDiscovery) discover(decodedSchema []*cuetils.Node) ([]*discoveredDatasource, error) {
 	response, err := d.kubeClient.CoreV1().Pods(d.namespace).List(context.Background(), metav1.ListOptions{LabelSelector: d.labelSelector})
 	if err != nil {
 		return nil, err
 	}
-	var result []*v1.GlobalDatasource
+	var result []*discoveredDatasource
 	for _, item := range response.Items {
 		dts, convertErr := d.podToGlobalDatasource(item, decodedSchema)
 		if convertErr != nil {
 			return nil, convertErr
 		}
 		if dts != nil {
-			result = append(result, dts)
+			result = append(result, &discoveredDatasource{
+				datasource:  dts,
+				labels:      item.Labels,
+				annotations: item.Annotations,
+			})
 		}
 	}
 	return result, nil
