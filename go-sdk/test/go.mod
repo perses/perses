@@ -10,7 +10,7 @@ require (
 	github.com/perses/plugins/staticlistvariable v0.9.0
 	github.com/perses/plugins/table v0.13.0
 	github.com/perses/plugins/timeserieschart v0.13.0
-	github.com/perses/spec v0.3.0-beta.7
+	github.com/perses/spec v0.3.0-beta.8
 	github.com/stretchr/testify v1.12.1
 )
 

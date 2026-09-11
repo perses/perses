@@ -98,6 +98,7 @@ type authEndpoint interface {
 	GetAuthKind() string
 	GetSlugID() string
 	GetExtraProviderLogoutHandler() echo.HandlerFunc
+	RefreshOIDCToken(ctx echo.Context)
 }
 
 type endpoint struct {
@@ -110,7 +111,7 @@ type endpoint struct {
 	apiPrefix        string
 }
 
-func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, error) {
+func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, providers config.AuthenticationProviders, isAuthnEnable bool, apiPrefix string) (route.Endpoint, crypto.TokenRefresher, error) {
 	ep := &endpoint{
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
@@ -130,7 +131,7 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 	for _, provider := range providers.OIDC {
 		oidcEp, err := newOIDCEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		ep.endpoints = append(ep.endpoints, oidcEp)
 	}
@@ -139,11 +140,11 @@ func New(dao user.DAO, jwt crypto.JWT, authz authorization.Authorization, provid
 	for _, provider := range providers.OAuth {
 		oauthEp, err := newOAuthEndpoint(provider, jwt, dao, authz, apiPrefix)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		ep.endpoints = append(ep.endpoints, oauthEp)
 	}
-	return ep, nil
+	return ep, ep.getTokenRefresher(), nil
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
@@ -185,6 +186,15 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// Refresh the OIDC token if the provider supports it
+	for _, ep := range e.endpoints {
+		if ep.GetAuthKind() == claims.ProviderKind && ep.GetSlugID() == claims.ProviderID {
+			ep.RefreshOIDCToken(ctx)
+			break
+		}
+	}
+
 	return ctx.JSON(http.StatusOK, oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -196,6 +206,8 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 func (e *endpoint) logout(ctx echo.Context) error {
 	jwtHeaderPayloadCookie, signatureCookie := e.jwt.DeleteAccessTokenCookie()
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
+	ctx.SetCookie(e.jwt.DeleteOIDCTokenCookie())
+	ctx.SetCookie(e.jwt.DeleteOIDCRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
 
@@ -218,6 +230,30 @@ func (e *endpoint) logout(ctx echo.Context) error {
 		prefix = e.apiPrefix
 	}
 	return ctx.Redirect(302, prefix)
+}
+
+// getTokenRefresher returns a TokenRefresher that can be used by the proxy endpoint
+// to refresh the upstream OIDC/OAuth token when it expires before the Perses session token.
+func (e *endpoint) getTokenRefresher() crypto.TokenRefresher {
+	return func(ctx echo.Context) {
+		refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
+		if errors.Is(err, http.ErrNoCookie) {
+			return
+		}
+		if refreshTokenCookie.Value == "" {
+			return
+		}
+		claims, err := e.jwt.ValidateRefreshToken(refreshTokenCookie.Value)
+		if err != nil {
+			return
+		}
+		for _, ep := range e.endpoints {
+			if ep.GetAuthKind() == claims.ProviderKind && ep.GetSlugID() == claims.ProviderID {
+				ep.RefreshOIDCToken(ctx)
+				return
+			}
+		}
+	}
 }
 
 // withOAuthErrorMdw applies to the handler a middleware that the error is well managed in oauth2.0 context.
