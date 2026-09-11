@@ -297,10 +297,6 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
-		var echoHttpErr *echo.HTTPError
-		if errors.As(err, &echoHttpErr) {
-			return echoHttpErr
-		}
 		return apiinterface.InternalError
 	}
 
@@ -369,7 +365,7 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-
+	h.filterHeaders(req.Header)
 	return h.setupAuthentication(c)
 }
 
@@ -397,13 +393,12 @@ func (h *httpProxy) setupAuthentication(c echo.Context) error {
 	if h.config.OauthPassthrough {
 		return h.setupOAuthPassthrough(c)
 	}
+
 	if h.secret == nil {
 		return nil
 	}
 
 	req := c.Request()
-	h.filterHeaders(req.Header)
-
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
 		password, err := basicAuth.GetPassword()
@@ -446,7 +441,7 @@ func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
 			}
 		}
 		if errors.Is(err, http.ErrNoCookie) {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf(
+			return apiinterface.HandleBadRequestError(fmt.Sprintf(
 				"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
 				h.datasourceName,
 			))
