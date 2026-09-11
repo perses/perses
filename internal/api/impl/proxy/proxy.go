@@ -297,7 +297,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
-		return apiinterface.InternalError
+		return err
 	}
 
 	// redirect the request to the datasource
