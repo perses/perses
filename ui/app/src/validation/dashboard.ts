@@ -15,7 +15,7 @@ import { nameSchema } from '@perses-dev/client';
 import { useMemo } from 'react';
 import { z } from 'zod';
 
-import { useDashboardList } from '../model/dashboard-client';
+import { useSearchDashboards } from '../model/search-client';
 import { generateMetadataName } from '../utils/metadata';
 
 export const dashboardDisplayNameValidationSchema = z
@@ -60,7 +60,7 @@ export interface DashboardValidationSchema {
 
 // Validate dashboard name and check if it doesn't already exist
 export function useDashboardValidationSchema(projectName?: string): DashboardValidationSchema {
-  const { data: dashboards, isLoading: isDashboardsLoading, isError } = useDashboardList({ project: projectName });
+  const { data: dashboards, isLoading: isDashboardsLoading, isError } = useSearchDashboards(projectName);
   return useMemo((): DashboardValidationSchema => {
     if (isDashboardsLoading)
       return {
