@@ -158,6 +158,7 @@ const mapFolderItemsToTableRow = (
             project: project,
             path: parentPath,
             displayName: item.name,
+            tagsSearchValue: '',
             children: item.items
               ? mapFolderItemsToTableRow(item.items, dashboardMap, project, buildPath(parentPath, item.name))
               : [noItemsRow(project, parentPath)],

@@ -468,6 +468,10 @@ describe('buildTableRows – nested folders', () => {
     expect(innerRow.name).toBe('inner');
     expect(innerRow.children).toHaveLength(1);
     expect(innerRow.children![0]!.name).toBe('dash-a');
+    // Nested subfolder rows must still carry a string tagsSearchValue (never
+    // undefined), since the table's global search relies on it to consider the
+    // Tags column searchable at all.
+    expect(typeof innerRow.tagsSearchValue).toBe('string');
   });
 
   it('builds the correct path for deeply nested dashboards', () => {
