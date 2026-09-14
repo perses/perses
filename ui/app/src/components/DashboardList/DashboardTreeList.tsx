@@ -44,6 +44,10 @@ export interface DashboardTreeTableRow {
   createdAt?: Date;
   updatedAt?: Date;
   tags?: string[];
+  // Space-joined copy of `tags`. The table's global search only considers a column
+  // searchable when its value is a string or number, so this always resolves to a
+  // string (possibly empty) rather than reusing `tags` directly.
+  tagsSearchValue: string;
   version?: number;
   viewedAt?: Date;
   children?: DashboardTreeTableRow[];
@@ -141,13 +145,13 @@ function DashboardTreeList({
       },
       {
         id: 'tags',
-        accessorKey: 'tags',
+        accessorKey: 'tagsSearchValue',
         header: 'Tags',
         align: 'left',
         enableSorting: true,
         cellDescription: (): string => '',
-        cell: ({ getValue }): ReactNode => {
-          const tags: string[] | undefined = getValue();
+        cell: ({ row }): ReactNode => {
+          const tags = row.original.tags;
           return tags ? (
             <Box
               sx={{

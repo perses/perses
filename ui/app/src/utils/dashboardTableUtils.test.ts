@@ -664,7 +664,7 @@ const row = (
   displayName: string,
   project = 'p',
 ): { original: DashboardTreeTableRow } => ({
-  original: { kind, displayName, project, name: displayName.toLowerCase(), path: [] },
+  original: { kind, displayName, project, name: displayName.toLowerCase(), path: [], tagsSearchValue: '' },
 });
 
 describe('sortDashboardTableStringColumn', () => {

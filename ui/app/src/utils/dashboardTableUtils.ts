@@ -104,6 +104,7 @@ const mapToTableRow = (dashboardResource: DashboardListRow, path: string[]): Das
     createdAt: createdAt ? new Date(createdAt) : undefined,
     updatedAt: updatedAt ? new Date(updatedAt) : undefined,
     tags: dashboardResource.tags,
+    tagsSearchValue: (dashboardResource.tags ?? []).join(' '),
     version: dashboardResource.version,
     project: dashboardResource.project,
     viewedAt: viewedAt ? new Date(viewedAt) : undefined,
@@ -126,6 +127,7 @@ const mapToTableData = (
       path: rootPath,
       displayName: getResourceDisplayName(folder),
       tags: folder.metadata.tags,
+      tagsSearchValue: (folder.metadata.tags ?? []).join(' '),
       version: folder.metadata.version,
       children: mapFolderItemsToTableRow(folder.spec.items, map, project, buildPath(rootPath, folder.metadata.name)),
     };
@@ -183,6 +185,7 @@ const noItemsRow = (project: string, path: string[]): DashboardTreeTableRow => (
   displayName: '',
   project: project,
   path: path,
+  tagsSearchValue: '',
 });
 
 function compareFolderFirst(kindA: string, kindB: string, isDesc = false): number {
