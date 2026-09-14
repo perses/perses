@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/perses/perses/go-sdk/annotation"
 	"github.com/perses/perses/go-sdk/datasource"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
@@ -253,6 +254,18 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 			builder.Dashboard.Spec.Datasources = make(map[string]*datasourceSpec.Spec)
 		}
 		builder.Dashboard.Spec.Datasources[name] = &ds.Spec
+		return nil
+	}
+}
+
+// AddAnnotation adds an annotation to the dashboard.
+func AddAnnotation(name string, option annotation.Option, options ...annotation.DisplayOption) Option {
+	return func(builder *Builder) error {
+		a, err := annotation.New(name, option, options...)
+		if err != nil {
+			return err
+		}
+		builder.Dashboard.Spec.Annotations = append(builder.Dashboard.Spec.Annotations, *a)
 		return nil
 	}
 }
