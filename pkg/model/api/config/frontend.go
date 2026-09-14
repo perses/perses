@@ -34,6 +34,15 @@ var defaultTimeRangeOptions = []common.DurationString{
 	"14d",
 }
 
+var defaultAutoRefreshOptions = []common.DurationString{
+	"0s",
+	"5s",
+	"10s",
+	"15s",
+	"30s",
+	"60s",
+}
+
 type FrontendTheme string
 
 const defaultRowsPerPage uint8 = 25
@@ -75,7 +84,15 @@ type TimeRange struct {
 }
 
 type AutoRefresh struct {
-	Disable bool `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Disable bool                    `json:"disable,omitempty" yaml:"disable,omitempty"`
+	Options []common.DurationString `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+func (p *AutoRefresh) Verify() error {
+	if len(p.Options) == 0 {
+		p.Options = defaultAutoRefreshOptions
+	}
+	return nil
 }
 
 // DefaultUserPreferences contains the preferences used when the user has not
@@ -166,7 +183,7 @@ type Frontend struct {
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// AutoRefresh contains the auto-refresh configuration for dashboards
-	AutoRefresh *AutoRefresh `json:"auto_refresh,omitempty" yaml:"auto_refresh,omitempty"`
+	AutoRefresh AutoRefresh `json:"auto_refresh,omitempty" yaml:"auto_refresh,omitempty"`
 	// BannerInfo contains the content to be display in a banner at the top of each page along with the severity of the information
 	Banner *Banner `json:"banner,omitempty" yaml:"banner,omitempty"`
 	// DefaultUserPreferences contains server-wide defaults for user preferences.

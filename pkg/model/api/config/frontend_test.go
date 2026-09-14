@@ -20,6 +20,39 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAutoRefresh_Verify(t *testing.T) {
+	testSuite := []struct {
+		title           string
+		options         []common.DurationString
+		errMessage      string
+		expectedOptions []common.DurationString
+	}{
+		{
+			title:           "defaults are used and already sorted when no options are provided",
+			options:         nil,
+			expectedOptions: defaultAutoRefreshOptions,
+		},
+		{
+			title:           "custom options should be provided",
+			options:         []common.DurationString{"30s", "5m", "1h"},
+			expectedOptions: []common.DurationString{"30s", "5m", "1h"},
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			tr := &AutoRefresh{Options: test.options}
+			err := tr.Verify()
+			if len(test.errMessage) == 0 {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expectedOptions, tr.Options)
+			} else {
+				assert.ErrorContains(t, err, test.errMessage)
+			}
+		})
+	}
+}
+
 func TestTimeRange_Verify(t *testing.T) {
 	testSuite := []struct {
 		title           string

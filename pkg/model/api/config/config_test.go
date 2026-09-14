@@ -88,7 +88,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
-    }
+    },
+    "auto_refresh": {}
   },
   "plugin": {
     "enable_dev": false
@@ -160,6 +161,16 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
+    },
+    "auto_refresh": {
+      "options": [
+        "0s",
+        "5s",
+        "10s",
+        "15s",
+        "30s",
+        "60s"
+      ]
     }
   },
   "plugin": {
@@ -256,6 +267,12 @@ func TestUnmarshalJSONConfig(t *testing.T) {
       "rows_per_page": 25,
       "theme": "dark"
     },
+    "auto_refresh": {
+      "options": [
+      "2s",
+      "8s"
+    ]
+      },
     "important_dashboards": [
       {
         "project": "perses",
@@ -357,6 +374,9 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						Timezone:    "UTC",
 						RowsPerPage: 25,
 						Theme:       "dark",
+					},
+					AutoRefresh: AutoRefresh{
+						Options: []common.DurationString{"2s", "8s"},
 					},
 				},
 				Plugin: Plugin{
@@ -540,6 +560,10 @@ plugin:
 						Timezone:    "UTC",
 						RowsPerPage: 25,
 						Theme:       "dark",
+					},
+					AutoRefresh: AutoRefresh{
+						Disable: false,
+						Options: defaultAutoRefreshOptions,
 					},
 				},
 				Plugin: Plugin{
