@@ -1,5 +1,85 @@
 # Changelog
 
+## 0.55.0-beta.0 / 2026-09-15
+
+Time for a new release! Here is the 0.55.0 that contains already some tremendous improvements and bug fixes.
+
+A new plugin! Canvas (perses/plugins#729) is now available. :rocket: Go and see it in action!
+Feedback is more than welcome.
+
+Some core improvements come as well and complete the picture, like claim-based role assignment, new `percli dac watch`
+command, and the improved search experience.
+
+Mind some breaking changes that we couldn't avoid:
+- the removal of `@perses-dev/core` announced as deprecated in the previous release,
+- as an effort of being always up-to-date, we have done some major upgrade of dependencies (drop React 17, upgrade to
+  Node 24 (LTS), upgrade TypeScript to v7...),
+- we also dropped the support of CommonJS.
+
+We hope you will enjoy this release and we are looking forward to your feedback and contributions.
+Thank you also for all the contributors who made this release possible!
+
+### Core & UI
+
+- [FEATURE] Go SDK: add dashboard.Timezone option for Spec.timezone (#4386)
+- [FEATURE] Add configurable refresh interval (#4432)
+- [FEATURE] implement oauthPassThru, handles OIDC refreshToken as well (#4404)
+- [FEATURE] Support pre-computed bcrypt password hash for user provisioning (#4423)
+- [FEATURE] Add HTTP proxy header filtering policies (#4428)
+- [FEATURE] Add metrics+logs+traces demo dashboard to dev environment (#4402)
+- [FEATURE] Add disable_auto_refresh config (#4338)
+- [FEATURE] Wire test datasource connection button into DatasourceDrawer (#4396)
+- [FEATURE] Enable decompress middleware for all route (#4381)
+- [FEATURE] Add claim-based role assignment from OAuth/OIDC access tokens (#4172)
+- [FEATURE] Add new search endpoint (#4355)
+- [FEATURE] Add server defaults for user preferences (#4268)
+- [FEATURE] Consume panel-level annotations in the UI (#4356)
+- [FEATURE] Validate panel-level annotation definitions (#4299)
+- [FEATURE] Add panel repeat migration from grafana (#4328)
+- [FEATURE] Add k8s user impersonation support (#4339)
+- [FEATURE] New `percli dac watch` command (#3903)
+- [ENHANCEMENT] `percli dac preview`: add new flag `--create-project` (#4413)
+- [ENHANCEMENT] Config: `frontend.time_range.options` is sorted in ascending order and values are verified (#4352)
+- [ENHANCEMENT] Update the statchart version to 0.14.0 (#4354)
+- [ENHANCEMENT] Multi yaml file support for provisioning (#4332)
+- [ENHANCEMENT] Allow provisioning by watching folders (#4136)
+- [BUGFIX] Fix SecretSpec validation of mutually exclusive auth methods (#4269)
+- [BUGFIX] Fix drop of query parameter when redirection is running with api_prefix (#4449)
+- [BUGFIX] Default OIDC/OAuth redirect path to api_prefix, not router basename-relative root (#4437)
+- [BUGFIX] Prefix OIDC/OAuth login redirect with api_prefix (#4433)
+- [BUGFIX] Prevent infinite spinner when creating dashboards on an empty project (#4412)
+- [BUGFIX] Handle semver comparission with plugins that do not include v as version prefix (#4387)
+- [BUGFIX] Support curly braces ${} variable in variable validation (#4379)
+- [BUGFIX] Honor kubeconfig exec credential plugins during Kubernetes login (#4343)
+- [BUGFIX] Fix data race when listing project resources across authorized projects (#4342)
+- [BUGFIX] Align mdox docs checks (#4203)
+- [BREAKINGCHANGE] Upgrade TypeScript, Zod and React Hook Forms deps + remove TypeDoc (#4421)
+- [BREAKINGCHANGE] Upgrade to Node 24 (LTS) and remove CommonJS (#4380)
+- [BREAKINGCHANGE] Dropping React 17 (#4391)
+- [BREAKINGCHANGE] Remove old dashboard and datasource specification (#4326)
+- [BREAKINGCHANGE] Remove @perses-dev/core package (#4325)
+- [DOC] Document the Annotation plugin kind (#4427)
+- [DOC] Improve `percli dac watch` doc to use provisioning watcher (#4298)
+- [DOC] Update release doc (#4389)
+- [DOC] Fix typos in troubleshooting doc, client error message, and comments (#4394)
+- [DOC] Update migration doc (#4308)
+- [DOC] Warn about usage of postgreSQL (#4306)
+- [DOC] Fix link in getting started redirecting to the API (#4313)
+- [DOC] Fix typo knowm -> known (#4390)
+
+### Plugins improvements
+
+- [FEATURE] Add new plugin: Canvas (perses/plugins#729)
+- [FEATURE] OpenSearch: Add health check path to OpenSearch plugin (perses/plugins#797)
+- [FEATURE] AlertManager: Add health check path to AlertManager plugin (perses/plugins#798)
+- [FEATURE] Prometheus: add test connection button to prometheus plugin (perses/plugins#620)
+- [FEATURE] Table: adds a table-wide Enable Sorting option (perses/plugins#759)
+- [FEATURE] Pyroscope: migrate profile queries to the Connect API (perses/plugins#763)
+- [FEATURE] BarChart: add regex based color override (perses/plugins#774)
+- [FEATURE] TimeSeriesChart: Scope TimeSeriesChart annotations to the panel (perses/plugins#754)
+- [ENHANCEMENT] Prometheus: add instant mode to queries (perses/plugins#752)
+- [BUGFIX] Table: align filter rows with table columns (perses/plugins#755)
+
 ## 0.54.0 / 2026-07-29
 
 Welcome in the v0.54.0 release !
@@ -7,7 +87,7 @@ Welcome in the v0.54.0 release !
 First of all this release includes several security fixes that patches some breach in the permission system included in Perses,
 so we strongly recommend to upgrade to this version as soon as possible.
 
-Then, you will be happy to know that this release includes new plugins: Jaeger, GreptimeDB, Splunk, LogExplorer, AlertManager and OpenSearch.
+Then, you will be happy to know that this release includes new plugins: Jaeger, GreptimeDB, Splunk, LogExplorer, AlertManager, and OpenSearch.
 
 As adding more plugins is increasing the size of the container image, likely we will remove some of them in future
 release.
@@ -144,7 +224,7 @@ better!
 - [FEATURE] Table: add DataLink support to Go SDK (perses/plugins#631)
 - [FEATURE] LogsTable: add Grafana migration script (perses/plugins#622)
 - [FEATURE] LogsTable: add JSON export to the logs table (perses/plugins#604)
-- [FEATURE] Loki: add loki values, value names and logql variables (perses/plugins#651)
+- [FEATURE] Loki: add loki values, value names, and logql variables (perses/plugins#651)
 - [FEATURE] Loki: add query migration script for log queries (perses/plugins#634)
 - [FEATURE] TracingGanttChart: add search functionality (perses/plugins#661)
 - [FEATURE] Prometheus: add request headers and query params interpolation (perses/plugins#638)
@@ -159,7 +239,7 @@ better!
 - [ENHANCEMENT] Table: improve migration (perses/plugins#654)
 - [ENHANCEMENT] TraceTable: enable word wrap on spans and start time columns (perses/plugins#655)
 - [ENHANCEMENT] TraceTable: use timezone setting from TimeRangeSelector (perses/plugins#713)
-- [ENHANCEMENT] TracingGanttChart: show span kind, status and scope in attribute pane (perses/plugins#617)
+- [ENHANCEMENT] TracingGanttChart: show span kind, status, and scope in attribute pane (perses/plugins#617)
 - [ENHANCEMENT] TracingGanttChart: show error message if panel query is a search query instead of a single trace (perses/plugins#537)
 - [ENHANCEMENT] TracingGanttChart: support span attributes with type double (perses/plugins#421)
 - [ENHANCEMENT] TracingGanttChart: add number of events and links in tab (perses/plugins#341)
@@ -823,7 +903,7 @@ It also introduces a way to track the time to load the dashboards.
 This update introduces a brand-new Prometheus metric finder,
 based on the design from Prometheus 3.0 / Promlens, as well as a new Pie chart panel.
 
-Besides, It comes with multiple enhancements for the Table, ScatterPlot and TracingGanttChart panels.
+Besides, It comes with multiple enhancements for the Table, ScatterPlot, and TracingGanttChart panels.
 
 It also addresses various bug fixes, documentation improvements,
 and includes a breaking change to OAuth & OIDC to better respect the industry standard.
@@ -1071,7 +1151,7 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [ENHANCEMENT] Improve dashboard toolbar UX (#1646)
 - [ENHANCEMENT] Improve variable editor form state update (#1648)
 - [ENHANCEMENT] Improve drawers responsive (#1647)
-- [ENHANCEMENT] UI - Improve project, admin, migrate and config pages responsive (#1643)
+- [ENHANCEMENT] UI - Improve project, admin, migrate, and config pages responsive (#1643)
 - [ENHANCEMENT] UI - Improve home page responsive (#1633)
 - [ENHANCEMENT] move config to pkg so its available publicly (#1636)
 - [BUGFIX] Fix the error generated when datasource is contacted (#1693)
@@ -1170,9 +1250,9 @@ It only contains a fix in the CI to release Perses.
 
 ## 0.40.0 / 2023-09-19
 
-- [FEATURE] Add metadata validation for project, dashboard, datasource and variable on the UI (#1416)
+- [FEATURE] Add metadata validation for project, dashboard, datasource, and variable on the UI (#1416)
 - [FEATURE] Display name is optional for variables (#1414)
-- [FEATURE] Add builtin variables ($__interval, $interval_ms and $__rate_interval) (#1379)
+- [FEATURE] Add builtin variables ($__interval, $interval_ms, and $__rate_interval) (#1379)
 - [FEATURE] Add $__range(_ms/_s) builtin variables + add support for curly bracket variables + fix prefixed variables by other variable name (#1376)
 - [FEATURE] Support secret CRUD on the API side (#1373)
 - [FEATURE] Add builtin variables ($__dashboard, $__project, $__from, $__to) (#1344)
@@ -1722,7 +1802,7 @@ It only contains a fix in the CI to release Perses.
 - [ENHANCEMENT] Upgrade react-query to v4 #578
 - [ENHANCEMENT] Monorepo / build tooling improvements #550, #567, #583, #585, #586
 - [ENHANCEMENT] Update Perses Header, refactor embeddable components #580
-- [ENHANCEMENT] Code, tables, lists and links within a markdown panel will be styled, relying on theme for colors #553,
+- [ENHANCEMENT] Code, tables, lists, and links within a markdown panel will be styled, relying on theme for colors #553,
   #563
 - [ENHANCEMENT] Add optional Datasource selector spec to Prom variables and queries #587
 - [BUGFIX] Fix overlapping header issue #580
