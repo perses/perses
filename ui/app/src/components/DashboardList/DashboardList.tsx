@@ -31,8 +31,10 @@ import { EditDashboardDialog } from '../dialogs/EditDashboardDialog';
 import { EditFolderDialog } from '../dialogs/EditFolderDialog';
 import DashboardTreeList from './DashboardTreeList';
 
-type editDashboardAction = { type: 'editDashboard'; target: SearchProjectResource };
-type duplicateDashboardAction = { type: 'duplicateDashboard'; target: SearchProjectResource };
+// `openedAt` is used to make sure the dashboard data rendered in the dialog has been fetched after the dialog was
+// opened (i.e. it is not a stale cached version).
+type editDashboardAction = { type: 'editDashboard'; target: SearchProjectResource; openedAt: number };
+type duplicateDashboardAction = { type: 'duplicateDashboard'; target: SearchProjectResource; openedAt: number };
 type deleteDashboardAction = { type: 'deleteDashboard'; target: SearchProjectResource };
 type deleteFolderAction = { type: 'deleteFolder'; target: FolderResource; path: string[] };
 type editFolderAction = {
@@ -118,12 +120,16 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
 
   const [activeDialog, setActiveDialog] = useState<openDialogAction>({ type: 'none' });
 
-  // Use `isFetching` rather than `isLoading`: when stale cached data exists, `isLoading` is false while a background
-  // refetch is in flight. We must wait for that refetch to complete before rendering the dialog, otherwise the user
-  // could edit/duplicate an outdated version of the dashboard and overwrite a newer server spec.
+  // We must make sure the dashboard has been fetched *after* the dialog was opened: when stale cached data exists,
+  // `isLoading` is false while a background refetch is in flight, and the user could edit/duplicate an outdated version
+  // of the dashboard and overwrite a newer server spec.
+  // We compare `dataUpdatedAt` with the time the dialog was opened rather than relying on `isFetching`: the update
+  // mutation invalidates the dashboard queries on success, which triggers a refetch. Using `isFetching` would unmount
+  // the dialog during that refetch and remount it once done, making the dialog flicker (close then re-open) on save.
   const duplicateDashboardTarget = activeDialog.type === 'duplicateDashboard' ? activeDialog.target : undefined;
   const {
     data: duplicateDashboardData,
+    dataUpdatedAt: duplicateDashboardUpdatedAt,
     isFetching: isDuplicateDashboardFetching,
     error: duplicateDashboardError,
   } = useDashboard(
@@ -135,6 +141,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const editDashboardTarget = activeDialog.type === 'editDashboard' ? activeDialog.target : undefined;
   const {
     data: editDashboardData,
+    dataUpdatedAt: editDashboardUpdatedAt,
     isFetching: isEditDashboardFetching,
     error: editDashboardError,
   } = useDashboard(
@@ -144,18 +151,41 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   );
 
   const isEditDashboardReady =
-    activeDialog.type === 'editDashboard' && !isEditDashboardFetching && !editDashboardError && !!editDashboardData;
+    activeDialog.type === 'editDashboard' &&
+    !!editDashboardData &&
+    editDashboardUpdatedAt >= activeDialog.openedAt &&
+    !editDashboardError;
   const isDuplicateDashboardReady =
     activeDialog.type === 'duplicateDashboard' &&
-    !isDuplicateDashboardFetching &&
-    !duplicateDashboardError &&
-    !!duplicateDashboardData;
+    !!duplicateDashboardData &&
+    duplicateDashboardUpdatedAt >= activeDialog.openedAt &&
+    !duplicateDashboardError;
+  const isEditDashboardLoading =
+    activeDialog.type === 'editDashboard' && !isEditDashboardReady && (isEditDashboardFetching || !editDashboardError);
+  const isDuplicateDashboardLoading =
+    activeDialog.type === 'duplicateDashboard' &&
+    !isDuplicateDashboardReady &&
+    (isDuplicateDashboardFetching || !duplicateDashboardError);
+  const hasEditDashboardError =
+    activeDialog.type === 'editDashboard' && !isEditDashboardReady && !isEditDashboardLoading && !!editDashboardError;
+  const hasDuplicateDashboardError =
+    activeDialog.type === 'duplicateDashboard' &&
+    !isDuplicateDashboardReady &&
+    !isDuplicateDashboardLoading &&
+    !!duplicateDashboardError;
 
   const openDialog = useCallback(
     (dialog: openDialogActionType) => (project: string, name: string, path?: string[]) => (): void => {
       switch (dialog) {
         case 'editDashboard':
-        case 'duplicateDashboard':
+        case 'duplicateDashboard': {
+          const dashboard = dashboardsMap.get(project)?.get(name);
+          const dashboardResource = dashboard ? dashboardList[dashboard.index] : undefined;
+          if (dashboardResource) {
+            setActiveDialog({ type: dialog, target: dashboardResource, openedAt: Date.now() });
+          }
+          break;
+        }
         case 'deleteDashboard': {
           const dashboard = dashboardsMap.get(project)?.get(name);
           const dashboardResource = dashboard ? dashboardList[dashboard.index] : undefined;
@@ -274,8 +304,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
         isLoading={isLoading}
       />
-      {((activeDialog.type === 'editDashboard' && isEditDashboardFetching) ||
-        (activeDialog.type === 'duplicateDashboard' && isDuplicateDashboardFetching)) && (
+      {(isEditDashboardLoading || isDuplicateDashboardLoading) && (
         <Dialog open onClose={closeDialog} aria-labelledby="loading-dialog" fullWidth={true}>
           <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
           <Dialog.Content sx={{ width: '100%' }}>
@@ -285,8 +314,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           </Dialog.Content>
         </Dialog>
       )}
-      {((activeDialog.type === 'editDashboard' && !isEditDashboardFetching && editDashboardError) ||
-        (activeDialog.type === 'duplicateDashboard' && !isDuplicateDashboardFetching && duplicateDashboardError)) && (
+      {(hasEditDashboardError || hasDuplicateDashboardError) && (
         <Dialog open onClose={closeDialog} aria-labelledby="error-dialog" fullWidth={true}>
           <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
           <Dialog.Content sx={{ width: '100%' }}>
