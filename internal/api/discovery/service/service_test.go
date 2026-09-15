@@ -82,7 +82,7 @@ func newTestDatasource(name string) *v1.GlobalDatasource {
 	return ds
 }
 
-func TestApplyService_EnableFalse(t *testing.T) {
+func TestApplyService_CreatesEntities(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
 	applySvc := New(false, mockSvc)
 
@@ -91,7 +91,7 @@ func TestApplyService_EnableFalse(t *testing.T) {
 		newTestDatasource("prometheus-2"),
 	}
 
-	applySvc.Apply(entities, "")
+	applySvc.Apply(entities)
 
 	require.Equal(t, 2, len(mockSvc.createdEntities))
 	for _, e := range mockSvc.createdEntities {
@@ -99,24 +99,7 @@ func TestApplyService_EnableFalse(t *testing.T) {
 	}
 }
 
-func TestApplyService_NoMatch(t *testing.T) {
-	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc)
-
-	entities := []*v1.GlobalDatasource{
-		newTestDatasource("prometheus-1"),
-		newTestDatasource("prometheus-2"),
-	}
-
-	applySvc.Apply(entities, "no-such-datasource")
-
-	require.Equal(t, 2, len(mockSvc.createdEntities))
-	for _, e := range mockSvc.createdEntities {
-		assert.False(t, e.Spec.Default)
-	}
-}
-
-func TestApplyService_SingleMatch(t *testing.T) {
+func TestApplyService_PreservesDefault(t *testing.T) {
 	mockSvc := &mockGlobalDatasourceService{}
 	applySvc := New(false, mockSvc)
 
@@ -125,25 +108,12 @@ func TestApplyService_SingleMatch(t *testing.T) {
 		newTestDatasource("prometheus-2"),
 		newTestDatasource("prometheus-3"),
 	}
+	entities[1].Spec.Default = true
 
-	applySvc.Apply(entities, "prometheus-2")
+	applySvc.Apply(entities)
 
 	require.Equal(t, 3, len(mockSvc.createdEntities))
 	assert.False(t, mockSvc.createdEntities[0].Spec.Default)
 	assert.True(t, mockSvc.createdEntities[1].Spec.Default)
 	assert.False(t, mockSvc.createdEntities[2].Spec.Default)
-}
-
-func TestApplyService_DefaultNameNotInList(t *testing.T) {
-	mockSvc := &mockGlobalDatasourceService{}
-	applySvc := New(false, mockSvc)
-
-	entities := []*v1.GlobalDatasource{
-		newTestDatasource("prometheus-1"),
-	}
-
-	applySvc.Apply(entities, "prometheus-99")
-
-	require.Equal(t, 1, len(mockSvc.createdEntities))
-	assert.False(t, mockSvc.createdEntities[0].Spec.Default)
 }

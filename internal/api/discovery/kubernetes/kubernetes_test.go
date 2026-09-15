@@ -70,7 +70,7 @@ func newDiscoveredDatasource(name string, labels, annotations map[string]string)
 	}
 }
 
-func TestResolveDefaultName_Disabled(t *testing.T) {
+func TestSetDefaultDatasource_Disabled(t *testing.T) {
 	d := &discovery{
 		cfg: &config.KubernetesDiscovery{
 			Default: config.DiscoveryDefault{Enable: false},
@@ -79,10 +79,11 @@ func TestResolveDefaultName_Disabled(t *testing.T) {
 	resources := []*discoveredDatasource{
 		newDiscoveredDatasource("ns.prometheus", map[string]string{"app": "prometheus"}, nil),
 	}
-	assert.Equal(t, "", d.resolveDefaultName(resources))
+	d.setDefaultDatasource(resources)
+	assert.False(t, resources[0].datasource.Spec.Default)
 }
 
-func TestResolveDefaultName_NoMatch(t *testing.T) {
+func TestSetDefaultDatasource_NoMatch(t *testing.T) {
 	d := &discovery{
 		cfg: &config.KubernetesDiscovery{
 			Default: config.DiscoveryDefault{
@@ -94,10 +95,11 @@ func TestResolveDefaultName_NoMatch(t *testing.T) {
 	resources := []*discoveredDatasource{
 		newDiscoveredDatasource("ns.other", map[string]string{"app": "other"}, nil),
 	}
-	assert.Equal(t, "", d.resolveDefaultName(resources))
+	d.setDefaultDatasource(resources)
+	assert.False(t, resources[0].datasource.Spec.Default)
 }
 
-func TestResolveDefaultName_FirstMatch(t *testing.T) {
+func TestSetDefaultDatasource_FirstMatch(t *testing.T) {
 	d := &discovery{
 		cfg: &config.KubernetesDiscovery{
 			Default: config.DiscoveryDefault{
@@ -110,10 +112,12 @@ func TestResolveDefaultName_FirstMatch(t *testing.T) {
 		newDiscoveredDatasource("ns.prometheus-1", map[string]string{"app": "prometheus"}, nil),
 		newDiscoveredDatasource("ns.prometheus-2", map[string]string{"app": "prometheus"}, nil),
 	}
-	assert.Equal(t, "ns.prometheus-1", d.resolveDefaultName(resources))
+	d.setDefaultDatasource(resources)
+	assert.True(t, resources[0].datasource.Spec.Default)
+	assert.False(t, resources[1].datasource.Spec.Default)
 }
 
-func TestResolveDefaultName_AnnotationFilter(t *testing.T) {
+func TestSetDefaultDatasource_AnnotationFilter(t *testing.T) {
 	d := &discovery{
 		cfg: &config.KubernetesDiscovery{
 			Default: config.DiscoveryDefault{
@@ -127,10 +131,12 @@ func TestResolveDefaultName_AnnotationFilter(t *testing.T) {
 		newDiscoveredDatasource("ns.prometheus-1", map[string]string{"app": "prometheus"}, map[string]string{"default": "false"}),
 		newDiscoveredDatasource("ns.prometheus-2", map[string]string{"app": "prometheus"}, map[string]string{"default": "true"}),
 	}
-	assert.Equal(t, "ns.prometheus-2", d.resolveDefaultName(resources))
+	d.setDefaultDatasource(resources)
+	assert.False(t, resources[0].datasource.Spec.Default)
+	assert.True(t, resources[1].datasource.Spec.Default)
 }
 
-func TestResolveDefaultName_EmptyResources(t *testing.T) {
+func TestSetDefaultDatasource_EmptyResources(t *testing.T) {
 	d := &discovery{
 		cfg: &config.KubernetesDiscovery{
 			Default: config.DiscoveryDefault{
@@ -139,5 +145,5 @@ func TestResolveDefaultName_EmptyResources(t *testing.T) {
 			},
 		},
 	}
-	assert.Equal(t, "", d.resolveDefaultName(nil))
+	d.setDefaultDatasource(nil) // should not panic
 }
