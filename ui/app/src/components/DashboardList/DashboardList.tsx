@@ -118,10 +118,13 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
 
   const [activeDialog, setActiveDialog] = useState<openDialogAction>({ type: 'none' });
 
+  // Use `isFetching` rather than `isLoading`: when stale cached data exists, `isLoading` is false while a background
+  // refetch is in flight. We must wait for that refetch to complete before rendering the dialog, otherwise the user
+  // could edit/duplicate an outdated version of the dashboard and overwrite a newer server spec.
   const duplicateDashboardTarget = activeDialog.type === 'duplicateDashboard' ? activeDialog.target : undefined;
   const {
     data: duplicateDashboardData,
-    isLoading: isDuplicateDashboardLoading,
+    isFetching: isDuplicateDashboardFetching,
     error: duplicateDashboardError,
   } = useDashboard(
     duplicateDashboardTarget?.metadata.project ?? '',
@@ -132,13 +135,21 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const editDashboardTarget = activeDialog.type === 'editDashboard' ? activeDialog.target : undefined;
   const {
     data: editDashboardData,
-    isLoading: isEditDashboardLoading,
+    isFetching: isEditDashboardFetching,
     error: editDashboardError,
   } = useDashboard(
     editDashboardTarget?.metadata.project ?? '',
     editDashboardTarget?.metadata.name ?? '',
     !!editDashboardTarget,
   );
+
+  const isEditDashboardReady =
+    activeDialog.type === 'editDashboard' && !isEditDashboardFetching && !editDashboardError && !!editDashboardData;
+  const isDuplicateDashboardReady =
+    activeDialog.type === 'duplicateDashboard' &&
+    !isDuplicateDashboardFetching &&
+    !duplicateDashboardError &&
+    !!duplicateDashboardData;
 
   const openDialog = useCallback(
     (dialog: openDialogActionType) => (project: string, name: string, path?: string[]) => (): void => {
@@ -263,8 +274,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
         isLoading={isLoading}
       />
-      {((activeDialog.type === 'editDashboard' && isEditDashboardLoading) ||
-        (activeDialog.type === 'duplicateDashboard' && isDuplicateDashboardLoading)) && (
+      {((activeDialog.type === 'editDashboard' && isEditDashboardFetching) ||
+        (activeDialog.type === 'duplicateDashboard' && isDuplicateDashboardFetching)) && (
         <Dialog open onClose={closeDialog} aria-labelledby="loading-dialog" fullWidth={true}>
           <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
           <Dialog.Content sx={{ width: '100%' }}>
@@ -274,8 +285,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           </Dialog.Content>
         </Dialog>
       )}
-      {((activeDialog.type === 'editDashboard' && editDashboardError) ||
-        (activeDialog.type === 'duplicateDashboard' && duplicateDashboardError)) && (
+      {((activeDialog.type === 'editDashboard' && !isEditDashboardFetching && editDashboardError) ||
+        (activeDialog.type === 'duplicateDashboard' && !isDuplicateDashboardFetching && duplicateDashboardError)) && (
         <Dialog open onClose={closeDialog} aria-labelledby="error-dialog" fullWidth={true}>
           <Dialog.Header>{activeDialog.type === 'editDashboard' ? 'Edit' : 'Duplicate'} Dashboard</Dialog.Header>
           <Dialog.Content sx={{ width: '100%' }}>
@@ -288,14 +299,10 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           </Dialog.Actions>
         </Dialog>
       )}
-      {activeDialog.type === 'editDashboard' && editDashboardData && (
-        <EditDashboardDialog
-          open={activeDialog.type === 'editDashboard'}
-          dashboard={editDashboardData}
-          onClose={closeDialog}
-        />
+      {activeDialog.type === 'editDashboard' && isEditDashboardReady && editDashboardData && (
+        <EditDashboardDialog open dashboard={editDashboardData} onClose={closeDialog} />
       )}
-      {activeDialog.type === 'duplicateDashboard' && duplicateDashboardData && (
+      {activeDialog.type === 'duplicateDashboard' && isDuplicateDashboardReady && (
         <CreateDashboardDialog
           open={activeDialog.type === 'duplicateDashboard'}
           projects={[{ kind: 'Project', metadata: { name: activeDialog.target.metadata.project }, spec: {} }]}
