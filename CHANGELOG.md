@@ -23,7 +23,7 @@ Thank you also for all the contributors who made this release possible!
 
 - [FEATURE] Go SDK: add dashboard.Timezone option for Spec.timezone (#4386)
 - [FEATURE] Add configurable refresh interval (#4432)
-- [FEATURE] implement oauthPassThru, handles OIDC refreshToken as well (#4404)
+- [FEATURE] Implement oauthPassThru, handles OIDC refreshToken as well (#4404)
 - [FEATURE] Support pre-computed bcrypt password hash for user provisioning (#4423)
 - [FEATURE] Add HTTP proxy header filtering policies (#4428)
 - [FEATURE] Add metrics+logs+traces demo dashboard to dev environment (#4402)
