@@ -137,6 +137,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
                   isDatasourceEnabled={isLocalDatasourceEnabled}
                   disableShortcuts={!isKeyboardShortcutsEnabled}
                   isLockModeAvailable={isLockModeAvailable}
+                  isUpdateButtonAvailable={isLockModeAvailable}
                   isEditing={isEditing}
                   isCreating={isCreating}
                   isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
