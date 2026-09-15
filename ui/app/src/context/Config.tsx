@@ -12,8 +12,11 @@
 // limitations under the License.
 
 import { buildRelativeTimeOption } from '@perses-dev/components';
+import type { TimeOption } from '@perses-dev/components';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
+import { parseDurationString } from '@perses-dev/spec';
 import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import type { ReactElement } from 'react';
@@ -37,10 +40,30 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
     () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
     [data?.frontend.default_user_preferences?.timezone],
   );
+
   const timeRangeOptions = useMemo(
     () => data?.frontend.time_range?.options?.map((option: DurationString) => buildRelativeTimeOption(option)),
     [data?.frontend.time_range?.options],
   );
+
+  const autoRefreshOptions = useMemo((): TimeOption[] => {
+    const timeOptions = [...(data?.frontend.auto_refresh?.options ?? [])];
+
+    /* preserve an explicit Off option while adding the configured positive intervals */
+    if (!timeOptions.some((to) => milliseconds(parseDurationString(to)) === 0)) {
+      timeOptions.push('0s');
+    }
+
+    /* ensure user input is sorted */
+    timeOptions.sort((a, b) => milliseconds(parseDurationString(a)) - milliseconds(parseDurationString(b)));
+
+    return timeOptions.map((option: DurationString) => {
+      return {
+        value: { pastDuration: option },
+        display: milliseconds(parseDurationString(option)) === 0 ? 'Off' : option,
+      };
+    });
+  }, [data?.frontend.auto_refresh?.options]);
 
   if (isLoading || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
@@ -53,6 +76,7 @@ export function ConfigContextProvider(props: { children: React.ReactNode }): Rea
           showZoomButtons={!data.frontend.time_range?.disable_zoom}
           disableAutoRefresh={!!data.frontend.auto_refresh?.disable}
           options={timeRangeOptions}
+          autoRefreshIntervalOptions={autoRefreshOptions}
         >
           {props.children}
         </TimeRangeSettingsProvider>
