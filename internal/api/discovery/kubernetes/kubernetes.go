@@ -116,28 +116,28 @@ func (d *discovery) Execute(_ context.Context, _ context.CancelFunc) error {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil
 	}
-	defaultName := d.resolveDefaultName(resources)
+	d.setDefaultDatasource(resources)
 	var entities []*v1.GlobalDatasource
 	for _, r := range resources {
 		entities = append(entities, r.datasource)
 	}
-	d.svc.Apply(entities, defaultName)
+	d.svc.Apply(entities)
 	return nil
 }
 
-// resolveDefaultName returns the name of the first discovered datasource whose
-// labels and annotations match Default.Labels and Default.Annotations.
-// Returns empty string if Default.Enable is false or no match is found.
-func (d *discovery) resolveDefaultName(resources []*discoveredDatasource) string {
+// setDefaultDatasource marks the first discovered datasource whose labels and
+// annotations match Default.Labels and Default.Annotations as the default.
+// Does nothing if Default.Enable is false or no match is found.
+func (d *discovery) setDefaultDatasource(resources []*discoveredDatasource) {
 	if !d.cfg.Default.Enable {
-		return ""
+		return
 	}
 	for _, r := range resources {
 		if matchesLabels(r.labels, d.cfg.Default.Labels) && matchesAnnotations(r.annotations, d.cfg.Default.Annotations) {
-			return r.datasource.Metadata.Name
+			r.datasource.Spec.Default = true
+			return
 		}
 	}
-	return ""
 }
 
 // matchesLabels returns true if all key/value pairs in required are present in actual.
