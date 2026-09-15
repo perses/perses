@@ -2,7 +2,7 @@
 
 ## 0.55.0-beta.0 / 2026-09-15
 
-Time for a new release! Here is the 0.55.0 that contains already some tremendous improvements and bug fixes.
+Time for a new release! Here is the first beta of the 0.55.X cycle that contains already some tremendous improvements and bug fixes.
 
 A new plugin! Canvas (perses/plugins#729) is now available. :rocket: Go and see it in action!
 Feedback is more than welcome.
