@@ -348,6 +348,9 @@ security:
 				Frontend: Frontend{
 					ImportantDashboards: nil,
 					Information:         "",
+					AutoRefresh: AutoRefresh{
+						Options: defaultAutoRefreshOptions,
+					},
 				},
 				Plugin: Plugin{
 					Path:         "plugins",
