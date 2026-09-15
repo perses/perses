@@ -33,10 +33,9 @@ type ApplyService struct {
 	svc           globaldatasource.Service
 }
 
-func (a *ApplyService) Apply(entities []*v1.GlobalDatasource, defaultName string) {
+func (a *ApplyService) Apply(entities []*v1.GlobalDatasource) {
 	for _, entity := range entities {
 		entity.GetMetadata().Flatten(a.caseSensitive)
-		entity.Spec.Default = defaultName != "" && entity.Metadata.Name == defaultName
 		_, createErr := a.svc.Create(nil, entity)
 		if createErr == nil {
 			continue
