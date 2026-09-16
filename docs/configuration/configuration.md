@@ -675,7 +675,8 @@ global:
   # It will also remove the associated proxy.
   # Also, since the global variable depends on the global datasource, it will also disable the global variable feature.
   disable: <boolean> | default = false # Optional
-  discovery: <GlobalDatasourceDiscovery config> # Optional
+  discovery: 
+  - <GlobalDatasourceDiscovery config> # Optional
 
 project:
   # It is used to disable the project datasource feature.
