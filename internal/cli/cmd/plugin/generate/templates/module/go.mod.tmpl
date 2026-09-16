@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/perses/perses v0.54.0
-	github.com/perses/spec v0.3.0-beta.7
+	github.com/perses/spec v0.3.0-beta.8
 )
 
 require (
