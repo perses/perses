@@ -78,9 +78,9 @@ func TestSetDefaultDatasource(t *testing.T) {
 		expectedDefault []bool
 	}{
 		{
-			name:      "disabled",
-			cfg:       config.DiscoveryDefault{Enable: false},
-			resources: []*discoveredDatasource{newDiscoveredDatasource("ns.prometheus", map[string]string{"app": "prometheus"}, nil)},
+			name:            "disabled",
+			cfg:             config.DiscoveryDefault{Enable: false},
+			resources:       []*discoveredDatasource{newDiscoveredDatasource("ns.prometheus", map[string]string{"app": "prometheus"}, nil)},
 			expectedDefault: []bool{false},
 		},
 		{
