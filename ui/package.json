@@ -42,6 +42,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "ajv": "^8.20.0",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "esbuild-loader": "^4.0.3",
