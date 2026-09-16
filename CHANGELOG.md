@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.55.0-beta.1 / 2026-09-16
+
+This release comes to fix the 0.55.0-beta.0 release that was not fully released.
+Please don't use 0.55.0-beta.0.
+
+- [BUGFIX] Fix error not well handled in perses http client for auth (#4450)
+
 ## 0.55.0-beta.0 / 2026-09-15
 
 Time for a new release! Here is the first beta of the 0.55.X cycle that contains already some tremendous improvements and bug fixes.
