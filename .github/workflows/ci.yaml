@@ -51,7 +51,6 @@ jobs:
         run: npm run build
 
       - name: Generate frontend SBOM (CycloneDX)
-        if: ${{ github.event_name == 'push' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 'snapshot/')) }}
         working-directory: ./ui
         run: npx @cyclonedx/cyclonedx-npm --output-file ../ui-sbom.cdx.json --output-format JSON
       - name: store frontend SBOM

@@ -15,7 +15,7 @@
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
-    "@perses-dev/dashboards": "^0.55.0-beta.8",
+    "@perses-dev/dashboards": "^0.55.0-beta.10",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0"
   },
