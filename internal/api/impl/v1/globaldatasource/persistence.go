@@ -52,5 +52,28 @@ func (d *dao) Get(name string) (*v1.GlobalDatasource, error) {
 func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	var result []*v1.GlobalDatasource
 	err := d.client.Query(q, &result)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return applyListFilter(result, q), nil
+}
+
+func applyListFilter(result []*v1.GlobalDatasource, q *globaldatasource.Query) []*v1.GlobalDatasource {
+	var filteredResult []*v1.GlobalDatasource
+	for _, datasource := range result {
+		// filter results for source, if specified
+		if q.Source != "" && datasource.Metadata.Source != q.Source {
+			continue
+		}
+		// filter results for discovery name, if specified
+		if q.DiscoveryName != "" && q.DiscoveryName != datasource.Metadata.DiscoveryName {
+			continue
+		}
+		// filter results for discovery type, if specified
+		if q.DiscoveryType != "" && q.DiscoveryType != datasource.Metadata.DiscoveryType {
+			continue
+		}
+		filteredResult = append(filteredResult, datasource)
+	}
+	return filteredResult
 }

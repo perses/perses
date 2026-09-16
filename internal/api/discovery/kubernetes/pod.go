@@ -79,8 +79,10 @@ func (d *podDiscovery) podToGlobalDatasource(pod corev1.Pod, decodedSchema []*cu
 
 	return &v1.GlobalDatasource{
 		Kind: v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{
-			Name: fmt.Sprintf("%s.%s", pod.Namespace, pod.Name),
+		Metadata: v1.DatasourceMetadata{
+			Metadata: v1.Metadata{
+				Name: fmt.Sprintf("%s.%s", pod.Namespace, pod.Name),
+			},
 		},
 		Spec: datasource.Spec{
 			Plugin: plugin,
