@@ -765,6 +765,27 @@ pod_configuration: <KubePodDiscovery Config> # Optional
 # The labels used to filter the list of resource when contacting the Kubernetes API.
 labels:
   <string>: <string> # Optional
+
+# Configuration to automatically mark one of the discovered datasources as the default.
+default: <DiscoveryDefault Config> # Optional
+```
+
+##### DiscoveryDefault Config
+
+```yaml
+# When true, the first discovered datasource whose labels and annotations match the filters below
+# will be marked as the default datasource.
+enable: <boolean> | default = false # Optional
+
+# Label key/value pairs that the discovered resource must have to be selected as the default.
+# All specified labels must be present on the resource.
+labels:
+  <string>: <string> # Optional
+
+# Annotation key/value pairs that the discovered resource must have to be selected as the default.
+# All specified annotations must be present on the resource.
+annotations:
+  <string>: <string> # Optional
 ```
 
 ##### KubeServiceDiscovery Config
