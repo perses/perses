@@ -49,6 +49,7 @@ export class Panel {
     this.actionsMenu = this.page.locator('[id=actions-menu]');
 
     // Snapgrid's resize handle is a sibling of the panel content without an accessible label.
+    // Find the nearest ancestor with data-grid-id (the owning grid item), regardless of wrapper depth.
     this.resizeHandle = this.container
       .locator('xpath=ancestor::*[@data-grid-id][1]')
       .locator('.snapgrid-resize-handle--se');

@@ -117,7 +117,8 @@ test.describe('Dashboard: Panels', () => {
     const panel = dashboardPage.getPanelByName('Markdown Example Zero');
     const panelGroup = dashboardPage.getPanelGroup('Row 1');
 
-    // Save original panel size.
+    // Wait for the initial responsive layout before saving the panel size.
+    await expect.poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width).toBeCloseTo(0.25, 1);
     const originalPanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
 
     const previousViewport = page.viewportSize();
@@ -134,14 +135,11 @@ test.describe('Dashboard: Panels', () => {
       });
 
       // Panel is ~100% of panel group on a small screen.
-      const smallPanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
-      expect(smallPanelPercentSize.width).toBeCloseTo(1, 1);
+      await expect.poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width).toBeCloseTo(1, 1);
 
       // Panel returns to the original size, which should be ~25%.
       await page.setViewportSize(previousViewport);
-      const largePanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
-      expect(largePanelPercentSize).toEqual(originalPanelPercentSize);
-      expect(largePanelPercentSize.width).toBeCloseTo(0.25, 1);
+      await expect.poll(() => panelGroup.getPanelPercentOfBounds(panel)).toEqual(originalPanelPercentSize);
     }
   });
 });

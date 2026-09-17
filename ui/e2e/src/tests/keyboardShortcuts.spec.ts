@@ -77,6 +77,12 @@ test.describe('Keyboard Shortcuts', () => {
     await togglePanelViewModeButton.click();
     await expect(page).toHaveURL(/viewPanelRef=/);
 
+    // Re-enter the expanded panel and wait for its debounced shortcut focus.
+    await dashboardPage.toolbar.hover();
+    // Hovering away clears shortcut state but can leave the old DOM focus behind.
+    await panel.parent.blur();
+    await panel.container.hover();
+    await expect(panel.parent).toBeFocused();
     await page.keyboard.press('e');
     await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeVisible({ timeout: 5000 });
 
