@@ -69,7 +69,7 @@ func TestOIDCUserInfoGetLogin(t *testing.T) {
 			expectedLogin: "jdoe",
 		},
 		{
-			name: "custom login property configured but empty in userinfo falls back to email",
+			name: "custom login property configured but empty in userinfo falls back to subject",
 			userInfo: oidcUserInfo{
 				externalUserInfoProfile: externalUserInfoProfile{
 					Email: "john.doe@example.com",
@@ -77,7 +77,7 @@ func TestOIDCUserInfoGetLogin(t *testing.T) {
 				Subject:       "subject-123",
 				loginProperty: "preferred_username",
 			},
-			expectedLogin: "john.doe",
+			expectedLogin: "subject-123",
 		},
 		{
 			name: "unknown custom login property falls back to email",
@@ -88,6 +88,17 @@ func TestOIDCUserInfoGetLogin(t *testing.T) {
 				},
 				Subject:       "subject-123",
 				loginProperty: "unknown_property",
+			},
+			expectedLogin: "john.doe",
+		},
+		{
+			name: "custom login property email uses the email prefix, not the raw address",
+			userInfo: oidcUserInfo{
+				externalUserInfoProfile: externalUserInfoProfile{
+					Email: "john.doe@example.com",
+				},
+				Subject:       "subject-123",
+				loginProperty: "email",
 			},
 			expectedLogin: "john.doe",
 		},

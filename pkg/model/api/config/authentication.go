@@ -193,6 +193,54 @@ type OIDCLogout struct {
 	LogoutRedirectParamName string `json:"logout_redirect_param_name,omitempty" yaml:"logout_redirect_param_name,omitempty"`
 }
 
+// LoginProperty is the name of a userinfo property that can be used as the OIDC "login" of the user.
+type LoginProperty string
+
+const (
+	LoginPropertyName              LoginProperty = "name"
+	LoginPropertyGivenName         LoginProperty = "given_name"
+	LoginPropertyFamilyName        LoginProperty = "family_name"
+	LoginPropertyMiddleName        LoginProperty = "middle_name"
+	LoginPropertyNickname          LoginProperty = "nickname"
+	LoginPropertyPreferredUsername LoginProperty = "preferred_username"
+	LoginPropertyEmail             LoginProperty = "email"
+)
+
+func (p *LoginProperty) UnmarshalJSON(data []byte) error {
+	var tmp LoginProperty
+	type plain LoginProperty
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := tmp.validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *LoginProperty) UnmarshalYAML(unmarshal func(any) error) error {
+	var tmp LoginProperty
+	type plain LoginProperty
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := tmp.validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p LoginProperty) validate() error {
+	switch p {
+	case "", LoginPropertyName, LoginPropertyGivenName, LoginPropertyFamilyName, LoginPropertyMiddleName, LoginPropertyNickname, LoginPropertyPreferredUsername, LoginPropertyEmail:
+		return nil
+	default:
+		return fmt.Errorf("invalid custom_login_property %q", string(p))
+	}
+}
+
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
@@ -204,7 +252,7 @@ type OIDCProvider struct {
 	// (e.g. "preferred_username"). It must be one of the properties Perses already extracts from
 	// the userinfo response. If not set or not found in the response, it falls back to the email,
 	// then to the subject.
-	CustomLoginProperty string `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
+	CustomLoginProperty LoginProperty `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *OIDCProvider) Verify() error {

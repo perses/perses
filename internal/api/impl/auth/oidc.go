@@ -47,7 +47,7 @@ type oidcUserInfo struct {
 	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
 	issuer string
 	// loginProperty is not supposed to be taken from json, but instead it must be set right before the db sync.
-	loginProperty string
+	loginProperty config.LoginProperty
 }
 
 // GetSubject implements [rp.SubjectGetter]
@@ -56,38 +56,35 @@ func (u *oidcUserInfo) GetSubject() string {
 }
 
 // getProfileProperty returns the value of the given userinfo property already extracted into
-// externalUserInfoProfile, or an empty string if the property name is unknown or empty.
-func (u *oidcUserInfo) getProfileProperty(name string) string {
+// externalUserInfoProfile. If the property is unknown or empty, it falls back to the first part
+// of the email.
+func (u *oidcUserInfo) getProfileProperty(name config.LoginProperty) string {
 	switch name {
-	case "name":
+	case config.LoginPropertyName:
 		return u.Name
-	case "given_name":
+	case config.LoginPropertyGivenName:
 		return u.GivenName
-	case "family_name":
+	case config.LoginPropertyFamilyName:
 		return u.FamilyName
-	case "middle_name":
+	case config.LoginPropertyMiddleName:
 		return u.MiddleName
-	case "nickname":
+	case config.LoginPropertyNickname:
 		return u.Nickname
-	case "preferred_username":
+	case config.LoginPropertyPreferredUsername:
 		return u.PreferredUsername
-	case "email":
-		return u.Email
+	case config.LoginPropertyEmail:
+		return buildLoginFromEmail(u.Email)
 	default:
-		return ""
+		return buildLoginFromEmail(u.Email)
 	}
 }
 
 // GetLogin implements [externalUserInfo]
-// If a custom login property is configured and present in the userinfo response, it is used.
-// Otherwise, it uses the first part of the email to create the username, falling back to the subject.
+// If no custom login property is configured, or it is set to "email", the first part of the email
+// is used. If a custom login property is configured and present in the userinfo response, it is
+// used as-is. In any case, it falls back to the subject if the resulting value is empty.
 func (u *oidcUserInfo) GetLogin() string {
-	if u.loginProperty != "" {
-		if login := u.getProfileProperty(u.loginProperty); login != "" {
-			return login
-		}
-	}
-	login := buildLoginFromEmail(u.Email)
+	login := u.getProfileProperty(u.loginProperty)
 	if len(login) > 0 {
 		return login
 	}
@@ -182,7 +179,7 @@ type oIDCEndpoint struct {
 	slugID                 string
 	urlParams              map[string]string
 	issuer                 string
-	customLoginProperty    string
+	customLoginProperty    config.LoginProperty
 	svc                    service
 	claimConfigs           []config.ProviderClaimConfig
 	extraLogoutHandler     echo.HandlerFunc
