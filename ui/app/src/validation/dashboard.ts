@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-import { useMemo } from 'react';
 import { nameSchema } from '@perses-dev/client';
+import { useMemo } from 'react';
+import { z } from 'zod';
+
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 
@@ -29,7 +30,7 @@ export const tagsValidationSchema = z
       .trim()
       .min(1, 'Tag cannot be empty')
       .max(50, 'Tag must be 50 or fewer characters long')
-      .regex(/^[a-z0-9 _-]+$/, 'Tag can only contain lowercase letters, numbers, spaces, hyphens, and underscores')
+      .regex(/^[a-z0-9 _-]+$/, 'Tag can only contain lowercase letters, numbers, spaces, hyphens, and underscores'),
   )
   .max(20, 'Must be 20 or fewer tags')
   .optional()
@@ -41,16 +42,18 @@ export const createDashboardDialogValidationSchema = z.object({
   dashboardName: dashboardDisplayNameValidationSchema,
   tags: tagsValidationSchema,
 });
+export type CreateDashboardInput = z.input<typeof createDashboardDialogValidationSchema>;
 export type CreateDashboardValidationType = z.infer<typeof createDashboardDialogValidationSchema>;
 
 export const editDashboardDialogValidationSchema = z.object({
   dashboardName: dashboardDisplayNameValidationSchema,
   tags: tagsValidationSchema,
 });
+export type EditDashboardInput = z.input<typeof editDashboardDialogValidationSchema>;
 export type EditDashboardValidationType = z.infer<typeof editDashboardDialogValidationSchema>;
 
 export interface DashboardValidationSchema {
-  schema?: z.ZodSchema;
+  schema?: typeof createDashboardDialogValidationSchema;
   isSchemaLoading: boolean;
   hasSchemaError: boolean; // TODO: Later use it with a goog error handling design
 }
@@ -75,23 +78,29 @@ export function useDashboardValidationSchema(projectName?: string): DashboardVal
     }
 
     if (!dashboards?.length)
-      return { schema: createDashboardDialogValidationSchema, isSchemaLoading: true, hasSchemaError: false };
+      return {
+        schema: createDashboardDialogValidationSchema,
+        isSchemaLoading: false,
+        hasSchemaError: false,
+      };
 
-    const refinedSchema = createDashboardDialogValidationSchema.refine(
-      (schema) => {
-        return !(dashboards ?? []).some((dashboard) => {
+    const refinedSchema = createDashboardDialogValidationSchema.superRefine((schema, ctx) => {
+      if (
+        (dashboards ?? []).some((dashboard) => {
           return (
             dashboard.metadata.project.toLowerCase() === schema.projectName.toLowerCase() &&
             dashboard.metadata.name.toLowerCase() === generateMetadataName(schema.dashboardName).toLowerCase()
           );
+        })
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
+          path: ['dashboardName'],
         });
-      },
-      (schema) => ({
-        message: `Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
-        path: ['dashboardName'],
-      })
-    );
+      }
+    });
 
-    return { schema: refinedSchema, isSchemaLoading: true, hasSchemaError: false };
+    return { schema: refinedSchema, isSchemaLoading: false, hasSchemaError: false };
   }, [dashboards, isDashboardsLoading, isError]);
 }

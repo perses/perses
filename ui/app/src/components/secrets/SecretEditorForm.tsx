@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { BoxProps } from '@mui/material';
 import {
   Box,
-  BoxProps,
   Button,
   Divider,
   FormControl,
@@ -34,11 +32,18 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import type { Secret, SecretsEditorSchemaType } from '@perses-dev/client';
+import { secretsEditorSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
-import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/client';
-import { FormEditorProps } from '../form-drawers';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+import type { ReactElement, SyntheticEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import type { z } from 'zod';
+
+import type { FormEditorProps } from '../form-drawers';
 
 const noAuthIndex = 'noAuth';
 const basicAuthIndex = 'basicAuth';
@@ -74,7 +79,7 @@ export function SecretEditorForm({
 }: SecretEditorFormProps): ReactElement {
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialSecretClean: Secret = useMemo(() => {
-    const result = { ...initialValue };
+    const result = structuredClone(initialValue);
     if (result.spec.basicAuth?.password) result.spec.basicAuth.password = '';
     if (result.spec.authorization?.credentials) result.spec.authorization.credentials = '';
     if (result.spec.oauth?.clientID) result.spec.oauth.clientID = '';
@@ -90,7 +95,7 @@ export function SecretEditorForm({
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<SecretsEditorSchemaType>({
+  const form = useForm<z.input<typeof secretsEditorSchema>, unknown, SecretsEditorSchemaType>({
     resolver: zodResolver(secretsEditorSchema),
     mode: 'onChange',
     defaultValues: initialSecretClean,
@@ -120,7 +125,7 @@ export function SecretEditorForm({
     if (form.formState.isValid) {
       form.clearErrors();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react/exhaustive-deps
   }, [form.formState.isValid]);
 
   const [tabValue, setTabValue] = useState<string>(() => {
@@ -545,7 +550,7 @@ export function SecretEditorForm({
                             ...acc,
                             [key]: value,
                           }),
-                          {}
+                          {},
                         );
                       field.onChange(newParams);
                     };
@@ -556,7 +561,7 @@ export function SecretEditorForm({
                           ...acc,
                           [key === oldKey ? newKey : key]: val,
                         }),
-                        {}
+                        {},
                       );
                       field.onChange(newParams);
                     };
@@ -578,7 +583,7 @@ export function SecretEditorForm({
                       const currentValues = params[key] || [];
                       updateParamValue(
                         key,
-                        currentValues.filter((_, index) => index !== indexToRemove)
+                        currentValues.filter((_, index) => index !== indexToRemove),
                       );
                     };
 

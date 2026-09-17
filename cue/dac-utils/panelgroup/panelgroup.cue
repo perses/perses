@@ -52,7 +52,7 @@ layout: dashboard.#Layout & {
 			title: #title
 			if #isCollapsed != _|_ {
 				collapse: {
-					open: #isCollapsed
+					open: !#isCollapsed
 				}
 			}
 		}

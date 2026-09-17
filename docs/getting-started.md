@@ -147,4 +147,4 @@ Once you are comfortable creating dashboards through the UI, you can manage them
 
 - Dive deeper into [Concepts](./concepts/dashboard.md)
 - Explore the [CLI](./cli.md)
-- Check the [API documentation](./api)
+- Check the [API documentation](./api/README.md)

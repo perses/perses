@@ -16,6 +16,7 @@ package schema
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -132,6 +133,23 @@ func loadQueryPlugins(queryPath string, sch Schema, t *testing.T) {
 	loadPlugin(queryPath, modules, sch, t)
 }
 
+func loadAnnotationPlugins(annotationPath string, sch Schema, t *testing.T) {
+	modules := []v1.ModuleSpec{
+		{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindAnnotation,
+					Spec: module.PluginSpec{
+						Name: "FirstAnnotation",
+					},
+				},
+			},
+		},
+	}
+	loadPlugin(annotationPath, modules, sch, t)
+}
+
 func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
 	modules := []v1.ModuleSpec{
 		{
@@ -158,6 +176,25 @@ func loadVariablePlugins(variablePath string, sch Schema, t *testing.T) {
 		},
 	}
 	loadPlugin(variablePath, modules, sch, t)
+}
+
+func loadDevVariablePlugin(variablePath string, sch Schema, t *testing.T) {
+	module := v1.PluginModule{
+		Spec: v1.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindVariable,
+					Spec: module.PluginSpec{
+						Name: "FirstVariable",
+					},
+				},
+			},
+		},
+	}
+	if err := sch.LoadDevPlugin(variablePath, module); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestValidatePanels(t *testing.T) {
@@ -322,6 +359,66 @@ func TestValidatePanels(t *testing.T) {
 	}
 }
 
+func TestValidatePanelsWithAnnotations(t *testing.T) {
+	s := New()
+	loadPanelPlugins("testdata/schemas/panels", s, t)
+	loadQueryPlugins("testdata/schemas/queries", s, t)
+	loadAnnotationPlugins("testdata/schemas/annotations", s, t)
+
+	validFirstPanel := loadPluginFromJSON("testdata/samples/panels/valid_first_panel.json", t)
+	validCustomQueries := loadQueriesFromJSON("testdata/samples/queries/valid_custom_queries.json", t)
+	validAnnotation := loadPluginFromJSON("testdata/samples/annotations/valid_first_annotation.json", t)
+	invalidAnnotation := loadPluginFromJSON("testdata/samples/annotations/invalid_kind_annotation.json", t)
+
+	panelWithAnnotations := func(annotations []dashboard.AnnotationSpec) map[string]*dashboard.Panel {
+		return map[string]*dashboard.Panel{
+			"MyPanel": {
+				Spec: dashboard.PanelSpec{
+					Plugin:      validFirstPanel,
+					Queries:     validCustomQueries,
+					Annotations: annotations,
+				},
+			},
+		}
+	}
+
+	testSuite := []struct {
+		title            string
+		panels           map[string]*dashboard.Panel
+		expectedErrorStr string
+	}{
+		{
+			title: "panel with a valid panel-local annotation definition",
+			panels: panelWithAnnotations([]dashboard.AnnotationSpec{
+				{Display: dashboard.AnnotationDisplay{Name: "Deploys"}, Plugin: validAnnotation},
+			}),
+			expectedErrorStr: "",
+		},
+		{
+			title: "panel with an invalid panel-local annotation definition (unknown kind)",
+			panels: panelWithAnnotations([]dashboard.AnnotationSpec{
+				{Display: dashboard.AnnotationDisplay{Name: "Deploys"}, Plugin: invalidAnnotation},
+			}),
+			expectedErrorStr: "schema not found for plugin UnknownAnnotation",
+		},
+		{
+			title:            "panel without any annotations",
+			panels:           panelWithAnnotations(nil),
+			expectedErrorStr: "",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			err := s.ValidatePanels(test.panels)
+			if test.expectedErrorStr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.expectedErrorStr)
+			}
+		})
+	}
+}
+
 func TestValidateDashboardVariables(t *testing.T) {
 	s := New()
 	loadVariablePlugins("testdata/schemas/variables", s, t)
@@ -434,6 +531,32 @@ func TestValidateDashboardVariables(t *testing.T) {
 	}
 }
 
+// TestValidateVariableWithDevSchema ensures a variable plugin loaded only in
+// development mode is validated against the dev variable schema. It guards
+// against dispatching the dev-load probe to the wrong tree (e.g. panels), which
+// would make ValidateVariable fall through to the production set and reject a
+// dev-only variable plugin.
+func TestValidateVariableWithDevSchema(t *testing.T) {
+	s := New()
+	loadDevVariablePlugin("testdata/schemas/variables", s, t)
+	validFirstVariable := loadPluginFromJSON("testdata/samples/variables/valid_first_variable.json", t)
+
+	variables := []dashboard.Variable{
+		{
+			Kind: variable.KindList,
+			Spec: &dashboard.ListVariableSpec{
+				ListSpec: variable.ListSpec{
+					Plugin: validFirstVariable,
+				},
+				Name: "my1rstVar",
+			},
+		},
+	}
+
+	assert.NoError(t, s.ValidateDashboardVariables(variables))
+	assert.NoError(t, s.ValidateVariable(validFirstVariable, "my1rstVar"))
+}
+
 func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 	// Successful load case
 	s := newSch()
@@ -477,5 +600,42 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 		if !strings.Contains(err.Error(), "unable to find the plugin with the associated schema") {
 			t.Fatalf("unexpected error message: %v", err)
 		}
+	}
+}
+
+// TestSch_load_SkipsCueFileWithWrongPackage ensures that a .cue file that does not
+// belong to the "model" package is skipped instead of being loaded. The package
+// check is meant to ignore such files, but a bug used to make the skip unreachable,
+// so the file was passed to LoadModelSchema and produced a build error instead of
+// being silently ignored.
+func TestSch_load_SkipsCueFileWithWrongPackage(t *testing.T) {
+	pluginPath := t.TempDir()
+	schemaDir := filepath.Join(pluginPath, "first")
+	if err := os.MkdirAll(schemaDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	// A .cue file that belongs to another package than "model".
+	content := []byte("package notmodel\n\nkind: \"FirstChart\"\nspec: {}\n")
+	if err := os.WriteFile(filepath.Join(schemaDir, "panel.cue"), content, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	s := newSch()
+	pluginModule := v1.PluginModule{
+		Spec: v1.ModuleSpec{
+			SchemasPath: "first",
+			Plugins: []module.Plugin{
+				{
+					Kind: plugin.KindPanel,
+					Spec: module.PluginSpec{Name: "FirstChart"},
+				},
+			},
+		},
+	}
+	if err := s.load(pluginPath, pluginModule); err != nil {
+		t.Fatalf("expected the non-model file to be skipped, got error: %v", err)
+	}
+	if _, ok := s.panels.Get("FirstChart", pluginModule.Metadata); ok {
+		t.Fatalf("expected no panel schema to be registered for a non-model file")
 	}
 }

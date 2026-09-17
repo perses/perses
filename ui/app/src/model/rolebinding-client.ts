@@ -11,11 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import { fetchJson, RoleBindingResource, StatusError } from '@perses-dev/client';
-import buildURL from './url-builder';
+import type { RoleBindingResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
+import buildURL from './url-builder';
 
 export const resource = 'rolebindings';
 
@@ -100,7 +103,7 @@ export function useRoleBindingList(project?: string): UseQueryResult<RoleBinding
  * @param project
  */
 export function useCreateRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -124,7 +127,7 @@ export function useCreateRoleBindingMutation(
  * @param project
  */
 export function useUpdateRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -150,7 +153,7 @@ export function useUpdateRoleBindingMutation(
  * @param project
  */
 export function useDeleteRoleBindingMutation(
-  project: string
+  project: string,
 ): UseMutationResult<RoleBindingResource, StatusError, RoleBindingResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

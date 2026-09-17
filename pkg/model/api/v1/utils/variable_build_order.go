@@ -19,6 +19,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -29,7 +30,8 @@ import (
 
 // Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
 // For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-var variableSyntaxRegexp = regexp.MustCompile(`\$(\w+)`)
+// It also supports the curly braces syntax ${} to align with frontend.
+var variableSyntaxRegexp = regexp.MustCompile(`\$(\w+|{\w+})`)
 
 type VariableGroup struct {
 	Variables []string
@@ -239,6 +241,7 @@ func parseVariableUsed(str string) [][]string {
 	matches := variableSyntaxRegexp.FindAllStringSubmatch(str, -1)
 	var result [][]string
 	for _, match := range matches {
+		match[1] = strings.Trim(match[1], "{}")
 		if _, err := strconv.Atoi(match[1]); err != nil {
 			// We want to keep only variables that are not only a number.
 			// A number that represents a variable is not meaningful, and so we don't want to consider it.

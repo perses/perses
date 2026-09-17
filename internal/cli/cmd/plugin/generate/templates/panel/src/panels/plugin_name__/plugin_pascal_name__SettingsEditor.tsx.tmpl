@@ -2,11 +2,12 @@ import {
   OptionsEditorGrid,
   OptionsEditorColumn,
   ThresholdsEditor,
-  ThresholdsEditorProps,
 } from '@perses-dev/components';
-import { LegendOptionsEditor, LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ReactElement } from 'react';
-import { {{.PluginPascalName }}Options } from './{{ .PluginName }}-types';
+import type { ThresholdsEditorProps } from '@perses-dev/components';
+import type { LegendOptionsEditorProps, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { LegendOptionsEditor } from '@perses-dev/plugin-system';
+import type { ReactElement } from 'react';
+import type { {{.PluginPascalName }}Options } from './{{ .PluginName }}-types';
 
 type {{ .PluginPascalName }}SettingsEditorProps = OptionsEditorProps<{{ .PluginPascalName}}Options>;
 

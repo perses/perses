@@ -39,15 +39,17 @@ type GrafanaLink struct {
 }
 
 type Panel struct {
-	Type         string            `json:"type"`
-	Title        string            `json:"title"`
-	Description  string            `json:"description"`
-	Repeat       string            `json:"repeat"`
-	Collapsed    bool              `json:"collapsed"`
-	Panels       []Panel           `json:"panels"`
-	GridPosition GridPosition      `json:"gridPos"`
-	Targets      []json.RawMessage `json:"targets"`
-	Links        []GrafanaLink     `json:"links"`
+	Type            string            `json:"type"`
+	Title           string            `json:"title"`
+	Description     string            `json:"description"`
+	Repeat          string            `json:"repeat"`
+	RepeatDirection string            `json:"repeatDirection"`
+	MaxPerRow       *int              `json:"maxPerRow"`
+	Collapsed       bool              `json:"collapsed"`
+	Panels          []Panel           `json:"panels"`
+	GridPosition    GridPosition      `json:"gridPos"`
+	Targets         []json.RawMessage `json:"targets"`
+	Links           []GrafanaLink     `json:"links"`
 	json.RawMessage
 }
 
@@ -70,6 +72,12 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	}
 	if repeat, ok := tmp["repeat"]; ok {
 		_ = json.Unmarshal(repeat, &panel.Repeat)
+	}
+	if repeatDirection, ok := tmp["repeatDirection"]; ok {
+		_ = json.Unmarshal(repeatDirection, &panel.RepeatDirection)
+	}
+	if maxPerRow, ok := tmp["maxPerRow"]; ok {
+		_ = json.Unmarshal(maxPerRow, &panel.MaxPerRow)
 	}
 	if collapsed, ok := tmp["collapsed"]; ok {
 		_ = json.Unmarshal(collapsed, &panel.Collapsed)

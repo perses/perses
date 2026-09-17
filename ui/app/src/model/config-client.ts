@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { Duration } from 'date-fns';
-import { fetchJson, Permission, StatusError } from '@perses-dev/client';
-import { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { Permission, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { Duration } from 'date-fns';
+
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -63,9 +66,9 @@ export interface DatabaseSQL {
   allow_all_files: boolean;
   allow_cleartext_passwords: boolean;
   allow_fallback_to_plaintext: boolean;
-  allow_native_passwords: boolean;
+  allow_native_passwords?: boolean;
   allow_old_passwords: boolean;
-  check_conn_liveness: boolean;
+  check_conn_liveness?: boolean;
   client_found_rows: boolean;
   columns_with_alias: boolean;
   interpolate_params: boolean;
@@ -73,6 +76,10 @@ export interface DatabaseSQL {
   parse_time: boolean;
   reject_read_only: boolean;
   case_sensitive: boolean;
+  conn_max_lifetime?: string;
+  conn_max_idle_time?: string;
+  max_open_conns?: number;
+  max_idle_conns?: number;
 }
 
 export interface Database {
@@ -182,13 +189,26 @@ export interface TimeRangeConfig {
   options?: DurationString[];
 }
 
+export interface AutoRefreshConfig {
+  disable?: boolean;
+  options?: DurationString[];
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   important_dashboards?: DashboardSelector[];
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;
+  auto_refresh?: AutoRefreshConfig;
   banner?: Banner;
+  default_user_preferences?: DefaultUserPreferences;
+}
+
+export interface DefaultUserPreferences {
+  timezone?: string;
+  rows_per_page?: number;
+  theme?: 'light' | 'dark';
 }
 
 export interface EphemeralDashboardConfig {

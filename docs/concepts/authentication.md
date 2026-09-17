@@ -28,6 +28,36 @@ security:
 In case a native provider is used, the users and their password are stored in the Perses database.
 
 Login is done through http POST on /api/auth/providers/native/login.
+Example:
+
+```bash
+#!/usr/bin/env bash
+
+TOKEN_JSON=$(
+  curl -X POST \
+    -H "Content-Type: application/json" \
+    -d '{"login":"<USER>","password":"<PASS>"}' \
+    "<PERSES_URL>/api/auth/providers/native/login"
+)
+
+ACCESS_TOKEN=$(jq -r '.access_token' <<<"$TOKEN_JSON")
+
+# Then you can use ACCESS_TOKEN in your requests
+curl \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "<PERSES_URL>/api/v1/projects"
+```
+
+You can also use the CLI to login:
+
+```bash
+#!/usr/bin/env bash
+
+percli login <PERSES_URL> --username="<USER>" --password="<PASS>"
+
+# Then you can use the CLI to get anything from Perses
+percli get projects
+```
 
 ## External OIDC/OAuth provider(s)
 
@@ -39,11 +69,8 @@ collected (email, firstname, lastname, picture) to **sync the user in database**
 Then the backend takes in charge the creation of the access_token/refresh_token that will be used to
 authenticate this user in the subsequent requests.
 
-> The **user synchronization** can possibly be used to update also its [permissions](./authorization.md), based on
-> some roles/groups present in the external idp's token.
->
-> At the time we write this documentation, there is nothing implemented yet. User have to login first and ask specific
-> permissions to an admin.
+> The **user synchronization** can also update the user's [permissions](./authorization.md) based on
+> roles or groups present in the external provider's token, via [claim-based role assignment](#claim-based-role-assignment).
 
 ### => Configuration example
 
@@ -84,6 +111,57 @@ security:
           user_infos_url: "https://api.github.com/user"
 ```
 
+## Claim-Based Role Assignment
+
+When authenticating via an external OIDC or OAuth provider, Perses can read claims from the
+upstream token and automatically map them to Perses roles — without requiring manual
+`RoleBinding` or `GlobalRoleBinding` objects per user.
+
+This is configured per-provider using the `claims` field:
+
+```yaml
+security:
+  authentication:
+    providers:
+      oidc:
+        - slug_id: keycloak
+          name: "Keycloak"
+          issuer: "https://<keycloak-host>/realms/<realm>"
+          client_id: "<secret>"
+          client_secret: "<secret>"
+          scopes: ["openid", "profile", "email", "roles"]
+          claims:
+            - claim_name: "roles"        # JSON field name in the upstream token
+              mappings:
+                - claim_value: "admin"
+                  role_name: "admin"     # maps to GlobalRole "admin" (GlobalRole due to no project specified)
+                - claim_value: "editor"
+                  role_name: "dashboard-editor"
+                  project: "myproject"   # maps to Role "dashboard-editor" in project "myproject"
+```
+
+### How it works
+
+1. At login, Perses extracts the configured claim values from the upstream access token (or ID token for OIDC).
+2. The extracted values are embedded in the Perses session JWT.
+3. On every request, Perses evaluates the claim→role mappings and resolves the corresponding permissions — stateless, no extra database lookup.
+4. Resolved permissions are **additive** with any explicit `RoleBinding`/`GlobalRoleBinding` the user may have — permissions from both sources are merged, never reduced. For example, if a user is mapped to the `admin` GlobalRole by a claim but only has an `editor` `GlobalRoleBinding` in the database, the user will hold the full set of permissions from **both** roles.
+
+### `claims` field reference
+
+| Field | Description |
+|---|---|
+| `claim_name` | The JSON key in the upstream token, e.g. `"roles"`, `"groups"` |
+| `mappings[].claim_value` | The upstream value to match, e.g. `"admin"` |
+| `mappings[].role_name` | The Perses `Role` or `GlobalRole` to grant |
+| `mappings[].project` | *(optional)* When set, resolves `role_name` as a project-scoped `Role`. When omitted, resolves as a `GlobalRole`. |
+
+> Multi-valued claims (arrays) are supported — if any value in the array matches a mapping, the role is granted.
+
+> **Note:** The referenced roles must already exist in Perses. Claim mappings do not create roles automatically.
+
+> **Revocation Semantics:** Claims are captured once at login and persisted in the refresh token. Each subsequent refresh re-carries the **same** claim snapshot into the new token without re-querying the identity provider. As a result, if an operator removes a user's claim at the identity provider (e.g., removes them from an LDAP group), that user will retain the derived Perses roles until their refresh token chain expires and they are forced to re-login — which may never happen for an active user. This is a structural property of how Perses sessions work and differs from `RoleBinding`/`GlobalRoleBinding`, which are evaluated live against the database on every request. To tighten the revocation window, operators can lower `access_token_ttl` and `refresh_token_ttl` in the authentication config. See [#3891](https://github.com/perses/perses/issues/3891) for discussion on re-fetching claims from the identity provider on refresh.
+
 ### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (`authorization_code`)
 
 ```mermaid
@@ -93,7 +171,7 @@ sequenceDiagram
     participant br as Perses Frontend
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>br: Login with OIDC provider (e.g Microsoft Entra ID)
     activate br
     br->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/login
@@ -154,7 +232,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     hu->>pc: EXEC: percli login
     activate pc
     pc->>rp: GET /api/config
@@ -239,7 +317,7 @@ sequenceDiagram
     participant pc as percli Command Line
     participant rp as Perses Backend
     participant op as External Identity Provider
-    
+
     ro->>pc: EXEC: percli login --provider <slug_id> --client-id <client_id> --client-secret <client_secret>
     activate pc
     pc->>rp: GET /api/config

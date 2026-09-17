@@ -16,12 +16,13 @@ plugin. Therefore, the migration is in best-effort basis. However we are working
 
 ## Prerequisites
 
-As we are always supporting the last version of Grafana, we advise to have your Grafana dashboard up to date if the
-latest version of Grafana.
+We are trying to support as many versions of Grafana as possible. But unfortunately, we can't support all of them. 
+Specially the latest versions of Grafana where the data model has changed a lot.
 
-When we started to develop Perses, the latest version of Grafana was 9.0.0. And since we always have a backward
-compatible mind when developing the migration script. So there is a high chance you can migrate your dashboard from an
-older version of Grafana. But we can't guarantee it.
+The migration script is working for Grafana versions 9.0.0 until the version 11.x. Above or below this range, we cannot guarantee the migration will work.
+
+We aim to support the latest version of Grafana and we will try to support the Datadog format as well.
+If you are interesting in this, you can track the associated issue: https://github.com/perses/perses/issues/4307
 
 ## How to migrate
 

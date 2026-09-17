@@ -148,7 +148,7 @@ func createRoleAndBidingForAlice(t *testing.T, manager dependency.Manager) (*mod
 	globalRoleBinding := NewGlobalRoleBinding("admin")
 	CreateAndWaitUntilEntityExists(t, manager.Persistence(), globalRoleBinding)
 	// Refresh the permissions to ensure Alice has the latest permissions
-	err := manager.Service().GetAuthorization().RefreshPermissions()
+	err := manager.Service().GetAuthorization().RefreshPermissionsAndRoles()
 	if err != nil {
 		t.Fatalf("failed to refresh permissions: %v", err)
 	}
@@ -167,13 +167,12 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{
 			SQL: &apiConfig.SQL{
-				User:                 "user",
-				Password:             "password",
-				Net:                  "tcp",
-				Addr:                 "localhost:3306",
-				DBName:               "perses",
-				AllowNativePasswords: true,
-				CaseSensitive:        true,
+				User:          "user",
+				Password:      "password",
+				Net:           "tcp",
+				Addr:          "localhost:3306",
+				DBName:        "perses",
+				CaseSensitive: true,
 			},
 		}
 	} else {
@@ -318,7 +317,8 @@ func NewOAuthProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OAuth
 // - The returned server is a simple HTTP test server that will return a mocked response for each endpoint.
 // Currently, this is only OK responses, but we can easily extend it to return more complex responses from given
 // constructor parameters.
-func NewOIDCProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OIDCProvider) {
+// - extraClaims, if non-nil, are embedded in the /token response (access token + ID token). Pass nil for the standard mock.
+func NewOIDCProviderTestServer(t *testing.T, extraClaims map[string]any) (*httptest.Server, apiConfig.OIDCProvider) {
 	authPath := "/auth"
 	deviceAuthPath := "/device"
 	tokenPath := "/token"
@@ -354,8 +354,8 @@ func NewOIDCProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OIDCPr
 			return
 		}
 		if strings.HasPrefix(request.RequestURI, tokenPath) {
-			accessToken, _ := ValidAccessToken(discoveryConfig.Issuer)
-			idToken, _ := ValidIDToken(discoveryConfig.Issuer)
+			accessToken, _ := NewAccessTokenCustom(discoveryConfig.Issuer, validSubject, validAudience, validExpiration(), validJWTID, validClientID, validSkew, extraClaims)
+			idToken, _ := NewIDTokenCustom(discoveryConfig.Issuer, validSubject, validAudience, validExpiration(), validAuthTime(), validNonce, validACR, validAMR, validClientID, validSkew, "", extraClaims)
 			body, err := json.Marshal(oidc.AccessTokenResponse{
 				AccessToken: accessToken,
 				TokenType:   "Bearer",

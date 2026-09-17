@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import type { EphemeralDashboardResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { EphemeralDashboardResource, fetchJson, StatusError } from '@perses-dev/client';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
 
@@ -24,7 +26,7 @@ export const resource = 'ephemeraldashboards';
  * Will automatically invalidate ephemeral dashboards and force the get query to be executed again.
  */
 export function useCreateEphemeralDashboardMutation(
-  onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown
+  onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown,
 ): UseMutationResult<EphemeralDashboardResource, StatusError, EphemeralDashboardResource> {
   const queryClient = useQueryClient();
 
@@ -94,7 +96,7 @@ export function useDeleteEphemeralDashboardMutation(): UseMutationResult<
  */
 export function useEphemeralDashboard(
   project: string,
-  name: string
+  name: string,
 ): UseQueryResult<EphemeralDashboardResource, StatusError> {
   return useQuery<EphemeralDashboardResource, StatusError>({
     queryKey: [resource, project, name],

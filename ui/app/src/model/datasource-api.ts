@@ -11,31 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback } from 'react';
-import { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
-import { PERSES_APP_CONFIG } from '../config';
+import type { DatasourceApi, DatasourceSelector } from '@perses-dev/client';
+import { buildProxyUrl } from '@perses-dev/client';
+import { useCallback, useMemo } from 'react';
+
 import { useDatasourceList } from './datasource-client';
 import { useGlobalDatasourceList } from './global-datasource-client';
-
-export function buildProxyUrl({
-  project,
-  dashboard,
-  name,
-}: {
-  project?: string;
-  dashboard?: string;
-  name: string;
-}): string {
-  const basePath = PERSES_APP_CONFIG.api_prefix;
-  let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
-  if (dashboard) {
-    url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
-  }
-  if (project) {
-    url = `projects/${encodeURIComponent(project)}/${url}`;
-  }
-  return `${basePath}/proxy/${url}`;
-}
 
 export function useDatasourceApi(): DatasourceApi {
   const { data: globalDatasources, isLoading: isGlobalDatasourcesPending } = useGlobalDatasourceList();
@@ -59,7 +40,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const getGlobalDatasource = useCallback(
@@ -77,7 +58,7 @@ export function useDatasourceApi(): DatasourceApi {
         return datasource.metadata.name.toLowerCase() === selector.name.toLowerCase();
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
   const listDatasources = useCallback(
@@ -95,7 +76,7 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [datasources, isDatasourcesPending]
+    [datasources, isDatasourcesPending],
   );
 
   const listGlobalDatasources = useCallback(
@@ -110,14 +91,17 @@ export function useDatasourceApi(): DatasourceApi {
         return true;
       });
     },
-    [globalDatasources, isGlobalDatasourcesPending]
+    [globalDatasources, isGlobalDatasourcesPending],
   );
 
-  return {
-    getDatasource,
-    getGlobalDatasource,
-    listDatasources,
-    listGlobalDatasources,
-    buildProxyUrl: buildProxyUrl,
-  };
+  return useMemo(
+    () => ({
+      getDatasource,
+      getGlobalDatasource,
+      listDatasources,
+      listGlobalDatasources,
+      buildProxyUrl,
+    }),
+    [getDatasource, getGlobalDatasource, listDatasources, listGlobalDatasources],
+  );
 }

@@ -110,57 +110,48 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	return nil
 }
 
+func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
+	defer close(ch)
+	folder, prefix, isExist, err := d.buildQuery(query)
+	if err != nil {
+		return fmt.Errorf("unable to build the query: %s", err)
+	}
+	if !isExist {
+		// There is nothing to send to the channel, so we can just stop here and return nil.
+		return nil
+	}
+	var files []string
+	if files, err = d.visit(folder, prefix); err != nil {
+		return fmt.Errorf("unable to visit files: %s", err)
+	}
+	if len(files) <= 0 {
+		// in case the result is empty, we can just stop here and return nil.
+		return nil
+	}
+	for _, file := range files {
+		// now read all files and send them to the channel.
+		data, readErr := os.ReadFile(file) //nolint: gosec
+		if readErr != nil {
+			return fmt.Errorf("unable to read file %s: %s", file, readErr)
+		}
+
+		jsonData, jsonErr := d.yamlToJSON(file, data)
+		if jsonErr != nil {
+			return fmt.Errorf("unable to convert YAML to JSON for file %s: %s", file, jsonErr)
+		}
+		ch <- jsonData
+	}
+	return nil
+}
+
 func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([]json.RawMessage, error) {
+	// this is implemented in the dao struct in database.go. This is just here to satisfy the interface.
 	return nil, fmt.Errorf("raw metadata query not implemented")
 }
 
-func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
-	folder, prefix, isExist, err := d.buildQuery(query)
-	if err != nil {
-		return nil, fmt.Errorf("unable to build the query: %s", err)
-	}
-	if !isExist {
-		// There is nothing to return. So let's initialize the slice just to avoid returning a nil slice
-		return make([]json.RawMessage, 0), nil
-	}
-	// so now we have the proper folder to looking for and potentially a filter to use
-	var files []string
-	if files, err = d.visit(folder, prefix); err != nil {
-		return nil, err
-	}
-	if len(files) <= 0 {
-		// in case the result is empty, let's initialize the slice just to avoid returning a nil slice
-		return make([]json.RawMessage, 0), nil
-	}
-	result := []json.RawMessage{}
-
-	for _, file := range files {
-		// now read all files and append them to the final result
-		data, readErr := os.ReadFile(file) //nolint: gosec
-		if readErr != nil {
-			return nil, readErr
-		}
-
-		// If it's YAML, we need to convert to JSON first
-		if d.Extension == config.YAMLExtension {
-			// Parse the YAML content
-			var yamlData any
-			if err := yaml.Unmarshal(data, &yamlData); err != nil {
-				return nil, fmt.Errorf("failed to parse YAML from %s: %w", file, err)
-			}
-
-			// Convert YAML to JSON
-			jsonData, err := json.Marshal(yamlData)
-			if err != nil {
-				return nil, fmt.Errorf("failed to convert to JSON from %s: %w", file, err)
-			}
-			result = append(result, json.RawMessage(jsonData))
-		} else {
-			// For JSON files, we can append directly
-			result = append(result, json.RawMessage(data))
-		}
-	}
-	return result, nil
+func (d *DAO) RawQuery(_ databaseModel.Query) ([]json.RawMessage, error) {
+	// this is implemented in the dao struct in database.go. This is just here to satisfy the interface.
+	return nil, fmt.Errorf("raw query not implemented")
 }
 
 func (d *DAO) Query(query databaseModel.Query, slice any) error {
@@ -313,6 +304,26 @@ func (d *DAO) marshal(entity any) ([]byte, error) {
 		return json.Marshal(entity)
 	}
 	return yaml.Marshal(entity)
+}
+
+func (d *DAO) yamlToJSON(file string, data []byte) ([]byte, error) {
+	// If it's YAML, we need to convert to JSON first
+	if d.Extension == config.YAMLExtension {
+		// Parse the YAML content
+		var yamlData any
+		if err := yaml.Unmarshal(data, &yamlData); err != nil {
+			return nil, fmt.Errorf("failed to parse YAML from %s: %w", file, err)
+		}
+
+		// Convert YAML to JSON
+		jsonData, err := json.Marshal(yamlData)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert to JSON from %s: %w", file, err)
+		}
+		return jsonData, nil
+	}
+	// For JSON files, we can append directly
+	return data, nil
 }
 
 func (d *DAO) visit(rootPath string, prefix string) ([]string, error) {

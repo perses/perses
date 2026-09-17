@@ -49,7 +49,6 @@ const (
 	PathProject            = "projects"
 	PathRole               = "roles"
 	PathRoleBinding        = "rolebindings"
-	PathSchemas            = "schemas"
 	PathSecret             = "secrets"
 	PathUnsaved            = "unsaved"
 	PathUser               = "users"
@@ -57,6 +56,7 @@ const (
 	PathVariable           = "variables"
 	PathView               = "view"
 	PathWhoAmI             = "whoami"
+	PathSearch             = "search"
 	ContextKeyAnonymous    = "anonymous"
 )
 

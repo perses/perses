@@ -38,9 +38,6 @@ validators:
   # timeout
   - regex: 'lodash\.com'
     type: 'ignore'
-  # timeout
-  - regex: 'eslint\.org'
-    type: 'ignore'
   # code 999
   - regex: 'linkedin\.com'
     type: 'ignore'

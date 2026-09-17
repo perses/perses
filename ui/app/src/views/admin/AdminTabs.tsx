@@ -12,47 +12,50 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import CodeJsonIcon from 'mdi-material-ui/CodeJson';
-import DatabaseIcon from 'mdi-material-ui/Database';
-import KeyIcon from 'mdi-material-ui/Key';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
-import ShieldIcon from 'mdi-material-ui/Shield';
-import AccountIcon from 'mdi-material-ui/Account';
-import {
+import type {
   GlobalDatasourceResource,
   GlobalRoleBindingResource,
   GlobalRoleResource,
   GlobalSecretResource,
   GlobalVariableResource,
 } from '@perses-dev/client';
-import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
-import { VariableDrawer } from '../../components/variable/VariableDrawer';
-import { useCreateGlobalVariableMutation, useGlobalVariableList } from '../../model/global-variable-client';
+import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import AccountIcon from 'mdi-material-ui/Account';
+import CodeJsonIcon from 'mdi-material-ui/CodeJson';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import KeyIcon from 'mdi-material-ui/Key';
+import ShieldIcon from 'mdi-material-ui/Shield';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+
+import type { CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
+import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
+import { RoleDrawer } from '../../components/roles/RoleDrawer';
+import { SecretDrawer } from '../../components/secrets/SecretDrawer';
+import { MenuLinkTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
+import { VariableDrawer } from '../../components/variable/VariableDrawer';
+import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import {
   useIsAuthEnabled,
   useIsGlobalDatasourceEnabled,
   useIsGlobalVariableEnabled,
   useIsReadonly,
 } from '../../context/Config';
-import { MenuLinkTab, MenuTabs, TabLabel, TabPanel } from '../../components/tabs';
-import { useCreateGlobalRoleBindingMutation, useGlobalRoleBindingList } from '../../model/global-rolebinding-client';
-import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
-import { RoleDrawer } from '../../components/roles/RoleDrawer';
-import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
-import { GlobalProject, useHasPermission } from '../../context/Authorization';
-import { useIsMobileSize } from '../../utils/browser-size';
-import { useCreateGlobalSecretMutation, useGlobalSecretList } from '../../model/global-secret-client';
-import { SecretDrawer } from '../../components/secrets/SecretDrawer';
 import { useCreateGlobalDatasourceMutation, useGlobalDatasourceList } from '../../model/global-datasource-client';
+import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
+import { useCreateGlobalRoleBindingMutation, useGlobalRoleBindingList } from '../../model/global-rolebinding-client';
+import { useCreateGlobalSecretMutation, useGlobalSecretList } from '../../model/global-secret-client';
+import { useCreateGlobalVariableMutation, useGlobalVariableList } from '../../model/global-variable-client';
 import { useUserList } from '../../model/user-client';
-import { GlobalVariables } from './tabs/GlobalVariables';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
-import { GlobalSecrets } from './tabs/GlobalSecrets';
-import { GlobalRoles } from './tabs/GlobalRoles';
 import { GlobalRoleBindings } from './tabs/GlobalRoleBindings';
+import { GlobalRoles } from './tabs/GlobalRoles';
+import { GlobalSecrets } from './tabs/GlobalSecrets';
+import { GlobalVariables } from './tabs/GlobalVariables';
 import { Users } from './tabs/Users';
 
 const datasourcesTabIndex = 'datasources';
@@ -99,7 +102,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation],
   );
 
   const handleGlobalRoleCreation = useCallback(
@@ -115,7 +118,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalRoleMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalRoleMutation],
   );
 
   const handleGlobalRoleBindingCreation = useCallback(
@@ -131,7 +134,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation],
   );
 
   const handleGlobalSecretCreation = useCallback(
@@ -147,7 +150,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalSecretMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalSecretMutation],
   );
 
   const handleGlobalVariableCreation = useCallback(
@@ -155,7 +158,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
       createGlobalVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: GlobalVariableResource) => {
           successSnackbar(
-            `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`
+            `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`,
           );
           setVariableDrawerOpened(false);
         },
@@ -165,7 +168,7 @@ function TabButton({ index, ...props }: TabButtonProps): ReactElement {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalVariableMutation],
   );
 
   switch (index) {

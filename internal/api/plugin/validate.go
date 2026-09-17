@@ -44,7 +44,7 @@ func IsRequiredFileExists(frontendFolder string, schemaFolder string, distFolder
 	// check if the package.json file exists
 	npmPackageData, readErr := ReadPackage(frontendFolder)
 	if readErr != nil {
-		return err
+		return readErr
 	}
 	// check if the schema folder exists only if it requires schema
 	if IsSchemaRequired(v1.ModuleSpec{

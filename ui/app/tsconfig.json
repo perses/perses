@@ -3,5 +3,6 @@
   "include": ["src"],
   "compilerOptions": {
     "sourceMap": true,
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
   }
 }

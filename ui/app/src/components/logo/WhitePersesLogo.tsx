@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, SVGProps } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 
 interface PersesLogoProps extends SVGProps<SVGSVGElement> {
   title?: string;

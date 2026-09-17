@@ -13,17 +13,26 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
+import type { Action, UserEditorSchemaType, UserResource } from '@perses-dev/client';
+import { userSchema } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { Fragment, useMemo, useState } from 'react';
+import type { Control, SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { z } from 'zod';
+
 import { useIsExternalAuthnProviderEnabled, useIsNativeAuthnProviderEnabled } from '../../context/Config';
-import { FormEditorProps } from '../form-drawers';
+import type { FormEditorProps } from '../form-drawers';
 
 type UserEditorFormProps = FormEditorProps<UserResource>;
+
+// The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
+const formSchema = z.transform((value: UserEditorSchemaType): unknown => value).pipe(userSchema);
 
 export function UserEditorForm({
   initialValue,
@@ -40,7 +49,7 @@ export function UserEditorForm({
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
-    const result = { ...initialValue };
+    const result = structuredClone(initialValue);
     if (result.spec.nativeProvider?.password) result.spec.nativeProvider.password = '';
     if (result.spec.oauthProviders === undefined) result.spec.oauthProviders = [];
     return result;
@@ -52,12 +61,12 @@ export function UserEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<UserEditorSchemaType>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(formSchema),
     mode: 'onBlur',
     defaultValues: initialUserClean,
   });
 
-  const { spec } = form.watch();
+  const nativeProvider = useWatch({ control: form.control, name: 'spec.nativeProvider' });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -182,7 +191,7 @@ export function UserEditorForm({
           <Typography variant="h1" mb={2}>
             Native Provider
           </Typography>
-          {spec.nativeProvider?.password === undefined ? (
+          {nativeProvider?.password === undefined ? (
             <IconButton
               disabled={isReadonly || action === 'read'}
               style={{ width: 'fit-content', height: 'fit-content' }}

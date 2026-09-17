@@ -2,8 +2,12 @@
   "extends": "./tsconfig.json",
   "exclude": ["**/*.stories.*", "**/*.test.*", "**/*.map"],
   "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./dist/lib",
+    "rootDir": "./src",
     "emitDeclarationOnly": true,
     "declaration": true,
+    "declarationMap": true,
     "preserveWatchOutput": true
   }
 }

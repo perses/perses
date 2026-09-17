@@ -36,7 +36,7 @@ variables:
 panels:
   <string>: <Panel specification> # Optional
 
-# `layouts` is the list of layouts. A layout describes how to display the list of panels. 
+# `layouts` is the list of layouts. A layout describes how to display the list of panels.
 # Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
 layouts:
   - <Layout specification>
@@ -176,7 +176,7 @@ content:
 ### Get a list of `Dashboard`
 
 ```bash
-GET /api/v1/projects/<project_name>/dasbhoards
+GET /api/v1/projects/<project_name>/dashboards
 ```
 
 URL query parameters:
@@ -186,7 +186,7 @@ URL query parameters:
 ### Get a single `Dashboard`
 
 ```bash
-GET /api/v1/projects/<project_name>/dasbhoards/<dasbhoard_name>
+GET /api/v1/projects/<project_name>/dashboards/<dashboard_name>
 ```
 
 ### Create a single `Dashboard`
@@ -198,11 +198,11 @@ POST /api/v1/projects/<project_name>/dashboards
 ### Update a single `Dashboard`
 
 ```bash
-PUT /api/v1/projects/<project_name>/dasbhoards/<dasbhoard_name>
+PUT /api/v1/projects/<project_name>/dashboards/<dashboard_name>
 ```
 
 ### Delete a single `Dashboard`
 
 ```bash
-DELETE /api/v1/projects/<project_name>/dasbhoards/<dasbhoard_name>
+DELETE /api/v1/projects/<project_name>/dashboards/<dashboard_name>
 ```

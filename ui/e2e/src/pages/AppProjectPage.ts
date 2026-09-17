@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import { escapeRegExp } from '../utils';
 import { DatasourceEditor } from './DatasourceEditor';
-import { VariableEditor } from './VariableEditor';
 import { SecretEditor } from './SecretEditor';
+import { VariableEditor } from './VariableEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
 
@@ -97,11 +99,18 @@ export class AppProjectPage {
     await this.addDashboardButton.click();
 
     const nameInput = this.createDashboardDialog.getByRole('textbox', {
-      name: 'Name',
+      name: 'Dashboard Name',
+      exact: true,
     });
-    await nameInput.type(name);
+    await nameInput.fill(name);
 
-    await this.createDashboardDialog.getByRole('button', { name: 'Add' }).click();
+    // Trigger onBlur validation before Playwright waits for the submit button to become enabled.
+    await nameInput.press('Tab');
+
+    const addButton = this.createDashboardDialog.getByRole('button', { name: 'Add', exact: true });
+    await expect(addButton).toBeEnabled();
+    await addButton.click();
+    await expect(this.createDashboardDialog).toBeHidden();
   }
 
   /**

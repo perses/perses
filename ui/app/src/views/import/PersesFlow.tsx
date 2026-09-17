@@ -12,14 +12,16 @@
 // limitations under the License.
 
 import { Alert, Autocomplete, Button, Stack, TextField, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
-import Import from 'mdi-material-ui/Import';
-import { useNavigate } from 'react-router-dom';
+import type { DashboardResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/client';
-import { useProjectList } from '../../model/project-client';
-import { useCreateDashboardMutation } from '../../model/dashboard-client';
+import Import from 'mdi-material-ui/Import';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { useIsReadonly } from '../../context/Config';
+import { useCreateDashboardMutation } from '../../model/dashboard-client';
+import { useProjectList } from '../../model/project-client';
 
 interface PersesFlowProps {
   dashboard: DashboardResource;
@@ -36,8 +38,9 @@ function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
   });
 
   const importOnClick = (): void => {
-    dashboard.metadata.project = projectName;
-    dashboardMutation.mutate(dashboard);
+    const dashboardToCreate = structuredClone(dashboard);
+    dashboardToCreate.metadata.project = projectName;
+    dashboardMutation.mutate(dashboardToCreate);
   };
 
   if (error) {

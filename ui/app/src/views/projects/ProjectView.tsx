@@ -11,19 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Stack, CircularProgress } from '@mui/material';
-import React, { ReactElement, useState } from 'react';
+import type { ProjectResource } from '@perses-dev/client';
+import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
-import { ProjectResource } from '@perses-dev/client';
-import { DeleteResourceDialog, RenameResourceDialog } from '../../components/dialogs';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { DeleteResourceDialog, RenameResourceDialog } from '../../components/dialogs';
 import PageHeader from '../../components/page-header/PageHeader';
-import { useIsMobileSize } from '../../utils/browser-size';
 import { useDeleteProjectMutation, useProject, useUpdateProjectMutation } from '../../model/project-client';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { ProjectTabs } from './ProjectTabs';
 
 function ProjectView(): ReactElement {
@@ -55,7 +57,7 @@ function ProjectView(): ReactElement {
           exceptionSnackbar(err);
           throw err;
         },
-      }
+      },
     );
   }
 
@@ -72,7 +74,7 @@ function ProjectView(): ReactElement {
           exceptionSnackbar(err);
           throw err;
         },
-      }
+      },
     );
   }
 

@@ -1,0 +1,29 @@
+{
+  "uid": "panel-repeat-only-test",
+  "title": "Panel Repeat Only Dashboard",
+  "panels": [
+    {
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "repeat": "myVar",
+      "title": "Repeated Panel",
+      "type": "timeseries"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "myVar",
+        "type": "custom",
+        "query": "value1,value2",
+        "current": { "text": "value1", "value": "value1" },
+        "options": [
+          { "selected": true, "text": "value1", "value": "value1" },
+          { "selected": false, "text": "value2", "value": "value2" }
+        ]
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "schemaVersion": 41
+}

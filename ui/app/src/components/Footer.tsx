@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, CircularProgress, Link, Theme } from '@mui/material';
-import { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
+import type { Theme } from '@mui/material';
+import { Box, CircularProgress, Link } from '@mui/material';
+import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import Github from 'mdi-material-ui/Github';
-import { useSnackbar } from '@perses-dev/components';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+
 import { useHealth } from '../model/health-client';
 
 const style: SxProps<Theme> = {
@@ -64,12 +65,7 @@ function VersionInfo({
 }
 
 export default function Footer(): ReactElement {
-  const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading, error } = useHealth();
-
-  if (error) {
-    exceptionSnackbar(error);
-  }
+  const { data, isLoading } = useHealth();
 
   return (
     <Box component="footer" sx={style}>

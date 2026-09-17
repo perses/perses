@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Scope } from '@perses-dev/client';
+import type { Action, Scope } from '@perses-dev/client';
+
+export enum ProfileSections {
+  AUTHENTICATION,
+  PERMISSIONS,
+  PREFERENCES,
+}
 
 export interface IFlatPermission {
   key: string;
@@ -28,7 +34,7 @@ export interface IFlatPermission {
  * @returns
  */
 export const normalizePermissions = (flatPermissions: IFlatPermission[]): IFlatPermission[] => {
-  /* 
+  /*
     Avoid mutate the original array and return a cloned version 
     There might be a feature to toggle views of Raw and normalized data
   */
@@ -47,7 +53,7 @@ export const normalizePermissions = (flatPermissions: IFlatPermission[]): IFlatP
           fullGrantItems.add(`${item.key}`);
         }
       } else {
-        /* 
+        /*
         This block finds redundant actions 
         Redundant actions should not be rendered for individual scopes
         Because they are already covered by the '*' scope

@@ -172,14 +172,17 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		httpClient = oauthConfig.Client(ctx)
 	}
 	if config.K8sAuth != nil {
-		token, getTokenErr := config.K8sAuth.GetToken()
-		if getTokenErr != nil {
-			return nil, getTokenErr
+		baseRoundTripper := roundTripper
+		if httpClient != nil {
+			baseRoundTripper = httpClient.Transport
 		}
-		if len(config.Headers) == 0 {
-			config.Headers = map[string]string{}
+		roundTripper, err = config.K8sAuth.WrapRoundTripper(baseRoundTripper)
+		if err != nil {
+			return nil, err
 		}
-		config.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
+		if httpClient != nil {
+			httpClient.Transport = roundTripper
+		}
 	}
 
 	if httpClient == nil {

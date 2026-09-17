@@ -13,13 +13,15 @@
 
 import { Box, Button, Chip, Stack, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { NoDataOverlay, useSnackbar } from '@perses-dev/components';
-import { useMemo, useState } from 'react';
 import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { NoDataOverlay, useSnackbar } from '@perses-dev/components';
 import type { PluginModuleResource } from '@perses-dev/plugin-system';
+import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
+
 import { DATA_GRID_SLOT_PROPS, DATA_GRID_STYLES, GridToolbar, PAGE_SIZE_OPTIONS } from '../../components/datagrid';
 import { PersesLoader } from '../../components/PersesLoader';
+import { useDefaultRowsPerPage } from '../../context/Config';
 import { usePlugins } from '../../model/plugin-client';
 import { PluginDetailsDialog } from './PluginDetailsDialog';
 
@@ -37,6 +39,7 @@ function NoPluginRowOverlay(): ReactElement {
 }
 
 export function PluginsList(): ReactElement {
+  const defaultRowsPerPage = useDefaultRowsPerPage();
   const [selectedPluginModule, setSelectedPluginModule] = useState<PluginModuleResource | null>(null);
   const { exceptionSnackbar } = useSnackbar();
 
@@ -123,7 +126,7 @@ export function PluginsList(): ReactElement {
         ),
       },
     ],
-    []
+    [],
   );
 
   if (isLoading || pluginModules === undefined) {
@@ -144,7 +147,7 @@ export function PluginsList(): ReactElement {
         columns={columns}
         slots={{ toolbar: GridToolbar, noRowsOverlay: NoPluginRowOverlay }}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
+        initialState={{ pagination: { paginationModel: { pageSize: defaultRowsPerPage, page: 0 } } }}
         slotProps={DATA_GRID_SLOT_PROPS}
         sx={{
           ...DATA_GRID_STYLES,

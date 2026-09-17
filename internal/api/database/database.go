@@ -57,21 +57,35 @@ func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 func (d *dao) Query(query databaseModel.Query, slice any) error {
 	return d.client.Query(query, slice)
 }
+func (d *dao) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
+	return d.client.StreamRaw(query, ch)
+}
 func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
-	return d.client.RawQuery(query)
+	ch := make(chan json.RawMessage)
+	var err error
+	go func() {
+		err = d.StreamRaw(query, ch)
+	}()
+	result := make([]json.RawMessage, 0)
+	for data := range ch {
+		result = append(result, data)
+	}
+	return result, err
 }
 func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
-	raws, err := d.client.RawQuery(query)
-	if err != nil {
-		return nil, err
-	}
-	// now let's extract the metadata and the kind
-	result := make([]json.RawMessage, 0, len(raws))
-	for _, raw := range raws {
+	ch := make(chan json.RawMessage)
+	var err error
+	go func() {
+		// Using the StreamRaw method to get the raw data in a stream will reduce the cost of memory allocation
+		// and improve performance when the number of resources is large.
+		err = d.StreamRaw(query, ch)
+	}()
+	result := make([]json.RawMessage, 0)
+	for raw := range ch {
 		metadata := gjson.GetBytes(raw, "metadata").String()
 		result = append(result, fmt.Appendf(nil, `{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata))
 	}
-	return result, nil
+	return result, err
 }
 func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
 	return d.client.Delete(kind, metadata)
@@ -96,31 +110,46 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		}
 	} else if conf.SQL != nil {
 		c := conf.SQL
-		mysqlConfig := mysql.Config{
-			User:                     string(c.User),
-			Passwd:                   string(c.Password),
-			Net:                      c.Net,
-			Addr:                     string(c.Addr),
-			DBName:                   c.DBName,
-			Collation:                c.Collation,
-			Loc:                      c.Loc,
-			MaxAllowedPacket:         c.MaxAllowedPacket,
-			ServerPubKey:             c.ServerPubKey,
-			Timeout:                  time.Duration(c.Timeout),
-			ReadTimeout:              time.Duration(c.ReadTimeout),
-			WriteTimeout:             time.Duration(c.WriteTimeout),
-			AllowAllFiles:            c.AllowAllFiles,
-			AllowCleartextPasswords:  c.AllowCleartextPasswords,
-			AllowFallbackToPlaintext: c.AllowFallbackToPlaintext,
-			AllowNativePasswords:     c.AllowNativePasswords,
-			AllowOldPasswords:        c.AllowOldPasswords,
-			CheckConnLiveness:        c.CheckConnLiveness,
-			ClientFoundRows:          c.ClientFoundRows,
-			ColumnsWithAlias:         c.ColumnsWithAlias,
-			InterpolateParams:        c.InterpolateParams,
-			MultiStatements:          c.MultiStatements,
-			ParseTime:                c.ParseTime,
-			RejectReadOnly:           c.RejectReadOnly,
+		// Start from the driver's default config (via NewConfig) rather than a bare
+		// struct literal, so that sane defaults such as CheckConnLiveness=true,
+		// AllowNativePasswords=true, Loc=time.UTC and MaxAllowedPacket are preserved
+		// unless explicitly overridden.
+		mysqlConfig := mysql.NewConfig()
+		mysqlConfig.User = string(c.User)
+		mysqlConfig.Passwd = string(c.Password)
+		mysqlConfig.Net = c.Net
+		mysqlConfig.Addr = string(c.Addr)
+		mysqlConfig.DBName = c.DBName
+		if c.Collation != "" {
+			mysqlConfig.Collation = c.Collation
+		}
+		if c.Loc != nil {
+			mysqlConfig.Loc = c.Loc
+		}
+		if c.MaxAllowedPacket != 0 {
+			mysqlConfig.MaxAllowedPacket = c.MaxAllowedPacket
+		}
+		mysqlConfig.ServerPubKey = c.ServerPubKey
+		mysqlConfig.Timeout = time.Duration(c.Timeout)
+		mysqlConfig.ReadTimeout = time.Duration(c.ReadTimeout)
+		mysqlConfig.WriteTimeout = time.Duration(c.WriteTimeout)
+		mysqlConfig.AllowAllFiles = c.AllowAllFiles
+		mysqlConfig.AllowCleartextPasswords = c.AllowCleartextPasswords
+		mysqlConfig.AllowFallbackToPlaintext = c.AllowFallbackToPlaintext
+		mysqlConfig.AllowOldPasswords = c.AllowOldPasswords
+		mysqlConfig.ClientFoundRows = c.ClientFoundRows
+		mysqlConfig.ColumnsWithAlias = c.ColumnsWithAlias
+		mysqlConfig.InterpolateParams = c.InterpolateParams
+		mysqlConfig.MultiStatements = c.MultiStatements
+		mysqlConfig.ParseTime = c.ParseTime
+		mysqlConfig.RejectReadOnly = c.RejectReadOnly
+		// AllowNativePasswords and CheckConnLiveness default to true via NewConfig.
+		// Only override them when the user explicitly set a value in the config.
+		if c.AllowNativePasswords != nil {
+			mysqlConfig.AllowNativePasswords = *c.AllowNativePasswords
+		}
+		if c.CheckConnLiveness != nil {
+			mysqlConfig.CheckConnLiveness = *c.CheckConnLiveness
 		}
 
 		// (OPTIONAL) Configure TLS
@@ -141,6 +170,17 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		db, err := sql.Open("mysql", mysqlConfig.FormatDSN())
 		if err != nil {
 			return nil, err
+		}
+		// Configure the connection pool. Retiring connections before the server's
+		// wait_timeout prevents stale connections from being reused, which is the
+		// main cause of intermittent health check ping failures.
+		db.SetConnMaxLifetime(time.Duration(c.ConnMaxLifetime))
+		db.SetConnMaxIdleTime(time.Duration(c.ConnMaxIdleTime))
+		if c.MaxOpenConns > 0 {
+			db.SetMaxOpenConns(c.MaxOpenConns)
+		}
+		if c.MaxIdleConns > 0 {
+			db.SetMaxIdleConns(c.MaxIdleConns)
 		}
 		client = &databaseSQL.DAO{
 			DB:            db,
