@@ -45,9 +45,6 @@ export class PanelEditor {
   }
 
   async isClosed(): Promise<void> {
-    // Wait for all animations to complete to avoid misclicking as the panel
-    // animates out.
-    await waitForAnimations(this.container);
     await expect(this.container).toHaveCount(0);
   }
 

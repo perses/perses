@@ -52,7 +52,8 @@ test.describe('Dashboard: Panels can be duplicated', () => {
       const originalBounds = await originalPanel.getBounds();
       const duplicateBounds = await duplicatePanel.getBounds();
       expect(originalBounds.height).toEqual(duplicateBounds.height);
-      expect(originalBounds.width).toEqual(duplicateBounds.width);
+      // Snapgrid rounds each tile's edges, so equal column spans can differ by one pixel.
+      expect(Math.abs(originalBounds.width - duplicateBounds.width)).toBeLessThanOrEqual(1);
 
       // Duplicate panel should have the same content.
       const originalContent = await originalPanel.figure.innerHTML();
@@ -96,13 +97,13 @@ test.describe('Dashboard: Panels can be duplicated', () => {
 
       const originalPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated' });
       await expect(originalPanel.container).toBeVisible();
-      const orignalPanelCount = await dashboardPage.getPanels(panelGroup).count();
+      const originalPanelCount = await panelGroup.gridItems.count();
 
       // Duplicate the original panel
       await originalPanel.duplicateButton().then((x) => x.click());
 
       // Wait for new panel to be added and loaded.
-      await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(orignalPanelCount + 1);
+      await expect(panelGroup.gridItems).toHaveCount(originalPanelCount + 1);
       const newPanel = dashboardPage.getPanel({ group: panelGroup, name: 'panel being duplicated', nth: 1 });
       await newPanel.isLoaded();
     });
