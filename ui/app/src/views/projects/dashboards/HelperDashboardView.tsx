@@ -19,7 +19,7 @@ import { ViewDashboard } from '@perses-dev/dashboards';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import type { DashboardSpec } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 import { PERSES_APP_CONFIG } from '../../../config';
@@ -34,6 +34,7 @@ import { useGlobalVariableList } from '../../../model/global-variable-client';
 import { useProject } from '../../../model/project-client';
 import { useRemotePluginLoader } from '../../../model/remote-plugin-loader';
 import { useVariableList } from '../../../model/variable-client';
+import { buildDashboardDocumentTitle } from '../../../utils/document-title';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 
 export interface GenericDashboardViewProps {
@@ -78,6 +79,18 @@ export function HelperDashboardView(props: GenericDashboardViewProps): ReactElem
     ],
     [dashboardResource.metadata.project, projectVars, globalVars],
   );
+
+  // Browser tab title: dashboard display name (Grafana parity for multi-tab workflows).
+  useEffect((): (() => void) => {
+    const previousTitle = document.title;
+    document.title = buildDashboardDocumentTitle(
+      getResourceDisplayName(dashboardResource),
+      dashboardResource.metadata.project,
+    );
+    return (): void => {
+      document.title = previousTitle || 'Perses';
+    };
+  }, [dashboardResource]);
 
   if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
     return (
