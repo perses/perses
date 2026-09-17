@@ -200,6 +200,11 @@ type OIDCProvider struct {
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
+	// CustomLoginProperty is the name of the userinfo property to use as the "login" of the user
+	// (e.g. "preferred_username"). It must be one of the properties Perses already extracts from
+	// the userinfo response. If not set or not found in the response, it falls back to the email,
+	// then to the subject.
+	CustomLoginProperty string `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *OIDCProvider) Verify() error {

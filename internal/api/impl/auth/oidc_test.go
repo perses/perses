@@ -32,6 +32,74 @@ import (
 	"golang.org/x/oauth2"
 )
 
+func TestOIDCUserInfoGetLogin(t *testing.T) {
+	tests := []struct {
+		name          string
+		userInfo      oidcUserInfo
+		expectedLogin string
+	}{
+		{
+			name: "no custom login property falls back to email",
+			userInfo: oidcUserInfo{
+				externalUserInfoProfile: externalUserInfoProfile{
+					Email:             "john.doe@example.com",
+					PreferredUsername: "jdoe",
+				},
+				Subject: "subject-123",
+			},
+			expectedLogin: "john.doe",
+		},
+		{
+			name: "no email and no custom login property falls back to subject",
+			userInfo: oidcUserInfo{
+				Subject: "subject-123",
+			},
+			expectedLogin: "subject-123",
+		},
+		{
+			name: "custom login property preferred_username is used",
+			userInfo: oidcUserInfo{
+				externalUserInfoProfile: externalUserInfoProfile{
+					Email:             "john.doe@example.com",
+					PreferredUsername: "jdoe",
+				},
+				Subject:       "subject-123",
+				loginProperty: "preferred_username",
+			},
+			expectedLogin: "jdoe",
+		},
+		{
+			name: "custom login property configured but empty in userinfo falls back to email",
+			userInfo: oidcUserInfo{
+				externalUserInfoProfile: externalUserInfoProfile{
+					Email: "john.doe@example.com",
+				},
+				Subject:       "subject-123",
+				loginProperty: "preferred_username",
+			},
+			expectedLogin: "john.doe",
+		},
+		{
+			name: "unknown custom login property falls back to email",
+			userInfo: oidcUserInfo{
+				externalUserInfoProfile: externalUserInfoProfile{
+					Email:             "john.doe@example.com",
+					PreferredUsername: "jdoe",
+				},
+				Subject:       "subject-123",
+				loginProperty: "unknown_property",
+			},
+			expectedLogin: "john.doe",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expectedLogin, tt.userInfo.GetLogin())
+		})
+	}
+}
+
 func TestGetRootURL(t *testing.T) {
 	tests := []struct {
 		name            string
