@@ -244,20 +244,24 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 		return nil, apiInterface.InternalError
 	}
 
-	// Claim-based check: if wildcard permission found via claims, short-circuit.
 	usr, err := n.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// Claim and cache checks read the cache, so they must be done under the read lock.
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	// Claim-based check: if wildcard permission found via claims, short-circuit.
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		if claimProjects := projectsWithPermission(n.claimPermissions(claims), requestAction, requestScope); len(claimProjects) > 0 {
 			return claimProjects, nil
 		}
 	}
-
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return projectsWithPermission(n.cache.permissions[username], requestAction, requestScope), nil
+	// The wildcard user ("*") applies to every user, so its permissions are merged with
+	// the user-specific ones.
+	userPermissions := mergePermissions(n.cache.permissions[v1.WildcardUser], n.cache.permissions[username])
+	return projectsWithPermission(userPermissions, requestAction, requestScope), nil
 }
 
 func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
@@ -285,12 +289,15 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 	if ok := listHasPermission(n.guestPermissions, requestAction, requestScope); ok {
 		return true
 	}
-	// Claim-based check (stateless, from JWT)
+	// Claim and cache checks read the cache, so they must be done under the read lock.
 	usr, err := n.GetUser(ctx)
 	if err != nil {
 		logrus.WithError(err).Error("unable to retrieve user from context")
 		return false
 	}
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	// Claim-based check (stateless, from JWT)
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
 		claimPerms := n.claimPermissions(claims)
 		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
@@ -301,8 +308,6 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		}
 	}
 	// Checking cached permissions
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
@@ -312,8 +317,6 @@ func (n *native) HasCreateProjectPermission(ctx echo.Context, projectName string
 }
 
 func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	username, err := n.GetUsername(ctx)
 	if err != nil {
 		return nil, err
@@ -323,20 +326,23 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 		logrus.Error("No username found in the context, this should not happen in a native RBAC implementation")
 		return nil, apiInterface.InternalError
 	}
-	userPermissions := make(map[string][]*v1Role.Permission)
-	userPermissions[v1.WildcardProject] = n.guestPermissions
-	for project, projectPermissions := range n.cache.permissions[username] {
-		userPermissions[project] = append(userPermissions[project], projectPermissions...)
-	}
-	// Merge claim-based permissions
 	usr, err := n.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// Cache reads (user, wildcard user and claim permissions) are done under the read lock.
+	n.mutex.RLock()
+	defer n.mutex.RUnlock()
+	// Guest permissions apply to the wildcard project.
+	userPermissions := map[string][]*v1Role.Permission{v1.WildcardProject: n.guestPermissions}
+	// The wildcard user ("*") applies to every user, so its permissions are merged with
+	// the user-specific ones.
+	userPermissions = mergePermissions(userPermissions, n.cache.permissions[v1.WildcardUser])
+	userPermissions = mergePermissions(userPermissions, n.cache.permissions[username])
+	// Merge claim-based permissions.
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		for project, perms := range n.claimPermissions(claims) {
-			userPermissions[project] = append(userPermissions[project], perms...)
-		}
+		userPermissions = mergePermissions(userPermissions, n.claimPermissions(claims))
 	}
 	return userPermissions, nil
 }
@@ -417,6 +423,7 @@ func (n *native) loadAllPermissionsAndRoles() (usersPermissions, []*v1.GlobalRol
 // the provider's claim→role mappings defined in the config.
 // Returns a map of project → permissions (using v1.WildcardProject for GlobalRole mappings).
 // Returns nil when no matching mappings are found.
+// The caller must hold n.mutex for reading, as role definitions are read from the cache.
 func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role.Permission {
 	if claims == nil || len(claims.PersistedClaims) == 0 {
 		return nil
@@ -428,8 +435,6 @@ func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role
 	}
 
 	result := make(map[string][]*v1Role.Permission)
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	for _, m := range mappings {
 		claimValues := claims.PersistedClaims[m.claimName]
 		if !slices.Contains(claimValues, m.claimValue) {
