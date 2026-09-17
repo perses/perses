@@ -293,9 +293,9 @@ logout:
   # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
   logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
 
-# Name of the userinfo property to use as the "login" of the user.
-# If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
-custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
+  # Name of the userinfo property to use as the "login" of the user.
+  # If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
+  custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
 ```
 
 ##### OAuth provider
