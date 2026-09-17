@@ -36,7 +36,7 @@ test.describe('Dashboard: Panels can be duplicated', () => {
     await duplicateOne.duplicateButton().then((x) => x.click());
     const duplicateTwo = dashboardPage.getPanel({ group: panelGroup, nth: 2 });
 
-    await expect(dashboardPage.getPanels(panelGroup)).toHaveCount(3);
+    await expect(panelGroup.gridItems).toHaveCount(3);
     await expect(dashboardPage.getPanelHeadings(panelGroup)).toContainText([
       'panel being duplicated',
       'panel being duplicated',

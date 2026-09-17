@@ -23,7 +23,7 @@ test.describe('Dashboard: Panels', () => {
     await dashboardPage.addPanelToGroup('Row 1');
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.getPanels()).toHaveCount(2);
+    await expect(dashboardPage.getGridItems()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
@@ -40,7 +40,7 @@ test.describe('Dashboard: Panels', () => {
 
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.getPanels()).toHaveCount(2);
+    await expect(dashboardPage.getGridItems()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
@@ -50,7 +50,7 @@ test.describe('Dashboard: Panels', () => {
   test('can be removed', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.removePanel('Markdown Example Zero');
-    await expect(dashboardPage.getPanels()).toHaveCount(0);
+    await expect(dashboardPage.getGridItems()).toHaveCount(0);
   });
 
   test('can be moved to a different panel group', async ({ dashboardPage }) => {
@@ -139,7 +139,12 @@ test.describe('Dashboard: Panels', () => {
 
       // Panel returns to the original size, which should be ~25%.
       await page.setViewportSize(previousViewport);
-      await expect.poll(() => panelGroup.getPanelPercentOfBounds(panel)).toEqual(originalPanelPercentSize);
+      await expect
+        .poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width)
+        .toBeCloseTo(originalPanelPercentSize.width, 1);
+      await expect
+        .poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).height)
+        .toBeCloseTo(originalPanelPercentSize.height, 1);
     }
   });
 });

@@ -77,6 +77,7 @@ test.describe('Keyboard Shortcuts', () => {
     await togglePanelViewModeButton.click();
     await expect(page).toHaveURL(/viewPanelRef=/);
 
+    // Snapgrid's aria-disabled view-mode wrapper blocks Playwright's edit-button click, so open with E.
     // Re-enter the expanded panel and wait for its debounced shortcut focus.
     await dashboardPage.toolbar.hover();
     // Hovering away clears shortcut state but can leave the old DOM focus behind.
