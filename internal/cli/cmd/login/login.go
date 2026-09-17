@@ -273,10 +273,10 @@ func (o *option) selectAndSetProvider() error {
 
 	if providers.KubernetesProvider.Enable {
 		optKey := "Kubernetes"
-		optValue := string(delegatedAuthnKindK8s)
+		optValue := delegatedAuthnKindK8s
 		options = append(options, huh.NewOption(optKey, optValue))
 		modifiers[optValue] = func() {
-			o.setExternalAuthnProvider(delegatedAuthnKindK8s, string(delegatedAuthnKindK8s))
+			o.setExternalAuthnProvider(delegatedAuthnKindK8s, delegatedAuthnKindK8s)
 		}
 	}
 
@@ -297,6 +297,9 @@ func (o *option) selectAndSetProvider() error {
 }
 
 func (o *option) promptProvider(options []huh.Option[string]) (string, error) {
+	if err := ensureInteractive("authentication provider", "--provider (with --client-id/--client-secret), --username/--password or --token"); err != nil {
+		return "", err
+	}
 	selectedItem := ""
 	sel := huh.NewSelect[string]().
 		Title("Select Provider")
