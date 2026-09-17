@@ -50,6 +50,14 @@ const SLOTS_WITH_TOOLBAR = {
 };
 const getRowId = (row: Row): string => row.name;
 
+const EPHEMERAL_DASHBOARD_GRID_STYLES = {
+  ...DATA_GRID_STYLES,
+  // Row clicks no longer navigate; keep the pointer cursor on the name link only.
+  '& .MuiDataGrid-row:hover': {
+    cursor: 'default',
+  },
+};
+
 export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
   const { columns, rows, initialState, hideToolbar, isLoading } = props;
@@ -74,7 +82,7 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
         slotProps={DATA_GRID_SLOT_PROPS}
-        sx={DATA_GRID_STYLES}
+        sx={EPHEMERAL_DASHBOARD_GRID_STYLES}
       />
     </div>
   );
