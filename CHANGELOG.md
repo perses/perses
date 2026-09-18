@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.55.0-beta.2 / 2026-09-18
+
+### Core & UI
+
+- [FEATURE] Add dashboard lock mode (#4370)
+- [FEATURE] Add default flag to datasource discovery configuration (#4368)
+- [ENHANCEMENT] Allow opening dashboards and tabs in new tabs (#4252)
+- [ENHANCEMENT] Add Cache-Control headers for static UI assets (#4475)
+- [ENHANCEMENT] Support custom login property for the OIDC provider (#4468)
+- [ENHANCEMENT] CLI/LOGIN: check the terminal if it is interactive (#4469)
+- [BUGFIX] CUE SDK: fix wrong lib (#4471)
+- [DOC] Fix configuration doc: discovery is an array (#4462)
+
+### Plugins improvements
+
+- [FEATURE] Pyroscope: add configurable minStep to datasource (#810)
+- [FEATURE] Prometheus: add Exemplars support (#799)
+- [ENHANCEMENT] Pyroscope: scope profile type options to the selected service for pyroscope (#820)
+- [ENHANCEMENT] DatasourceVariable, Jaeger, OpenSearch: support jaeger and opensearch in migration (#769)
+- [DOC] Table: Document Table embedded panels (#816)
+
 ## 0.55.0-beta.1 / 2026-09-16
 
 This release comes to fix the 0.55.0-beta.0 release that was not fully released.
