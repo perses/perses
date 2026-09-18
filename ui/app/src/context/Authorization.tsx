@@ -106,6 +106,26 @@ export function useHasPermission(action: Action, project: string, scope: Scope):
   return permissionListHasPermission(userPermissions[project] ?? [], action, scope);
 }
 
+/*
+ * useHasPermissionInAnyProject is a helper for knowing if a user can perform an action on a scope
+ * in any project, including global (`*`) permissions.
+ * It's only a check client-side, easily bypassable.
+ * It will always return true if the authorization is disabled.
+ */
+export function useHasPermissionInAnyProject(action: Action, scope: Scope): boolean {
+  const { enabled, username, userPermissions } = useAuthorizationContext();
+
+  if (!enabled) {
+    return true;
+  }
+
+  if (!username) {
+    return false;
+  }
+
+  return Object.values(userPermissions).some((permissions) => permissionListHasPermission(permissions, action, scope));
+}
+
 function permissionListHasPermission(permissions: Permission[], requestAction: Action, requestScope: Scope): boolean {
   return permissions.some(
     (permission) =>
