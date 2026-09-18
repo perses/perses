@@ -22,12 +22,11 @@ package panelgroup
 
 import (
 	"math"
-	"github.com/perses/perses/cue/model/api/v1"
 	"github.com/perses/spec/cue/dashboard"
 )
 
 // expected user inputs
-#panels: [...v1.#Panel]
+#panels: [...dashboard.#Panel]
 #title:           string
 #isCollapsed?:    bool
 #repeatVariable?: string

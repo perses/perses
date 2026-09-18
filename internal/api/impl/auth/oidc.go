@@ -46,6 +46,8 @@ type oidcUserInfo struct {
 	Subject string `json:"sub,omitempty"`
 	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
 	issuer string
+	// loginProperty is not supposed to be taken from json, but instead it must be set right before the db sync.
+	loginProperty config.LoginProperty
 }
 
 // GetSubject implements [rp.SubjectGetter]
@@ -53,10 +55,36 @@ func (u *oidcUserInfo) GetSubject() string {
 	return u.Subject
 }
 
+// getProfileProperty returns the value of the given userinfo property already extracted into
+// externalUserInfoProfile. If the property is unknown or empty, it falls back to the first part
+// of the email.
+func (u *oidcUserInfo) getProfileProperty(name config.LoginProperty) string {
+	switch name {
+	case config.LoginPropertyName:
+		return u.Name
+	case config.LoginPropertyGivenName:
+		return u.GivenName
+	case config.LoginPropertyFamilyName:
+		return u.FamilyName
+	case config.LoginPropertyMiddleName:
+		return u.MiddleName
+	case config.LoginPropertyNickname:
+		return u.Nickname
+	case config.LoginPropertyPreferredUsername:
+		return u.PreferredUsername
+	case config.LoginPropertyEmail:
+		return buildLoginFromEmail(u.Email)
+	default:
+		return buildLoginFromEmail(u.Email)
+	}
+}
+
 // GetLogin implements [externalUserInfo]
-// It uses the first part of the email to create the username.
+// If no custom login property is configured, or it is set to "email", the first part of the email
+// is used. If a custom login property is configured and present in the userinfo response, it is
+// used as-is. In any case, it falls back to the subject if the resulting value is empty.
 func (u *oidcUserInfo) GetLogin() string {
-	login := buildLoginFromEmail(u.Email)
+	login := u.getProfileProperty(u.loginProperty)
 	if len(login) > 0 {
 		return login
 	}
@@ -151,6 +179,7 @@ type oIDCEndpoint struct {
 	slugID                 string
 	urlParams              map[string]string
 	issuer                 string
+	customLoginProperty    config.LoginProperty
 	svc                    service
 	claimConfigs           []config.ProviderClaimConfig
 	extraLogoutHandler     echo.HandlerFunc
@@ -219,6 +248,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO,
 		slugID:                 provider.SlugID,
 		urlParams:              provider.URLParams,
 		issuer:                 provider.Issuer.String(),
+		customLoginProperty:    provider.CustomLoginProperty,
 		svc:                    service{dao: dao, authz: authz},
 		claimConfigs:           provider.Claims,
 		extraLogoutHandler:     extraLogoutHandler,
@@ -419,8 +449,9 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
 func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, persistedClaims map[string][]string, setCookie func(cookie *http.Cookie), oidcToken *oauth2.Token) (*oauth2.Token, error) {
-	// We don´t forget to set the issuer before making any sync in the database.
+	// We don´t forget to set the issuer and the login property before making any sync in the database.
 	userInfo.issuer = e.issuer
+	userInfo.loginProperty = e.customLoginProperty
 
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {

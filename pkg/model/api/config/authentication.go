@@ -63,7 +63,7 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 
 type HTTP struct {
 	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
-	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 }
 
 func (h HTTP) MarshalYAML() (any, error) {
@@ -193,6 +193,28 @@ type OIDCLogout struct {
 	LogoutRedirectParamName string `json:"logout_redirect_param_name,omitempty" yaml:"logout_redirect_param_name,omitempty"`
 }
 
+// LoginProperty is the name of a userinfo property that can be used as the OIDC "login" of the user.
+type LoginProperty string
+
+const (
+	LoginPropertyName              LoginProperty = "name"
+	LoginPropertyGivenName         LoginProperty = "given_name"
+	LoginPropertyFamilyName        LoginProperty = "family_name"
+	LoginPropertyMiddleName        LoginProperty = "middle_name"
+	LoginPropertyNickname          LoginProperty = "nickname"
+	LoginPropertyPreferredUsername LoginProperty = "preferred_username"
+	LoginPropertyEmail             LoginProperty = "email"
+)
+
+func (p *LoginProperty) Verify() error {
+	switch *p {
+	case "", LoginPropertyName, LoginPropertyGivenName, LoginPropertyFamilyName, LoginPropertyMiddleName, LoginPropertyNickname, LoginPropertyPreferredUsername, LoginPropertyEmail:
+		return nil
+	default:
+		return fmt.Errorf("invalid custom_login_property %q", *p)
+	}
+}
+
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
@@ -200,6 +222,11 @@ type OIDCProvider struct {
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
+	// CustomLoginProperty is the name of the userinfo property to use as the "login" of the user
+	// (e.g. "preferred_username"). It must be one of the properties Perses already extracts from
+	// the userinfo response. If not set or not found in the response, it falls back to the email,
+	// then to the subject.
+	CustomLoginProperty LoginProperty `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *OIDCProvider) Verify() error {

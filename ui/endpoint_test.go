@@ -91,6 +91,56 @@ func TestAssetHandlerContentType(t *testing.T) {
 	}
 }
 
+func TestAssetHandlerCacheControl(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/main.abc123.css": &fstest.MapFile{Data: []byte("body {}")},
+		"app/dist/main.abc123.js":  &fstest.MapFile{Data: []byte("console.log('ok')")},
+		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
+	}
+	asts = http.FS(testFS)
+
+	f := &frontend{apiPrefix: ""}
+
+	tests := []struct {
+		name                 string
+		path                 string
+		expectedCacheControl string
+	}{
+		{
+			name:                 "hashed CSS bundle is cached long term",
+			path:                 "/app/dist/main.abc123.css",
+			expectedCacheControl: "public, max-age=31536000, immutable",
+		},
+		{
+			name:                 "hashed JS bundle is cached long term",
+			path:                 "/app/dist/main.abc123.js",
+			expectedCacheControl: "public, max-age=31536000, immutable",
+		},
+		{
+			name:                 "other assets are left untouched",
+			path:                 "/app/dist/image.png",
+			expectedCacheControl: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+
+			handler := f.assetHandler()
+			err := handler(ctx)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedCacheControl, rec.Header().Get("Cache-Control"))
+		})
+	}
+}
+
 func TestServeASTFilesContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
 	originalAsts := asts
@@ -112,6 +162,7 @@ func TestServeASTFilesContentType(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "text/html; charset=utf-8", rec.Header().Get("Content-Type"))
 	assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
+	assert.Equal(t, "no-cache", rec.Header().Get("Cache-Control"))
 }
 
 func TestParsePluginPath(t *testing.T) {

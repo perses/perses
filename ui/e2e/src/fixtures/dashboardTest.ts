@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { DashboardResource } from '@perses-dev/dashboards';
+import type { DashboardResource } from '@perses-dev/client';
 import type { ConsoleMessage } from '@playwright/test';
 import { test as testBase, expect } from '@playwright/test';
 

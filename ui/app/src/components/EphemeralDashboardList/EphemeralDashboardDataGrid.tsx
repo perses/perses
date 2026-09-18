@@ -11,13 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { GridRowParams } from '@mui/x-data-grid';
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import type { ReactElement } from 'react';
-import { memo, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { memo, useMemo } from 'react';
 
 import { useDefaultRowsPerPage } from '../../context/Config';
 import type { DataGridProperties, CommonRow } from '../datagrid';
@@ -52,11 +50,17 @@ const SLOTS_WITH_TOOLBAR = {
 };
 const getRowId = (row: Row): string => row.name;
 
+const EPHEMERAL_DASHBOARD_GRID_STYLES = {
+  ...DATA_GRID_STYLES,
+  // Row clicks no longer navigate; keep the pointer cursor on the name link only.
+  '& .MuiDataGrid-row:hover': {
+    cursor: 'default',
+  },
+};
+
 export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
   const { columns, rows, initialState, hideToolbar, isLoading } = props;
-
-  const navigate = useNavigate();
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -66,17 +70,10 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
     } as GridInitialStateCommunity;
   }, [defaultRowsPerPage, initialState]);
 
-  const handleRowClick = useCallback(
-    (params: GridRowParams<Row>): void => {
-      navigate(`/projects/${params.row.project}/ephemeraldashboards/${params.row.name}`);
-    },
-    [navigate],
-  );
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
       <DataGrid
-        onRowClick={handleRowClick}
+        disableRowSelectionOnClick
         rows={rows}
         columns={columns}
         getRowId={getRowId}
@@ -85,7 +82,7 @@ export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): Reac
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         initialState={mergedInitialState}
         slotProps={DATA_GRID_SLOT_PROPS}
-        sx={DATA_GRID_STYLES}
+        sx={EPHEMERAL_DASHBOARD_GRID_STYLES}
       />
     </div>
   );

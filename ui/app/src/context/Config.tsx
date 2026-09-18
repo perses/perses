@@ -138,6 +138,11 @@ export function useDefaultRowsPerPage(): number {
   return config.frontend.default_user_preferences?.rows_per_page ?? 25;
 }
 
+export function useIsLockModeAvailable(): boolean {
+  const { config } = useConfigContext();
+  return config.frontend.enable_lock_mode ?? false;
+}
+
 export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
   return config.ephemeral_dashboard.enable;

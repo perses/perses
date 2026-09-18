@@ -36,6 +36,7 @@ frontend:
   enable_keyboard_shortcuts: true
   explorer:
     enable: true
+  enable_lock_mode: true
 
   important_dashboards:
     - project: "perses"

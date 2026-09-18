@@ -36,6 +36,11 @@ func (l *roboticLogin) Login() (*oauth2.Token, error) {
 }
 
 func (l *roboticLogin) SetMissingInput() error {
+	if len(l.clientID) == 0 || len(l.clientSecret) == 0 {
+		if err := ensureInteractive("client ID and/or client secret", "--client-id and --client-secret"); err != nil {
+			return err
+		}
+	}
 	if len(l.clientID) == 0 {
 		input := huh.NewInput().Title("Client ID").Value(&l.clientID)
 		if err := input.Run(); err != nil {
