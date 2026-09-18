@@ -63,7 +63,7 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 
 type HTTP struct {
 	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
-	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 }
 
 func (h HTTP) MarshalYAML() (any, error) {
@@ -206,38 +206,12 @@ const (
 	LoginPropertyEmail             LoginProperty = "email"
 )
 
-func (p *LoginProperty) UnmarshalJSON(data []byte) error {
-	var tmp LoginProperty
-	type plain LoginProperty
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := tmp.validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *LoginProperty) UnmarshalYAML(unmarshal func(any) error) error {
-	var tmp LoginProperty
-	type plain LoginProperty
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := tmp.validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p LoginProperty) validate() error {
-	switch p {
+func (p *LoginProperty) Verify() error {
+	switch *p {
 	case "", LoginPropertyName, LoginPropertyGivenName, LoginPropertyFamilyName, LoginPropertyMiddleName, LoginPropertyNickname, LoginPropertyPreferredUsername, LoginPropertyEmail:
 		return nil
 	default:
-		return fmt.Errorf("invalid custom_login_property %q", string(p))
+		return fmt.Errorf("invalid custom_login_property %q", *p)
 	}
 }
 
