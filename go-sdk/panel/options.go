@@ -14,6 +14,7 @@
 package panel
 
 import (
+	"github.com/perses/perses/go-sdk/annotation"
 	"github.com/perses/perses/go-sdk/link"
 	"github.com/perses/perses/go-sdk/query"
 	"github.com/perses/spec/go/dashboard"
@@ -56,6 +57,18 @@ func AddQuery(options ...query.Option) Option {
 			}
 			builder.Spec.Queries = append(builder.Spec.Queries, *q)
 		}
+		return nil
+	}
+}
+
+// AddAnnotation adds an annotation to the panel.
+func AddAnnotation(name string, option annotation.Option, options ...annotation.DisplayOption) Option {
+	return func(builder *Builder) error {
+		a, err := annotation.New(name, option, options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Annotations = append(builder.Spec.Annotations, *a)
 		return nil
 	}
 }
