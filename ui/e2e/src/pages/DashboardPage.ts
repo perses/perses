@@ -262,6 +262,12 @@ export class DashboardPage {
     return this.getPanelByName(panelNameOrPanel);
   }
 
+  /** Get mounted grid items, including items whose offscreen panel content is virtualized. */
+  getGridItems(): Locator {
+    return this.panelGroups.locator('[data-grid-id]');
+  }
+
+  /** Get rendered panel content; offscreen panels may be unmounted. */
   getPanels(group?: PanelGroup): Locator {
     const parent = group ? group.container : this.page;
 

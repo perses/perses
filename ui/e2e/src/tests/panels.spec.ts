@@ -23,7 +23,7 @@ test.describe('Dashboard: Panels', () => {
     await dashboardPage.addPanelToGroup('Row 1');
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.getPanels()).toHaveCount(2);
+    await expect(dashboardPage.getGridItems()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
@@ -40,7 +40,7 @@ test.describe('Dashboard: Panels', () => {
 
     await dashboardPage.addMarkdownPanel('Markdown One');
 
-    await expect(dashboardPage.getPanels()).toHaveCount(2);
+    await expect(dashboardPage.getGridItems()).toHaveCount(2);
     const newPanel = dashboardPage.getPanelByName('Markdown One');
     await expect(newPanel.container).toBeVisible();
 
@@ -50,7 +50,7 @@ test.describe('Dashboard: Panels', () => {
   test('can be removed', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
     await dashboardPage.removePanel('Markdown Example Zero');
-    await expect(dashboardPage.getPanels()).toHaveCount(0);
+    await expect(dashboardPage.getGridItems()).toHaveCount(0);
   });
 
   test('can be moved to a different panel group', async ({ dashboardPage }) => {
@@ -117,7 +117,8 @@ test.describe('Dashboard: Panels', () => {
     const panel = dashboardPage.getPanelByName('Markdown Example Zero');
     const panelGroup = dashboardPage.getPanelGroup('Row 1');
 
-    // Save original panel size.
+    // Wait for the initial responsive layout before saving the panel size.
+    await expect.poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width).toBeCloseTo(0.25, 1);
     const originalPanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
 
     const previousViewport = page.viewportSize();
@@ -134,14 +135,16 @@ test.describe('Dashboard: Panels', () => {
       });
 
       // Panel is ~100% of panel group on a small screen.
-      const smallPanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
-      expect(smallPanelPercentSize.width).toBeCloseTo(1, 1);
+      await expect.poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width).toBeCloseTo(1, 1);
 
       // Panel returns to the original size, which should be ~25%.
       await page.setViewportSize(previousViewport);
-      const largePanelPercentSize = await panelGroup.getPanelPercentOfBounds(panel);
-      expect(largePanelPercentSize).toEqual(originalPanelPercentSize);
-      expect(largePanelPercentSize.width).toBeCloseTo(0.25, 1);
+      await expect
+        .poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).width)
+        .toBeCloseTo(originalPanelPercentSize.width, 1);
+      await expect
+        .poll(async () => (await panelGroup.getPanelPercentOfBounds(panel)).height)
+        .toBeCloseTo(originalPanelPercentSize.height, 1);
     }
   });
 });
