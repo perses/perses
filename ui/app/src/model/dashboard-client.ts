@@ -13,6 +13,7 @@
 
 import type { DashboardResource, StatusError } from '@perses-dev/client';
 import { fetchJson } from '@perses-dev/client';
+import type { DashboardSpec } from '@perses-dev/spec';
 import type { UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -54,12 +55,17 @@ export function useCreateDashboardMutation(
  * Used to get a dashboard in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboard(project: string, name: string): UseQueryResult<DashboardResource, StatusError> {
+export function useDashboard(
+  project: string,
+  name: string,
+  enabled: boolean = true,
+): UseQueryResult<DashboardResource, StatusError> {
   return useQuery<DashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getDashboard(project, name);
     },
+    enabled,
   });
 }
 
@@ -168,14 +174,24 @@ export function useUpdateDashboardMutation(): UseMutationResult<DashboardResourc
 }
 
 /**
+ * A dashboard resource with an optional / partial spec.
+ * Useful for actions like the deletion that only require the metadata.
+ */
+export type PartialDashboardResource = Omit<DashboardResource, 'spec'> & { spec?: Partial<DashboardSpec> };
+
+/**
  * Used to delete a dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useDeleteDashboardMutation(): UseMutationResult<DashboardResource, Error, DashboardResource> {
+export function useDeleteDashboardMutation(): UseMutationResult<
+  PartialDashboardResource,
+  Error,
+  PartialDashboardResource
+> {
   const queryClient = useQueryClient();
-  return useMutation<DashboardResource, Error, DashboardResource>({
+  return useMutation<PartialDashboardResource, Error, PartialDashboardResource>({
     mutationKey: [resource],
-    mutationFn: (entity: DashboardResource) => {
+    mutationFn: (entity: PartialDashboardResource) => {
       return deleteDashboard(entity).then(() => {
         return entity;
       });
@@ -225,7 +241,7 @@ export function updateDashboard(entity: DashboardResource): Promise<DashboardRes
   });
 }
 
-export function deleteDashboard(entity: DashboardResource): Promise<Response> {
+export function deleteDashboard(entity: PartialDashboardResource): Promise<Response> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,
