@@ -62,6 +62,21 @@ func smallMockCache() cache {
 	return cache{permissions: permissions}
 }
 
+func wildcardUserMockCache() cache {
+	permissions := make(usersPermissions)
+	// Wildcard user has read on dashboards in project0
+	permissions.addEntry(v1.WildcardUser, "project0", &role.Permission{
+		Actions: []role.Action{role.ReadAction},
+		Scopes:  []role.Scope{role.DashboardScope},
+	})
+	// user0 also has create on dashboards in project0
+	permissions.addEntry("user0", "project0", &role.Permission{
+		Actions: []role.Action{role.CreateAction},
+		Scopes:  []role.Scope{role.DashboardScope},
+	})
+	return cache{permissions: permissions}
+}
+
 func TestCacheHasPermission(t *testing.T) {
 	smallCache := smallMockCache()
 
@@ -202,6 +217,61 @@ func TestCacheHasPermission(t *testing.T) {
 			reqProject:     v1.WildcardProject,
 			reqScope:       role.GlobalRoleScope,
 			expectedResult: true,
+		},
+		// Testing wildcard user permissions
+		{
+			title:          "wildcard user grants 'read' on 'project0' for 'dashboard' scope to user3",
+			cache:          wildcardUserMockCache(),
+			user:           "user3",
+			reqAction:      role.ReadAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "wildcard user grants 'read' on 'project0' for 'dashboard' scope to user0",
+			cache:          wildcardUserMockCache(),
+			user:           "user0",
+			reqAction:      role.ReadAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "wildcard user permissions merge with user-specific permissions",
+			cache:          wildcardUserMockCache(),
+			user:           "user0",
+			reqAction:      role.CreateAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "wildcard user does not grant permission on unrelated project",
+			cache:          wildcardUserMockCache(),
+			user:           "user3",
+			reqAction:      role.ReadAction,
+			reqProject:     "project99",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "wildcard user does not grant wrong action",
+			cache:          wildcardUserMockCache(),
+			user:           "user3",
+			reqAction:      role.DeleteAction,
+			reqProject:     "project0",
+			reqScope:       role.DashboardScope,
+			expectedResult: false,
+		},
+		{
+			title:          "wildcard user does not grant wrong scope",
+			cache:          wildcardUserMockCache(),
+			user:           "user3",
+			reqAction:      role.ReadAction,
+			reqProject:     "project0",
+			reqScope:       role.VariableScope,
+			expectedResult: false,
 		},
 	}
 	for i := range testSuites {

@@ -24,6 +24,10 @@ import (
 // It is used in the context of user permissions to indicate that the permission applies to all projects.
 const WildcardProject = "*"
 
+// WildcardUser is a special user name that can be used to refer to all users.
+// It is used in the context of role bindings to indicate that the permission applies to all users.
+const WildcardUser = "*"
+
 type NativeProvider struct {
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
 	// PasswordHash accepts a pre-computed bcrypt hash instead of a plaintext password.
