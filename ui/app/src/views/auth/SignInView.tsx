@@ -12,13 +12,15 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { ReactElement, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useNativeAuthnMutation } from '../../model/auth/native-authn-client';
-import { useRedirectQueryParam } from '../../model/auth/auth-client';
-import { SignUpRoute } from '../../model/route';
+
 import { useIsSignUpDisable } from '../../context/Config';
+import { useRedirectQueryParam } from '../../model/auth/auth-client';
+import { useNativeAuthnMutation } from '../../model/auth/native-authn-client';
+import { SignUpRoute } from '../../model/route';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView(): ReactElement {
@@ -41,7 +43,7 @@ function SignInView(): ReactElement {
         onError: (err) => {
           exceptionSnackbar(err);
         },
-      }
+      },
     );
   };
 

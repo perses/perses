@@ -17,7 +17,9 @@ Below is a list of notable tooling that is used throughout the Perses UI.
 - Development utilities
   - Monorepo management: [turborepo](https://turbo.build/)
   - Code compiling: [swc](https://swc.rs/) (used for libraries), [webpack](https://webpack.js.org/) (used for applications)
-  - Code linting/formatting: [eslint](https://eslint.org/), [prettier](https://prettier.io/)
+  - Code linting/formatting: [Oxlint](https://oxc.rs/docs/guide/usage/linter) with the
+    [React Doctor plugin](https://www.react.doctor/docs/configuration/eslint-and-oxlint-plugins), and
+    [Oxfmt](https://oxc.rs/docs/guide/usage/formatter)
   - Language: [TypeScript](https://www.typescriptlang.org/) (with a few exceptions for things like config files)
   - Package manager: [npm](https://docs.npmjs.com/) with [workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces)
 - Core UI and component libraries
@@ -105,13 +107,16 @@ are reflected in how the packages are organized. There is some variability from 
 
 ### All packages
 
-- Eslint enforces certain style and correctness rules to help avoid common coding pitfalls and maintain consistency.
-  - Exceptions can be made on a case-by-case basis using `eslint-disable-next-line` and a comment that communicates the reason for the exception.
-  - We prefer `error` (instead of `warn`) for eslint rules because it makes it easier to catch and enforce linting issues.
+- Oxlint enforces certain style and correctness rules to help avoid common coding pitfalls and maintain consistency.
+  React Doctor's Oxlint plugin adds React-specific correctness and maintainability checks to the same lint command.
+  - Exceptions can be made on a case-by-case basis using `oxlint-disable-next-line` and a comment that communicates the reason for the exception.
+  - We prefer `error` (instead of `warn`) for Oxlint rules because it makes it easier to catch and enforce linting issues.
+- Run `npm run doctor` for the full React Doctor project scan. GitHub Actions runs the same broader analysis on pull
+  requests and pushes to `main`.
 - Typescript is used to provide a stronger guarantee of correctness across the
   application. Please avoid using escape hatches like `any`, prefer using `unknown`
   and type narrowing instead.
-- Prettier is auto formatting all code to avoid bikeshedding on basic stylistic
+- Oxfmt is auto formatting all code to avoid bikeshedding on basic stylistic
   concerns
 
 ### Application

@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import { selectMenuItem, waitForAnimations } from '../utils';
 
 export class VariableEditor {
@@ -60,15 +62,6 @@ export class VariableEditor {
   }
 
   async isClosed(): Promise<void> {
-    // Wait for all animations to complete to avoid misclicking as the panel
-    // animates out.
-
-    const isContainerVisible = await this.container.isVisible();
-
-    if (isContainerVisible) {
-      await waitForAnimations(this.container);
-    }
-
     await expect(this.container).toHaveCount(0);
   }
 

@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Card, CardProps } from '@mui/material';
-import { ReactElement } from 'react';
-import { useEphemeralDashboardList } from '../../../model/ephemeral-dashboard-client';
+import type { CardProps } from '@mui/material';
+import { Card } from '@mui/material';
+import type { ReactElement } from 'react';
+
 import { EphemeralDashboardList } from '../../../components/EphemeralDashboardList/EphemeralDashboardList';
+import { useEphemeralDashboardList } from '../../../model/ephemeral-dashboard-client';
 
 interface ProjectEphemeralDashboardsProps extends CardProps {
   projectName: string;

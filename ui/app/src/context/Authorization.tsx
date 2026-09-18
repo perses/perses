@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useMemo } from 'react';
-import { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
-import { useUserPermissions } from '../model/user-client';
-import { useProjectList } from '../model/project-client';
-import { enableRefreshFetch } from '../model/fetch';
+import type { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
+import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+
 import { useUsername } from '../model/auth/auth-client';
+import { enableRefreshFetch } from '../model/fetch';
+import { useProjectList } from '../model/project-client';
+import { useUserPermissions } from '../model/user-client';
 import { useIsDelegatedAuthnProviderEnabled, useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
@@ -41,18 +43,16 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
 
   const username = useUsername();
   const { data } = useUserPermissions(username);
-  const userPermissions: Record<string, Permission[]> = useMemo(() => {
-    if (!data) {
-      return {};
-    }
-    return data;
-  }, [data]);
-
-  return (
-    <AuthorizationContext.Provider value={{ enabled, username, userPermissions }}>
-      {props.children}
-    </AuthorizationContext.Provider>
+  const contextValue: AuthorizationContext = useMemo(
+    () => ({
+      enabled,
+      username,
+      userPermissions: data ?? {},
+    }),
+    [data, enabled, username],
   );
+
+  return <AuthorizationContext.Provider value={contextValue}>{props.children}</AuthorizationContext.Provider>;
 }
 
 export function useAuthorizationContext(): AuthorizationContext {
@@ -73,7 +73,7 @@ export function useDashboardCreateAllowedProjects(): ProjectResource[] {
   return (data ?? []).filter(
     (project) =>
       permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
-      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard')
+      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
   );
 }
 
@@ -106,11 +106,31 @@ export function useHasPermission(action: Action, project: string, scope: Scope):
   return permissionListHasPermission(userPermissions[project] ?? [], action, scope);
 }
 
+/*
+ * useHasPermissionInAnyProject is a helper for knowing if a user can perform an action on a scope
+ * in any project, including global (`*`) permissions.
+ * It's only a check client-side, easily bypassable.
+ * It will always return true if the authorization is disabled.
+ */
+export function useHasPermissionInAnyProject(action: Action, scope: Scope): boolean {
+  const { enabled, username, userPermissions } = useAuthorizationContext();
+
+  if (!enabled) {
+    return true;
+  }
+
+  if (!username) {
+    return false;
+  }
+
+  return Object.values(userPermissions).some((permissions) => permissionListHasPermission(permissions, action, scope));
+}
+
 function permissionListHasPermission(permissions: Permission[], requestAction: Action, requestScope: Scope): boolean {
   return permissions.some(
     (permission) =>
       permission.actions.some((action) => action === requestAction || action === '*') &&
-      permission.scopes.some((scope) => scope === requestScope || scope === '*')
+      permission.scopes.some((scope) => scope === requestScope || scope === '*'),
   );
 }
 

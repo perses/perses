@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { expect, test } from '@playwright/test';
+
 import { AppHomePage, AppProjectPage, DashboardPage } from '../pages';
 
 test.describe('homeView', () => {

@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import type { Role, RoleResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { Role, RoleResource } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { RoleList } from '../../../components/roles/RoleList';
 import {
   useDeleteRoleMutation,
@@ -53,7 +55,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleMutation]
+    [exceptionSnackbar, successSnackbar, createRoleMutation],
   );
 
   const handleRoleUpdate = useCallback(
@@ -71,7 +73,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleMutation],
   );
 
   const handleRoleDelete = useCallback(
@@ -89,7 +91,7 @@ export function ProjectRoles(props: ProjectRolesProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleMutation],
   );
 
   return (

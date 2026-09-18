@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import path from 'path';
+import { resolve } from 'node:path';
+
 import type { PlaywrightTestConfig } from '@playwright/test';
+
 import baseConfig from './base.playwright.config';
 
 /**
@@ -39,7 +41,7 @@ const config: PlaywrightTestConfig = {
     {
       command: './scripts/api_backend_dev.sh --e2e --ci',
       port: 8080,
-      cwd: path.resolve(__dirname, '../../../..'),
+      cwd: resolve(import.meta.dirname, '../../../..'),
       reuseExistingServer: true,
       timeout: 5 * 60 * 1000,
     },

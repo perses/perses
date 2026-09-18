@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import type { GlobalSecretResource, Secret } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { GlobalSecretResource, Secret } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { SecretList } from '../../../components/secrets/SecretList';
 import {
   useCreateGlobalSecretMutation,
@@ -52,7 +54,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createSecretMutation]
+    [exceptionSnackbar, successSnackbar, createSecretMutation],
   );
 
   const handleSecretUpdate = useCallback(
@@ -70,7 +72,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateSecretMutation]
+    [exceptionSnackbar, successSnackbar, updateSecretMutation],
   );
 
   const handleSecretDelete = useCallback(
@@ -88,7 +90,7 @@ export function GlobalSecrets(props: GlobalSecretsProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteSecretMutation]
+    [exceptionSnackbar, successSnackbar, deleteSecretMutation],
   );
 
   return (

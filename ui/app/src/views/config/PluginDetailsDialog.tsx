@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PluginModuleResource } from '@perses-dev/plugin-system';
 import {
   Chip,
   DialogContent,
@@ -24,6 +23,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
+import type { PluginModuleResource } from '@perses-dev/plugin-system';
 import { Fragment } from 'react';
 import type { ReactElement } from 'react';
 

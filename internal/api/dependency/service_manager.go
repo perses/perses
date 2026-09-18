@@ -35,6 +35,7 @@ import (
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	viewImpl "github.com/perses/perses/internal/api/impl/v1/view"
+	"github.com/perses/perses/internal/api/index"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -71,6 +72,7 @@ type ServiceManager interface {
 	GetGlobalSecret() globalsecret.Service
 	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
+	GetIndex() index.Client
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetPlugin() plugin.Plugin
@@ -98,6 +100,7 @@ type service struct {
 	globalSecret       globalsecret.Service
 	globalVariable     globalvariable.Service
 	health             health.Service
+	index              index.Client
 	jwt                crypto.JWT
 	migrate            migrate.Migration
 	plugin             plugin.Plugin
@@ -120,10 +123,11 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
+	indexService := index.New(conf.Search, authzService, dao.GetPersesDAO())
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, indexService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())
@@ -154,6 +158,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		globalSecret:       globalSecret,
 		globalVariable:     globalVariableService,
 		health:             healthService,
+		index:              indexService,
 		jwt:                jwtService,
 		migrate:            migrateService,
 		plugin:             pluginService,
@@ -215,6 +220,10 @@ func (s *service) GetGlobalVariable() globalvariable.Service {
 
 func (s *service) GetHealth() health.Service {
 	return s.health
+}
+
+func (s *service) GetIndex() index.Client {
+	return s.index
 }
 
 func (s *service) GetJWT() crypto.JWT {

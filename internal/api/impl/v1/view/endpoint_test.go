@@ -89,7 +89,7 @@ func (t *testRBAC) IsNativeAuthz() bool {
 	return true
 }
 
-func (t *testRBAC) RefreshPermissions() error {
+func (t *testRBAC) RefreshPermissionsAndRoles() error {
 	return nil
 }
 

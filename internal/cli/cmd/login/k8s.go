@@ -14,7 +14,7 @@
 package login
 
 import (
-	"fmt"
+	"net/http"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -27,6 +27,7 @@ import (
 type k8sLogin struct {
 	apiClient          api.ClientInterface
 	kubeconfigLocation string
+	baseTransport      http.RoundTripper
 }
 
 func NewK8sLogin(apiClient api.ClientInterface, kubeconfigLocation string) *k8sLogin {
@@ -37,24 +38,31 @@ func NewK8sLogin(apiClient api.ClientInterface, kubeconfigLocation string) *k8sL
 }
 
 func (k *k8sLogin) Login() (*oauth2.Token, error) {
-	kubeconfig, err := config.InitKubeConfig(k.kubeconfigLocation)
+	restClient := k.apiClient.RESTClient()
+	httpClient := restClient.Client
+	if httpClient == nil {
+		httpClient = &http.Client{Timeout: http.DefaultClient.Timeout}
+		restClient.Client = httpClient
+	}
+	if k.baseTransport == nil {
+		k.baseTransport = httpClient.Transport
+		if k.baseTransport == nil {
+			k.baseTransport = http.DefaultTransport
+		}
+	}
+
+	roundTripper, err := (&config.K8sAuth{KubeconfigFile: k.kubeconfigLocation}).WrapRoundTripper(k.baseTransport)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(k.apiClient.RESTClient().Headers) == 0 {
-		k.apiClient.RESTClient().Headers = map[string]string{}
-	}
-	k.apiClient.RESTClient().Headers["Authorization"] = fmt.Sprintf("Bearer %s", kubeconfig.BearerToken)
+	httpClient.Transport = roundTripper
 
 	_, err = k.apiClient.V1().User().WhoAmI()
 	if err != nil {
 		return nil, err
 	}
 
-	return &oauth2.Token{
-		AccessToken: kubeconfig.BearerToken,
-	}, nil
+	return &oauth2.Token{}, nil
 }
 
 func (k *k8sLogin) Refresh() (*oauth2.Token, error) {

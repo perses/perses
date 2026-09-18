@@ -63,7 +63,7 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 
 type HTTP struct {
 	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
-	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+	TLSConfig *secret.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 }
 
 func (h HTTP) MarshalYAML() (any, error) {
@@ -95,6 +95,50 @@ func (h *HTTP) Verify() error {
 	return nil
 }
 
+// ClaimMapping maps a single upstream token claim value to a Perses role.
+// When Project is empty, RoleName is resolved as a GlobalRole (global permissions).
+// When Project is non-empty, RoleName is resolved as a project-scoped Role within that project.
+type ClaimMapping struct {
+	ClaimValue string `json:"claim_value" yaml:"claim_value"`
+	RoleName   string `json:"role_name" yaml:"role_name"`
+	// Project is optional. When set, maps the claim value to a project-scoped Role.
+	// When empty, maps to a GlobalRole.
+	// +optional
+	Project string `json:"project,omitempty" yaml:"project,omitempty"`
+}
+
+func (c *ClaimMapping) Verify() error {
+	if c.ClaimValue == "" {
+		return errors.New("claim_mapping's `claim_value` is mandatory")
+	}
+	if c.RoleName == "" {
+		return errors.New("claim_mapping's `role_name` is mandatory")
+	}
+	return nil
+}
+
+// ProviderClaimConfig describes one claim field that Perses should persist
+// from the upstream access token, and optionally map to Perses roles.
+type ProviderClaimConfig struct {
+	// ClaimName is the JSON field name in the upstream access token (e.g. "roles", "groups").
+	ClaimName string `json:"claim_name" yaml:"claim_name"`
+	// Mappings maps individual claim values to Perses roles.
+	// +optional
+	Mappings []ClaimMapping `json:"mappings,omitempty" yaml:"mappings,omitempty"`
+}
+
+func (p *ProviderClaimConfig) Verify() error {
+	if p.ClaimName == "" {
+		return errors.New("provider_claim_config's `claim_name` is mandatory")
+	}
+	for i := range p.Mappings {
+		if err := p.Mappings[i].Verify(); err != nil {
+			return fmt.Errorf("invalid mapping in claim %q: %w", p.ClaimName, err)
+		}
+	}
+	return nil
+}
+
 type Provider struct {
 	SlugID            string         `json:"slug_id" yaml:"slug_id"`
 	Name              string         `json:"name" yaml:"name"`
@@ -106,6 +150,10 @@ type Provider struct {
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
 	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
 	HTTP              HTTP           `json:"http" yaml:"http"`
+	// Claims lists upstream token claim fields that Perses should persist in the
+	// Perses JWT and optionally map to Perses roles.
+	// +optional
+	Claims []ProviderClaimConfig `json:"claims,omitempty" yaml:"claims,omitempty"`
 }
 
 func (p *Provider) Verify() error {
@@ -128,6 +176,11 @@ func (p *Provider) Verify() error {
 		}
 		p.ClientSecret = secret.Hidden(data)
 	}
+	for i := range p.Claims {
+		if err := p.Claims[i].Verify(); err != nil {
+			return fmt.Errorf("invalid claim config at index %d: %w", i, err)
+		}
+	}
 	return nil
 }
 
@@ -140,6 +193,28 @@ type OIDCLogout struct {
 	LogoutRedirectParamName string `json:"logout_redirect_param_name,omitempty" yaml:"logout_redirect_param_name,omitempty"`
 }
 
+// LoginProperty is the name of a userinfo property that can be used as the OIDC "login" of the user.
+type LoginProperty string
+
+const (
+	LoginPropertyName              LoginProperty = "name"
+	LoginPropertyGivenName         LoginProperty = "given_name"
+	LoginPropertyFamilyName        LoginProperty = "family_name"
+	LoginPropertyMiddleName        LoginProperty = "middle_name"
+	LoginPropertyNickname          LoginProperty = "nickname"
+	LoginPropertyPreferredUsername LoginProperty = "preferred_username"
+	LoginPropertyEmail             LoginProperty = "email"
+)
+
+func (p *LoginProperty) Verify() error {
+	switch *p {
+	case "", LoginPropertyName, LoginPropertyGivenName, LoginPropertyFamilyName, LoginPropertyMiddleName, LoginPropertyNickname, LoginPropertyPreferredUsername, LoginPropertyEmail:
+		return nil
+	default:
+		return fmt.Errorf("invalid custom_login_property %q", *p)
+	}
+}
+
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
@@ -147,6 +222,11 @@ type OIDCProvider struct {
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 	Logout       OIDCLogout        `json:"logout" yaml:"logout"`
+	// CustomLoginProperty is the name of the userinfo property to use as the "login" of the user
+	// (e.g. "preferred_username"). It must be one of the properties Perses already extracts from
+	// the userinfo response. If not set or not found in the response, it falls back to the email,
+	// then to the subject.
+	CustomLoginProperty LoginProperty `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *OIDCProvider) Verify() error {

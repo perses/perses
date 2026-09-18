@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Autocomplete,
   Button,
@@ -23,17 +23,20 @@ import {
   Switch,
   TextField,
 } from '@mui/material';
+import type { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
-import { DashboardSelector } from '@perses-dev/spec';
-import {
+import type { DashboardSelector } from '@perses-dev/spec';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useCallback, useState } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+
+import type {
+  CreateDashboardInput,
   CreateDashboardValidationType,
   CreateEphemeralDashboardValidationType,
-  useDashboardValidationSchema,
-  useEphemeralDashboardValidationSchema,
 } from '../../validation';
+import { useDashboardValidationSchema, useEphemeralDashboardValidationSchema } from '../../validation';
 
 interface CreateDashboardProps {
   open: boolean;
@@ -110,7 +113,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
   const { schema: dashboardSchemaValidation, isSchemaLoading: isDashboardSchemaValidationLoading } =
     useDashboardValidationSchema(projects[0]?.metadata.name);
 
-  const dashboardForm = useForm<CreateDashboardValidationType>({
+  const dashboardForm = useForm<CreateDashboardInput, unknown, CreateDashboardValidationType>({
     resolver: dashboardSchemaValidation ? zodResolver(dashboardSchemaValidation) : undefined,
     mode: 'onBlur',
     defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', tags: [] },
@@ -130,7 +133,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
     dashboardForm.reset();
   };
 
-  if (!isDashboardSchemaValidationLoading)
+  if (isDashboardSchemaValidationLoading)
     return (
       <Stack
         sx={{
@@ -208,8 +211,8 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
                   onChange={(_, newValue) =>
                     field.onChange(
                       Array.from(
-                        new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
-                      )
+                        new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0)),
+                      ),
                     )
                   }
                   renderTags={(value, getTagProps) =>

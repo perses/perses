@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 /**
  * Util to help with selecting a menu item in a MUI select.
@@ -22,7 +22,7 @@ import { Locator } from '@playwright/test';
 export async function selectMenuItem(
   container: Locator,
   selectName: string | RegExp,
-  itemName: string | RegExp
+  itemName: string | RegExp,
 ): Promise<void> {
   await container
     .getByRole('combobox', {

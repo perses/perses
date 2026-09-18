@@ -36,10 +36,13 @@ frontend:
   enable_keyboard_shortcuts: true
   explorer:
     enable: true
+  enable_lock_mode: true
 
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"
+    - project: "perses"
+      dashboard: "ThreeSignals"
     - project: "perses"
       dashboard: "NodeExporter"
     - project: "perses"

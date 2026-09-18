@@ -12,22 +12,26 @@
 // limitations under the License.
 
 import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
-import Magnify from 'mdi-material-ui/Magnify';
-import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import Archive from 'mdi-material-ui/Archive';
-import DatabaseIcon from 'mdi-material-ui/Database';
-import { MouseEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import IconButton from '@mui/material/IconButton';
-import Close from 'mdi-material-ui/Close';
+import type { Resource, StatusError } from '@perses-dev/client';
+import { isProjectMetadata } from '@perses-dev/client';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
-import { isProjectMetadata, Resource, StatusError } from '@perses-dev/client';
-import { useIsMobileSize } from '../../../utils/browser-size';
+import Archive from 'mdi-material-ui/Archive';
+import Close from 'mdi-material-ui/Close';
+import DatabaseIcon from 'mdi-material-ui/Database';
+import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
+import Magnify from 'mdi-material-ui/Magnify';
+import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import type { MouseEvent, ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { GlobalProject, useHasPermission, useHasPermissionInAnyProject } from '../../../context/Authorization';
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
-import { useProjectList } from '../../../model/project-client';
-import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
+import { useProjectList } from '../../../model/project-client';
+import { AdminRoute, ProjectRoute } from '../../../model/route';
+import { useIsMobileSize } from '../../../utils/browser-size';
 import { SearchList } from './SearchList';
 
 function shortcutDisplay(): string {
@@ -40,45 +44,76 @@ interface ResourceListProps {
   query: string;
   onClick: () => void;
   isResources?: (type: ResourceType, available: boolean) => void;
+  onLoadError?: (type: ResourceType, hasError: boolean) => void;
+}
+
+const EMPTY_RESOURCE_LIST: Resource[] = [];
+const searchErrorAlertBoxSx = { margin: 1 };
+const searchErrorAlertSx = {
+  alignItems: 'center',
+  '& .MuiAlert-message': {
+    display: 'flex',
+    alignItems: 'center',
+    padding: 0,
+  },
+};
+
+function isForbiddenError(error: StatusError | null | undefined): boolean {
+  return error?.status === 403;
 }
 
 function SearchErrorAlert({ title, error }: { title: string; error: StatusError }): ReactElement {
-  const detail = error.message?.trim() || 'Unknown error';
+  // Permission failures are handled by skipping unauthorized searches. If a 403 still
+  // reaches the UI, keep the copy generic so RBAC scope/kind names are not exposed.
+  const detail = isForbiddenError(error)
+    ? 'you do not have permission to view this'
+    : error.message?.trim() || 'Unknown error';
 
   return (
-    <Box sx={{ margin: 1 }}>
-      <Alert
-        severity="error"
-        sx={{
-          alignItems: 'center',
-          '& .MuiAlert-message': {
-            display: 'flex',
-            alignItems: 'center',
-            padding: 0,
-          },
-        }}
-      >
+    <Box sx={searchErrorAlertBoxSx}>
+      <Alert severity="error" sx={searchErrorAlertSx}>
         {title}: {detail}
       </Alert>
     </Box>
   );
 }
 
+function useSearchListErrorState(
+  type: ResourceType,
+  error: StatusError | null | undefined,
+  isResources?: (type: ResourceType, available: boolean) => void,
+  onLoadError?: (type: ResourceType, hasError: boolean) => void,
+): StatusError | undefined {
+  useEffect(() => {
+    onLoadError?.(type, Boolean(error));
+    if (error) {
+      isResources?.(type, false);
+    }
+  }, [error, isResources, onLoadError, type]);
+
+  return error ?? undefined;
+}
+
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
-  const { query, onClick, isResources } = props;
+  const { query, onClick, isResources, onLoadError } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('projects', isAvailable),
+    [isResources],
+  );
+  const visibleError = useSearchListErrorState('projects', projectListError, isResources, onLoadError);
 
-  if (projectListError) {
-    return <SearchErrorAlert title="Failed to load projects" error={projectListError} />;
+  if (visibleError) {
+    return <SearchErrorAlert title="Failed to load projects" error={visibleError} />;
   }
 
   return (
     <SearchList
-      list={projectList ?? []}
+      list={projectList ?? EMPTY_RESOURCE_LIST}
       query={query}
       onClick={onClick}
       icon={Archive}
-      isResource={(isAvailable) => isResources?.('projects', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -87,20 +122,30 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
     refetchOnMount: false,
   });
-  const { query, onClick, isResources } = props;
+  const { query, onClick, isResources, onLoadError } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
+    [isResources],
+  );
+  const visibleError = useSearchListErrorState(
+    'globalDatasources',
+    globalDatasourceListError,
+    isResources,
+    onLoadError,
+  );
 
-  if (globalDatasourceListError) {
-    return <SearchErrorAlert title="Failed to load global datasources" error={globalDatasourceListError} />;
+  if (visibleError) {
+    return <SearchErrorAlert title="Failed to load global datasources" error={visibleError} />;
   }
 
   return (
     <SearchList
-      list={globalDatasourceList ?? []}
+      list={globalDatasourceList ?? EMPTY_RESOURCE_LIST}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
       buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={(isAvailable) => isResources?.('globalDatasources', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -120,16 +165,21 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
     error: importantDashboardsError,
   } = useImportantDashboardList();
 
-  const { query, isResources, onClick } = props;
+  const { query, isResources, onClick, onLoadError } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
+    [isResources],
+  );
 
   const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
     if (query.length && dashboardList) {
+      const importantDashboardKeys = new Set(
+        importantDashboards.map(
+          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
+        ),
+      );
       return dashboardList.map((d) => {
-        const highlight = !!importantDashboards.some(
-          (importantDashboard) =>
-            importantDashboard.metadata.name === d.metadata.name &&
-            importantDashboard.metadata.project === d.metadata.project
-        );
+        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
         return { ...d, highlight };
       });
     } else {
@@ -138,8 +188,10 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   }, [importantDashboards, dashboardList, query]);
 
   const dashboardError = dashboardListError ?? importantDashboardsError;
-  if (dashboardError) {
-    return <SearchErrorAlert title="Failed to load dashboards" error={dashboardError} />;
+  const visibleError = useSearchListErrorState('dashboards', dashboardError, isResources, onLoadError);
+
+  if (visibleError) {
+    return <SearchErrorAlert title="Failed to load dashboards" error={visibleError} />;
   }
 
   return dashboardListLoading || importantDashboardsLoading ? null : (
@@ -149,22 +201,27 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
       onClick={onClick}
       icon={ViewDashboardIcon}
       chip={true}
-      isResource={(isAvailable) => isResources?.('dashboards', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
 
 function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
   const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
-  const { isResources, onClick, query } = props;
+  const { isResources, onClick, query, onLoadError } = props;
+  const handleIsResource = useCallback(
+    (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
+    [isResources],
+  );
+  const visibleError = useSearchListErrorState('datasources', datasourceListError, isResources, onLoadError);
 
-  if (datasourceListError) {
-    return <SearchErrorAlert title="Failed to load datasources" error={datasourceListError} />;
+  if (visibleError) {
+    return <SearchErrorAlert title="Failed to load datasources" error={visibleError} />;
   }
 
   return (
     <SearchList
-      list={datasourceList ?? []}
+      list={datasourceList ?? EMPTY_RESOURCE_LIST}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
@@ -172,7 +229,7 @@ function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
       buildRouting={(resource) =>
         `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
       }
-      isResource={(isAvailable) => isResources?.('datasources', isAvailable)}
+      isResource={handleIsResource}
     />
   );
 }
@@ -191,6 +248,10 @@ function useHandleShortCut(handleOpen: () => void): void {
 
 export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
+  const canReadDashboards = useHasPermissionInAnyProject('read', 'Dashboard');
+  const canReadProjects = useHasPermissionInAnyProject('read', 'Project');
+  const canReadDatasources = useHasPermissionInAnyProject('read', 'Datasource');
+  const canReadGlobalDatasources = useHasPermission('read', GlobalProject, 'GlobalDatasource');
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
@@ -199,12 +260,22 @@ export function SearchBar(): ReactElement {
     globalDatasources: false,
     datasources: false,
   });
+  const [hasLoadError, setHasLoadError] = useState<Record<ResourceType, boolean>>({
+    dashboards: false,
+    projects: false,
+    globalDatasources: false,
+    datasources: false,
+  });
 
-  function handleIsResourceAvailable(type: ResourceType, available: boolean): void {
+  const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
-  }
+  }, []);
+  const handleLoadError = useCallback((type: ResourceType, hasError: boolean): void => {
+    setHasLoadError((prev) => (prev[type] === hasError ? prev : { ...prev, [type]: hasError }));
+  }, []);
 
   const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
+  const hasAnyLoadError = useMemo(() => Object.values(hasLoadError).some(Boolean), [hasLoadError]);
   const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
     inputElement?.focus();
   }, []);
@@ -254,7 +325,7 @@ export function SearchBar(): ReactElement {
         >
           <TextField
             size="medium"
-            /* eslint-disable-next-line jsx-a11y/no-autofocus */
+            /* oxlint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus={true}
             inputRef={handleSearchInputRef}
             variant="outlined"
@@ -281,16 +352,44 @@ export function SearchBar(): ReactElement {
               ),
             }}
           />
-          {query.length > 0 && !hasAnyResource && (
+          {query.length > 0 && !hasAnyResource && !hasAnyLoadError && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          <SearchDashboardList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchProjectList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchGlobalDatasource query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchDatasourceList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          {canReadDashboards && (
+            <SearchDashboardList
+              query={query}
+              onClick={handleClose}
+              isResources={handleIsResourceAvailable}
+              onLoadError={handleLoadError}
+            />
+          )}
+          {canReadProjects && (
+            <SearchProjectList
+              query={query}
+              onClick={handleClose}
+              isResources={handleIsResourceAvailable}
+              onLoadError={handleLoadError}
+            />
+          )}
+          {canReadGlobalDatasources && (
+            <SearchGlobalDatasource
+              query={query}
+              onClick={handleClose}
+              isResources={handleIsResourceAvailable}
+              onLoadError={handleLoadError}
+            />
+          )}
+          {canReadDatasources && (
+            <SearchDatasourceList
+              query={query}
+              onClick={handleClose}
+              isResources={handleIsResourceAvailable}
+              onLoadError={handleLoadError}
+            />
+          )}
         </Paper>
       </Modal>
     </Paper>

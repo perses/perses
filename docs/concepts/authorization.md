@@ -6,6 +6,9 @@ The RBAC API includes four kinds of resources: `GlobalRole`, `Role`, `GlobalRole
 
 The RBAC implementation in Perses is heavily inspired by Kubernetes' RBAC model.
 
+> **Tip:** When using an external OIDC/OAuth provider, roles can also be assigned automatically
+> based on token claims. See [Claim-Based Role Assignment](./authentication.md#claim-based-role-assignment).
+
 ## Role and GlobalRole
 
 An RBAC `Role` or `GlobalRole` defines a set of permissions (rules). Permissions are purely additive, meaning there are

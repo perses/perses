@@ -12,13 +12,15 @@
 // limitations under the License.
 
 import { CircularProgress, Stack } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import type { DashboardResource, EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback, useEffect } from 'react';
-import { DashboardResource, EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
-import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
+import type { ReactElement } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
+import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { HelperDashboardView } from './HelperDashboardView';
 
 /**
@@ -44,7 +46,7 @@ function EphemeralDashboardView(): ReactElement | null {
   const navHistoryDispatch = useNavHistoryDispatch();
   useEffect(
     () => navHistoryDispatch({ project: projectName, name: ephemeralDashboardName }),
-    [navHistoryDispatch, projectName, ephemeralDashboardName]
+    [navHistoryDispatch, projectName, ephemeralDashboardName],
   );
 
   const handleEphemeralDashboardSave = useCallback(
@@ -61,8 +63,8 @@ function EphemeralDashboardView(): ReactElement | null {
         onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(
-              updatedEphemeralDashboard
-            )} has been successfully updated`
+              updatedEphemeralDashboard,
+            )} has been successfully updated`,
           );
           return updatedEphemeralDashboard;
         },
@@ -72,7 +74,7 @@ function EphemeralDashboardView(): ReactElement | null {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation]
+    [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation],
   );
 
   if (isLoading) {

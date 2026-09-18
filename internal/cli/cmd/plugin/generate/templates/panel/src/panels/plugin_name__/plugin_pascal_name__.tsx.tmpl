@@ -1,6 +1,6 @@
 import { {{ .PluginPascalName }}Component } from "./{{ .PluginPascalName }}Component";
-import { {{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
-import { PanelPlugin } from "@perses-dev/plugin-system";
+import type { {{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
+import type { PanelPlugin } from "@perses-dev/plugin-system";
 import { {{ .PluginPascalName }}SettingsEditor } from "./{{ .PluginPascalName }}SettingsEditor";
 
 export const {{ .PluginPascalName }}: PanelPlugin<{{ .PluginPascalName }}Options, {{ .PluginPascalName }}Props> = {

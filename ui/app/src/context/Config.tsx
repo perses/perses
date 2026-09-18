@@ -11,14 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useContext, useMemo } from 'react';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { buildRelativeTimeOption } from '@perses-dev/components';
-import { DashboardSelector, DurationString } from '@perses-dev/spec';
-import { Banner, ConfigModel, useConfig } from '../model/config-client';
+import type { TimeOption } from '@perses-dev/components';
+import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
+import { parseDurationString } from '@perses-dev/spec';
+import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import type { ReactElement } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+
 import { PersesLoader } from '../components/PersesLoader';
+import type { Banner, ConfigModel } from '../model/config-client';
+import { useConfig } from '../model/config-client';
+import { UserPreferencesContextProvider } from './UserPreferences';
 
 interface ConfigContextType {
   config: ConfigModel;
@@ -28,18 +35,52 @@ const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export function ConfigContextProvider(props: { children: React.ReactNode }): ReactElement {
   const { data, isLoading } = useConfig();
-  if (isLoading || data === undefined) {
+  const contextValue = useMemo<ConfigContextType | undefined>(() => (data ? { config: data } : undefined), [data]);
+  const defaultPreferences = useMemo(
+    () => ({ timezone: data?.frontend.default_user_preferences?.timezone ?? 'local' }),
+    [data?.frontend.default_user_preferences?.timezone],
+  );
+
+  const timeRangeOptions = useMemo(
+    () => data?.frontend.time_range?.options?.map((option: DurationString) => buildRelativeTimeOption(option)),
+    [data?.frontend.time_range?.options],
+  );
+
+  const autoRefreshOptions = useMemo((): TimeOption[] => {
+    const timeOptions = [...(data?.frontend.auto_refresh?.options ?? [])];
+
+    /* preserve an explicit Off option while adding the configured positive intervals */
+    if (!timeOptions.some((to) => milliseconds(parseDurationString(to)) === 0)) {
+      timeOptions.push('0s');
+    }
+
+    /* ensure user input is sorted */
+    timeOptions.sort((a, b) => milliseconds(parseDurationString(a)) - milliseconds(parseDurationString(b)));
+
+    return timeOptions.map((option: DurationString) => {
+      return {
+        value: { pastDuration: option },
+        display: milliseconds(parseDurationString(option)) === 0 ? 'Off' : option,
+      };
+    });
+  }, [data?.frontend.auto_refresh?.options]);
+
+  if (isLoading || data === undefined || contextValue === undefined) {
     return <PersesLoader />;
   }
   return (
-    <ConfigContext.Provider value={{ config: data }}>
-      <TimeRangeSettingsProvider
-        showCustom={!data.frontend.time_range?.disable_custom}
-        showZoomButtons={!data.frontend.time_range?.disable_zoom}
-        options={data.frontend.time_range?.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
-      >
-        {props.children}
-      </TimeRangeSettingsProvider>
+    <ConfigContext.Provider value={contextValue}>
+      <UserPreferencesContextProvider defaultPreferences={defaultPreferences}>
+        <TimeRangeSettingsProvider
+          showCustom={!data.frontend.time_range?.disable_custom}
+          showZoomButtons={!data.frontend.time_range?.disable_zoom}
+          disableAutoRefresh={!!data.frontend.auto_refresh?.disable}
+          options={timeRangeOptions}
+          autoRefreshIntervalOptions={autoRefreshOptions}
+        >
+          {props.children}
+        </TimeRangeSettingsProvider>
+      </UserPreferencesContextProvider>
     </ConfigContext.Provider>
   );
 }
@@ -92,6 +133,16 @@ export function useIsKeyboardShortcutsEnabled(): boolean {
   return config.frontend.enable_keyboard_shortcuts ?? true;
 }
 
+export function useDefaultRowsPerPage(): number {
+  const { config } = useConfigContext();
+  return config.frontend.default_user_preferences?.rows_per_page ?? 25;
+}
+
+export function useIsLockModeAvailable(): boolean {
+  const { config } = useConfigContext();
+  return config.frontend.enable_lock_mode ?? false;
+}
+
 export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
   return config.ephemeral_dashboard.enable;
@@ -137,30 +188,31 @@ export function useInformation(): string {
 
   const html = useMemo(
     () => marked.parse(config.frontend.information ?? '', { gfm: true, async: false }),
-    [config.frontend.information]
+    [config.frontend.information],
   );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
 
 export function useBanner(): Banner | undefined {
   const { config } = useConfigContext();
+  const bannerConfig = config.frontend.banner;
 
   const html = useMemo(
-    () => marked.parse(config.frontend.banner?.message ?? '', { gfm: true, async: false }),
-    [config.frontend.banner?.message]
+    () => marked.parse(bannerConfig?.message ?? '', { gfm: true, async: false }),
+    [bannerConfig?.message],
   );
 
   const sanitizedHtml = useMemo(() => DOMPurify.sanitize(html), [html]);
 
   const banner = useMemo(() => {
-    if (!config.frontend.banner?.message || !config.frontend.banner?.severity) {
+    if (!bannerConfig?.message || !bannerConfig.severity) {
       return undefined;
     }
     return {
-      severity: config.frontend.banner.severity,
+      severity: bannerConfig.severity,
       message: sanitizedHtml,
     };
-  }, [config.frontend.banner?.message, config.frontend.banner?.severity, sanitizedHtml]);
+  }, [bannerConfig, sanitizedHtml]);
 
   return banner;
 }

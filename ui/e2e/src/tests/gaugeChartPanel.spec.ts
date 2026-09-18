@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { expect } from '@playwright/test';
 import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
+import { expect } from '@playwright/test';
+
 import { test } from '../fixtures/dashboardTest';
-import { DashboardPage } from '../pages';
+import type { DashboardPage } from '../pages';
 import { waitForStableCanvas } from '../utils';
 
 test.use({
@@ -143,7 +144,7 @@ async function mockGaugeChartQueryRangeRequest(page: DashboardPage, mockNow: num
               ],
               startTimeMs: mockNow - 6 * 60 * 60 * 1000,
               endTimeMs: mockNow,
-            })
+            }),
           ),
         },
       },

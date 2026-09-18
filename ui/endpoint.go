@@ -197,6 +197,9 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 		}
 		if strings.Contains(fileName, ".js") || strings.Contains(fileName, ".css") {
 			data = bytes.ReplaceAll(data, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
+			// The build pipeline names JS/CSS bundles with a content hash (e.g. main.<hash>.js), so a
+			// given filename's content never changes and it is safe to cache for a long time.
+			c.Response().Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		}
 		contentType := mime.TypeByExtension(filepath.Ext(fileName))
 		if contentType == "" {
@@ -263,6 +266,9 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 	idx = bytes.ReplaceAll(idx, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
 	c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
 	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+	// index.html references the current hashed JS/CSS bundle filenames, so it must always be
+	// revalidated to avoid serving a stale page that points at assets no longer being served.
+	c.Response().Header().Set("Cache-Control", "no-cache")
 	_, err = c.Response().Write(idx)
 	return apiinterface.HandleError(err)
 }

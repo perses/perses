@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Subject } from '@perses-dev/client';
+import type { Subject } from '@perses-dev/client';
 
 // subjectsSummary returns a formatted string of a list of subjects where max is the amount of subject to show with their name
 export function subjectsSummary(subjects: Subject[], max: number): string {
@@ -22,11 +22,14 @@ export function subjectsSummary(subjects: Subject[], max: number): string {
     return subjects.map((subject) => subject.name).join(', ');
   }
   let result = '';
-  subjects.forEach((subject, index) => {
-    if (index < max) {
-      result += `${subject.name}, `;
+  let index = 0;
+  for (const subject of subjects) {
+    if (index >= max) {
+      break;
     }
-  });
+    result += `${subject.name}, `;
+    index++;
+  }
   result += `+${subjects.length - max} others`;
   return result;
 }

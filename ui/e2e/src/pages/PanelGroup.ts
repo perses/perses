@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator, expect } from '@playwright/test';
+import type { Locator } from '@playwright/test';
+import { expect } from '@playwright/test';
+
 import { waitForAnimations } from '../utils';
-import { Panel } from './Panel';
+import type { Panel } from './Panel';
 
 /**
  * Panel group on a dashboard page.
@@ -23,6 +25,7 @@ export class PanelGroup {
 
   readonly header: Locator;
   readonly content: Locator;
+  readonly gridItems: Locator;
 
   readonly editButton: Locator;
   readonly expandButton: Locator;
@@ -36,6 +39,8 @@ export class PanelGroup {
     this.container = container;
     this.header = container.getByTestId('panel-group-header');
     this.content = container.getByTestId('panel-group-content');
+    // Grid items remain mounted when offscreen panel content is virtualized.
+    this.gridItems = this.content.locator('[data-grid-id]');
 
     this.editButton = this.header.getByRole('button', {
       name: 'edit group',

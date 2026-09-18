@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@mui/material';
-import { ReactElement } from 'react';
-import { useDashboardList } from '../../../model/dashboard-client';
+import type { BoxProps } from '@mui/material';
+import { Box } from '@mui/material';
+import type { ReactElement } from 'react';
+
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
 import { useIsEphemeralDashboardEnabled } from '../../../context/Config';
+import { useDashboardList } from '../../../model/dashboard-client';
 import { useFolderList } from '../../../model/folder-client';
 
 interface ProjectDashboardsProps extends BoxProps {

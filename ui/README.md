@@ -14,11 +14,17 @@ If you are new to Perses, please review the rest of this README first before sta
 - Start the Perses app: `npm run start`
 - Open the app: http://localhost:3000/
 
-### Run Jest tests
+### Run Vitest tests
 
 - Change to the `ui` directory.
 - Install dependencies: `npm install`
 - Run tests: `npm run test`
+
+### Check React code health
+
+- Run `npm run lint` for the regular Oxlint checks, including the React Doctor rules configured in `.oxlintrc.json`.
+- Run `npm run doctor` for the full React Doctor project scan. Pull requests and pushes to `main` also run the scan in
+  GitHub Actions.
 
 ### Run end-to-end tests
 
@@ -28,7 +34,7 @@ If you are new to Perses, please review the rest of this README first before sta
 
 ## Package organization
 
-The UI is split across multiple npm packages so features can be embedded and extended independently. For a full overview of each package, how they relate, and the dependency graph, see [UI package architecture](../docs/ui-package-architecture.md).
+The UI is split across multiple npm packages so features can be embedded and extended independently. For a full overview of each package, how they relate, and the dependency graph, see [UI package architecture](./ARCHITECTURE.md).
 
 The UI-based code for Perses is organized as a monorepo using [turborepo](https://turbo.build/repo).
 
@@ -68,9 +74,9 @@ The following packages are internal tooling that assists with development of the
 First, check out the [UI Guidelines](./ui-guidelines.md) for some information on how the codebase is organized and our
 approach to development in the UI. You'll need to have the following installed locally before you can start developing:
 
-- [Node.js](https://nodejs.org/) v18 or higher: we suggest using [NVM](https://github.com/nvm-sh/nvm) for installing
+- [Node.js](https://nodejs.org/) v24 or higher: we suggest using [NVM](https://github.com/nvm-sh/nvm) for installing
   and managing versions.
-- [NPM](https://npmjs.com/) v7 or higher: a version of `npm` that supports workspaces (use
+- [NPM](https://npmjs.com/) v11 or higher: a version of `npm` that supports workspaces (use
   `npm --version` to check your version locally)
 
 ## Running Scripts

@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useMemo } from 'react';
-import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FolderItem, FolderResource } from '@perses-dev/client';
-import { CreateFolderValidationType, useFolderValidationSchema } from '../../validation';
+import { Autocomplete, Button, Chip, CircularProgress, Stack, TextField } from '@mui/material';
+import type { FolderItem, FolderResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useMemo } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+
 import { useDashboardList } from '../../model/dashboard-client';
 import { useCreateFolderMutation } from '../../model/folder-client';
 import { generateMetadataName } from '../../utils/metadata';
+import type { CreateFolderValidationType } from '../../validation';
+import { useFolderValidationSchema } from '../../validation';
 
 export interface CreateFolderDialogProps {
   projectName: string;
@@ -49,7 +53,7 @@ export const CreateFolderDialog = ({
 
   const options = useMemo(
     () => [...(dashboards?.values() ?? [])].map((d) => ({ label: getResourceDisplayName(d), name: d.metadata.name })),
-    [dashboards]
+    [dashboards],
   );
 
   const form = useForm<CreateFolderValidationType>({

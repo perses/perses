@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement, useEffect } from 'react';
-import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DashboardResource } from '@perses-dev/client';
+import { Autocomplete, Button, Chip, Stack, TextField } from '@mui/material';
+import type { DashboardResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import { useEffect } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
-import { editDashboardDialogValidationSchema, EditDashboardValidationType } from '../../validation';
+import type { EditDashboardInput, EditDashboardValidationType } from '../../validation';
+import { editDashboardDialogValidationSchema } from '../../validation';
 
 interface EditDashboardDialogProps {
   dashboard: DashboardResource;
@@ -36,7 +40,7 @@ interface EditDashboardDialogProps {
  */
 export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactElement => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const form = useForm<EditDashboardValidationType>({
+  const form = useForm<EditDashboardInput, unknown, EditDashboardValidationType>({
     resolver: zodResolver(editDashboardDialogValidationSchema),
     mode: 'onBlur',
     defaultValues: {
@@ -132,8 +136,8 @@ export const EditDashboardDialog = (props: EditDashboardDialogProps): ReactEleme
                     onChange={(_, newValue) =>
                       field.onChange(
                         Array.from(
-                          new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0))
-                        )
+                          new Set(newValue.map((tag) => tag.trim().toLowerCase()).filter((tag) => tag.length > 0)),
+                        ),
                       )
                     }
                     renderTags={(value, getTagProps) =>

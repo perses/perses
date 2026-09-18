@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FolderItem } from '@perses-dev/client';
+import type { FolderItem } from '@perses-dev/client';
 
 /**
  * Returns a new items array without the `FolderItem` node identified by `path`.
@@ -273,7 +273,7 @@ export function replaceSubFolder(items: FolderItem[], path: string[], replacemen
 export function collectDashboards(
   folderItems: FolderItem[] | undefined,
   deep: boolean = true,
-  filter?: (name: string) => boolean
+  filter?: (name: string) => boolean,
 ): string[] {
   if (!folderItems) {
     return [];
