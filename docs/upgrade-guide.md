@@ -93,10 +93,10 @@ The dependencies from `core` had been used in all repositories and different pac
 The following example shows the `Table` plugin and its dependencies at the moment
 
 ```json
-    "@perses-dev/components": "^0.54.0-rc.1",
-    "@perses-dev/spec": "^0.2.0-rc.0",
-    "@perses-dev/plugin-system": "^0.54.0-rc.1",
-    "@perses-dev/dashboards": "^0.54.0-rc.1"
+    "@perses-dev/components": "^0.54.0",
+    "@perses-dev/spec": "^0.2.0",
+    "@perses-dev/plugin-system": "^0.54.0",
+    "@perses-dev/dashboards": "^0.54.0"
 ```
 
 For instance, if you take a look at the imported members in `table\src\components\TablePanel.tsx` you find many types that used to be imported from `core`. Now, after this change the core has been replaced accordingly.
