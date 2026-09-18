@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tooltip } from '@mui/material';
+import { Box, Link, Stack, Tooltip } from '@mui/material';
 import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import type { EphemeralDashboardResource } from '@perses-dev/client';
 import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
@@ -21,6 +21,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
@@ -127,7 +128,20 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties):
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       PROJECT_COL_DEF,
-      DISPLAY_NAME_COL_DEF,
+      {
+        ...DISPLAY_NAME_COL_DEF,
+        renderCell: (params): ReactElement => (
+          <Link
+            component={RouterLink}
+            to={`/projects/${params.row.project}/ephemeraldashboards/${params.row.name}`}
+            tabIndex={params.hasFocus ? 0 : -1}
+            color="inherit"
+            underline="hover"
+          >
+            {params.row.displayName}
+          </Link>
+        ),
+      },
       VERSION_COL_DEF,
       {
         field: 'expireAt',
