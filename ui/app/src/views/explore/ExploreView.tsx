@@ -17,12 +17,11 @@ import { ErrorAlert, ErrorBoundary, getResourceDisplayName } from '@perses-dev/c
 import type { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { useQueryClient } from '@tanstack/react-query';
 import Archive from 'mdi-material-ui/Archive';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import Compass from 'mdi-material-ui/Compass';
 import type { ReactElement, MouseEvent } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 
 import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
@@ -128,19 +127,7 @@ function HelperExploreView(): ReactElement {
   const datasourceApi = useDatasourceApi();
   const pluginLoader = useRemotePluginLoader();
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
-  const queryClient = useQueryClient();
   const isMobileSize = useIsMobileSize();
-  const previousProjectName = useRef<string | undefined | null>(null);
-
-  // Invalidate datasource select item cache when project changes so
-  // DatasourceStoreProvider re-fetches with the new project scope
-  useEffect(() => {
-    if (previousProjectName.current === projectName) {
-      return;
-    }
-    previousProjectName.current = projectName;
-    queryClient.invalidateQueries({ queryKey: ['listDatasourceSelectItems'] });
-  }, [projectName, queryClient]);
 
   // Fetch the list of projects the user has access to
   const { data: projects } = useProjectList({ enabled: isProjectDatasourceEnabled });
