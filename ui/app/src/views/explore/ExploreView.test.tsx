@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { vi } from 'vitest';
@@ -20,6 +19,7 @@ import ExploreView from './ExploreView';
 
 let mockProjectParam: string | null | undefined;
 const setProjectParam = vi.fn();
+const viewExplore = vi.fn((_props: { projectName?: string }): null => null);
 
 vi.mock('use-query-params', () => ({
   StringParam: {},
@@ -33,7 +33,7 @@ vi.mock('@perses-dev/components', () => ({
 }));
 
 vi.mock('@perses-dev/explore', () => ({
-  ViewExplore: (): null => null,
+  ViewExplore: (props: { projectName?: string }): null => viewExplore(props),
 }));
 
 vi.mock('@perses-dev/plugin-system', () => ({
@@ -57,50 +57,36 @@ vi.mock('../../model/project-client', () => ({
 }));
 
 vi.mock('../../model/global-variable-client', () => ({
-  useGlobalVariableList: (): object => ({ data: [], isLoading: true }),
+  useGlobalVariableList: (): object => ({ data: [], isLoading: false }),
 }));
 
 vi.mock('../../utils/browser-size', () => ({
   useIsMobileSize: (): boolean => false,
 }));
 
-const datasourceQueryKey = ['listDatasourceSelectItems', 'PrometheusDatasource'];
+const lastProjectName = (): string | undefined => viewExplore.mock.lastCall?.[0]?.projectName;
 
 describe('ExploreView datasource scope', () => {
-  it.each([undefined, null, 'project-a'])('refreshes datasource choices on entry with project %s', (project) => {
-    mockProjectParam = project;
-    const queryClient = new QueryClient();
-    queryClient.setQueryData(datasourceQueryKey, []);
-
-    render(
-      <QueryClientProvider client={queryClient}>
-        <ExploreView />
-      </QueryClientProvider>,
-    );
-
-    expect(queryClient.getQueryState(datasourceQueryKey)?.isInvalidated).toBe(true);
-    queryClient.clear();
+  it.each([
+    [undefined, undefined],
+    [null, undefined],
+    ['project-a', 'project-a'],
+  ])('scopes the datasource store to project param %s', (param, expected) => {
+    mockProjectParam = param;
+    viewExplore.mockClear();
+    render(<ExploreView />);
+    expect(lastProjectName()).toBe(expected);
   });
 
-  it('refreshes datasource choices on project changes, including returning to global scope', () => {
+  it('follows project changes, including returning to global scope', () => {
     mockProjectParam = undefined;
-    const queryClient = new QueryClient();
-    const createView = (): ReactElement => (
-      <QueryClientProvider client={queryClient}>
-        <ExploreView />
-      </QueryClientProvider>
-    );
+    const createView = (): ReactElement => <ExploreView />;
     const { rerender } = render(createView());
 
     for (const project of ['project-a', 'project-b', undefined]) {
-      queryClient.setQueryData(datasourceQueryKey, []);
-      rerender(createView());
-      expect(queryClient.getQueryState(datasourceQueryKey)?.isInvalidated).toBe(false);
-
       mockProjectParam = project;
       rerender(createView());
-      expect(queryClient.getQueryState(datasourceQueryKey)?.isInvalidated).toBe(true);
+      expect(lastProjectName()).toBe(project);
     }
-    queryClient.clear();
   });
 });

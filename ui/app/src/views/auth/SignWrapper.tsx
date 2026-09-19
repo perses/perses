@@ -11,16 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* TODO: @Gladorme check social button types */
-/* oxlint-disable typescript/explicit-function-return-type */
-
 import type { Theme } from '@mui/material';
 import { alpha, Divider, Stack, useTheme } from '@mui/material';
 import Bitbucket from 'mdi-material-ui/Bitbucket';
 import Gitlab from 'mdi-material-ui/Gitlab';
-import type { ReactElement, ReactNode } from 'react';
+import type { ComponentClass, ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
 import * as React from 'react';
+import type { SpecificSocialLoginButtonProps } from 'react-social-login-buttons';
 import {
   AmazonLoginButton,
   AppleLoginButton,
@@ -53,10 +51,26 @@ import { useDarkMode } from '../../context/DarkMode';
 import { buildRedirectQueryString, useRedirectQueryParam } from '../../model/auth/auth-client';
 import { useIsLaptopSize } from '../../utils/browser-size';
 
+type SocialLoginButton = ComponentClass<SpecificSocialLoginButtonProps>;
+type SocialButtonFactory = (theme: Theme) => SocialLoginButton;
+
+// Default button. Will match all remaining providers.
+const DEFAULT_SOCIAL_BUTTON: SocialButtonFactory = (theme) =>
+  createButton({
+    icon: '',
+    style: {
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.background.default,
+    },
+    activeStyle: {
+      backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity),
+    },
+  });
+
 // A simple map to know which button to use, according to the configuration.
 // If the issuer/auth url contains the given key, this will use the corresponding button.
 // noinspection JSUnusedGlobalSymbols
-const SOCIAL_BUTTONS_MAPPING = {
+const SOCIAL_BUTTONS_MAPPING: Record<string, SocialButtonFactory> = {
   // Managed by the lib.
   amazon: () => AmazonLoginButton,
   apple: () => AppleLoginButton,
@@ -91,19 +105,7 @@ const SOCIAL_BUTTONS_MAPPING = {
       style: { background: '#0C66E4' },
       activeStyle: { background: '#0055CC' },
     }),
-  // Default button. Will match all remaining providers.
-  '': (theme: Theme) => {
-    return createButton({
-      icon: '',
-      style: {
-        color: theme.palette.text.primary,
-        backgroundColor: theme.palette.background.default,
-      },
-      activeStyle: {
-        backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity),
-      },
-    });
-  },
+  '': DEFAULT_SOCIAL_BUTTON,
 };
 
 /**
@@ -112,15 +114,15 @@ const SOCIAL_BUTTONS_MAPPING = {
  * @param theme
  * @param url
  */
-function computeSocialButtonFromURL(theme: Theme, url: string) {
-  for (const [key, createButton] of Object.entries(SOCIAL_BUTTONS_MAPPING)) {
+function computeSocialButtonFromURL(theme: Theme, url: string): SocialLoginButton {
+  for (const [key, createSocialButton] of Object.entries(SOCIAL_BUTTONS_MAPPING)) {
     if (url.includes(key)) {
-      return createButton(theme);
+      return createSocialButton(theme);
     }
   }
 
   // Should not happen as '' is always contained in any string.
-  return SOCIAL_BUTTONS_MAPPING[''](theme);
+  return DEFAULT_SOCIAL_BUTTON(theme);
 }
 
 export function PersesLogo({
@@ -176,7 +178,10 @@ export function SignWrapper(props: { children: ReactNode }): ReactElement {
         orientation={isLaptopSize ? 'vertical' : 'horizontal'}
         variant="middle"
         flexItem
-        sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
+        sx={{
+          marginTop: isLaptopSize ? '30vh' : undefined,
+          marginBottom: isLaptopSize ? '30vh' : undefined,
+        }}
       />
       <Stack gap={1} sx={{ maxWidth: '85%', minWidth: '200px' }}>
         {isNativeAuthnProviderEnabled && props.children}
