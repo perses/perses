@@ -292,6 +292,10 @@ logout:
   enabled: <boolean> | default = false # Optional
   # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
   logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
+
+  # Name of the userinfo property to use as the "login" of the user.
+  # If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
+  custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
 ```
 
 ##### OAuth provider
@@ -675,7 +679,8 @@ global:
   # It will also remove the associated proxy.
   # Also, since the global variable depends on the global datasource, it will also disable the global variable feature.
   disable: <boolean> | default = false # Optional
-  discovery: <GlobalDatasourceDiscovery config> # Optional
+  discovery: 
+  - <GlobalDatasourceDiscovery config> # Optional
 
 project:
   # It is used to disable the project datasource feature.
@@ -836,6 +841,18 @@ cleanup_interval: <duration> | default = 1d # Optional
 # When it is true, Perses won't serve the frontend anymore.
 disable: <bool> | default = false # Optional
 
+# Contains the content to be display in a banner at the top of each page along with the severity of the information
+banner: <Banner config> # Optional
+
+# Enables keyboard shortcuts in the UI
+enable_keyboard_shortcuts: <bool> | default = true # Optional
+
+# Enables the dashboard "lock" button that pins every plugin to its latest available version.
+enable_lock_mode: <bool> | default = false # Optional
+
+# Activating the different kind of explorer supported.
+explorer: <Explorer config>
+
 # A list of dashboards you would like to display in the UI home page
 important_dashboards:
   - <Dashboard Selector config> # Optional
@@ -854,6 +871,22 @@ default_user_preferences:
   timezone: <IANA timezone or "local"> # Optional, default = local
   rows_per_page: <10 | 25 | 50 | 100> # Optional, default = 25
   theme: <"light" | "dark"> # Optional, default = light
+```
+
+#### Banner config
+
+```yaml
+# The severity of the information to be displayed in the banner. It will change the color of the banner.
+severity: <enum | possibleValue = 'info' | 'warning' | 'error'>
+# The content of the information to be displayed in the banner. It can be html content.
+message: <string>
+```
+
+#### Explorer config
+
+```yaml
+# When true, the explorer feature will be enabled in the UI.
+enable: <bool> | default = false
 ```
 
 #### TimeRange config
