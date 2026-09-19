@@ -22,7 +22,7 @@ import Archive from 'mdi-material-ui/Archive';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import Compass from 'mdi-material-ui/Compass';
 import type { ReactElement, MouseEvent } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 
 import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
@@ -130,10 +130,15 @@ function HelperExploreView(): ReactElement {
   const isProjectDatasourceEnabled = useIsProjectDatasourceEnabled();
   const queryClient = useQueryClient();
   const isMobileSize = useIsMobileSize();
+  const previousProjectName = useRef<string | undefined | null>(null);
 
   // Invalidate datasource select item cache when project changes so
   // DatasourceStoreProvider re-fetches with the new project scope
   useEffect(() => {
+    if (previousProjectName.current === projectName) {
+      return;
+    }
+    previousProjectName.current = projectName;
     queryClient.invalidateQueries({ queryKey: ['listDatasourceSelectItems'] });
   }, [projectName, queryClient]);
 

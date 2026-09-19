@@ -17,12 +17,17 @@ interface SampleDataModule<T> {
   default: T;
 }
 
+async function loadSampleData<T>(name: string): Promise<T> {
+  const js: SampleDataModule<T> = await import(`../../sample-data/${name}`);
+  return js.default;
+}
+
 export function useSampleData<T>(name: string): T | undefined {
   const [data, setData] = useState<T>();
   useEffect(() => {
     async function loadData(): Promise<void> {
-      const js: SampleDataModule<T> = await import(`../../sample-data/${name}`);
-      setData(js.default);
+      const sampleData = await loadSampleData<T>(name);
+      setData(sampleData);
     }
     loadData();
   }, [name]);
