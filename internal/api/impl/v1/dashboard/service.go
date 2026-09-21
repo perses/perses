@@ -16,9 +16,11 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -29,6 +31,8 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,14 +46,16 @@ type service struct {
 	isVariableDisable   bool
 	customRules         []*config.CustomLintRule
 	index               index.Client
+	authz               authorization.Authorization
 }
 
-func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, indexClient index.Client) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, indexClient index.Client) dashboard.Service {
 	return &service{
 		dao:                 dao,
 		globalVarDAO:        globalVarDAO,
 		projectVarDAO:       projectVarDAO,
 		sch:                 sch,
+		authz:               authz,
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
@@ -57,10 +63,13 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
+func (s *service) Create(ctx echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.create(copyEntity)
 }
@@ -83,10 +92,13 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
+func (s *service) Update(ctx echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.update(copyEntity, parameters)
 }
@@ -200,4 +212,37 @@ func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error
 
 func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 	return s.globalVarDAO.List(&globalvariable.Query{})
+}
+
+// checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
+// reader permission.
+func (s *service) checkSecretPermission(ctx echo.Context, dashboard *v1.Dashboard) error {
+	if !s.authz.IsEnabled() {
+		return nil
+	}
+
+	hasSecret := false
+	for name, dts := range dashboard.Spec.Datasources {
+		var proxyErr error
+		hasSecret, proxyErr = datasourceV1.HasSecret(dts)
+		if proxyErr != nil {
+			logrus.WithError(proxyErr).WithFields(map[string]any{
+				"datasource": name,
+			}).Error("unable to build or find the config for the datasource defined in the dashboard spec")
+			return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config for the datasource defined in the dashboard spec")
+		}
+		if hasSecret {
+			// as long as we found one datasource with a secret, we can stop the loop and check the permission
+			break
+		}
+	}
+
+	if !hasSecret {
+		return nil
+	}
+	if ok := s.authz.HasPermission(ctx, role.ReadAction, dashboard.Metadata.Project, role.SecretScope); !ok {
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, dashboard.Metadata.Project, role.SecretScope))
+	}
+
+	return nil
 }
