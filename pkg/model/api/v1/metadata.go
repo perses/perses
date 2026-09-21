@@ -203,16 +203,12 @@ func (m *PublicMetadata) UnmarshalYAML(unmarshal func(any) error) error {
 
 func NewProjectMetadata(project string, name string) *ProjectMetadata {
 	return &ProjectMetadata{
-		Metadata: Metadata{
-			Name: name,
-		},
-		ProjectMetadataWrapper: ProjectMetadataWrapper{
-			Project: project,
-		},
+		Name:    name,
+		Project: project,
 	}
 }
 
-// This wrapping struct is required to allow defining a custom unmarshall on Metadata
+// ProjectMetadataWrapper is a wrapping struct that is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in
 // ProjectMetadata caused Project string to be ignored when unmarshalling)
 type ProjectMetadataWrapper struct {
@@ -225,6 +221,9 @@ func (p *ProjectMetadataWrapper) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
 	*p = tmp
 	return nil
 }
@@ -235,8 +234,21 @@ func (p *ProjectMetadataWrapper) UnmarshalYAML(unmarshal func(any) error) error 
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
 	*p = tmp
 	return nil
+}
+
+func (p *ProjectMetadataWrapper) validate() error {
+	if len(p.Project) == 0 {
+		// Project is not required for all resources, so we don't return an error if it's empty.
+		// This is because it is a valid use case you are creating a resource using the endpoint that is including the project in the path, so the project is not required in the body.
+		// The validation will be done in the service layer if needed.
+		return nil
+	}
+	return common.ValidateID(p.Project)
 }
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
