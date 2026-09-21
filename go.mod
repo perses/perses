@@ -43,6 +43,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	github.com/tidwall/gjson v1.19.0
+	github.com/tidwall/sjson v1.2.5
 	github.com/zitadel/oidc/v3 v3.51.3
 	golang.org/x/crypto v0.57.0
 	golang.org/x/mod v0.41.0
