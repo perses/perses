@@ -34,8 +34,6 @@ interface AuthorizationContext {
   enabled: boolean;
   username: string;
   userPermissions: Record<string, Permission[]>;
-  isPermissionsLoading: boolean;
-  permissionsError: StatusError | undefined;
 }
 
 const AuthorizationContext = createContext<AuthorizationContext | undefined>(undefined);
@@ -50,19 +48,15 @@ export function AuthorizationProvider(props: { children: ReactNode }): ReactElem
   }
 
   const username = useUsername();
-  const { data, error, isFetching, isLoading } = useUserPermissions(username);
-  const contextValue: AuthorizationContext = useMemo(() => {
-    const hasUsername = Boolean(username);
-    return {
+  const { data } = useUserPermissions(username);
+  const contextValue: AuthorizationContext = useMemo(
+    () => ({
       enabled,
       username,
       userPermissions: data ?? {},
-      // TanStack Query v4 reports isLoading while a disabled query is idle.
-      // Require isFetching so an empty username is not treated as loading.
-      isPermissionsLoading: enabled && hasUsername && isLoading && isFetching,
-      permissionsError: enabled && hasUsername ? (error ?? undefined) : undefined,
-    };
-  }, [data, enabled, error, isFetching, isLoading, username]);
+    }),
+    [data, enabled, username],
+  );
 
   return <AuthorizationContext.Provider value={contextValue}>{props.children}</AuthorizationContext.Provider>;
 }
@@ -167,11 +161,23 @@ export function useCanReadAnyProject(): boolean {
 /*
  * usePermissionsQueryStatus exposes loading/error for the permissions request
  * so callers can distinguish "still loading" and "request failed" from an
- * empty permission map.
+ * empty permission map. Kept out of AuthorizationContext, which only holds
+ * resolved permission data.
  */
 export function usePermissionsQueryStatus(): { isLoading: boolean; error: StatusError | undefined } {
-  const { isPermissionsLoading, permissionsError } = useAuthorizationContext();
-  return { isLoading: isPermissionsLoading, error: permissionsError };
+  const enabled = useIsAuthEnabled();
+  const username = useUsername();
+  const { error, isFetching, isLoading } = useUserPermissions(username);
+
+  return useMemo(() => {
+    const hasUsername = Boolean(username);
+    return {
+      // TanStack Query v4 reports isLoading while a disabled query is idle.
+      // Require isFetching so an empty username is not treated as loading.
+      isLoading: enabled && hasUsername && isLoading && isFetching,
+      error: enabled && hasUsername ? (error ?? undefined) : undefined,
+    };
+  }, [enabled, error, isFetching, isLoading, username]);
 }
 
 function permissionListHasPermission(permissions: Permission[], requestAction: Action, requestScope: Scope): boolean {

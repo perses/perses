@@ -68,9 +68,36 @@ function isForbiddenError(error: StatusError | null | undefined): boolean {
   return error?.status === 403;
 }
 
-function SearchErrorAlert({ title, error }: { title: string; error: StatusError }): ReactElement {
+interface SearchErrorAlertProps {
+  title: string;
+  error: StatusError;
+  type?: ResourceType;
+  isResources?: (type: ResourceType, available: boolean) => void;
+  onLoadError?: (type: ResourceType, hasError: boolean) => void;
+}
+
+function useSearchListErrorState(
+  type: ResourceType | undefined,
+  isResources?: (type: ResourceType, available: boolean) => void,
+  onLoadError?: (type: ResourceType, hasError: boolean) => void,
+): void {
+  useEffect(() => {
+    if (!type) {
+      return;
+    }
+    onLoadError?.(type, true);
+    isResources?.(type, false);
+    return (): void => {
+      onLoadError?.(type, false);
+      isResources?.(type, false);
+    };
+  }, [isResources, onLoadError, type]);
+}
+
+function SearchErrorAlert({ title, error, type, isResources, onLoadError }: SearchErrorAlertProps): ReactElement {
   // Permission failures are handled by skipping unauthorized searches. If a 403 still
   // reaches the UI, keep the copy generic so RBAC scope/kind names are not exposed.
+  useSearchListErrorState(type, isResources, onLoadError);
   const detail = isForbiddenError(error)
     ? 'you do not have permission to view this'
     : error.message?.trim() || 'Unknown error';
@@ -84,26 +111,6 @@ function SearchErrorAlert({ title, error }: { title: string; error: StatusError 
   );
 }
 
-function useSearchListErrorState(
-  type: ResourceType,
-  error: StatusError | null | undefined,
-  isResources?: (type: ResourceType, available: boolean) => void,
-  onLoadError?: (type: ResourceType, hasError: boolean) => void,
-): StatusError | undefined {
-  useEffect(() => {
-    onLoadError?.(type, Boolean(error));
-    if (error) {
-      isResources?.(type, false);
-    }
-    return (): void => {
-      onLoadError?.(type, false);
-      isResources?.(type, false);
-    };
-  }, [error, isResources, onLoadError, type]);
-
-  return error ?? undefined;
-}
-
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
   const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
   const { query, onClick, isResources, onLoadError } = props;
@@ -111,10 +118,17 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
     (isAvailable: boolean): void => isResources?.('projects', isAvailable),
     [isResources],
   );
-  const visibleError = useSearchListErrorState('projects', projectListError, isResources, onLoadError);
 
-  if (visibleError) {
-    return <SearchErrorAlert title="Failed to load projects" error={visibleError} />;
+  if (projectListError) {
+    return (
+      <SearchErrorAlert
+        title="Failed to load projects"
+        error={projectListError}
+        type="projects"
+        isResources={isResources}
+        onLoadError={onLoadError}
+      />
+    );
   }
 
   return (
@@ -137,15 +151,17 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
     (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
     [isResources],
   );
-  const visibleError = useSearchListErrorState(
-    'globalDatasources',
-    globalDatasourceListError,
-    isResources,
-    onLoadError,
-  );
 
-  if (visibleError) {
-    return <SearchErrorAlert title="Failed to load global datasources" error={visibleError} />;
+  if (globalDatasourceListError) {
+    return (
+      <SearchErrorAlert
+        title="Failed to load global datasources"
+        error={globalDatasourceListError}
+        type="globalDatasources"
+        isResources={isResources}
+        onLoadError={onLoadError}
+      />
+    );
   }
 
   return (
@@ -198,10 +214,17 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   }, [importantDashboards, dashboardList, query]);
 
   const dashboardError = dashboardListError ?? importantDashboardsError;
-  const visibleError = useSearchListErrorState('dashboards', dashboardError, isResources, onLoadError);
 
-  if (visibleError) {
-    return <SearchErrorAlert title="Failed to load dashboards" error={visibleError} />;
+  if (dashboardError) {
+    return (
+      <SearchErrorAlert
+        title="Failed to load dashboards"
+        error={dashboardError}
+        type="dashboards"
+        isResources={isResources}
+        onLoadError={onLoadError}
+      />
+    );
   }
 
   return dashboardListLoading || importantDashboardsLoading ? null : (
@@ -223,10 +246,17 @@ function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
     (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
     [isResources],
   );
-  const visibleError = useSearchListErrorState('datasources', datasourceListError, isResources, onLoadError);
 
-  if (visibleError) {
-    return <SearchErrorAlert title="Failed to load datasources" error={visibleError} />;
+  if (datasourceListError) {
+    return (
+      <SearchErrorAlert
+        title="Failed to load datasources"
+        error={datasourceListError}
+        type="datasources"
+        isResources={isResources}
+        onLoadError={onLoadError}
+      />
+    );
   }
 
   return (
