@@ -127,7 +127,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, indexService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())

@@ -12,7 +12,7 @@ package v1
 // need validation like the kubernetes users.
 #PublicMetadata: _
 
-// This wrapping struct is required to allow defining a custom unmarshall on Metadata
+// ProjectMetadataWrapper is a wrapping struct that is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in
 // ProjectMetadata caused Project string to be ignored when unmarshalling)
 #ProjectMetadataWrapper: _
