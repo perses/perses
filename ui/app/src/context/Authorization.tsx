@@ -24,11 +24,11 @@ import { useIsDelegatedAuthnProviderEnabled, useIsAuthEnabled } from './Config';
 // Used as placeholder for checking Global permissions
 export const GlobalProject = '*';
 
+const NATIVE_PROJECT_READ_SCOPES: Scope[] = ['Project'];
 // Kubernetes/delegated auth does not emit Project scope entries. Backend project
 // access is derived from read on Dashboard, Datasource, or Secret in a namespace
-// (see internal/api/authorization/k8s/k8s.go checkNamespaceAccess). Native RBAC
-// still uses the Project scope, so include it here as well.
-const PROJECT_READ_SCOPES: Scope[] = ['Project', 'Dashboard', 'Datasource', 'Secret'];
+// (see internal/api/authorization/k8s/k8s.go checkNamespaceAccess).
+const DELEGATED_PROJECT_READ_SCOPES: Scope[] = ['Project', 'Dashboard', 'Datasource', 'Secret'];
 
 interface AuthorizationContext {
   enabled: boolean;
@@ -145,6 +145,7 @@ export function useHasPermissionInAnyProject(action: Action, scope: Scope): bool
  */
 export function useCanReadAnyProject(): boolean {
   const { enabled, username, userPermissions } = useAuthorizationContext();
+  const isDelegatedAuthnProviderEnabled = useIsDelegatedAuthnProviderEnabled();
 
   if (!enabled) {
     return true;
@@ -154,8 +155,12 @@ export function useCanReadAnyProject(): boolean {
     return false;
   }
 
+  const projectReadScopes = isDelegatedAuthnProviderEnabled
+    ? DELEGATED_PROJECT_READ_SCOPES
+    : NATIVE_PROJECT_READ_SCOPES;
+
   return Object.values(userPermissions).some((permissions) =>
-    PROJECT_READ_SCOPES.some((scope) => permissionListHasPermission(permissions, 'read', scope)),
+    projectReadScopes.some((scope) => permissionListHasPermission(permissions, 'read', scope)),
   );
 }
 

@@ -20,6 +20,7 @@ import { vi } from 'vitest';
 const { authState } = vi.hoisted(() => ({
   authState: {
     enabled: true,
+    delegated: true,
     username: 'user',
     userPermissions: {} as Record<string, Permission[]>,
     isLoading: false,
@@ -56,7 +57,7 @@ vi.mock('../model/fetch', () => ({
 
 vi.mock('./Config', () => ({
   useIsAuthEnabled: (): boolean => authState.enabled,
-  useIsDelegatedAuthnProviderEnabled: (): boolean => true,
+  useIsDelegatedAuthnProviderEnabled: (): boolean => authState.delegated,
 }));
 
 import {
@@ -94,6 +95,7 @@ function renderProbe(): void {
 describe('useHasPermissionInAnyProject', () => {
   beforeEach(() => {
     authState.enabled = true;
+    authState.delegated = true;
     authState.username = 'user';
     authState.userPermissions = {};
     authState.isLoading = false;
@@ -135,6 +137,7 @@ describe('useHasPermissionInAnyProject', () => {
 describe('useHasPermission for global resources', () => {
   beforeEach(() => {
     authState.enabled = true;
+    authState.delegated = true;
     authState.username = 'user';
     authState.userPermissions = {};
     authState.isLoading = false;
@@ -162,6 +165,7 @@ describe('useHasPermission for global resources', () => {
 describe('useCanReadAnyProject', () => {
   beforeEach(() => {
     authState.enabled = true;
+    authState.delegated = true;
     authState.username = 'user';
     authState.userPermissions = {};
     authState.isLoading = false;
@@ -214,11 +218,30 @@ describe('useCanReadAnyProject', () => {
     renderProbe();
     expect(screen.getByText('project-any:false')).toBeInTheDocument();
   });
+
+  it('does not treat Datasource read as project access for native RBAC', () => {
+    authState.delegated = false;
+    authState.userPermissions = {
+      demo: [{ actions: ['read'], scopes: ['Datasource'] }],
+    };
+    renderProbe();
+    expect(screen.getByText('project-any:false')).toBeInTheDocument();
+  });
+
+  it('still grants native project access via the Project scope', () => {
+    authState.delegated = false;
+    authState.userPermissions = {
+      demo: [{ actions: ['read'], scopes: ['Project'] }],
+    };
+    renderProbe();
+    expect(screen.getByText('project-any:true')).toBeInTheDocument();
+  });
 });
 
 describe('usePermissionsQueryStatus', () => {
   beforeEach(() => {
     authState.enabled = true;
+    authState.delegated = true;
     authState.username = 'user';
     authState.userPermissions = {};
     authState.isLoading = false;

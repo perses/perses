@@ -95,6 +95,10 @@ function useSearchListErrorState(
     if (error) {
       isResources?.(type, false);
     }
+    return (): void => {
+      onLoadError?.(type, false);
+      isResources?.(type, false);
+    };
   }, [error, isResources, onLoadError, type]);
 
   return error ?? undefined;

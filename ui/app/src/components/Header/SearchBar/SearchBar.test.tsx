@@ -16,6 +16,7 @@ import type { StatusError } from '@perses-dev/client';
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
@@ -113,14 +114,18 @@ import { SearchBar } from './SearchBar';
 
 const theme = createTheme();
 
-function renderSearchBar(): ReturnType<typeof render> {
-  return render(
+function searchBarTree(): ReactElement {
+  return (
     <MemoryRouter>
       <ThemeProvider theme={theme}>
         <SearchBar />
       </ThemeProvider>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
+}
+
+function renderSearchBar(): ReturnType<typeof render> {
+  return render(searchBarTree());
 }
 
 async function openSearch(): Promise<void> {
@@ -264,5 +269,25 @@ describe('SearchBar', () => {
 
     expect(screen.queryByText(/No records found/)).not.toBeInTheDocument();
     expect(listState.globalDatasourceListCalls).toBe(0);
+  });
+
+  it('clears stale load errors when a gated list unmounts', async () => {
+    listState.projects = {
+      data: [],
+      error: { message: 'network down', status: 500 } as StatusError,
+    };
+
+    const view = renderSearchBar();
+    await openSearch();
+    await userEvent.type(screen.getByPlaceholderText('What are you looking for?'), 'demo');
+
+    expect(screen.getByText('Failed to load projects: network down')).toBeInTheDocument();
+    expect(screen.queryByText(/No records found/)).not.toBeInTheDocument();
+
+    authState.projects = false;
+    view.rerender(searchBarTree());
+
+    expect(screen.queryByText(/Failed to load projects/)).not.toBeInTheDocument();
+    expect(screen.getByText('No records found for demo')).toBeInTheDocument();
   });
 });
