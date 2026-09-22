@@ -159,10 +159,27 @@ func CreateAuthorizationHeader(token string) (string, string) {
 	return "Authorization", fmt.Sprintf("Bearer %s", token)
 }
 
+func hasExtractedPlugins(pluginPath string) bool {
+	entries, err := os.ReadDir(pluginPath)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			return true
+		}
+	}
+	return false
+}
+
 func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.Manager) {
 	// Integration tests don't need to re-extract archives at each server boot.
 	// Redirect archives to an empty temp folder to avoid heavy I/O on Windows CI.
-	conf.Plugin.ArchivePaths = []string{t.TempDir()}
+	// Keep the real archive path when plugins/ is empty so the first server extracts
+	// schemas instead of racing a later StrictLoad from another test package.
+	if hasExtractedPlugins(conf.Plugin.Path) {
+		conf.Plugin.ArchivePaths = []string{t.TempDir()}
+	}
 
 	if useSQL == "true" {
 		conf.Database = apiConfig.Database{

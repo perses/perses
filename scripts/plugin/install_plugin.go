@@ -23,6 +23,8 @@ import (
 	"strings"
 
 	"github.com/perses/common/async"
+	pluginapi "github.com/perses/perses/internal/api/plugin"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -99,6 +101,18 @@ func main() {
 	}
 	for _, download := range downloadToBeDone {
 		_, _ = download.Await()
+	}
+
+	// Extract once so integration tests can skip per-server unzip without racing schema load.
+	pluginService := pluginapi.New(config.Plugin{
+		Path: config.DefaultPluginPath,
+		ArchivePaths: []string{
+			pluginArchiveFolder,
+		},
+	})
+	fmt.Println("Extracting plugin archives...")
+	if err := pluginService.UnzipArchives(); err != nil {
+		panic(err)
 	}
 	fmt.Println("All plugins successfully installed.")
 }
