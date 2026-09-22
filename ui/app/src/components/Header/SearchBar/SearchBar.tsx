@@ -25,7 +25,13 @@ import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import type { MouseEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { GlobalProject, useHasPermission, useHasPermissionInAnyProject } from '../../../context/Authorization';
+import {
+  GlobalProject,
+  useCanReadAnyProject,
+  useHasPermission,
+  useHasPermissionInAnyProject,
+  usePermissionsQueryStatus,
+} from '../../../context/Authorization';
 import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
@@ -248,10 +254,12 @@ function useHandleShortCut(handleOpen: () => void): void {
 
 export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
+  const { isLoading: isPermissionsLoading, error: permissionsError } = usePermissionsQueryStatus();
   const canReadDashboards = useHasPermissionInAnyProject('read', 'Dashboard');
-  const canReadProjects = useHasPermissionInAnyProject('read', 'Project');
+  const canReadProjects = useCanReadAnyProject();
   const canReadDatasources = useHasPermissionInAnyProject('read', 'Datasource');
   const canReadGlobalDatasources = useHasPermission('read', GlobalProject, 'GlobalDatasource');
+  const canFetchSearchLists = !isPermissionsLoading && !permissionsError;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
@@ -352,13 +360,14 @@ export function SearchBar(): ReactElement {
               ),
             }}
           />
-          {query.length > 0 && !hasAnyResource && !hasAnyLoadError && (
+          {permissionsError && <SearchErrorAlert title="Failed to load permissions" error={permissionsError} />}
+          {query.length > 0 && !hasAnyResource && !hasAnyLoadError && !isPermissionsLoading && !permissionsError && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          {canReadDashboards && (
+          {canFetchSearchLists && canReadDashboards && (
             <SearchDashboardList
               query={query}
               onClick={handleClose}
@@ -366,7 +375,7 @@ export function SearchBar(): ReactElement {
               onLoadError={handleLoadError}
             />
           )}
-          {canReadProjects && (
+          {canFetchSearchLists && canReadProjects && (
             <SearchProjectList
               query={query}
               onClick={handleClose}
@@ -374,7 +383,7 @@ export function SearchBar(): ReactElement {
               onLoadError={handleLoadError}
             />
           )}
-          {canReadGlobalDatasources && (
+          {canFetchSearchLists && canReadGlobalDatasources && (
             <SearchGlobalDatasource
               query={query}
               onClick={handleClose}
@@ -382,7 +391,7 @@ export function SearchBar(): ReactElement {
               onLoadError={handleLoadError}
             />
           )}
-          {canReadDatasources && (
+          {canFetchSearchLists && canReadDatasources && (
             <SearchDatasourceList
               query={query}
               onClick={handleClose}

@@ -25,6 +25,8 @@ const { authState, listState } = vi.hoisted(() => ({
     projects: true,
     datasources: true,
     globalDatasources: true,
+    permissionsLoading: false,
+    permissionsError: null as StatusError | null,
   },
   listState: {
     dashboards: {
@@ -41,6 +43,7 @@ const { authState, listState } = vi.hoisted(() => ({
       data: [] as unknown[],
       error: null as StatusError | null,
     },
+    projectListCalls: 0,
     datasources: {
       data: [] as unknown[],
       error: null as StatusError | null,
@@ -71,14 +74,16 @@ vi.mock('../../../context/Authorization', () => ({
     if (scope === 'Dashboard') {
       return authState.dashboards;
     }
-    if (scope === 'Project') {
-      return authState.projects;
-    }
     if (scope === 'Datasource') {
       return authState.datasources;
     }
     return true;
   },
+  useCanReadAnyProject: (): boolean => authState.projects,
+  usePermissionsQueryStatus: (): { isLoading: boolean; error: StatusError | undefined } => ({
+    isLoading: authState.permissionsLoading,
+    error: authState.permissionsError ?? undefined,
+  }),
 }));
 
 vi.mock('../../../model/dashboard-client', () => ({
@@ -87,7 +92,10 @@ vi.mock('../../../model/dashboard-client', () => ({
 }));
 
 vi.mock('../../../model/project-client', () => ({
-  useProjectList: (): typeof listState.projects => listState.projects,
+  useProjectList: (): typeof listState.projects => {
+    listState.projectListCalls += 1;
+    return listState.projects;
+  },
 }));
 
 vi.mock('../../../model/datasource-client', () => ({
@@ -124,12 +132,15 @@ function resetState(): void {
   authState.projects = true;
   authState.datasources = true;
   authState.globalDatasources = true;
+  authState.permissionsLoading = false;
+  authState.permissionsError = null;
   listState.dashboards = { data: [], isLoading: false, error: null };
   listState.importantDashboards = { data: [], isLoading: false, error: null };
   listState.projects = { data: [], error: null };
   listState.datasources = { data: [], error: null };
   listState.globalDatasources = { data: [], error: null };
   listState.globalDatasourceListCalls = 0;
+  listState.projectListCalls = 0;
 }
 
 describe('SearchBar', () => {
@@ -185,6 +196,35 @@ describe('SearchBar', () => {
     expect(screen.queryByText(/GlobalDatasource/)).not.toBeInTheDocument();
   });
 
+  it('still searches projects when access comes from dashboard-like permissions', async () => {
+    authState.projects = true;
+    listState.projects = {
+      data: [
+        {
+          kind: 'Project',
+          metadata: { name: 'demo', createdAt: '', updatedAt: '', version: 0 },
+        },
+      ],
+      error: null,
+    };
+
+    renderSearchBar();
+    await openSearch();
+    await userEvent.type(screen.getByPlaceholderText('What are you looking for?'), 'demo');
+
+    expect(listState.projectListCalls).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: /demo/i })).toBeInTheDocument();
+  });
+
+  it('does not search projects when the user cannot read any project', async () => {
+    authState.projects = false;
+
+    renderSearchBar();
+    await openSearch();
+
+    expect(listState.projectListCalls).toBe(0);
+  });
+
   it('lists matching resources when APIs succeed', async () => {
     listState.projects = {
       data: [
@@ -201,5 +241,28 @@ describe('SearchBar', () => {
     await userEvent.type(screen.getByPlaceholderText('What are you looking for?'), 'demo');
 
     expect(screen.getByRole('link', { name: /demo/i })).toBeInTheDocument();
+  });
+
+  it('does not treat a failed permissions request as an empty search', async () => {
+    authState.permissionsError = { message: 'permissions unavailable', status: 500 } as StatusError;
+
+    renderSearchBar();
+    await openSearch();
+    await userEvent.type(screen.getByPlaceholderText('What are you looking for?'), 'demo');
+
+    expect(screen.getByText('Failed to load permissions: permissions unavailable')).toBeInTheDocument();
+    expect(screen.queryByText(/No records found/)).not.toBeInTheDocument();
+    expect(listState.globalDatasourceListCalls).toBe(0);
+  });
+
+  it('does not show an empty search state while permissions are loading', async () => {
+    authState.permissionsLoading = true;
+
+    renderSearchBar();
+    await openSearch();
+    await userEvent.type(screen.getByPlaceholderText('What are you looking for?'), 'demo');
+
+    expect(screen.queryByText(/No records found/)).not.toBeInTheDocument();
+    expect(listState.globalDatasourceListCalls).toBe(0);
   });
 });
