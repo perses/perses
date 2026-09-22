@@ -26,14 +26,24 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
 	"gopkg.in/yaml.v3"
 )
 
 func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
 	switch m := metadata.(type) {
 	case *modelV1.ProjectMetadata:
+		if err := common.ValidateID(m.Project); err != nil {
+			return "", &databaseModel.Error{Key: m.Project, Code: databaseModel.ErrorBadRequest}
+		}
+		if err := common.ValidateID(m.Name); err != nil {
+			return "", &databaseModel.Error{Key: m.Name, Code: databaseModel.ErrorBadRequest}
+		}
 		return filepath.Join(modelV1.PluralKindMap[kind], m.Project, m.Name), nil
 	case *modelV1.Metadata:
+		if err := common.ValidateID(m.Name); err != nil {
+			return "", &databaseModel.Error{Key: m.Name, Code: databaseModel.ErrorBadRequest}
+		}
 		return filepath.Join(modelV1.PluralKindMap[kind], m.Name), nil
 	}
 	return "", fmt.Errorf("metadata %T not managed", metadata)
@@ -226,6 +236,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	return nil
 }
 func (d *DAO) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
+	metadata.Flatten(d.CaseSensitive)
 	key, generateIDErr := generateID(kind, metadata)
 	if generateIDErr != nil {
 		return generateIDErr
