@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.55.0-beta.3 / 2026-09-22
+
+### Core & UI
+
+- [FEATURE] Add dynamic page title (#4489)
+- [ENHANCEMENT] Protect the database against path transversal attack (#4492)
+- [ENHANCEMENT] Validate the value used in `metadata.name` (#4488)
+- [BUGFIX] Ensure the project name parameter is valid for any HTTP methods (#4491)
+- [BUGFIX] Missing secret read permission when creating en embedded datasource in dashboard (#4487)
+- [BUGFIX] Prevent path transversal attack when using project query parameter (#4485)
+
+### Plugins improvements
+
+- [FEATURE] Add new plugin: Json (perses/plugins#770)
+
 ## 0.55.0-beta.2 / 2026-09-18
 
 ### Core & UI
