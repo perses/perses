@@ -77,10 +77,6 @@ func (a *arch) unzipAll() error {
 }
 
 func (a *arch) unzip(folder string, archiveFileName string) error {
-	if !archive.IsArchiveFile(archiveFileName) {
-		logrus.Debugf("skipping unarchive file %s", archiveFileName)
-		return nil
-	}
 	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveName := archive.ExtractArchiveName(archiveFileName)
 	if strings.Contains(archiveName, "..") {
@@ -89,7 +85,7 @@ func (a *arch) unzip(folder string, archiveFileName string) error {
 	archiveFile := filepath.Join(folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile) //nolint: gosec
 	if archiveOpenErr != nil {
-		return fmt.Errorf("unable to open archive file %q", archiveFile)
+		return fmt.Errorf("unable to open archive file %q: %w", archiveFile, archiveOpenErr)
 	}
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {
