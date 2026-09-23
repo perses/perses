@@ -56,6 +56,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
@@ -115,6 +116,7 @@ type service struct {
 }
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+	secretFileValidator := secretfile.New(conf.Security.SecretFileAllowedDirectories)
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
@@ -135,13 +137,13 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemaService, authzService)
 	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), authzService, schemaService)
 	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), authzService, schemaService)
-	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
+	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, secretFileValidator)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemaService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), authzService)
 	roleService := roleImpl.NewService(dao.GetRole(), authzService, schemaService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), authzService, schemaService)
-	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
+	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService, secretFileValidator)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
 

@@ -172,6 +172,14 @@ encryption_key_file: <filename> # Optional
 
 # Configuration for CORS (cross-origin resource sharing).
 cors: <CORS config> # Optional
+
+# List of absolute directories from which Secrets and GlobalSecrets are allowed to read files
+# (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
+# Symlinks are resolved, and the file must remain inside one of these directories.
+# When empty (default), any file reference in a Secret or GlobalSecret is rejected.
+# This prevents users allowed to create secrets from exfiltrating arbitrary files from the Perses server.
+secret_file_allowed_directories: # Optional
+  - <string>
 ```
 
 #### Cookie config
