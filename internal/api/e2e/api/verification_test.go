@@ -30,12 +30,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const invalidProjectErrorMessage = "the project name is invalid"
+const (
+	invalidProjectErrorMessage = "the project name is invalid"
+	invalidNameErrorMessage    = "the name is invalid"
+)
 
-// invalidProjectNames is a list of project names that must be rejected by the CheckProject middleware.
+// globalResourcePathList is the list of the resource paths that are NOT part of a project.
+// They are exposed as /api/v1/<resource>/:name and so the `name` path parameter must be validated as well.
+var globalResourcePathList = []string{
+	utils.PathProject, utils.PathUser, utils.PathGlobalDatasource, utils.PathGlobalRole, utils.PathGlobalRoleBinding, utils.PathGlobalSecret, utils.PathGlobalVariable,
+}
+
+// invalidIDs is a list of IDs (project name or resource name) that must be rejected by the CheckParameter middleware.
 // They are either path traversal attempts or names that don't match the ID format expected by Perses.
 // `raw` is the value used in the HTTP path (kept verbatim, no extra encoding), `decoded` is the value used in a JSON body.
-var invalidProjectNames = []struct {
+var invalidIDs = []struct {
 	name    string
 	raw     string
 	decoded string
@@ -71,18 +80,24 @@ func expectInvalidProject(req *httpexpect.Request) {
 		JSON().Object().Value("message").String().Contains(invalidProjectErrorMessage)
 }
 
-// TestCheckProjectMiddlewarePathTraversalInPath ensures that any project name coming from the HTTP path
+func expectInvalidName(req *httpexpect.Request) {
+	req.Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().Value("message").String().Contains(invalidNameErrorMessage)
+}
+
+// TestCheckParameterMiddlewarePathTraversalInPath ensures that any project name coming from the HTTP path
 // is validated for every HTTP method (GET, POST, PUT, DELETE) and for every resource that belongs to a project.
 // Before the fix, only GET and POST were verifying the project, allowing path traversal attacks on PUT / DELETE like:
 // DELETE /api/v1/projects/../variables/anyVariableName
-func TestCheckProjectMiddlewarePathTraversalInPath(t *testing.T) {
+func TestCheckParameterMiddlewarePathTraversalInPath(t *testing.T) {
 	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
 		// Create a legit resource that an attacker could try to reach through a path traversal.
 		project := e2eframework.NewProject("perses")
 		variable := e2eframework.NewVariable(project.Metadata.Name, "targetVariable")
 		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), project, variable)
 
-		for _, tc := range invalidProjectNames {
+		for _, tc := range invalidIDs {
 			for _, resourcePath := range utils.ProjectResourcePathList {
 				listURL := fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, tc.raw, resourcePath)
 				resourceURL := fmt.Sprintf("%s/%s", listURL, variable.Metadata.Name)
@@ -103,11 +118,133 @@ func TestCheckProjectMiddlewarePathTraversalInPath(t *testing.T) {
 	})
 }
 
-// TestCheckProjectMiddlewareInvalidProjectInBody ensures that when a resource is created through the root endpoint
-// (e.g. POST /api/v1/variables), the project name extracted from the body is validated as well.
-func TestCheckProjectMiddlewareInvalidProjectInBody(t *testing.T) {
+// TestCheckParameterMiddlewareInvalidNameOnGlobalResources ensures that the `name` path parameter is validated
+// for every resource that is NOT part of a project (projects, users, global*), and for every HTTP method that uses it (GET, PUT, DELETE).
+// Before the fix, the name was never validated, so the command
+// `curl -XDELETE --path-as-is http://localhost:8080/api/v1/projects/..` was deleting the entire database
+// as the "project" `..` was resolved to the root folder of the file database.
+func TestCheckParameterMiddlewareInvalidNameOnGlobalResources(t *testing.T) {
+	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+		// Create a bunch of resources to be sure nothing is deleted by the requests below.
+		project := e2eframework.NewProject("perses")
+		variable := e2eframework.NewVariable(project.Metadata.Name, "targetVariable")
+		globalVariable := e2eframework.NewGlobalVariable("targetGlobalVariable")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), project, variable, globalVariable)
+
+		for _, tc := range invalidIDs {
+			for _, resourcePath := range globalResourcePathList {
+				resourceURL := fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, resourcePath, tc.raw)
+
+				expectInvalidName(rawRequest(server, expect, token, http.MethodGet, resourceURL))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodPut, resourceURL).WithJSON(project))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodDelete, resourceURL))
+			}
+		}
+
+		// Nothing should have been deleted.
+		_, err := manager.Persistence().GetProject().Get(project.Metadata.Name)
+		assert.NoError(t, err)
+		_, err = manager.Persistence().GetVariable().Get(project.Metadata.Name, variable.Metadata.Name)
+		assert.NoError(t, err)
+		_, err = manager.Persistence().GetGlobalVariable().Get(globalVariable.Metadata.Name)
+		assert.NoError(t, err)
+
+		return []modelAPI.Entity{project, variable, globalVariable}
+	})
+}
+
+// TestCheckParameterMiddlewareInvalidNameOnProjectResources ensures that the `name` path parameter is validated
+// for every resource that belongs to a project, even when the project name itself is valid and exists.
+// e.g. DELETE /api/v1/projects/perses/variables/.. must be rejected.
+func TestCheckParameterMiddlewareInvalidNameOnProjectResources(t *testing.T) {
+	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+		project := e2eframework.NewProject("perses")
+		variable := e2eframework.NewVariable(project.Metadata.Name, "targetVariable")
+		dashboard := e2eframework.NewDashboard(t, project.Metadata.Name, "targetDashboard")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), project, variable, dashboard)
+
+		for _, tc := range invalidIDs {
+			for _, resourcePath := range utils.ProjectResourcePathList {
+				resourceURL := fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, project.Metadata.Name, resourcePath, tc.raw)
+
+				expectInvalidName(rawRequest(server, expect, token, http.MethodGet, resourceURL))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodPut, resourceURL).WithJSON(variable))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodDelete, resourceURL))
+			}
+		}
+
+		// Nothing should have been deleted.
+		_, err := manager.Persistence().GetProject().Get(project.Metadata.Name)
+		assert.NoError(t, err)
+		_, err = manager.Persistence().GetVariable().Get(project.Metadata.Name, variable.Metadata.Name)
+		assert.NoError(t, err)
+		_, err = manager.Persistence().GetDashboard().Get(project.Metadata.Name, dashboard.Metadata.Name)
+		assert.NoError(t, err)
+
+		return []modelAPI.Entity{project, variable, dashboard}
+	})
+}
+
+// TestCheckParameterMiddlewareInvalidProjectAndName ensures that when both the project and the name are invalid,
+// the request is rejected. The name is checked first by the middleware, so the error message must be about the name.
+func TestCheckParameterMiddlewareInvalidProjectAndName(t *testing.T) {
+	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
+		project := e2eframework.NewProject("perses")
+		variable := e2eframework.NewVariable(project.Metadata.Name, "targetVariable")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager.Persistence(), project, variable)
+
+		for _, tc := range invalidIDs {
+			for _, resourcePath := range utils.ProjectResourcePathList {
+				resourceURL := fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, tc.raw, resourcePath, tc.raw)
+
+				expectInvalidName(rawRequest(server, expect, token, http.MethodGet, resourceURL))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodPut, resourceURL).WithJSON(variable))
+				expectInvalidName(rawRequest(server, expect, token, http.MethodDelete, resourceURL))
+			}
+		}
+
+		_, err := manager.Persistence().GetVariable().Get(project.Metadata.Name, variable.Metadata.Name)
+		assert.NoError(t, err)
+
+		return []modelAPI.Entity{project, variable}
+	})
+}
+
+// TestCheckParameterMiddlewareValidNameOnGlobalResources is the happy path for the name check on global resources:
+// a valid name must not be rejected by the middleware whatever the HTTP method used.
+func TestCheckParameterMiddlewareValidNameOnGlobalResources(t *testing.T) {
 	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager, token string) []modelAPI.Entity {
-		for _, tc := range invalidProjectNames {
+		// A name using every allowed character class: letters, digits, '_', '-', and a '.' in the middle.
+		globalVariable := e2eframework.NewGlobalVariable("my_Global-Variable.1")
+		listURL := fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalVariable)
+		resourceURL := fmt.Sprintf("%s/%s", listURL, globalVariable.Metadata.Name)
+
+		rawRequest(server, expect, token, http.MethodPost, listURL).
+			WithJSON(globalVariable).
+			Expect().
+			Status(http.StatusOK)
+		// Let the DB catch up before reading / deleting the resource.
+		time.Sleep(3 * time.Second)
+		rawRequest(server, expect, token, http.MethodGet, resourceURL).
+			Expect().
+			Status(http.StatusOK)
+		rawRequest(server, expect, token, http.MethodPut, resourceURL).
+			WithJSON(globalVariable).
+			Expect().
+			Status(http.StatusOK)
+		rawRequest(server, expect, token, http.MethodDelete, resourceURL).
+			Expect().
+			Status(http.StatusNoContent)
+
+		return []modelAPI.Entity{}
+	})
+}
+
+// TestCheckParameterMiddlewareInvalidProjectInBody ensures that when a resource is created through the root endpoint
+// (e.g. POST /api/v1/variables), the project name extracted from the body is validated as well.
+func TestCheckParameterMiddlewareInvalidProjectInBody(t *testing.T) {
+	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager, token string) []modelAPI.Entity {
+		for _, tc := range invalidIDs {
 			for _, resourcePath := range utils.ProjectResourcePathList {
 				// The body is only partially decoded by the middleware to extract the project name,
 				// so a partial object is enough here. The middleware must reject the request before reaching the handler.
@@ -155,7 +292,7 @@ func TestCheckProjectMiddlewareInvalidProjectInBody(t *testing.T) {
 // TestCheckProjectMiddlewareNotExistingProject ensures that a valid but not existing project name is rejected
 // on GET and POST (the only methods for which the project's existence is verified),
 // while PUT and DELETE are passed through to the handler that returns a 404 as the resource can't exist.
-func TestCheckProjectMiddlewareNotExistingProject(t *testing.T) {
+func TestCheckParameterMiddlewareNotExistingProject(t *testing.T) {
 	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager, token string) []modelAPI.Entity {
 		projectName := "not-existing-project"
 		variable := e2eframework.NewVariable(projectName, "myVariable")
@@ -192,9 +329,9 @@ func TestCheckProjectMiddlewareNotExistingProject(t *testing.T) {
 	})
 }
 
-// TestCheckProjectMiddlewareValidProject is the happy path: a valid project name must not be rejected by the middleware
+// TestCheckParameterMiddlewareValidProject is the happy path: a valid project name must not be rejected by the middleware
 // whatever the HTTP method used.
-func TestCheckProjectMiddlewareValidProject(t *testing.T) {
+func TestCheckParameterMiddlewareValidProject(t *testing.T) {
 	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager, token string) []modelAPI.Entity {
 		// A name using every allowed character class: letters, digits, '_', '-', and a '.' in the middle.
 		project := e2eframework.NewProject("my_Project-1.0")

@@ -37,12 +37,19 @@ type partialObject struct {
 	Metadata partialMetadata `json:"metadata"`
 }
 
-// CheckProject is a middleware that will verify if the project used for the request exists.
-func CheckProject(svc project.Service) echo.MiddlewareFunc {
+// CheckParameter is a middleware that will verify if the project used for the request exists.
+// It will also check if the project name and the resource name are valid. This is required to prevent any path traversal attack.
+func CheckParameter(svc project.Service) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			method := c.Request().Method
 			projectName := utils.GetProjectParameter(c)
+			name := utils.GetNameParameter(c)
+			if len(name) > 0 {
+				if err := common.ValidateID(name); err != nil {
+					return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", err.Error()))
+				}
+			}
 			if len(projectName) == 0 && method == http.MethodPost && c.Request().Body != nil {
 				// It's possible the HTTP Path doesn't contain the project because the user is calling the root endpoint to create a new resource.
 				// So we need to ensure the project name exists in the resource, which is why we will partially decode the body to get the project name.
