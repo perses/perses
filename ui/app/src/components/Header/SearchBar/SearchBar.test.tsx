@@ -88,23 +88,47 @@ vi.mock('../../../context/Authorization', () => ({
 }));
 
 vi.mock('../../../model/dashboard-client', () => ({
-  useDashboardList: (): typeof listState.dashboards => listState.dashboards,
-  useImportantDashboardList: (): typeof listState.importantDashboards => listState.importantDashboards,
+  useDashboardList: (options?: { enabled?: boolean }): typeof listState.dashboards => {
+    if (options?.enabled === false) {
+      return { data: [], isLoading: false, error: null };
+    }
+    return listState.dashboards;
+  },
+  useImportantDashboardList: (
+    _project?: string,
+    options?: { enabled?: boolean },
+  ): typeof listState.importantDashboards => {
+    if (options?.enabled === false) {
+      return { data: [], isLoading: false, error: null };
+    }
+    return listState.importantDashboards;
+  },
 }));
 
 vi.mock('../../../model/project-client', () => ({
-  useProjectList: (): typeof listState.projects => {
+  useProjectList: (options?: { enabled?: boolean }): typeof listState.projects => {
+    if (options?.enabled === false) {
+      return { data: [], error: null };
+    }
     listState.projectListCalls += 1;
     return listState.projects;
   },
 }));
 
 vi.mock('../../../model/datasource-client', () => ({
-  useDatasourceList: (): typeof listState.datasources => listState.datasources,
+  useDatasourceList: (options?: { enabled?: boolean }): typeof listState.datasources => {
+    if (options?.enabled === false) {
+      return { data: [], error: null };
+    }
+    return listState.datasources;
+  },
 }));
 
 vi.mock('../../../model/global-datasource-client', () => ({
-  useGlobalDatasourceList: (): typeof listState.globalDatasources => {
+  useGlobalDatasourceList: (options?: { enabled?: boolean }): typeof listState.globalDatasources => {
+    if (options?.enabled === false) {
+      return { data: [], error: null };
+    }
     listState.globalDatasourceListCalls += 1;
     return listState.globalDatasources;
   },

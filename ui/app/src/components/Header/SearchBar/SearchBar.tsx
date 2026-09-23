@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import type { Resource, StatusError } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
@@ -38,6 +38,7 @@ import { useGlobalDatasourceList } from '../../../model/global-datasource-client
 import { useProjectList } from '../../../model/project-client';
 import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useIsMobileSize } from '../../../utils/browser-size';
+import { SearchErrorAlert } from './SearchErrorAlert';
 import { SearchList } from './SearchList';
 
 function shortcutDisplay(): string {
@@ -50,123 +51,42 @@ interface ResourceListProps {
   query: string;
   onClick: () => void;
   isResources?: (type: ResourceType, available: boolean) => void;
-  onLoadError?: (type: ResourceType, hasError: boolean) => void;
 }
 
 const EMPTY_RESOURCE_LIST: Resource[] = [];
-const searchErrorAlertBoxSx = { margin: 1 };
-const searchErrorAlertSx = {
-  alignItems: 'center',
-  '& .MuiAlert-message': {
-    display: 'flex',
-    alignItems: 'center',
-    padding: 0,
-  },
-};
 
-function isForbiddenError(error: StatusError | null | undefined): boolean {
-  return error?.status === 403;
-}
-
-interface SearchErrorAlertProps {
-  title: string;
-  error: StatusError;
-  type?: ResourceType;
-  isResources?: (type: ResourceType, available: boolean) => void;
-  onLoadError?: (type: ResourceType, hasError: boolean) => void;
-}
-
-function useSearchListErrorState(
-  type: ResourceType | undefined,
-  isResources?: (type: ResourceType, available: boolean) => void,
-  onLoadError?: (type: ResourceType, hasError: boolean) => void,
-): void {
-  useEffect(() => {
-    if (!type) {
-      return;
-    }
-    onLoadError?.(type, true);
-    isResources?.(type, false);
-    return (): void => {
-      onLoadError?.(type, false);
-      isResources?.(type, false);
-    };
-  }, [isResources, onLoadError, type]);
-}
-
-function SearchErrorAlert({ title, error, type, isResources, onLoadError }: SearchErrorAlertProps): ReactElement {
-  // Permission failures are handled by skipping unauthorized searches. If a 403 still
-  // reaches the UI, keep the copy generic so RBAC scope/kind names are not exposed.
-  useSearchListErrorState(type, isResources, onLoadError);
-  const detail = isForbiddenError(error)
-    ? 'you do not have permission to view this'
-    : error.message?.trim() || 'Unknown error';
-
-  return (
-    <Box sx={searchErrorAlertBoxSx}>
-      <Alert severity="error" sx={searchErrorAlertSx}>
-        {title}: {detail}
-      </Alert>
-    </Box>
-  );
-}
-
-function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const { data: projectList, error: projectListError } = useProjectList({ refetchOnMount: false });
-  const { query, onClick, isResources, onLoadError } = props;
+function SearchProjectList(
+  props: ResourceListProps & { list: Resource[]; error: StatusError | null },
+): ReactElement | null {
+  const { query, onClick, isResources, list, error } = props;
   const handleIsResource = useCallback(
     (isAvailable: boolean): void => isResources?.('projects', isAvailable),
     [isResources],
   );
 
-  if (projectListError) {
-    return (
-      <SearchErrorAlert
-        title="Failed to load projects"
-        error={projectListError}
-        type="projects"
-        isResources={isResources}
-        onLoadError={onLoadError}
-      />
-    );
+  if (error) {
+    return <SearchErrorAlert title="Failed to load projects" error={error} />;
   }
 
-  return (
-    <SearchList
-      list={projectList ?? EMPTY_RESOURCE_LIST}
-      query={query}
-      onClick={onClick}
-      icon={Archive}
-      isResource={handleIsResource}
-    />
-  );
+  return <SearchList list={list} query={query} onClick={onClick} icon={Archive} isResource={handleIsResource} />;
 }
 
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
-    refetchOnMount: false,
-  });
-  const { query, onClick, isResources, onLoadError } = props;
+function SearchGlobalDatasource(
+  props: ResourceListProps & { list: Resource[]; error: StatusError | null },
+): ReactElement | null {
+  const { query, onClick, isResources, list, error } = props;
   const handleIsResource = useCallback(
     (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
     [isResources],
   );
 
-  if (globalDatasourceListError) {
-    return (
-      <SearchErrorAlert
-        title="Failed to load global datasources"
-        error={globalDatasourceListError}
-        type="globalDatasources"
-        isResources={isResources}
-        onLoadError={onLoadError}
-      />
-    );
+  if (error) {
+    return <SearchErrorAlert title="Failed to load global datasources" error={error} />;
   }
 
   return (
     <SearchList
-      list={globalDatasourceList ?? EMPTY_RESOURCE_LIST}
+      list={list}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
@@ -176,58 +96,24 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
   );
 }
 
-function SearchDashboardList(props: ResourceListProps): ReactElement | null {
-  const {
-    data: dashboardList,
-    isLoading: dashboardListLoading,
-    error: dashboardListError,
-  } = useDashboardList({
-    metadataOnly: true,
-    refetchOnMount: false,
-  });
-  const {
-    data: importantDashboards,
-    isLoading: importantDashboardsLoading,
-    error: importantDashboardsError,
-  } = useImportantDashboardList();
-
-  const { query, isResources, onClick, onLoadError } = props;
+function SearchDashboardList(
+  props: ResourceListProps & {
+    list: Array<Resource & { highlight: boolean }>;
+    error: StatusError | null;
+    isLoading: boolean;
+  },
+): ReactElement | null {
+  const { query, isResources, onClick, list, error, isLoading } = props;
   const handleIsResource = useCallback(
     (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
     [isResources],
   );
 
-  const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    if (query.length && dashboardList) {
-      const importantDashboardKeys = new Set(
-        importantDashboards.map(
-          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
-        ),
-      );
-      return dashboardList.map((d) => {
-        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
-        return { ...d, highlight };
-      });
-    } else {
-      return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
-    }
-  }, [importantDashboards, dashboardList, query]);
-
-  const dashboardError = dashboardListError ?? importantDashboardsError;
-
-  if (dashboardError) {
-    return (
-      <SearchErrorAlert
-        title="Failed to load dashboards"
-        error={dashboardError}
-        type="dashboards"
-        isResources={isResources}
-        onLoadError={onLoadError}
-      />
-    );
+  if (error) {
+    return <SearchErrorAlert title="Failed to load dashboards" error={error} />;
   }
 
-  return dashboardListLoading || importantDashboardsLoading ? null : (
+  return isLoading ? null : (
     <SearchList
       list={list}
       query={query}
@@ -239,29 +125,22 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   );
 }
 
-function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const { data: datasourceList, error: datasourceListError } = useDatasourceList({ refetchOnMount: false });
-  const { isResources, onClick, query, onLoadError } = props;
+function SearchDatasourceList(
+  props: ResourceListProps & { list: Resource[]; error: StatusError | null },
+): ReactElement | null {
+  const { isResources, onClick, query, list, error } = props;
   const handleIsResource = useCallback(
     (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
     [isResources],
   );
 
-  if (datasourceListError) {
-    return (
-      <SearchErrorAlert
-        title="Failed to load datasources"
-        error={datasourceListError}
-        type="datasources"
-        isResources={isResources}
-        onLoadError={onLoadError}
-      />
-    );
+  if (error) {
+    return <SearchErrorAlert title="Failed to load datasources" error={error} />;
   }
 
   return (
     <SearchList
-      list={datasourceList ?? EMPTY_RESOURCE_LIST}
+      list={list}
       query={query}
       onClick={onClick}
       icon={DatabaseIcon}
@@ -294,6 +173,10 @@ export function SearchBar(): ReactElement {
   const canReadDatasources = useHasPermissionInAnyProject('read', 'Datasource');
   const canReadGlobalDatasources = useHasPermission('read', GlobalProject, 'GlobalDatasource');
   const canFetchSearchLists = !isPermissionsLoading && !permissionsError;
+  const fetchDashboards = canFetchSearchLists && canReadDashboards;
+  const fetchProjects = canFetchSearchLists && canReadProjects;
+  const fetchDatasources = canFetchSearchLists && canReadDatasources;
+  const fetchGlobalDatasources = canFetchSearchLists && canReadGlobalDatasources;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
@@ -302,22 +185,65 @@ export function SearchBar(): ReactElement {
     globalDatasources: false,
     datasources: false,
   });
-  const [hasLoadError, setHasLoadError] = useState<Record<ResourceType, boolean>>({
-    dashboards: false,
-    projects: false,
-    globalDatasources: false,
-    datasources: false,
+
+  const {
+    data: dashboardList,
+    isLoading: dashboardListLoading,
+    error: dashboardListError,
+  } = useDashboardList({
+    metadataOnly: true,
+    refetchOnMount: false,
+    enabled: fetchDashboards,
+  });
+  const {
+    data: importantDashboards,
+    isLoading: importantDashboardsLoading,
+    error: importantDashboardsError,
+  } = useImportantDashboardList(undefined, { enabled: fetchDashboards });
+  const { data: projectList, error: projectListError } = useProjectList({
+    refetchOnMount: false,
+    enabled: fetchProjects,
+  });
+  const { data: globalDatasourceList, error: globalDatasourceListError } = useGlobalDatasourceList({
+    refetchOnMount: false,
+    enabled: fetchGlobalDatasources,
+  });
+  const { data: datasourceList, error: datasourceListError } = useDatasourceList({
+    refetchOnMount: false,
+    enabled: fetchDatasources,
   });
 
+  const dashboardSearchList: Array<Resource & { highlight: boolean }> = useMemo(() => {
+    if (query.length && dashboardList) {
+      const importantDashboardKeys = new Set(
+        (importantDashboards ?? []).map(
+          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
+        ),
+      );
+      return dashboardList.map((d) => {
+        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
+        return { ...d, highlight };
+      });
+    }
+    return (importantDashboards ?? []).map((imp) => ({ ...imp, highlight: true }));
+  }, [importantDashboards, dashboardList, query]);
+
+  const dashboardError = dashboardListError ?? importantDashboardsError ?? null;
   const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }, []);
-  const handleLoadError = useCallback((type: ResourceType, hasError: boolean): void => {
-    setHasLoadError((prev) => (prev[type] === hasError ? prev : { ...prev, [type]: hasError }));
-  }, []);
 
-  const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
-  const hasAnyLoadError = useMemo(() => Object.values(hasLoadError).some(Boolean), [hasLoadError]);
+  const hasAnyResource =
+    (fetchDashboards && hasResource.dashboards) ||
+    (fetchProjects && hasResource.projects) ||
+    (fetchGlobalDatasources && hasResource.globalDatasources) ||
+    (fetchDatasources && hasResource.datasources);
+  const hasAnyLoadError = Boolean(
+    (fetchDashboards && dashboardError) ||
+    (fetchProjects && projectListError) ||
+    (fetchGlobalDatasources && globalDatasourceListError) ||
+    (fetchDatasources && datasourceListError),
+  );
   const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
     inputElement?.focus();
   }, []);
@@ -401,36 +327,41 @@ export function SearchBar(): ReactElement {
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          {canFetchSearchLists && canReadDashboards && (
+          {fetchDashboards && (
             <SearchDashboardList
               query={query}
               onClick={handleClose}
               isResources={handleIsResourceAvailable}
-              onLoadError={handleLoadError}
+              list={dashboardSearchList}
+              error={dashboardError}
+              isLoading={dashboardListLoading || importantDashboardsLoading}
             />
           )}
-          {canFetchSearchLists && canReadProjects && (
+          {fetchProjects && (
             <SearchProjectList
               query={query}
               onClick={handleClose}
               isResources={handleIsResourceAvailable}
-              onLoadError={handleLoadError}
+              list={projectList ?? EMPTY_RESOURCE_LIST}
+              error={projectListError ?? null}
             />
           )}
-          {canFetchSearchLists && canReadGlobalDatasources && (
+          {fetchGlobalDatasources && (
             <SearchGlobalDatasource
               query={query}
               onClick={handleClose}
               isResources={handleIsResourceAvailable}
-              onLoadError={handleLoadError}
+              list={globalDatasourceList ?? EMPTY_RESOURCE_LIST}
+              error={globalDatasourceListError ?? null}
             />
           )}
-          {canFetchSearchLists && canReadDatasources && (
+          {fetchDatasources && (
             <SearchDatasourceList
               query={query}
               onClick={handleClose}
               isResources={handleIsResourceAvailable}
-              onLoadError={handleLoadError}
+              list={datasourceList ?? EMPTY_RESOURCE_LIST}
+              error={datasourceListError ?? null}
             />
           )}
         </Paper>
