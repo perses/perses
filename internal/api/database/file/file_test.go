@@ -15,6 +15,8 @@ package databasefile
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -109,4 +111,120 @@ func TestDAO_Delete(t *testing.T) {
 	result := &modelV1.Project{}
 	assert.True(t, databaseModel.IsKeyNotFound(d.Get(modelV1.KindProject, projectEntity.GetMetadata(), result)))
 	removeAllFiles(t)
+}
+
+// maliciousIDs is a list of names that attempt to escape the DAO folder or to
+// otherwise manipulate the resulting file path.
+var maliciousIDs = []string{
+	"..",
+	".",
+	"../secret",
+	"../../etc/passwd",
+	"..%2F..%2Fetc%2Fpasswd",
+	"foo/../../secret",
+	"foo/bar",
+	"/etc/passwd",
+	"..\\..\\windows\\system32",
+	"foo\\bar",
+	"secret\x00",
+}
+
+// assertNoFileOutsideFolder walks the given folder and its parent and fails if an unexpected file was created.
+// A canary file is created in the parent folder before the test to make sure we detect any overwrite as well.
+func createCanary(t *testing.T, parent string) (string, []byte) {
+	canaryPath := filepath.Join(parent, "secret."+string(config.JSONExtension))
+	content := []byte(`{"canary": true}`)
+	if err := os.WriteFile(canaryPath, content, 0600); err != nil {
+		t.Fatal(err)
+	}
+	return canaryPath, content
+}
+
+func TestDAO_PathTraversal_Metadata(t *testing.T) {
+	parent := t.TempDir()
+	d := &DAO{
+		Folder:    filepath.Join(parent, "db"),
+		Extension: config.JSONExtension,
+	}
+	canaryPath, canaryContent := createCanary(t, parent)
+
+	for _, id := range maliciousIDs {
+		t.Run(id, func(t *testing.T) {
+			entity := &modelV1.Project{
+				Kind: modelV1.KindProject,
+				Metadata: modelV1.Metadata{
+					Name: id,
+				},
+			}
+			// every write / read / delete operation must be rejected before touching the filesystem
+			assert.True(t, databaseModel.IsKeyBadRequest(d.Create(entity)), "Create should reject %q", id)
+			assert.True(t, databaseModel.IsKeyBadRequest(d.Upsert(entity)), "Upsert should reject %q", id)
+			assert.True(t, databaseModel.IsKeyBadRequest(d.Get(modelV1.KindProject, entity.GetMetadata(), &modelV1.Project{})), "Get should reject %q", id)
+			assert.True(t, databaseModel.IsKeyBadRequest(d.Delete(modelV1.KindProject, entity.GetMetadata())), "Delete should reject %q", id)
+
+			// the DAO folder must not even have been created
+			_, err := os.Stat(d.Folder)
+			assert.True(t, os.IsNotExist(err), "DAO folder should not exist after rejected operations for %q", id)
+			// the canary outside the DAO folder must be untouched
+			content, err := os.ReadFile(canaryPath) //nolint: gosec // this is a test for path traversal, so we need to read a file outside the DAO folder
+			assert.NoError(t, err, "canary file must still exist for %q", id)
+			assert.Equal(t, canaryContent, content, "canary file must not be modified for %q", id)
+		})
+	}
+}
+
+func TestDAO_PathTraversal_ProjectMetadata(t *testing.T) {
+	parent := t.TempDir()
+	d := &DAO{
+		Folder:    filepath.Join(parent, "db"),
+		Extension: config.JSONExtension,
+	}
+	canaryPath, canaryContent := createCanary(t, parent)
+
+	for _, id := range maliciousIDs {
+		// the traversal can be attempted through the project field as well as the name field
+		testCases := []struct {
+			title    string
+			metadata modelV1.ProjectMetadata
+		}{
+			{
+				title:    "name/" + id,
+				metadata: modelV1.ProjectMetadata{Metadata: modelV1.Metadata{Name: id}, ProjectMetadataWrapper: modelV1.ProjectMetadataWrapper{Project: "perses"}},
+			},
+			{
+				title:    "project/" + id,
+				metadata: modelV1.ProjectMetadata{Metadata: modelV1.Metadata{Name: "dashboard"}, ProjectMetadataWrapper: modelV1.ProjectMetadataWrapper{Project: id}},
+			},
+		}
+		for _, tc := range testCases {
+			t.Run(tc.title, func(t *testing.T) {
+				entity := &modelV1.Dashboard{
+					Kind:     modelV1.KindDashboard,
+					Metadata: tc.metadata,
+				}
+				assert.True(t, databaseModel.IsKeyBadRequest(d.Create(entity)), "Create should reject %q", tc.title)
+				assert.True(t, databaseModel.IsKeyBadRequest(d.Upsert(entity)), "Upsert should reject %q", tc.title)
+				assert.True(t, databaseModel.IsKeyBadRequest(d.Get(modelV1.KindDashboard, entity.GetMetadata(), &modelV1.Dashboard{})), "Get should reject %q", tc.title)
+				assert.True(t, databaseModel.IsKeyBadRequest(d.Delete(modelV1.KindDashboard, entity.GetMetadata())), "Delete should reject %q", tc.title)
+
+				_, err := os.Stat(d.Folder)
+				assert.True(t, os.IsNotExist(err), "DAO folder should not exist after rejected operations for %q", tc.title)
+				content, err := os.ReadFile(canaryPath) //nolint: gosec // this is a test for path traversal, so we need to read a file outside the DAO folder
+				assert.NoError(t, err, "canary file must still exist for %q", tc.title)
+				assert.Equal(t, canaryContent, content, "canary file must not be modified for %q", tc.title)
+			})
+		}
+	}
+}
+
+func TestDAO_PathTraversal_BuildPathStaysInFolder(t *testing.T) {
+	d := newDAO()
+	// A valid ID must always produce a path located inside the DAO folder.
+	key, err := generateID(modelV1.KindProject, &modelV1.Metadata{Name: "perses"})
+	assert.NoError(t, err)
+	absFolder, err := filepath.Abs(d.Folder)
+	assert.NoError(t, err)
+	absPath, err := filepath.Abs(d.buildPath(key))
+	assert.NoError(t, err)
+	assert.True(t, strings.HasPrefix(absPath, absFolder+string(filepath.Separator)), "path %q must be inside %q", absPath, absFolder)
 }

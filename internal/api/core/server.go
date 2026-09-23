@@ -43,6 +43,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/view"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
@@ -112,7 +113,8 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
-			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetAuthorization(),
+			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
+			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetAuthorization(),
 			tokenRefresher),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth

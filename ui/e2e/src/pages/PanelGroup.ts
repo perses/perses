@@ -25,6 +25,7 @@ export class PanelGroup {
 
   readonly header: Locator;
   readonly content: Locator;
+  readonly gridItems: Locator;
 
   readonly editButton: Locator;
   readonly expandButton: Locator;
@@ -38,6 +39,8 @@ export class PanelGroup {
     this.container = container;
     this.header = container.getByTestId('panel-group-header');
     this.content = container.getByTestId('panel-group-content');
+    // Grid items remain mounted when offscreen panel content is virtualized.
+    this.gridItems = this.content.locator('[data-grid-id]');
 
     this.editButton = this.header.getByRole('button', {
       name: 'edit group',

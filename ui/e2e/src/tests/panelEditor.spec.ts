@@ -43,7 +43,8 @@ test.describe('Dashboard: Panel Editor', () => {
 
   test('should not require confirmation to discard changes when there is no change', async ({ dashboardPage }) => {
     await dashboardPage.startEditing();
-    await dashboardPage.addPanel();
+    // A new time-series panel automatically adds a query; use an unchanged existing panel.
+    await dashboardPage.getPanelByName('Markdown Example Zero').startEditing();
     const panelEditor = dashboardPage.getPanelEditor();
     await panelEditor.isVisible();
     await panelEditor.cancelButton.click();

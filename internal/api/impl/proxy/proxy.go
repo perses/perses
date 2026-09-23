@@ -42,6 +42,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -131,13 +132,14 @@ type endpoint struct {
 	dts            datasource.DAO
 	globalDTS      globaldatasource.DAO
 	crypto         crypto.Crypto
+	fileValidator  *secretfile.Validator
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
-	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, authz authorization.Authorization,
-	tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator,
+	authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
 	return &endpoint{
 		cfg:            cfg,
 		dashboard:      dashboardDAO,
@@ -146,6 +148,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		dts:            dtsDAO,
 		globalDTS:      globalDtsDAO,
 		crypto:         crypto,
+		fileValidator:  fileValidator,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
 	}
@@ -198,7 +201,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -212,22 +215,39 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		path = "/" + path
 	}
 
+	loadSecret := func(name string) (*v1.SecretSpec, error) {
+		scrt, retrieveErr := retrieveSecret(name)
+		if retrieveErr != nil {
+			return nil, retrieveErr
+		}
+		if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			logrus.WithError(decryptErr).WithFields(map[string]interface{}{
+				datasourceFieldLog: datasourceName,
+				projectFieldLog:    projectForLog(projectName),
+			}).Error("unable to decrypt the datasource secret")
+			return nil, apiinterface.InternalError
+		}
+		// Defense in depth: the secret might have been stored before the file restriction was enforced
+		// (or the allowed directories changed since). Never read a file that is not explicitly allowed.
+		if validateErr := fileValidator.ValidateSpec(scrt); validateErr != nil {
+			logrus.WithError(validateErr).WithFields(map[string]interface{}{
+				datasourceFieldLog: datasourceName,
+				projectFieldLog:    projectForLog(projectName),
+			}).Warning("the datasource secret references a file that is not allowed")
+			return nil, apiinterface.HandleForbiddenError(fmt.Sprintf("secret %q references a file that is not allowed", name))
+		}
+		return scrt, nil
+	}
+
 	var scrt *v1.SecretSpec
 
 	switch kind {
 	case datasourceHTTP.ProxyKindName:
 		httpConfig := cfg.(*datasourceHTTP.Config)
 		if len(httpConfig.Secret) > 0 {
-			scrt, err = retrieveSecret(httpConfig.Secret)
+			scrt, err = loadSecret(httpConfig.Secret)
 			if err != nil {
 				return nil, err
-			}
-			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
-					datasourceFieldLog: datasourceName,
-					projectFieldLog:    projectForLog(projectName),
-				}).Error("unable to decrypt the datasource secret")
-				return nil, apiinterface.InternalError
 			}
 		}
 		return &httpProxy{
@@ -240,16 +260,9 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
 		if len(sqlConfig.Secret) > 0 {
-			scrt, err = retrieveSecret(sqlConfig.Secret)
+			scrt, err = loadSecret(sqlConfig.Secret)
 			if err != nil {
 				return nil, err
-			}
-			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
-					datasourceFieldLog: datasourceName,
-					projectFieldLog:    projectForLog(projectName),
-				}).Error("unable to decrypt the datasource secret")
-				return nil, apiinterface.InternalError
 			}
 		}
 		return &sqlProxy{

@@ -19,6 +19,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 func FromStdin() (string, error) {
@@ -34,14 +36,17 @@ func FromStdin() (string, error) {
 	return input, nil
 }
 
-func FromStdout() ([]byte, error) {
-	// from https://flaviocopes.com/go-shell-pipes/
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
-	}
+// IsStdinTerminal reports whether stdin is attached to an interactive terminal (TTY),
+// as opposed to a pipe, a file or /dev/null. It is used to know if interactive prompts can be displayed.
+// Note: checking os.ModeCharDevice is not enough since /dev/null (the default stdin in most CI systems)
+// is a character device but not a terminal.
+// It is a variable, so it can be overridden in tests.
+var IsStdinTerminal = func() bool {
+	return term.IsTerminal(int(os.Stdin.Fd()))
+}
 
-	if info.Mode()&os.ModeCharDevice != 0 {
+func FromStdout() ([]byte, error) {
+	if IsStdinTerminal() {
 		return nil, fmt.Errorf("the command is intended to work with pipes")
 	}
 

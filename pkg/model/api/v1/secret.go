@@ -57,6 +57,32 @@ func (s *SecretSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+// FilePaths returns every file path referenced by the secret spec
+// (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
+func (s *SecretSpec) FilePaths() []string {
+	var paths []string
+	appendIfSet := func(p string) {
+		if len(p) > 0 {
+			paths = append(paths, p)
+		}
+	}
+	if s.BasicAuth != nil {
+		appendIfSet(s.BasicAuth.PasswordFile)
+	}
+	if s.Authorization != nil {
+		appendIfSet(s.Authorization.CredentialsFile)
+	}
+	if s.OAuth != nil {
+		appendIfSet(s.OAuth.ClientSecretFile)
+	}
+	if s.TLSConfig != nil {
+		appendIfSet(s.TLSConfig.CAFile)
+		appendIfSet(s.TLSConfig.CertFile)
+		appendIfSet(s.TLSConfig.KeyFile)
+	}
+	return paths
+}
+
 func (s *SecretSpec) validate() error {
 	nbAuthConfigured := 0
 	if s.BasicAuth != nil {

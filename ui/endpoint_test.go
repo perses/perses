@@ -37,8 +37,8 @@ func TestAssetHandlerContentType(t *testing.T) {
 	t.Cleanup(func() { asts = originalAsts })
 
 	testFS := fstest.MapFS{
-		"app/dist/main.abc123.css": &fstest.MapFile{Data: []byte("body { background: url(PREFIX_PATH_PLACEHOLDER/font.woff2); }")},
-		"app/dist/main.abc123.js":  &fstest.MapFile{Data: []byte("console.log('PREFIX_PATH_PLACEHOLDER')")},
+		"app/dist/main.abc12345.css": &fstest.MapFile{Data: []byte("body { background: url(PREFIX_PATH_PLACEHOLDER/font.woff2); }")},
+		"app/dist/main.abc12345.js":  &fstest.MapFile{Data: []byte("console.log('PREFIX_PATH_PLACEHOLDER')")},
 		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
 		"app/dist/index.html":      &fstest.MapFile{Data: []byte("<html></html>")},
 	}
@@ -54,13 +54,13 @@ func TestAssetHandlerContentType(t *testing.T) {
 	}{
 		{
 			name:                 "CSS file with placeholder substitution",
-			path:                 "/app/dist/main.abc123.css",
+			path:                 "/app/dist/main.abc12345.css",
 			expectedContentTypes: []string{"text/css; charset=utf-8"},
 			expectedBody:         "body { background: url(/custom/font.woff2); }",
 		},
 		{
 			name: "JavaScript file with placeholder substitution",
-			path: "/app/dist/main.abc123.js",
+			path: "/app/dist/main.abc12345.js",
 			// Windows registers the obsolete application/javascript MIME type.
 			expectedContentTypes: []string{"text/javascript; charset=utf-8", "application/javascript"},
 			expectedBody:         "console.log('/custom')",
@@ -91,6 +91,119 @@ func TestAssetHandlerContentType(t *testing.T) {
 	}
 }
 
+func TestAssetHandlerCacheControl(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/main.abc12345.css": &fstest.MapFile{Data: []byte("body {}")},
+		"app/dist/main.abc12345.js":  &fstest.MapFile{Data: []byte("console.log('ok')")},
+		"app/dist/image.png":       &fstest.MapFile{Data: []byte("fake-png-data")},
+	}
+	asts = http.FS(testFS)
+
+	f := &frontend{apiPrefix: ""}
+
+	tests := []struct {
+		name                 string
+		path                 string
+		expectedCacheControl string
+	}{
+		{
+			name:                 "hashed CSS bundle is cached long term",
+			path:                 "/app/dist/main.abc12345.css",
+			expectedCacheControl: "public, max-age=31536000, immutable",
+		},
+		{
+			name:                 "hashed JS bundle is cached long term",
+			path:                 "/app/dist/main.abc12345.js",
+			expectedCacheControl: "public, max-age=31536000, immutable",
+		},
+		{
+			name:                 "other assets must be revalidated",
+			path:                 "/app/dist/image.png",
+			expectedCacheControl: "no-cache",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+
+			handler := f.assetHandler()
+			err := handler(ctx)
+			require.NoError(t, err)
+			assert.Equal(t, tt.expectedCacheControl, rec.Header().Get("Cache-Control"))
+			assert.NotEmpty(t, rec.Header().Get("ETag"))
+		})
+	}
+}
+
+func TestAssetHandlerConditionalRequest(t *testing.T) {
+	// Override the package-level embedded filesystem with test data.
+	originalAsts := asts
+	t.Cleanup(func() { asts = originalAsts })
+
+	testFS := fstest.MapFS{
+		"app/dist/main.abc12345.js": &fstest.MapFile{Data: []byte("console.log('PREFIX_PATH_PLACEHOLDER')")},
+	}
+	asts = http.FS(testFS)
+
+	f := &frontend{apiPrefix: "/custom"}
+	e := echo.New()
+
+	// First request: full response with an ETag.
+	req := httptest.NewRequest(http.MethodGet, "/app/dist/main.abc12345.js", nil)
+	rec := httptest.NewRecorder()
+	require.NoError(t, f.assetHandler()(e.NewContext(req, rec)))
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "console.log('/custom')", rec.Body.String())
+	etag := rec.Header().Get("ETag")
+	require.NotEmpty(t, etag)
+
+	// Second request with If-None-Match: the server must answer 304 without a body.
+	req = httptest.NewRequest(http.MethodGet, "/app/dist/main.abc12345.js", nil)
+	req.Header.Set("If-None-Match", etag)
+	rec = httptest.NewRecorder()
+	require.NoError(t, f.assetHandler()(e.NewContext(req, rec)))
+	assert.Equal(t, http.StatusNotModified, rec.Code)
+	assert.Empty(t, rec.Body.String())
+
+	// The ETag depends on the bytes actually sent, so a different prefix yields a different ETag.
+	other := &frontend{apiPrefix: "/other"}
+	req = httptest.NewRequest(http.MethodGet, "/app/dist/main.abc12345.js", nil)
+	rec = httptest.NewRecorder()
+	require.NoError(t, other.assetHandler()(e.NewContext(req, rec)))
+	assert.NotEqual(t, etag, rec.Header().Get("ETag"))
+}
+
+func TestIsHashedAsset(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected bool
+	}{
+		{"/app/dist/main.daecaaf558591aab.js", true},
+		{"/app/dist/main.184a811c682450f7.css", true},
+		{"__mf/js/main.f55169be.js", true},
+		{"__mf/js/async/463.85c2cbf6.css", true},
+		{"__mf/js/TimeSeriesChart.b9caac04.js", true},
+		{"__mf/js/async/392.8cb3dcaa.js.LICENSE.txt", false},
+		{"mf-manifest.json", false},
+		{"/app/dist/index.html", false},
+		{"/app/dist/image.png", false},
+		{"/app/dist/main.js", false},
+		{"/app/dist/vendor.min.js", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, isHashedAsset(tt.name))
+		})
+	}
+}
+
 func TestServeASTFilesContentType(t *testing.T) {
 	// Override the package-level embedded filesystem with test data.
 	originalAsts := asts
@@ -112,6 +225,8 @@ func TestServeASTFilesContentType(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "text/html; charset=utf-8", rec.Header().Get("Content-Type"))
 	assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
+	assert.Equal(t, "no-cache", rec.Header().Get("Cache-Control"))
+	assert.NotEmpty(t, rec.Header().Get("ETag"))
 }
 
 func TestParsePluginPath(t *testing.T) {
@@ -396,3 +511,52 @@ func TestServePluginFilesPathTraversal(t *testing.T) {
 		})
 	}
 }
+
+func TestServePluginFilesCacheControl(t *testing.T) {
+	pluginDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(pluginDir, "mf-manifest.json"), []byte(`{"name":"test"}`), 0o600))
+	require.NoError(t, os.MkdirAll(filepath.Join(pluginDir, "__mf", "js"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(pluginDir, "__mf", "js", "main.f55169be.js"), []byte("console.log('ok')"), 0o600))
+
+	mockSvc := &mockPluginService{
+		loaded: map[string]*plugin.Loaded{
+			"testplugin": {
+				LocalPath: pluginDir,
+				Module: v1.PluginModule{
+					Status: &module.Status{IsLoaded: true},
+				},
+			},
+		},
+	}
+	f := &frontend{pluginService: mockSvc}
+
+	tests := []struct {
+		name                 string
+		path                 string
+		expectedCacheControl string
+	}{
+		{
+			name:                 "manifest must be revalidated",
+			path:                 "/plugins/testplugin/mf-manifest.json",
+			expectedCacheControl: "no-cache",
+		},
+		{
+			name:                 "hashed bundle is cached long term",
+			path:                 "/plugins/testplugin/__mf/js/main.f55169be.js",
+			expectedCacheControl: "public, max-age=31536000, immutable",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodGet, tt.path, nil)
+			rec := httptest.NewRecorder()
+			require.NoError(t, f.servePluginFiles(e.NewContext(req, rec)))
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, tt.expectedCacheControl, rec.Header().Get("Cache-Control"))
+			assert.Equal(t, "nosniff", rec.Header().Get("X-Content-Type-Options"))
+			assert.NotEmpty(t, rec.Header().Get("Last-Modified"))
+		})
+	}
+}
+
