@@ -44,18 +44,21 @@ frontend:
     enable: true
 
   important_dashboards:
-    - project: "perses"
-      dashboard: "Demo"
-    - project: "perses"
-      dashboard: "NodeExporter"
-    - project: "perses"
-      dashboard: "Benchmark"
-    - project: "testing"
-      dashboard: "Defaults"
-    - project: "testing"
-      dashboard: "StatChartPanel"
-    - project: "testing"
-      dashboard: "MarkdownPanel"
+    - title: "Perses demos"
+      description: "Quick links to key demo dashboards and projects."
+      dashboards:
+        - project: "perses"
+          dashboard: "Demo"
+        - project: "perses"
+          dashboard: "NodeExporter"
+        - project: "perses"
+          dashboard: "Benchmark"
+        - project: "testing"
+          dashboard: "Defaults"
+        - project: "testing"
+          dashboard: "StatChartPanel"
+        - project: "testing"
+          dashboard: "MarkdownPanel"
 
   information: |-
     # Hello World

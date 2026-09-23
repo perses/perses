@@ -181,8 +181,9 @@ type Frontend struct {
 	Explorer Explorer `json:"explorer" yaml:"explorer"`
 	// Information contains Markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
-	// ImportantDashboards contains important dashboard selectors
-	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
+	// ImportantDashboards contains grouped important dashboard selectors.
+	// Each selector can target one dashboard or an entire project when dashboard is omitted.
+	ImportantDashboards importantDashboards `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// AutoRefresh contains the auto-refresh configuration for dashboards

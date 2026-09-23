@@ -861,9 +861,10 @@ enable_lock_mode: <bool> | default = false # Optional
 # Activating the different kind of explorer supported.
 explorer: <Explorer config>
 
-# A list of dashboards you would like to display in the UI home page
+# Lists of dashboards you would like to display in the UI home page
+# The legacy flat list of dashboard selectors is still supported but deprecated.
 important_dashboards:
-  - <Dashboard Selector config> # Optional
+  - <Important Dashboard Group config> # Optional
 
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
@@ -918,6 +919,20 @@ disable:  <bool> | default = false # Optional
 options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 ```
 
+#### Important Dashboard Group config
+
+```yaml
+# Optional title displayed above the configured entries
+title: <string> # Optional
+
+# Optional description displayed below the title
+description: <string> # Optional
+
+# Dashboards or projects displayed in this group
+dashboards:
+  - <Dashboard Selector config> # Optional
+```
+
 #### Dashboard Selector config
 
 ```yaml
@@ -925,7 +940,8 @@ options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 project: <string>
 
 # The dashboard name (dashboard.metadata.name)
-dashboard: <string>
+# When omitted, all dashboards from the project are considered important
+dashboard: <string> # Optional
 ```
 
 ### Plugin config

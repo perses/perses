@@ -13,7 +13,7 @@
 
 import type { Permission, StatusError } from '@perses-dev/client';
 import { fetchJson } from '@perses-dev/client';
-import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { DurationString } from '@perses-dev/spec';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { Duration } from 'date-fns';
@@ -194,10 +194,21 @@ export interface AutoRefreshConfig {
   options?: DurationString[];
 }
 
+export interface ImportantDashboardSelectorConfig {
+  project: string;
+  dashboard?: string;
+}
+
+export interface ImportantDashboardGroupConfig {
+  title?: string;
+  description?: string;
+  dashboards?: ImportantDashboardSelectorConfig[];
+}
+
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   enable_lock_mode?: boolean;
-  important_dashboards?: DashboardSelector[];
+  important_dashboards?: ImportantDashboardGroupConfig[] | null;
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;

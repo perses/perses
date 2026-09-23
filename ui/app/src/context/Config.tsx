@@ -15,7 +15,7 @@ import { buildRelativeTimeOption } from '@perses-dev/components';
 import type { TimeOption } from '@perses-dev/components';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { parseDurationString } from '@perses-dev/spec';
-import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { DurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
@@ -23,7 +23,12 @@ import type { ReactElement } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import type { Banner, ConfigModel } from '../model/config-client';
+import type {
+  Banner,
+  ConfigModel,
+  ImportantDashboardGroupConfig,
+  ImportantDashboardSelectorConfig,
+} from '../model/config-client';
 import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
@@ -164,23 +169,48 @@ export function useIsSignUpDisable(): boolean {
 }
 
 export function useHasImportantDashboards(): boolean {
-  const { config } = useConfigContext();
-  return Boolean(config.frontend.important_dashboards?.length);
+  return useImportantDashboardGroups().some((group) => (group.dashboards?.length ?? 0) > 0);
 }
 
-export function useImportantDashboardSelectors(): DashboardSelector[] {
+export function useShouldNormalizeResourceNames(): boolean {
   const { config } = useConfigContext();
+  return !config.database.file?.case_sensitive || !config.database.sql?.case_sensitive;
+}
+
+export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {
+  const { config } = useConfigContext();
+  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
+
   return useMemo(() => {
-    if (!config.database.file?.case_sensitive || !config.database.sql?.case_sensitive) {
-      return (config.frontend.important_dashboards ?? []).map((selector) => {
-        return {
+    return (config.frontend.important_dashboards ?? []).map((group) => {
+      const dashboards = (group.dashboards ?? []).map((selector) => {
+        if (!shouldNormalizeResourceNames) {
+          return selector;
+        }
+        const normalizedSelector: ImportantDashboardSelectorConfig = {
           project: selector.project.toLowerCase(),
-          dashboard: selector.dashboard.toLowerCase(),
         };
+        if (selector.dashboard !== undefined) {
+          normalizedSelector.dashboard = selector.dashboard.toLowerCase();
+        }
+        return normalizedSelector;
       });
-    }
-    return config.frontend.important_dashboards ?? [];
-  }, [config.database.file?.case_sensitive, config.database.sql?.case_sensitive, config.frontend.important_dashboards]);
+
+      return {
+        title: group.title,
+        description: group.description,
+        dashboards,
+      };
+    });
+  }, [config.frontend.important_dashboards, shouldNormalizeResourceNames]);
+}
+
+export function useImportantDashboardSelectors(): ImportantDashboardSelectorConfig[] {
+  const importantDashboardGroups = useImportantDashboardGroups();
+
+  return useMemo(() => {
+    return importantDashboardGroups.flatMap((group) => group.dashboards ?? []);
+  }, [importantDashboardGroups]);
 }
 
 export function useInformation(): string {
