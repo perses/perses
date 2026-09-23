@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -427,12 +428,8 @@ func TestValidateDashboardVariables(t *testing.T) {
 	invalidUnknownVariable := loadPluginFromJSON("testdata/samples/variables/invalid_unknown_variable.json", t)
 
 	metadata := v1.ProjectMetadata{
-		Metadata: v1.Metadata{
-			Name: "SimpleDashboard",
-		},
-		ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
-			Project: "perses",
-		},
+		Name:    "SimpleDashboard",
+		Project: "perses",
 	}
 
 	testSuite := []struct {
@@ -451,33 +448,29 @@ func TestValidateDashboardVariables(t *testing.T) {
 						{
 							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								ListSpec: variable.ListSpec{
-									Display: &variable.Display{
-										Name:        "My First Variable",
-										Description: "A simple variable of type FirstVariable",
-										Hidden:      false,
-									},
-									AllowAllValue: true,
-									AllowMultiple: false,
-									Plugin:        validFirstVariable,
+								Display: &variable.Display{
+									Name:        "My First Variable",
+									Description: "A simple variable of type FirstVariable",
+									Hidden:      false,
 								},
-								Name: "my1rstVar",
+								AllowAllValue: true,
+								AllowMultiple: false,
+								Plugin:        validFirstVariable,
+								Name:          "my1rstVar",
 							},
 						},
 						{
 							Kind: variable.KindList,
 							Spec: &dashboard.ListVariableSpec{
-								ListSpec: variable.ListSpec{
-									Display: &variable.Display{
-										Name:        "My Second Variable",
-										Description: "A simple variable of type SecondVariable",
-										Hidden:      false,
-									},
-									AllowAllValue: true,
-									AllowMultiple: false,
-									Plugin:        validSecondVariable,
+								Display: &variable.Display{
+									Name:        "My Second Variable",
+									Description: "A simple variable of type SecondVariable",
+									Hidden:      false,
 								},
-								Name: "my2ndVar",
+								AllowAllValue: true,
+								AllowMultiple: false,
+								Plugin:        validSecondVariable,
+								Name:          "my2ndVar",
 							},
 						},
 					},
@@ -498,17 +491,15 @@ func TestValidateDashboardVariables(t *testing.T) {
 						{
 							Kind: "ListVariable",
 							Spec: &dashboard.ListVariableSpec{
-								ListSpec: variable.ListSpec{
-									Display: &variable.Display{
-										Name:        "My Unknown Variable",
-										Description: "A simple variable of type UnknownVariable",
-										Hidden:      false,
-									},
-									AllowAllValue: false,
-									AllowMultiple: true,
-									Plugin:        invalidUnknownVariable,
+								Display: &variable.Display{
+									Name:        "My Unknown Variable",
+									Description: "A simple variable of type UnknownVariable",
+									Hidden:      false,
 								},
-								Name: "myUnknownVar",
+								AllowAllValue: false,
+								AllowMultiple: true,
+								Plugin:        invalidUnknownVariable,
+								Name:          "myUnknownVar",
 							},
 						},
 					},
@@ -545,10 +536,8 @@ func TestValidateVariableWithDevSchema(t *testing.T) {
 		{
 			Kind: variable.KindList,
 			Spec: &dashboard.ListVariableSpec{
-				ListSpec: variable.ListSpec{
-					Plugin: validFirstVariable,
-				},
-				Name: "my1rstVar",
+				Plugin: validFirstVariable,
+				Name:   "my1rstVar",
 			},
 		},
 	}
@@ -572,7 +561,7 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 		},
 	}
 	// should load without error
-	if err := s.load("testdata/schemas/panels", pluginModule); err != nil {
+	if err := s.load("testdata/schemas/panels", pluginModule, &sync.RWMutex{}); err != nil {
 		t.Fatalf("unexpected error while loading schema: %v", err)
 	}
 	inst, ok := s.panels.Get("FirstChart", pluginModule.Metadata)
@@ -593,7 +582,7 @@ func TestSch_load_SuccessAndMissingPlugin(t *testing.T) {
 			},
 		},
 	}
-	if err := s2.load("testdata/schemas/panels", moduleMissing); err == nil {
+	if err := s2.load("testdata/schemas/panels", moduleMissing, &sync.RWMutex{}); err == nil {
 		t.Fatalf("expected error when plugin list does not contain schema kind")
 	} else {
 		// give a readable check to ensure it's the expected failure path
@@ -632,7 +621,7 @@ func TestSch_load_SkipsCueFileWithWrongPackage(t *testing.T) {
 			},
 		},
 	}
-	if err := s.load(pluginPath, pluginModule); err != nil {
+	if err := s.load(pluginPath, pluginModule, &sync.RWMutex{}); err != nil {
 		t.Fatalf("expected the non-model file to be skipped, got error: %v", err)
 	}
 	if _, ok := s.panels.Get("FirstChart", pluginModule.Metadata); ok {

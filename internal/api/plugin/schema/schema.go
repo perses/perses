@@ -161,15 +161,11 @@ type completeSchema struct {
 }
 
 func (s *completeSchema) Load(pluginPath string, module v1.PluginModule) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	return s.sch.load(pluginPath, module)
+	return s.sch.load(pluginPath, module, &s.mutex)
 }
 
 func (s *completeSchema) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	return s.devSch.load(pluginPath, module)
+	return s.devSch.load(pluginPath, module, &s.mutex)
 }
 
 func (s *completeSchema) UnloadDevPlugin(module v1.PluginModule) {
@@ -454,11 +450,13 @@ func newSch() *sch {
 	}
 }
 
-func (s *sch) load(pluginPath string, pluginModule v1.PluginModule) error {
+func (s *sch) load(pluginPath string, pluginModule v1.PluginModule, mutex *sync.RWMutex) error {
 	schemas, err := Load(pluginPath, pluginModule.Spec)
 	if err != nil {
 		return err
 	}
+	mutex.Lock()
+	defer mutex.Unlock()
 	for _, schema := range schemas {
 		if schema.Kind.IsQuery() {
 			// Here the information about the "super type" of the query (aka TimeSeriesQuery for PrometheusTimeSeriesQuery) disappears.

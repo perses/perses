@@ -260,15 +260,11 @@ type completeMigration struct {
 }
 
 func (m *completeMigration) Load(pluginPath string, module v1.PluginModule) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	return m.mig.load(pluginPath, module)
+	return m.mig.load(pluginPath, module, &m.mutex)
 }
 
 func (m *completeMigration) LoadDevPlugin(pluginPath string, module v1.PluginModule) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	return m.devMig.load(pluginPath, module)
+	return m.devMig.load(pluginPath, module, &m.mutex)
 }
 
 func (m *completeMigration) UnLoadDevPlugin(module v1.PluginModule) {
@@ -437,7 +433,7 @@ type mig struct {
 	queries map[string]*queryInstance
 }
 
-func (m *mig) load(pluginPath string, module v1.PluginModule) error {
+func (m *mig) load(pluginPath string, module v1.PluginModule, mutex *sync.RWMutex) error {
 	schemas, err := Load(pluginPath, module.Spec)
 	if err != nil {
 		return err
@@ -445,17 +441,17 @@ func (m *mig) load(pluginPath string, module v1.PluginModule) error {
 	for _, sch := range schemas {
 		switch sch.Kind {
 		case plugin.KindQuery:
-			m.loadQuery(sch.Name, sch.Instance, module)
+			m.loadQuery(sch.Name, sch.Instance, module, mutex)
 		case plugin.KindVariable:
-			m.loadVariable(sch.Name, sch.Instance, module)
+			m.loadVariable(sch.Name, sch.Instance, module, mutex)
 		case plugin.KindPanel:
-			m.loadPanel(sch.Name, sch.Instance, module)
+			m.loadPanel(sch.Name, sch.Instance, module, mutex)
 		}
 	}
 	return nil
 }
 
-func (m *mig) loadPanel(schemaPath string, instance *build.Instance, module v1.PluginModule) {
+func (m *mig) loadPanel(schemaPath string, instance *build.Instance, module v1.PluginModule, mutex *sync.RWMutex) {
 	ctx := cuecontext.New()
 	panelSchema := ctx.BuildInstance(instance)
 	kindValue := panelSchema.LookupPath(cue.ParsePath(grafanaType))
@@ -491,6 +487,8 @@ func (m *mig) loadPanel(schemaPath string, instance *build.Instance, module v1.P
 	}
 
 	// Kind can be a simple string or a disjunction of strings. Like #grafanaType: "table" | "table-old"
+	mutex.Lock()
+	defer mutex.Unlock()
 	if grafanaKind == cue.StringKind {
 		kindAsString, _ := kindValue.String()
 		m.panels[kindAsString] = pInstance
@@ -511,7 +509,7 @@ func (m *mig) loadPanel(schemaPath string, instance *build.Instance, module v1.P
 	}
 }
 
-func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v1.PluginModule) {
+func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v1.PluginModule, mutex *sync.RWMutex) {
 	// The idea here is to know the variable instance name we are dealing with.
 	// There is no particular purpose to have the variable instance name for the migration itself.
 	// The goal here is more to ensure we have a single migration script per variable kind.
@@ -519,7 +517,10 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
 	if err != nil {
 		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
 	}
+	mutex.Lock()
+	defer mutex.Unlock()
 	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
 		if len(group) < 2 {
 			continue
@@ -535,14 +536,17 @@ func (m *mig) loadVariable(schemaPath string, instance *build.Instance, module v
 	logrus.Infof("unable to recognize the variable kind from the migrate script %q", schemaPath)
 }
 
-func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule) {
+func (m *mig) loadQuery(schemaPath string, instance *build.Instance, module v1.PluginModule, mutex *sync.RWMutex) {
 	// The idea here is to know the query instance name we are dealing with.
 	// Then based on that, we will loop over the plugins listed in the module to get the high level query kind.
 	// It will be useful to know which query plugin to use when migrating the Grafana dashboard.
 	data, err := os.ReadFile(filepath.Join(schemaPath, "migrate.cue")) //nolint: gosec
 	if err != nil {
 		logrus.WithError(err).Warnf("unable to read migrate script from %q", schemaPath)
+		return
 	}
+	mutex.Lock()
+	defer mutex.Unlock()
 	for _, group := range kindRegexp.FindAllStringSubmatch(string(data), -1) {
 		if len(group) < 2 {
 			continue
