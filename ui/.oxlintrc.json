@@ -26,6 +26,7 @@
       }
     ],
     "typescript/no-import-type-side-effects": "error",
+    "typescript/no-explicit-any": "error",
     "eqeqeq": ["error", "always"],
     "no-unused-vars": [
       "error",
