@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
@@ -46,7 +47,7 @@ func ParseSameSite(s string) (SameSite, error) {
 	case SameSiteStrictMode:
 		return SameSite(http.SameSiteStrictMode), nil
 	default:
-		return 0, fmt.Errorf("cookie same_site %q mode not knowm", s)
+		return 0, fmt.Errorf("cookie same_site %q mode not known", s)
 	}
 }
 
@@ -161,6 +162,12 @@ type Security struct {
 	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
 	// Configuration for the CORS middleware.
 	CORS CORSConfig `json:"cors,omitempty" yaml:"cors"`
+	// SecretFileAllowedDirectories is the list of absolute directories from which the Secrets and GlobalSecrets
+	// are allowed to read files (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile,
+	// tlsConfig.caFile/certFile/keyFile).
+	// When empty (default), any file reference in a Secret or a GlobalSecret is rejected.
+	// This prevents a user allowed to create a secret from exfiltrating arbitrary files from the server.
+	SecretFileAllowedDirectories []string `json:"secret_file_allowed_directories,omitempty" yaml:"secret_file_allowed_directories,omitempty"`
 }
 
 func (s *Security) Verify() error {
@@ -201,6 +208,17 @@ func (s *Security) Verify() error {
 
 	if (s.Authorization.Provider.Kubernetes.Enable && !s.Authentication.Providers.KubernetesProvider.Enable) || (!s.Authorization.Provider.Kubernetes.Enable && s.Authentication.Providers.KubernetesProvider.Enable) {
 		return errors.New("kubernetes authorization and authentication providers must be enabled at the same time")
+	}
+
+	for i, dir := range s.SecretFileAllowedDirectories {
+		if !filepath.IsAbs(dir) {
+			return fmt.Errorf("secret_file_allowed_directories: %q must be an absolute path", dir)
+		}
+		cleaned := filepath.Clean(dir)
+		if cleaned == string(filepath.Separator) {
+			return errors.New("secret_file_allowed_directories: the root directory is not allowed")
+		}
+		s.SecretFileAllowedDirectories[i] = cleaned
 	}
 
 	return nil

@@ -11,18 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, BoxProps } from '@mui/material';
-import { ReactElement } from 'react';
-import { useDashboardList } from '../../../model/dashboard-client';
+import type { BoxProps } from '@mui/material';
+import { Box } from '@mui/material';
+import type { ReactElement } from 'react';
+
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
 import { useIsEphemeralDashboardEnabled } from '../../../context/Config';
 import { useFolderList } from '../../../model/folder-client';
+import { useSearchDashboards } from '../../../model/search-client';
 
 interface ProjectDashboardsProps extends BoxProps {
   projectName: string;
 }
 export function ProjectDashboards({ projectName, ...props }: ProjectDashboardsProps): ReactElement {
-  const { data, isLoading } = useDashboardList({ project: projectName });
+  const { data, isLoading } = useSearchDashboards(projectName);
   const { data: folderList, isLoading: isLoadingFolderList } = useFolderList({ project: projectName });
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 

@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/spec/go/common"
 )
 
 type ProjectSpec struct {

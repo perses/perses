@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -41,6 +42,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -123,27 +125,32 @@ func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
 const unsavedDatasourceDefaultName = "unsaved-datasource"
 
 type endpoint struct {
-	cfg          config.DatasourceConfig
-	dashboard    dashboard.DAO
-	secret       secret.DAO
-	globalSecret globalsecret.DAO
-	dts          datasource.DAO
-	globalDTS    globaldatasource.DAO
-	crypto       crypto.Crypto
-	authz        authorization.Authorization
+	cfg            config.DatasourceConfig
+	dashboard      dashboard.DAO
+	secret         secret.DAO
+	globalSecret   globalsecret.DAO
+	dts            datasource.DAO
+	globalDTS      globaldatasource.DAO
+	crypto         crypto.Crypto
+	fileValidator  *secretfile.Validator
+	authz          authorization.Authorization
+	tokenRefresher crypto.TokenRefresher
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
-	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, authz authorization.Authorization) route.Endpoint {
+	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator,
+	authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
 	return &endpoint{
-		cfg:          cfg,
-		dashboard:    dashboardDAO,
-		secret:       secretDAO,
-		globalSecret: globalSecretDAO,
-		dts:          dtsDAO,
-		globalDTS:    globalDtsDAO,
-		crypto:       crypto,
-		authz:        authz,
+		cfg:            cfg,
+		dashboard:      dashboardDAO,
+		secret:         secretDAO,
+		globalSecret:   globalSecretDAO,
+		dts:            dtsDAO,
+		globalDTS:      globalDtsDAO,
+		crypto:         crypto,
+		fileValidator:  fileValidator,
+		authz:          authz,
+		tokenRefresher: tokenRefresher,
 	}
 }
 
@@ -194,7 +201,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -208,22 +215,39 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		path = "/" + path
 	}
 
+	loadSecret := func(name string) (*v1.SecretSpec, error) {
+		scrt, retrieveErr := retrieveSecret(name)
+		if retrieveErr != nil {
+			return nil, retrieveErr
+		}
+		if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			logrus.WithError(decryptErr).WithFields(map[string]interface{}{
+				datasourceFieldLog: datasourceName,
+				projectFieldLog:    projectForLog(projectName),
+			}).Error("unable to decrypt the datasource secret")
+			return nil, apiinterface.InternalError
+		}
+		// Defense in depth: the secret might have been stored before the file restriction was enforced
+		// (or the allowed directories changed since). Never read a file that is not explicitly allowed.
+		if validateErr := fileValidator.ValidateSpec(scrt); validateErr != nil {
+			logrus.WithError(validateErr).WithFields(map[string]interface{}{
+				datasourceFieldLog: datasourceName,
+				projectFieldLog:    projectForLog(projectName),
+			}).Warning("the datasource secret references a file that is not allowed")
+			return nil, apiinterface.HandleForbiddenError(fmt.Sprintf("secret %q references a file that is not allowed", name))
+		}
+		return scrt, nil
+	}
+
 	var scrt *v1.SecretSpec
 
 	switch kind {
 	case datasourceHTTP.ProxyKindName:
 		httpConfig := cfg.(*datasourceHTTP.Config)
 		if len(httpConfig.Secret) > 0 {
-			scrt, err = retrieveSecret(httpConfig.Secret)
+			scrt, err = loadSecret(httpConfig.Secret)
 			if err != nil {
 				return nil, err
-			}
-			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
-					datasourceFieldLog: datasourceName,
-					projectFieldLog:    projectForLog(projectName),
-				}).Error("unable to decrypt the datasource secret")
-				return nil, apiinterface.InternalError
 			}
 		}
 		return &httpProxy{
@@ -231,20 +255,14 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			datasourceName: datasourceName,
 			path:           path,
 			secret:         scrt,
+			tokenRefresher: tokenRefresher,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
 		if len(sqlConfig.Secret) > 0 {
-			scrt, err = retrieveSecret(sqlConfig.Secret)
+			scrt, err = loadSecret(sqlConfig.Secret)
 			if err != nil {
 				return nil, err
-			}
-			if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
-				logrus.WithError(decryptErr).WithFields(map[string]interface{}{
-					datasourceFieldLog: datasourceName,
-					projectFieldLog:    projectForLog(projectName),
-				}).Error("unable to decrypt the datasource secret")
-				return nil, apiinterface.InternalError
 			}
 		}
 		return &sqlProxy{
@@ -264,6 +282,7 @@ type httpProxy struct {
 	secret         *v1.SecretSpec
 	datasourceName string
 	path           string
+	tokenRefresher crypto.TokenRefresher
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -291,7 +310,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
-		return apiinterface.InternalError
+		return err
 	}
 
 	// redirect the request to the datasource
@@ -359,13 +378,40 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 			req.Header.Set(k, v)
 		}
 	}
-	return h.setupAuthentication(req)
+	h.filterHeaders(req.Header)
+	return h.setupAuthentication(c)
 }
 
-func (h *httpProxy) setupAuthentication(req *http.Request) error {
+// filterHeaders applies the policy after configured headers have been set, just before authentication have been added.
+func (h *httpProxy) filterHeaders(headers http.Header) {
+	isAllowed := func(name string) bool {
+		matches := func(header string) bool { return strings.EqualFold(header, name) }
+		if len(h.config.AllowHeaders) > 0 {
+			return slices.ContainsFunc(h.config.AllowHeaders, matches)
+		}
+		return !slices.ContainsFunc(h.config.DropHeaders, matches)
+	}
+	for name := range headers {
+		if !isAllowed(name) {
+			delete(headers, name)
+		}
+	}
+	if !isAllowed(echo.HeaderXForwardedFor) {
+		// A nil value tells ReverseProxy not to add X-Forwarded-For again.
+		headers[echo.HeaderXForwardedFor] = nil
+	}
+}
+
+func (h *httpProxy) setupAuthentication(c echo.Context) error {
+	if h.config.OauthPassthrough {
+		return h.setupOAuthPassthrough(c)
+	}
+
 	if h.secret == nil {
 		return nil
 	}
+
+	req := c.Request()
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
 		password, err := basicAuth.GetPassword()
@@ -391,6 +437,32 @@ func (h *httpProxy) setupAuthentication(req *http.Request) error {
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token.AccessToken))
 	}
 
+	return nil
+}
+
+func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
+	oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
+	if errors.Is(err, http.ErrNoCookie) {
+		// OIDC token cookie is missing. It may have expired while the Perses session
+		// was still valid. Attempt to refresh using the stored OIDC refresh token
+		// before giving up.
+		if h.tokenRefresher != nil {
+			if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
+				h.tokenRefresher(c)
+				// Re-read the OIDC token cookie after the refresh attempt.
+				oidcCookie, err = c.Cookie(crypto.CookieKeyOIDCToken)
+			}
+		}
+		if errors.Is(err, http.ErrNoCookie) {
+			return apiinterface.HandleBadRequestError(fmt.Sprintf(
+				"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
+				h.datasourceName,
+			))
+		}
+	}
+
+	req := c.Request()
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oidcCookie.Value))
 	return nil
 }
 

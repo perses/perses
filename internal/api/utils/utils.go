@@ -57,6 +57,7 @@ const (
 	PathVariable           = "variables"
 	PathView               = "view"
 	PathWhoAmI             = "whoami"
+	PathSearch             = "search"
 	ContextKeyAnonymous    = "anonymous"
 )
 

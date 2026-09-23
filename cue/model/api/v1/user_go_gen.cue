@@ -8,6 +8,13 @@ package v1
 
 #NativeProvider: {
 	password?: string @go(Password)
+
+	// PasswordHash accepts a pre-computed bcrypt hash instead of a plaintext password.
+	// When set, the hash is stored directly without re-hashing.
+	// This is useful for provisioning users from configuration files without exposing
+	// cleartext passwords (e.g. in Kubernetes ConfigMaps).
+	// Mutually exclusive with Password.
+	passwordHash?: string @go(PasswordHash)
 }
 
 #OAuthProvider: {

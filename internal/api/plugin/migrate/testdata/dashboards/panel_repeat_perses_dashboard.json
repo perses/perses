@@ -1,0 +1,172 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "panel-repeat-test",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Panel Repeat Dashboard"
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "value1",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "SomeVariable",
+            "spec": {
+              "values": [
+                "value1",
+                "value2"
+              ]
+            }
+          },
+          "name": "myVar"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "display": {
+            "hidden": false
+          },
+          "defaultValue": "a",
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "SomeVariable",
+            "spec": {
+              "values": [
+                "a",
+                "b"
+              ]
+            }
+          },
+          "name": "otherVar"
+        }
+      }
+    ],
+    "panels": {
+      "0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Orphan Repeated Panel",
+            "description": "An orphan panel repeated by variable"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "iwas": "timeseries",
+              "expr": "up"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "ExoticQuery",
+                  "spec": {
+                    "query": "up"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "1_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Repeated Panel",
+            "description": "A panel repeated by variable inside a row"
+          },
+          "plugin": {
+            "kind": "FooChart",
+            "spec": {
+              "iwas": "timeseries",
+              "expr": "up"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "ExoticQuery",
+                  "spec": {
+                    "query": "up"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Panel Group 1"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0"
+              },
+              "repeatVariable": {
+                "value": "otherVar",
+                "alignment": "vertical"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "My Row",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 9,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/1_0"
+              },
+              "repeatVariable": {
+                "value": "myVar",
+                "maxPer": 3,
+                "alignment": "horizontal"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}

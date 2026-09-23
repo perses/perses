@@ -70,12 +70,21 @@ test.describe('Keyboard Shortcuts', () => {
   test('v exits panel view mode while panel editor is open', async ({ dashboardPage, page }) => {
     await dashboardPage.startEditing();
 
-    const togglePanelViewModeButton = page.getByRole('button', { name: /toggle panel .* view mode/i }).first();
+    const panel = dashboardPage.getPanelByName('Markdown Example Zero');
+    const togglePanelViewModeButton = panel.container.getByRole('button', {
+      name: /^toggle panel .* view mode$/i,
+    });
     await togglePanelViewModeButton.click();
     await expect(page).toHaveURL(/viewPanelRef=/);
 
-    const editPanelButton = page.getByRole('button', { name: /edit panel/i }).first();
-    await editPanelButton.click();
+    // Snapgrid's aria-disabled view-mode wrapper blocks Playwright's edit-button click, so open with E.
+    // Re-enter the expanded panel and wait for its debounced shortcut focus.
+    await dashboardPage.toolbar.hover();
+    // Hovering away clears shortcut state but can leave the old DOM focus behind.
+    await panel.parent.blur();
+    await panel.container.hover();
+    await expect(panel.parent).toBeFocused();
+    await page.keyboard.press('e');
     await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeVisible({ timeout: 5000 });
 
     await page.keyboard.press('v');
@@ -85,8 +94,8 @@ test.describe('Keyboard Shortcuts', () => {
   test('e closes panel editor when it is open', async ({ dashboardPage, page }) => {
     await dashboardPage.startEditing();
 
-    const editPanelButton = page.getByRole('button', { name: /edit panel/i }).first();
-    await editPanelButton.click();
+    const panel = dashboardPage.getPanelByName('Markdown Example Zero');
+    await panel.startEditing();
     await expect(page.getByRole('heading', { name: /Edit Panel/i })).toBeVisible({ timeout: 5000 });
 
     await page.keyboard.press('e');

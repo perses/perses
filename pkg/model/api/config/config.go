@@ -79,6 +79,8 @@ type Config struct {
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
 	// Plugin contains the config for runtime plugins.
 	Plugin Plugin `json:"plugin,omitempty" yaml:"plugin,omitempty"`
+	// Search contains the config for the search engine and the index in memory.
+	Search Search `json:"search,omitempty" yaml:"search,omitempty"`
 }
 
 func (c *Config) Verify() error {

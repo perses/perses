@@ -11,28 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useMemo, useState } from 'react';
-import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
+import type { GridColDef, GridRowParams } from '@mui/x-data-grid';
+import type { Action, Secret } from '@perses-dev/client';
+import { getMetadataProject } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import PencilIcon from 'mdi-material-ui/Pencil';
+import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { Action, getMetadataProject, Secret } from '@perses-dev/client';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+
 import { GlobalProject } from '../../context/Authorization';
-import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';
-import {
-  CREATED_AT_COL_DEF,
-  ListPropertiesWithCallbacks,
-  NAME_COL_DEF,
-  PROJECT_COL_DEF,
-  UPDATED_AT_COL_DEF,
-  VERSION_COL_DEF,
-} from '../list';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DeleteResourceDialog } from '../dialogs';
-import { SecretDataGrid, Row } from './SecretDataGrid';
+import type { ListPropertiesWithCallbacks } from '../list';
+import { CREATED_AT_COL_DEF, NAME_COL_DEF, PROJECT_COL_DEF, UPDATED_AT_COL_DEF, VERSION_COL_DEF } from '../list';
+import type { Row } from './SecretDataGrid';
+import { SecretDataGrid } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
 
 /**
@@ -60,7 +58,7 @@ export function SecretList<T extends Secret>({
     (name: string, project?: string) => {
       return data.find((secret: T) => getMetadataProject(secret.metadata) === project && secret.metadata.name === name);
     },
-    [data]
+    [data],
   );
 
   const rows = useMemo(() => {
@@ -77,7 +75,7 @@ export function SecretList<T extends Secret>({
           createdAt: secret.metadata.createdAt,
           updatedAt: secret.metadata.updatedAt,
           noAuth: !secret.spec.basicAuth && !secret.spec.authorization,
-        }) as Row
+        }) as Row,
     );
   }, [data]);
 
@@ -91,7 +89,7 @@ export function SecretList<T extends Secret>({
       await navigator.clipboard.writeText(secretName);
       infoSnackbar('Secret copied to clipboard!');
     },
-    [infoSnackbar]
+    [infoSnackbar],
   );
 
   const handleSecretSave = useCallback(
@@ -103,7 +101,7 @@ export function SecretList<T extends Secret>({
       }
       setSecretDrawerOpened(false);
     },
-    [action, onCreate, onUpdate]
+    [action, onCreate, onUpdate],
   );
 
   const handleRowClick = useCallback(
@@ -112,7 +110,7 @@ export function SecretList<T extends Secret>({
       setAction('read');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleDuplicateButtonClick = useCallback(
@@ -122,7 +120,7 @@ export function SecretList<T extends Secret>({
       setAction('create');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleEditButtonClick = useCallback(
@@ -132,7 +130,7 @@ export function SecretList<T extends Secret>({
       setAction('update');
       setSecretDrawerOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const handleDeleteButtonClick = useCallback(
@@ -140,7 +138,7 @@ export function SecretList<T extends Secret>({
       setTargetedSecret(findSecret(name, project));
       setDeleteSecretDialogOpened(true);
     },
-    [findSecret]
+    [findSecret],
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -228,7 +226,7 @@ export function SecretList<T extends Secret>({
         ],
       },
     ],
-    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
+    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick],
   );
 
   return (

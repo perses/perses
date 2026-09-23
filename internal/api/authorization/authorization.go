@@ -40,7 +40,7 @@ type Authorization interface {
 	// You should consider the case where the context can be empty and that the function can be called from an anonymous endpoint.
 	// To check if it is called from an anonymous endpoint, you can use the function utils.IsAnonymous.
 	// In case the context is not empty, and it is not an anonymous endpoint, the user information should be set in the context.
-	// If it is not the case, you should return an error. All further functions are dependant on the results of theses decisions.
+	// If it is not the case, you should return an error. All further functions are dependent on the results of these decisions.
 	GetUser(ctx echo.Context) (any, error)
 	// GetUsername returns the username/the login of the user from the context.
 	GetUsername(ctx echo.Context) (string, error)
@@ -75,12 +75,12 @@ type Authorization interface {
 	// Be aware that this function cannot be called from an anonymous endpoint.
 	// In case the user information is not found in the context, the implementation should return an error.
 	GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error)
-	// RefreshPermissions refreshes the permissions.
+	// RefreshPermissionsAndRoles refreshes the permissions and roles.
 	// We know this method is relative to the implementation and should not appear in the interface.
-	// This is convenient to have it here when the implementation is keeping the permissions in memory.
+	// This is convenient to have it here when the implementation is keeping the permissions and roles in memory.
 	// And since it is a single method, it does not hurt to have it in the interface as it is straight forward to implement it if it's unnecessary.
 	// Just return nil.
-	RefreshPermissions() error
+	RefreshPermissionsAndRoles() error
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,

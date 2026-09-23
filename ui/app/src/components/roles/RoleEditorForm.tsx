@@ -11,17 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment, ReactElement, useMemo, useState } from 'react';
-import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import PlusIcon from 'mdi-material-ui/Plus';
+import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import type { Action, Role } from '@perses-dev/client';
+import { ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, rolesEditorSchema } from '@perses-dev/client';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
-import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/client';
-import { FormEditorProps } from '../form-drawers';
+import PlusIcon from 'mdi-material-ui/Plus';
+import type { ReactElement } from 'react';
+import { Fragment, useMemo, useState } from 'react';
+import type { Control, SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { z } from 'zod';
+
+import type { FormEditorProps } from '../form-drawers';
 
 type RoleEditorFormProps = FormEditorProps<Role>;
+
+// The client schema exposes unknown input; keep form values typed and validate through the full schema.
+// TODO: Remove in the next shared beta release.
+const formSchema = z.transform((value: Role): unknown => value).pipe(rolesEditorSchema);
 
 export function RoleEditorForm({
   initialValue,
@@ -39,7 +48,7 @@ export function RoleEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const form = useForm<Role>({
-    resolver: zodResolver(rolesEditorSchema),
+    resolver: zodResolver(formSchema),
     mode: 'onBlur',
     defaultValues: initialValue,
   });
@@ -177,7 +186,7 @@ function PermissionControl({ control, index, action }: PermissionControl): React
       return PROJECT_SCOPES;
     } else {
       // Else GlobalRole
-      return PROJECT_SCOPES.concat(GLOBAL_SCOPES).sort();
+      return PROJECT_SCOPES.concat(GLOBAL_SCOPES).toSorted();
     }
   }, [kind]);
 

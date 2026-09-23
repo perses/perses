@@ -1,5 +1,6 @@
-import { AnnotationPlugin, parseVariables } from '@perses-dev/plugin-system';
-import { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { AnnotationPlugin } from '@perses-dev/plugin-system';
+import { parseVariables } from '@perses-dev/plugin-system';
+import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 import { {{ .PluginPascalName }}OptionEditor } from './{{ .PluginPascalName }}OptionEditor';
 import { getAnnotationData } from './get-annotation-data';
 

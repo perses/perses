@@ -74,13 +74,21 @@ security:
           client_id: "<your client ID>"
           client_secret: "<your client Secret>"
           issuer: "https://<keycloak host>/realms/<realm>" // For Keycloak versions <17: https://<keycloak host>/auth/realms/<realm>
-          scopes: [ "openid", "profile", "email" ]
+          scopes: [ "openid", "profile", "email", "roles" ]
           logout:
             enabled: true # Generally advised, but you can disable it if you don't want to redirect to the provider's logout page
+          claims:
+            - claim_name: "roles"   # or "groups" depending on your Keycloak configuration
+              mappings:
+                - claim_value: "admin"
+                  role_name: "admin"          # GlobalRole
+                - claim_value: "editor"
+                  role_name: "dashboard-editor"
+                  project: "myproject"        # project-scoped Role
 ```
 
 !!! tip
-    Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). As of now, the Perses does not support `RoleBinding` or `GlobalRoleBinding` based on the roles assigned to user in the OIDC provider.
+    Keycloak uses claims `roles` or `groups` for managing user permissions. For more details check this [link](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups). Use the `claims` field to map Keycloak roles/groups to Perses roles automatically — see [Claim-Based Role Assignment](../concepts/authentication.md#claim-based-role-assignment) for the full reference.
 
 *Reference: [Keycloak OpenID Connect](https://www.keycloak.org/securing-apps/oidc-layers)*
 

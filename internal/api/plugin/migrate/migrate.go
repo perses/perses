@@ -15,6 +15,7 @@ package migrate
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -168,6 +169,42 @@ func executeCuelangScript(cueScript *build.Instance, grafanaData []byte, defID s
 	return convertToPlugin(finalVal)
 }
 
+// resolveLazyDefs pre-fills definition fields with their evaluated values.
+// This works around cue-lang/cue#4487; TODO remove it once Perses uses a CUE version containing that fix.
+func resolveLazyDefs(migrateValue cue.Value) (cue.Value, bool, error) {
+	updated := false
+	// Fill concrete definitions at this level before marshaling.
+	if definitions, err := migrateValue.Fields(cue.Definitions(true), cue.Optional(false)); err == nil {
+		for definitions.Next() {
+			selector := definitions.Selector()
+			if !selector.IsDefinition() {
+				continue
+			}
+			definitionValue := definitions.Value()
+			if err := definitionValue.Err(); err != nil {
+				return migrateValue, false, err
+			}
+			migrateValue = migrateValue.FillPath(cue.MakePath(selector), definitionValue)
+			updated = true
+		}
+	}
+
+	// Recurse into regular fields so nested migration definitions are resolved too.
+	if fields, err := migrateValue.Fields(cue.Optional(false)); err == nil {
+		for fields.Next() {
+			fieldValue, fieldUpdated, err := resolveLazyDefs(fields.Value())
+			if err != nil {
+				return migrateValue, false, err
+			}
+			if fieldUpdated {
+				migrateValue = migrateValue.FillPath(cue.MakePath(fields.Selector()), fieldValue)
+				updated = true
+			}
+		}
+	}
+	return migrateValue, updated, nil
+}
+
 // convertToPlugin converts a CUE value to a common.Plugin struct
 func convertToPlugin(migrateValue cue.Value) (*plugin.Plugin, bool, error) {
 	if migrateValue.IsNull() {
@@ -175,7 +212,16 @@ func convertToPlugin(migrateValue cue.Value) (*plugin.Plugin, bool, error) {
 	}
 	data, err := migrateValue.MarshalJSON()
 	if err != nil {
-		return nil, true, err
+		// CUE v0.17 can leave comprehension-built definitions incomplete until explicitly forced.
+		// Keep this fallback migration-only, and remove it when cue-lang/cue#4487 is fixed upstream.
+		resolvedValue, _, resolveErr := resolveLazyDefs(migrateValue)
+		if resolveErr != nil {
+			return nil, true, errors.Join(err, resolveErr)
+		}
+		data, err = resolvedValue.MarshalJSON()
+		if err != nil {
+			return nil, true, err
+		}
 	}
 	if string(data) == "" || string(data) == "{}" {
 		return nil, true, nil
@@ -281,6 +327,17 @@ func (m *completeMigration) migrateDashboardLinks(grafanaDashboard *SimplifiedDa
 	return links
 }
 
+func buildRepeatVariable(value string, direction string, maxPerRow *int) *dashboard.RepeatVariable {
+	rv := &dashboard.RepeatVariable{Value: value, MaxPer: maxPerRow}
+	switch direction {
+	case "v":
+		rv.Alignment = dashboard.RepeatVariableAlignmentVertical
+	default:
+		rv.Alignment = dashboard.RepeatVariableAlignmentHorizontal
+	}
+	return rv
+}
+
 func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
 	// This is not allowed in Perses to have "orphan" panels (a.k.a panels that don't belong to a group).
@@ -300,7 +357,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 
 	for i, panel := range grafanaDashboard.Panels {
 		if panel.Type != grafanaPanelRowType {
-			orphansGridSpec.Items = append(orphansGridSpec.Items, dashboard.GridItem{
+			item := dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
 				X:      int(panel.GridPosition.X),
@@ -309,7 +366,11 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 					Ref:  fmt.Sprintf("#/spec/panels/%d", i),
 					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
 				},
-			})
+			}
+			if panel.Repeat != "" {
+				item.RepeatVariable = buildRepeatVariable(panel.Repeat, panel.RepeatDirection, panel.MaxPerRow)
+			}
+			orphansGridSpec.Items = append(orphansGridSpec.Items, item)
 		} else {
 			gridSpec := &dashboard.GridLayoutSpec{
 				Display: &dashboard.GridLayoutDisplay{
@@ -325,7 +386,7 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 				Spec: gridSpec,
 			}
 			for j, innerPanel := range panel.Panels {
-				gridSpec.Items = append(gridSpec.Items, dashboard.GridItem{
+				item := dashboard.GridItem{
 					Width:  innerPanel.GridPosition.Width,
 					Height: innerPanel.GridPosition.Height,
 					X:      int(innerPanel.GridPosition.X),
@@ -334,7 +395,11 @@ func (m *completeMigration) migrateGrid(grafanaDashboard *SimplifiedDashboard) [
 						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
 						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
 					},
-				})
+				}
+				if innerPanel.Repeat != "" {
+					item.RepeatVariable = buildRepeatVariable(innerPanel.Repeat, innerPanel.RepeatDirection, innerPanel.MaxPerRow)
+				}
+				gridSpec.Items = append(gridSpec.Items, item)
 			}
 			if len(gridSpec.Items) > 0 {
 				result = append(result, grid)

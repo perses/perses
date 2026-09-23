@@ -12,18 +12,17 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
+import type { GridColDef, GridValidRowModel } from '@mui/x-data-grid';
 import {
-  GridColDef,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
-  GridValidRowModel,
 } from '@mui/x-data-grid';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { ReactElement } from 'react';
+import type { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import type { ReactElement } from 'react';
 
-export const DATA_GRID_INITIAL_STATE_SORT_BY_NAME = {
+export const getDataGridInitialStateSortByName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
     columnVisibilityModel: {},
   },
@@ -31,11 +30,11 @@ export const DATA_GRID_INITIAL_STATE_SORT_BY_NAME = {
     sortModel: [{ field: 'name', sort: 'asc' }],
   },
   pagination: {
-    paginationModel: { pageSize: 10, page: 0 },
+    paginationModel: { pageSize, page: 0 },
   },
-};
+});
 
-export const DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME = {
+export const getDataGridInitialStateSortByDisplayName = (pageSize: number): GridInitialStateCommunity => ({
   columns: {
     columnVisibilityModel: {},
   },
@@ -43,9 +42,9 @@ export const DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME = {
     sortModel: [{ field: 'displayName', sort: 'asc' }],
   },
   pagination: {
-    paginationModel: { pageSize: 10, page: 0 },
+    paginationModel: { pageSize, page: 0 },
   },
-};
+});
 
 export const DATA_GRID_STYLES = {
   border: 'none',

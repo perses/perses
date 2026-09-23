@@ -1,6 +1,6 @@
 import { fetch } from '@perses-dev/core';
-import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { {{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client } from './{{ .PluginName }}-types';
+import type { DatasourcePlugin } from '@perses-dev/plugin-system';
+import type { {{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client } from './{{ .PluginName }}-types';
 import { {{ .PluginPascalName }}Editor } from './{{ .PluginPascalName }}Editor';
 
 const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client>['createClient'] = (spec, options) => {

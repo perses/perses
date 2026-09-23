@@ -21,12 +21,12 @@ import (
 	"net/http"
 	"strings"
 
-	apiInterface "github.com/perses/perses/internal/api/interface"
-
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/spec/go/common"
 )
 
 type partialMetadata struct {
@@ -37,24 +37,36 @@ type partialObject struct {
 	Metadata partialMetadata `json:"metadata"`
 }
 
-// CheckProject is a middleware that will verify if the project used for the request exists.
-func CheckProject(svc project.Service) echo.MiddlewareFunc {
+// CheckParameter is a middleware that will verify if the project used for the request exists.
+// It will also check if the project name and the resource name are valid. This is required to prevent any path traversal attack.
+// apiPrefix is the optional prefix configured by the user (config `api_prefix`) under which every route is registered.
+func CheckParameter(svc project.Service, apiPrefix string) echo.MiddlewareFunc {
+	apiV1Prefix := apiPrefix + utils.APIV1Prefix
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// We don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
-			// Also, we avoid an additional query to the DB like that.
-			// In case the body is nil, then there is nothing to do with it as well
-			method := c.Request().Method
-			if (method != http.MethodPost && method != http.MethodGet) || c.Request().Body == nil {
+			// This middleware is only used for the REST API (/api/v1). So we will skip any other route that doesn't start with the API prefix.
+			// This is required because other routes such as the proxy are using the same `name` path parameter, but for the dashboard-local datasources
+			// the name is a free-form key of `dashboard.spec.datasources` (it can contain spaces for example) and must not be rejected.
+			if !strings.HasPrefix(c.Path(), apiV1Prefix) {
 				return next(c)
 			}
+			method := c.Request().Method
 			projectName := utils.GetProjectParameter(c)
-			if len(projectName) == 0 && method == http.MethodPost {
+			name := utils.GetNameParameter(c)
+			// The name needs to be verified because it is used as a key in the database and this can be used to perform a path traversal attack.
+			// (e.g. DELETE /api/v1/projects/.. was deleting the entire database).
+
+			if len(name) > 0 {
+				if err := common.ValidateID(name); err != nil {
+					return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", err.Error()))
+				}
+			}
+			if len(projectName) == 0 && method == http.MethodPost && c.Request().Body != nil {
 				// It's possible the HTTP Path doesn't contain the project because the user is calling the root endpoint to create a new resource.
 				// So we need to ensure the project name exists in the resource, which is why we will partially decode the body to get the project name.
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
 				for _, path := range utils.ProjectResourcePathList {
-					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)) {
+					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", apiV1Prefix, path)) {
 						// Parsing the body in Echo middleware may cause the error code=400, message=EOF.
 						//
 						// Context.Bind only can be called only once in the life of the request as it read the body which can only be read once.
@@ -83,11 +95,21 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				}
 			}
 			if len(projectName) > 0 {
-				if _, err := svc.Get(apiInterface.Parameters{Name: projectName}); err != nil {
-					if databaseModel.IsKeyNotFound(err) {
-						return apiInterface.HandleBadRequestError(apiInterface.ProjectDoesNotExistErrorMessage(projectName))
+				// In any case, we need to validate the project name. That will prevent any usage of the project name for a path traversal attack.
+				// This is required specially for method PUT and DELETE since we don't check if the project exists in those cases, so we need to ensure the project name is valid.
+				// Without this check, a user could delete a resource that belongs to a project that doesn't exist by using a path traversal attack like: /api/v1/dashboards/../variables/anyVariableName
+				if err := common.ValidateID(projectName); err != nil {
+					return apiInterface.HandleBadRequestError(fmt.Sprintf("the project name is invalid: %s", err.Error()))
+				}
+				// We don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the resource that belongs to a project won't exist either.
+				// Also, we avoid an additional query to the DB like that.
+				if method == http.MethodPost || method == http.MethodGet {
+					if _, err := svc.Get(apiInterface.Parameters{Name: projectName}); err != nil {
+						if databaseModel.IsKeyNotFound(err) {
+							return apiInterface.HandleBadRequestError(apiInterface.ProjectDoesNotExistErrorMessage(projectName))
+						}
+						return err
 					}
-					return err
 				}
 			}
 			return next(c)

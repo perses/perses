@@ -1,0 +1,19 @@
+// Grafana Alloy config used as a "fake" profiling data generator for the dev setup.
+// It scrapes the pprof endpoints exposed by Pyroscope and Alloy themselves and
+// remote-writes the resulting profiles back into Pyroscope, so the Pyroscope UI
+// (and the Perses Pyroscope datasource) always has some live data to display.
+
+pyroscope.write "local" {
+  endpoint {
+    url = "http://pyroscope:4040"
+  }
+}
+
+pyroscope.scrape "local" {
+  targets = [
+    {"__address__" = "pyroscope:4040", "service_name" = "pyroscope"},
+    {"__address__" = "localhost:12345", "service_name" = "alloy"},
+  ]
+
+  forward_to = [pyroscope.write.local.receiver]
+}

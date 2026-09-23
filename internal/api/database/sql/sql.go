@@ -25,6 +25,7 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -91,8 +92,17 @@ func getTableName(kind modelV1.Kind) (string, error) {
 func generateID(metadata modelAPI.Metadata) (string, error) {
 	switch m := metadata.(type) {
 	case *modelV1.ProjectMetadata:
+		if err := common.ValidateID(m.Project); err != nil {
+			return "", &databaseModel.Error{Key: m.Project, Code: databaseModel.ErrorBadRequest}
+		}
+		if err := common.ValidateID(m.Name); err != nil {
+			return "", &databaseModel.Error{Key: m.Name, Code: databaseModel.ErrorBadRequest}
+		}
 		return fmt.Sprintf("%s|%s", m.Project, m.Name), nil
 	case *modelV1.Metadata:
+		if err := common.ValidateID(m.Name); err != nil {
+			return "", &databaseModel.Error{Key: m.Name, Code: databaseModel.ErrorBadRequest}
+		}
 		return m.Name, nil
 	}
 	return "", fmt.Errorf("metadata %T not managed", metadata)
@@ -265,30 +275,35 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
 }
 
-func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
+func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) error {
+	defer close(ch)
 	q, args, buildQueryErr := d.buildQuery(query)
 	if buildQueryErr != nil {
-		return nil, fmt.Errorf("unable to build the query: %s", buildQueryErr)
+		return fmt.Errorf("unable to build the query: %s", buildQueryErr)
 	}
 	rows, runQueryErr := d.DB.Query(q, args...)
 	if runQueryErr != nil {
-		return nil, runQueryErr
+		return runQueryErr
 	}
 	defer rows.Close() //nolint:errcheck
-
-	result := []json.RawMessage{}
 
 	for rows.Next() {
 		var rowJSONDoc string
 		if scanErr := rows.Scan(&rowJSONDoc); scanErr != nil {
-			return nil, scanErr
+			return scanErr
 		}
-		result = append(result, []byte(rowJSONDoc))
+		ch <- []byte(rowJSONDoc)
 	}
-	return result, nil
+	return nil
+}
+
+func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
+	// this is implemented in the dao struct in database.go. This is just here to satisfy the interface.
+	return nil, fmt.Errorf("raw query not implemented")
 }
 
 func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([]json.RawMessage, error) {
+	// this is implemented in the dao struct in database.go. This is just here to satisfy the interface.
 	return nil, fmt.Errorf("raw metadata query not implemented")
 }
 

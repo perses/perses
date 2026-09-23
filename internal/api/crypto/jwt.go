@@ -20,14 +20,22 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/pkg/model/api/config"
+	"golang.org/x/oauth2"
 )
 
+// TokenRefresher is a function that attempts to refresh the upstream OIDC/OAuth token
+// using the stored refresh token. It should set new cookies on success or clear them on failure.
+type TokenRefresher func(ctx echo.Context)
+
 const (
-	CookieKeyJWTPayload   = "jwtPayload"
-	CookieKeyJWTSignature = "jwtSignature"
-	CookieKeyRefreshToken = "jwtRefreshToken"
-	cookiePath            = "/"
+	CookieKeyJWTPayload       = "jwtPayload"
+	CookieKeyJWTSignature     = "jwtSignature"
+	CookieKeyRefreshToken     = "jwtRefreshToken"
+	CookieKeyOIDCToken        = "oidcToken"
+	CookieKeyOIDCRefreshToken = "oidcRefreshToken"
+	cookiePath                = "/"
 )
 
 type ProviderInfo struct {
@@ -38,11 +46,17 @@ type ProviderInfo struct {
 type JWTClaims struct {
 	jwt.RegisteredClaims
 	ProviderInfo
+	// PersistedClaims holds selected upstream token claim values keyed by claim name.
+	// Values are []string because OAuth/OIDC claims can be multi-valued (e.g. roles: ["admin","viewer"]).
+	// Omitted for native-auth tokens.
+	// +optional
+	PersistedClaims map[string][]string `json:"prc,omitempty"`
 }
 
-func signedToken(login string, providerInfo ProviderInfo, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
+func signedToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTClaims{
-		ProviderInfo: providerInfo,
+		ProviderInfo:    providerInfo,
+		PersistedClaims: persistedClaims,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   login,
 			ExpiresAt: jwt.NewNumericDate(expireAt),
@@ -55,8 +69,8 @@ func signedToken(login string, providerInfo ProviderInfo, notBefore time.Time, e
 }
 
 type JWT interface {
-	SignedAccessToken(login string, providerInfo ProviderInfo) (string, error)
-	SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error)
+	SignedAccessToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error)
+	SignedRefreshToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error)
 	// CreateAccessTokenCookie will create two different cookies that contain a piece of the token.
 	// As a reminder, a JWT token has the following structure: header.payload.signature
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
@@ -65,6 +79,12 @@ type JWT interface {
 	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
 	DeleteRefreshTokenCookie() *http.Cookie
+	// OIDC Token Cookie stores the token from external IDP, to help implement a grafana feature OAuthPassThrough.
+	// this token will be passed to datasources/globalDatasources when httpProxy.config.OauthPassthrough set to true.
+	CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie
+	DeleteOIDCTokenCookie() *http.Cookie
+	CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie
+	DeleteOIDCRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTClaims, error)
 	GetExpiresIn() int64
 }
@@ -77,14 +97,14 @@ type jwtImpl struct {
 	cookieConfig    config.Cookie
 }
 
-func (j *jwtImpl) SignedAccessToken(login string, providerInfo ProviderInfo) (string, error) {
+func (j *jwtImpl) SignedAccessToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error) {
 	now := time.Now()
-	return signedToken(login, providerInfo, now, now.Add(j.accessTokenTTL), j.accessKey)
+	return signedToken(login, providerInfo, persistedClaims, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
-func (j *jwtImpl) SignedRefreshToken(login string, providerInfo ProviderInfo) (string, error) {
+func (j *jwtImpl) SignedRefreshToken(login string, providerInfo ProviderInfo, persistedClaims map[string][]string) (string, error) {
 	now := time.Now()
-	return signedToken(login, providerInfo, now, now.Add(j.refreshTokenTTL), j.refreshKey)
+	return signedToken(login, providerInfo, persistedClaims, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
@@ -155,6 +175,64 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 		Path:     cookiePath,
 		MaxAge:   -1,
 		HttpOnly: true,
+	}
+}
+
+func (j *jwtImpl) CreateOIDCTokenCookie(token *oauth2.Token) *http.Cookie {
+	expiry := token.Expiry
+	if expiry.IsZero() {
+		expiry = time.Now().Add(j.accessTokenTTL)
+	}
+	maxAge := int(time.Until(expiry).Seconds())
+	if maxAge < 0 {
+		maxAge = 0
+	}
+	return &http.Cookie{ //nolint:gosec
+		Name:     CookieKeyOIDCToken,
+		Value:    token.AccessToken,
+		Path:     cookiePath,
+		MaxAge:   maxAge,
+		Expires:  expiry,
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
+	}
+}
+
+func (j *jwtImpl) DeleteOIDCTokenCookie() *http.Cookie {
+	return &http.Cookie{ //nolint:gosec
+		Name:     CookieKeyOIDCToken,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
+	}
+}
+
+func (j *jwtImpl) CreateOIDCRefreshTokenCookie(refreshToken string) *http.Cookie {
+	return &http.Cookie{ //nolint:gosec
+		Name:     CookieKeyOIDCRefreshToken,
+		Value:    refreshToken,
+		Path:     cookiePath,
+		MaxAge:   int(j.refreshTokenTTL.Seconds()),
+		Expires:  time.Now().Add(j.refreshTokenTTL),
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
+	}
+}
+
+func (j *jwtImpl) DeleteOIDCRefreshTokenCookie() *http.Cookie {
+	return &http.Cookie{ //nolint:gosec
+		Name:     CookieKeyOIDCRefreshToken,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		Secure:   j.cookieConfig.Secure,
+		HttpOnly: true,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 }
 

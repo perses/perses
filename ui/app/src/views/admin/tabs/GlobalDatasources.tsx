@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
+import type { GlobalDatasourceResource } from '@perses-dev/client';
 import { getResourceDisplayName, useSnackbar } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
-import { GlobalDatasourceResource } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { DatasourceList } from '../../../components/datasource/DatasourceList';
 import {
   useCreateGlobalDatasourceMutation,
@@ -43,7 +45,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         createDatasourceMutation.mutate(datasource, {
           onSuccess: (createdDatasource: GlobalDatasourceResource) => {
             successSnackbar(
-              `Global Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`
+              `Global Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`,
             );
             resolve();
           },
@@ -55,7 +57,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation],
   );
 
   const handleDatasourceUpdate = useCallback(
@@ -64,7 +66,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         updateDatasourceMutation.mutate(datasource, {
           onSuccess: (updatedDatasource: GlobalDatasourceResource) => {
             successSnackbar(
-              `Global Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`
+              `Global Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`,
             );
             resolve();
           },
@@ -76,7 +78,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, updateDatasourceMutation],
   );
 
   const handleDatasourceDelete = useCallback(
@@ -85,7 +87,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         deleteDatasourceMutation.mutate(datasource, {
           onSuccess: (deletedDatasource: GlobalDatasourceResource) => {
             successSnackbar(
-              `Global Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`
+              `Global Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`,
             );
             resolve();
           },
@@ -97,7 +99,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
         });
       });
     },
-    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation],
   );
 
   return (

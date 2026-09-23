@@ -11,15 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
-import { Button, TextField } from '@mui/material';
-import { Dialog, getResourceDisplayName, useSnackbar } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { ProjectResource } from '@perses-dev/client';
-import { CreateProjectValidationType, useProjectValidationSchema } from '../../validation';
-import { generateMetadataName } from '../../utils/metadata';
+import { Button, TextField } from '@mui/material';
+import type { ProjectResource } from '@perses-dev/client';
+import { Dialog, getResourceDisplayName, useSnackbar } from '@perses-dev/components';
+import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+
 import { useCreateProjectMutation } from '../../model/project-client';
+import { generateMetadataName } from '../../utils/metadata';
+import type { CreateProjectValidationType } from '../../validation';
+import { useProjectValidationSchema } from '../../validation';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -61,7 +64,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
         onError: (err: Error) => {
           exceptionSnackbar(err);
         },
-      }
+      },
     );
   };
 

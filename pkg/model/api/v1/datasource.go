@@ -19,7 +19,6 @@ import (
 	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/spec/go/datasource"
 )
 
@@ -38,15 +37,6 @@ func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list
 type DatasourceInterface interface {
 	GetMetadata() modelAPI.Metadata
 	GetDatasourceSpec() datasource.Spec
-}
-
-// DEPRECATED: this is replaced by the struct github.com/perses/spec/go/datasource.Spec
-type DatasourceSpec struct {
-	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Default bool            `json:"default" yaml:"default"`
-	// Plugin will contain the datasource configuration.
-	// The data typed is available in Cue.
-	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 // GlobalDatasource is the struct representing the datasource shared to everybody.

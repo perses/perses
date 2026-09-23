@@ -46,16 +46,21 @@ In the usual workflow, all PRs are squashed. There is two exceptions to this rul
 
 ## Documentation
 
-Documentation is written in Markdown. To ensure some quality on our documentation, we are
-running [mdox](https://github.com/bwplotka/mdox) that will ensure the doc is well formatted and all links are working.
+Documentation is written in Markdown. To ensure some quality on our documentation, we are running
+[mdox](https://github.com/bwplotka/mdox) on Markdown files that use GitHub Flavored Markdown. mdox ensures these files
+are well formatted and all links are working.
 
-To format the docs, you will have to install the tool mentioned above. An easy way is to run the following command:
+The `docs/` tree is imported by the [Perses website](https://github.com/perses/website) and rendered with MkDocs
+Material, so it is not formatted with mdox.
+
+To format mdox-managed Markdown, you will have to install the tool mentioned above. An easy way is to run the following
+command:
 
 ```bash
 go install github.com/bwplotka/mdox@latest
 ```
 
-Then to format the doc, run:
+Then to format mdox-managed Markdown, run:
 
 ```bash
 make fmt-docs
@@ -130,7 +135,7 @@ The API backend is now available on port 8080 :). You can log in with user: `adm
 
 ### Web App
 
-See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI. For an overview of UI npm packages and their dependencies, see [docs/ui-package-architecture.md](./docs/ui-package-architecture.md).
+See the [ui/README.md](./ui/README.md) file for details around the build process and the structure of the web UI. For an overview of UI npm packages and their dependencies, see [ui/ARCHITECTURE.md](./ui/ARCHITECTURE.md).
 
 ### Development Container Image
 

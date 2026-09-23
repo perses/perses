@@ -158,7 +158,7 @@ func (s *service) checkSecretPermission(ctx echo.Context, datasource *v1.Datasou
 
 	hasSecret, proxyErr := datasourceV1.HasSecret(datasource.Spec.Plugin.Spec)
 	if proxyErr != nil {
-		logrus.WithError(proxyErr).WithFields(map[string]interface{}{
+		logrus.WithError(proxyErr).WithFields(map[string]any{
 			"datasource": datasource.Metadata.Name,
 			"project":    datasource.Metadata.Project,
 		}).Error("unable to build or find the config in the datasource spec")

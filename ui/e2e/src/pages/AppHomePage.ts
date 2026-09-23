@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Page } from '@playwright/test';
-import { escapeRegExp } from '../utils';
+import type { Page } from '@playwright/test';
 
 const recentDashboardListId = 'recent-dashboard-list';
 
@@ -76,10 +75,11 @@ export class AppHomePage {
   }
 
   async clickRecentDashboardItem(projectName: string, dashboardName: string): Promise<void> {
-    const dashboardButton = this.page
-      .locator(`#${recentDashboardListId}`)
-      .getByRole('row', { name: new RegExp(`^${escapeRegExp(projectName)}\\s+${escapeRegExp(dashboardName)}$`, 'i') });
-    await dashboardButton.click();
+    const projectSegment = encodeURIComponent(projectName);
+    const dashboardSegment = encodeURIComponent(dashboardName);
+    const href = `/projects/${projectSegment}/dashboards/${dashboardSegment}`;
+    const dashboardLink = this.page.locator(`#${recentDashboardListId}`).locator(`a[href="${href}" i]`);
+    await dashboardLink.click();
   }
 
   async clickImportantDashboardItem(projectName: string, dashboardName: string): Promise<void> {

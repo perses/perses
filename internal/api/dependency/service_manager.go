@@ -35,6 +35,7 @@ import (
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	viewImpl "github.com/perses/perses/internal/api/impl/v1/view"
+	"github.com/perses/perses/internal/api/index"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -55,6 +56,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
@@ -71,6 +73,7 @@ type ServiceManager interface {
 	GetGlobalSecret() globalsecret.Service
 	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
+	GetIndex() index.Client
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetPlugin() plugin.Plugin
@@ -98,6 +101,7 @@ type service struct {
 	globalSecret       globalsecret.Service
 	globalVariable     globalvariable.Service
 	health             health.Service
+	index              index.Client
 	jwt                crypto.JWT
 	migrate            migrate.Migration
 	plugin             plugin.Plugin
@@ -112,6 +116,7 @@ type service struct {
 }
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+	secretFileValidator := secretfile.New(conf.Security.SecretFileAllowedDirectories)
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
@@ -120,10 +125,11 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
+	indexService := index.New(conf.Search, authzService, dao.GetPersesDAO())
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())
@@ -131,13 +137,13 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemaService, authzService)
 	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), authzService, schemaService)
 	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), authzService, schemaService)
-	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
+	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, secretFileValidator)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemaService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), authzService)
 	roleService := roleImpl.NewService(dao.GetRole(), authzService, schemaService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), authzService, schemaService)
-	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
+	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService, secretFileValidator)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
 
@@ -154,6 +160,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		globalSecret:       globalSecret,
 		globalVariable:     globalVariableService,
 		health:             healthService,
+		index:              indexService,
 		jwt:                jwtService,
 		migrate:            migrateService,
 		plugin:             pluginService,
@@ -215,6 +222,10 @@ func (s *service) GetGlobalVariable() globalvariable.Service {
 
 func (s *service) GetHealth() health.Service {
 	return s.health
+}
+
+func (s *service) GetIndex() index.Client {
+	return s.index
 }
 
 func (s *service) GetJWT() crypto.JWT {

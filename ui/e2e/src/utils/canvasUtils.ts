@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Locator } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 function getCanvasDataURL(canvasEl: Locator): Promise<string | undefined> {
   return canvasEl.evaluate((node) => {
@@ -47,7 +47,7 @@ type WaitForStableCanvasOptions = {
  */
 export async function waitForStableCanvas(
   canvasEl: Locator,
-  { interval = 250, timeout = 5000 }: WaitForStableCanvasOptions = {}
+  { interval = 250, timeout = 5000 }: WaitForStableCanvasOptions = {},
 ): Promise<void> {
   const maxChecks = Math.floor(timeout / interval);
 

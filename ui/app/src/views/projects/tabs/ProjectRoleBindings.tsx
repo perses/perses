@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import type { RoleBinding, RoleBindingResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { RoleBinding, RoleBindingResource } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
 import {
   useDeleteRoleBindingMutation,
@@ -53,7 +55,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation],
   );
 
   const handleRoleBindingUpdate = useCallback(
@@ -71,7 +73,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleBindingMutation],
   );
 
   const handleRoleBindingDelete = useCallback(
@@ -89,7 +91,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps): ReactEleme
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteRoleBindingMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleBindingMutation],
   );
 
   return (

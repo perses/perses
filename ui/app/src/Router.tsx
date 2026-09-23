@@ -12,14 +12,21 @@
 // limitations under the License.
 
 import { SnackbarProvider } from '@perses-dev/components';
+import { HotkeysProvider } from '@perses-dev/dashboards';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { lazy, ReactElement, Suspense } from 'react';
+import type { ReactElement } from 'react';
+import { lazy, Suspense } from 'react';
 import { CookiesProvider } from 'react-cookie';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
-import { HotkeysProvider } from '@perses-dev/dashboards';
+
+// Default route is eagerly loaded
+import App from './App';
+import type { PageTitleHandle } from './components/PageTitle';
+import { PageTitle } from './components/PageTitle';
 import { PersesLoader } from './components/PersesLoader';
+import { PERSES_APP_CONFIG } from './config';
 import { AuthorizationProvider } from './context/Authorization';
 import {
   ConfigContextProvider,
@@ -30,6 +37,7 @@ import {
 } from './context/Config';
 import { DarkModeContextProvider } from './context/DarkMode';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
+import { buildRedirectQueryString, useIsLoggedIn, useRedirectQueryParam } from './model/auth/auth-client';
 import {
   AdminRoute,
   ConfigRoute,
@@ -41,14 +49,10 @@ import {
   SignInRoute,
   SignUpRoute,
 } from './model/route';
+import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
-import DelegatedAuthnErrorView from './views/auth/DelegatedAuthnErrorView';
 import HomeView from './views/home/HomeView';
-// Default route is eagerly loaded
-import App from './App';
-import { PERSES_APP_CONFIG } from './config';
-import { buildRedirectQueryString, useIsLoggedIn, useRedirectQueryParam } from './model/auth/auth-client';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -79,6 +83,7 @@ const queryClient = new QueryClient({
 function AppProviders(): ReactElement {
   return (
     <CookiesProvider>
+      <PageTitle />
       <QueryClientProvider client={queryClient}>
         <HotkeysProvider
           defaultOptions={{
@@ -105,90 +110,110 @@ function AppProviders(): ReactElement {
   );
 }
 
-function Router(): ReactElement {
-  const router = createBrowserRouter(
-    [
-      {
-        path: '/',
-        Component: AppProviders,
-        children: [
-          {
-            path: '',
-            element: <RequireAuth />,
-            children: [
-              { index: true, Component: HomeView },
-              { path: ProfileRoute, Component: ProfileView },
-              {
-                path: AdminRoute,
-                children: [
-                  { index: true, Component: AdminView },
-                  { path: ':tab', Component: AdminView },
-                ],
-              },
-              { path: ConfigRoute, Component: ConfigView },
-              { path: ImportRoute, Component: ImportView },
-              { path: ProjectRoute, Component: ProjectView },
-              {
-                path: ExploreRoute,
-                element: <RequireExplorerEnabled />,
-                children: [{ index: true, Component: ExploreView }],
-              },
-              {
-                path: ProjectRoute,
-                element: <GuardedProjectRoute />,
-                children: [
-                  { index: true, element: <Navigate to="/" replace /> },
-                  {
-                    path: `:projectName`,
-                    children: [
-                      { index: true, Component: ProjectView },
-                      { path: 'dashboard/new', Component: CreateDashboardView },
-                      { path: 'dashboards/:dashboardName', Component: DashboardView },
-                      {
-                        path: 'ephemeraldashboard/new',
-                        element: <RequireEphemeralDashboardEnabled />,
-                        children: [{ index: true, Component: CreateEphemeralDashboardView }],
-                      },
-                      {
-                        path: 'ephemeraldashboards/:ephemeralDashboardName',
-                        element: <RequireEphemeralDashboardEnabled />,
-                        children: [{ index: true, Component: EphemeralDashboardView }],
-                      },
-                      { path: ':tab', Component: ProjectView },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            path: '',
-            element: <AlreadyLoggedIn />,
-            children: [
-              {
-                path: SignInRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: SignInView }],
-              },
-              {
-                path: SignUpRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: SignUpView }],
-              },
-              {
-                path: DelegatedAuthnErrorRoute,
-                element: <RequireAuthEnabled />,
-                children: [{ index: true, Component: DelegatedAuthnErrorView }],
-              },
-            ],
-          },
-        ],
-      },
-      { path: '*', element: <Navigate to="/" replace /> },
-    ],
-    { basename: PERSES_APP_CONFIG.api_prefix }
-  );
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      Component: AppProviders,
+      children: [
+        {
+          path: '',
+          element: <RequireAuth />,
+          children: [
+            { index: true, Component: HomeView, handle: { title: 'Home' } satisfies PageTitleHandle },
+            { path: ProfileRoute, Component: ProfileView, handle: { title: 'Profile' } satisfies PageTitleHandle },
+            {
+              path: AdminRoute,
+              handle: { title: 'Administration' } satisfies PageTitleHandle,
+              children: [
+                { index: true, Component: AdminView },
+                { path: ':tab', Component: AdminView },
+              ],
+            },
+            { path: ConfigRoute, Component: ConfigView, handle: { title: 'Configuration' } satisfies PageTitleHandle },
+            { path: ImportRoute, Component: ImportView, handle: { title: 'Import' } satisfies PageTitleHandle },
+            { path: ProjectRoute, Component: ProjectView, handle: { title: 'Projects' } satisfies PageTitleHandle },
+            {
+              path: ExploreRoute,
+              handle: { title: 'Explore' } satisfies PageTitleHandle,
+              element: <RequireExplorerEnabled />,
+              children: [{ index: true, Component: ExploreView }],
+            },
+            {
+              path: ProjectRoute,
+              element: <GuardedProjectRoute />,
+              children: [
+                { index: true, element: <Navigate to="/" replace /> },
+                {
+                  path: `:projectName`,
+                  handle: { title: ({ projectName }): string | undefined => projectName } satisfies PageTitleHandle,
+                  children: [
+                    { index: true, Component: ProjectView },
+                    {
+                      path: 'dashboard/new',
+                      Component: CreateDashboardView,
+                      handle: { title: 'New Dashboard' } satisfies PageTitleHandle,
+                    },
+                    {
+                      path: 'dashboards/:dashboardName',
+                      Component: DashboardView,
+                      handle: {
+                        title: ({ dashboardName }): string | undefined => dashboardName,
+                      } satisfies PageTitleHandle,
+                    },
+                    {
+                      path: 'ephemeraldashboard/new',
+                      handle: { title: 'New Ephemeral Dashboard' } satisfies PageTitleHandle,
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: CreateEphemeralDashboardView }],
+                    },
+                    {
+                      path: 'ephemeraldashboards/:ephemeralDashboardName',
+                      handle: {
+                        title: ({ ephemeralDashboardName }): string | undefined => ephemeralDashboardName,
+                      } satisfies PageTitleHandle,
+                      element: <RequireEphemeralDashboardEnabled />,
+                      children: [{ index: true, Component: EphemeralDashboardView }],
+                    },
+                    { path: ':tab', Component: ProjectView },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: '',
+          element: <AlreadyLoggedIn />,
+          children: [
+            {
+              path: SignInRoute,
+              handle: { title: 'Sign In' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignInView }],
+            },
+            {
+              path: SignUpRoute,
+              handle: { title: 'Sign Up' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: SignUpView }],
+            },
+            {
+              path: DelegatedAuthnErrorRoute,
+              handle: { title: 'Authentication Error' } satisfies PageTitleHandle,
+              element: <RequireAuthEnabled />,
+              children: [{ index: true, Component: DelegatedAuthnErrorView }],
+            },
+          ],
+        },
+      ],
+    },
+    { path: '*', element: <Navigate to="/" replace /> },
+  ],
+  { basename: PERSES_APP_CONFIG.api_prefix },
+);
 
+function Router(): ReactElement {
   return (
     <Suspense fallback={<PersesLoader />}>
       <RouterProvider router={router} />

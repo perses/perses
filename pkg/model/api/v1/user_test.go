@@ -43,6 +43,22 @@ func TestUnmarshalUser(t *testing.T) {
 `,
 		},
 		{
+			title: "native provider with passwordHash only",
+			jason: `
+{
+  "kind": "User",
+  "metadata": {
+    "name": "alice"
+  },
+  "spec": {
+    "nativeProvider": {
+      "passwordHash": "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ0123"
+    }
+  }
+}
+`,
+		},
+		{
 			title: "oauth providers only",
 			jason: `
 {
@@ -103,6 +119,48 @@ func TestUnmarshalUserError(t *testing.T) {
   "spec": {
     "nativeProvider": {
       "password": "password"
+    },
+    "oauthProviders": [
+      {
+        "issuer": "http://localhost/openid",
+        "email": "alice@example.com",
+        "subject": "123456789"
+      }
+    ]
+  }
+}
+`,
+			err: fmt.Errorf("nativeProvider and oauthProviders are mutually exclusive, use one of them"),
+		},
+		{
+			title: "password and passwordHash are mutually exclusive",
+			jason: `
+{
+  "kind": "User",
+  "metadata": {
+    "name": "alice"
+  },
+  "spec": {
+    "nativeProvider": {
+      "password": "password",
+      "passwordHash": "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ0123"
+    }
+  }
+}
+`,
+			err: fmt.Errorf("password and passwordHash are mutually exclusive, use one of them"),
+		},
+		{
+			title: "passwordHash and oauth providers are mutually exclusive",
+			jason: `
+{
+  "kind": "User",
+  "metadata": {
+    "name": "alice"
+  },
+  "spec": {
+    "nativeProvider": {
+      "passwordHash": "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ0123"
     },
     "oauthProviders": [
       {

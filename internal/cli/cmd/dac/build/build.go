@@ -56,7 +56,7 @@ func isGoMainPackage(path string) bool {
 	return f.Name.Name == "main"
 }
 
-type option struct {
+type Option struct {
 	persesCMD.Option
 	opt.FileOption
 	opt.DirectoryOption
@@ -67,7 +67,7 @@ type option struct {
 	Mode      string
 }
 
-func (o *option) Complete(args []string) error {
+func (o *Option) Complete(args []string) error {
 	o.args = args
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
@@ -75,7 +75,7 @@ func (o *option) Complete(args []string) error {
 	return nil
 }
 
-func (o *option) Validate() error {
+func (o *Option) Validate() error {
 	if o.Mode != modeFile && o.Mode != modeStdout {
 		return fmt.Errorf("invalid mode provided: must be either `file` or `stdout`")
 	}
@@ -86,7 +86,7 @@ func (o *option) Validate() error {
 	return o.DirectoryOption.Validate()
 }
 
-func (o *option) Execute() error {
+func (o *Option) Execute() error {
 	if o.File != "" {
 		return o.processFile(o.File, filepath.Ext(o.File))
 	}
@@ -142,7 +142,7 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func (o *option) processFile(file string, extension string) error {
+func (o *Option) processFile(file string, extension string) error {
 	var cmd *exec.Cmd
 
 	if extension == goExtension { //nolint: staticcheck
@@ -191,7 +191,7 @@ func (o *option) processFile(file string, extension string) error {
 	}
 
 	// Build the path of the file where to store the command output
-	outputFilePath := o.buildOutputFilePath(file)
+	outputFilePath := o.BuildOutputFilePath(file)
 
 	// Write the output to the file
 	if writeErr := os.WriteFile(outputFilePath, cmdOutput, 0644); writeErr != nil { // nolint: gosec
@@ -200,24 +200,29 @@ func (o *option) processFile(file string, extension string) error {
 	return output.HandleString(o.writer, fmt.Sprintf("Successfully built %s at %s", file, outputFilePath))
 }
 
-// buildOutputFilePath generates the output file path based on the input file path
-func (o *option) buildOutputFilePath(inputFilePath string) string {
+// BuildOutputFilePath generates the output file path based on the input file path
+// Example when the dac output folder is "built", and the output format is "yaml":
+//   - inputFilePath: "dashboards/my_dashboard.cue"
+//   - outputFilePath: "built/dashboards/my_dashboard_output.yaml"
+//
+// /!\ Be sure to be in a DaC context so config.Global.Dac.OutputFolder is correctly set when calling this function.
+func (o *Option) BuildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
 	return filepath.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
 }
 
-func (o *option) SetWriter(writer io.Writer) {
+func (o *Option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
-func (o *option) SetErrWriter(errWriter io.Writer) {
+func (o *Option) SetErrWriter(errWriter io.Writer) {
 	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {
-	o := &option{}
+	o := &Option{}
 	cmd := &cobra.Command{
 		Use:   "build",
 		Short: "Build the given DaC file(s)",

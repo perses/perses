@@ -15,6 +15,8 @@ package ui
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"io"
 	"io/fs"
@@ -25,6 +27,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -40,7 +43,20 @@ import (
 
 var pluginPathRegex = regexp.MustCompile(`^/plugins/[^/]+`)
 
-const prefixPathPlaceholder = "PREFIX_PATH_PLACEHOLDER"
+// hashedAssetRegex matches bundler output whose filename embeds a content hash (e.g. main.f55169be.js,
+// 463.85c2cbf6.css, TimeSeriesChart.b9caac04.js). The content of such a file never changes for a given
+// name, so it can be cached by browsers "forever".
+var hashedAssetRegex = regexp.MustCompile(`\.[0-9a-fA-F]{8,}\.(m?js|css)$`)
+
+const (
+	prefixPathPlaceholder = "PREFIX_PATH_PLACEHOLDER"
+	// cacheControlImmutable is used for content-hashed assets: the browser can reuse them for a year
+	// without ever asking the server again, even on a page reload (for browsers honoring `immutable`).
+	cacheControlImmutable = "public, max-age=31536000, immutable"
+	// cacheControlRevalidate allows the browser to store the response but forces it to revalidate
+	// (conditional request, answered with 304 when unchanged) before reusing it.
+	cacheControlRevalidate = "no-cache"
+)
 
 var (
 	asts        = http.FS(assets.New(embedFS))
@@ -123,6 +139,15 @@ func (f *frontend) servePluginFiles(c echo.Context) error {
 		// Without it, browsers perform "MIME sniffing". For example, a file served as text/plain could be sniffed as text/html and executed as HTML, which could open the door to XSS attacks.
 		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options
 		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+		// Plugin bundles built with rsbuild/module federation are content-hashed (e.g. __mf/js/main.f55169be.js),
+		// so they can be cached indefinitely. Everything else (mf-manifest.json, schemas, ...) has a stable name
+		// and must be revalidated. `c.File` relies on http.ServeContent, which sets Last-Modified and honors
+		// If-Modified-Since / Range requests, so revalidation is answered with a cheap 304.
+		if isHashedAsset(relPath) {
+			c.Response().Header().Set("Cache-Control", cacheControlImmutable)
+		} else {
+			c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
+		}
 		return c.File(localPath)
 	}
 	// Otherwise, it means we are in a dev environment, and we need to proxy the request to the dev server.
@@ -192,21 +217,52 @@ func (f *frontend) assetHandler() echo.HandlerFunc {
 		defer assetFile.Close() //nolint:errcheck
 		data, err := io.ReadAll(assetFile)
 		if err != nil {
-			logrus.WithError(err).Error("Error reading React index.html")
+			logrus.WithError(err).Errorf("Error reading the file %s", fileName)
 			return apiinterface.HandleError(err)
 		}
 		if strings.Contains(fileName, ".js") || strings.Contains(fileName, ".css") {
 			data = bytes.ReplaceAll(data, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
 		}
+		if isHashedAsset(fileName) {
+			// The build pipeline names JS/CSS bundles with a content hash (e.g. main.<hash>.js), so a
+			// given filename's content never changes and it is safe to cache for a long time.
+			c.Response().Header().Set("Cache-Control", cacheControlImmutable)
+		} else {
+			// Other assets (favicon, images, fonts with a stable name...) may change between releases,
+			// so the browser has to revalidate them. Thanks to the ETag, this costs a 304 and not a full download.
+			c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
+		}
 		contentType := mime.TypeByExtension(filepath.Ext(fileName))
 		if contentType == "" {
 			contentType = http.DetectContentType(data)
 		}
-		c.Response().Header().Set("Content-Type", contentType)
-		c.Response().Header().Set("X-Content-Type-Options", "nosniff")
-		_, err = c.Response().Write(data)
-		return apiinterface.HandleError(err)
+		return serveContent(c, fileName, contentType, data)
 	}
+}
+
+// serveContent writes the given in-memory content, adding the headers that make the response cacheable
+// and revalidate by browsers:
+//   - an ETag computed from the actual bytes sent (after placeholder substitution), so a conditional request
+//     (If-None-Match) is answered with 304 Not Modified instead of the full body.
+//   - X-Content-Type-Options: nosniff to prevent MIME sniffing.
+//
+// It relies on http.ServeContent, which handles conditional requests (If-None-Match / If-Modified-Since),
+// HEAD requests and Range requests for us.
+func serveContent(c echo.Context, name string, contentType string, data []byte) error {
+	sum := sha256.Sum256(data)
+	header := c.Response().Header()
+	header.Set("ETag", `"`+hex.EncodeToString(sum[:16])+`"`)
+	header.Set("Content-Type", contentType)
+	header.Set("X-Content-Type-Options", "nosniff")
+	// The zero modtime tells ServeContent not to emit Last-Modified: the embedded FS has no meaningful
+	// modification time, and the ETag is a stronger validator anyway.
+	http.ServeContent(c.Response(), c.Request(), name, time.Time{}, bytes.NewReader(data))
+	return nil
+}
+
+// isHashedAsset returns true when the file name embeds a content hash generated by the bundler.
+func isHashedAsset(name string) bool {
+	return hashedAssetRegex.MatchString(path.Base(name))
 }
 
 // routerMiddleware is here to serve properly the React app.
@@ -261,10 +317,11 @@ func (f *frontend) serveASTFiles(c echo.Context) error {
 		return apiinterface.HandleError(err)
 	}
 	idx = bytes.ReplaceAll(idx, []byte(prefixPathPlaceholder), []byte(f.apiPrefix))
-	c.Response().Header().Set("Content-Type", "text/html; charset=utf-8")
-	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
-	_, err = c.Response().Write(idx)
-	return apiinterface.HandleError(err)
+	// index.html references the current hashed JS/CSS bundle filenames, so it must always be
+	// revalidated to avoid serving a stale page that points at assets no longer being served.
+	// With the ETag set by serveContent, the revalidation is answered with a 304 when nothing changed.
+	c.Response().Header().Set("Cache-Control", cacheControlRevalidate)
+	return serveContent(c, "index.html", "text/html; charset=utf-8", idx)
 }
 
 // parsePluginPath parses a URL path of the form:

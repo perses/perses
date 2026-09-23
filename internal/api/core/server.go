@@ -37,12 +37,14 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/role"
 	"github.com/perses/perses/internal/api/impl/v1/rolebinding"
 	"github.com/perses/perses/internal/api/impl/v1/schema"
+	"github.com/perses/perses/internal/api/impl/v1/search"
 	"github.com/perses/perses/internal/api/impl/v1/secret"
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/impl/v1/view"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
@@ -74,6 +76,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		plugin.NewEndpoint(serviceManager.GetPlugin(), cfg.Plugin.EnableDev),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		schema.NewEndpoint(serviceManager.GetPlugin(), readonly),
+		search.NewEndpoint(serviceManager.GetIndex()),
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetAuthorization(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
 		variable.NewEndpoint(cfg.Variable, serviceManager.GetVariable(), serviceManager.GetAuthorization(), readonly, caseSensitive),
@@ -91,7 +94,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		)
 	}
 
-	authEndpoint, err := authendpoint.New(
+	authEndpoint, tokenRefresher, err := authendpoint.New(
 		persistenceManager.GetUser(),
 		serviceManager.GetJWT(),
 		serviceManager.GetAuthorization(),
@@ -112,7 +115,9 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
-			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetAuthorization()),
+			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
+			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetAuthorization(),
+			tokenRefresher),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),

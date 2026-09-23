@@ -16,7 +16,7 @@ package login
 import (
 	"io"
 
-	"github.com/charmbracelet/huh"
+	"charm.land/huh/v2"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"golang.org/x/oauth2"
@@ -34,6 +34,11 @@ func (l *nativeLogin) Login() (*oauth2.Token, error) {
 }
 
 func (l *nativeLogin) SetMissingInput() error {
+	if len(l.username) == 0 || len(l.password) == 0 {
+		if err := ensureInteractive("username and/or password", "--username and --password"); err != nil {
+			return err
+		}
+	}
 	if len(l.username) == 0 {
 		input := huh.NewInput().Title("Username").Value(&l.username)
 		if err := input.Run(); err != nil {

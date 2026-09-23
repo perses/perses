@@ -348,6 +348,9 @@ security:
 				Frontend: Frontend{
 					ImportantDashboards: nil,
 					Information:         "",
+					AutoRefresh: AutoRefresh{
+						Options: defaultAutoRefreshOptions,
+					},
 				},
 				Plugin: Plugin{
 					Path:         "plugins",
@@ -355,6 +358,11 @@ security:
 				},
 				Provisioning: ProvisioningConfig{
 					Interval: common.Duration(defaultInterval),
+				},
+				Search: Search{
+					CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
+					ExcludedChars:             nil,
+					IndexKeys:                 IndexKeys{Dashboard: []string{"metadata.name", "spec.display.name"}},
 				},
 			},
 		},

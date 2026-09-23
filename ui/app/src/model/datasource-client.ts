@@ -11,18 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-  UseQueryOptions,
-  UseQueryResult,
-} from '@tanstack/react-query';
-import { DatasourceResource, fetchJson, StatusError } from '@perses-dev/client';
-import buildURL from './url-builder';
+import type { DatasourceResource, StatusError } from '@perses-dev/client';
+import { fetchJson } from '@perses-dev/client';
+import type { UseMutationResult, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
+import buildURL from './url-builder';
 
 export const resource = 'datasources';
 
@@ -112,7 +108,7 @@ export function useDatasourceList(options: DatasourceListOptions): UseQueryResul
  * @param project
  */
 export function useCreateDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -136,7 +132,7 @@ export function useCreateDatasourceMutation(
  * @param project
  */
 export function useUpdateDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
@@ -162,7 +158,7 @@ export function useUpdateDatasourceMutation(
  * @param project
  */
 export function useDeleteDatasourceMutation(
-  project: string
+  project: string,
 ): UseMutationResult<DatasourceResource, StatusError, DatasourceResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });

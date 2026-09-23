@@ -77,9 +77,9 @@ func TestPluginGenerateCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: `module MyPluginModule created successfully, plugin MyTestDatasource generated successfully
 ` + getFileList([]string{
-				".cjs.swcrc",
-				".eslintrc.js",
 				".gitignore",
+				".oxfmtrc.json",
+				".oxlintrc.json",
 				".swcrc",
 				"LICENSE",
 				"README.md",
@@ -116,9 +116,9 @@ func TestPluginGenerateCMD(t *testing.T) {
 			IsErrorExpected: false,
 			ExpectedMessage: `plugin MyTestPanel generated successfully
 ` + getFileList([]string{
-				".cjs.swcrc",
-				".eslintrc.js",
 				".gitignore",
+				".oxfmtrc.json",
+				".oxlintrc.json",
 				".swcrc",
 				"LICENSE",
 				"README.md",

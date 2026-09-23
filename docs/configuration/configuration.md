@@ -132,6 +132,9 @@ frontend: <Frontend config> # Optional
 
 # The configuration to access and load the runtime plugins 
 plugin: <Plugin config> # Optional
+
+# The configuration of the search feature. You can customize the search engine used and the indexation of the resources.
+search: <Search config> # Optional
 ```
 
 ### Security config
@@ -169,6 +172,14 @@ encryption_key_file: <filename> # Optional
 
 # Configuration for CORS (cross-origin resource sharing).
 cors: <CORS config> # Optional
+
+# List of absolute directories from which Secrets and GlobalSecrets are allowed to read files
+# (basicAuth.passwordFile, authorization.credentialsFile, oauth.clientSecretFile, tlsConfig.caFile/certFile/keyFile).
+# Symlinks are resolved, and the file must remain inside one of these directories.
+# When empty (default), any file reference in a Secret or GlobalSecret is rejected.
+# This prevents users allowed to create secrets from exfiltrating arbitrary files from the Perses server.
+secret_file_allowed_directories: # Optional
+  - <string>
 ```
 
 #### Cookie config
@@ -289,6 +300,10 @@ logout:
   enabled: <boolean> | default = false # Optional
   # A config option to use a different query parameter for the redirect uri on logout. Some providers (e.g. Cognito) require this.
   logout_redirect_param_name: <string> | default = post_logout_redirect_uri # Optional
+
+  # Name of the userinfo property to use as the "login" of the user.
+  # If not set, or not present in the userinfo response, it falls back to the email, then to the subject.
+  custom_login_property: < enum | possibleValue = 'name' | 'given_name' | 'family_name' | 'middle_name' | 'nickname' | 'preferred_username' | 'email' > # Optional
 ```
 
 ##### OAuth provider
@@ -486,7 +501,7 @@ file: <Database file config> # Optional
 sql: <Database SQL config> # Optional
 ```
 
-#### Database_file config
+#### Database File config
 
 ```yaml
 # The path to the folder containing the database
@@ -501,6 +516,11 @@ case_sensitive: <string> | default = false # Optional
 ```
 
 #### Database SQL config
+
+This is the configuration to connect to a SQL database. Note that Perses will create the tables needed to store the data if they do not exist. The database user must have the rights to create tables.
+
+!!! warning
+    PostgreSQL is not supported. Prefer to use MySQL or MariaDB.
 
 ```yaml
 # TLS configuration.
@@ -667,7 +687,8 @@ global:
   # It will also remove the associated proxy.
   # Also, since the global variable depends on the global datasource, it will also disable the global variable feature.
   disable: <boolean> | default = false # Optional
-  discovery: <GlobalDatasourceDiscovery config> # Optional
+  discovery: 
+  - <GlobalDatasourceDiscovery config> # Optional
 
 project:
   # It is used to disable the project datasource feature.
@@ -757,6 +778,27 @@ pod_configuration: <KubePodDiscovery Config> # Optional
 # The labels used to filter the list of resource when contacting the Kubernetes API.
 labels:
   <string>: <string> # Optional
+
+# Configuration to automatically mark one of the discovered datasources as the default.
+default: <DiscoveryDefault Config> # Optional
+```
+
+##### DiscoveryDefault Config
+
+```yaml
+# When true, the first discovered datasource whose labels and annotations match the filters below
+# will be marked as the default datasource.
+enable: <boolean> | default = false # Optional
+
+# Label key/value pairs that the discovered resource must have to be selected as the default.
+# All specified labels must be present on the resource.
+labels:
+  <string>: <string> # Optional
+
+# Annotation key/value pairs that the discovered resource must have to be selected as the default.
+# All specified annotations must be present on the resource.
+annotations:
+  <string>: <string> # Optional
 ```
 
 ##### KubeServiceDiscovery Config
@@ -807,6 +849,18 @@ cleanup_interval: <duration> | default = 1d # Optional
 # When it is true, Perses won't serve the frontend anymore.
 disable: <bool> | default = false # Optional
 
+# Contains the content to be display in a banner at the top of each page along with the severity of the information
+banner: <Banner config> # Optional
+
+# Enables keyboard shortcuts in the UI
+enable_keyboard_shortcuts: <bool> | default = true # Optional
+
+# Enables the dashboard "lock" button that pins every plugin to its latest available version.
+enable_lock_mode: <bool> | default = false # Optional
+
+# Activating the different kind of explorer supported.
+explorer: <Explorer config>
+
 # A list of dashboards you would like to display in the UI home page
 important_dashboards:
   - <Dashboard Selector config> # Optional
@@ -816,6 +870,31 @@ information: <string> # Optional
 
 # TimeRange configuration
 time_range: <TimeRange config> # Optional
+
+# AutoRefresh configuration
+auto_refresh: <AutoRefresh config> # Optional
+
+# Defaults used when a user has not selected their own preference
+default_user_preferences:
+  timezone: <IANA timezone or "local"> # Optional, default = local
+  rows_per_page: <10 | 25 | 50 | 100> # Optional, default = 25
+  theme: <"light" | "dark"> # Optional, default = light
+```
+
+#### Banner config
+
+```yaml
+# The severity of the information to be displayed in the banner. It will change the color of the banner.
+severity: <enum | possibleValue = 'info' | 'warning' | 'error'>
+# The content of the information to be displayed in the banner. It can be html content.
+message: <string>
+```
+
+#### Explorer config
+
+```yaml
+# When true, the explorer feature will be enabled in the UI.
+enable: <bool> | default = false
 ```
 
 #### TimeRange config
@@ -828,6 +907,15 @@ options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d",
 disable_custom:  <bool> | default = false # Optional
 # Allow you to disable the zoom actions (extend or half current time range)
 disable_zoom:  <bool> | default = false # Optional
+```
+
+#### AutoRefresh config
+
+```yaml
+# Allow you to disable dashboard auto-refresh (refresh interval picker hidden; refreshInterval and ?refresh= ignored)
+disable:  <bool> | default = false # Optional
+# Use duration format. The display will be computed automatically. Eg: "5s: will be display "5 seconds" 0s value means Off
+options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 ```
 
 #### Dashboard Selector config
@@ -901,4 +989,28 @@ message: <string>
 
 # If set to true, the custom lint rule is disabled.
 disable: <bool> | default = false # Optional
+```
+
+### Search config
+
+```yaml
+# The interval when it checks if the index cache needs to be refreshed with db content. Only for SQL database setup.
+check_latest_update_interval: <duration> | default = 30s # Optional
+
+# The list of characters that will be excluded from the search engine.
+excluded_chars: <list of strings> # Optional
+
+# The keys used for indexing the resources in the search engine.
+# Adding more keys will allow to search for more attributes of the resources. 
+# For example, if you add "spec.display.name" in the list of keys, you will be able to search for a dashboard by its display name.
+# But the more keys you add, the more time it will take to index the resources and the more memory it will take to store the index. So be careful when adding keys.
+# Example of keys:
+# - "metadata.name": it will index the name of the resource (that was the default behavior before the search feature was added)
+# - "metadata.tags": it will index the tags of the resource (if it has any)
+# - "spec.display.name": it will index the display name of the resource (if it has one)
+# - "spec.panels.@dig:display.name": It will index the display name of all panels in a dashboard. The @dig is used to dig into the panels array and index the display name of each panel.
+# We are using gjson to find the value of the key in the resource. So you can use any valid gjson path to index the value you want.
+# Syntax is available here: https://github.com/tidwall/gjson/blob/master/SYNTAX.md
+index_keys:
+  dashboard: <list of strings | default = ["metadata.name", "spec.display.name"]> # Optional
 ```

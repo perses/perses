@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { ReactElement, useCallback } from 'react';
+import type { UserResource } from '@perses-dev/client';
 import { useSnackbar } from '@perses-dev/components';
-import { UserResource } from '@perses-dev/client';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+
 import { UserList } from '../../../components/users/UserList';
 import {
   useCreateUserMutation,
@@ -52,7 +54,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, createUserMutation]
+    [exceptionSnackbar, successSnackbar, createUserMutation],
   );
 
   const handleUserUpdate = useCallback(
@@ -70,7 +72,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateUserMutation]
+    [exceptionSnackbar, successSnackbar, updateUserMutation],
   );
 
   const handleUserDelete = useCallback(
@@ -88,7 +90,7 @@ export function Users(props: UsersProps): ReactElement {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteUserMutation]
+    [exceptionSnackbar, successSnackbar, deleteUserMutation],
   );
 
   return (

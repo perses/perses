@@ -16,9 +16,12 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
+	"github.com/perses/perses/internal/api/index"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
@@ -28,6 +31,8 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 )
 
@@ -40,24 +45,31 @@ type service struct {
 	isDatasourceDisable bool
 	isVariableDisable   bool
 	customRules         []*config.CustomLintRule
+	index               index.Client
+	authz               authorization.Authorization
 }
 
-func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, indexClient index.Client) dashboard.Service {
 	return &service{
 		dao:                 dao,
 		globalVarDAO:        globalVarDAO,
 		projectVarDAO:       projectVarDAO,
 		sch:                 sch,
+		authz:               authz,
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
+		index:               indexClient,
 	}
 }
 
-func (s *service) Create(_ echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
+func (s *service) Create(ctx echo.Context, entity *v1.Dashboard) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.create(copyEntity)
 }
@@ -73,13 +85,20 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
+	// Add the dashboard to the index
+	if err := s.index.Add(entity); err != nil {
+		logrus.WithError(err).Errorf("unable to add the dashboard %q to the index", entity.Metadata.Name)
+	}
 	return entity, nil
 }
 
-func (s *service) Update(_ echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
+func (s *service) Update(ctx echo.Context, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
 	copyEntity, err := deep.Copy(entity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	if errPerm := s.checkSecretPermission(ctx, copyEntity); errPerm != nil {
+		return nil, errPerm
 	}
 	return s.update(copyEntity, parameters)
 }
@@ -111,11 +130,27 @@ func (s *service) update(entity *v1.Dashboard, parameters apiInterface.Parameter
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the dashboard %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	// Update the dashboard in the index
+	if indexErr := s.index.Add(entity); indexErr != nil {
+		logrus.WithError(indexErr).Errorf("unable to update the dashboard %q in the index", entity.Metadata.Name)
+	}
 	return entity, nil
 }
 
 func (s *service) Delete(_ echo.Context, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Project, parameters.Name)
+	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
+		return err
+	}
+	// Remove the dashboard from the index
+	s.index.Delete(v1.KindDashboard, &v1.ProjectMetadata{
+		Metadata: v1.Metadata{
+			Name: parameters.Name,
+		},
+		ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+			Project: parameters.Project,
+		},
+	})
+	return nil
 }
 
 func (s *service) Get(parameters apiInterface.Parameters) (*v1.Dashboard, error) {
@@ -177,4 +212,37 @@ func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error
 
 func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 	return s.globalVarDAO.List(&globalvariable.Query{})
+}
+
+// checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret
+// reader permission.
+func (s *service) checkSecretPermission(ctx echo.Context, dashboard *v1.Dashboard) error {
+	if !s.authz.IsEnabled() {
+		return nil
+	}
+
+	hasSecret := false
+	for name, dts := range dashboard.Spec.Datasources {
+		var proxyErr error
+		hasSecret, proxyErr = datasourceV1.HasSecret(dts)
+		if proxyErr != nil {
+			logrus.WithError(proxyErr).WithFields(map[string]any{
+				"datasource": name,
+			}).Error("unable to build or find the config for the datasource defined in the dashboard spec")
+			return echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config for the datasource defined in the dashboard spec")
+		}
+		if hasSecret {
+			// as long as we found one datasource with a secret, we can stop the loop and check the permission
+			break
+		}
+	}
+
+	if !hasSecret {
+		return nil
+	}
+	if ok := s.authz.HasPermission(ctx, role.ReadAction, dashboard.Metadata.Project, role.SecretScope); !ok {
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, dashboard.Metadata.Project, role.SecretScope))
+	}
+
+	return nil
 }

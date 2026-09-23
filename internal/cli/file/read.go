@@ -37,6 +37,6 @@ func readAndDetect(file string) (data []byte, isJSON bool, err error) {
 	return
 }
 
-func newReadFileErr(err error) error {
-	return fmt.Errorf("unable to read file, format invalid: %w", err)
+func newReadFileErr(file string, err error) error {
+	return fmt.Errorf("unable to read file %q, format invalid: %w", file, err)
 }

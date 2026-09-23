@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import type { DashboardResource, EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
 import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/dashboards';
-import { ReactElement, useCallback, useState } from 'react';
-import { DashboardResource, EphemeralDashboardResource, EphemeralDashboardSpec } from '@perses-dev/client';
-import { DurationString } from '@perses-dev/spec';
+import type { DurationString } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
@@ -82,11 +84,11 @@ function CreateEphemeralDashboardView(): ReactElement | null {
         onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
             `Ephemeral Dashboard ${getResourceExtendedDisplayName(
-              createdEphemeralDashboard
-            )} has been successfully created`
+              createdEphemeralDashboard,
+            )} has been successfully created`,
           );
           navigate(
-            `/projects/${createdEphemeralDashboard.metadata.project}/ephemeralDashboards/${createdEphemeralDashboard.metadata.name}`
+            `/projects/${createdEphemeralDashboard.metadata.project}/ephemeralDashboards/${createdEphemeralDashboard.metadata.name}`,
           );
         },
         onError: (err) => {
@@ -96,7 +98,7 @@ function CreateEphemeralDashboardView(): ReactElement | null {
         },
       });
     },
-    [createEphemeralDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
+    [createEphemeralDashboardMutation, exceptionSnackbar, navigate, successSnackbar],
   );
 
   const handleEphemeralDashboardDiscard = useCallback(() => {
