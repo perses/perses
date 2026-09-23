@@ -25,6 +25,8 @@ import buildURL from './url-builder';
 
 export const resource = 'dashboards';
 
+type DashboardOptions = Omit<UseQueryOptions<DashboardResource, StatusError>, 'queryKey' | 'queryFn'>;
+
 type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], StatusError>, 'queryKey' | 'queryFn'> & {
   project?: string;
   metadataOnly?: boolean;
@@ -58,14 +60,14 @@ export function useCreateDashboardMutation(
 export function useDashboard(
   project: string,
   name: string,
-  enabled: boolean = true,
+  options?: DashboardOptions,
 ): UseQueryResult<DashboardResource, StatusError> {
   return useQuery<DashboardResource, StatusError>({
     queryKey: [resource, project, name],
     queryFn: () => {
       return getDashboard(project, name);
     },
-    enabled,
+    ...options,
   });
 }
 
