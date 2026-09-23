@@ -39,12 +39,23 @@ type partialObject struct {
 
 // CheckParameter is a middleware that will verify if the project used for the request exists.
 // It will also check if the project name and the resource name are valid. This is required to prevent any path traversal attack.
-func CheckParameter(svc project.Service) echo.MiddlewareFunc {
+// apiPrefix is the optional prefix configured by the user (config `api_prefix`) under which every route is registered.
+func CheckParameter(svc project.Service, apiPrefix string) echo.MiddlewareFunc {
+	apiV1Prefix := apiPrefix + utils.APIV1Prefix
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			// This middleware is only used for the REST API (/api/v1). So we will skip any other route that doesn't start with the API prefix.
+			// This is required because other routes such as the proxy are using the same `name` path parameter, but for the dashboard-local datasources
+			// the name is a free-form key of `dashboard.spec.datasources` (it can contain spaces for example) and must not be rejected.
+			if !strings.HasPrefix(c.Path(), apiV1Prefix) {
+				return next(c)
+			}
 			method := c.Request().Method
 			projectName := utils.GetProjectParameter(c)
 			name := utils.GetNameParameter(c)
+			// The name needs to be verified because it is used as a key in the database and this can be used to perform a path traversal attack.
+			// (e.g. DELETE /api/v1/projects/.. was deleting the entire database).
+
 			if len(name) > 0 {
 				if err := common.ValidateID(name); err != nil {
 					return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", err.Error()))
@@ -55,7 +66,7 @@ func CheckParameter(svc project.Service) echo.MiddlewareFunc {
 				// So we need to ensure the project name exists in the resource, which is why we will partially decode the body to get the project name.
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
 				for _, path := range utils.ProjectResourcePathList {
-					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)) {
+					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", apiV1Prefix, path)) {
 						// Parsing the body in Echo middleware may cause the error code=400, message=EOF.
 						//
 						// Context.Bind only can be called only once in the life of the request as it read the body which can only be read once.
