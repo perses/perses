@@ -36,6 +36,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/role"
 	"github.com/perses/perses/internal/api/impl/v1/rolebinding"
+	"github.com/perses/perses/internal/api/impl/v1/schema"
 	"github.com/perses/perses/internal/api/impl/v1/search"
 	"github.com/perses/perses/internal/api/impl/v1/secret"
 	"github.com/perses/perses/internal/api/impl/v1/user"
@@ -74,6 +75,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		health.NewEndpoint(serviceManager.GetHealth()),
 		plugin.NewEndpoint(serviceManager.GetPlugin(), cfg.Plugin.EnableDev),
 		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetAuthorization(), readonly, caseSensitive),
+		schema.NewEndpoint(serviceManager.GetPlugin(), readonly),
 		search.NewEndpoint(serviceManager.GetIndex()),
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetAuthorization(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetAuthorization(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
