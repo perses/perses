@@ -130,7 +130,11 @@ export function resolveImportantDashboardList(
   importantDashboardGroups.forEach((group) => {
     (group.dashboards ?? []).forEach((selector) => {
       if (selector.dashboard === undefined) {
-        result.push(...(dashboardsByProject.get(selector.project) ?? []));
+        result.push(
+          ...(dashboardsByProject.get(
+            normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames),
+          ) ?? []),
+        );
         return;
       }
 
@@ -172,7 +176,9 @@ export function resolveImportantDashboardGroups(
         entries.push({
           kind: 'project',
           project: selector.project,
-          dashboards: dashboardsByProject.get(selector.project) ?? [],
+          dashboards:
+            dashboardsByProject.get(normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames)) ??
+            [],
         });
         return;
       }

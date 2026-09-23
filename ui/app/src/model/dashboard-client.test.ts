@@ -60,4 +60,18 @@ describe('resolveImportantDashboardGroups', () => {
       { kind: 'project', project: 'perses', dashboards },
     ]);
   });
+
+  it('matches project-wide selectors case-insensitively when resource names are normalized', () => {
+    const dashboards = [buildDashboard('Perses', 'Demo'), buildDashboard('Perses', 'Benchmark')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        dashboards: [{ project: 'perses' }],
+      },
+    ];
+
+    expect(resolveImportantDashboardList(dashboards, groups, true)).toEqual(dashboards);
+    expect(resolveImportantDashboardGroups(dashboards, groups, true)[0]?.entries).toEqual([
+      { kind: 'project', project: 'perses', dashboards },
+    ]);
+  });
 });

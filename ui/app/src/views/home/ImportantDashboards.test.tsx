@@ -37,6 +37,20 @@ function buildDashboard(project: string, name: string, displayName = name): Dash
   } as unknown as DashboardResource;
 }
 
+vi.mock('../../context/Config', () => ({
+  useImportantDashboardGroups: (): Array<{
+    title: string;
+    description: string;
+    dashboards: Array<{ project: string; dashboard?: string }>;
+  }> => [
+    {
+      title: 'Operations',
+      description: 'Key dashboards and projects',
+      dashboards: [{ project: 'perses', dashboard: 'demo' }, { project: 'testing' }],
+    },
+  ],
+}));
+
 vi.mock('../../model/dashboard-client', () => ({
   useImportantDashboardGroupsData: (): {
     isLoading: boolean;

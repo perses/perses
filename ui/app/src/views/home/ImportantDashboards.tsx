@@ -21,6 +21,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
+import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
 
@@ -214,7 +215,11 @@ function ImportantDashboardEntryLink(props: {
 }
 
 export function ImportantDashboards(): ReactElement | null {
+  const configuredImportantDashboardGroups = useImportantDashboardGroups();
   const { data: importantDashboardGroups, isLoading } = useImportantDashboardGroupsData();
+  const hasConfiguredImportantDashboards = useMemo(() => {
+    return configuredImportantDashboardGroups.some((group) => (group.dashboards?.length ?? 0) > 0);
+  }, [configuredImportantDashboardGroups]);
 
   const groups = useMemo(
     () => importantDashboardGroups.filter((group) => group.entries.length > 0),
@@ -228,7 +233,7 @@ export function ImportantDashboards(): ReactElement | null {
     return cardBodySx;
   }, [groups.length, isLoading]);
 
-  if (importantDashboardGroups.length === 0 && !isLoading) {
+  if (!hasConfiguredImportantDashboards && !isLoading) {
     return null;
   }
 
