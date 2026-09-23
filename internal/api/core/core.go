@@ -112,7 +112,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}).
 		PreMiddleware(echoMiddleware.Decompress()).
 		Middleware(middleware.HandleError()).
-		Middleware(middleware.CheckProject(dependencyManager.Service().GetProject()))
+		Middleware(middleware.CheckParameter(dependencyManager.Service().GetProject(), conf.APIPrefix))
 	if !conf.Frontend.Disable {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
 	}
