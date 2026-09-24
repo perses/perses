@@ -172,13 +172,13 @@ export function SearchBar(): ReactElement {
   const canReadProjects = useCanReadAnyProject();
   const canReadDatasources = useHasPermissionInAnyProject('read', 'Datasource');
   const canReadGlobalDatasources = useHasPermission('read', GlobalProject, 'GlobalDatasource');
-  const canFetchSearchLists = !isPermissionsLoading && !permissionsError;
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const canFetchSearchLists = open && !isPermissionsLoading && !permissionsError;
   const fetchDashboards = canFetchSearchLists && canReadDashboards;
   const fetchProjects = canFetchSearchLists && canReadProjects;
   const fetchDatasources = canFetchSearchLists && canReadDatasources;
   const fetchGlobalDatasources = canFetchSearchLists && canReadGlobalDatasources;
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
     dashboards: false,
     projects: false,

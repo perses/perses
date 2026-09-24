@@ -40,6 +40,8 @@ const { authState, listState } = vi.hoisted(() => ({
       isLoading: false,
       error: null as StatusError | null,
     },
+    dashboardListCalls: 0,
+    importantDashboardListCalls: 0,
     projects: {
       data: [] as unknown[],
       error: null as StatusError | null,
@@ -92,6 +94,7 @@ vi.mock('../../../model/dashboard-client', () => ({
     if (options?.enabled === false) {
       return { data: [], isLoading: false, error: null };
     }
+    listState.dashboardListCalls += 1;
     return listState.dashboards;
   },
   useImportantDashboardList: (
@@ -101,6 +104,7 @@ vi.mock('../../../model/dashboard-client', () => ({
     if (options?.enabled === false) {
       return { data: [], isLoading: false, error: null };
     }
+    listState.importantDashboardListCalls += 1;
     return listState.importantDashboards;
   },
 }));
@@ -170,11 +174,29 @@ function resetState(): void {
   listState.globalDatasources = { data: [], error: null };
   listState.globalDatasourceListCalls = 0;
   listState.projectListCalls = 0;
+  listState.dashboardListCalls = 0;
+  listState.importantDashboardListCalls = 0;
 }
 
 describe('SearchBar', () => {
   beforeEach(() => {
     resetState();
+  });
+
+  it('does not fetch search lists until the search box is opened', async () => {
+    renderSearchBar();
+
+    expect(listState.dashboardListCalls).toBe(0);
+    expect(listState.importantDashboardListCalls).toBe(0);
+    expect(listState.projectListCalls).toBe(0);
+    expect(listState.globalDatasourceListCalls).toBe(0);
+
+    await openSearch();
+
+    expect(listState.dashboardListCalls).toBeGreaterThan(0);
+    expect(listState.importantDashboardListCalls).toBeGreaterThan(0);
+    expect(listState.projectListCalls).toBeGreaterThan(0);
+    expect(listState.globalDatasourceListCalls).toBeGreaterThan(0);
   });
 
   it('shows a shared error alert when a resource list fails to load', async () => {
