@@ -48,6 +48,17 @@ panel.AddQuery(queryOptions...)
 
 Define the panel query. More info at [Query](./query.md).
 
+### AddAnnotation
+
+```golang
+import "github.com/perses/perses/go-sdk/panel"
+import "github.com/perses/perses/go-sdk/annotation"
+
+panel.AddAnnotation("Deployments", annotationPlugin(), annotation.Hidden(true))
+```
+
+Add an annotation to the panel. More info at [Annotation](./annotation.md).
+
 ## Panel Plugin Options
 
 See the related documentation for each panel plugin.
