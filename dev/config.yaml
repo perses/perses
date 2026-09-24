@@ -43,13 +43,6 @@ frontend:
       description: "Quick links to key demo dashboards and projects."
       dashboards:
         - project: "perses"
-          dashboard: "Demo"
-        - project: "perses"
-          dashboard: "ThreeSignals"
-        - project: "perses"
-          dashboard: "NodeExporter"
-        - project: "perses"
-          dashboard: "Benchmark"
         - project: "testing"
           dashboard: "Defaults"
         - project: "testing"
