@@ -121,12 +121,15 @@ export function SecretEditorForm({
 
   // Form errors are removed only from latest input touched
   // This will remove errors for others inputs
+  const {
+    clearErrors,
+    formState: { isValid },
+  } = form;
   useEffect(() => {
-    if (form.formState.isValid) {
-      form.clearErrors();
+    if (isValid) {
+      clearErrors();
     }
-    // oxlint-disable-next-line react/exhaustive-deps
-  }, [form.formState.isValid]);
+  }, [clearErrors, isValid]);
 
   const [tabValue, setTabValue] = useState<string>(() => {
     if (initialSecretClean.spec.basicAuth) return basicAuthIndex;
