@@ -346,7 +346,7 @@ security:
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: nil,
+					ImportantDashboards: importantDashboards{},
 					Information:         "",
 					AutoRefresh: AutoRefresh{
 						Options: defaultAutoRefreshOptions,

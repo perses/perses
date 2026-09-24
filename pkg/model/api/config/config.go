@@ -14,6 +14,7 @@
 package config
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -43,9 +44,115 @@ func (e *EphemeralDashboard) Verify() error {
 type dashboardSelector struct {
 	// Project is the name of the project (dashboard.metadata.project)
 	Project string `json:"project" yaml:"project"`
-	// Dashboard is the name of the dashboard (dashboard.metadata.name)
-	Dashboard string `json:"dashboard" yaml:"dashboard"`
+	// Dashboard is the name of the dashboard (dashboard.metadata.name).
+	// When omitted, all dashboards from the project are considered important.
+	Dashboard string `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
 }
+
+type importantDashboardGroup struct {
+	Title       string              `json:"title,omitempty" yaml:"title,omitempty"`
+	Description string              `json:"description,omitempty" yaml:"description,omitempty"`
+	Dashboards  []dashboardSelector `json:"dashboards,omitempty" yaml:"dashboards,omitempty"`
+}
+
+type importantDashboards struct {
+	Groups           []importantDashboardGroup `json:"-" yaml:"-"`
+	usesLegacyFormat bool                      `json:"-" yaml:"-"`
+}
+
+func (d importantDashboards) IsZero() bool {
+	return len(d.Groups) == 0
+}
+
+func (d importantDashboards) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Groups)
+}
+
+func (d *importantDashboards) UnmarshalJSON(bytes []byte) error {
+	var raw []map[string]json.RawMessage
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+	if len(raw) == 0 {
+		d.Groups = nil
+		d.usesLegacyFormat = false
+		return nil
+	}
+	if isGroupedImportantDashboardConfigJSON(raw) {
+		return json.Unmarshal(bytes, &d.Groups)
+	}
+	var selectors []dashboardSelector
+	if err := json.Unmarshal(bytes, &selectors); err != nil {
+		return err
+	}
+	d.Groups = []importantDashboardGroup{{Dashboards: selectors}}
+	d.usesLegacyFormat = true
+	return nil
+}
+
+func (d importantDashboards) MarshalYAML() (any, error) {
+	return d.Groups, nil
+}
+
+func (d *importantDashboards) UnmarshalYAML(unmarshal func(any) error) error {
+	var raw []map[string]any
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+	if len(raw) == 0 {
+		d.Groups = nil
+		d.usesLegacyFormat = false
+		return nil
+	}
+	if isGroupedImportantDashboardConfigYAML(raw) {
+		return unmarshal(&d.Groups)
+	}
+	var selectors []dashboardSelector
+	if err := unmarshal(&selectors); err != nil {
+		return err
+	}
+	d.Groups = []importantDashboardGroup{{Dashboards: selectors}}
+	d.usesLegacyFormat = true
+	return nil
+}
+
+func (d *importantDashboards) Verify() error {
+	if d.usesLegacyFormat {
+		logrus.Warn("'frontend.important_dashboards' flat selector format is deprecated. Please group entries under 'frontend.important_dashboards[].dashboards' instead")
+	}
+	return nil
+}
+
+func isGroupedImportantDashboardConfigJSON(groups []map[string]json.RawMessage) bool {
+	for _, group := range groups {
+		if _, ok := group["dashboards"]; ok {
+			return true
+		}
+		if _, ok := group["title"]; ok {
+			return true
+		}
+		if _, ok := group["description"]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func isGroupedImportantDashboardConfigYAML(groups []map[string]any) bool {
+	for _, group := range groups {
+		if _, ok := group["dashboards"]; ok {
+			return true
+		}
+		if _, ok := group["title"]; ok {
+			return true
+		}
+		if _, ok := group["description"]; ok {
+			return true
+		}
+	}
+	return false
+}
+
 type Config struct {
 	// Use it in case you want to prefix the API path.
 	// This can be useful if you are running Perses behind a reverse proxy.

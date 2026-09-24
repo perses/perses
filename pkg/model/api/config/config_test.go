@@ -89,6 +89,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     "explorer": {
       "enable": false
     },
+    "important_dashboards": null,
     "auto_refresh": {}
   },
   "plugin": {
@@ -162,6 +163,7 @@ func TestJSONMarshalConfig(t *testing.T) {
     "explorer": {
       "enable": false
     },
+    "important_dashboards": null,
     "auto_refresh": {
       "options": [
         "0s",
@@ -355,19 +357,26 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: []dashboardSelector{
-						{
-							Project:   "perses",
-							Dashboard: "Demo",
+					ImportantDashboards: importantDashboards{
+						Groups: []importantDashboardGroup{
+							{
+								Dashboards: []dashboardSelector{
+									{
+										Project:   "perses",
+										Dashboard: "Demo",
+									},
+									{
+										Project:   "testing",
+										Dashboard: "DuplicatePanels",
+									},
+									{
+										Project:   "Unknown",
+										Dashboard: "Dashboard",
+									},
+								},
+							},
 						},
-						{
-							Project:   "testing",
-							Dashboard: "DuplicatePanels",
-						},
-						{
-							Project:   "Unknown",
-							Dashboard: "Dashboard",
-						},
+						usesLegacyFormat: true,
 					},
 					Information: "# Hello World\n## File Database setup",
 					DefaultUserPreferences: &DefaultUserPreferences{
@@ -541,19 +550,26 @@ plugin:
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: []dashboardSelector{
-						{
-							Project:   "perses",
-							Dashboard: "Demo",
+					ImportantDashboards: importantDashboards{
+						Groups: []importantDashboardGroup{
+							{
+								Dashboards: []dashboardSelector{
+									{
+										Project:   "perses",
+										Dashboard: "Demo",
+									},
+									{
+										Project:   "testing",
+										Dashboard: "DuplicatePanels",
+									},
+									{
+										Project:   "Unknown",
+										Dashboard: "Dashboard",
+									},
+								},
+							},
 						},
-						{
-							Project:   "testing",
-							Dashboard: "DuplicatePanels",
-						},
-						{
-							Project:   "Unknown",
-							Dashboard: "Dashboard",
-						},
+						usesLegacyFormat: true,
 					},
 					Information: "# Hello World\n## File Database setup",
 					DefaultUserPreferences: &DefaultUserPreferences{
@@ -600,6 +616,85 @@ plugin:
 			assert.Equal(t, test.result, c)
 		})
 	}
+}
+
+func TestUnmarshalJSONImportantDashboardGroups(t *testing.T) {
+	c := Config{}
+
+	assert.NoError(t, json.Unmarshal([]byte(`{
+  "frontend": {
+    "important_dashboards": [
+      {
+        "title": "Awesome First List",
+        "description": "a long and useful description about my first list of dashboard",
+        "dashboards": [
+          {
+            "project": "perses",
+            "dashboard": "Demo"
+          },
+          {
+            "project": "perses"
+          }
+        ]
+      }
+    ]
+  }
+}`), &c))
+
+	assert.Equal(t, importantDashboards{
+		Groups: []importantDashboardGroup{
+			{
+				Title:       "Awesome First List",
+				Description: "a long and useful description about my first list of dashboard",
+				Dashboards: []dashboardSelector{
+					{
+						Project:   "perses",
+						Dashboard: "Demo",
+					},
+					{
+						Project: "perses",
+					},
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
+}
+
+func TestResolveYAMLImportantDashboardGroups(t *testing.T) {
+	c := Config{}
+
+	assert.NoError(t, config.NewResolver[Config]().
+		SetConfigData([]byte(`
+frontend:
+  important_dashboards:
+    - title: "Awesome First List"
+      description: "a long and useful description about my first list of dashboard"
+      dashboards:
+        - project: "perses"
+          dashboard: "Demo"
+        - project: "perses"
+`)).
+		SetEnvPrefix("PERSES").
+		Resolve(&c).
+		Verify())
+
+	assert.Equal(t, importantDashboards{
+		Groups: []importantDashboardGroup{
+			{
+				Title:       "Awesome First List",
+				Description: "a long and useful description about my first list of dashboard",
+				Dashboards: []dashboardSelector{
+					{
+						Project:   "perses",
+						Dashboard: "Demo",
+					},
+					{
+						Project: "perses",
+					},
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
 }
 
 func TestDefaultUserPreferencesVerify(t *testing.T) {
