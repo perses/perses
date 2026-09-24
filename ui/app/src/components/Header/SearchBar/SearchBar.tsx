@@ -11,158 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, InputAdornment, Modal, Paper, Stack, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import type { Resource } from '@perses-dev/client';
-import { isProjectMetadata } from '@perses-dev/client';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
-import Archive from 'mdi-material-ui/Archive';
 import Close from 'mdi-material-ui/Close';
-import DatabaseIcon from 'mdi-material-ui/Database';
 import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
+import FilterIcon from 'mdi-material-ui/Filter';
 import Magnify from 'mdi-material-ui/Magnify';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import type { MouseEvent, ReactElement } from 'react';
+import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
-import { useDatasourceList } from '../../../model/datasource-client';
-import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
-import { useProjectList } from '../../../model/project-client';
-import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useIsMobileSize } from '../../../utils/browser-size';
-import { SearchList } from './SearchList';
+import { RESOURCE_TYPE_TITLES } from './model';
+import type { ResourceType } from './model';
+import { ResourceFilter } from './ResourceFilter';
+import { ResourceIcon } from './ResourceIcon';
+import { SearchDashboardList } from './SearchDashboardList';
+import { SearchDatasourceList } from './SearchDatasourceList';
+import { SearchGlobalDatasource } from './SearchGlobalDatasource';
+import { SearchProjectList } from './SearchProjectList';
 
-function shortcutDisplay(): string {
-  return formatForDisplay('Mod+K');
-}
-
-type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
-
-interface ResourceListProps {
-  query: string;
-  onClick: () => void;
-  isResources?: (type: ResourceType, available: boolean) => void;
-}
-
-function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const projectsQueryResult = useProjectList({ refetchOnMount: false });
-  const { query, onClick, isResources } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('projects', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={projectsQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={Archive}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
-  const { query, onClick, isResources } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={globalDatasourceQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={DatabaseIcon}
-      buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchDashboardList(props: ResourceListProps): ReactElement | null {
-  const {
-    data: dashboardList,
-    isLoading: dashboardListLoading,
-    error: dashboardListError,
-  } = useDashboardList({
-    metadataOnly: true,
-    refetchOnMount: false,
-  });
-  const {
-    data: importantDashboards,
-    isLoading: importantDashboardsLoading,
-    error: importantDashboardsError,
-  } = useImportantDashboardList();
-
-  const { query, isResources, onClick } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
-    [isResources],
-  );
-
-  const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    if (query.length && dashboardList) {
-      const importantDashboardKeys = new Set(
-        importantDashboards.map(
-          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
-        ),
-      );
-      return dashboardList.map((d) => {
-        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
-        return { ...d, highlight };
-      });
-    } else {
-      return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
-    }
-  }, [importantDashboards, dashboardList, query]);
-
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
-  return dashboardListLoading || importantDashboardsLoading ? null : (
-    <SearchList
-      list={list}
-      query={query}
-      onClick={onClick}
-      icon={ViewDashboardIcon}
-      chip={true}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
-  const { isResources, onClick, query } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={datasourceQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={DatabaseIcon}
-      chip={true}
-      buildRouting={(resource) =>
-        `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
-      }
-      isResource={handleIsResource}
-    />
-  );
-}
+export const SEARCH_LIST_IDS: Record<ResourceType, string> = {
+  dashboards: 'dashboard-search-list',
+  datasources: 'data-source-search-list',
+  globalDatasources: 'global-data-source-search-list',
+  projects: 'project-search-list',
+};
 
 function useHandleShortCut(handleOpen: () => void): void {
   useEffect(() => {
@@ -180,6 +54,9 @@ export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [appliedResources, setAppliedResource] = useState<Set<ResourceType>>(
+    () => new Set<ResourceType>(['dashboards', 'datasources', 'globalDatasources', 'projects']),
+  );
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
     dashboards: false,
     projects: false,
@@ -202,8 +79,149 @@ export function SearchBar(): ReactElement {
   const handleClose = useCallback((): void => setOpen(false), []);
   useHandleShortCut(handleOpen);
 
+  const inputTextSlotProps = useMemo(() => {
+    return {
+      input: {
+        startAdornment: (
+          <InputAdornment position="start">
+            <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
+          </InputAdornment>
+        ),
+        endAdornment: (
+          <InputAdornment position="end">
+            {query && (
+              <IconButton size="small" onClick={() => setQuery('')}>
+                <Close fontSize="small" />
+              </IconButton>
+            )}
+            <Chip label="esc" size="small" onClick={handleClose} />
+          </InputAdornment>
+        ),
+      },
+    };
+  }, [handleClose, query]);
+
+  const handleInputTextChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return setQuery(e.target.value);
+  }, []);
+
+  const inputText = useMemo((): ReactElement => {
+    return (
+      <TextField
+        size="medium"
+        /* oxlint-disable-next-line jsx-a11y/no-autofocus */
+        autoFocus={true}
+        inputRef={handleSearchInputRef}
+        variant="outlined"
+        placeholder="What are you looking for?"
+        fullWidth
+        sx={{ justifyContent: 'flex-start', marginBottom: 1 }}
+        value={query}
+        onChange={handleInputTextChange}
+        slotProps={inputTextSlotProps}
+      />
+    );
+  }, [query, handleSearchInputRef, inputTextSlotProps, handleInputTextChange]);
+
+  const applyResources = useCallback(
+    (resourceTypes: Set<ResourceType>) => {
+      setAppliedResource(resourceTypes);
+    },
+    [setAppliedResource],
+  );
+
+  const shortcutDisplay = formatForDisplay('Mod+K');
+
+  const searBarItemsMap = useMemo((): Record<ResourceType, ReactElement> => {
+    return {
+      dashboards: (
+        <SearchDashboardList
+          id={SEARCH_LIST_IDS.dashboards}
+          query={query}
+          onClick={handleClose}
+          isResources={handleIsResourceAvailable}
+        />
+      ),
+      datasources: (
+        <SearchDatasourceList
+          id={SEARCH_LIST_IDS.datasources}
+          query={query}
+          onClick={handleClose}
+          isResources={handleIsResourceAvailable}
+        />
+      ),
+      globalDatasources: (
+        <SearchGlobalDatasource
+          id={SEARCH_LIST_IDS.globalDatasources}
+          query={query}
+          onClick={handleClose}
+          isResources={handleIsResourceAvailable}
+        />
+      ),
+      projects: (
+        <SearchProjectList
+          id={SEARCH_LIST_IDS.projects}
+          query={query}
+          onClick={handleClose}
+          isResources={handleIsResourceAvailable}
+        />
+      ),
+    };
+  }, [query, handleIsResourceAvailable, handleClose]);
+
+  const searchBarItems = useMemo((): ReactElement => {
+    const sorted = Array.from(appliedResources).toSorted();
+    return (
+      <Stack direction="column">
+        <Stack
+          id="search-bar-indicator"
+          direction="row"
+          alignItems="center"
+          spacing={0.75}
+          sx={{
+            px: 2,
+            py: 0.75,
+            borderBottom: 1,
+            borderColor: 'divider',
+            backgroundColor: 'background.paper',
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+          }}
+        >
+          <FilterIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+          <Typography variant="caption" sx={{ mr: 0.5 }} color="text.secondary">
+            Searching in
+          </Typography>
+          {sorted.map((rt) => {
+            return (
+              <Chip
+                id={`search-bar-indicator-${rt}`}
+                key={rt}
+                size="small"
+                variant="outlined"
+                label={RESOURCE_TYPE_TITLES[rt]}
+                // oxlint-disable-next-line react-perf/jsx-no-jsx-as-prop
+                icon={<ResourceIcon sx={{ ml: 0.5 }} resourceType={rt} />}
+                sx={{
+                  height: 24,
+                  bgcolor: 'action.selected',
+                  border: 0,
+                  '& .MuiChip-label': {
+                    px: 1,
+                  },
+                }}
+              />
+            );
+          })}
+        </Stack>
+        {sorted.map((i) => searBarItemsMap[i])}
+      </Stack>
+    );
+  }, [appliedResources, searBarItemsMap]);
+
   return (
-    <Paper sx={{ width: '100%', flexShrink: 1 }}>
+    <Paper sx={{ width: '100%', flexShrink: 1, display: 'flex', flexDirection: 'row' }}>
       <Button
         size="small"
         fullWidth
@@ -215,7 +233,7 @@ export function SearchBar(): ReactElement {
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
           <Typography>Search...</Typography>
         </Box>
-        {!isMobileSize && <Chip label={shortcutDisplay()} size="small" />}
+        {!isMobileSize && <Chip label={shortcutDisplay} size="small" />}
       </Button>
       <Modal
         open={open}
@@ -239,47 +257,17 @@ export function SearchBar(): ReactElement {
           }}
           variant="outlined"
         >
-          <TextField
-            size="medium"
-            /* oxlint-disable-next-line jsx-a11y/no-autofocus */
-            autoFocus={true}
-            inputRef={handleSearchInputRef}
-            variant="outlined"
-            placeholder="What are you looking for?"
-            fullWidth
-            sx={{ justifyContent: 'flex-start', marginBottom: 1 }}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {query && (
-                    <IconButton size="small" onClick={() => setQuery('')}>
-                      <Close fontSize="small" />
-                    </IconButton>
-                  )}
-                  <Chip label="esc" size="small" onClick={handleClose} />
-                </InputAdornment>
-              ),
-            }}
-          />
+          {inputText}
           {query.length > 0 && !hasAnyResource && (
             <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          <SearchDashboardList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchProjectList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchGlobalDatasource query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchDatasourceList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          {searchBarItems}
         </Paper>
       </Modal>
+      <ResourceFilter appliedResources={appliedResources} apply={applyResources} />
     </Paper>
   );
 }
