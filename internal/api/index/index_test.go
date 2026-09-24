@@ -17,9 +17,11 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -243,6 +245,48 @@ func Test_client_add_multipleProjectsAreIndexedSeparately(t *testing.T) {
 	require.Contains(t, c.dashboards.idx, "project-b")
 	assert.Contains(t, c.dashboards.idx["project-a"], "dashboard-a")
 	assert.Contains(t, c.dashboards.idx["project-b"], "dashboard-b")
+}
+
+// wildcardAuthorization returns the wildcard mixed with a real project, as k8s authz does for a user
+// with all-project access alongside specific projects.
+type wildcardAuthorization struct {
+	authorization.Authorization
+}
+
+func (*wildcardAuthorization) IsEnabled() bool {
+	return true
+}
+
+func (*wildcardAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+	return true
+}
+
+func (*wildcardAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+	return []string{v1.WildcardProject, "project-a"}, nil
+}
+
+// TestClientSearch_wildcardAmongAuthorizedProjects ensures a wildcard mixed with a real project grants
+// global access (search spans all projects) instead of being limited to the explicitly listed project.
+func TestClientSearch_wildcardAmongAuthorizedProjects(t *testing.T) {
+	c := New(config.Search{IndexKeys: config.IndexKeys{Dashboard: []string{"metadata.name"}}}, &wildcardAuthorization{}, nil).(*client)
+
+	docs := []json.RawMessage{
+		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "node-exporter", "project": "project-a"}, "spec": {}}`),
+		json.RawMessage(`{"kind": "Dashboard", "metadata": {"name": "node-cpu-usage", "project": "project-b"}, "spec": {}}`),
+	}
+	for _, d := range docs {
+		require.NoError(t, c.add(d))
+	}
+
+	// An empty project triggers the GetUserProjects path.
+	results, err := c.Search(nil, v1.KindDashboard, "", "node")
+	require.NoError(t, err)
+
+	var names []string
+	for _, r := range results {
+		names = append(names, r.Original)
+	}
+	assert.ElementsMatch(t, []string{"node-exporter", "node-cpu-usage"}, names)
 }
 
 // TestClientSearch_authorizationDisabled tests the client.search function when authorization is disabled.
