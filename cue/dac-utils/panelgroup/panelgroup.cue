@@ -46,6 +46,9 @@ import (
 
 // output: the final layout & panels as map.
 layout: dashboard.#Layout & {
+	// TODO This builder is currently opinionated towards grid layouts.
+	// This could be extended to support other layout kinds in the future.
+	kind: dashboard.#KindGridLayout
 	spec: dashboard.#GridLayoutSpec & {
 		display: {
 			title: #title
