@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -33,6 +34,7 @@ import (
 	"github.com/perses/spec/go/plugin"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/errgroup"
 )
 
 const pluginFileName = "plugin-modules.json"
@@ -159,26 +161,29 @@ func (p *pluginFile) Load() error {
 	if err != nil {
 		return err
 	}
+	g := new(errgroup.Group)
+	g.SetLimit(runtime.NumCPU())
 	for _, f := range files {
 		if !f.IsDir() {
 			// we are only interested in the plugin folder, so any files at the root of the plugin folder can be skipped
 			continue
 		}
-		pluginPath := filepath.Join(p.path, f.Name())
-		pluginModule := p.loadSinglePlugin(f, pluginPath)
-		if pluginModule == nil {
-			// the plugin is not valid, we can skip it
-			continue
-		}
-		pluginLoaded := &Loaded{
-			DevEnvironment: nil,
-			Module:         *pluginModule,
-			LocalPath:      pluginPath,
-		}
-		p.mutex.Lock()
-		p.loaded.Add(pluginModule.Metadata.Name, pluginModule.Metadata, pluginLoaded)
-		p.mutex.Unlock()
+		g.Go(func() error {
+			pluginPath := filepath.Join(p.path, f.Name())
+			pluginModule := p.loadSinglePlugin(f, pluginPath)
+			if pluginModule == nil {
+				return nil
+			}
+			p.mutex.Lock()
+			p.loaded.Add(pluginModule.Metadata.Name, pluginModule.Metadata, &Loaded{
+				Module:    *pluginModule,
+				LocalPath: pluginPath,
+			})
+			p.mutex.Unlock()
+			return nil
+		})
 	}
+	_ = g.Wait() // loadSinglePlugin never returns an error, it logs and marks status
 	return p.storeLoadedList()
 }
 
