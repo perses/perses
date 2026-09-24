@@ -21,6 +21,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -106,4 +107,46 @@ func TestListAcrossAuthorizedProjects(t *testing.T) {
 		projects = append(projects, project)
 	}
 	require.ElementsMatch(t, []string{"project-1", "project-2"}, projects)
+}
+
+// wildcardAuthorization returns the wildcard mixed with a real project, as k8s authz does for a user
+// with all-namespace access alongside specific namespaces.
+type wildcardAuthorization struct {
+	authorization.Authorization
+}
+
+func (*wildcardAuthorization) IsEnabled() bool {
+	return true
+}
+
+func (*wildcardAuthorization) HasPermission(_ echo.Context, _ role.Action, _ string, _ role.Scope) bool {
+	return true
+}
+
+func (*wildcardAuthorization) GetUserProjects(_ echo.Context, _ role.Action, _ role.Scope) ([]string, error) {
+	return []string{v1.WildcardProject, "project-1"}, nil
+}
+
+// wildcardRejectingDashboardService mimics the database layer, which rejects the wildcard project as an
+// invalid id: if the wildcard ever reaches the query, RawList fails.
+type wildcardRejectingDashboardService struct {
+	dashboard.Service
+}
+
+func (*wildcardRejectingDashboardService) RawList(query *dashboard.Query) ([]json.RawMessage, error) {
+	if query.Project == v1.WildcardProject {
+		return nil, &databaseModel.Error{Key: query.Project, Code: databaseModel.ErrorBadRequest}
+	}
+	return []json.RawMessage{}, nil
+}
+
+// TestListWithWildcardAmongAuthorizedProjects ensures a wildcard mixed with real projects is treated as
+// global access (full list returned) instead of forwarding the literal "*" to the database, which would 500.
+func TestListWithWildcardAmongAuthorizedProjects(t *testing.T) {
+	tb := New[*v1.Dashboard, *v1.Dashboard, *dashboard.Query](&wildcardRejectingDashboardService{}, &wildcardAuthorization{}, v1.KindDashboard, true).(*toolbox[*v1.Dashboard, *v1.Dashboard, *dashboard.Query])
+	e := echo.New()
+	ctx := e.NewContext(httptest.NewRequest(http.MethodGet, "/api/v1/dashboards", nil), httptest.NewRecorder())
+
+	_, err := tb.list(ctx, apiInterface.Parameters{}, &dashboard.Query{})
+	require.NoError(t, err)
 }

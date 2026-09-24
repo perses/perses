@@ -16,6 +16,7 @@ package toolbox
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/brunoga/deep"
@@ -100,9 +101,9 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return t.metadataOrFullList(q)
 	}
 
-	// In case, there is one result; it can mean the user has global access to the resource across the project.
-	// Or it can mean he has access to only one project. If he has global access, then we should return the complete list.
-	if len(projects) == 1 && projects[0] == modelV1.WildcardProject {
+	// The wildcard means global access and must never be forwarded to the database as a literal project name.
+	// It can be returned alone or mixed with real projects (e.g. k8s lists authorized namespaces alongside it).
+	if slices.Contains(projects, modelV1.WildcardProject) {
 		return t.metadataOrFullList(q)
 	}
 
@@ -135,8 +136,8 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 }
 
 func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(projects []string, query V) (any, error) {
-	// User has global access to all projects and should get the complete list.
-	if projects[0] == modelV1.WildcardProject {
+	// The wildcard means global access, whether alone or mixed with real projects, so return the complete list.
+	if slices.Contains(projects, modelV1.WildcardProject) {
 		return t.metadataOrFullList(query)
 	}
 
