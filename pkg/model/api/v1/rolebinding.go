@@ -75,7 +75,7 @@ type RoleBindingSpec struct {
 
 func (r *RoleBindingSpec) Has(kind Kind, name string) bool {
 	for _, sub := range r.Subjects {
-		if sub.Kind == kind && sub.Name == name {
+		if sub.Kind == kind && (sub.Name == name || sub.Name == WildcardUser) {
 			return true
 		}
 	}
