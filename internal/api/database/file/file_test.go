@@ -14,6 +14,8 @@
 package databasefile
 
 import (
+	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -63,6 +65,64 @@ func TestDAO_Upsert(t *testing.T) {
 	assert.NoError(t, d.Upsert(projectEntity))
 	assert.NoError(t, d.Upsert(projectEntity))
 	removeAllFiles(t)
+}
+
+func TestWriteFileAtomically(t *testing.T) {
+	dir := t.TempDir()
+	filePath := filepath.Join(dir, "project.json")
+	oldData := []byte(`{"value":"old"}`)
+	newData := []byte(`{"value":"new"}`)
+
+	assert.NoError(t, os.WriteFile(filePath, oldData, 0600))
+	assert.NoError(t, writeFileAtomically(filePath, newData, 0600))
+
+	data, err := os.ReadFile(filePath)
+	assert.NoError(t, err)
+	assert.Equal(t, newData, data)
+
+	entries, err := os.ReadDir(dir)
+	assert.NoError(t, err)
+	assert.Len(t, entries, 1)
+	assert.Equal(t, "project.json", entries[0].Name())
+}
+
+func TestWriteFileAtomicallyConcurrentReads(t *testing.T) {
+	dir := t.TempDir()
+	filePath := filepath.Join(dir, "project.json")
+	payloadA := []byte(`{"value":"` + strings.Repeat("a", 128*1024) + `"}`)
+	payloadB := []byte(`{"value":"` + strings.Repeat("b", 128*1024) + `"}`)
+
+	assert.NoError(t, writeFileAtomically(filePath, payloadA, 0600))
+
+	writerDone := make(chan error, 1)
+	go func() {
+		for i := 0; i < 200; i++ {
+			payload := payloadA
+			if i%2 == 0 {
+				payload = payloadB
+			}
+			if err := writeFileAtomically(filePath, payload, 0600); err != nil {
+				writerDone <- err
+				return
+			}
+		}
+		writerDone <- nil
+	}()
+
+	for {
+		select {
+		case err := <-writerDone:
+			assert.NoError(t, err)
+			return
+		default:
+			data, err := os.ReadFile(filePath)
+			if !assert.NoError(t, err) {
+				continue
+			}
+			assert.True(t, json.Valid(data), "reader observed invalid JSON")
+			assert.True(t, bytes.Equal(data, payloadA) || bytes.Equal(data, payloadB), "reader observed a partial write")
+		}
+	}
 }
 
 func TestDAO_Get(t *testing.T) {
