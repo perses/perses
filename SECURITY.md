@@ -11,7 +11,7 @@ are not considered as sensitive, and it should not contain any of it.
 
 The application does not collect any personal data.
 
-By default, the application is not secured and does not require any authentication. However, it is possible to enable
+By default, the application is not secured and does not require any authentication. See the [security considerations](docs/security.md) page for the deployment choices to consider. However, it is possible to enable
 authentication and authorization through the configuration. Read the documentation for more
 details: https://perses.dev/perses/docs/configuration/configuration/.
 
