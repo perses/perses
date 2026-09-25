@@ -296,7 +296,34 @@ func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filePath, data, 0600)
+	return writeFileAtomically(filePath, data, 0600)
+}
+
+func writeFileAtomically(filePath string, data []byte, perm fs.FileMode) error {
+	tmpFile, err := os.CreateTemp(filepath.Dir(filePath), "."+filepath.Base(filePath)+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("unable to create temporary file for %s: %w", filePath, err)
+	}
+	tmpPath := tmpFile.Name()
+	defer func() {
+		_ = os.Remove(tmpPath)
+	}()
+
+	if err = tmpFile.Chmod(perm); err != nil {
+		_ = tmpFile.Close()
+		return fmt.Errorf("unable to set permissions on temporary file for %s: %w", filePath, err)
+	}
+	if _, err = tmpFile.Write(data); err != nil {
+		_ = tmpFile.Close()
+		return fmt.Errorf("unable to write temporary file for %s: %w", filePath, err)
+	}
+	if err = tmpFile.Close(); err != nil {
+		return fmt.Errorf("unable to close temporary file for %s: %w", filePath, err)
+	}
+	if err = os.Rename(tmpPath, filePath); err != nil {
+		return fmt.Errorf("unable to atomically replace %s: %w", filePath, err)
+	}
+	return nil
 }
 
 func (d *DAO) buildPath(key string) string {
