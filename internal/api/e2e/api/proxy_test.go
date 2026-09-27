@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -40,7 +41,12 @@ import (
 )
 
 func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
-	promURL, err := common.ParseURL("http://localhost:9090")
+	return newHTTPDatasourceSpecURL(t, "http://localhost:9090")
+}
+
+func newHTTPDatasourceSpecURL(t *testing.T, rawURL string) datasourceSpec.Spec {
+	t.Helper()
+	promURL, err := common.ParseURL(rawURL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,6 +76,17 @@ func newHTTPDatasourceSpec(t *testing.T) datasourceSpec.Spec {
 			Spec: pluginSpecAsMapInterface,
 		},
 	}
+}
+
+func newGlobalHTTPDatasourceURL(t *testing.T, name, rawURL string) *v1.GlobalDatasource {
+	t.Helper()
+	entity := &v1.GlobalDatasource{
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: v1.Metadata{Name: name},
+		Spec:     newHTTPDatasourceSpecURL(t, rawURL),
+	}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func newSQLDatasourceSpec(t *testing.T) datasourceSpec.Spec {
@@ -189,6 +206,52 @@ func TestHTTPProxyGlobalDatasource(t *testing.T) {
 		expect.GET(fmt.Sprintf("/proxy/%s/%s/api/v1/status/config", utils.PathGlobalDatasource, dtsName)).
 			Expect().
 			Status(http.StatusOK)
+		return []api.Entity{dts}
+	})
+}
+
+// TestHTTPProxyQueryRangeBatch verifies POST …/query_range_batch fans out to N upstream query_range calls.
+func TestHTTPProxyQueryRangeBatch(t *testing.T) {
+	var hits atomic.Int32
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/query_range" {
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+			return
+		}
+		hits.Add(1)
+		_ = r.ParseForm()
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[]}}`))
+	}))
+	defer upstream.Close()
+
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.Manager) []api.Entity {
+		dtsName := "promMockBatch"
+		dts := newGlobalHTTPDatasourceURL(t, dtsName, upstream.URL)
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager.Persistence(), dts)
+
+		body := map[string]any{
+			"start": 1000,
+			"end":   2000,
+			"step":  15,
+			"queries": []map[string]string{
+				{"id": "0", "query": "up"},
+				{"id": "1", "query": "node_cpu"},
+			},
+		}
+		resp := expect.POST(fmt.Sprintf("/proxy/%s/%s/api/v1/query_range_batch", utils.PathGlobalDatasource, dtsName)).
+			WithJSON(body).
+			Expect().
+			Status(http.StatusOK).
+			JSON()
+
+		resp.Path("$.status").String().IsEqual("success")
+		resp.Path(`$.data.results["0"].status`).String().IsEqual("success")
+		resp.Path(`$.data.results["1"].status`).String().IsEqual("success")
+
+		if hits.Load() != 2 {
+			t.Fatalf("expected 2 upstream query_range hits, got %d", hits.Load())
+		}
 		return []api.Entity{dts}
 	})
 }

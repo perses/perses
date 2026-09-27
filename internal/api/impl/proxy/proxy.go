@@ -296,16 +296,31 @@ func (h *httpProxy) serve(c echo.Context) error {
 	req := c.Request()
 	res := c.Response()
 
+	allowPath := pathForAllowlist(h.path)
 	isAllowed := false
 	for _, allowedEndpoint := range h.config.AllowedEndpoints {
-		if allowedEndpoint.Method == req.Method && len(allowedEndpoint.EndpointPattern.FindAllString(h.path, -1)) > 0 {
+		if allowedEndpoint.Method == req.Method && len(allowedEndpoint.EndpointPattern.FindAllString(allowPath, -1)) > 0 {
 			isAllowed = true
 			break
+		}
+	}
+	// Also accept explicit allow of query_range_batch if configured.
+	if !isAllowed && isQueryRangeBatchPath(h.path) {
+		for _, allowedEndpoint := range h.config.AllowedEndpoints {
+			if allowedEndpoint.Method == req.Method && len(allowedEndpoint.EndpointPattern.FindAllString(h.path, -1)) > 0 {
+				isAllowed = true
+				break
+			}
 		}
 	}
 
 	if len(h.config.AllowedEndpoints) > 0 && !isAllowed {
 		return apiinterface.HandleForbiddenError(fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
+	}
+
+	// Fan-out batch before reverse-proxy (upstream Prom has no query_range_batch).
+	if isQueryRangeBatchPath(h.path) {
+		return h.serveQueryRangeBatch(c)
 	}
 
 	if err := h.prepareRequest(c); err != nil {
