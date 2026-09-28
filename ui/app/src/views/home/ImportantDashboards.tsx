@@ -78,13 +78,14 @@ function useKeyedImportantDashboardGroups(groups: ImportantDashboardGroupData[])
 
 function ImportantDashboardEntryLink(props: {
   Icon: typeof Archive | typeof ViewDashboardOutline;
+  SecondaryIcon?: typeof Archive;
   iconVariant?: 'filled' | 'outlined';
   to: string;
   primary: string;
   secondary: string;
   ariaLabel: string;
 }): ReactElement {
-  const { Icon, iconVariant = 'filled', to, primary, secondary, ariaLabel } = props;
+  const { Icon, SecondaryIcon, iconVariant = 'filled', to, primary, secondary, ariaLabel } = props;
 
   return (
     <Box
@@ -130,9 +131,18 @@ function ImportantDashboardEntryLink(props: {
         >
           {primary}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {secondary}
-        </Typography>
+        {SecondaryIcon ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+            <SecondaryIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">
+              {secondary}
+            </Typography>
+          </Box>
+        ) : (
+          <Typography variant="caption" color="text.secondary">
+            {secondary}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
@@ -256,6 +266,7 @@ export function ImportantDashboards(): ReactElement | null {
                         <Box key={key}>
                           <ImportantDashboardEntryLink
                             Icon={ViewDashboardOutline}
+                            SecondaryIcon={Archive}
                             to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
                             ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
                             primary={displayName}
