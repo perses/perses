@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
@@ -47,9 +48,10 @@ type service struct {
 	customRules         []*config.CustomLintRule
 	index               index.Client
 	authz               authorization.Authorization
+	guard               *netguard.Guard
 }
 
-func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, indexClient index.Client) dashboard.Service {
+func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, indexClient index.Client, guard *netguard.Guard) dashboard.Service {
 	return &service{
 		dao:                 dao,
 		globalVarDAO:        globalVarDAO,
@@ -60,6 +62,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
 		index:               indexClient,
+		guard:               guard,
 	}
 }
 
@@ -193,6 +196,14 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 	if s.isDatasourceDisable {
 		if len(entity.Spec.Datasources) > 0 {
 			return apiInterface.HandleBadRequestError("local datasource cannot be used as it has been disabled in the configuration")
+		}
+	}
+	for name, dts := range entity.Spec.Datasources {
+		if dts == nil {
+			continue
+		}
+		if err := s.guard.ValidateDatasourceSpec(*dts); err != nil {
+			return apiInterface.HandleBadRequestError(fmt.Sprintf("invalid local datasource %q: %s", name, err))
 		}
 	}
 	if s.isVariableDisable {

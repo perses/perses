@@ -66,6 +66,12 @@ func DefaultConfig() apiConfig.Config {
 		EphemeralDashboard: apiConfig.EphemeralDashboard{
 			Enable: true,
 		},
+		Datasource: apiConfig.DatasourceConfig{
+			Proxy: apiConfig.DatasourceProxyConfig{
+				// The datasources used by the tests (Prometheus, Postgres, ...) are running on the same host.
+				AllowedNetworks: []string{"127.0.0.0/8", "::1/128"},
+			},
+		},
 		Plugin: apiConfig.Plugin{
 			Path: filepath.Join(projectPath, "plugins"),
 			ArchivePaths: []string{

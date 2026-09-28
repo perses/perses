@@ -53,6 +53,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -117,6 +118,10 @@ type service struct {
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	secretFileValidator := secretfile.New(conf.Security.SecretFileAllowedDirectories)
+	proxyGuard, err := netguard.New(conf.Datasource.Proxy)
+	if err != nil {
+		return nil, err
+	}
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
@@ -129,12 +134,12 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService)
-	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService, proxyGuard)
+	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemaService, authzService, proxyGuard)
 	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService)
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemaService)
-	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemaService, authzService)
+	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemaService, authzService, proxyGuard)
 	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), authzService, schemaService)
 	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), authzService, schemaService)
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, secretFileValidator)
