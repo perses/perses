@@ -13,7 +13,7 @@
 
 import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
-import ArchiveOutline from 'mdi-material-ui/ArchiveOutline';
+import Archive from 'mdi-material-ui/Archive';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import type { ReactElement } from 'react';
@@ -77,13 +77,14 @@ function useKeyedImportantDashboardGroups(groups: ImportantDashboardGroupData[])
 }
 
 function ImportantDashboardEntryLink(props: {
-  Icon: typeof ArchiveOutline | typeof ViewDashboardOutline;
+  Icon: typeof Archive | typeof ViewDashboardOutline;
+  iconVariant?: 'filled' | 'outlined';
   to: string;
   primary: string;
   secondary: string;
   ariaLabel: string;
 }): ReactElement {
-  const { Icon, to, primary, secondary, ariaLabel } = props;
+  const { Icon, iconVariant = 'filled', to, primary, secondary, ariaLabel } = props;
 
   return (
     <Box
@@ -110,13 +111,17 @@ function ImportantDashboardEntryLink(props: {
         sx={{
           p: 1.25,
           borderRadius: 1.5,
-          bgcolor: 'primary.main',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          ...(iconVariant === 'outlined'
+            ? { bgcolor: 'transparent', border: '1px solid', borderColor: 'primary.main' }
+            : { bgcolor: 'primary.main' }),
         }}
       >
-        <Icon sx={{ fontSize: 16, color: 'primary.contrastText' }} />
+        <Icon
+          sx={{ fontSize: 16, color: iconVariant === 'outlined' ? 'primary.main' : 'primary.contrastText' }}
+        />
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
@@ -229,7 +234,8 @@ export function ImportantDashboards(): ReactElement | null {
                         return (
                           <Box key={key}>
                             <ImportantDashboardEntryLink
-                              Icon={ArchiveOutline}
+                              Icon={Archive}
+                              iconVariant="outlined"
                               to={`/projects/${entry.project}`}
                               ariaLabel={entry.project}
                               primary={entry.project}
