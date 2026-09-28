@@ -27,6 +27,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/spec/go/common"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -296,7 +297,38 @@ func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filePath, data, 0600)
+	return writeFileAtomically(filePath, data)
+}
+
+// writeFileAtomically prepares the new contents in the destination directory
+// before replacing the file, so readers never see it truncated mid-write.
+func writeFileAtomically(filePath string, data []byte) error {
+	tmpFile, err := os.CreateTemp(filepath.Dir(filePath), fmt.Sprintf(".%s.tmp-*", filepath.Base(filePath)))
+	if err != nil {
+		return fmt.Errorf("unable to create temporary file for %s: %w", filePath, err)
+	}
+	tmpPath := tmpFile.Name()
+	defer func() {
+		if removeErr := os.Remove(tmpPath); removeErr != nil && !os.IsNotExist(removeErr) {
+			logrus.WithError(removeErr).Warnf("unable to remove temporary file %q", tmpPath)
+		}
+	}()
+
+	if err = tmpFile.Chmod(0600); err != nil {
+		_ = tmpFile.Close()
+		return fmt.Errorf("unable to set permissions on temporary file for %s: %w", filePath, err)
+	}
+	if _, err = tmpFile.Write(data); err != nil {
+		_ = tmpFile.Close()
+		return fmt.Errorf("unable to write temporary file for %s: %w", filePath, err)
+	}
+	if err = tmpFile.Close(); err != nil {
+		return fmt.Errorf("unable to close temporary file for %s: %w", filePath, err)
+	}
+	if err = replaceFile(tmpPath, filePath); err != nil {
+		return fmt.Errorf("unable to atomically replace %s: %w", filePath, err)
+	}
+	return nil
 }
 
 func (d *DAO) buildPath(key string) string {
