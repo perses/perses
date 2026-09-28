@@ -246,7 +246,6 @@ export function ImportantDashboards(): ReactElement | null {
                         );
                       }
 
-                      const metricsCount = Object.keys(entry.dashboard.spec.panels ?? {}).length;
                       const updatedAt = entry.dashboard.metadata.updatedAt ?? entry.dashboard.metadata.createdAt;
                       const relativeTime = updatedAt
                         ? intlFormatDistance(new Date(updatedAt), new Date())
@@ -260,9 +259,7 @@ export function ImportantDashboards(): ReactElement | null {
                             to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
                             ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
                             primary={displayName}
-                            secondary={`${entry.dashboard.metadata.project} • ${metricsCount} ${
-                              metricsCount === 1 ? 'metric' : 'metrics'
-                            } • ${relativeTime}`}
+                            secondary={`${entry.dashboard.metadata.project} • ${relativeTime}`}
                           />
                           {entryIndex < group.keyedEntries.length - 1 && <Divider />}
                         </Box>
