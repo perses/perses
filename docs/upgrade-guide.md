@@ -9,6 +9,41 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 ## Perses application
 
+### Upgrading from v0.54.0 to v0.55.0
+
+#### The datasource proxy restricts the destinations it can reach
+
+To prevent the datasource proxy from being used to reach services that are not datasources (Server-Side Request
+Forgery), the destinations of the proxy are now verified. By default, the proxy refuses to reach:
+
+- the loopback interface (`127.0.0.0/8`, `::1`, `localhost`)
+- the link-local addresses (`169.254.0.0/16`, `fe80::/10`), which include the cloud metadata endpoints
+- the other known cloud metadata endpoints, the multicast, reserved and unspecified addresses
+- the Kubernetes API service when Perses is running in a Kubernetes cluster
+- any URL scheme other than `http` and `https`, and the Unix sockets for the SQL datasources
+
+The private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, ...) remain allowed by default.
+
+**If one of your datasources is running on the same host as Perses** (e.g. `http://localhost:9090`), the requests to
+this datasource are now refused with a `403 Forbidden` error, and saving such a datasource is refused with a
+`400 Bad Request` error. You have to explicitly allow the loopback interface:
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"
+```
+
+The same applies to the OAuth token URL of the secrets used by the datasources.
+
+You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
+hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.
+
+Finally, the MySQL/MariaDB param `allowAllFiles` is now always ignored for the SQL datasources, as it would allow the
+database server to read any file from the Perses server.
+
 ### Upgrading from v0.53.0 to v0.54.0
 
 #### SQL Database default configuration changes

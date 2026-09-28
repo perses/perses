@@ -698,6 +698,81 @@ project:
 # When used is preventing the possibility to add a datasource directly in the dashboard spec.
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
+
+# Restrict the destinations the datasource proxy is allowed to reach.
+proxy: <DatasourceProxy config> # Optional
+```
+
+#### DatasourceProxy config
+
+The datasource proxy forwards the requests to the URL (or connects to the SQL host) defined in the datasource spec, which
+is provided by the users. Without restriction, anyone allowed to create a datasource, or to use the unsaved proxy
+endpoints, could use Perses to reach any service accessible from the Perses server and read its response
+(Server-Side Request Forgery): the Perses API itself, the cloud metadata endpoints, the Kubernetes API, etc.
+
+The destination is verified when a datasource is saved and before a request is proxied. More importantly, it is verified
+at connection time on every IP address the destination resolves to (including the redirections followed to get an
+OAuth token), so it cannot be bypassed with a DNS name pointing to a forbidden IP address.
+
+The following networks are **always denied**, unless they are explicitly listed in `allowed_networks`:
+
+- loopback: `127.0.0.0/8`, `::1`
+- "this" network (`0.0.0.0/8`) and unspecified addresses (`::`)
+- link-local: `169.254.0.0/16`, `fe80::/10`. It includes the metadata endpoint of most cloud providers (`169.254.169.254`)
+- other cloud metadata endpoints: `100.100.100.200` (Alibaba Cloud), `fd00:ec2::254` (AWS IPv6)
+- multicast, reserved and broadcast addresses: `224.0.0.0/4`, `240.0.0.0/4`, `ff00::/8`
+- deprecated IPv4-compatible addresses (`::/96`), Teredo (`2001::/32`) and local-use NAT64 (`64:ff9b:1::/48`)
+- when Perses is running in a Kubernetes cluster, the IP of the Kubernetes API service (`KUBERNETES_SERVICE_HOST`)
+
+IPv4-mapped IPv6 addresses (`::ffff:127.0.0.1`), NAT64 (`64:ff9b::/96`) and 6to4 (`2002::/16`) addresses are verified
+against the IPv4 address they embed.
+
+Unix sockets are never allowed for the SQL datasources.
+
+Private networks are allowed by default, as this is where the datasources usually are. Use `deny_private_networks`,
+`denied_networks` or `allowed_hosts` to restrict them.
+
+```yaml
+# The list of URL schemes an HTTP datasource is allowed to use. Only "http" and "https" are supported.
+allowed_schemes: # Optional. Default: ["http", "https"]
+  - <string>
+
+# When not empty, it is the exhaustive list of hosts the proxy can reach.
+# An entry is an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain (e.g. "*.monitoring.svc")
+# or an IP address. The port must not be provided.
+# Note: the denied networks still apply to the IP addresses these hosts resolve to.
+allowed_hosts: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are always allowed.
+# It takes precedence over the denied networks (the built-in ones, `denied_networks` and `deny_private_networks`).
+# For example, use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
+allowed_networks: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are denied, in addition to the built-in ones.
+denied_networks: # Optional
+  - <string>
+
+# When true, the private networks are denied as well:
+# 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, fc00::/7 and fec0::/10.
+deny_private_networks: <boolean> | default = false # Optional
+```
+
+When Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), the connection is
+made to this proxy, which is trusted. The final destination is then verified upfront by resolving its name from the
+Perses server. If the name can only be resolved by the proxy, only the static verification applies: use `allowed_hosts`
+(or the proxy's own access control) to strictly restrict the destinations in this situation.
+
+Example of a strict configuration, only allowing the datasources running in the `monitoring` namespace of a Kubernetes
+cluster:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      - "*.monitoring.svc"
+      - "*.monitoring.svc.cluster.local"
 ```
 
 #### GlobalDatasourceDiscovery config

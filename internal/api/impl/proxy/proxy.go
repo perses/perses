@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -41,6 +40,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
@@ -133,13 +133,17 @@ type endpoint struct {
 	globalDTS      globaldatasource.DAO
 	crypto         crypto.Crypto
 	fileValidator  *secretfile.Validator
+	guard          *netguard.Guard
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
 	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator,
-	authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	guard *netguard.Guard, authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	if !authz.IsEnabled() {
+		logrus.Warning("authentication is disabled: anyone able to reach Perses can create a datasource and use the datasource proxy. The destinations of the proxy are only restricted by the 'datasource.proxy' configuration")
+	}
 	return &endpoint{
 		cfg:            cfg,
 		dashboard:      dashboardDAO,
@@ -149,6 +153,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		globalDTS:      globalDtsDAO,
 		crypto:         crypto,
 		fileValidator:  fileValidator,
+		guard:          guard,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
 	}
@@ -201,7 +206,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, guard *netguard.Guard, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -209,6 +214,20 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			projectFieldLog:    projectForLog(projectName),
 		}).Error("unable to build or find the config in the datasource spec")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
+	}
+
+	// The destination is verified before anything else, in particular before decrypting the secret.
+	// It covers the saved datasources (that could have been stored before the policy was enforced or changed)
+	// as well as the unsaved ones coming from the request body.
+	if validateErr := guard.ValidateDatasourceSpec(spec); validateErr != nil {
+		logrus.WithError(validateErr).WithFields(map[string]interface{}{
+			datasourceFieldLog: datasourceName,
+			projectFieldLog:    projectForLog(projectName),
+		}).Warning("the datasource destination is not allowed")
+		if netguard.IsDenied(validateErr) {
+			return nil, apiinterface.HandleForbiddenError(validateErr.Error())
+		}
+		return nil, apiinterface.HandleBadRequestError(validateErr.Error())
 	}
 
 	if !strings.HasPrefix(path, "/") {
@@ -255,6 +274,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			datasourceName: datasourceName,
 			path:           path,
 			secret:         scrt,
+			guard:          guard,
 			tokenRefresher: tokenRefresher,
 		}, nil
 	case datasourceSQL.ProxyKindName:
@@ -271,6 +291,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			project: projectName,
 			path:    path,
 			secret:  scrt,
+			guard:   guard,
 		}, nil
 	default:
 		return nil, errors.New("no proxy kind found")
@@ -282,6 +303,8 @@ type httpProxy struct {
 	secret         *v1.SecretSpec
 	datasourceName string
 	path           string
+	// guard verifies every connection made by the proxy. When nil, the default policy applies.
+	guard          *netguard.Guard
 	tokenRefresher crypto.TokenRefresher
 }
 
@@ -310,6 +333,9 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	if err := h.prepareRequest(c); err != nil {
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
+		if netguard.IsDenied(err) {
+			return apiinterface.HandleForbiddenError(deniedDestinationMsg)
+		}
 		return err
 	}
 
@@ -324,6 +350,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 		h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
 		proxyErr = err
 	}
+	reverseProxy.ModifyResponse = h.sanitizeRedirection
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
 	reverseProxy.Transport, transportErr = h.prepareTransport()
@@ -334,6 +361,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 	reverseProxy.ServeHTTP(res, req)
 	// Return any error handled during proxying request.
 	if proxyErr != nil {
+		if netguard.IsDenied(proxyErr) {
+			// The details (like the resolved IP address) are only logged, to not leak information about the internal network.
+			return apiinterface.HandleForbiddenError(deniedDestinationMsg)
+		}
 		// we need to wrap the error with an Echo Error,
 		// otherwise the error will be hidden by the middleware "middleware.HandleError".
 		status := res.Status
@@ -344,6 +375,41 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(status, proxyErr.Error())
 	}
 	return nil
+}
+
+const deniedDestinationMsg = "the datasource destination is not allowed by the Perses server configuration ('datasource.proxy')"
+
+// sanitizeRedirection removes the Location header of a redirection pointing to another host than the datasource.
+// The proxy never follows the redirections itself, but the browser does. Without this, the proxy could be used as an
+// open redirect from the Perses domain to any website.
+func (h *httpProxy) sanitizeRedirection(resp *http.Response) error {
+	if resp.StatusCode < 300 || resp.StatusCode >= 400 {
+		return nil
+	}
+	location := resp.Header.Get("Location")
+	if len(location) == 0 {
+		return nil
+	}
+	if !isSameOriginRedirection(location, h.config.URL.URL) {
+		h.logWithDefaultEntry().WithField("location", location).Warning("dropping the Location header of a redirection to another host")
+		resp.Header.Del("Location")
+	}
+	return nil
+}
+
+func isSameOriginRedirection(location string, target *url.URL) bool {
+	// Browsers ignore tabs and newlines in a URL, and consider backslashes as slashes ("/\evil.com" is "//evil.com").
+	normalized := strings.NewReplacer("\t", "", "\r", "", "\n", "", "\\", "/").Replace(strings.TrimSpace(location))
+	u, err := url.Parse(normalized)
+	if err != nil {
+		return false
+	}
+	if len(u.Scheme) == 0 && len(u.Host) == 0 {
+		// Relative redirection. Browsers consider "///evil.com" as "//evil.com".
+		return !strings.HasPrefix(normalized, "//")
+	}
+	sameScheme := len(u.Scheme) == 0 || strings.EqualFold(u.Scheme, target.Scheme)
+	return sameScheme && strings.EqualFold(u.Host, target.Host)
 }
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {
@@ -516,17 +582,8 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		h.logWithDefaultEntry().WithError(err).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
-	return &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
-		IdleConnTimeout:     90 * time.Second,
-		ForceAttemptHTTP2:   true,
-		TLSClientConfig:     tlsConfig,
-	}, nil
+	// Every connection (including the ones to the OAuth token endpoint and the redirections it follows) is verified by the guard.
+	return h.guard.HTTPTransport(tlsConfig), nil
 }
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
@@ -548,6 +605,8 @@ type sqlProxy struct {
 	path     string
 	username string
 	password string
+	// guard verifies every connection made to the database. When nil, the default policy applies.
+	guard *netguard.Guard
 }
 
 func (s *sqlProxy) logWithDefaultEntry() *logrus.Entry {
@@ -666,6 +725,18 @@ func (s *sqlProxy) sqlOpen(tlsConfig *tls.Config) (*sql.DB, error) {
 
 // open mySQL specific database connection
 func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
+	dsnConfig, err := s.buildMySQLConfig(tlsConfig)
+	if err != nil {
+		return nil, err
+	}
+	connector, connectorErr := mysql.NewConnector(dsnConfig)
+	if connectorErr != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", connectorErr)
+	}
+	return sql.OpenDB(connector), nil
+}
+
+func (s *sqlProxy) buildMySQLConfig(tlsConfig *tls.Config) (*mysql.Config, error) {
 	mysqlConfig := mysql.Config{
 		Net:    "tcp",
 		Addr:   s.config.Host,
@@ -706,11 +777,17 @@ func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
 		mysqlConfig.TLSConfig = tlsConfigName
 	}
 
-	db, dbErr := sql.Open(string(datasourceSQL.DriverMySQL), mysqlConfig.FormatDSN())
-	if dbErr != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", dbErr)
+	// The DSN is formatted then parsed back, so the params keep the same meaning as they would have in a DSN.
+	dsnConfig, parseErr := mysql.ParseDSN(mysqlConfig.FormatDSN())
+	if parseErr != nil {
+		return nil, fmt.Errorf("failed to build the database config: %w", parseErr)
 	}
-	return db, nil
+	// Every connection goes through the guard, so the SQL proxy cannot be used to reach a forbidden destination.
+	dsnConfig.DialFunc = s.guard.DialContext
+	// LOAD DATA LOCAL INFILE must never be allowed: the database server (which can be controlled by the datasource creator)
+	// would be able to read any file from the Perses server.
+	dsnConfig.AllowAllFiles = false
+	return dsnConfig, nil
 }
 
 // open postgres specific database connection
@@ -774,6 +851,10 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 		}
 		pgxConfig.ConnConfig.TLSConfig = tlsConfig
 	}
+
+	// Every connection (including the fallbacks) goes through the guard,
+	// so the SQL proxy cannot be used to reach a forbidden destination.
+	pgxConfig.ConnConfig.DialFunc = s.guard.DialContext
 
 	db := stdlib.OpenDB(*pgxConfig.ConnConfig)
 

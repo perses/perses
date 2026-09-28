@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
@@ -37,13 +38,15 @@ type service struct {
 	dao   globaldatasource.DAO
 	sch   schema.Schema
 	authz authorization.Authorization
+	guard *netguard.Guard
 }
 
-func NewService(dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
+func NewService(dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization, guard *netguard.Guard) globaldatasource.Service {
 	return &service{
 		dao:   dao,
 		sch:   sch,
 		authz: authz,
+		guard: guard,
 	}
 }
 
@@ -165,5 +168,8 @@ func (s *service) validate(entity *v1.GlobalDatasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch)
+	if err := validate.Datasource(entity, list, s.sch); err != nil {
+		return err
+	}
+	return s.guard.ValidateDatasourceSpec(entity.Spec)
 }

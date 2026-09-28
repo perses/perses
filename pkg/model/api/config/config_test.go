@@ -69,7 +69,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false
+    }
   },
   "variable": {
     "global": {
@@ -142,7 +145,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false
+    }
   },
   "variable": {
     "global": {
