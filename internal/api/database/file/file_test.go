@@ -115,7 +115,7 @@ func TestWriteFileAtomicallyConcurrentReads(t *testing.T) {
 			assert.NoError(t, err)
 			return
 		default:
-			data, err := os.ReadFile(filePath) //nolint:gosec // filePath is inside t.TempDir
+			data, err := readFile(filePath)
 			if !assert.NoError(t, err) {
 				continue
 			}

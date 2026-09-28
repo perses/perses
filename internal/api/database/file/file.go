@@ -101,7 +101,7 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		return generateIDErr
 	}
 	filePath := d.buildPath(key)
-	data, err := os.ReadFile(filePath) //nolint: gosec
+	data, err := readFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
@@ -141,7 +141,7 @@ func (d *DAO) StreamRaw(query databaseModel.Query, ch chan<- json.RawMessage) er
 	}
 	for _, file := range files {
 		// now read all files and send them to the channel.
-		data, readErr := os.ReadFile(file) //nolint: gosec
+		data, readErr := readFile(file)
 		if readErr != nil {
 			return fmt.Errorf("unable to read file %s: %s", file, readErr)
 		}
@@ -207,7 +207,7 @@ func (d *DAO) Query(query databaseModel.Query, slice any) error {
 	}
 	for _, file := range files {
 		// now read all files and append them to the final result
-		data, readErr := os.ReadFile(file) //nolint: gosec
+		data, readErr := readFile(file)
 		if readErr != nil {
 			return readErr
 		}
