@@ -201,7 +201,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
+func (e *endpoint) newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -220,7 +220,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		if retrieveErr != nil {
 			return nil, retrieveErr
 		}
-		if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+		if _, decryptErr := e.crypto.Decrypt(scrt); decryptErr != nil {
 			logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -229,7 +229,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		}
 		// Defense in depth: the secret might have been stored before the file restriction was enforced
 		// (or the allowed directories changed since). Never read a file that is not explicitly allowed.
-		if validateErr := fileValidator.ValidateSpec(scrt); validateErr != nil {
+		if validateErr := e.fileValidator.ValidateSpec(scrt); validateErr != nil {
 			logrus.WithError(validateErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -255,7 +255,9 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			datasourceName: datasourceName,
 			path:           path,
 			secret:         scrt,
-			tokenRefresher: tokenRefresher,
+			tokenRefresher: e.tokenRefresher,
+			defaultTimeout: e.cfg.GetHTTPProxyDefaultTimeout(),
+			maximumTimeout: e.cfg.GetHTTPProxyMaxTimeout(),
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -283,6 +285,8 @@ type httpProxy struct {
 	datasourceName string
 	path           string
 	tokenRefresher crypto.TokenRefresher
+	defaultTimeout time.Duration
+	maximumTimeout time.Duration
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -516,10 +520,15 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		h.logWithDefaultEntry().WithError(err).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
+	timeout, err := h.connectionTimeout()
+	if err != nil {
+		h.logWithDefaultEntry().WithError(err).Error("unable to parse the datasource connection timeout")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to parse the datasource connection timeout")
+	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
+			Timeout:   timeout,
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
@@ -527,6 +536,24 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		ForceAttemptHTTP2:   true,
 		TLSClientConfig:     tlsConfig,
 	}, nil
+}
+
+func (h *httpProxy) connectionTimeout() (time.Duration, error) {
+	if h.defaultTimeout <= 0 || h.maximumTimeout <= 0 {
+		return 0, fmt.Errorf("HTTP proxy default and maximum timeouts must be greater than zero")
+	}
+	defaultTimeout := min(h.defaultTimeout, h.maximumTimeout)
+	if h.config == nil || h.config.Timeout == "" {
+		return defaultTimeout, nil
+	}
+	timeout, err := common.ParseDuration(string(h.config.Timeout))
+	if err != nil {
+		return 0, err
+	}
+	if timeout <= 0 {
+		return 0, fmt.Errorf("HTTP proxy timeout must be greater than zero")
+	}
+	return min(time.Duration(timeout), h.maximumTimeout), nil
 }
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {

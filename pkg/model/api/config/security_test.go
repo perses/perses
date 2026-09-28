@@ -296,6 +296,10 @@ security:
           - Project
 `,
 			result: Config{
+				Datasource: DatasourceConfig{
+					HTTPProxyDefaultTimeout: common.Duration(30 * time.Second),
+					HTTPProxyMaxTimeout:     common.Duration(30 * time.Second),
+				},
 				Security: Security{
 					Readonly: false,
 					Cookie: Cookie{

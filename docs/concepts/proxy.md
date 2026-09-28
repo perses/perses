@@ -45,6 +45,12 @@ Then, if a secret is associated with the datasource, Perses will retrieve the se
 inject the secret in the request.
 Finally, Perses will forward the request to the datasource and return the response to the client.
 
+The optional `timeout` field configures how long Perses waits to establish a connection to the datasource. It accepts a
+positive duration such as `500ms`, `30s`, or `1m30s`. When omitted, Perses uses the server's
+`http_proxy_default_timeout`, which defaults to `30s`. A datasource cannot be saved with a non-positive timeout or one
+greater than the server's `http_proxy_max_timeout`. Perses also caps the timeout at that maximum when proxying, so
+lowering the server limit applies to datasources that were saved previously.
+
 The HTTP proxy spec supports two optional request header policies:
 
 * `allowHeaders`: forward only the listed headers.

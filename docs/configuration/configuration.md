@@ -695,6 +695,12 @@ project:
   # It will also remove the associated proxy.
   disable: <boolean> | default = false # Optional
 
+# Connection timeout used by HTTP proxies when their datasource timeout is omitted.
+http_proxy_default_timeout: <duration> | default = 30s # Optional
+
+# Maximum connection timeout an HTTP proxy datasource may request.
+http_proxy_max_timeout: <duration> | default = 30s # Optional
+
 # When used is preventing the possibility to add a datasource directly in the dashboard spec.
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional

@@ -16,12 +16,15 @@ package validate
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/perses/perses/internal/api/plugin/schema"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
+	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/perses/spec/go/plugin"
 )
 
@@ -53,6 +56,40 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Sc
 	}
 	if list != nil {
 		return validateUnicityOfDefaultDTS(entity, list)
+	}
+	return nil
+}
+
+func HTTPProxyTimeout(pluginSpec any, maxTimeout time.Duration) error {
+	proxyConfig, proxyKind, err := datasource.ValidateAndExtract(pluginSpec)
+	if err != nil {
+		return err
+	}
+	if proxyKind != datasourceHTTP.ProxyKindName {
+		return nil
+	}
+	httpConfig := proxyConfig.(*datasourceHTTP.Config)
+	if httpConfig.Timeout == "" {
+		return nil
+	}
+	timeout, err := common.ParseDuration(string(httpConfig.Timeout))
+	if err != nil {
+		return err
+	}
+	if timeout <= 0 {
+		return fmt.Errorf("HTTP proxy timeout must be greater than zero")
+	}
+	if time.Duration(timeout) > maxTimeout {
+		return fmt.Errorf("HTTP proxy timeout %q exceeds the server maximum of %q", httpConfig.Timeout, maxTimeout)
+	}
+	return nil
+}
+
+func DashboardHTTPProxyTimeouts(spec dashboard.Spec, maxTimeout time.Duration) error {
+	for name, datasourceSpec := range spec.Datasources {
+		if err := HTTPProxyTimeout(datasourceSpec.Plugin.Spec, maxTimeout); err != nil {
+			return fmt.Errorf("invalid timeout for datasource %q: %w", name, err)
+		}
 	}
 	return nil
 }

@@ -16,6 +16,7 @@ package ephemeraldashboard
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
@@ -26,24 +27,27 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
 
 type service struct {
 	ephemeraldashboard.Service
-	dao           ephemeraldashboard.DAO
-	globalVarDAO  globalvariable.DAO
-	projectVarDAO variable.DAO
-	sch           schema.Schema
+	dao                 ephemeraldashboard.DAO
+	globalVarDAO        globalvariable.DAO
+	projectVarDAO       variable.DAO
+	sch                 schema.Schema
+	maxHTTPProxyTimeout time.Duration
 }
 
-func NewService(dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) ephemeraldashboard.Service {
+func NewService(cfg config.DatasourceConfig, dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema) ephemeraldashboard.Service {
 	return &service{
-		dao:           dao,
-		globalVarDAO:  globalVarDAO,
-		projectVarDAO: projectVarDAO,
-		sch:           sch,
+		dao:                 dao,
+		globalVarDAO:        globalVarDAO,
+		projectVarDAO:       projectVarDAO,
+		sch:                 sch,
+		maxHTTPProxyTimeout: cfg.GetHTTPProxyMaxTimeout(),
 	}
 }
 
@@ -143,6 +147,9 @@ func (s *service) Validate(entity *v1.EphemeralDashboard) error {
 	}
 
 	if err := validate.DashboardSpecWithVars(entity.Spec.Spec, s.sch, projectVars, globalVars); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := validate.DashboardHTTPProxyTimeouts(entity.Spec.Spec, s.maxHTTPProxyTimeout); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil

@@ -13,7 +13,14 @@
 
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+
+	"github.com/perses/spec/go/common"
+)
+
+const defaultHTTPProxyTimeout = 30 * time.Second
 
 type GlobalDatasourceConfig struct {
 	// Disable is used to disable the global datasource feature.
@@ -42,7 +49,45 @@ type ProjectDatasourceConfig struct {
 type DatasourceConfig struct {
 	Global  GlobalDatasourceConfig  `json:"global" yaml:"global"`
 	Project ProjectDatasourceConfig `json:"project" yaml:"project"`
+	// HTTPProxyDefaultTimeout is the connection timeout used when a datasource does not define one or sets it to zero.
+	HTTPProxyDefaultTimeout common.Duration `json:"http_proxy_default_timeout,omitempty" yaml:"http_proxy_default_timeout,omitempty"`
+	// HTTPProxyMaxTimeout is the maximum connection timeout a datasource may request.
+	HTTPProxyMaxTimeout common.Duration `json:"http_proxy_max_timeout,omitempty" yaml:"http_proxy_max_timeout,omitempty"`
 	// DisableLocal when used is preventing the possibility to add a datasource directly in the dashboard spec.
 	// It will also disable the associated proxy.
 	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
+}
+
+func (c *DatasourceConfig) Verify() error {
+	if c.HTTPProxyDefaultTimeout < 0 {
+		return fmt.Errorf("the HTTP proxy default timeout cannot be negative")
+	}
+	if c.HTTPProxyMaxTimeout < 0 {
+		return fmt.Errorf("the HTTP proxy maximum timeout cannot be negative")
+	}
+	if c.HTTPProxyDefaultTimeout == 0 {
+		c.HTTPProxyDefaultTimeout = common.Duration(defaultHTTPProxyTimeout)
+	}
+	if c.HTTPProxyMaxTimeout == 0 {
+		c.HTTPProxyMaxTimeout = common.Duration(defaultHTTPProxyTimeout)
+	}
+	if c.HTTPProxyDefaultTimeout > c.HTTPProxyMaxTimeout {
+		return fmt.Errorf("the HTTP proxy default timeout cannot exceed the maximum timeout")
+	}
+	return nil
+}
+
+func (c DatasourceConfig) GetHTTPProxyMaxTimeout() time.Duration {
+	if c.HTTPProxyMaxTimeout <= 0 {
+		return defaultHTTPProxyTimeout
+	}
+	return time.Duration(c.HTTPProxyMaxTimeout)
+}
+
+func (c DatasourceConfig) GetHTTPProxyDefaultTimeout() time.Duration {
+	defaultTimeout := time.Duration(c.HTTPProxyDefaultTimeout)
+	if defaultTimeout <= 0 {
+		defaultTimeout = defaultHTTPProxyTimeout
+	}
+	return min(defaultTimeout, c.GetHTTPProxyMaxTimeout())
 }

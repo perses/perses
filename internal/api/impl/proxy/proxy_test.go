@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -365,6 +366,43 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 	}
 }
 
+func TestHTTPProxy_connectionTimeout(t *testing.T) {
+	for _, test := range []struct {
+		name           string
+		config         *datasourceHTTP.Config
+		defaultTimeout time.Duration
+		maximumTimeout time.Duration
+		want           time.Duration
+		wantError      bool
+	}{
+		{name: "nil datasource config", defaultTimeout: 30 * time.Second, maximumTimeout: 30 * time.Second, want: 30 * time.Second},
+		{name: "server default", config: &datasourceHTTP.Config{}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, want: 15 * time.Second},
+		{name: "zero is invalid", config: &datasourceHTTP.Config{Timeout: "0"}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, wantError: true},
+		{name: "zero duration is invalid", config: &datasourceHTTP.Config{Timeout: "0s"}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, wantError: true},
+		{name: "configured below maximum", config: &datasourceHTTP.Config{Timeout: "45s"}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, want: 45 * time.Second},
+		{name: "configured above maximum is clamped", config: &datasourceHTTP.Config{Timeout: "2m"}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, want: time.Minute},
+		{name: "unverified default is clamped", config: &datasourceHTTP.Config{}, defaultTimeout: 2 * time.Minute, maximumTimeout: time.Minute, want: time.Minute},
+		{name: "invalid", config: &datasourceHTTP.Config{Timeout: "30 seconds"}, defaultTimeout: 15 * time.Second, maximumTimeout: time.Minute, wantError: true},
+		{name: "missing server timeout configuration", config: &datasourceHTTP.Config{}, wantError: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			h := &httpProxy{
+				config:         test.config,
+				defaultTimeout: test.defaultTimeout,
+				maximumTimeout: test.maximumTimeout,
+			}
+
+			timeout, err := h.connectionTimeout()
+			if test.wantError {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.want, timeout)
+		})
+	}
+}
+
 func TestHTTPProxy_serve_headerPolicies(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -390,7 +428,9 @@ func TestHTTPProxy_serve_headerPolicies(t *testing.T) {
 					AllowHeaders: test.allow,
 					DropHeaders:  test.drop,
 				},
-				path: "/query",
+				path:           "/query",
+				defaultTimeout: 30 * time.Second,
+				maximumTimeout: 30 * time.Second,
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/query", nil)
 			req.RemoteAddr = "192.0.2.1:1234"
@@ -427,6 +467,8 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
 
 	h := &httpProxy{
+		defaultTimeout: 30 * time.Second,
+		maximumTimeout: 30 * time.Second,
 		secret: &v1.SecretSpec{
 			TLSConfig: &secretModel.TLSConfig{
 				CA:         string(caPEM),

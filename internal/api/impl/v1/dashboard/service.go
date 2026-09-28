@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
@@ -44,6 +45,7 @@ type service struct {
 	sch                 schema.Schema
 	isDatasourceDisable bool
 	isVariableDisable   bool
+	maxHTTPProxyTimeout time.Duration
 	customRules         []*config.CustomLintRule
 	index               index.Client
 	authz               authorization.Authorization
@@ -58,6 +60,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		authz:               authz,
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
+		maxHTTPProxyTimeout: cfg.Datasource.GetHTTPProxyMaxTimeout(),
 		customRules:         cfg.Dashboard.CustomLintRules,
 		index:               indexClient,
 	}
@@ -185,6 +188,9 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 	}
 
 	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
+		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	if err := validate.DashboardHTTPProxyTimeouts(entity.Spec, s.maxHTTPProxyTimeout); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	if err := validate.DashboardWithCustomRules(entity, s.customRules); err != nil {

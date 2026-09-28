@@ -16,12 +16,14 @@ package validate
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/perses/perses/internal/api/plugin"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testDataFolder = "testdata"
@@ -124,6 +126,37 @@ func TestDatasource(t *testing.T) {
 					assert.ErrorContains(t, err, test.expectedErrorStr)
 				}
 			}
+		})
+	}
+}
+
+func TestHTTPProxyTimeout(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		timeout   string
+		wantError string
+	}{
+		{name: "omitted"},
+		{name: "zero", timeout: "0", wantError: "HTTP proxy timeout must be greater than zero"},
+		{name: "below maximum", timeout: "15s"},
+		{name: "at maximum", timeout: "30s"},
+		{name: "above maximum", timeout: "31s", wantError: `HTTP proxy timeout "31s" exceeds the server maximum of "30s"`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			spec := map[string]any{
+				"kind": "HTTPProxy",
+				"spec": map[string]any{
+					"url":     "https://datasource.example.com",
+					"timeout": test.timeout,
+				},
+			}
+
+			err := HTTPProxyTimeout(spec, 30*time.Second)
+			if test.wantError != "" {
+				require.EqualError(t, err, test.wantError)
+				return
+			}
+			require.NoError(t, err)
 		})
 	}
 }

@@ -27,6 +27,17 @@ http.URL("http://mysuperurl.com")
 
 Define the url of the http proxy.
 
+### Timeout
+
+```golang
+import "github.com/perses/perses/go-sdk/http"
+
+http.Timeout("1m30s")
+```
+
+Define how long the proxy waits to establish a connection to the datasource. The timeout must be positive. Omit this
+option to use the server default. The server administrator controls both the default and the maximum accepted timeout.
+
 ### AllowedEndpoints
 
 ```golang

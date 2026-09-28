@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
@@ -26,6 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -34,16 +36,18 @@ import (
 
 type service struct {
 	globaldatasource.Service
-	dao   globaldatasource.DAO
-	sch   schema.Schema
-	authz authorization.Authorization
+	dao                 globaldatasource.DAO
+	sch                 schema.Schema
+	authz               authorization.Authorization
+	maxHTTPProxyTimeout time.Duration
 }
 
-func NewService(dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
+func NewService(cfg config.DatasourceConfig, dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
 	return &service{
-		dao:   dao,
-		sch:   sch,
-		authz: authz,
+		dao:                 dao,
+		sch:                 sch,
+		authz:               authz,
+		maxHTTPProxyTimeout: cfg.GetHTTPProxyMaxTimeout(),
 	}
 }
 
@@ -165,5 +169,8 @@ func (s *service) validate(entity *v1.GlobalDatasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch)
+	if err := validate.Datasource(entity, list, s.sch); err != nil {
+		return err
+	}
+	return validate.HTTPProxyTimeout(entity.Spec.Plugin.Spec, s.maxHTTPProxyTimeout)
 }

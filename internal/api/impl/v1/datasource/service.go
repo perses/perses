@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
@@ -26,6 +27,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -34,16 +36,18 @@ import (
 
 type service struct {
 	datasource.Service
-	dao   datasource.DAO
-	sch   schema.Schema
-	authz authorization.Authorization
+	dao                 datasource.DAO
+	sch                 schema.Schema
+	authz               authorization.Authorization
+	maxHTTPProxyTimeout time.Duration
 }
 
-func NewService(dao datasource.DAO, sch schema.Schema, authz authorization.Authorization) datasource.Service {
+func NewService(cfg config.DatasourceConfig, dao datasource.DAO, sch schema.Schema, authz authorization.Authorization) datasource.Service {
 	return &service{
-		dao:   dao,
-		sch:   sch,
-		authz: authz,
+		dao:                 dao,
+		sch:                 sch,
+		authz:               authz,
+		maxHTTPProxyTimeout: cfg.GetHTTPProxyMaxTimeout(),
 	}
 }
 
@@ -146,7 +150,10 @@ func (s *service) validate(entity *v1.Datasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch)
+	if err := validate.Datasource(entity, list, s.sch); err != nil {
+		return err
+	}
+	return validate.HTTPProxyTimeout(entity.Spec.Plugin.Spec, s.maxHTTPProxyTimeout)
 }
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret

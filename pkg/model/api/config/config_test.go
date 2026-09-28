@@ -142,6 +142,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
+    "http_proxy_default_timeout": "30s",
+    "http_proxy_max_timeout": "30s",
     "disable_local": false
   },
   "variable": {
@@ -482,6 +484,10 @@ plugin:
   archive_path: "custom/plugins/archive"
 `,
 			result: Config{
+				Datasource: DatasourceConfig{
+					HTTPProxyDefaultTimeout: common.Duration(30 * time.Second),
+					HTTPProxyMaxTimeout:     common.Duration(30 * time.Second),
+				},
 				Security: Security{
 					Readonly: false,
 					Cookie: Cookie{
