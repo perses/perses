@@ -711,3 +711,53 @@ frontend:
 		})
 	}
 }
+
+func TestResolveDatasourceHTTPProxy(t *testing.T) {
+	testSuite := []struct {
+		name       string
+		configData string
+		expected   HTTPProxyConfig
+		errMessage string
+	}{
+		{
+			name:       "no limit by default",
+			configData: ``,
+			expected:   HTTPProxyConfig{},
+		},
+		{
+			name: "resolves max_conns_per_host",
+			configData: `
+datasource:
+  http_proxy:
+    max_conns_per_host: 50
+`,
+			expected: HTTPProxyConfig{MaxConnsPerHost: 50},
+		},
+		{
+			name: "rejects negative max_conns_per_host",
+			configData: `
+datasource:
+  http_proxy:
+    max_conns_per_host: -1
+`,
+			errMessage: "datasource.http_proxy.max_conns_per_host cannot be negative",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			resolvedConfig := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.configData)).
+				SetEnvPrefix("PERSES").
+				Resolve(&resolvedConfig).
+				Verify()
+			if len(test.errMessage) > 0 {
+				assert.ErrorContains(t, err, test.errMessage)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.expected, resolvedConfig.Datasource.HTTPProxy)
+		})
+	}
+}

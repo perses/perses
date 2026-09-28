@@ -698,6 +698,19 @@ project:
 # When used is preventing the possibility to add a datasource directly in the dashboard spec.
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
+
+# Configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+http_proxy: <HTTPProxy config> # Optional
+```
+
+#### HTTPProxy config
+
+```yaml
+# Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
+# Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
+# It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+# Zero means no limit.
+max_conns_per_host: <int> | default = 0 # Optional
 ```
 
 #### GlobalDatasourceDiscovery config

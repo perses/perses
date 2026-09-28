@@ -30,7 +30,7 @@ import (
 // transportKey must be empty for an unsaved datasource, so its transport is not cached.
 func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
-	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, e.fileValidator, retrieveSecret, e.tokenRefresher, e.transports, transportKey)
+	pr, err := e.newProxy(dtsName, projectName, transportKey, spec, path, retrieveSecret)
 	if err != nil {
 		return err
 	}

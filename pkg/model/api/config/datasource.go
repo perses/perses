@@ -39,10 +39,31 @@ type ProjectDatasourceConfig struct {
 	Disable bool `json:"disable" yaml:"disable"`
 }
 
+// HTTPProxyConfig contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+type HTTPProxyConfig struct {
+	// MaxConnsPerHost limits the total number of connections (in use and idle) that Perses opens,
+	// for a given datasource, to a given host.
+	// Once the limit is reached, the new requests wait until a connection is available,
+	// or until they are canceled.
+	// It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+	// Zero means no limit.
+	MaxConnsPerHost int `json:"max_conns_per_host,omitempty" yaml:"max_conns_per_host,omitempty"`
+}
+
+func (c *HTTPProxyConfig) Verify() error {
+	if c.MaxConnsPerHost < 0 {
+		return fmt.Errorf("datasource.http_proxy.max_conns_per_host cannot be negative")
+	}
+	return nil
+}
+
 type DatasourceConfig struct {
 	Global  GlobalDatasourceConfig  `json:"global" yaml:"global"`
 	Project ProjectDatasourceConfig `json:"project" yaml:"project"`
 	// DisableLocal when used is preventing the possibility to add a datasource directly in the dashboard spec.
 	// It will also disable the associated proxy.
 	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
+	// HTTPProxy contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+	// +optional
+	HTTPProxy HTTPProxyConfig `json:"http_proxy,omitzero" yaml:"http_proxy,omitempty"`
 }

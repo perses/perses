@@ -206,9 +206,8 @@ type proxy interface {
 // newProxy builds the proxy matching the kind of the datasource.
 // transportKey identifies the saved datasource in the transport cache. It must be empty for unsaved datasources,
 // so their (one-off) transport is not cached.
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto,
-	fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error),
-	tokenRefresher crypto.TokenRefresher, transports *transportCache, transportKey string) (proxy, error) {
+func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, spec datasourceSpec.Spec, path string,
+	retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -227,7 +226,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		if retrieveErr != nil {
 			return nil, retrieveErr
 		}
-		if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+		if _, decryptErr := e.crypto.Decrypt(scrt); decryptErr != nil {
 			logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -236,7 +235,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		}
 		// Defense in depth: the secret might have been stored before the file restriction was enforced
 		// (or the allowed directories changed since). Never read a file that is not explicitly allowed.
-		if validateErr := fileValidator.ValidateSpec(scrt); validateErr != nil {
+		if validateErr := e.fileValidator.ValidateSpec(scrt); validateErr != nil {
 			logrus.WithError(validateErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -258,13 +257,14 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			}
 		}
 		return &httpProxy{
-			config:         httpConfig,
-			datasourceName: datasourceName,
-			path:           path,
-			secret:         scrt,
-			tokenRefresher: tokenRefresher,
-			transports:     transports,
-			transportKey:   transportKey,
+			config:          httpConfig,
+			datasourceName:  datasourceName,
+			path:            path,
+			secret:          scrt,
+			tokenRefresher:  e.tokenRefresher,
+			transports:      e.transports,
+			transportKey:    transportKey,
+			maxConnsPerHost: e.cfg.HTTPProxy.MaxConnsPerHost,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -296,6 +296,8 @@ type httpProxy struct {
 	transports *transportCache
 	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
 	transportKey string
+	// maxConnsPerHost limits the number of connections of the transport per host. Zero means no limit.
+	maxConnsPerHost int
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -556,8 +558,11 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		// so keep more idle connections than the default (2) to actually reuse them.
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 10,
-		ForceAttemptHTTP2:   true,
-		TLSClientConfig:     tlsConfig,
+		// Limit the connections opened to the datasource (configured with datasource.http_proxy.max_conns_per_host).
+		// Once reached, requests wait for a connection to be available. Zero means no limit.
+		MaxConnsPerHost:   h.maxConnsPerHost,
+		ForceAttemptHTTP2: true,
+		TLSClientConfig:   tlsConfig,
 	}, nil
 }
 

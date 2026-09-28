@@ -31,7 +31,7 @@ import (
 func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
-	pr, err := newProxy(datasourceName, "", spec, path, e.crypto, e.fileValidator, retrieveSecret, e.tokenRefresher, e.transports, transportKey)
+	pr, err := e.newProxy(datasourceName, "", transportKey, spec, path, retrieveSecret)
 	if err != nil {
 		return err
 	}

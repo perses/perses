@@ -17,14 +17,18 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/pkg/model/api/config"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
+	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
+	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -190,5 +194,96 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 				e.transport.CloseIdleConnections()
 			}
 		})
+	}
+}
+
+// TestEndpoint_newProxy_maxConnsPerHost ensures the limit set in the config (datasource.http_proxy.max_conns_per_host)
+// is applied to the transport of the HTTP proxy.
+func TestEndpoint_newProxy_maxConnsPerHost(t *testing.T) {
+	spec := datasourceSpec.Spec{
+		Plugin: plugin.Plugin{
+			Kind: "PrometheusDatasource",
+			Spec: map[string]any{
+				"proxy": map[string]any{
+					"kind": "HTTPProxy",
+					"spec": map[string]any{"url": "http://localhost:9090"},
+				},
+			},
+		},
+	}
+	for _, test := range []struct {
+		name            string
+		maxConnsPerHost int
+		transportKey    string
+	}{
+		{name: "no limit by default", maxConnsPerHost: 0, transportKey: globalTransportKey("prometheus")},
+		{name: "limit applied to a saved datasource", maxConnsPerHost: 3, transportKey: globalTransportKey("prometheus")},
+		{name: "limit applied to an unsaved datasource", maxConnsPerHost: 3, transportKey: ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e := &endpoint{
+				cfg:        config.DatasourceConfig{HTTPProxy: config.HTTPProxyConfig{MaxConnsPerHost: test.maxConnsPerHost}},
+				transports: newTransportCache(),
+			}
+			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
+			require.NoError(t, err)
+			h, ok := pr.(*httpProxy)
+			require.True(t, ok)
+			transport, err := h.getTransport()
+			require.NoError(t, err)
+			assert.Equal(t, test.maxConnsPerHost, transport.MaxConnsPerHost)
+		})
+	}
+}
+
+// TestHTTPProxy_serve_maxConnsPerHost ensures concurrent requests beyond the limit wait for a connection
+// instead of opening new ones.
+func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
+	var newConns, inFlight, maxInFlight atomic.Int32
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		current := inFlight.Add(1)
+		defer inFlight.Add(-1)
+		for {
+			previous := maxInFlight.Load()
+			if current <= previous || maxInFlight.CompareAndSwap(previous, current) {
+				break
+			}
+		}
+		time.Sleep(20 * time.Millisecond)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"success"}`))
+	}))
+	server.Config.ConnState = func(_ net.Conn, state http.ConnState) {
+		if state == http.StateNew {
+			newConns.Add(1)
+		}
+	}
+	server.Start()
+	defer server.Close()
+
+	const nbRequests = 5
+	cache := newTransportCache()
+	var wg sync.WaitGroup
+	for range nbRequests {
+		wg.Go(func() {
+			h := &httpProxy{
+				config:          &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				path:            "/api/v1/query",
+				transports:      cache,
+				transportKey:    globalTransportKey("prometheus"),
+				maxConnsPerHost: 1,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
+			rec := httptest.NewRecorder()
+			assert.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+			assert.Equal(t, http.StatusOK, rec.Code)
+		})
+	}
+	wg.Wait()
+
+	assert.Equal(t, int32(1), newConns.Load())
+	assert.Equal(t, int32(1), maxInFlight.Load())
+	for _, e := range cache.entries {
+		e.transport.CloseIdleConnections()
 	}
 }
