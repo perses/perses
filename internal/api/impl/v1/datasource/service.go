@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/internal/api/authorization"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
@@ -40,14 +41,16 @@ type service struct {
 	authz authorization.Authorization
 	// proxyCfg is used to validate the proxy of the datasource (e.g. its timeout) against the server configuration.
 	proxyCfg config.HTTPProxyConfig
+	guard    *netguard.Guard
 }
 
-func NewService(cfg config.DatasourceConfig, dao datasource.DAO, sch schema.Schema, authz authorization.Authorization) datasource.Service {
+func NewService(cfg config.DatasourceConfig, dao datasource.DAO, sch schema.Schema, authz authorization.Authorization, guard *netguard.Guard) datasource.Service {
 	return &service{
 		dao:      dao,
 		sch:      sch,
 		authz:    authz,
 		proxyCfg: cfg.HTTPProxy,
+		guard:    guard,
 	}
 }
 
@@ -150,7 +153,10 @@ func (s *service) validate(entity *v1.Datasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch, &s.proxyCfg)
+	if err := validate.Datasource(entity, list, s.sch, &s.proxyCfg); err != nil {
+		return err
+	}
+	return s.guard.ValidateDatasourceSpec(entity.Spec)
 }
 
 // checkSecretPermission ensures that the user that creates/updates a datasource with a secret actually has the secret

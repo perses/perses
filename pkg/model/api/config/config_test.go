@@ -69,7 +69,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false
+    }
   },
   "variable": {
     "global": {
@@ -148,6 +151,9 @@ func TestJSONMarshalConfig(t *testing.T) {
       "max_idle_conns_per_host": 10,
       "default_timeout": "30s",
       "max_timeout": "30s"
+    },
+    "proxy": {
+      "deny_private_networks": false
     }
   },
   "variable": {

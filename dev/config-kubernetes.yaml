@@ -50,3 +50,11 @@ plugin:
   enable_dev: true
   path: "plugins"
   archive_path: "plugins-archive"
+
+datasource:
+  proxy:
+    # The datasources of the dev environment (Prometheus, Tempo, Loki, Pyroscope, ...) are running on localhost.
+    # The loopback interface is denied by default, so it must be explicitly allowed.
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"

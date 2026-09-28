@@ -387,6 +387,7 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 					config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 					path:         "/api/v1/query",
 					transports:   cache,
+					guard:        newLoopbackGuard(t),
 					transportKey: test.transportKey,
 				}
 				req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
@@ -442,6 +443,7 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 			e := &endpoint{
 				cfg:        config.DatasourceConfig{HTTPProxy: proxyConfig},
 				transports: newTransportCache(),
+				guard:      newLoopbackGuard(t),
 			}
 			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
 			require.NoError(t, err)
@@ -495,6 +497,7 @@ func TestEndpoint_newProxy_timeout(t *testing.T) {
 			e := &endpoint{
 				cfg:        config.DatasourceConfig{HTTPProxy: proxyConfig},
 				transports: newTransportCache(),
+				guard:      newLoopbackGuard(t),
 			}
 			pr, err := e.newProxy("prometheus", "", globalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
 			require.NoError(t, err)
@@ -514,6 +517,7 @@ func TestHTTPProxy_getTransport_timeoutChange(t *testing.T) {
 			config:       &datasourceHTTP.Config{URL: common.MustParseURL("http://localhost:9090"), Timeout: timeout},
 			path:         "/api/v1/query",
 			transports:   cache,
+			guard:        newLoopbackGuard(t),
 			transportKey: globalTransportKey("prometheus"),
 			proxyConfig:  config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)},
 		}
@@ -573,6 +577,7 @@ func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
 				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 				path:         "/api/v1/query",
 				transports:   cache,
+				guard:        newLoopbackGuard(t),
 				transportKey: globalTransportKey("prometheus"),
 				proxyConfig:  config.HTTPProxyConfig{MaxConnsPerHost: 1},
 			}
@@ -633,6 +638,7 @@ func TestHTTPProxy_serve_maxIdleConnsPerHost(t *testing.T) {
 				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 				path:         "/api/v1/query",
 				transports:   cache,
+				guard:        newLoopbackGuard(t),
 				transportKey: globalTransportKey("prometheus"),
 				proxyConfig:  config.HTTPProxyConfig{MaxIdleConnsPerHost: 1},
 			}
@@ -701,6 +707,7 @@ func TestHTTPProxy_serve_caFileRotation(t *testing.T) {
 			path:         "/api/v1/query",
 			secret:       &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{CAFile: caFile, MinVersion: "TLS12"}},
 			transports:   cache,
+			guard:        newLoopbackGuard(t),
 			transportKey: globalTransportKey("prometheus"),
 		}
 		req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
