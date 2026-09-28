@@ -2,7 +2,8 @@
 
 This page describes the security-relevant deployment choices an operator should
 be aware of when running Perses. For reporting vulnerabilities, see
-[SECURITY.md](../SECURITY.md).
+[SECURITY.md](https://github.com/perses/perses/blob/main/SECURITY.md).
+Published advisories are listed under the Security tab of the repository.
 
 ## Authentication is disabled by default
 
@@ -63,9 +64,3 @@ When using the SQL backend:
 - With `database.sql.case_sensitive: true`, ensure the database uses a
   case-sensitive collation; otherwise case variants of names alias each other
   even though the setting is enabled.
-
-## Reporting
-
-Please report security issues privately to the maintainers, per
-[SECURITY.md](../SECURITY.md). Published advisories are listed under the
-Security tab of the repository.
