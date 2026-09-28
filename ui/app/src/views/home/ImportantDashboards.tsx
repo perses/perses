@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
-import type { SxProps, Theme } from '@mui/material/styles';
 import { intlFormatDistance } from 'date-fns';
 import ArchiveOutline from 'mdi-material-ui/ArchiveOutline';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
@@ -24,117 +23,6 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
-
-const cardSx = {
-  border: '1px solid',
-  borderColor: 'divider',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-} satisfies SxProps<Theme>;
-
-const cardHeaderSx = {
-  flex: '0 0 auto',
-} satisfies SxProps<Theme>;
-
-const cardBodySx = {
-  flex: '1 1 auto',
-  pt: 0,
-  minHeight: 0,
-} satisfies SxProps<Theme>;
-
-const emptyCardBodySx = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-} satisfies SxProps<Theme>;
-
-const titleRowSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-} satisfies SxProps<Theme>;
-
-const titleIconSx = {
-  color: 'primary.main',
-} satisfies SxProps<Theme>;
-
-const entryLinkSx = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1.5,
-  py: 1.5,
-  px: 1,
-  borderRadius: 1.5,
-  textDecoration: 'none',
-  color: 'inherit',
-  cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
-  '&:hover': {
-    bgcolor: 'action.hover',
-  },
-} satisfies SxProps<Theme>;
-
-const entryIconContainerSx = {
-  p: 1.25,
-  borderRadius: 1.5,
-  bgcolor: 'primary.main',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-} satisfies SxProps<Theme>;
-
-const entryTextContainerSx = {
-  flex: 1,
-  minWidth: 0,
-} satisfies SxProps<Theme>;
-
-const entryPrimaryTextSx = {
-  fontWeight: 600,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-} satisfies SxProps<Theme>;
-
-const loadingSx = {
-  alignItems: 'center',
-  justifyContent: 'center',
-} satisfies SxProps<Theme>;
-
-const emptyStateSx = {
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-  px: 2,
-} satisfies SxProps<Theme>;
-
-const emptyStateIconSx = {
-  fontSize: 32,
-  color: 'text.secondary',
-} satisfies SxProps<Theme>;
-
-const groupsContainerSx = {
-  display: 'flex',
-  flexDirection: 'column',
-  maxHeight: 360,
-  overflowY: 'auto',
-} satisfies SxProps<Theme>;
-
-const groupHeaderSx = {
-  mb: 1.5,
-} satisfies SxProps<Theme>;
-
-const groupTitleSx = {
-  fontWeight: 600,
-} satisfies SxProps<Theme>;
-
-const entryIconSx = {
-  fontSize: 16,
-  color: 'primary.contrastText',
-} satisfies SxProps<Theme>;
-
-const groupDividerSx = {
-  my: 2,
-} satisfies SxProps<Theme>;
 
 function buildGroupKey(group: ImportantDashboardGroupData): string {
   const entryKeys = group.entries.map(buildEntryBaseKey).join('|');
@@ -198,12 +86,43 @@ function ImportantDashboardEntryLink(props: {
   const { Icon, to, primary, secondary, ariaLabel } = props;
 
   return (
-    <Box component={RouterLink} to={to} aria-label={ariaLabel} sx={entryLinkSx}>
-      <Box sx={entryIconContainerSx}>
-        <Icon sx={entryIconSx} />
+    <Box
+      component={RouterLink}
+      to={to}
+      aria-label={ariaLabel}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        py: 1.5,
+        px: 1,
+        borderRadius: 1.5,
+        textDecoration: 'none',
+        color: 'inherit',
+        cursor: 'pointer',
+        transition: 'background-color 0.15s ease',
+        '&:hover': {
+          bgcolor: 'action.hover',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          p: 1.25,
+          borderRadius: 1.5,
+          bgcolor: 'primary.main',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Icon sx={{ fontSize: 16, color: 'primary.contrastText' }} />
       </Box>
-      <Box sx={entryTextContainerSx}>
-        <Typography variant="body1" sx={entryPrimaryTextSx}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
           {primary}
         </Typography>
         <Typography variant="caption" color="text.secondary">
@@ -226,24 +145,28 @@ export function ImportantDashboards(): ReactElement | null {
     [importantDashboardGroups],
   );
   const keyedGroups = useKeyedImportantDashboardGroups(groups);
-  const bodySx = useMemo<SxProps<Theme>>(() => {
-    if (groups.length === 0 && !isLoading) {
-      return { ...cardBodySx, ...emptyCardBodySx };
-    }
-    return cardBodySx;
-  }, [groups.length, isLoading]);
 
   if (!hasConfiguredImportantDashboards && !isLoading) {
     return null;
   }
 
   return (
-    <Card elevation={0} sx={cardSx} data-testid="important-dashboards-card">
-      <CardContent sx={cardHeaderSx}>
+    <Card
+      elevation={0}
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+      data-testid="important-dashboards-card"
+    >
+      <CardContent sx={{ flex: '0 0 auto' }}>
         <Stack spacing={0.75}>
-          <Box sx={titleRowSx}>
-            <StarFourPointsOutline sx={titleIconSx} />
-            <Typography variant="h6" sx={groupTitleSx}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <StarFourPointsOutline sx={{ color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontSize: '1.125rem', fontWeight: 600 }}>
               Important Dashboards
             </Typography>
           </Box>
@@ -252,15 +175,27 @@ export function ImportantDashboards(): ReactElement | null {
           </Typography>
         </Stack>
       </CardContent>
-      <CardContent sx={bodySx}>
+      <CardContent
+        sx={{
+          flex: '1 1 auto',
+          pt: 0,
+          minHeight: 0,
+          ...(groups.length === 0 && !isLoading
+            ? { display: 'flex', alignItems: 'center', justifyContent: 'center' }
+            : {}),
+        }}
+      >
         {isLoading && (
-          <Stack width="100%" sx={loadingSx}>
+          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={24} />
           </Stack>
         )}
         {!isLoading && groups.length === 0 && (
-          <Stack spacing={1} sx={emptyStateSx}>
-            <StarFourPointsOutline sx={emptyStateIconSx} />
+          <Stack
+            spacing={1}
+            sx={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', px: 2 }}
+          >
+            <StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />
             <Typography variant="body1">No important dashboards found.</Typography>
             <Typography variant="body2" color="text.secondary">
               Configure important dashboards in your config file.
@@ -268,13 +203,16 @@ export function ImportantDashboards(): ReactElement | null {
           </Stack>
         )}
         {!isLoading && keyedGroups.length > 0 && (
-          <Box data-testid="important-dashboards-mosaic" sx={groupsContainerSx}>
+          <Box
+            data-testid="important-dashboards-mosaic"
+            sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
+          >
             {keyedGroups.map((group, groupIndex) => {
               return (
                 <Box key={group.key}>
-                  <Stack spacing={0.5} sx={groupHeaderSx}>
+                  <Stack spacing={0.5} sx={{ mb: 1.5 }}>
                     {group.title !== undefined && (
-                      <Typography variant="subtitle1" sx={groupTitleSx}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         {group.title}
                       </Typography>
                     )}
@@ -325,7 +263,7 @@ export function ImportantDashboards(): ReactElement | null {
                       );
                     })}
                   </Box>
-                  {groupIndex < keyedGroups.length - 1 && <Divider sx={groupDividerSx} />}
+                  {groupIndex < keyedGroups.length - 1 && <Divider sx={{ my: 2 }} />}
                 </Box>
               );
             })}
