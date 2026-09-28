@@ -135,6 +135,7 @@ type endpoint struct {
 	fileValidator  *secretfile.Validator
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
+	transports     *transportCache
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
@@ -151,6 +152,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		fileValidator:  fileValidator,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
+		transports:     newTransportCache(),
 	}
 }
 
@@ -201,7 +203,12 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
+// newProxy builds the proxy matching the kind of the datasource.
+// transportKey identifies the saved datasource in the transport cache. It must be empty for unsaved datasources,
+// so their (one-off) transport is not cached.
+func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto,
+	fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error),
+	tokenRefresher crypto.TokenRefresher, transports *transportCache, transportKey string) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -256,6 +263,8 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			path:           path,
 			secret:         scrt,
 			tokenRefresher: tokenRefresher,
+			transports:     transports,
+			transportKey:   transportKey,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -283,6 +292,10 @@ type httpProxy struct {
 	datasourceName string
 	path           string
 	tokenRefresher crypto.TokenRefresher
+	// transports caches the HTTP transports of the saved datasources. It can be nil.
+	transports *transportCache
+	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
+	transportKey string
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -326,7 +339,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
-	reverseProxy.Transport, transportErr = h.prepareTransport()
+	reverseProxy.Transport, transportErr = h.getTransport()
 	if transportErr != nil {
 		return transportErr
 	}
@@ -469,7 +482,7 @@ func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
 // getToken exchanges the client credentials for an access token,
 // from the OAuth 2.0 provider.
 func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2.Token, error) {
-	transport, err := h.prepareTransport()
+	transport, err := h.getTransport()
 	if err != nil {
 		return nil, err
 	}
@@ -510,6 +523,20 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	return token, err
 }
 
+// getTransport returns the transport to reach the datasource.
+// For a saved datasource, the transport is cached so the connections are reused across requests.
+// For an unsaved datasource, a new transport is built for each request.
+func (h *httpProxy) getTransport() (*http.Transport, error) {
+	if h.transports == nil || len(h.transportKey) == 0 {
+		return h.prepareTransport()
+	}
+	var tlsConfig *secretModel.TLSConfig
+	if h.secret != nil {
+		tlsConfig = h.secret.TLSConfig
+	}
+	return h.transports.get(h.transportKey, tlsConfig, h.prepareTransport)
+}
+
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 	tlsConfig, err := h.prepareTLSConfig()
 	if err != nil {
@@ -524,6 +551,11 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
 		IdleConnTimeout:     90 * time.Second,
+		// The transport is reused across requests (see transportCache).
+		// A dashboard usually sends many queries in parallel to the same datasource,
+		// so keep more idle connections than the default (2) to actually reuse them.
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
 		ForceAttemptHTTP2:   true,
 		TLSClientConfig:     tlsConfig,
 	}, nil

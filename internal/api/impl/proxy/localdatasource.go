@@ -26,10 +26,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
+// proxyDashboardDatasource forwards the request to the datasource.
+// transportKey must be empty for an unsaved datasource, so its transport is not cached.
+func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
-	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, e.fileValidator, retrieveSecret, e.tokenRefresher)
+	pr, err := newProxy(dtsName, projectName, spec, path, e.crypto, e.fileValidator, retrieveSecret, e.tokenRefresher, e.transports, transportKey)
 	if err != nil {
 		return err
 	}
@@ -54,7 +56,7 @@ func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {
 		dtsName = body.Spec.Display.Name
 	}
 
-	return e.proxyDashboardDatasource(ctx, projectName, dtsName, body.Spec, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, "", body.Spec, func(name string) (*v1.SecretSpec, error) {
 		if err := e.checkPermission(ctx, projectName, role.SecretScope, role.ReadAction); err != nil {
 			return nil, err
 		}
@@ -76,7 +78,7 @@ func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dashboardTransportKey(projectName, dashboardName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 }
