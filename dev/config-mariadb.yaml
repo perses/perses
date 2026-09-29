@@ -46,7 +46,6 @@ frontend:
   important_dashboards:
     - title: "Perses demos"
       dashboards:
-        - project: "perses"
         - project: "testing"
     - title: "Quick links"
       description: "Highlighted dashboards"

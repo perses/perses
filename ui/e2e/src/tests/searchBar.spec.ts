@@ -66,8 +66,8 @@ test.describe('SearchBar', () => {
     const searchBar = new SearchBar(page);
     await searchBar.open();
 
-    // Search for "panel" which matches both important (markdownpanel) and non-important (timeserieschartpanel) dashboards
-    await searchBar.search('panel');
+    // Match dashboards from both the project-wide testing shortcut and explicit Perses shortcuts.
+    await searchBar.search('e');
 
     // Click "see more..." if present to load additional results
     await searchBar.clickSeeMoreIfPresent();
@@ -78,10 +78,17 @@ test.describe('SearchBar', () => {
     await expect(importantDashboard).toBeVisible();
     await expect(importantDashboard).toHaveCSS('font-weight', '700');
 
-    // timeserieschartpanel is NOT in the important_dashboards list
-    const nonImportantDashboard = searchBar.getDashboardLink('testing', 'timeserieschartpanel');
-    await expect(nonImportantDashboard).toBeVisible();
-    await expect(nonImportantDashboard).toHaveCSS('font-weight', '400');
+    const projectImportantDashboard = searchBar.getDashboardLink('testing', 'timeserieschartpanel');
+    await expect(projectImportantDashboard).toBeVisible();
+    await expect(projectImportantDashboard).toHaveCSS('font-weight', '700');
+
+    const explicitlyImportantDashboard = searchBar.getDashboardLink('perses', 'NodeExporter');
+    await expect(explicitlyImportantDashboard).toBeVisible();
+    await expect(explicitlyImportantDashboard).toHaveCSS('font-weight', '700');
+
+    const unconfiguredDashboard = searchBar.getDashboardLink('perses', 'Demo');
+    await expect(unconfiguredDashboard).toBeVisible();
+    await expect(unconfiguredDashboard).toHaveCSS('font-weight', '400');
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
