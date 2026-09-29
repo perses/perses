@@ -645,17 +645,15 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		}
 		return apiinterface.InternalError
 	}
-	// The deferred functions are executed in the reverse order: the transaction is rolled back before the connection is released.
-	defer func(conn *sql.Conn) {
-		if closeErr := conn.Close(); closeErr != nil && !errors.Is(closeErr, sql.ErrConnDone) {
-			s.logWithDefaultEntry().WithError(closeErr).Error("unable to release the database connection")
-		}
-	}(conn)
-	defer func(tx *sql.Tx) {
+	// The transaction must be rolled back before the connection is released: closing the connection waits for the transaction to end.
+	defer func() {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 			s.logWithDefaultEntry().WithError(rollbackErr).Error("unable to roll back the read-only transaction")
 		}
-	}(tx)
+		if closeErr := conn.Close(); closeErr != nil && !errors.Is(closeErr, sql.ErrConnDone) {
+			s.logWithDefaultEntry().WithError(closeErr).Error("unable to release the database connection")
+		}
+	}()
 
 	// Execute the cleaned query (without comments) for safety
 	rows, err := tx.QueryContext(r.Context(), cleanQuery)
