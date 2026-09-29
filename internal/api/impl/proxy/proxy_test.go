@@ -72,7 +72,7 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 			},
 			tlsConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
 			expectError:   true,
-			errorContains: "cannot use custom TLSConfig with sslmode=disable",
+			errorContains: "the sslMode is not set or set to disable",
 		},
 		{
 			name: "mysql success",

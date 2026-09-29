@@ -21,16 +21,19 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
@@ -577,8 +580,8 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	// The cleaned query (without comments) is used for both validation and execution
 	cleanQuery, isValid := sanitizeAndValidateQuery(q.Query)
 	if !isValid {
-		s.logWithDefaultEntry().WithField("query", q.Query).Error("rejected query with write operations; only SELECT queries are allowed through the SQL proxy")
-		return apiinterface.HandleBadRequestError("only SELECT queries are allowed through the SQL proxy")
+		s.logWithDefaultEntry().WithField("query", q.Query).Error("rejected query not starting with a read statement keyword")
+		return apiinterface.HandleBadRequestError(fmt.Sprintf("only read-only queries are allowed through the SQL proxy. The query must start with one of: %s", strings.Join(readOnlyStatementKeywords, ", ")))
 	}
 
 	// add password if provided
@@ -606,8 +609,24 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		}
 	}(db)
 
+	// Execute the query in a read-only transaction. The check above only looks at the first keyword of the query,
+	// so it cannot catch every statement modifying data. For example, a data-modifying CTE (WITH d AS (DELETE ...) SELECT ...),
+	// or EXPLAIN ANALYZE of a write statement in PostgreSQL.
+	// In a read-only transaction, the database itself rejects any write.
+	// The transaction is always rolled back: there is nothing to commit.
+	tx, err := db.BeginTx(r.Context(), &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		s.logWithDefaultEntry().WithError(err).Error("unable to start a read-only transaction")
+		return apiinterface.InternalError
+	}
+	defer func(tx *sql.Tx) {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			s.logWithDefaultEntry().WithError(rollbackErr).Error("unable to roll back the read-only transaction")
+		}
+	}(tx)
+
 	// Execute the cleaned query (without comments) for safety
-	rows, err := db.QueryContext(r.Context(), cleanQuery)
+	rows, err := tx.QueryContext(r.Context(), cleanQuery)
 	if err != nil {
 		s.logWithDefaultEntry().WithError(err).WithField("query", cleanQuery).Error("unable to execute the query")
 		return apiinterface.InternalError
@@ -645,9 +664,11 @@ func (s *sqlProxy) setupAuthentication() error {
 	return nil
 }
 
+// prepareTLSConfig returns the TLS config defined in the secret of the datasource, or nil if there is none.
+// When there is none, the TLS behavior is defined by the datasource config (see buildMySQLConfig and buildPostgresConfig).
 func (s *sqlProxy) prepareTLSConfig() (*tls.Config, error) {
-	if s.secret == nil {
-		return &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}, nil
+	if s.secret == nil || s.secret.TLSConfig == nil {
+		return nil, nil
 	}
 	return s.secret.TLSConfig.BuildTLSConfig()
 }
@@ -666,19 +687,26 @@ func (s *sqlProxy) sqlOpen(tlsConfig *tls.Config) (*sql.DB, error) {
 
 // open mySQL specific database connection
 func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
-	mysqlConfig := mysql.Config{
-		Net:    "tcp",
-		Addr:   s.config.Host,
-		DBName: s.config.Database,
+	mysqlConfig, err := s.buildMySQLConfig(tlsConfig)
+	if err != nil {
+		return nil, err
 	}
+	connector, err := mysql.NewConnector(mysqlConfig)
+	if err != nil {
+		return nil, fmt.Errorf("invalid MySQL configuration: %w", err)
+	}
+	return sql.OpenDB(connector), nil
+}
 
-	if s.username != "" {
-		mysqlConfig.User = s.username
-	}
-
-	if s.password != "" {
-		mysqlConfig.Passwd = s.password
-	}
+func (s *sqlProxy) buildMySQLConfig(tlsConfig *tls.Config) (*mysql.Config, error) {
+	// Start from the default config of the driver. For example, it allows the mysql_native_password authentication,
+	// which is the default authentication method of MariaDB.
+	baseConfig := mysql.NewConfig()
+	baseConfig.Net = "tcp"
+	baseConfig.Addr = s.config.Host
+	baseConfig.DBName = s.config.Database
+	baseConfig.User = s.username
+	baseConfig.Passwd = s.password
 
 	// Use MariaDB config if a driver is MariaDB, otherwise use MySQL config
 	driverConfig := s.config.MySQL
@@ -687,34 +715,59 @@ func (s *sqlProxy) openMySQL(tlsConfig *tls.Config) (*sql.DB, error) {
 	}
 
 	if driverConfig != nil {
+		dialTimeout, _ := common.ParseDuration(string(driverConfig.Timeout))
 		readTimeout, _ := common.ParseDuration(string(driverConfig.ReadTimeout))
 		writeTimeout, _ := common.ParseDuration(string(driverConfig.WriteTimeout))
-		mysqlConfig.Params = driverConfig.Params
-		mysqlConfig.MaxAllowedPacket = driverConfig.MaxAllowedPacket
-		mysqlConfig.ReadTimeout = time.Duration(readTimeout)
-		mysqlConfig.WriteTimeout = time.Duration(writeTimeout)
+		baseConfig.Params = driverConfig.Params
+		if driverConfig.MaxAllowedPacket != 0 {
+			baseConfig.MaxAllowedPacket = driverConfig.MaxAllowedPacket
+		}
+		baseConfig.Timeout = time.Duration(dialTimeout)
+		baseConfig.ReadTimeout = time.Duration(readTimeout)
+		baseConfig.WriteTimeout = time.Duration(writeTimeout)
 	}
 
-	if tlsConfig != nil {
-		if s.project == "" {
-			s.project = "global"
-		}
-		tlsConfigName := fmt.Sprintf("%s-%s-tls", s.project, s.name)
-		if err := mysql.RegisterTLSConfig(tlsConfigName, tlsConfig); err != nil {
-			return nil, err
-		}
-		mysqlConfig.TLSConfig = tlsConfigName
+	// The params can contain options of the driver (e.g. parseTime, tls) as well as system variables.
+	// Going through the DSN lets the driver interpret them exactly like in a DSN.
+	mysqlConfig, err := mysql.ParseDSN(baseConfig.FormatDSN())
+	if err != nil {
+		return nil, fmt.Errorf("invalid MySQL configuration: %w", err)
 	}
 
-	db, dbErr := sql.Open(string(datasourceSQL.DriverMySQL), mysqlConfig.FormatDSN())
-	if dbErr != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", dbErr)
+	// Never allow multiple statements in a query, whatever the params say.
+	// Otherwise, a query like "SELECT 1; COMMIT; DELETE FROM ..." would end the read-only transaction the query is executed in.
+	mysqlConfig.MultiStatements = false
+
+	switch {
+	case tlsConfig != nil:
+		// The TLS config is set on the connection config directly, and not registered in the global registry of the driver
+		// (mysql.RegisterTLSConfig). With the registry, concurrent requests to datasources registering the same name
+		// could use the TLS config of each other.
+		// If the server name is not set, the driver sets it from the host (unless InsecureSkipVerify is set).
+		mysqlConfig.TLS = tlsConfig
+	case driverConfig == nil || len(driverConfig.Params["tls"]) == 0:
+		// No TLS config in the secret, and no "tls" param: TLS is required, and the certificate of the server is verified
+		// with the system CAs. TLS can be disabled with the param "tls" set to "false".
+		mysqlConfig.TLS = &tls.Config{MinVersion: tls.VersionTLS12, MaxVersion: tls.VersionTLS13}
 	}
-	return db, nil
+	return mysqlConfig, nil
 }
 
 // open postgres specific database connection
 func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
+	connConfig, err := s.buildPostgresConfig(tlsConfig)
+	if err != nil {
+		return nil, err
+	}
+	// The connection pool is the one of database/sql, so the max number of connections must be set on it.
+	db := stdlib.OpenDB(*connConfig)
+	if s.config.Postgres != nil && s.config.Postgres.MaxConns > 0 {
+		db.SetMaxOpenConns(int(s.config.Postgres.MaxConns))
+	}
+	return db, nil
+}
+
+func (s *sqlProxy) buildPostgresConfig(tlsConfig *tls.Config) (*pgx.ConnConfig, error) {
 	// build the postgres DSN for pgx to parse
 	u := &url.URL{
 		Scheme: "postgres",
@@ -731,53 +784,79 @@ func (s *sqlProxy) openPostgres(tlsConfig *tls.Config) (*sql.DB, error) {
 		u.User = url.UserPassword(s.username, s.password)
 	}
 
+	postgresConfig := s.config.Postgres
+	if postgresConfig == nil {
+		postgresConfig = &datasourceSQL.PostgresConfig{}
+	}
+
 	query := url.Values{}
 
-	// set the default max connections to 100
-	query.Set("pool_max_conns", "100")
-
-	if s.config.Postgres == nil {
-		s.config.Postgres = &datasourceSQL.PostgresConfig{}
+	if postgresConfig.Options != "" {
+		query.Set("options", postgresConfig.Options)
 	}
 
-	if s.config.Postgres.Options != "" {
-		query.Set("options", s.config.Postgres.Options)
+	// PrepareThreshold is intentionally not used: it is an option of the PostgreSQL JDBC driver, unknown to pgx.
+	// pgx would send it to the server as a runtime parameter, and the server would reject the connection
+	// with "unrecognized configuration parameter".
+
+	if len(postgresConfig.ConnectTimeout) > 0 {
+		// The connect timeout is a duration (e.g. "10s"), while pgx expects a number of seconds.
+		connectTimeout, err := common.ParseDuration(string(postgresConfig.ConnectTimeout))
+		if err != nil {
+			return nil, fmt.Errorf("invalid connectTimeout: %w", err)
+		}
+		if seconds := int64(math.Ceil(time.Duration(connectTimeout).Seconds())); seconds > 0 {
+			query.Set("connect_timeout", strconv.FormatInt(seconds, 10))
+		}
 	}
 
-	if s.config.Postgres.PrepareThreshold != nil {
-		query.Set("prepareThreshold", fmt.Sprintf("%d", *s.config.Postgres.PrepareThreshold))
-	}
-
-	if len(s.config.Postgres.ConnectTimeout) > 0 && s.config.Postgres.ConnectTimeout != "0" {
-		query.Set("connect_timeout", string(s.config.Postgres.ConnectTimeout))
-	}
-
-	if s.config.Postgres.SSLMode != "" {
-		query.Set("sslmode", string(s.config.Postgres.SSLMode))
+	if postgresConfig.SSLMode != "" {
+		query.Set("sslmode", string(postgresConfig.SSLMode))
 	}
 
 	u.RawQuery = query.Encode()
 
-	pgxConfig, parseErr := pgxpool.ParseConfig(u.String())
-	if parseErr != nil {
-		logrus.WithError(parseErr).Error("failed to parse postgres address")
-		return nil, parseErr
+	// pgx.ParseConfig and not pgxpool.ParseConfig: the connection is opened with stdlib.OpenDB,
+	// so the pool settings of pgxpool (e.g. pool_max_conns) would not be used.
+	connConfig, err := pgx.ParseConfig(u.String())
+	if err != nil {
+		logrus.WithError(err).Error("failed to parse postgres address")
+		return nil, err
 	}
 
-	if s.config.Postgres.MaxConns != 0 {
-		pgxConfig.MaxConns = s.config.Postgres.MaxConns
-	}
-
+	// Without TLS config in the secret, the TLS behavior is the one defined by the sslMode.
 	if tlsConfig != nil {
-		if s.config.Postgres.SSLMode == "" || s.config.Postgres.SSLMode == datasourceSQL.SSLModeDisable {
-			return nil, errors.New("cannot use custom TLSConfig with sslmode=disable")
+		if postgresConfig.SSLMode == "" || postgresConfig.SSLMode == datasourceSQL.SSLModeDisable {
+			return nil, errors.New("the secret of the datasource defines a TLS config, but the sslMode is not set or set to disable. Set the sslMode to require, verify-ca or verify-full")
 		}
-		pgxConfig.ConnConfig.TLSConfig = tlsConfig
+		applyPostgresTLSConfig(connConfig, tlsConfig)
 	}
 
-	db := stdlib.OpenDB(*pgxConfig.ConnConfig)
+	return connConfig, nil
+}
 
-	return db, nil
+// applyPostgresTLSConfig replaces the TLS config derived by pgx from the sslMode, with the TLS config of the secret.
+// pgx derives one connection attempt per host, and depending on the sslMode, a fallback attempt (e.g. "prefer" tries with TLS, then without).
+// The TLS config of the secret is used for every attempt using TLS. The attempts without TLS are kept as they are.
+func applyPostgresTLSConfig(connConfig *pgx.ConnConfig, tlsConfig *tls.Config) {
+	connConfig.TLSConfig = postgresTLSConfigForHost(connConfig.TLSConfig, tlsConfig, connConfig.Host)
+	for _, fallback := range connConfig.Fallbacks {
+		fallback.TLSConfig = postgresTLSConfigForHost(fallback.TLSConfig, tlsConfig, fallback.Host)
+	}
+}
+
+func postgresTLSConfigForHost(derivedTLSConfig *tls.Config, tlsConfig *tls.Config, host string) *tls.Config {
+	if derivedTLSConfig == nil {
+		// This connection attempt doesn't use TLS.
+		return nil
+	}
+	result := tlsConfig.Clone()
+	// Unlike pgx, the TLS config of the secret doesn't necessarily define the server name.
+	// Without it, the certificate of the server cannot be verified, and the TLS handshake fails.
+	if result.ServerName == "" && !result.InsecureSkipVerify {
+		result.ServerName = host
+	}
+	return result
 }
 
 // SQLColumnMetadata represents metadata for a single column in SQL result
@@ -896,29 +975,31 @@ func sanitizeAndValidateQuery(query string) (string, bool) {
 
 	upperQuery := strings.ToUpper(cleanQuery)
 
-	// Define dangerous SQL operations that modify data
-	dangerousKeywords := []string{
-		"INSERT",
-		"UPDATE",
-		"DELETE",
-		"DROP",
-		"ALTER",
-		"CREATE",
-		"REPLACE",
-		"TRUNCATE",
-		"GRANT",
-		"REVOKE",
-	}
-
-	// Check if the clean query starts with any dangerous keyword
-	for _, keyword := range dangerousKeywords {
-		if strings.HasPrefix(upperQuery, keyword) {
-			return "", false
-		}
+	// Only allow the queries starting with a keyword of a read statement. It is an allowlist rather than a list of forbidden keywords,
+	// as there are too many statements modifying data or the schema to list (e.g. CALL, DO, MERGE, COPY, RENAME, LOCK, ...).
+	// Note that some statements modifying data can still start with one of these keywords, like a data-modifying CTE (WITH d AS (DELETE ...) SELECT ...)
+	// or EXPLAIN ANALYZE of a write statement in PostgreSQL. That's why the query is also executed in a read-only transaction (see sqlProxy.serve).
+	// The keyword check remains required: in MySQL, a statement modifying the schema (e.g. RENAME TABLE) implicitly commits the current transaction,
+	// and is then not executed in the read-only transaction.
+	if !slices.Contains(readOnlyStatementKeywords, firstKeyword(upperQuery)) {
+		return "", false
 	}
 
 	// Query is valid and read-only, return the cleaned version
 	return cleanQuery, true
+}
+
+// readOnlyStatementKeywords are the keywords a query sent to the SQL proxy is allowed to start with.
+var readOnlyStatementKeywords = []string{"SELECT", "WITH", "SHOW", "DESCRIBE", "DESC", "EXPLAIN", "VALUES", "TABLE"}
+
+// firstKeyword returns the first word of the query, ignoring the opening parentheses (e.g. "(SELECT 1) UNION (SELECT 2)").
+func firstKeyword(query string) string {
+	query = strings.TrimLeft(query, "( \t\r\n")
+	end := strings.IndexFunc(query, func(r rune) bool { return !unicode.IsLetter(r) })
+	if end == -1 {
+		return query
+	}
+	return query[:end]
 }
 
 // removeSQLComments removes SQL comments from a string

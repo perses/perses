@@ -190,39 +190,43 @@ spec:
   
   # MySQL specific driver config
   mysql:
-    # params Connection parameters
+    # params Connection parameters. They are interpreted like the parameters of a DSN of the Go MySQL driver,
+    # so they can be options of the driver (e.g. parseTime, tls) or system variables.
+    # When the secret doesn't define a TLS config, TLS is required, and the certificate of the server is verified with the system CAs.
+    # Set the param "tls" to "false" to disable TLS, or to "preferred" to use TLS without verifying the certificate when the server supports it.
+    # Note: the param "multiStatements" is always disabled.
     params: 
       <string>: <string> # Optional
       
-    # max_allowed_packet Max packet size allowed
-    max_allowed_packet: <int> # Optional 
+    # maxAllowedPacket Max packet size allowed
+    maxAllowedPacket: <int> # Optional 
     
     # timeout Dial timeout 
-    timeout: <time.Duration> # Optional 
+    timeout: <duration> # Optional 
     
-    # read_timeout I/O read timeout
-    read_timeout: <time.Duration> # Optional 
+    # readTimeout I/O read timeout
+    readTimeout: <duration> # Optional 
     
-    # write_timeout I/O read timeout
-    write_timeout: <time.Duration> # Optional 
+    # writeTimeout I/O write timeout
+    writeTimeout: <duration> # Optional 
 
   # MariaDB specific driver config (uses same structure as MySQL since MariaDB is MySQL-compatible)
   mariadb:
-    # params Connection parameters
+    # params Connection parameters. See the MySQL params above.
     params: 
       <string>: <string> # Optional
       
-    # max_allowed_packet Max packet size allowed
-    max_allowed_packet: <int> # Optional 
+    # maxAllowedPacket Max packet size allowed
+    maxAllowedPacket: <int> # Optional 
     
     # timeout Dial timeout 
-    timeout: <time.Duration> # Optional 
+    timeout: <duration> # Optional 
     
-    # read_timeout I/O read timeout
-    read_timeout: <time.Duration> # Optional 
+    # readTimeout I/O read timeout
+    readTimeout: <duration> # Optional 
     
-    # write_timeout I/O read timeout
-    write_timeout: <time.Duration> # Optional 
+    # writeTimeout I/O write timeout
+    writeTimeout: <duration> # Optional 
 
   # Postgres specific driver config
   postgres:
@@ -230,16 +234,19 @@ spec:
     options: <string>
     
     # the max connections for the SQL connection
-    max_conns: <int> # Optional 
+    maxConns: <int> # Optional 
     
-    # the timeout value used for socket connect operations.
-    connect_timeout: <time.Duration> # Optional
+    # the timeout value used for socket connect operations. It is rounded up to the second.
+    connectTimeout: <duration> # Optional
 
-    # specifies the number of PreparedStatement executions that must occur before the driver begins using server-side prepared statements.
-    prepare_threshold: <int> # Optional
+    # Not supported: it is an option of the PostgreSQL JDBC driver, and it is ignored.
+    prepareThreshold: <int> # Optional
 
-    # The ssl configuration when connection to the datasource
-    ssl_mode: <enum | possibleValue = 'disable' | 'allow' | 'prefer' | 'require' | 'verify-ca' | 'verify-full'> # Optional
+    # The ssl configuration when connection to the datasource. It follows the semantic of libpq, and defaults to 'prefer'.
+    # When the secret defines a TLS config, it is used to establish the TLS connection and to verify the certificate of the server,
+    # and the sslMode must be set to a mode using TLS ('allow', 'prefer', 'require', 'verify-ca' or 'verify-full').
+    # If the TLS config doesn't define the server name, the host is used.
+    sslMode: <enum | possibleValue = 'disable' | 'allow' | 'prefer' | 'require' | 'verify-ca' | 'verify-full'> # Optional
 ```
 
 ## Thresholds specification
