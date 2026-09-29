@@ -23,6 +23,7 @@ import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
 import { HomeListItem } from './HomeListItem';
+import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 function buildGroupKey(group: ImportantDashboardGroupData): string {
   const entryKeys = group.entries.map(buildEntryBaseKey).join('|');
@@ -134,16 +135,11 @@ export function ImportantDashboards(): ReactElement | null {
           </Stack>
         )}
         {!isLoading && groups.length === 0 && (
-          <Stack
-            spacing={1}
-            sx={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', px: 2 }}
-          >
-            <StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />
-            <Typography variant="body1">No important dashboards found.</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Configure important dashboards in your config file.
-            </Typography>
-          </Stack>
+          <EmptyState
+            icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
+            message="No important dashboards found."
+            hint="Configure important dashboards in your config file."
+          />
         )}
         {!isLoading && keyedGroups.length > 0 && (
           <Box
