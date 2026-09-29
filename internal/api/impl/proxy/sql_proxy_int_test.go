@@ -134,6 +134,15 @@ func TestSQLProxy_Postgres(t *testing.T) {
 		assert.Contains(t, err.Error(), "only read-only queries are allowed")
 		assert.Equal(t, 10, countRows(t, newPostgresProxy(nil), table))
 	})
+
+	t.Run("connection error not reported as a read-only transaction error", func(t *testing.T) {
+		// The connection is established when the query is executed: the error happens before starting the transaction.
+		s := newPostgresProxy(nil)
+		s.config.Database = "perses_database_not_existing"
+		_, err := serveSQLQuery(t, s, "SELECT 1 AS one")
+		require.Error(t, err)
+		assert.NotContains(t, err.Error(), "read-only transaction")
+	})
 }
 
 func TestSQLProxy_MariaDB(t *testing.T) {

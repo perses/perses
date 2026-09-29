@@ -14,7 +14,11 @@
 package proxy
 
 import (
+	"context"
 	"crypto/tls"
+	"database/sql"
+	"database/sql/driver"
+	"errors"
 	"testing"
 	"time"
 
@@ -250,4 +254,75 @@ func TestSQLProxy_openPostgres_maxConns(t *testing.T) {
 	require.NoError(t, err)
 	defer func() { _ = db.Close() }()
 	assert.Equal(t, 7, db.Stats().MaxOpenConnections)
+}
+
+// fakeConnector is a database/sql connector whose connections can fail to be established, or to start a transaction.
+type fakeConnector struct {
+	connectErr error
+	beginErr   error
+	// readOnly records whether the last transaction has been started as read-only.
+	readOnly *bool
+}
+
+func (c fakeConnector) Connect(context.Context) (driver.Conn, error) {
+	if c.connectErr != nil {
+		return nil, c.connectErr
+	}
+	return fakeConn(c), nil
+}
+
+func (c fakeConnector) Driver() driver.Driver { return nil }
+
+type fakeConn fakeConnector
+
+func (c fakeConn) Prepare(string) (driver.Stmt, error) { return nil, errors.New("not implemented") }
+func (c fakeConn) Close() error                        { return nil }
+func (c fakeConn) Begin() (driver.Tx, error)           { return nil, errors.New("not implemented") }
+
+func (c fakeConn) BeginTx(_ context.Context, opts driver.TxOptions) (driver.Tx, error) {
+	if c.beginErr != nil {
+		return nil, c.beginErr
+	}
+	*c.readOnly = opts.ReadOnly
+	return fakeTx{}, nil
+}
+
+type fakeTx struct{}
+
+func (fakeTx) Commit() error   { return nil }
+func (fakeTx) Rollback() error { return nil }
+
+func TestBeginReadOnlyTx(t *testing.T) {
+	errConnect := errors.New("connection refused")
+	errBegin := errors.New("syntax error near READ ONLY")
+
+	t.Run("read-only transaction started", func(t *testing.T) {
+		readOnly := false
+		db := sql.OpenDB(fakeConnector{readOnly: &readOnly})
+		defer func() { _ = db.Close() }()
+		conn, tx, err := beginReadOnlyTx(context.Background(), db)
+		require.NoError(t, err)
+		assert.True(t, readOnly)
+		require.NoError(t, tx.Rollback())
+		require.NoError(t, conn.Close())
+	})
+
+	t.Run("connection error told apart from the transaction error", func(t *testing.T) {
+		db := sql.OpenDB(fakeConnector{connectErr: errConnect})
+		defer func() { _ = db.Close() }()
+		_, _, err := beginReadOnlyTx(context.Background(), db)
+		require.ErrorIs(t, err, errConnect)
+		assert.NotErrorIs(t, err, errReadOnlyTx)
+	})
+
+	t.Run("read-only transaction not supported by the database", func(t *testing.T) {
+		readOnly := false
+		db := sql.OpenDB(fakeConnector{beginErr: errBegin, readOnly: &readOnly})
+		defer func() { _ = db.Close() }()
+		_, _, err := beginReadOnlyTx(context.Background(), db)
+		require.ErrorIs(t, err, errReadOnlyTx)
+		assert.ErrorIs(t, err, errBegin)
+		// The connection has been released: the database can be closed without waiting for it.
+		assert.Equal(t, 0, db.Stats().InUse)
+	})
 }

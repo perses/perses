@@ -543,6 +543,27 @@ type sqlQuery struct {
 	Query string `json:"query"`
 }
 
+// errReadOnlyTx is returned by beginReadOnlyTx when the connection to the database is established,
+// but the read-only transaction cannot be started.
+var errReadOnlyTx = errors.New("unable to start a read-only transaction")
+
+// beginReadOnlyTx connects to the database and starts a read-only transaction.
+// The database is opened lazily: without connecting explicitly first, the errors to connect (network, TLS, authentication)
+// could not be told apart from the ones to start the transaction (e.g. a database not supporting read-only transactions).
+// The caller must roll back the transaction, then close the connection.
+func beginReadOnlyTx(ctx context.Context, db *sql.DB) (*sql.Conn, *sql.Tx, error) {
+	conn, err := db.Conn(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to connect to the database: %w", err)
+	}
+	tx, err := conn.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		_ = conn.Close()
+		return nil, nil, fmt.Errorf("%w: %w", errReadOnlyTx, err)
+	}
+	return conn, tx, nil
+}
+
 type sqlProxy struct {
 	config   *datasourceSQL.Config
 	secret   *v1.SecretSpec
@@ -612,13 +633,24 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	// Execute the query in a read-only transaction. The check above only looks at the first keyword of the query,
 	// so it cannot catch every statement modifying data. For example, a data-modifying CTE (WITH d AS (DELETE ...) SELECT ...),
 	// or EXPLAIN ANALYZE of a write statement in PostgreSQL.
-	// In a read-only transaction, the database itself rejects any write.
+	// In a read-only transaction, the database itself rejects any change to the data or the schema.
 	// The transaction is always rolled back: there is nothing to commit.
-	tx, err := db.BeginTx(r.Context(), &sql.TxOptions{ReadOnly: true})
+	conn, tx, err := beginReadOnlyTx(r.Context(), db)
 	if err != nil {
-		s.logWithDefaultEntry().WithError(err).Error("unable to start a read-only transaction")
+		s.logWithDefaultEntry().WithError(err).Error("unable to execute the query in a read-only transaction")
+		if errors.Is(err, errReadOnlyTx) {
+			// The connection is established, but the database refuses the read-only transaction.
+			// It happens with databases only compatible with the MySQL or PostgreSQL protocol.
+			return echo.NewHTTPError(http.StatusBadGateway, "unable to start a read-only transaction: the SQL proxy executes every query in a read-only transaction, so the database must support it")
+		}
 		return apiinterface.InternalError
 	}
+	// The deferred functions are executed in the reverse order: the transaction is rolled back before the connection is released.
+	defer func(conn *sql.Conn) {
+		if closeErr := conn.Close(); closeErr != nil && !errors.Is(closeErr, sql.ErrConnDone) {
+			s.logWithDefaultEntry().WithError(closeErr).Error("unable to release the database connection")
+		}
+	}(conn)
 	defer func(tx *sql.Tx) {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 			s.logWithDefaultEntry().WithError(rollbackErr).Error("unable to roll back the read-only transaction")

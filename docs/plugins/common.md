@@ -247,6 +247,8 @@ spec:
     # When the secret defines a TLS config, it is used to establish the TLS connection and to verify the certificate of the server,
     # and the sslMode must be set to a mode using TLS ('allow', 'prefer', 'require', 'verify-ca' or 'verify-full').
     # If the TLS config doesn't define the server name, the host is used.
+    # Unlike libpq, the certificate of the server is then always verified with the TLS config, including its hostname, whatever the sslMode:
+    # 'require' and 'verify-ca' behave like 'verify-full', unless the TLS config sets insecureSkipVerify.
     sslMode: <enum | possibleValue = 'disable' | 'allow' | 'prefer' | 'require' | 'verify-ca' | 'verify-full'> # Optional
 ```
 
