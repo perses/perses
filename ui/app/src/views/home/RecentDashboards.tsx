@@ -20,11 +20,11 @@ import HistoryIcon from 'mdi-material-ui/History';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { useNavHistoryDispatch } from '../../context/DashboardNavHistory';
 import { useRecentDashboardList } from '../../model/dashboard-client';
+import { HomeListItem } from './HomeListItem';
 
 export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
@@ -32,9 +32,7 @@ export function RecentDashboards(): ReactElement {
 
   const dashboards = useMemo(() => data ?? [], [data]);
 
-  const handleRemove = (project: string, name: string, event: React.MouseEvent): void => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleRemove = (project: string, name: string): void => {
     navHistoryDispatch({ type: 'remove', project, name });
   };
 
@@ -103,62 +101,24 @@ export function RecentDashboards(): ReactElement {
 
                 return (
                   <Box key={dashboardKey}>
-                    <Box
-                      component={RouterLink}
+                    <HomeListItem
                       to={`/projects/${item.dashboard.metadata.project}/dashboards/${item.dashboard.metadata.name}`}
-                      aria-label={`${item.dashboard.metadata.project} ${item.dashboard.metadata.name}`}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        py: 2,
-                        px: 1,
-                        borderRadius: 1.5,
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.15s ease',
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          p: 1.25,
-                          borderRadius: 1.5,
-                          bgcolor: 'primary.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />
-                      </Box>
-
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="body1"
-                          sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      ariaLabel={`${item.dashboard.metadata.project} ${item.dashboard.metadata.name}`}
+                      title={displayName}
+                      subtitle={`${item.dashboard.metadata.project} • ${relativeTime}`}
+                      icon={<ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />}
+                      subtitleIcon={<Archive sx={{ fontSize: 12, color: 'text.secondary' }} />}
+                      action={
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemove(item.dashboard.metadata.project, item.dashboard.metadata.name)}
+                          aria-label={`Remove ${displayName} from recent list`}
+                          sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
                         >
-                          {displayName}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                          <Archive sx={{ fontSize: 12, color: 'text.secondary' }} />
-                          <Typography variant="caption" color="text.secondary">
-                            {item.dashboard.metadata.project} • {relativeTime}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleRemove(item.dashboard.metadata.project, item.dashboard.metadata.name, e)}
-                        aria-label={`Remove ${displayName} from recent list`}
-                        sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
-                      >
-                        <Close fontSize="small" />
-                      </IconButton>
-                    </Box>
+                          <Close fontSize="small" />
+                        </IconButton>
+                      }
+                    />
                     {index < dashboards.length - 1 && <Divider />}
                   </Box>
                 );

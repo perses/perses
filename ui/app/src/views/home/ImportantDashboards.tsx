@@ -18,11 +18,11 @@ import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
 import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
 import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
+import { HomeListItem } from './HomeListItem';
 
 function buildGroupKey(group: ImportantDashboardGroupData): string {
   const entryKeys = group.entries.map(buildEntryBaseKey).join('|');
@@ -74,78 +74,6 @@ function useKeyedImportantDashboardGroups(groups: ImportantDashboardGroupData[])
       };
     });
   }, [groups]);
-}
-
-function ImportantDashboardEntryLink(props: {
-  Icon: typeof Archive | typeof ViewDashboardOutline;
-  SecondaryIcon?: typeof Archive;
-  iconVariant?: 'filled' | 'outlined';
-  to: string;
-  primary: string;
-  secondary: string;
-  ariaLabel: string;
-}): ReactElement {
-  const { Icon, SecondaryIcon, iconVariant = 'filled', to, primary, secondary, ariaLabel } = props;
-
-  return (
-    <Box
-      component={RouterLink}
-      to={to}
-      aria-label={ariaLabel}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        py: 1.5,
-        px: 1,
-        borderRadius: 1.5,
-        textDecoration: 'none',
-        color: 'inherit',
-        cursor: 'pointer',
-        transition: 'background-color 0.15s ease',
-        '&:hover': {
-          bgcolor: 'action.hover',
-        },
-      }}
-    >
-      <Box
-        sx={{
-          p: 1.25,
-          borderRadius: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          ...(iconVariant === 'outlined'
-            ? { bgcolor: 'transparent', border: '1px solid', borderColor: 'primary.main' }
-            : { bgcolor: 'primary.main' }),
-        }}
-      >
-        <Icon
-          sx={{ fontSize: 16, color: iconVariant === 'outlined' ? 'primary.main' : 'primary.contrastText' }}
-        />
-      </Box>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography
-          variant="body1"
-          sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {primary}
-        </Typography>
-        {SecondaryIcon ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-            <SecondaryIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-            <Typography variant="caption" color="text.secondary">
-              {secondary}
-            </Typography>
-          </Box>
-        ) : (
-          <Typography variant="caption" color="text.secondary">
-            {secondary}
-          </Typography>
-        )}
-      </Box>
-    </Box>
-  );
 }
 
 export function ImportantDashboards(): ReactElement | null {
@@ -243,13 +171,13 @@ export function ImportantDashboards(): ReactElement | null {
                         const dashboardCount = entry.dashboards.length;
                         return (
                           <Box key={key}>
-                            <ImportantDashboardEntryLink
-                              Icon={Archive}
-                              iconVariant="outlined"
+                            <HomeListItem
                               to={`/projects/${entry.project}`}
                               ariaLabel={entry.project}
-                              primary={entry.project}
-                              secondary={`${dashboardCount} ${dashboardCount === 1 ? 'dashboard' : 'dashboards'} in project`}
+                              title={entry.project}
+                              subtitle={`${dashboardCount} ${dashboardCount === 1 ? 'dashboard' : 'dashboards'} in project`}
+                              icon={<Archive sx={{ fontSize: 16, color: 'primary.main' }} />}
+                              iconVariant="outlined"
                             />
                             {entryIndex < group.keyedEntries.length - 1 && <Divider />}
                           </Box>
@@ -264,20 +192,20 @@ export function ImportantDashboards(): ReactElement | null {
 
                       return (
                         <Box key={key}>
-                          <ImportantDashboardEntryLink
-                            Icon={ViewDashboardOutline}
-                            SecondaryIcon={Archive}
+                          <HomeListItem
                             to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
                             ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
-                            primary={displayName}
-                            secondary={`${entry.dashboard.metadata.project} • ${relativeTime}`}
+                            title={displayName}
+                            subtitle={`${entry.dashboard.metadata.project} • ${relativeTime}`}
+                            icon={<ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />}
+                            subtitleIcon={<Archive sx={{ fontSize: 12, color: 'text.secondary' }} />}
                           />
                           {entryIndex < group.keyedEntries.length - 1 && <Divider />}
                         </Box>
                       );
                     })}
                   </Box>
-                  {groupIndex < keyedGroups.length - 1 && <Divider sx={{ my: 2 }} />}
+                  {groupIndex < keyedGroups.length - 1 && <Divider sx={{ mb: 2 }} />}
                 </Box>
               );
             })}
