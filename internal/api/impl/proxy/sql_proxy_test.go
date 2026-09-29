@@ -108,6 +108,30 @@ func TestSQLProxy_buildMySQLConfig(t *testing.T) {
 		assert.False(t, cfg.MultiStatements)
 	})
 
+	t.Run("options letting the server read local files or get the password in clear text always disabled", func(t *testing.T) {
+		params := map[string]string{"allowAllFiles": "true", "allowCleartextPasswords": "true", "allowOldPasswords": "true"}
+		// Make sure the params are actually honored by the driver, otherwise this test would pass for the wrong reason.
+		dsnConfig, err := mysql.ParseDSN("user:password@tcp(localhost:3306)/perses?allowAllFiles=true&allowCleartextPasswords=true&allowOldPasswords=true")
+		require.NoError(t, err)
+		require.True(t, dsnConfig.AllowAllFiles)
+		require.True(t, dsnConfig.AllowCleartextPasswords)
+		require.True(t, dsnConfig.AllowOldPasswords)
+
+		for _, driver := range []datasourceSQL.Driver{datasourceSQL.DriverMySQL, datasourceSQL.DriverMariaDB} {
+			p := newProxy(&datasourceSQL.MySQLConfig{Params: params})
+			p.config.Driver = driver
+			if driver == datasourceSQL.DriverMariaDB {
+				p.config.MySQL = nil
+				p.config.MariaDB = &datasourceSQL.MySQLConfig{Params: params}
+			}
+			cfg, err := p.buildMySQLConfig(nil)
+			require.NoError(t, err, driver)
+			assert.False(t, cfg.AllowAllFiles, driver)
+			assert.False(t, cfg.AllowCleartextPasswords, driver)
+			assert.False(t, cfg.AllowOldPasswords, driver)
+		}
+	})
+
 	t.Run("MariaDB config used for MariaDB", func(t *testing.T) {
 		p := newProxy(nil)
 		p.config.Driver = datasourceSQL.DriverMariaDB

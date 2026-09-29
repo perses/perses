@@ -737,6 +737,15 @@ func (s *sqlProxy) buildMySQLConfig(tlsConfig *tls.Config) (*mysql.Config, error
 	// Never allow multiple statements in a query, whatever the params say.
 	// Otherwise, a query like "SELECT 1; COMMIT; DELETE FROM ..." would end the read-only transaction the query is executed in.
 	mysqlConfig.MultiStatements = false
+	// The host of the datasource is set by the user and can be a server they control.
+	// Whatever the params say, never enable the options that let such a server:
+	//   - read any file of the Perses server: with allowAllFiles, the driver sends the file requested by the server
+	//     with LOAD DATA LOCAL INFILE, and the server can request it in response to any query.
+	//   - get the password of the datasource in clear text (allowCleartextPasswords),
+	//     or authenticate with the insecure old password method (allowOldPasswords).
+	mysqlConfig.AllowAllFiles = false
+	mysqlConfig.AllowCleartextPasswords = false
+	mysqlConfig.AllowOldPasswords = false
 
 	switch {
 	case tlsConfig != nil:

@@ -194,7 +194,8 @@ spec:
     # so they can be options of the driver (e.g. parseTime, tls) or system variables.
     # When the secret doesn't define a TLS config, TLS is required, and the certificate of the server is verified with the system CAs.
     # Set the param "tls" to "false" to disable TLS, or to "preferred" to use TLS without verifying the certificate when the server supports it.
-    # Note: the param "multiStatements" is always disabled.
+    # Note: the params "multiStatements", "allowAllFiles", "allowCleartextPasswords" and "allowOldPasswords" are always disabled.
+    # In particular, the authentication methods requiring the password in clear text (mysql_clear_password, e.g. PAM or LDAP) are not supported.
     params: 
       <string>: <string> # Optional
       
