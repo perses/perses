@@ -25,10 +25,10 @@ test.describe('SearchBar', () => {
 
     await expect(searchBar.getDashboardsHeading()).toBeVisible();
 
-    const nodeExporterLink = searchBar.getDashboardLink('perses', 'NodeExporter');
+    const markdownPanelLink = searchBar.getDashboardLink('testing', 'MarkdownPanel');
 
     // Verify the dashboard is highlighted (important dashboards have bold text)
-    await expect(nodeExporterLink).toHaveCSS('font-weight', '700');
+    await expect(markdownPanelLink).toHaveCSS('font-weight', '700');
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
