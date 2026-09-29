@@ -10,7 +10,8 @@ interface {{ .PluginPascalName }}QueryParams {
   queries?: QueryDefinition[];
 }
 
-// TODO: change to the type of query you want to support for explore
+// TODO: change to the query type your explore view supports. It must be a QueryPluginType from @perses-dev/spec
+// (TimeSeriesQuery, TraceQuery, ProfileQuery, LogQuery, ...), and the result handling below must match its data shape.
 const QUERY_TYPE = 'TraceQuery';
 const QUERY_TYPES: QueryPluginType[] = [QUERY_TYPE];
 const EMPTY_QUERIES: QueryDefinition[] = [];
@@ -33,6 +34,7 @@ function SearchResultsPanel(): ReactElement | null {
     throw queryError.error;
   }
 
+  // `searchResult` is specific to TraceData; adapt this check to your query type's data.
   const dataFound = queryResults.some((result) => (result.data?.searchResult ?? []).length > 0);
   if (!dataFound) {
     return <NoDataOverlay resource="{{ .PluginPascalName }}" />;
