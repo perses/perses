@@ -29,6 +29,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -240,9 +241,18 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		builds := 0
 		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
 		require.NoError(t, err)
-		// Swap the "..data" symlink atomically, like the kubelet does.
-		require.NoError(t, os.Symlink(filepath.Base(v2Dir), filepath.Join(dir, "..data_tmp")))
-		require.NoError(t, os.Rename(filepath.Join(dir, "..data_tmp"), filepath.Join(dir, "..data")))
+		// Swap the "..data" symlink like the kubelet does (see AtomicWriter in kubernetes/pkg/volume/util/atomic_writer.go).
+		dataDir := filepath.Join(dir, "..data")
+		if runtime.GOOS == "windows" {
+			// On Windows, a symlink to a directory cannot be replaced by a rename ("Access is denied"),
+			// so the kubelet removes it and creates it again.
+			require.NoError(t, os.Remove(dataDir))
+			require.NoError(t, os.Symlink(filepath.Base(v2Dir), dataDir))
+		} else {
+			// Elsewhere, the symlink is swapped atomically.
+			require.NoError(t, os.Symlink(filepath.Base(v2Dir), filepath.Join(dir, "..data_tmp")))
+			require.NoError(t, os.Rename(filepath.Join(dir, "..data_tmp"), dataDir))
+		}
 		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
