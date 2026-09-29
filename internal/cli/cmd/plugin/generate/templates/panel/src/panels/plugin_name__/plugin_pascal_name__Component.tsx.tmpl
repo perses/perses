@@ -1,11 +1,12 @@
-import type { ReactElement } from "react";
-import type { {{ .PluginPascalName }}Props } from "./{{ .PluginName }}-types";
+import type { ReactElement } from 'react';
+
+import type { {{ .PluginPascalName }}Props } from './{{ .PluginName }}-types';
 
 export function {{ .PluginPascalName }}Component(props: {{ .PluginPascalName }}Props): ReactElement | null {
   const { queryResults, spec } = props;
 
-  console.log("Panel data", queryResults);
-  console.log("Panel spec", spec);
+  console.log('Panel data', queryResults);
+  console.log('Panel spec', spec);
 
   // TODO: implement your awesome panel component here
 

@@ -240,6 +240,30 @@ func TestCheckParameterMiddlewareValidNameOnGlobalResources(t *testing.T) {
 	})
 }
 
+// TestCheckParameterMiddlewareUserPermissionsUsername ensures the permissions endpoint accepts percent-encoded
+// delegated usernames (e.g. Kubernetes "kube:admin") while still rejecting path traversal attempts.
+func TestCheckParameterMiddlewareUserPermissionsUsername(t *testing.T) {
+	e2eframework.WithServerAuthConfig(t, func(server *httptest.Server, expect *httpexpect.Expect, _ dependency.Manager, token string) []modelAPI.Entity {
+		// The authenticated user is "alice": requesting her own permissions must succeed.
+		rawRequest(server, expect, token, http.MethodGet, fmt.Sprintf("%s/%s/alice/%s", utils.APIV1Prefix, utils.PathUser, utils.PathPermissions)).
+			Expect().
+			Status(http.StatusOK)
+
+		// A 403 (not a 400 "the name is invalid") proves the encoded username passed the middleware and
+		// reached the handler, which rejects it only because it isn't alice's own username.
+		rawRequest(server, expect, token, http.MethodGet, fmt.Sprintf("%s/%s/kube%%3Aadmin/%s", utils.APIV1Prefix, utils.PathUser, utils.PathPermissions)).
+			Expect().
+			Status(http.StatusForbidden)
+
+		// Path traversal attempts on the permissions endpoint must still be rejected by the middleware.
+		for _, tc := range invalidIDs {
+			expectInvalidName(rawRequest(server, expect, token, http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathUser, tc.raw, utils.PathPermissions)))
+		}
+
+		return []modelAPI.Entity{}
+	})
+}
+
 // TestCheckParameterMiddlewareInvalidProjectInBody ensures that when a resource is created through the root endpoint
 // (e.g. POST /api/v1/variables), the project name extracted from the body is validated as well.
 func TestCheckParameterMiddlewareInvalidProjectInBody(t *testing.T) {

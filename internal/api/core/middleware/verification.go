@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -28,6 +30,35 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/spec/go/common"
 )
+
+// usernameRegexp is common.ValidateID's ID regexp plus ':' and '@', for delegated auth usernames
+// (e.g. k8s "kube:admin", OIDC "alice@corp.com"). It still rejects path separators and '%'.
+var usernameRegexp = regexp.MustCompile("^[a-zA-Z0-9_.:@-]+$")
+
+// usernameMaxLength is larger than common.ValidateID's 75-char DB-key limit: this name is only compared
+// to the authenticated user (never used as a storage key) and delegated identities can be long.
+const usernameMaxLength = 253
+
+// validateUsername validates a URL-decoded username from the HTTP path. It keeps common.ValidateID's
+// path-traversal protections (no '..', no leading/trailing '.', strict allow-list) while allowing ':' and '@'.
+func validateUsername(name string) error {
+	if len(name) == 0 {
+		return fmt.Errorf("name cannot be empty")
+	}
+	if len(name) > usernameMaxLength {
+		return fmt.Errorf("cannot contain more than %d characters", usernameMaxLength)
+	}
+	if !usernameRegexp.MatchString(name) {
+		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, usernameRegexp.String())
+	}
+	if strings.Contains(name, "..") {
+		return fmt.Errorf("%q is not a correct name. It should not contain '..'", name)
+	}
+	if strings.HasPrefix(name, ".") || strings.HasSuffix(name, ".") {
+		return fmt.Errorf("%q is not a correct name. It should not start or end with '.'", name)
+	}
+	return nil
+}
 
 type partialMetadata struct {
 	Project string `json:"project"`
@@ -42,6 +73,9 @@ type partialObject struct {
 // apiPrefix is the optional prefix configured by the user (config `api_prefix`) under which every route is registered.
 func CheckParameter(svc project.Service, apiPrefix string) echo.MiddlewareFunc {
 	apiV1Prefix := apiPrefix + utils.APIV1Prefix
+	// The only route whose name is a delegated auth username (decoded by its handler), so the only one
+	// that accepts percent-encoded names. Built once to avoid formatting it on every request.
+	userPermissionsRoute := fmt.Sprintf("%s/%s/:%s/%s", apiV1Prefix, utils.PathUser, utils.ParamName, utils.PathPermissions)
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// This middleware is only used for the REST API (/api/v1). So we will skip any other route that doesn't start with the API prefix.
@@ -57,7 +91,17 @@ func CheckParameter(svc project.Service, apiPrefix string) echo.MiddlewareFunc {
 			// (e.g. DELETE /api/v1/projects/.. was deleting the entire database).
 
 			if len(name) > 0 {
-				if err := common.ValidateID(name); err != nil {
+				if c.Path() == userPermissionsRoute {
+					// Delegated usernames (e.g. /api/v1/users/kube%3Aadmin/permissions) are percent-encoded,
+					// so decode before validating. The raw param is left untouched; the handler decodes it itself.
+					decodedName, unescapeErr := url.PathUnescape(name)
+					if unescapeErr != nil {
+						return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", unescapeErr.Error()))
+					}
+					if err := validateUsername(decodedName); err != nil {
+						return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", err.Error()))
+					}
+				} else if err := common.ValidateID(name); err != nil {
 					return apiInterface.HandleBadRequestError(fmt.Sprintf("the name is invalid: %s", err.Error()))
 				}
 			}

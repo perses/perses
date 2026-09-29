@@ -12,28 +12,28 @@
 // limitations under the License.
 
 import { Stack } from '@mui/material';
-import type { EphemeralDashboardInfo, FolderResource, DashboardResource } from '@perses-dev/client';
-import { getResourceDisplayName, getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
+import type { EphemeralDashboardInfo, FolderResource } from '@perses-dev/client';
+import { getResourceExtendedDisplayName, useSnackbar } from '@perses-dev/components';
 import type { DashboardSelector } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useNavHistory } from '../../context/DashboardNavHistory';
-import { useDeleteDashboardMutation } from '../../model/dashboard-client';
-import {
-  AddFolderDialog,
-  CreateDashboardDialog,
-  DeleteResourceDialog,
-  EditDashboardDialog,
-  EditFolderDialog,
-} from '../dialogs';
+import type { PartialDashboardResource } from '../../model/dashboard-client';
+import { getDashboard, useDeleteDashboardMutation } from '../../model/dashboard-client';
+import type { SearchProjectResource } from '../../model/search-client';
+import { AddFolderDialog } from '../dialogs/AddFolderDialog';
+import { CreateDashboardDialog } from '../dialogs/CreateDashboardDialog';
 import { DeleteFolderDialog } from '../dialogs/DeleteFolderDialog';
+import { DeleteResourceDialog } from '../dialogs/DeleteResourceDialog';
+import { EditDashboardDialog } from '../dialogs/EditDashboardDialog';
+import { EditFolderDialog } from '../dialogs/EditFolderDialog';
 import DashboardTreeList from './DashboardTreeList';
 
-type editDashboardAction = { type: 'editDashboard'; target: DashboardResource };
-type duplicateDashboardAction = { type: 'duplicateDashboard'; target: DashboardResource };
-type deleteDashboardAction = { type: 'deleteDashboard'; target: DashboardResource };
+type editDashboardAction = { type: 'editDashboard'; target: SearchProjectResource };
+type duplicateDashboardAction = { type: 'duplicateDashboard'; target: SearchProjectResource };
+type deleteDashboardAction = { type: 'deleteDashboard'; target: SearchProjectResource };
 type deleteFolderAction = { type: 'deleteFolder'; target: FolderResource; path: string[] };
 type editFolderAction = {
   type: 'editFolder';
@@ -70,7 +70,7 @@ export interface DashboardListRow {
 }
 
 export interface DashboardListProperties {
-  dashboardList: DashboardResource[];
+  dashboardList: SearchProjectResource[];
   folderList: FolderResource[];
   isLoading: boolean;
   isEphemeralDashboardEnabled: boolean;
@@ -96,7 +96,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         index,
         project: dashboard.metadata.project,
         name: dashboard.metadata.name,
-        displayName: getResourceDisplayName(dashboard),
+        displayName: dashboard.displayName,
         version: dashboard.metadata.version ?? 0,
         createdAt: dashboard.metadata.createdAt ?? '',
         updatedAt: dashboard.metadata.updatedAt ?? '',
@@ -179,42 +179,49 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
 
   const closeDialog = useCallback(() => setActiveDialog({ type: 'none' }), []);
 
+  // The dashboard list only contains metadata: the full dashboard is fetched when the user confirms the duplication.
+  // It also guarantees the copy is based on the latest version of the dashboard, and not on an outdated cached one.
   const handleDashboardDuplication = useCallback(
     (dashboardInfo: DashboardSelector | EphemeralDashboardInfo) => {
-      if (activeDialog.type === 'duplicateDashboard') {
-        const targetedDashboard = activeDialog.target;
-        if ('ttl' in dashboardInfo) {
-          navigate(`/projects/${targetedDashboard.metadata.project}/ephemeraldashboard/new`, {
-            state: {
-              name: dashboardInfo.dashboard,
-              spec: {
-                ...targetedDashboard.spec,
-                ttl: dashboardInfo.ttl,
-                display: { name: dashboardInfo.dashboard },
-              },
-            },
-          });
-        } else {
-          navigate(`/projects/${targetedDashboard.metadata.project}/dashboard/new`, {
-            state: {
-              name: dashboardInfo.dashboard,
-              spec: {
-                ...targetedDashboard.spec,
-                display: { name: dashboardInfo.dashboard },
-              },
-            },
-          });
-        }
+      if (activeDialog.type !== 'duplicateDashboard') {
+        return;
       }
+      const { project, name } = activeDialog.target.metadata;
+      getDashboard(project, name)
+        .then((dashboard) => {
+          if ('ttl' in dashboardInfo) {
+            navigate(`/projects/${project}/ephemeraldashboard/new`, {
+              state: {
+                name: dashboardInfo.dashboard,
+                spec: {
+                  ...dashboard.spec,
+                  ttl: dashboardInfo.ttl,
+                  display: { name: dashboardInfo.dashboard },
+                },
+              },
+            });
+          } else {
+            navigate(`/projects/${project}/dashboard/new`, {
+              state: {
+                name: dashboardInfo.dashboard,
+                spec: {
+                  ...dashboard.spec,
+                  display: { name: dashboardInfo.dashboard },
+                },
+              },
+            });
+          }
+        })
+        .catch((err) => exceptionSnackbar(err));
     },
-    [navigate, activeDialog],
+    [navigate, activeDialog, exceptionSnackbar],
   );
 
   const handleDashboardDelete = useCallback(
-    (dashboard: DashboardResource): Promise<void> =>
+    (dashboard: PartialDashboardResource): Promise<void> =>
       new Promise((resolve, reject) => {
         deleteDashboardMutation.mutate(dashboard, {
-          onSuccess: (deletedDashboard: DashboardResource) => {
+          onSuccess: (deletedDashboard: PartialDashboardResource) => {
             successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
             resolve();
           },
@@ -244,7 +251,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       {activeDialog.type === 'editDashboard' && (
         <EditDashboardDialog
           open={activeDialog.type === 'editDashboard'}
-          dashboard={activeDialog.target}
+          project={activeDialog.target.metadata.project}
+          name={activeDialog.target.metadata.name}
           onClose={closeDialog}
         />
       )}
@@ -254,7 +262,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
           projects={[{ kind: 'Project', metadata: { name: activeDialog.target.metadata.project }, spec: {} }]}
           hideProjectSelect={true}
           mode="duplicate"
-          name={getResourceDisplayName(activeDialog.target)}
+          name={activeDialog.target.displayName}
           onSuccess={handleDashboardDuplication}
           onClose={closeDialog}
           isEphemeralDashboardEnabled={isEphemeralDashboardEnabled}
@@ -263,7 +271,16 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       {activeDialog.type === 'deleteDashboard' && (
         <DeleteResourceDialog
           open={activeDialog.type === 'deleteDashboard'}
-          resource={activeDialog.target}
+          resource={{
+            kind: 'Dashboard',
+            metadata: activeDialog.target.metadata,
+            spec:
+              // If the display name is the same as the metadata name, we don't need to pass it to the delete dialog, otherwise we need to pass it.
+              // It will preserve the display name in the delete dialog and show it to the user.
+              activeDialog.target.displayName === activeDialog.target.metadata.name
+                ? undefined
+                : { display: { name: activeDialog.target.displayName } },
+          }}
           onSubmit={(v) => handleDashboardDelete(v).then(closeDialog)}
           onClose={closeDialog}
         />

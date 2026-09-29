@@ -1,39 +1,28 @@
-import { Box, Stack } from "@mui/material";
-import {
-  ErrorAlert,
-  ErrorBoundary,
-  LoadingOverlay,
-  NoDataOverlay,
-} from "@perses-dev/components";
-import type { QueryDefinition } from '@perses-dev/spec';
-import { Panel } from "@perses-dev/dashboards";
-import { useExplorerManagerContext } from "@perses-dev/explore";
-import {
-  DataQueriesProvider,
-  MultiQueryEditor,
-  useDataQueries,
-} from "@perses-dev/plugin-system";
-import type { ReactElement } from "react";
+import { Box, Stack } from '@mui/material';
+import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
+import { useExplorerManagerContext } from '@perses-dev/explore';
+import { DataQueriesProvider, MultiQueryEditor, useDataQueries } from '@perses-dev/plugin-system';
+import type { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
+import type { ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface {{ .PluginPascalName }}QueryParams {
   queries?: QueryDefinition[];
 }
 
-interface SearchResultsPanelProps {
-  queries: QueryDefinition[];
-}
+// TODO: change to the query type your explore view supports. It must be a QueryPluginType from @perses-dev/spec
+// (TimeSeriesQuery, TraceQuery, ProfileQuery, LogQuery, ...), and the result handling below must match its data shape.
+const QUERY_TYPE = 'TraceQuery';
+const QUERY_TYPES: QueryPluginType[] = [QUERY_TYPE];
+const EMPTY_QUERIES: QueryDefinition[] = [];
+const CONTAINER_SX = { width: '100%' };
 
-// TODO: change to the type of query you want to support for explore
-const QUERY_TYPE = "MyQuery";
-
-function SearchResultsPanel({
-  queries,
-}: SearchResultsPanelProps): ReactElement {
+function SearchResultsPanel(): ReactElement | null {
   const { isFetching, isLoading, queryResults } = useDataQueries(QUERY_TYPE);
 
   // no query executed, show empty panel
   if (queryResults.length === 0) {
-    return <></>;
+    return null;
   }
 
   if (isLoading || isFetching) {
@@ -45,9 +34,8 @@ function SearchResultsPanel({
     throw queryError.error;
   }
 
-  const dataFound = queryResults.some(
-    (result) => (result.data?.searchResult ?? []).length > 0
-  );
+  // `searchResult` is specific to TraceData; adapt this check to your query type's data.
+  const dataFound = queryResults.some((result) => (result.data?.searchResult ?? []).length > 0);
   if (!dataFound) {
     return <NoDataOverlay resource="{{ .PluginPascalName }}" />;
   }
@@ -59,32 +47,29 @@ function SearchResultsPanel({
 
 export function {{ .PluginPascalName }}(): ReactElement {
   const {
-    data: { queries = [] },
+    data: { queries = EMPTY_QUERIES },
     setData,
   } = useExplorerManagerContext<{{ .PluginPascalName }}QueryParams>();
 
-  // map QueryDefinition to Definition<UnknownSpec>
-  const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
+  const [queryDefinitions, setQueryDefinitions] = useState(queries);
+  const handleQueryRun = useCallback((): void => {
+    setData({ queries: queryDefinitions });
+  }, [queryDefinitions, setData]);
+  const resetKeys = useMemo(() => [queries], [queries]);
 
   return (
-    <Stack gap={2} sx={{ "{{ width: '100%' }}" }}>
+    <Stack gap={2} sx={CONTAINER_SX}>
       <MultiQueryEditor
-        queryTypes={["TraceQuery"]}
-        onChange={(newQueries) => setData({ queries: newQueries })}
-        queries={queries}
+        queryTypes={QUERY_TYPES}
+        onChange={setQueryDefinitions}
+        onQueryRun={handleQueryRun}
+        queries={queryDefinitions}
       />
 
-      <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
-        <DataQueriesProvider definitions={definitions}>
+      <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={resetKeys}>
+        <DataQueriesProvider definitions={queries}>
           <Box height={700}>
-            <SearchResultsPanel queries={queries} />
+            <SearchResultsPanel />
           </Box>
         </DataQueriesProvider>
       </ErrorBoundary>

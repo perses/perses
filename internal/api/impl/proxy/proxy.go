@@ -135,6 +135,7 @@ type endpoint struct {
 	fileValidator  *secretfile.Validator
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
+	transports     *transportCache
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
@@ -151,6 +152,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		fileValidator:  fileValidator,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
+		transports:     newTransportCache(),
 	}
 }
 
@@ -201,7 +203,11 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path string, crypto crypto.Crypto, fileValidator *secretfile.Validator, retrieveSecret func(name string) (*v1.SecretSpec, error), tokenRefresher crypto.TokenRefresher) (proxy, error) {
+// newProxy builds the proxy matching the kind of the datasource.
+// transportKey identifies the saved datasource in the transport cache. It must be empty for unsaved datasources,
+// so their (one-off) transport is not cached.
+func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, spec datasourceSpec.Spec, path string,
+	retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, kind, err := datasourcev1.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).WithFields(map[string]interface{}{
@@ -220,7 +226,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		if retrieveErr != nil {
 			return nil, retrieveErr
 		}
-		if _, decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+		if _, decryptErr := e.crypto.Decrypt(scrt); decryptErr != nil {
 			logrus.WithError(decryptErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -229,7 +235,7 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 		}
 		// Defense in depth: the secret might have been stored before the file restriction was enforced
 		// (or the allowed directories changed since). Never read a file that is not explicitly allowed.
-		if validateErr := fileValidator.ValidateSpec(scrt); validateErr != nil {
+		if validateErr := e.fileValidator.ValidateSpec(scrt); validateErr != nil {
 			logrus.WithError(validateErr).WithFields(map[string]interface{}{
 				datasourceFieldLog: datasourceName,
 				projectFieldLog:    projectForLog(projectName),
@@ -255,7 +261,10 @@ func newProxy(datasourceName, projectName string, spec datasourceSpec.Spec, path
 			datasourceName: datasourceName,
 			path:           path,
 			secret:         scrt,
-			tokenRefresher: tokenRefresher,
+			tokenRefresher: e.tokenRefresher,
+			transports:     e.transports,
+			transportKey:   transportKey,
+			proxyConfig:    e.cfg.HTTPProxy,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -283,6 +292,13 @@ type httpProxy struct {
 	datasourceName string
 	path           string
 	tokenRefresher crypto.TokenRefresher
+	// transports caches the HTTP transports of the saved datasources. It can be nil.
+	transports *transportCache
+	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
+	transportKey string
+	// proxyConfig contains the connection limits applied to the transport (datasource.http_proxy).
+	// Unset values fall back to their defaults.
+	proxyConfig config.HTTPProxyConfig
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -326,7 +342,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
-	reverseProxy.Transport, transportErr = h.prepareTransport()
+	reverseProxy.Transport, transportErr = h.getTransport()
 	if transportErr != nil {
 		return transportErr
 	}
@@ -469,7 +485,7 @@ func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
 // getToken exchanges the client credentials for an access token,
 // from the OAuth 2.0 provider.
 func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2.Token, error) {
-	transport, err := h.prepareTransport()
+	transport, err := h.getTransport()
 	if err != nil {
 		return nil, err
 	}
@@ -510,6 +526,20 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	return token, err
 }
 
+// getTransport returns the transport to reach the datasource.
+// For a saved datasource, the transport is cached so the connections are reused across requests.
+// For an unsaved datasource, a new transport is built for each request.
+func (h *httpProxy) getTransport() (*http.Transport, error) {
+	if h.transports == nil || len(h.transportKey) == 0 {
+		return h.prepareTransport()
+	}
+	var tlsConfig *secretModel.TLSConfig
+	if h.secret != nil {
+		tlsConfig = h.secret.TLSConfig
+	}
+	return h.transports.get(h.transportKey, tlsConfig, h.prepareTransport)
+}
+
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 	tlsConfig, err := h.prepareTLSConfig()
 	if err != nil {
@@ -524,8 +554,17 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
 		IdleConnTimeout:     90 * time.Second,
-		ForceAttemptHTTP2:   true,
-		TLSClientConfig:     tlsConfig,
+		// The transport is reused across requests (see transportCache), and there is one transport per datasource.
+		// A dashboard usually sends many queries in parallel to the same datasource,
+		// so keep more idle connections than the Go default (2 per host) to actually reuse them.
+		// Configured with datasource.http_proxy.max_idle_conns and datasource.http_proxy.max_idle_conns_per_host.
+		MaxIdleConns:        h.proxyConfig.MaxIdleConns,
+		MaxIdleConnsPerHost: h.proxyConfig.MaxIdleConnsPerHost,
+		// Limit the connections opened to the datasource (configured with datasource.http_proxy.max_conns_per_host).
+		// Once reached, requests wait for a connection to be available. Zero means no limit.
+		MaxConnsPerHost:   h.proxyConfig.MaxConnsPerHost,
+		ForceAttemptHTTP2: true,
+		TLSClientConfig:   tlsConfig,
 	}, nil
 }
 

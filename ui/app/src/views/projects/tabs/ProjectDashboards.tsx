@@ -17,14 +17,14 @@ import type { ReactElement } from 'react';
 
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
 import { useIsEphemeralDashboardEnabled } from '../../../context/Config';
-import { useDashboardList } from '../../../model/dashboard-client';
 import { useFolderList } from '../../../model/folder-client';
+import { useSearchDashboards } from '../../../model/search-client';
 
 interface ProjectDashboardsProps extends BoxProps {
   projectName: string;
 }
 export function ProjectDashboards({ projectName, ...props }: ProjectDashboardsProps): ReactElement {
-  const { data, isLoading } = useDashboardList({ project: projectName });
+  const { data, isLoading } = useSearchDashboards(projectName);
   const { data: folderList, isLoading: isLoadingFolderList } = useFolderList({ project: projectName });
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
 

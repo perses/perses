@@ -23,7 +23,7 @@ export interface {{ .PluginPascalName }}Response {
   warnings?: string[];
   // TODO: adjust this type to match your datasource response shape
   data: any;
-};
+}
 
 export interface {{ .PluginPascalName }}Client extends DatasourceClient {
   options: {{ .PluginPascalName }}ClientOptions;

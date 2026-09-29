@@ -39,10 +39,58 @@ type ProjectDatasourceConfig struct {
 	Disable bool `json:"disable" yaml:"disable"`
 }
 
+const (
+	DefaultHTTPProxyMaxIdleConns        = 100
+	DefaultHTTPProxyMaxIdleConnsPerHost = 10
+)
+
+// HTTPProxyConfig contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+// Each datasource has its own pool of connections, so every limit below applies per datasource.
+type HTTPProxyConfig struct {
+	// MaxConnsPerHost limits the total number of connections (in use and idle) that Perses opens,
+	// for a given datasource, to a given host.
+	// Once the limit is reached, the new requests wait until a connection is available,
+	// or until they are canceled.
+	// It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+	// Zero means no limit.
+	MaxConnsPerHost int `json:"max_conns_per_host,omitempty" yaml:"max_conns_per_host,omitempty"`
+	// MaxIdleConns limits the number of idle connections kept open, for a given datasource, across all hosts.
+	// Idle connections are reused by the next requests, saving the TCP and TLS handshakes,
+	// but each of them holds a socket and some memory.
+	// Default: 100
+	MaxIdleConns int `json:"max_idle_conns,omitempty" yaml:"max_idle_conns,omitempty"`
+	// MaxIdleConnsPerHost limits the number of idle connections kept open, for a given datasource, to a given host.
+	// A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
+	// Default: 10
+	MaxIdleConnsPerHost int `json:"max_idle_conns_per_host,omitempty" yaml:"max_idle_conns_per_host,omitempty"`
+}
+
+func (c *HTTPProxyConfig) Verify() error {
+	if c.MaxConnsPerHost < 0 {
+		return fmt.Errorf("datasource.http_proxy.max_conns_per_host cannot be negative")
+	}
+	if c.MaxIdleConns < 0 {
+		return fmt.Errorf("datasource.http_proxy.max_idle_conns cannot be negative")
+	}
+	if c.MaxIdleConns == 0 {
+		c.MaxIdleConns = DefaultHTTPProxyMaxIdleConns
+	}
+	if c.MaxIdleConnsPerHost < 0 {
+		return fmt.Errorf("datasource.http_proxy.max_idle_conns_per_host cannot be negative")
+	}
+	if c.MaxIdleConnsPerHost == 0 {
+		c.MaxIdleConnsPerHost = DefaultHTTPProxyMaxIdleConnsPerHost
+	}
+	return nil
+}
+
 type DatasourceConfig struct {
 	Global  GlobalDatasourceConfig  `json:"global" yaml:"global"`
 	Project ProjectDatasourceConfig `json:"project" yaml:"project"`
 	// DisableLocal when used is preventing the possibility to add a datasource directly in the dashboard spec.
 	// It will also disable the associated proxy.
 	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
+	// HTTPProxy contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+	// +optional
+	HTTPProxy HTTPProxyConfig `json:"http_proxy,omitzero" yaml:"http_proxy,omitempty"`
 }

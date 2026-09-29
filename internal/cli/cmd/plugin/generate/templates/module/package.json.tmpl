@@ -1,6 +1,7 @@
 {
   "name": "@{{ .ModuleOrg }}/{{.ModuleName}}",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "type": "module",
   "engines": {
     "node": ">=24",
@@ -16,32 +17,36 @@
     "lint:fix": "oxlint --fix src",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "test": "cross-env LC_ALL=C TZ=UTC jest",
+    "test": "cross-env LC_ALL=C TZ=UTC vitest run",
     "type-check": "tsc --noEmit"
   },
   "main": "lib/index.js",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "devDependencies": {
-    "@module-federation/rsbuild-plugin": "^0.11.2",
-    "@rsbuild/core": "^1.2.19",
-    "@rsbuild/plugin-react": "^1.1.1",
-    "@types/react-dom": "^18.3.0",
-    "@types/jest": "^29.5.14",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.26.0",
-    "concurrently": "^9.1.2",
-    "jest": "^29.7.0",
-    "@swc/cli": "^0.6.0",
-    "@swc/core": "^1.7.10",
-    "@swc/jest": "^0.2.37",
+    "@module-federation/rsbuild-plugin": "^2.9.1",
+    "@rsbuild/core": "^1.7.6",
+    "@rsbuild/plugin-react": "^1.4.6",
+    "@swc/cli": "^0.8.1",
+    "@swc/core": "^1.15.43",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.3.0",
+    "concurrently": "^10.0.5",
+    "cross-env": "^7.0.3",
+    "jsdom": "^27.0.0",
     "oxfmt": "0.55.0",
-    "oxlint": "1.70.0"
+    "oxlint": "1.70.0",
+    "oxlint-plugin-react-doctor": "0.9.12",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-router-dom": "^6.30.6",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "@emotion/react": "^11.7.1",
@@ -59,8 +64,8 @@
     "echarts": "5.5.0",
     "immer": "^10.1.1",
     "lodash": "^4.17.21",
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "react-hook-form": "^7.87.0",
     "use-resize-observer": "^9.0.0"
   },
@@ -77,9 +82,10 @@
       "registry": "{{.ModuleOrg}}"
     },
     "schemasPath": "schemas",
-    "plugins": [{{ range $index, $item := .PersesPlugins }}
-      {{ if $index }},{{end}}{{- template "persesPlugin" $item -}}
-      {{ end }}
+    "plugins": [
+      {{- range $index, $item := .PersesPlugins }}{{ if $index }},{{ end }}
+      {{ template "persesPlugin" $item }}
+      {{- end }}
     ]
   }
 }
