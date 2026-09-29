@@ -257,14 +257,14 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			}
 		}
 		return &httpProxy{
-			config:          httpConfig,
-			datasourceName:  datasourceName,
-			path:            path,
-			secret:          scrt,
-			tokenRefresher:  e.tokenRefresher,
-			transports:      e.transports,
-			transportKey:    transportKey,
-			maxConnsPerHost: e.cfg.HTTPProxy.MaxConnsPerHost,
+			config:         httpConfig,
+			datasourceName: datasourceName,
+			path:           path,
+			secret:         scrt,
+			tokenRefresher: e.tokenRefresher,
+			transports:     e.transports,
+			transportKey:   transportKey,
+			proxyConfig:    e.cfg.HTTPProxy,
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -296,8 +296,9 @@ type httpProxy struct {
 	transports *transportCache
 	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
 	transportKey string
-	// maxConnsPerHost limits the number of connections of the transport per host. Zero means no limit.
-	maxConnsPerHost int
+	// proxyConfig contains the connection limits applied to the transport (datasource.http_proxy).
+	// Unset values fall back to their defaults.
+	proxyConfig config.HTTPProxyConfig
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -553,14 +554,15 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
 		IdleConnTimeout:     90 * time.Second,
-		// The transport is reused across requests (see transportCache).
+		// The transport is reused across requests (see transportCache), and there is one transport per datasource.
 		// A dashboard usually sends many queries in parallel to the same datasource,
-		// so keep more idle connections than the default (2) to actually reuse them.
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 10,
+		// so keep more idle connections than the Go default (2 per host) to actually reuse them.
+		// Configured with datasource.http_proxy.max_idle_conns and datasource.http_proxy.max_idle_conns_per_host.
+		MaxIdleConns:        h.proxyConfig.MaxIdleConns,
+		MaxIdleConnsPerHost: h.proxyConfig.MaxIdleConnsPerHost,
 		// Limit the connections opened to the datasource (configured with datasource.http_proxy.max_conns_per_host).
 		// Once reached, requests wait for a connection to be available. Zero means no limit.
-		MaxConnsPerHost:   h.maxConnsPerHost,
+		MaxConnsPerHost:   h.proxyConfig.MaxConnsPerHost,
 		ForceAttemptHTTP2: true,
 		TLSClientConfig:   tlsConfig,
 	}, nil

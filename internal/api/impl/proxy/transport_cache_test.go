@@ -197,9 +197,9 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 	}
 }
 
-// TestEndpoint_newProxy_maxConnsPerHost ensures the limit set in the config (datasource.http_proxy.max_conns_per_host)
-// is applied to the transport of the HTTP proxy.
-func TestEndpoint_newProxy_maxConnsPerHost(t *testing.T) {
+// TestEndpoint_newProxy_connectionLimits ensures the limits set in the config (datasource.http_proxy)
+// are applied to the transport of the HTTP proxy, and that the unset ones fall back to their defaults.
+func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 	spec := datasourceSpec.Spec{
 		Plugin: plugin.Plugin{
 			Kind: "PrometheusDatasource",
@@ -211,18 +211,28 @@ func TestEndpoint_newProxy_maxConnsPerHost(t *testing.T) {
 			},
 		},
 	}
+	custom := config.HTTPProxyConfig{MaxConnsPerHost: 3, MaxIdleConns: 20, MaxIdleConnsPerHost: 2}
 	for _, test := range []struct {
-		name            string
-		maxConnsPerHost int
-		transportKey    string
+		name         string
+		proxyConfig  config.HTTPProxyConfig
+		transportKey string
+		expected     config.HTTPProxyConfig
 	}{
-		{name: "no limit by default", maxConnsPerHost: 0, transportKey: globalTransportKey("prometheus")},
-		{name: "limit applied to a saved datasource", maxConnsPerHost: 3, transportKey: globalTransportKey("prometheus")},
-		{name: "limit applied to an unsaved datasource", maxConnsPerHost: 3, transportKey: ""},
+		{
+			name:         "defaults",
+			transportKey: globalTransportKey("prometheus"),
+			expected: config.HTTPProxyConfig{
+				MaxConnsPerHost:     0,
+				MaxIdleConns:        config.DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: config.DefaultHTTPProxyMaxIdleConnsPerHost,
+			},
+		},
+		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: globalTransportKey("prometheus"), expected: custom},
+		{name: "limits applied to an unsaved datasource", proxyConfig: custom, transportKey: "", expected: custom},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			e := &endpoint{
-				cfg:        config.DatasourceConfig{HTTPProxy: config.HTTPProxyConfig{MaxConnsPerHost: test.maxConnsPerHost}},
+				cfg:        config.DatasourceConfig{HTTPProxy: test.proxyConfig},
 				transports: newTransportCache(),
 			}
 			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
@@ -231,7 +241,9 @@ func TestEndpoint_newProxy_maxConnsPerHost(t *testing.T) {
 			require.True(t, ok)
 			transport, err := h.getTransport()
 			require.NoError(t, err)
-			assert.Equal(t, test.maxConnsPerHost, transport.MaxConnsPerHost)
+			assert.Equal(t, test.expected.MaxConnsPerHost, transport.MaxConnsPerHost)
+			assert.Equal(t, test.expected.MaxIdleConns, transport.MaxIdleConns)
+			assert.Equal(t, test.expected.MaxIdleConnsPerHost, transport.MaxIdleConnsPerHost)
 		})
 	}
 }
@@ -267,11 +279,11 @@ func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
 	for range nbRequests {
 		wg.Go(func() {
 			h := &httpProxy{
-				config:          &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-				path:            "/api/v1/query",
-				transports:      cache,
-				transportKey:    globalTransportKey("prometheus"),
-				maxConnsPerHost: 1,
+				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				path:         "/api/v1/query",
+				transports:   cache,
+				transportKey: globalTransportKey("prometheus"),
+				proxyConfig:  config.HTTPProxyConfig{MaxConnsPerHost: 1},
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 			rec := httptest.NewRecorder()
@@ -287,3 +299,65 @@ func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
 		e.transport.CloseIdleConnections()
 	}
 }
+
+// TestHTTPProxy_serve_maxIdleConnsPerHost ensures that, once a burst of requests is over,
+// the number of connections kept open for a datasource is bounded by max_idle_conns_per_host.
+func TestHTTPProxy_serve_maxIdleConnsPerHost(t *testing.T) {
+	const nbRequests = 5
+	var newConns, openConns atomic.Int32
+	var arrived sync.WaitGroup
+	arrived.Add(nbRequests)
+	allArrived := make(chan struct{})
+	go func() {
+		arrived.Wait()
+		close(allArrived)
+	}()
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		// Hold every request until all of them are in flight, so each one needs its own connection.
+		arrived.Done()
+		select {
+		case <-allArrived:
+		case <-time.After(5 * time.Second):
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"success"}`))
+	}))
+	server.Config.ConnState = func(_ net.Conn, state http.ConnState) {
+		switch state {
+		case http.StateNew:
+			newConns.Add(1)
+			openConns.Add(1)
+		case http.StateClosed, http.StateHijacked:
+			openConns.Add(-1)
+		}
+	}
+	server.Start()
+	defer server.Close()
+
+	cache := newTransportCache()
+	var wg sync.WaitGroup
+	for range nbRequests {
+		wg.Go(func() {
+			h := &httpProxy{
+				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				path:         "/api/v1/query",
+				transports:   cache,
+				transportKey: globalTransportKey("prometheus"),
+				proxyConfig:  config.HTTPProxyConfig{MaxIdleConnsPerHost: 1},
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
+			rec := httptest.NewRecorder()
+			assert.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+			assert.Equal(t, http.StatusOK, rec.Code)
+		})
+	}
+	wg.Wait()
+
+	// The burst needed one connection per request, but only one of them is kept idle afterward.
+	assert.Equal(t, int32(nbRequests), newConns.Load())
+	assert.Eventually(t, func() bool { return openConns.Load() == 1 }, 2*time.Second, 10*time.Millisecond)
+	for _, e := range cache.entries {
+		e.transport.CloseIdleConnections()
+	}
+}
+

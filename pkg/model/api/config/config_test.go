@@ -142,7 +142,11 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "http_proxy": {
+      "max_idle_conns": 100,
+      "max_idle_conns_per_host": 10
+    }
   },
   "variable": {
     "global": {
@@ -576,6 +580,12 @@ plugin:
 					},
 					Interval: common.Duration(defaultInterval),
 				},
+				Datasource: DatasourceConfig{
+					HTTPProxy: HTTPProxyConfig{
+						MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+						MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+					},
+				},
 				EphemeralDashboard: EphemeralDashboard{
 					Enable:          false,
 					CleanupInterval: common.Duration(2 * time.Hour),
@@ -720,9 +730,13 @@ func TestResolveDatasourceHTTPProxy(t *testing.T) {
 		errMessage string
 	}{
 		{
-			name:       "no limit by default",
+			name:       "defaults",
 			configData: ``,
-			expected:   HTTPProxyConfig{},
+			expected: HTTPProxyConfig{
+				MaxConnsPerHost:     0,
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+			},
 		},
 		{
 			name: "resolves max_conns_per_host",
@@ -731,7 +745,24 @@ datasource:
   http_proxy:
     max_conns_per_host: 50
 `,
-			expected: HTTPProxyConfig{MaxConnsPerHost: 50},
+			expected: HTTPProxyConfig{
+				MaxConnsPerHost:     50,
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+			},
+		},
+		{
+			name: "resolves idle connection limits",
+			configData: `
+datasource:
+  http_proxy:
+    max_idle_conns: 20
+    max_idle_conns_per_host: 2
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        20,
+				MaxIdleConnsPerHost: 2,
+			},
 		},
 		{
 			name: "rejects negative max_conns_per_host",
@@ -741,6 +772,24 @@ datasource:
     max_conns_per_host: -1
 `,
 			errMessage: "datasource.http_proxy.max_conns_per_host cannot be negative",
+		},
+		{
+			name: "rejects negative max_idle_conns",
+			configData: `
+datasource:
+  http_proxy:
+    max_idle_conns: -1
+`,
+			errMessage: "datasource.http_proxy.max_idle_conns cannot be negative",
+		},
+		{
+			name: "rejects negative max_idle_conns_per_host",
+			configData: `
+datasource:
+  http_proxy:
+    max_idle_conns_per_host: -1
+`,
+			errMessage: "datasource.http_proxy.max_idle_conns_per_host cannot be negative",
 		},
 	}
 
