@@ -7,3 +7,18 @@ export interface {{ .PluginPascalName }}Spec {
   legend?: string;
   tags?: string[];
 }
+
+// TODO: import this type from your datasource or an existing datasource plugin
+export interface DatasourceQueryClient {
+  query(
+    params: { query: string; start: number; end: number },
+    options: { signal?: AbortSignal }
+  ): Promise<{
+    data?: {
+      result?: Array<{
+        metric?: Record<string, string>;
+        values?: Array<[timestamp: number, value: string]>;
+      }>;
+    };
+  }>;
+}

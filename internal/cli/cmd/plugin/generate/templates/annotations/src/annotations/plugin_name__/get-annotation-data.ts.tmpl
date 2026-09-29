@@ -1,7 +1,7 @@
 import type { AnnotationData } from '@perses-dev/spec';
 import type { AnnotationContext } from '@perses-dev/plugin-system';
 import { replaceVariables } from '@perses-dev/plugin-system';
-import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
+import type { {{ .PluginPascalName }}Spec, DatasourceQueryClient } from './{{ .PluginName }}-types';
 
 export const getAnnotationData = async (
   spec: {{ .PluginPascalName }}Spec,
@@ -15,7 +15,7 @@ export const getAnnotationData = async (
 
   const query = replaceVariables(spec.query, context.variableState);
 
-  const client = await context.datasourceStore.getDatasourceClient(
+  const client = await context.datasourceStore.getDatasourceClient<DatasourceQueryClient>(
     // A default datasource will be selected by matching the kind if not provided
     spec.datasource ?? { kind: 'UnknownDatasource' }
   );
@@ -23,8 +23,8 @@ export const getAnnotationData = async (
   const { start, end } = context.absoluteTimeRange;
 
   // TODO: replace with the actual client method and response shape
-  const response = await (client as any).query(
-    { query, start: start / 1000, end: end / 1000 },
+  const response = await client.query(
+    { query, start: start.getTime() / 1000, end: end.getTime() / 1000 },
     { signal: abortSignal }
   );
 
