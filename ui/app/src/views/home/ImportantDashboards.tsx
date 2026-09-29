@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Card, CardContent, CircularProgress, Divider, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Divider, Stack, Typography } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
 import Archive from 'mdi-material-ui/Archive';
 import StarFourPointsOutline from 'mdi-material-ui/StarFourPointsOutline';
@@ -22,6 +22,7 @@ import { useMemo } from 'react';
 import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
+import { HomeListCard } from './HomeListCard';
 import { HomeListItem } from './HomeListItem';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 
@@ -95,119 +96,91 @@ export function ImportantDashboards(): ReactElement | null {
   }
 
   return (
-    <Card
-      elevation={0}
-      sx={{
-        border: '1px solid',
-        borderColor: 'divider',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      data-testid="important-dashboards-card"
+    <HomeListCard
+      testId="important-dashboards-card"
+      icon={<StarFourPointsOutline sx={{ color: 'primary.main' }} />}
+      title="Important Dashboards"
+      description="Curated dashboards configured for quick access."
+      centerContent={groups.length === 0 && !isLoading}
     >
-      <CardContent sx={{ flex: '0 0 auto' }}>
-        <Stack spacing={0.75}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <StarFourPointsOutline sx={{ color: 'primary.main' }} />
-            <Typography variant="h6" sx={{ fontSize: '1.125rem', fontWeight: 600 }}>
-              Important Dashboards
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            Curated dashboards configured for quick access.
-          </Typography>
+      {isLoading && (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress size={24} />
         </Stack>
-      </CardContent>
-      <CardContent
-        sx={{
-          flex: '1 1 auto',
-          pt: 0,
-          minHeight: 0,
-          ...(groups.length === 0 && !isLoading
-            ? { display: 'flex', alignItems: 'center', justifyContent: 'center' }
-            : {}),
-        }}
-      >
-        {isLoading && (
-          <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={24} />
-          </Stack>
-        )}
-        {!isLoading && groups.length === 0 && (
-          <EmptyState
-            icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
-            message="No important dashboards found."
-            hint="Configure important dashboards in your config file."
-          />
-        )}
-        {!isLoading && keyedGroups.length > 0 && (
-          <Box
-            data-testid="important-dashboards-mosaic"
-            sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
-          >
-            {keyedGroups.map((group, groupIndex) => {
-              return (
-                <Box key={group.key}>
-                  <Stack spacing={0.5} sx={{ mb: group.title !== undefined ? 1 : 0 }}>
-                    {group.title !== undefined && (
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {group.title}
-                      </Typography>
-                    )}
-                    {group.description !== undefined && (
-                      <Typography variant="body2" color="text.secondary">
-                        {group.description}
-                      </Typography>
-                    )}
-                  </Stack>
-                  <Box>
-                    {group.keyedEntries.map(({ key, entry }, entryIndex) => {
-                      if (entry.kind === 'project') {
-                        const dashboardCount = entry.dashboards.length;
-                        return (
-                          <Box key={key}>
-                            <HomeListItem
-                              to={`/projects/${entry.project}`}
-                              ariaLabel={entry.project}
-                              title={entry.project}
-                              subtitle={`${dashboardCount} ${dashboardCount === 1 ? 'dashboard' : 'dashboards'} in project`}
-                              icon={<Archive sx={{ fontSize: 16, color: 'primary.main' }} />}
-                              iconVariant="outlined"
-                            />
-                            {entryIndex < group.keyedEntries.length - 1 && <Divider />}
-                          </Box>
-                        );
-                      }
-
-                      const updatedAt = entry.dashboard.metadata.updatedAt ?? entry.dashboard.metadata.createdAt;
-                      const relativeTime = updatedAt
-                        ? intlFormatDistance(new Date(updatedAt), new Date())
-                        : 'Recently updated';
-                      const displayName = entry.dashboard.spec.display?.name ?? entry.dashboard.metadata.name;
-
+      )}
+      {!isLoading && groups.length === 0 && (
+        <EmptyState
+          icon={<StarFourPointsOutline sx={{ fontSize: 32, color: 'text.secondary' }} />}
+          message="No important dashboards found."
+          hint="Configure important dashboards in your config file."
+        />
+      )}
+      {!isLoading && keyedGroups.length > 0 && (
+        <Box
+          data-testid="important-dashboards-mosaic"
+          sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
+        >
+          {keyedGroups.map((group, groupIndex) => {
+            return (
+              <Box key={group.key}>
+                <Stack spacing={0.5} sx={{ mb: group.title !== undefined ? 1 : 0 }}>
+                  {group.title !== undefined && (
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {group.title}
+                    </Typography>
+                  )}
+                  {group.description !== undefined && (
+                    <Typography variant="body2" color="text.secondary">
+                      {group.description}
+                    </Typography>
+                  )}
+                </Stack>
+                <Box>
+                  {group.keyedEntries.map(({ key, entry }, entryIndex) => {
+                    if (entry.kind === 'project') {
+                      const dashboardCount = entry.dashboards.length;
                       return (
                         <Box key={key}>
                           <HomeListItem
-                            to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
-                            ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
-                            title={displayName}
-                            subtitle={`${entry.dashboard.metadata.project} • ${relativeTime}`}
-                            icon={<ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />}
-                            subtitleIcon={<Archive sx={{ fontSize: 12, color: 'text.secondary' }} />}
+                            to={`/projects/${entry.project}`}
+                            ariaLabel={entry.project}
+                            title={entry.project}
+                            subtitle={`${dashboardCount} ${dashboardCount === 1 ? 'dashboard' : 'dashboards'} in project`}
+                            icon={<Archive sx={{ fontSize: 16, color: 'primary.main' }} />}
+                            iconVariant="outlined"
                           />
                           {entryIndex < group.keyedEntries.length - 1 && <Divider />}
                         </Box>
                       );
-                    })}
-                  </Box>
-                  {groupIndex < keyedGroups.length - 1 && <Divider sx={{ mb: 2 }} />}
+                    }
+
+                    const updatedAt = entry.dashboard.metadata.updatedAt ?? entry.dashboard.metadata.createdAt;
+                    const relativeTime = updatedAt
+                      ? intlFormatDistance(new Date(updatedAt), new Date())
+                      : 'Recently updated';
+                    const displayName = entry.dashboard.spec.display?.name ?? entry.dashboard.metadata.name;
+
+                    return (
+                      <Box key={key}>
+                        <HomeListItem
+                          to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
+                          ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
+                          title={displayName}
+                          subtitle={`${entry.dashboard.metadata.project} • ${relativeTime}`}
+                          icon={<ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />}
+                          subtitleIcon={<Archive sx={{ fontSize: 12, color: 'text.secondary' }} />}
+                        />
+                        {entryIndex < group.keyedEntries.length - 1 && <Divider />}
+                      </Box>
+                    );
+                  })}
                 </Box>
-              );
-            })}
-          </Box>
-        )}
-      </CardContent>
-    </Card>
+                {groupIndex < keyedGroups.length - 1 && <Divider sx={{ mb: 2 }} />}
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+    </HomeListCard>
   );
 }
