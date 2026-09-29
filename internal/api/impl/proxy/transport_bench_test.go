@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
@@ -74,6 +75,15 @@ func newBenchSecret(server *httptest.Server, tlsEnabled bool) *v1.SecretSpec {
 	return &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{CA: string(caPEM), MinVersion: "TLS12", MaxVersion: "TLS13"}}
 }
 
+// benchProxyConfig is the default HTTP proxy config, as set when Perses loads its configuration.
+var benchProxyConfig = func() config.HTTPProxyConfig {
+	c := config.HTTPProxyConfig{}
+	if err := c.Verify(); err != nil {
+		panic(err)
+	}
+	return c
+}()
+
 func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec, cache *transportCache, transportKey string) error {
 	// A new httpProxy is created for each request, like newProxy does.
 	h := &httpProxy{
@@ -81,6 +91,7 @@ func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec
 		path:         "/api/v1/query",
 		secret:       secret,
 		transports:   cache,
+		proxyConfig:  benchProxyConfig,
 		transportKey: transportKey,
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
