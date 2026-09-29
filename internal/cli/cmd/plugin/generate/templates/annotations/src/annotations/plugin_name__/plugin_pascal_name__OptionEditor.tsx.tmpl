@@ -40,7 +40,7 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         value={localQuery}
         onChange={(e) => setLocalQuery(e.target.value)}
         onBlur={handleQueryBlur}
-        slotProps={{
+        slotProps={{"{{"}}
           inputLabel: { shrink: isReadonly ? true : undefined },
           input: { readOnly: isReadonly },
         }}
@@ -52,7 +52,7 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         helperText="Title displayed in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
         value={title ?? ''}
         onChange={(e) => handleTitleChange(e.target.value)}
-        slotProps={{
+        slotProps={{"{{"}}
           inputLabel: { shrink: isReadonly ? true : undefined },
           input: { readOnly: isReadonly },
         }}
@@ -64,7 +64,7 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         helperText="Text displayed below the title in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
         value={legend ?? ''}
         onChange={(e) => handleLegendChange(e.target.value)}
-        slotProps={{
+        slotProps={{"{{"}}
           inputLabel: { shrink: isReadonly ? true : undefined },
           input: { readOnly: isReadonly },
         }}
