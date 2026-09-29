@@ -94,9 +94,9 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("reuse the transport for the same datasource and TLS config", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get("global/a", &secretModel.TLSConfig{CA: "ca-a", MinVersion: "TLS12"}, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: &secretModel.TLSConfig{CA: "ca-a", MinVersion: "TLS12"}}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		assert.Equal(t, 1, builds)
@@ -105,9 +105,9 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("reuse the transport when there is no TLS config", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get("global/a", nil, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get("global/a", nil, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		assert.Equal(t, 1, builds)
@@ -116,11 +116,27 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("rebuild the transport when the TLS config changes", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get("global/a", tlsB, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsB}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
+		assert.Equal(t, 2, builds)
+		// Only the latest version is kept for a given datasource.
+		assert.Len(t, c.entries, 1)
+	})
+
+	t.Run("rebuild the transport when the connect timeout changes", func(t *testing.T) {
+		c, _ := newTestTransportCache()
+		builds := 0
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsA, ConnectTimeout: 30 * time.Second}, countingBuilder(&builds))
+		require.NoError(t, err)
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsA, ConnectTimeout: 30 * time.Second}, countingBuilder(&builds))
+		require.NoError(t, err)
+		assert.Same(t, t1, t2)
+		t3, err := c.get("global/a", transportSettings{TLSConfig: tlsA, ConnectTimeout: 10 * time.Second}, countingBuilder(&builds))
+		require.NoError(t, err)
+		assert.NotSame(t, t1, t3)
 		assert.Equal(t, 2, builds)
 		// Only the latest version is kept for a given datasource.
 		assert.Len(t, c.entries, 1)
@@ -129,9 +145,9 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("do not share the transport between datasources", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get(projectTransportKey("p", "a"), tlsA, countingBuilder(&builds))
+		t1, err := c.get(projectTransportKey("p", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get(dashboardTransportKey("p", "d", "a"), tlsA, countingBuilder(&builds))
+		t2, err := c.get(dashboardTransportKey("p", "d", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -140,14 +156,14 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("rebuild the transport once expired", func(t *testing.T) {
 		c, clock := newTestTransportCache()
 		builds := 0
-		t1, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		clock.advance(transportMaxLifetime - time.Second)
-		t2, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		clock.advance(time.Second)
-		t3, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		t3, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t3)
 		assert.Equal(t, 2, builds)
@@ -156,10 +172,10 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("remove the expired transports", func(t *testing.T) {
 		c, clock := newTestTransportCache()
 		builds := 0
-		_, err := c.get("global/a", tlsA, countingBuilder(&builds))
+		_, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		clock.advance(transportMaxLifetime)
-		_, err = c.get("global/b", tlsA, countingBuilder(&builds))
+		_, err = c.get("global/b", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotContains(t, c.entries, "global/a")
 		assert.Contains(t, c.entries, "global/b")
@@ -167,7 +183,7 @@ func TestTransportCache_get(t *testing.T) {
 
 	t.Run("do not cache when the build fails", func(t *testing.T) {
 		c, _ := newTestTransportCache()
-		_, err := c.get("global/a", tlsA, func() (*http.Transport, error) {
+		_, err := c.get("global/a", transportSettings{TLSConfig: tlsA}, func() (*http.Transport, error) {
 			return nil, assert.AnError
 		})
 		require.ErrorIs(t, err, assert.AnError)
@@ -186,9 +202,9 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, _ := newTestTransportCache()
 		_, tlsConfig := newCAFile(t, "ca-v1")
 		builds := 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		assert.Equal(t, 1, builds)
@@ -198,10 +214,10 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, _ := newTestTransportCache()
 		path, tlsConfig := newCAFile(t, "ca-v1")
 		builds := 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		writeFile(t, path, "ca-version-2")
-		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -211,12 +227,12 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, _ := newTestTransportCache()
 		path, tlsConfig := newCAFile(t, "ca-v1")
 		builds := 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		// Same size, different modification time.
 		future := time.Now().Add(time.Hour)
 		require.NoError(t, os.Chtimes(path, future, future))
-		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -239,7 +255,7 @@ func TestTransportCache_get_caFile(t *testing.T) {
 
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		// Swap the "..data" symlink like the kubelet does (see AtomicWriter in kubernetes/pkg/volume/util/atomic_writer.go).
 		dataDir := filepath.Join(dir, "..data")
@@ -253,7 +269,7 @@ func TestTransportCache_get_caFile(t *testing.T) {
 			require.NoError(t, os.Symlink(filepath.Base(v2Dir), filepath.Join(dir, "..data_tmp")))
 			require.NoError(t, os.Rename(filepath.Join(dir, "..data_tmp"), dataDir))
 		}
-		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -263,10 +279,10 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, _ := newTestTransportCache()
 		path, tlsConfig := newCAFile(t, "ca-v1")
 		builds := 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		require.NoError(t, os.Remove(path))
-		t2, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		assert.Equal(t, 1, builds)
@@ -276,33 +292,33 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, clock := newTestTransportCache()
 		path, tlsConfig := newCAFile(t, "ca-v1")
 		builds, failedBuilds := 0, 0
-		t1, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t1, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 
 		// The CA file is being rewritten, the new transport cannot be built: the previous one is used.
 		writeFile(t, path, "ca-being-rewritten")
-		t2, err := c.get("global/a", tlsConfig, failingBuilder(&failedBuilds))
+		t2, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, failingBuilder(&failedBuilds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t2)
 		assert.Equal(t, 1, failedBuilds)
 
 		// No new attempt before the retry interval.
 		clock.advance(transportRebuildRetryInterval - time.Second)
-		t3, err := c.get("global/a", tlsConfig, failingBuilder(&failedBuilds))
+		t3, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, failingBuilder(&failedBuilds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t3)
 		assert.Equal(t, 1, failedBuilds)
 
 		// New attempt after the retry interval, still failing.
 		clock.advance(time.Second)
-		t4, err := c.get("global/a", tlsConfig, failingBuilder(&failedBuilds))
+		t4, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, failingBuilder(&failedBuilds))
 		require.NoError(t, err)
 		assert.Same(t, t1, t4)
 		assert.Equal(t, 2, failedBuilds)
 
 		// Once the file is valid again, the new transport is built and used.
 		clock.advance(transportRebuildRetryInterval)
-		t5, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		t5, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t5)
 		assert.Equal(t, 2, builds)
@@ -313,14 +329,14 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, clock := newTestTransportCache()
 		path, tlsConfig := newCAFile(t, "ca-v1")
 		builds, failedBuilds := 0, 0
-		_, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		_, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		writeFile(t, path, "invalid-ca-file")
-		_, err = c.get("global/a", tlsConfig, failingBuilder(&failedBuilds))
+		_, err = c.get("global/a", transportSettings{TLSConfig: tlsConfig}, failingBuilder(&failedBuilds))
 		require.NoError(t, err)
 
 		clock.advance(transportRebuildGracePeriod)
-		_, err = c.get("global/a", tlsConfig, failingBuilder(&failedBuilds))
+		_, err = c.get("global/a", transportSettings{TLSConfig: tlsConfig}, failingBuilder(&failedBuilds))
 		require.ErrorIs(t, err, assert.AnError)
 		assert.Equal(t, 2, failedBuilds)
 	})
@@ -329,10 +345,10 @@ func TestTransportCache_get_caFile(t *testing.T) {
 		c, _ := newTestTransportCache()
 		_, tlsConfig := newCAFile(t, "ca-v1")
 		builds, failedBuilds := 0, 0
-		_, err := c.get("global/a", tlsConfig, countingBuilder(&builds))
+		_, err := c.get("global/a", transportSettings{TLSConfig: tlsConfig}, countingBuilder(&builds))
 		require.NoError(t, err)
 		otherConfig := &secretModel.TLSConfig{CAFile: tlsConfig.CAFile, MinVersion: "TLS13"}
-		_, err = c.get("global/a", otherConfig, failingBuilder(&failedBuilds))
+		_, err = c.get("global/a", transportSettings{TLSConfig: otherConfig}, failingBuilder(&failedBuilds))
 		require.ErrorIs(t, err, assert.AnError)
 	})
 }
@@ -438,6 +454,89 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 			assert.Equal(t, test.expected.MaxIdleConnsPerHost, transport.MaxIdleConnsPerHost)
 		})
 	}
+}
+
+// TestEndpoint_newProxy_timeout ensures the connection timeout of the HTTP proxy is the one defined by the datasource,
+// bounded by the server configuration (datasource.http_proxy.default_timeout and max_timeout).
+func TestEndpoint_newProxy_timeout(t *testing.T) {
+	newSpec := func(timeout string) datasourceSpec.Spec {
+		proxySpec := map[string]any{"url": "http://localhost:9090"}
+		if len(timeout) > 0 {
+			proxySpec["timeout"] = timeout
+		}
+		return datasourceSpec.Spec{
+			Plugin: plugin.Plugin{
+				Kind: "PrometheusDatasource",
+				Spec: map[string]any{
+					"proxy": map[string]any{"kind": "HTTPProxy", "spec": proxySpec},
+				},
+			},
+		}
+	}
+	serverCfg := config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)}
+	for _, test := range []struct {
+		name        string
+		proxyConfig config.HTTPProxyConfig
+		timeout     string
+		expected    time.Duration
+	}{
+		{name: "server defaults", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
+		{name: "server defaults: the datasource cannot increase the timeout", timeout: "5m", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
+		{name: "server defaults: the datasource can lower the timeout", timeout: "5s", expected: 5 * time.Second},
+		{name: "no timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, expected: 10 * time.Second},
+		{name: "zero timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, timeout: "0s", expected: 10 * time.Second},
+		{name: "timeout of the datasource", proxyConfig: serverCfg, timeout: "45s", expected: 45 * time.Second},
+		{name: "timeout of the datasource clamped to the maximum of the server", proxyConfig: serverCfg, timeout: "10m", expected: time.Minute},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// The config is verified when Perses loads it, which also sets the default values.
+			proxyConfig := test.proxyConfig
+			require.NoError(t, proxyConfig.Verify())
+			e := &endpoint{
+				cfg:        config.DatasourceConfig{HTTPProxy: proxyConfig},
+				transports: newTransportCache(),
+			}
+			pr, err := e.newProxy("prometheus", "", globalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
+			require.NoError(t, err)
+			h, ok := pr.(*httpProxy)
+			require.True(t, ok)
+			assert.Equal(t, test.expected, h.proxyConfig.EffectiveTimeout(h.config.Timeout))
+		})
+	}
+}
+
+// TestHTTPProxy_getTransport_timeoutChange ensures the cached transport of a saved datasource is rebuilt when its
+// effective timeout changes, so the new timeout applies right away instead of once the cached transport expires.
+func TestHTTPProxy_getTransport_timeoutChange(t *testing.T) {
+	cache := newTransportCache()
+	newHTTPProxy := func(timeout common.DurationString) *httpProxy {
+		return &httpProxy{
+			config:       &datasourceHTTP.Config{URL: common.MustParseURL("http://localhost:9090"), Timeout: timeout},
+			path:         "/api/v1/query",
+			transports:   cache,
+			transportKey: globalTransportKey("prometheus"),
+			proxyConfig:  config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)},
+		}
+	}
+	t1, err := newHTTPProxy("20s").getTransport()
+	require.NoError(t, err)
+	t2, err := newHTTPProxy("20s").getTransport()
+	require.NoError(t, err)
+	assert.Same(t, t1, t2)
+
+	// The timeout of the datasource has been updated.
+	t3, err := newHTTPProxy("30s").getTransport()
+	require.NoError(t, err)
+	assert.NotSame(t, t2, t3)
+
+	// Both timeouts are beyond the maximum and so clamped to the same value: the transport is reused.
+	t4, err := newHTTPProxy("5m").getTransport()
+	require.NoError(t, err)
+	assert.NotSame(t, t3, t4)
+	t5, err := newHTTPProxy("10m").getTransport()
+	require.NoError(t, err)
+	assert.Same(t, t4, t5)
+	assert.Len(t, cache.entries, 1)
 }
 
 // TestHTTPProxy_serve_maxConnsPerHost ensures concurrent requests beyond the limit wait for a connection

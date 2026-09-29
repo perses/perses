@@ -427,6 +427,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
 
 	h := &httpProxy{
+		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 		secret: &v1.SecretSpec{
 			TLSConfig: &secretModel.TLSConfig{
 				CA:         string(caPEM),

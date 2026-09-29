@@ -299,7 +299,7 @@ type httpProxy struct {
 	transports *transportCache
 	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
 	transportKey string
-	// proxyConfig contains the connection limits applied to the transport (datasource.http_proxy).
+	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.http_proxy).
 	// Unset values fall back to their defaults.
 	proxyConfig config.HTTPProxyConfig
 }
@@ -536,11 +536,11 @@ func (h *httpProxy) getTransport() (*http.Transport, error) {
 	if h.transports == nil || len(h.transportKey) == 0 {
 		return h.prepareTransport()
 	}
-	var tlsConfig *secretModel.TLSConfig
+	settings := transportSettings{ConnectTimeout: h.proxyConfig.EffectiveTimeout(h.config.Timeout)}
 	if h.secret != nil {
-		tlsConfig = h.secret.TLSConfig
+		settings.TLSConfig = h.secret.TLSConfig
 	}
-	return h.transports.get(h.transportKey, tlsConfig, h.prepareTransport)
+	return h.transports.get(h.transportKey, settings, h.prepareTransport)
 }
 
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
@@ -549,10 +549,27 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		h.logWithDefaultEntry().WithError(err).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
+	// The datasource can only lower the timeout set by the server (datasource.http_proxy.default_timeout and max_timeout).
+	// The timeout is clamped here again, even though it is validated when the datasource is saved,
+	// because the maximum can have been lowered since then, and because unsaved datasources are not validated.
+	connectTimeout := h.proxyConfig.EffectiveTimeout(h.config.Timeout)
+	if timeoutErr := h.proxyConfig.ValidateTimeout(h.config.Timeout); timeoutErr != nil {
+		entry := h.logWithDefaultEntry().WithError(timeoutErr)
+		const msg = "the timeout of the datasource is not allowed by the server configuration, %s is used instead"
+		if len(h.transportKey) == 0 {
+			// Unsaved datasource: it is not validated, and its transport is built for each request.
+			// Logging at debug level avoids letting any user flood the logs.
+			entry.Debugf(msg, connectTimeout)
+		} else {
+			// Saved datasource: the maximum has been lowered after the datasource has been saved.
+			// It is logged once per transport build (see transportCache).
+			entry.Warningf(msg, connectTimeout)
+		}
+	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
+			Timeout:   connectTimeout,
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,

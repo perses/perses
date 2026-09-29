@@ -363,6 +363,8 @@ security:
 					HTTPProxy: HTTPProxyConfig{
 						MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
 						MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+						DefaultTimeout:      DefaultHTTPProxyTimeout,
+						MaxTimeout:          DefaultHTTPProxyTimeout,
 					},
 				},
 				Search: Search{

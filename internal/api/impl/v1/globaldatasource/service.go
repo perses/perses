@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -37,13 +38,16 @@ type service struct {
 	dao   globaldatasource.DAO
 	sch   schema.Schema
 	authz authorization.Authorization
+	// proxyCfg is used to validate the proxy of the datasource (e.g. its timeout) against the server configuration.
+	proxyCfg config.HTTPProxyConfig
 }
 
-func NewService(dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
+func NewService(cfg config.DatasourceConfig, dao globaldatasource.DAO, sch schema.Schema, authz authorization.Authorization) globaldatasource.Service {
 	return &service{
-		dao:   dao,
-		sch:   sch,
-		authz: authz,
+		dao:      dao,
+		sch:      sch,
+		authz:    authz,
+		proxyCfg: cfg.HTTPProxy,
 	}
 }
 
@@ -165,5 +169,5 @@ func (s *service) validate(entity *v1.GlobalDatasource) error {
 			return err
 		}
 	}
-	return validate.Datasource(entity, list, s.sch)
+	return validate.Datasource(entity, list, s.sch, &s.proxyCfg)
 }

@@ -44,7 +44,7 @@ const (
 
 // transportKey builds the identity of a saved datasource used as a key in the transport cache.
 // Each part is joined with a separator that is not allowed in Perses resource names (nor in a path parameter).
-// Note: even in case of a key collision, a transport is only reused if it has been built from the same TLS config,
+// Note: even in case of a key collision, a transport is only reused if it has been built from the same settings (see transportSettings),
 // meaning both transports would be strictly equivalent.
 func transportKey(parts ...string) string {
 	return strings.Join(parts, "/")
@@ -86,7 +86,7 @@ func caFileFingerprint(tlsConfig *secretModel.TLSConfig) (fingerprint fileFinger
 }
 
 type transportEntry struct {
-	// configHash is the hash of the TLS config the transport has been built from.
+	// configHash is the hash of the settings the transport has been built from (see transportSettings).
 	configHash [sha256.Size]byte
 	// caFile is the fingerprint of the CA file when the transport has been built.
 	caFile    fileFingerprint
@@ -102,7 +102,8 @@ type transportEntry struct {
 // are reused across requests instead of being re-established for every proxied request.
 //
 // An entry is identified by the datasource identity. The transport is rebuilt when:
-//   - the TLS config of the secret changes (detected with a hash of the config. Only the hash is kept in memory, never the TLS config itself),
+//   - the settings of the transport change (see transportSettings), like the TLS config of the secret or the connection timeout
+//     (detected with a hash of the settings. Only the hash is kept in memory, never the TLS config itself),
 //   - the CA file referenced by the TLS config changes on disk (detected with its modification time and size),
 //   - the transport expires (see transportMaxLifetime).
 type transportCache struct {
@@ -122,10 +123,19 @@ func newTransportCache() *transportCache {
 	}
 }
 
-func hashTLSConfig(tlsConfig *secretModel.TLSConfig) ([sha256.Size]byte, error) {
+// transportSettings gathers the settings of a datasource that a transport is built from.
+// A cached transport is only reused if it has been built from the same settings.
+type transportSettings struct {
+	// TLSConfig is the TLS config of the datasource secret. It can be nil.
+	TLSConfig *secretModel.TLSConfig `json:"tlsConfig"`
+	// ConnectTimeout is the maximum amount of time allowed to establish a connection to the datasource.
+	ConnectTimeout time.Duration `json:"connectTimeout"`
+}
+
+func hashSettings(settings transportSettings) ([sha256.Size]byte, error) {
 	// json.Marshal is deterministic for structs, and TLSConfig doesn't use any redacted type,
-	// so any change in the config (including inline certificates and keys) changes the hash.
-	data, err := json.Marshal(tlsConfig)
+	// so any change in the settings (including inline certificates and keys) changes the hash.
+	data, err := json.Marshal(settings)
 	if err != nil {
 		return [sha256.Size]byte{}, err
 	}
@@ -134,15 +144,15 @@ func hashTLSConfig(tlsConfig *secretModel.TLSConfig) ([sha256.Size]byte, error) 
 
 // get returns the transport cached for the given key if it is still up to date.
 // Otherwise, it builds a new one with the given function, caches it and returns it.
-func (c *transportCache) get(key string, tlsConfig *secretModel.TLSConfig, build func() (*http.Transport, error)) (*http.Transport, error) {
-	configHash, err := hashTLSConfig(tlsConfig)
+func (c *transportCache) get(key string, settings transportSettings, build func() (*http.Transport, error)) (*http.Transport, error) {
+	configHash, err := hashSettings(settings)
 	if err != nil {
 		return nil, err
 	}
 	// The CA file must be stat'ed before building the transport. If the file changes in between,
 	// the stored fingerprint is the old one, and the next request rebuilds the transport again.
 	// The other way around, a new fingerprint could be stored with the old content, and the change would be missed.
-	caFile, caFileKnown := caFileFingerprint(tlsConfig)
+	caFile, caFileKnown := caFileFingerprint(settings.TLSConfig)
 	if t := c.lookup(key, configHash, caFile, caFileKnown); t != nil {
 		return t, nil
 	}
@@ -194,7 +204,7 @@ func (c *transportCache) lookup(key string, configHash [sha256.Size]byte, caFile
 }
 
 // fallback returns the current transport of the datasource when a new one cannot be built, as long as:
-//   - the TLS config didn't change (only the CA file changed on disk, or the transport expired),
+//   - the settings didn't change (only the CA file changed on disk, or the transport expired),
 //   - the first failure happened less than transportRebuildGracePeriod ago.
 //
 // It avoids failing the requests while the CA file is being rewritten, without trusting forever a CA that cannot be read anymore.

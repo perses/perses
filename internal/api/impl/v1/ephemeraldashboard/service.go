@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceV1 "github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -41,15 +42,18 @@ type service struct {
 	projectVarDAO variable.DAO
 	sch           schema.Schema
 	authz         authorization.Authorization
+	// proxyCfg is used to validate the proxy of the local datasources (e.g. its timeout) against the server configuration.
+	proxyCfg config.HTTPProxyConfig
 }
 
-func NewService(dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization) ephemeraldashboard.Service {
+func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization) ephemeraldashboard.Service {
 	return &service{
 		dao:           dao,
 		globalVarDAO:  globalVarDAO,
 		projectVarDAO: projectVarDAO,
 		sch:           sch,
 		authz:         authz,
+		proxyCfg:      cfg.Datasource.HTTPProxy,
 	}
 }
 
@@ -154,7 +158,7 @@ func (s *service) Validate(entity *v1.EphemeralDashboard) error {
 		return apiInterface.HandleError(globalVarsErr)
 	}
 
-	if err := validate.DashboardSpecWithVars(entity.Spec.Spec, s.sch, projectVars, globalVars); err != nil {
+	if err := validate.DashboardSpecWithVars(entity.Spec.Spec, s.sch, &s.proxyCfg, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil
