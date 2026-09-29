@@ -113,7 +113,29 @@ When contacting one of these URLs, Perses will first get the datasource from the
 information in the URI.
 Then, if a secret is associated with the datasource, Perses will retrieve the secret from the database and use it to
 inject the secret in the request.
-Finally, Perses will execute the query to the SQL datasource and return the response in CSV format to the client.
+Finally, Perses will execute the query to the SQL datasource and return the response in JSON format to the client.
+
+## Read-only queries
+
+The SQL proxy only executes read-only queries:
+
+- The query must start with one of the following keywords: `SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, `VALUES`, `TABLE`.
+  Any other query is rejected.
+- The query is executed in a read-only transaction, so the database rejects any statement modifying the data or the schema of the database,
+  even when the query starts with one of the keywords above (e.g. `WITH d AS (DELETE FROM ...) SELECT ...`).
+  The database must support read-only transactions (`START TRANSACTION READ ONLY` for MySQL / MariaDB, `BEGIN READ ONLY` for PostgreSQL).
+  It may not be the case of a database that is only compatible with the MySQL or PostgreSQL protocol: every query then fails.
+- A single statement is executed per query.
+
+These checks are a safety net, not a security boundary. A read-only transaction doesn't prevent the side effects happening
+outside the tables of the database, for example:
+
+- writing a file on the database server (`SELECT ... INTO OUTFILE` in MySQL / MariaDB, with the `FILE` privilege),
+- the administration functions (e.g. `pg_terminate_backend` or `pg_reload_conf` in PostgreSQL),
+- the functions acting through another connection (e.g. `dblink_exec` in PostgreSQL).
+
+It is still strongly recommended to configure the datasource with a database user having only the permissions it needs
+(e.g. read-only access to the relevant tables, without the `FILE` privilege or any administration role).
 
 
 ```mermaid
@@ -127,7 +149,7 @@ sequenceDiagram
     backend ->> db: Get datasource
     backend ->> db: Get secret
     backend ->> backend: Build the SQL database connection 
-    backend ->> datasource: Execute the SQL query against the database
-    datasource ->> backend: Return the response in CSV format 
-    backend ->> client: Forward the response
+    backend ->> datasource: Execute the SQL query in a read-only transaction
+    datasource ->> backend: Return the rows
+    backend ->> client: Forward the rows in JSON format
 ```
