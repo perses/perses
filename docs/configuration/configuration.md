@@ -698,6 +698,30 @@ project:
 # When used is preventing the possibility to add a datasource directly in the dashboard spec.
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
+
+# Configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+http_proxy: <HTTPProxy config> # Optional
+```
+
+#### HTTPProxy config
+
+Each datasource has its own pool of connections, so every limit below applies per datasource.
+Keeping connections open saves the TCP and TLS handshakes of the next requests, but each idle connection holds a socket and some memory.
+When running Perses with a large number of datasources, you may want to lower the idle connection limits.
+
+```yaml
+# Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
+# Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
+# It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+# Zero means no limit.
+max_conns_per_host: <int> | default = 0 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, across all hosts.
+max_idle_conns: <int> | default = 100 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, to a given host.
+# A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
+max_idle_conns_per_host: <int> | default = 10 # Optional
 ```
 
 #### GlobalDatasourceDiscovery config
