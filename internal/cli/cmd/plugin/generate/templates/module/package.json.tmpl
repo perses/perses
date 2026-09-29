@@ -82,9 +82,10 @@
       "registry": "{{.ModuleOrg}}"
     },
     "schemasPath": "schemas",
-    "plugins": [{{ range $index, $item := .PersesPlugins }}
-      {{ if $index }},{{end}}{{- template "persesPlugin" $item -}}
-      {{ end }}
+    "plugins": [
+      {{- range $index, $item := .PersesPlugins }}{{ if $index }},{{ end }}
+      {{ template "persesPlugin" $item }}
+      {{- end }}
     ]
   }
 }

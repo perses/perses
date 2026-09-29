@@ -1,25 +1,17 @@
 import { fetch } from '@perses-dev/client';
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
 
-import type {
-  {{ .PluginPascalName }}Spec,
-  {{ .PluginPascalName }}Client,
-} from './{{ .PluginName }}-types';
+import type { {{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client } from './{{ .PluginName }}-types';
 import { {{ .PluginPascalName }}Editor } from './{{ .PluginPascalName }}Editor';
 
-const createClient: DatasourcePlugin<
-  {{ .PluginPascalName }}Spec,
-  {{ .PluginPascalName }}Client
->['createClient'] = (spec, options) => {
+const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
-    throw new Error(
-      'No URL specified for {{ .PluginPascalName }} client. You can use directUrl in the spec to configure it.',
-    );
+    throw new Error('No URL specified for {{ .PluginPascalName }} client. You can use directUrl in the spec to configure it.');
   }
 
   const specHeaders = proxy?.spec.headers;
@@ -54,10 +46,7 @@ const createClient: DatasourcePlugin<
   };
 };
 
-export const {{ .PluginPascalName }}: DatasourcePlugin<
-  {{ .PluginPascalName }}Spec,
-  {{ .PluginPascalName }}Client
-> = {
+export const {{ .PluginPascalName }}: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client> = {
   createClient,
   OptionsEditorComponent: {{ .PluginPascalName }}Editor,
   createInitialOptions: () => ({ directUrl: '' }),
