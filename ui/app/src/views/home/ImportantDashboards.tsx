@@ -149,7 +149,7 @@ export function ImportantDashboards(): ReactElement | null {
             {keyedGroups.map((group, groupIndex) => {
               return (
                 <Box key={group.key}>
-                  <Stack spacing={0.5} sx={{ mb: 1.5 }}>
+                  <Stack spacing={0.5} sx={{ mb: group.title !== undefined ? 1 : 0 }}>
                     {group.title !== undefined && (
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                         {group.title}
