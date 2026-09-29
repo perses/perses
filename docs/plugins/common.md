@@ -147,6 +147,11 @@ spec:
   # URL is the url of datasource. It is not the url of the proxy.
   url: <url>
 
+  # The maximum amount of time allowed to establish a connection to the datasource.
+  # When not set or set to 0, the default timeout of the server is used (datasource.http_proxy.default_timeout).
+  # It cannot be greater than the maximum timeout allowed by the server (datasource.http_proxy.max_timeout).
+  timeout: <duration> # Optional
+
   # It is a tuple list of http methods and http endpoints that will be accessible.
   # Leave it empty if you don't want to restrict the access to the datasource.
   allowedEndpoints:

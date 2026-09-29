@@ -36,7 +36,7 @@ func validateAllDashboards(sch schema.Schema) {
 		logrus.Fatal(jsonErr)
 	}
 	for _, dashboard := range dashboardList {
-		if vErr := validate.DashboardSpec(dashboard.Spec, sch); vErr != nil {
+		if vErr := validate.DashboardSpec(dashboard.Spec, sch, nil); vErr != nil {
 			logrus.Fatal(vErr)
 		}
 	}
@@ -53,7 +53,7 @@ func validateAllDatasources(sch schema.Schema) {
 		logrus.Fatal(jsonErr)
 	}
 	for _, datasource := range datasourceList {
-		if vErr := validate.Datasource(datasource, nil, sch); vErr != nil {
+		if vErr := validate.Datasource(datasource, nil, sch, nil); vErr != nil {
 			logrus.Fatal(vErr)
 		}
 	}
@@ -70,7 +70,7 @@ func validateAllGlobalDatasources(sch schema.Schema) {
 		logrus.Fatal(jsonErr)
 	}
 	for _, datasource := range datasourceList {
-		if vErr := validate.Datasource(datasource, nil, sch); vErr != nil {
+		if vErr := validate.Datasource(datasource, nil, sch, nil); vErr != nil {
 			logrus.Fatal(vErr)
 		}
 	}

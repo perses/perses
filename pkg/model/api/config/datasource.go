@@ -13,7 +13,12 @@
 
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+
+	"github.com/perses/spec/go/common"
+)
 
 type GlobalDatasourceConfig struct {
 	// Disable is used to disable the global datasource feature.
@@ -42,6 +47,8 @@ type ProjectDatasourceConfig struct {
 const (
 	DefaultHTTPProxyMaxIdleConns        = 100
 	DefaultHTTPProxyMaxIdleConnsPerHost = 10
+	// DefaultHTTPProxyTimeout is the default maximum amount of time allowed to establish a connection to a datasource.
+	DefaultHTTPProxyTimeout = common.Duration(30 * time.Second)
 )
 
 // HTTPProxyConfig contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
@@ -63,6 +70,15 @@ type HTTPProxyConfig struct {
 	// A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
 	// Default: 10
 	MaxIdleConnsPerHost int `json:"max_idle_conns_per_host,omitempty" yaml:"max_idle_conns_per_host,omitempty"`
+	// DefaultTimeout is the maximum amount of time allowed to establish a connection to a datasource,
+	// when the datasource doesn't define its own timeout (or sets it to 0).
+	// Default: 30s
+	DefaultTimeout common.Duration `json:"default_timeout,omitempty" yaml:"default_timeout,omitempty"`
+	// MaxTimeout is the highest timeout a datasource can define. A datasource can only lower the timeout, never go beyond it.
+	// A long timeout keeps goroutines and sockets busy against unreachable hosts,
+	// so letting the users increase it freely would expose Perses to resource exhaustion.
+	// Default: the value of DefaultTimeout
+	MaxTimeout common.Duration `json:"max_timeout,omitempty" yaml:"max_timeout,omitempty"`
 }
 
 func (c *HTTPProxyConfig) Verify() error {
@@ -81,7 +97,77 @@ func (c *HTTPProxyConfig) Verify() error {
 	if c.MaxIdleConnsPerHost == 0 {
 		c.MaxIdleConnsPerHost = DefaultHTTPProxyMaxIdleConnsPerHost
 	}
+	if c.DefaultTimeout < 0 {
+		return fmt.Errorf("datasource.http_proxy.default_timeout cannot be negative")
+	}
+	if c.DefaultTimeout == 0 {
+		c.DefaultTimeout = DefaultHTTPProxyTimeout
+	}
+	if c.MaxTimeout < 0 {
+		return fmt.Errorf("datasource.http_proxy.max_timeout cannot be negative")
+	}
+	if c.MaxTimeout == 0 {
+		c.MaxTimeout = c.DefaultTimeout
+	}
+	if c.DefaultTimeout > c.MaxTimeout {
+		return fmt.Errorf("datasource.http_proxy.default_timeout (%s) cannot be greater than datasource.http_proxy.max_timeout (%s)", c.DefaultTimeout, c.MaxTimeout)
+	}
 	return nil
+}
+
+// ValidateTimeout verifies that the timeout defined in the spec of a datasource is allowed by the server configuration.
+// It is meant to be used when the datasource is saved.
+// An empty or zero timeout is valid: it means the datasource uses DefaultTimeout.
+func (c *HTTPProxyConfig) ValidateTimeout(timeout common.DurationString) error {
+	if len(timeout) == 0 {
+		return nil
+	}
+	d, err := common.ParseDuration(string(timeout))
+	if err != nil {
+		return fmt.Errorf("invalid timeout %q: %w", timeout, err)
+	}
+	if d < 0 {
+		return fmt.Errorf("timeout %q cannot be negative", timeout)
+	}
+	if maxTimeout := c.maxTimeout(); time.Duration(d) > maxTimeout {
+		return fmt.Errorf("timeout %q exceeds the maximum allowed by the server (%s)", timeout, common.Duration(maxTimeout))
+	}
+	return nil
+}
+
+// EffectiveTimeout returns the maximum amount of time allowed to establish a connection to a datasource
+// defining the given timeout in its spec: min(timeout, MaxTimeout), or DefaultTimeout when the timeout is not set (or 0).
+//
+// The timeout is clamped at runtime, even though it is already validated when the datasource is saved (see ValidateTimeout),
+// because MaxTimeout can have been lowered since the datasource has been saved.
+func (c *HTTPProxyConfig) EffectiveTimeout(timeout common.DurationString) time.Duration {
+	result := c.defaultTimeout()
+	if len(timeout) > 0 {
+		// An invalid timeout is not supposed to happen since it is validated when the spec is unmarshalled.
+		// Anyway, fallback on the default timeout in that case.
+		if d, err := common.ParseDuration(string(timeout)); err == nil && d > 0 {
+			result = time.Duration(d)
+		}
+	}
+	return min(result, c.maxTimeout())
+}
+
+// defaultTimeout returns DefaultTimeout.
+// It falls back on DefaultHTTPProxyTimeout when the config has not been verified (see Verify), so the timeout is never unbounded.
+func (c *HTTPProxyConfig) defaultTimeout() time.Duration {
+	if c.DefaultTimeout <= 0 {
+		return time.Duration(DefaultHTTPProxyTimeout)
+	}
+	return time.Duration(c.DefaultTimeout)
+}
+
+// maxTimeout returns MaxTimeout.
+// It falls back on the default timeout when the config has not been verified (see Verify).
+func (c *HTTPProxyConfig) maxTimeout() time.Duration {
+	if c.MaxTimeout <= 0 {
+		return c.defaultTimeout()
+	}
+	return time.Duration(c.MaxTimeout)
 }
 
 type DatasourceConfig struct {
