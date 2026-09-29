@@ -174,7 +174,7 @@ export function useHasImportantDashboards(): boolean {
 
 export function useShouldNormalizeResourceNames(): boolean {
   const { config } = useConfigContext();
-  return !config.database.file?.case_sensitive || !config.database.sql?.case_sensitive;
+  return config.database.file?.case_sensitive === false || config.database.sql?.case_sensitive === false;
 }
 
 export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {

@@ -124,7 +124,12 @@ export function resolveImportantDashboardList(
 
   dashboards.forEach((dashboard) => {
     const projectKey = normalizeImportantDashboardName(dashboard.metadata.project, shouldNormalizeResourceNames);
-    dashboardsByProject.set(projectKey, [...(dashboardsByProject.get(projectKey) ?? []), dashboard]);
+    const projectDashboards = dashboardsByProject.get(projectKey);
+    if (projectDashboards) {
+      projectDashboards.push(dashboard);
+    } else {
+      dashboardsByProject.set(projectKey, [dashboard]);
+    }
   });
 
   importantDashboardGroups.forEach((group) => {
