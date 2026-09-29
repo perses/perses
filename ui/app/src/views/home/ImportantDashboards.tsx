@@ -19,12 +19,12 @@ import ViewDashboardOutline from 'mdi-material-ui/ViewDashboardOutline';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
+import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { useImportantDashboardGroups } from '../../context/Config';
 import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
 import { HomeListCard } from './HomeListCard';
 import { HomeListItem } from './HomeListItem';
-import { EmptyState } from '../../components/EmptyState/EmptyState';
 
 function buildGroupKey(group: ImportantDashboardGroupData): string {
   const entryKeys = group.entries.map(buildEntryBaseKey).join('|');
