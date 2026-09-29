@@ -5,6 +5,7 @@
     "module": "esnext",
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
@@ -16,5 +17,5 @@
     "noEmit": true,
     "pretty": true
   },
-  "include": ["src"]
+  "include": ["src", "rsbuild.config.ts", "vitest.config.ts"]
 }

@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["**/*.stories.*", "**/*.test.*", "**/*.map"],
+  "include": ["src"],
+  "exclude": ["**/*.stories.*", "**/*.test.*", "**/*.map", "src/setup-tests.ts"],
   "compilerOptions": {
     "noEmit": false,
     "outDir": "./dist/lib",

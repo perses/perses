@@ -11,7 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '@testing-library/jest-dom/vitest';
+import { defineConfig } from 'vitest/config';
 
-// Always mock e-charts during tests since we don't have a proper canvas in jsdom
-vi.mock('echarts/core');
+export default defineConfig({
+  resolve: {
+    alias: {
+      'use-resize-observer': 'use-resize-observer/polyfilled',
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.{ts,tsx,js,jsx}', 'src/**/*.spec.{ts,tsx,js,jsx}'],
+    server: {
+      deps: {
+        inline: [/@perses-dev\/(components|dashboards|plugin-system)/],
+      },
+    },
+    setupFiles: ['./src/setup-tests.ts'],
+    passWithNoTests: true,
+    testTimeout: 15_000,
+  },
+});
