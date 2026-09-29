@@ -828,10 +828,25 @@ datasource:
 			errMessage: "datasource.http_proxy.default_timeout (1m) cannot be greater than datasource.http_proxy.max_timeout (10s)",
 		},
 		{
-			name: "rejects max_timeout lower than the default default_timeout",
+			name: "default_timeout follows max_timeout when only max_timeout is set lower than the default value",
 			configData: `
 datasource:
   http_proxy:
+    max_timeout: 10s
+`,
+			expected: HTTPProxyConfig{
+				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+				MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+				DefaultTimeout:      common.Duration(10 * time.Second),
+				MaxTimeout:          common.Duration(10 * time.Second),
+			},
+		},
+		{
+			name: "rejects default_timeout explicitly set greater than max_timeout",
+			configData: `
+datasource:
+  http_proxy:
+    default_timeout: 30s
     max_timeout: 10s
 `,
 			errMessage: "datasource.http_proxy.default_timeout (30s) cannot be greater than datasource.http_proxy.max_timeout (10s)",

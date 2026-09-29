@@ -72,7 +72,7 @@ type HTTPProxyConfig struct {
 	MaxIdleConnsPerHost int `json:"max_idle_conns_per_host,omitempty" yaml:"max_idle_conns_per_host,omitempty"`
 	// DefaultTimeout is the maximum amount of time allowed to establish a connection to a datasource,
 	// when the datasource doesn't define its own timeout (or sets it to 0).
-	// Default: 30s
+	// Default: 30s, or MaxTimeout if it is lower
 	DefaultTimeout common.Duration `json:"default_timeout,omitempty" yaml:"default_timeout,omitempty"`
 	// MaxTimeout is the highest timeout a datasource can define. A datasource can only lower the timeout, never go beyond it.
 	// A long timeout keeps goroutines and sockets busy against unreachable hosts,
@@ -100,11 +100,16 @@ func (c *HTTPProxyConfig) Verify() error {
 	if c.DefaultTimeout < 0 {
 		return fmt.Errorf("datasource.http_proxy.default_timeout cannot be negative")
 	}
-	if c.DefaultTimeout == 0 {
-		c.DefaultTimeout = DefaultHTTPProxyTimeout
-	}
 	if c.MaxTimeout < 0 {
 		return fmt.Errorf("datasource.http_proxy.max_timeout cannot be negative")
+	}
+	if c.DefaultTimeout == 0 {
+		// When only max_timeout is set, it can be lower than the default value.
+		// Lowering the maximum is the safe direction, so the default timeout follows it instead of failing.
+		c.DefaultTimeout = DefaultHTTPProxyTimeout
+		if c.MaxTimeout > 0 && c.MaxTimeout < c.DefaultTimeout {
+			c.DefaultTimeout = c.MaxTimeout
+		}
 	}
 	if c.MaxTimeout == 0 {
 		c.MaxTimeout = c.DefaultTimeout
@@ -118,6 +123,7 @@ func (c *HTTPProxyConfig) Verify() error {
 // ValidateTimeout verifies that the timeout defined in the spec of a datasource is allowed by the server configuration.
 // It is meant to be used when the datasource is saved.
 // An empty or zero timeout is valid: it means the datasource uses DefaultTimeout.
+// A negative timeout is rejected as an invalid duration, since ParseDuration doesn't accept any sign.
 func (c *HTTPProxyConfig) ValidateTimeout(timeout common.DurationString) error {
 	if len(timeout) == 0 {
 		return nil
@@ -125,9 +131,6 @@ func (c *HTTPProxyConfig) ValidateTimeout(timeout common.DurationString) error {
 	d, err := common.ParseDuration(string(timeout))
 	if err != nil {
 		return fmt.Errorf("invalid timeout %q: %w", timeout, err)
-	}
-	if d < 0 {
-		return fmt.Errorf("timeout %q cannot be negative", timeout)
 	}
 	if maxTimeout := c.maxTimeout(); time.Duration(d) > maxTimeout {
 		return fmt.Errorf("timeout %q exceeds the maximum allowed by the server (%s)", timeout, common.Duration(maxTimeout))

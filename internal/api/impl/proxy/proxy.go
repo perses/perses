@@ -554,8 +554,17 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 	// because the maximum can have been lowered since then, and because unsaved datasources are not validated.
 	connectTimeout := h.proxyConfig.EffectiveTimeout(h.config.Timeout)
 	if timeoutErr := h.proxyConfig.ValidateTimeout(h.config.Timeout); timeoutErr != nil {
-		// It can happen when the maximum has been lowered after the datasource has been saved, or for an unsaved datasource.
-		h.logWithDefaultEntry().WithError(timeoutErr).Warningf("the timeout of the datasource is not allowed by the server configuration, %s is used instead", connectTimeout)
+		entry := h.logWithDefaultEntry().WithError(timeoutErr)
+		const msg = "the timeout of the datasource is not allowed by the server configuration, %s is used instead"
+		if len(h.transportKey) == 0 {
+			// Unsaved datasource: it is not validated, and its transport is built for each request.
+			// Logging at debug level avoids letting any user flood the logs.
+			entry.Debugf(msg, connectTimeout)
+		} else {
+			// Saved datasource: the maximum has been lowered after the datasource has been saved.
+			// It is logged once per transport build (see transportCache).
+			entry.Warningf(msg, connectTimeout)
+		}
 	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,

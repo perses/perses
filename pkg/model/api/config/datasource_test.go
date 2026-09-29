@@ -121,6 +121,7 @@ func TestHTTPProxyConfig_EffectiveTimeout(t *testing.T) {
 		{title: "invalid: default timeout", cfg: serverCfg, timeout: "30 seconds", expected: 10 * time.Second},
 		{title: "default server config: default timeout", cfg: verified(HTTPProxyConfig{}), timeout: "", expected: 30 * time.Second},
 		{title: "default server config: cannot go beyond the default timeout", cfg: verified(HTTPProxyConfig{}), timeout: "5m", expected: 30 * time.Second},
+		{title: "only max_timeout set lower than the default value: default timeout follows it", cfg: verified(HTTPProxyConfig{MaxTimeout: common.Duration(10 * time.Second)}), timeout: "", expected: 10 * time.Second},
 		{title: "config not verified: default timeout", cfg: HTTPProxyConfig{}, timeout: "", expected: 30 * time.Second},
 		{title: "config not verified: bounded by the default timeout", cfg: HTTPProxyConfig{}, timeout: "5m", expected: 30 * time.Second},
 		{title: "config not verified: lower timeout", cfg: HTTPProxyConfig{}, timeout: "5s", expected: 5 * time.Second},
