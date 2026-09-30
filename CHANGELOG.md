@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.55.0-beta.4 / 2026-09-30
+
+### Core & UI
+
+- [FEATURE] Datasource proxy: bound the HTTP proxy timeout with the server config (#4525)
+- [FEATURE] Exposing complete dashboard and plugin CUE schema endpoint (#4505)
+- [ENHANCEMENT] Proxy: reuse HTTP transport per saved datasource (#4521)
+- [ENHANCEMENT] Extract plugin archives in parallel (#4507)
+- [ENHANCEMENT] UI: use dashboard list from search endpoint (#4366)
+- [ENHANCEMENT] Improve the way the cache is set when serving static file (#4497)
+- [BUGFIX] SQL proxy: fix TLS handling, read-only enforcement and driver options (#4522)
+- [BUGFIX] Missing secret read permission when creating an embedded datasource in ephemeralDashboard (#4524)
+- [BUGFIX] Align percli new plugin output (#4523)
+- [BUGFIX] Make file database writes atomic (#4513)
+- [BUGFIX] Handle wildcard access mixed with specifying projects (#4511)
+- [BUGFIX] DaC SDK: fix panelgroup lib not resolving layout kind (#4470)
+- [BUGFIX] Safely decode user names for permission API (#4510)
+- [BUGFIX] Ensure the name parameter is also verified before being used (#4499)
+- [BREAKINGCHANGE] Restrict files referenced in secrets to allowed directories (#4503)
+- [DOC] Add security considerations page (#4512)
+
+### Plugins improvements
+
+- [FEATURE] TimeSeriesChart: add Exemplars support (perses/plugins#800)
+- [FEATURE] StatChart: configurable multi-series layout (auto/row/grid) (perses/plugins#814)
+- [ENHANCEMENT] Improve time series chart performance (perses/plugins#832)
+- [ENHANCEMENT] Support responsive Stat Chart tile orientations (perses/plugins#812)
+- [BUGFIX] Prometheus: fix exemplars & ts labels not matching (perses/plugins#834)
+- [DOC] Document missing Go SDK options and fix stale examples (perses/plugins#831)
+
+## 0.55.0-beta.3 / 2026-09-22
+
+### Core & UI
+
+- [FEATURE] Add dynamic page title (#4489)
+- [ENHANCEMENT] Protect the database against path transversal attack (#4492)
+- [ENHANCEMENT] Validate the value used in `metadata.name` (#4488)
+- [BUGFIX] Ensure the project name parameter is valid for any HTTP methods (#4491)
+- [BUGFIX] Missing secret read permission when creating an embedded datasource in dashboard (#4487)
+- [BUGFIX] Prevent path transversal attack when using project query parameter (#4485)
+
+### Plugins improvements
+
+- [FEATURE] Add new plugin: Json (perses/plugins#770)
+
 ## 0.55.0-beta.2 / 2026-09-18
 
 ### Core & UI
