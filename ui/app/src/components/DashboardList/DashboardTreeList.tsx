@@ -58,6 +58,7 @@ export interface DashboardTreeTableProps {
   handleEditFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
   handleAddFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
   handleDeleteFolderButtonClick: (project: string, name: string, path: string[]) => () => void;
+  isDuplicationAllowed: boolean;
   isLoading?: boolean;
 }
 
@@ -70,6 +71,7 @@ function DashboardTreeList({
   handleEditFolderButtonClick,
   handleAddFolderButtonClick,
   handleDeleteFolderButtonClick,
+  isDuplicationAllowed,
   isLoading,
 }: DashboardTreeTableProps): ReactElement {
   const defaultRowsPerPage = useDefaultRowsPerPage();
@@ -230,12 +232,15 @@ function DashboardTreeList({
                 >
                   <PencilIcon />
                 </CRUDIconButton>
+                {/* Not bound to the dashboard's project, as the copy can be created in another one */}
                 <CRUDIconButton
                   key={row.original.name + '-duplicate'}
-                  label="Duplicate"
-                  action="create"
-                  scope="Dashboard"
-                  project={row.original.project}
+                  label={
+                    isDuplicationAllowed
+                      ? 'Duplicate'
+                      : "Missing 'create' permission in any project for 'Dashboard' kind"
+                  }
+                  disabled={!isDuplicationAllowed}
                   onClick={handleDuplicateButtonClick(row.original.project, row.original.name)}
                 >
                   <ContentCopyIcon />
@@ -299,6 +304,7 @@ function DashboardTreeList({
       handleDuplicateButtonClick,
       handleEditFolderButtonClick,
       handleRenameButtonClick,
+      isDuplicationAllowed,
       sortStringColumn,
     ],
   );
