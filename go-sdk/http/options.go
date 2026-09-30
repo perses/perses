@@ -14,6 +14,8 @@
 package http
 
 import (
+	"fmt"
+
 	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/datasource/proxy/http"
 )
@@ -25,6 +27,23 @@ func URL(url string) Option {
 			return err
 		}
 		builder.Spec.URL = u
+		return nil
+	}
+}
+
+// Timeout defines the maximum amount of time allowed to establish a connection to the datasource (e.g. "10s", "1m").
+// When not set, the default timeout of the Perses server is used.
+// Note: the Perses server rejects a timeout greater than the maximum it allows (datasource.http_proxy.max_timeout).
+func Timeout(timeout string) Option {
+	return func(builder *Builder) error {
+		duration, err := common.ParseDuration(timeout)
+		if err != nil {
+			return err
+		}
+		if duration <= 0 {
+			return fmt.Errorf("HTTP proxy timeout must be greater than zero")
+		}
+		builder.Spec.Timeout = common.DurationString(timeout)
 		return nil
 	}
 }

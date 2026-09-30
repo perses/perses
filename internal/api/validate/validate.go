@@ -18,10 +18,12 @@ import (
 	"regexp"
 
 	"github.com/perses/perses/internal/api/plugin/schema"
+	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/perses/spec/go/dashboard"
+	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/perses/spec/go/plugin"
 )
 
@@ -31,24 +33,31 @@ import (
 // For example, in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
 var variableNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
-func DashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
+// DashboardSpec validates the dashboard spec.
+// proxyCfg is the configuration of the HTTP proxy of the server, used to validate the proxy of the local datasources.
+// It can be nil when the server configuration is not known (e.g. when linting offline). The server-dependent checks are then skipped.
+func DashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTPProxyConfig) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
 		return err
 	}
-	return validateDashboardSpec(spec, sch)
+	return validateDashboardSpec(spec, sch, proxyCfg)
 
 }
 
-func DashboardSpecWithVars(spec dashboard.Spec, sch schema.Schema, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+// DashboardSpecWithVars is like DashboardSpec, but also takes into account the project and global variables.
+func DashboardSpecWithVars(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTPProxyConfig, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, projectVariables, globalVariables); err != nil {
 		return err
 	}
 
-	return validateDashboardSpec(spec, sch)
+	return validateDashboardSpec(spec, sch, proxyCfg)
 }
 
-func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Schema) error {
-	if err := validateDatasourcePlugin(entity.GetDatasourceSpec().Plugin, entity.GetMetadata().GetName(), sch); err != nil {
+// Datasource validates the datasource. When list is not nil, it also verifies there is only one default datasource per kind.
+// proxyCfg is the configuration of the HTTP proxy of the server, used to validate the proxy of the datasource.
+// It can be nil when the server configuration is not known (e.g. when linting offline). The server-dependent checks are then skipped.
+func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schema.Schema, proxyCfg *config.HTTPProxyConfig) error {
+	if err := validateDatasourcePlugin(entity.GetDatasourceSpec().Plugin, entity.GetMetadata().GetName(), sch, proxyCfg); err != nil {
 		return err
 	}
 	if list != nil {
@@ -108,14 +117,35 @@ func validateVariableNames(variables []dashboard.Variable) error {
 	return nil
 }
 
-func validateDatasourcePlugin(plugin plugin.Plugin, name string, sch schema.Schema) error {
-	if _, _, err := datasource.ValidateAndExtract(plugin.Spec); err != nil {
+func validateDatasourcePlugin(plugin plugin.Plugin, name string, sch schema.Schema, proxyCfg *config.HTTPProxyConfig) error {
+	proxyConfig, _, err := datasource.ValidateAndExtract(plugin.Spec)
+	if err != nil {
+		return err
+	}
+	if err := validateHTTPProxyTimeout(proxyConfig, name, proxyCfg); err != nil {
 		return err
 	}
 	return sch.ValidateDatasource(plugin, name)
 }
 
-func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
+// validateHTTPProxyTimeout verifies the timeout of the HTTP proxy of the datasource, if any, is allowed by the server configuration.
+// A datasource can only lower the timeout set by the server, so any value beyond the maximum is rejected.
+// The verification is skipped when proxyCfg is nil (server configuration unknown), or when the datasource doesn't use an HTTP proxy.
+func validateHTTPProxyTimeout(proxyConfig any, name string, proxyCfg *config.HTTPProxyConfig) error {
+	if proxyCfg == nil {
+		return nil
+	}
+	httpConfig, ok := proxyConfig.(*datasourceHTTP.Config)
+	if !ok || httpConfig == nil {
+		return nil
+	}
+	if err := proxyCfg.ValidateTimeout(httpConfig.Timeout); err != nil {
+		return fmt.Errorf("invalid proxy of the datasource %q: %w", name, err)
+	}
+	return nil
+}
+
+func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema, proxyCfg *config.HTTPProxyConfig) error {
 	if err := validateVariableNames(spec.Variables); err != nil {
 		return err
 	}
@@ -134,7 +164,7 @@ func validateDashboardSpec(spec dashboard.Spec, sch schema.Schema) error {
 	if len(spec.Datasources) > 0 {
 		defaultDts := make(map[string]bool)
 		for dtsName, dtsSpec := range spec.Datasources {
-			if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch); err != nil {
+			if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch, proxyCfg); err != nil {
 				return err
 			}
 			if dtsSpec.Default {

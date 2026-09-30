@@ -27,10 +27,10 @@ deps: {
 		default: true
 	}
 	"github.com/perses/shared/cue@v0": {
-		v:       "v0.55.0-beta.13"
+		v:       "v0.55.0-beta.14"
 		default: true
 	}
 	"github.com/perses/spec/cue@v0": {
-		v: "v0.3.0-beta.9"
+		v: "v0.3.0-beta.10"
 	}
 }

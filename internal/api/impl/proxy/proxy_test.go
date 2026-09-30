@@ -72,7 +72,7 @@ func TestSQLProxy_sqlOpen(t *testing.T) {
 			},
 			tlsConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
 			expectError:   true,
-			errorContains: "cannot use custom TLSConfig with sslmode=disable",
+			errorContains: "the sslMode is not set or set to disable",
 		},
 		{
 			name: "mysql success",
@@ -427,6 +427,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	caPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
 
 	h := &httpProxy{
+		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 		secret: &v1.SecretSpec{
 			TLSConfig: &secretModel.TLSConfig{
 				CA:         string(caPEM),

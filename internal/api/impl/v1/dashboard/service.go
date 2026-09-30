@@ -45,8 +45,10 @@ type service struct {
 	isDatasourceDisable bool
 	isVariableDisable   bool
 	customRules         []*config.CustomLintRule
-	index               index.Client
-	authz               authorization.Authorization
+	// proxyCfg is used to validate the proxy of the local datasources (e.g. its timeout) against the server configuration.
+	proxyCfg config.HTTPProxyConfig
+	index    index.Client
+	authz    authorization.Authorization
 }
 
 func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, indexClient index.Client) dashboard.Service {
@@ -59,6 +61,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
+		proxyCfg:            cfg.Datasource.HTTPProxy,
 		index:               indexClient,
 	}
 }
@@ -184,7 +187,7 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 		return apiInterface.HandleError(globalVarsErr)
 	}
 
-	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
+	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, &s.proxyCfg, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	if err := validate.DashboardWithCustomRules(entity, s.customRules); err != nil {

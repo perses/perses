@@ -242,6 +242,104 @@ func TestSanitizeAndValidateQuery(t *testing.T) {
 			expectedValid: true,
 			expectClean:   true,
 		},
+		// Other read statements
+		{
+			name:          "WITH",
+			query:         "WITH recent AS (SELECT * FROM logs WHERE ts > now() - interval '1 hour') SELECT count(*) FROM recent",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SHOW",
+			query:         "SHOW TABLES",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "DESCRIBE",
+			query:         "DESCRIBE users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "EXPLAIN",
+			query:         "EXPLAIN SELECT * FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "VALUES",
+			query:         "VALUES (1, 'a'), (2, 'b')",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "TABLE",
+			query:         "TABLE users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "parenthesized SELECT",
+			query:         "(SELECT 1) UNION (SELECT 2)",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "SELECT without space before the columns",
+			query:         "SELECT*FROM users",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		// Statements modifying data or the schema that are not in the list of the most common write statements
+		{
+			name:          "CALL of a stored procedure",
+			query:         "CALL wipe()",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "PostgreSQL anonymous code block",
+			query:         "DO $$BEGIN DELETE FROM users; END$$",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "MySQL RENAME TABLE",
+			query:         "RENAME TABLE users TO old_users",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "MERGE",
+			query:         "MERGE INTO users USING new_users ON users.id = new_users.id WHEN MATCHED THEN DELETE",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "PostgreSQL COPY",
+			query:         "COPY users FROM PROGRAM 'id'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "SET",
+			query:         "SET search_path TO attacker",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "COMMIT",
+			query:         "COMMIT",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "keyword only starting with SELECT",
+			query:         "SELECTED * FROM users",
+			expectedValid: false,
+			expectClean:   false,
+		},
 	}
 
 	for _, tt := range tests {
