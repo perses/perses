@@ -144,16 +144,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
-    if (!query && list?.[0]?.kind === 'Dashboard') {
-      return list.map((item, idx) => ({
-        original: item,
-        rendered: item,
-        score: 0,
-        index: idx,
-        matched: [],
-      }));
-    }
-    return kvSearch.filter(query, list);
+    return query ? kvSearch.filter(query, list) : [];
   }, [kvSearch, list, query]);
 
   useEffect(() => {

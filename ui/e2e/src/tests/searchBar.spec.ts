@@ -16,19 +16,16 @@ import { expect, test } from '@playwright/test';
 import { AppHomePage, SearchBar } from '../pages';
 
 test.describe('SearchBar', () => {
-  test('shows important dashboards when opened without a query', async ({ page }) => {
+  test('shows no results when opened without a query', async ({ page }) => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
     const searchBar = new SearchBar(page);
     await searchBar.open();
 
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
-
-    const markdownPanelLink = searchBar.getDashboardLink('testing', 'MarkdownPanel');
-
-    // Verify the dashboard is highlighted (important dashboards have bold text)
-    await expect(markdownPanelLink).toHaveCSS('font-weight', '700');
+    await expect(searchBar.searchInput).toBeVisible();
+    await expect(searchBar.getDashboardsHeading()).toBeHidden();
+    await expect(searchBar.getProjectsHeading()).toBeHidden();
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
@@ -49,9 +46,10 @@ test.describe('SearchBar', () => {
     await expect(searchBar.getDashboardsHeading()).toBeHidden();
     await expect(searchBar.getProjectsHeading()).toBeHidden();
 
-    // Clear the search and verify important dashboards reappear
+    // Clear the search and verify neither results nor the no results message are shown
     await searchBar.clearSearch();
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
+    await expect(searchBar.getNoResultsMessage('xyznonexistentresource123')).toBeHidden();
+    await expect(searchBar.getDashboardsHeading()).toBeHidden();
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();
