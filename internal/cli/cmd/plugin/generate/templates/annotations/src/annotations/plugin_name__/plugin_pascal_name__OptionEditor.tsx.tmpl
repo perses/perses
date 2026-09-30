@@ -1,10 +1,27 @@
-import type { ReactElement } from 'react';
-import { useState } from 'react';
 import { Autocomplete, Stack, TextField } from '@mui/material';
+import type { AutocompleteRenderInputParams } from '@mui/material';
 import type { OptionsEditorProps } from '@perses-dev/plugin-system';
+import type { ChangeEvent, FocusEvent, ReactElement, SyntheticEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+
 import type { {{ .PluginPascalName }}Spec } from './{{ .PluginName }}-types';
 
 type {{ .PluginPascalName }}OptionEditorProps = OptionsEditorProps<{{ .PluginPascalName }}Spec>;
+type InputChangeEvent = ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
+
+const TAG_OPTIONS: string[] = [];
+const EMPTY_TAGS: string[] = [];
+
+function renderTagsInput(params: AutocompleteRenderInputParams): ReactElement {
+  return (
+    <TextField
+      {...params}
+      label="Tags"
+      placeholder="Add label names..."
+      helperText="Label names to display as tags in the annotation tooltip. Leave empty to show all labels. Press Enter to add."
+    />
+  );
+}
 
 export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName }}OptionEditorProps): ReactElement {
   const { onChange, value, isReadonly } = props;
@@ -12,24 +29,48 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
 
   const [localQuery, setLocalQuery] = useState(query);
 
-  const handleQueryBlur = (event: React.FocusEvent<HTMLInputElement>): void => {
-    const next = event.target.value;
-    if (next !== value.query) {
-      onChange({ ...value, query: next });
-    }
-  };
+  const textFieldSlotProps = useMemo(
+    () => ({
+      inputLabel: { shrink: isReadonly ? true : undefined },
+      input: { readOnly: isReadonly },
+    }),
+    [isReadonly],
+  );
 
-  const handleTitleChange = (next: string): void => {
-    onChange({ ...value, title: next || undefined });
-  };
+  const handleQueryChange = useCallback((event: InputChangeEvent): void => {
+    setLocalQuery(event.target.value);
+  }, []);
 
-  const handleLegendChange = (next: string): void => {
-    onChange({ ...value, legend: next || undefined });
-  };
+  const handleQueryBlur = useCallback(
+    (event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      const next = event.target.value;
+      if (next !== value.query) {
+        onChange({ ...value, query: next });
+      }
+    },
+    [onChange, value],
+  );
 
-  const handleTagsChange = (next: string[]): void => {
-    onChange({ ...value, tags: next.length > 0 ? next : undefined });
-  };
+  const handleTitleChange = useCallback(
+    (event: InputChangeEvent): void => {
+      onChange({ ...value, title: event.target.value || undefined });
+    },
+    [onChange, value],
+  );
+
+  const handleLegendChange = useCallback(
+    (event: InputChangeEvent): void => {
+      onChange({ ...value, legend: event.target.value || undefined });
+    },
+    [onChange, value],
+  );
+
+  const handleTagsChange = useCallback(
+    (_: SyntheticEvent, next: string[]): void => {
+      onChange({ ...value, tags: next.length > 0 ? next : undefined });
+    },
+    [onChange, value],
+  );
 
   return (
     <Stack spacing={2}>
@@ -38,12 +79,9 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         label="Query"
         placeholder="Enter your query"
         value={localQuery}
-        onChange={(e) => setLocalQuery(e.target.value)}
+        onChange={handleQueryChange}
         onBlur={handleQueryBlur}
-        slotProps={{
-          inputLabel: { shrink: isReadonly ? true : undefined },
-          input: { readOnly: isReadonly },
-        }}
+        slotProps={textFieldSlotProps}
       />
       <TextField
         fullWidth
@@ -51,11 +89,8 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         placeholder="Example: 'Deployment {{"{{"}}service{{"}}"}}'"
         helperText="Title displayed in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
         value={title ?? ''}
-        onChange={(e) => handleTitleChange(e.target.value)}
-        slotProps={{
-          inputLabel: { shrink: isReadonly ? true : undefined },
-          input: { readOnly: isReadonly },
-        }}
+        onChange={handleTitleChange}
+        slotProps={textFieldSlotProps}
       />
       <TextField
         fullWidth
@@ -63,27 +98,17 @@ export function {{ .PluginPascalName }}OptionEditor(props: {{ .PluginPascalName 
         placeholder="Example: '{{"{{"}}instance{{"}}"}}'"
         helperText="Text displayed below the title in the annotation tooltip. Use {{"{{"}}label_name{{"}}"}} to interpolate label values."
         value={legend ?? ''}
-        onChange={(e) => handleLegendChange(e.target.value)}
-        slotProps={{
-          inputLabel: { shrink: isReadonly ? true : undefined },
-          input: { readOnly: isReadonly },
-        }}
+        onChange={handleLegendChange}
+        slotProps={textFieldSlotProps}
       />
       <Autocomplete
         multiple
         freeSolo
-        options={[]}
-        value={tags ?? []}
-        onChange={(_, next) => handleTagsChange(next as string[])}
+        options={TAG_OPTIONS}
+        value={tags ?? EMPTY_TAGS}
+        onChange={handleTagsChange}
         readOnly={isReadonly}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Tags"
-            placeholder="Add label names..."
-            helperText="Label names to display as tags in the annotation tooltip. Leave empty to show all labels. Press Enter to add."
-          />
-        )}
+        renderInput={renderTagsInput}
       />
     </Stack>
   );

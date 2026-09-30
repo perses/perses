@@ -36,6 +36,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,12 +52,15 @@ func isFolderExist(folder string) (bool, error) {
 	return true, nil
 }
 
-func (d *DAO) generateProjectResourceQuery(kind v1.Kind, project string) string {
+func (d *DAO) generateProjectResourceQuery(kind v1.Kind, project string) (string, error) {
 	if len(project) == 0 {
 		// It's used when we query a list of object. It can happen that the project is empty.
-		return filepath.Join(d.Folder, v1.PluralKindMap[kind])
+		return filepath.Join(d.Folder, v1.PluralKindMap[kind]), nil
 	}
-	return filepath.Join(d.Folder, v1.PluralKindMap[kind], project)
+	if err := common.ValidateID(project); err != nil {
+		return "", &databaseModel.Error{Key: project, Code: databaseModel.ErrorBadRequest}
+	}
+	return filepath.Join(d.Folder, v1.PluralKindMap[kind], project), nil
 }
 
 func (d *DAO) generateResourceQuery(kind v1.Kind) string {
@@ -66,16 +70,16 @@ func (d *DAO) generateResourceQuery(kind v1.Kind) string {
 func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix string, isExist bool, err error) {
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindDashboard, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindDashboard, qt.Project)
 		prefix = qt.NamePrefix
 	case *datasource.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
 		prefix = qt.NamePrefix
 	case *ephemeraldashboard.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindEphemeralDashboard, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindEphemeralDashboard, qt.Project)
 		prefix = qt.NamePrefix
 	case *folder.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)
 		prefix = qt.NamePrefix
 	case *globaldatasource.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalDatasource)
@@ -96,22 +100,25 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 		pathFolder = d.generateResourceQuery(v1.KindProject)
 		prefix = qt.NamePrefix
 	case *role.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindRole, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindRole, qt.Project)
 		prefix = qt.NamePrefix
 	case *rolebinding.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindRoleBinding, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindRoleBinding, qt.Project)
 		prefix = qt.NamePrefix
 	case *secret.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindSecret, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindSecret, qt.Project)
 		prefix = qt.NamePrefix
 	case *user.Query:
 		pathFolder = d.generateResourceQuery(v1.KindUser)
 		prefix = qt.NamePrefix
 	case *variable.Query:
-		pathFolder = d.generateProjectResourceQuery(v1.KindVariable, qt.Project)
+		pathFolder, err = d.generateProjectResourceQuery(v1.KindVariable, qt.Project)
 		prefix = qt.NamePrefix
 	default:
 		return "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)
+	}
+	if err != nil {
+		return "", "", false, err
 	}
 	if !d.CaseSensitive {
 		pathFolder = strings.ToLower(pathFolder)

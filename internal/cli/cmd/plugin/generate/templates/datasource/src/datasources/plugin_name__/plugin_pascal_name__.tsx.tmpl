@@ -1,5 +1,6 @@
-import { fetch } from '@perses-dev/core';
+import { fetch } from '@perses-dev/client';
 import type { DatasourcePlugin } from '@perses-dev/plugin-system';
+
 import type { {{ .PluginPascalName }}Spec, {{ .PluginPascalName }}Client } from './{{ .PluginName }}-types';
 import { {{ .PluginPascalName }}Editor } from './{{ .PluginPascalName }}Editor';
 
@@ -39,7 +40,7 @@ const createClient: DatasourcePlugin<{{ .PluginPascalName }}Spec, {{ .PluginPasc
         };
       } catch (e) {
         console.error('Invalid response from server', e);
-        throw new Error('Invalid response from server');
+        throw new Error('Invalid response from server', { cause: e });
       }
     },
   };

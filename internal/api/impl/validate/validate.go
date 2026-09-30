@@ -24,18 +24,22 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type endpoint struct {
 	sch       schema.Schema
 	dashboard dashboard.Service
+	// proxyCfg is used to validate the proxy of the datasources (e.g. its timeout) against the server configuration.
+	proxyCfg config.HTTPProxyConfig
 }
 
-func New(sch schema.Schema, dashboard dashboard.Service) route.Endpoint {
+func New(cfg config.DatasourceConfig, sch schema.Schema, dashboard dashboard.Service) route.Endpoint {
 	return &endpoint{
 		sch:       sch,
 		dashboard: dashboard,
+		proxyCfg:  cfg.HTTPProxy,
 	}
 }
 
@@ -62,11 +66,11 @@ func (e *endpoint) ValidateDashboard(ctx echo.Context) error {
 }
 
 func (e *endpoint) ValidateDatasource(ctx echo.Context) error {
-	return validateDatasource(&v1.Datasource{}, e.sch, ctx)
+	return validateDatasource(&v1.Datasource{}, e.sch, &e.proxyCfg, ctx)
 }
 
 func (e *endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
-	return validateDatasource(&v1.GlobalDatasource{}, e.sch, ctx)
+	return validateDatasource(&v1.GlobalDatasource{}, e.sch, &e.proxyCfg, ctx)
 }
 
 func (e *endpoint) ValidateVariable(ctx echo.Context) error {
@@ -77,11 +81,11 @@ func (e *endpoint) ValidateGlobalVariable(ctx echo.Context) error {
 	return validateVariable(&v1.GlobalVariable{}, e.sch, ctx)
 }
 
-func validateDatasource(entity v1.DatasourceInterface, sch schema.Schema, ctx echo.Context) error {
+func validateDatasource(entity v1.DatasourceInterface, sch schema.Schema, proxyCfg *config.HTTPProxyConfig, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
-	if err := validate.Datasource(entity, nil, sch); err != nil {
+	if err := validate.Datasource(entity, nil, sch, proxyCfg); err != nil {
 		return apiinterface.HandleBadRequestError(err.Error())
 	}
 	return ctx.NoContent(http.StatusOK)
