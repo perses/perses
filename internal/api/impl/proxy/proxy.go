@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -658,7 +659,7 @@ func (s *sqlProxy) serve(c echo.Context) error {
 	cleanQuery, isValid := sanitizeAndValidateQuery(q.Query)
 	if !isValid {
 		s.logWithDefaultEntry().WithField("query", q.Query).Error("rejected query not starting with a read statement keyword")
-		return apiinterface.HandleBadRequestError(fmt.Sprintf("only read-only queries are allowed through the SQL proxy. The query must start with one of: %s", strings.Join(readOnlyStatementKeywords, ", ")))
+		return apiinterface.HandleBadRequestError(fmt.Sprintf("only read-only queries are allowed through the SQL proxy. The query must start with one of: %s, and must not contain INTO OUTFILE or INTO DUMPFILE", strings.Join(readOnlyStatementKeywords, ", ")))
 	}
 
 	// add password if provided
@@ -697,7 +698,8 @@ func (s *sqlProxy) serve(c echo.Context) error {
 		if errors.Is(err, errReadOnlyTx) {
 			// The connection is established, but the database refuses the read-only transaction.
 			// It happens with databases only compatible with the MySQL or PostgreSQL protocol.
-			return echo.NewHTTPError(http.StatusBadGateway, "unable to start a read-only transaction: the SQL proxy executes every query in a read-only transaction, so the database must support it")
+			// The underlying error is logged server-side and not exposed to the client.
+			return echo.NewHTTPError(http.StatusBadGateway, "unable to start a read-only transaction, which the SQL proxy requires for every query. See the server logs for details")
 		}
 		return apiinterface.InternalError
 	}
@@ -1048,6 +1050,13 @@ func writeJSONResponse(c echo.Context, rows *sql.Rows, datasourceName, projectNa
 // sanitizeAndValidateQuery removes comments from a SQL query and validates it is read-only.
 // Returns the cleaned query (without comments) and true if the query is safe to execute.
 // Returns an empty string and false if the query contains write operations or is invalid.
+// intoOutfilePattern matches SELECT ... INTO OUTFILE / INTO DUMPFILE, whatever the
+// whitespace between the keywords (tab, newline, ...).
+var intoOutfilePattern = regexp.MustCompile(`\bINTO\s+(OUTFILE|DUMPFILE)\b`)
+
+// readOnlyStatementKeywords are the keywords a query sent to the SQL proxy is allowed to start with.
+var readOnlyStatementKeywords = []string{"SELECT", "WITH", "SHOW", "DESCRIBE", "DESC", "EXPLAIN", "VALUES", "TABLE"}
+
 func sanitizeAndValidateQuery(query string) (string, bool) {
 	if query == "" {
 		return "", false
@@ -1080,16 +1089,24 @@ func sanitizeAndValidateQuery(query string) (string, bool) {
 		return "", false
 	}
 
+	// Reject the file-writing forms of SELECT in MySQL / MariaDB. A read-only transaction
+	// prevents changes to the tables, but both MySQL and MariaDB permit
+	// SELECT ... INTO OUTFILE / INTO DUMPFILE inside a read-only transaction, so the
+	// database itself does not stop it. With the FILE privilege of the datasource's
+	// database user, such a query writes a file on the database host.
+	// The check is text-based: a string literal containing the exact pattern
+	// "INTO OUTFILE" / "INTO DUMPFILE" is rejected as well, which is an accepted trade-off.
+	if intoOutfilePattern.MatchString(upperQuery) {
+		return "", false
+	}
+
 	// Query is valid and read-only, return the cleaned version
 	return cleanQuery, true
 }
 
-// readOnlyStatementKeywords are the keywords a query sent to the SQL proxy is allowed to start with.
-var readOnlyStatementKeywords = []string{"SELECT", "WITH", "SHOW", "DESCRIBE", "DESC", "EXPLAIN", "VALUES", "TABLE"}
-
 // firstKeyword returns the first word of the query, ignoring the opening parentheses (e.g. "(SELECT 1) UNION (SELECT 2)").
 func firstKeyword(query string) string {
-	query = strings.TrimLeft(query, "( \t\r\n")
+	query = strings.TrimLeft(query, "( \t\r\n\f\v")
 	end := strings.IndexFunc(query, func(r rune) bool { return !unicode.IsLetter(r) })
 	if end == -1 {
 		return query

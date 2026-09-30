@@ -121,6 +121,7 @@ The SQL proxy only executes read-only queries:
 
 - The query must start with one of the following keywords: `SELECT`, `WITH`, `SHOW`, `DESCRIBE`, `DESC`, `EXPLAIN`, `VALUES`, `TABLE`.
   Any other query is rejected.
+- The query must not contain `INTO OUTFILE` or `INTO DUMPFILE`, which would write a file on the database server (MySQL / MariaDB, with the `FILE` privilege).
 - The query is executed in a read-only transaction, so the database rejects any statement modifying the data or the schema of the database,
   even when the query starts with one of the keywords above (e.g. `WITH d AS (DELETE FROM ...) SELECT ...`).
   The database must support read-only transactions (`START TRANSACTION READ ONLY` for MySQL / MariaDB, `BEGIN READ ONLY` for PostgreSQL).
@@ -130,7 +131,8 @@ The SQL proxy only executes read-only queries:
 These checks are a safety net, not a security boundary. A read-only transaction doesn't prevent the side effects happening
 outside the tables of the database, for example:
 
-- writing a file on the database server (`SELECT ... INTO OUTFILE` in MySQL / MariaDB, with the `FILE` privilege),
+- writing a file on the database server (`SELECT ... INTO OUTFILE` in MySQL / MariaDB, with the `FILE` privilege). Such queries are rejected by the SQL proxy,
+- the file-reading functions in PostgreSQL (`pg_read_file`, `pg_ls_dir`, `pg_read_binary_file`, with the `pg_read_server_files` role), which read files on the database server,
 - the administration functions (e.g. `pg_terminate_backend` or `pg_reload_conf` in PostgreSQL),
 - the functions acting through another connection (e.g. `dblink_exec` in PostgreSQL).
 

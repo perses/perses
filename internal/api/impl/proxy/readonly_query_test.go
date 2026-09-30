@@ -340,6 +340,49 @@ func TestSanitizeAndValidateQuery(t *testing.T) {
 			expectedValid: false,
 			expectClean:   false,
 		},
+		// File-writing forms rejected even though they start with SELECT
+		{
+			name:          "SELECT INTO OUTFILE",
+			query:         "SELECT @@version INTO OUTFILE '/var/lib/mysql/pwned.txt'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "SELECT INTO DUMPFILE",
+			query:         "SELECT 'a' INTO DUMPFILE '/tmp/pwned'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "INTO OUTFILE after a CTE",
+			query:         "WITH cte AS (SELECT 1) SELECT * FROM cte INTO OUTFILE '/tmp/pwned'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "INTO OUTFILE with a newline between keywords",
+			query:         "SELECT 1 INTO\nOUTFILE '/tmp/pwned'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "INTO OUTFILE in a string literal is rejected too (accepted trade-off)",
+			query:         "SELECT 'INTO OUTFILE'",
+			expectedValid: false,
+			expectClean:   false,
+		},
+		{
+			name:          "SELECT INTO a user variable remains allowed",
+			query:         "SELECT 1 INTO @x",
+			expectedValid: true,
+			expectClean:   true,
+		},
+		{
+			name:          "form feed before SELECT is trimmed",
+			query:         "\fSELECT 1",
+			expectedValid: true,
+			expectClean:   true,
+		},
 	}
 
 	for _, tt := range tests {
