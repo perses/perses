@@ -82,6 +82,21 @@ max_version -> maxVersion
 
 ## Plugin developer
 
+### Upgrading from v0.54.0 to v0.55.0
+
+#### Annotations are fetched on demand
+
+`AnnotationProvider` from `@perses-dev/dashboards` now only stores the annotation specs. Annotation data is fetched on
+demand through the TanStack Query cache by the hooks that need it.
+
+- The `setAnnotationState` action and the `annotationState` store field are removed. Read annotation data from the hooks
+  instead of writing it to the store.
+- `useAnnotationsWithData`, `useAnnotationStates`, and `useAnnotationSpecAndState` now fetch data themselves, so they need
+  the query client, plugin registry, time range, variable, and datasource providers.
+- `usePanelAnnotationsWithData` no longer returns hidden annotations.
+
+See [Displaying annotations](./plugins/creation.md#displaying-annotations) to use annotations in a panel plugin.
+
 ### Upgrading from v0.53.0 to v0.54.0
 
 #### Core package deprecated
