@@ -15,18 +15,79 @@ package plugin
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/mholt/archives"
 	"github.com/perses/perses/internal/api/archive"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
+
+// extractionMarkerFileName is the name of the file written at the root of a plugin folder once its archive has been fully extracted.
+// It contains the fingerprint of the archive, so the extraction can be skipped when the archive didn't change since the last time.
+const extractionMarkerFileName = ".perses-archive.json"
+
+// archiveFingerprint identifies the version of an archive file that has been extracted.
+// Size and modification time are enough to detect that an archive has been replaced, and it avoids reading the archive entirely.
+type archiveFingerprint struct {
+	Name    string    `json:"name"`
+	Size    int64     `json:"size"`
+	ModTime time.Time `json:"modTime"`
+}
+
+func newArchiveFingerprint(info os.FileInfo) archiveFingerprint {
+	return archiveFingerprint{
+		Name:    info.Name(),
+		Size:    info.Size(),
+		ModTime: info.ModTime().UTC(),
+	}
+}
+
+func (f archiveFingerprint) equal(other archiveFingerprint) bool {
+	return f.Name == other.Name && f.Size == other.Size && f.ModTime.Equal(other.ModTime)
+}
+
+// isAlreadyExtracted returns true if the marker present in the plugin folder matches the given archive fingerprint,
+// meaning the archive has already been fully extracted and didn't change since.
+func isAlreadyExtracted(pluginFolder string, fingerprint archiveFingerprint) bool {
+	data, readErr := os.ReadFile(filepath.Join(pluginFolder, extractionMarkerFileName)) //nolint: gosec
+	if readErr != nil {
+		if !errors.Is(readErr, fs.ErrNotExist) {
+			logrus.WithError(readErr).Warnf("unable to read the extraction marker of the plugin folder %q", pluginFolder)
+		}
+		return false
+	}
+	var extracted archiveFingerprint
+	if unmarshalErr := json.Unmarshal(data, &extracted); unmarshalErr != nil {
+		logrus.WithError(unmarshalErr).Warnf("invalid extraction marker in the plugin folder %q", pluginFolder)
+		return false
+	}
+	return fingerprint.equal(extracted)
+}
+
+func writeExtractionMarker(pluginFolder string, fingerprint archiveFingerprint) error {
+	data, marshalErr := json.Marshal(fingerprint)
+	if marshalErr != nil {
+		return fmt.Errorf("unable to marshal the extraction marker: %w", marshalErr)
+	}
+	// The plugin folder might not exist if the archive is empty.
+	if mkdirErr := os.MkdirAll(pluginFolder, 0750); mkdirErr != nil {
+		return fmt.Errorf("unable to create directory %q: %w", pluginFolder, mkdirErr)
+	}
+	if writeErr := os.WriteFile(filepath.Join(pluginFolder, extractionMarkerFileName), data, 0600); writeErr != nil {
+		return fmt.Errorf("unable to write the extraction marker in the plugin folder %q: %w", pluginFolder, writeErr)
+	}
+	return nil
+}
 
 type archiveJob struct {
 	folder   string
@@ -77,12 +138,22 @@ func (a *arch) unzipAll() error {
 }
 
 func (a *arch) unzip(folder string, archiveFileName string) error {
-	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveName := archive.ExtractArchiveName(archiveFileName)
 	if strings.Contains(archiveName, "..") {
 		return fmt.Errorf("archive name %q contains invalid characters", archiveName)
 	}
 	archiveFile := filepath.Join(folder, archiveFileName)
+	archiveInfo, statErr := os.Stat(archiveFile)
+	if statErr != nil {
+		return fmt.Errorf("unable to get the information of the archive file %q: %w", archiveFile, statErr)
+	}
+	fingerprint := newArchiveFingerprint(archiveInfo)
+	pluginFolder := filepath.Join(a.targetFolder, archiveName)
+	if isAlreadyExtracted(pluginFolder, fingerprint) {
+		logrus.Debugf("archive %s already extracted, skipping it", archiveFileName)
+		return nil
+	}
+	logrus.Debugf("unzipping archive %s", archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile) //nolint: gosec
 	if archiveOpenErr != nil {
 		return fmt.Errorf("unable to open archive file %q: %w", archiveFile, archiveOpenErr)
@@ -101,6 +172,9 @@ func (a *arch) unzip(folder string, archiveFileName string) error {
 		if extractErr := ex.Extract(context.Background(), newStream, a.extractArchiveFileHandler(archiveName)); extractErr != nil {
 			return fmt.Errorf("unable to extract the archive file: %w", extractErr)
 		}
+		// The marker is written only once the archive has been fully extracted.
+		// If the extraction is interrupted, the marker is missing (or outdated), and the archive will be extracted again on the next start.
+		return writeExtractionMarker(pluginFolder, fingerprint)
 	}
 	return nil
 }
