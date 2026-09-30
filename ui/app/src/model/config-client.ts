@@ -208,7 +208,7 @@ export interface ImportantDashboardGroupConfig {
 export interface FrontendConfig {
   enable_keyboard_shortcuts?: boolean;
   enable_lock_mode?: boolean;
-  important_dashboards?: ImportantDashboardGroupConfig[] | null;
+  important_dashboards?: ImportantDashboardGroupConfig[];
   information?: string;
   explorer: ExplorerConfig;
   time_range?: TimeRangeConfig;

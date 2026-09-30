@@ -14,12 +14,14 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 	"time"
 	_ "time/tzdata"
 
 	"github.com/perses/spec/go/common"
+	"github.com/sirupsen/logrus"
 )
 
 var defaultTimeRangeOptions = []common.DurationString{
@@ -168,6 +170,102 @@ func sortTimeRangeOptions(options []common.DurationString) ([]common.DurationStr
 	return sorted, nil
 }
 
+type DashboardSelector struct {
+	// Project is the name of the project (dashboard.metadata.project)
+	Project string `json:"project" yaml:"project"`
+	// Dashboard is the name of the dashboard (dashboard.metadata.name).
+	// When omitted, all dashboards from the project are considered important.
+	Dashboard string `json:"dashboard,omitempty" yaml:"dashboard,omitempty"`
+}
+
+type ImportantDashboardGroup struct {
+	Title       string              `json:"title,omitempty" yaml:"title,omitempty"`
+	Description string              `json:"description,omitempty" yaml:"description,omitempty"`
+	Dashboards  []DashboardSelector `json:"dashboards,omitempty" yaml:"dashboards,omitempty"`
+}
+
+// ImportantDashboards also accepts the deprecated flat list of DashboardSelector, converted into a single untitled group.
+type ImportantDashboards []ImportantDashboardGroup
+
+func (d *ImportantDashboards) UnmarshalJSON(data []byte) error {
+	var raw []map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	isLegacy, err := isLegacyImportantDashboardsFormat(raw)
+	if err != nil {
+		return err
+	}
+	if !isLegacy {
+		return json.Unmarshal(data, (*[]ImportantDashboardGroup)(d))
+	}
+	var selectors []DashboardSelector
+	if err := json.Unmarshal(data, &selectors); err != nil {
+		return err
+	}
+	*d = ImportantDashboards{{Dashboards: selectors}}
+	warnLegacyImportantDashboardsFormat()
+	return nil
+}
+
+func (d *ImportantDashboards) UnmarshalYAML(unmarshal func(any) error) error {
+	var raw []map[string]any
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+	isLegacy, err := isLegacyImportantDashboardsFormat(raw)
+	if err != nil {
+		return err
+	}
+	if !isLegacy {
+		return unmarshal((*[]ImportantDashboardGroup)(d))
+	}
+	var selectors []DashboardSelector
+	if err := unmarshal(&selectors); err != nil {
+		return err
+	}
+	*d = ImportantDashboards{{Dashboards: selectors}}
+	warnLegacyImportantDashboardsFormat()
+	return nil
+}
+
+func (d *ImportantDashboards) Verify() error {
+	for i, group := range *d {
+		if len(group.Dashboards) == 0 {
+			return fmt.Errorf("frontend.important_dashboards[%d]: at least one entry is required in 'dashboards'", i)
+		}
+		for j, selector := range group.Dashboards {
+			if len(selector.Project) == 0 {
+				return fmt.Errorf("frontend.important_dashboards[%d].dashboards[%d]: 'project' is required", i, j)
+			}
+		}
+	}
+	return nil
+}
+
+func isLegacyImportantDashboardsFormat[T any](items []map[string]T) (bool, error) {
+	hasLegacyItem := false
+	hasGroupedItem := false
+	for _, item := range items {
+		for key := range item {
+			switch key {
+			case "project", "dashboard":
+				hasLegacyItem = true
+			case "title", "description", "dashboards":
+				hasGroupedItem = true
+			}
+		}
+	}
+	if hasLegacyItem && hasGroupedItem {
+		return false, fmt.Errorf("frontend.important_dashboards: cannot mix the legacy selector format and the grouped format")
+	}
+	return hasLegacyItem, nil
+}
+
+func warnLegacyImportantDashboardsFormat() {
+	logrus.Warn("'frontend.important_dashboards' flat selector format is deprecated and will be removed in v0.57.0. Please group entries under 'frontend.important_dashboards[].dashboards' instead")
+}
+
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
 	Disable bool `json:"disable" yaml:"disable"`
@@ -183,7 +281,7 @@ type Frontend struct {
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains grouped important dashboard selectors.
 	// Each selector can target one dashboard or an entire project when dashboard is omitted.
-	ImportantDashboards importantDashboards `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
+	ImportantDashboards ImportantDashboards `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange *TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 	// AutoRefresh contains the auto-refresh configuration for dashboards

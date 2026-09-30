@@ -28,7 +28,7 @@ function buildDashboard(project: string, name: string): DashboardResource {
 }
 
 describe('resolveImportantDashboardList', () => {
-  it('expands project entries and preserves explicitly configured duplicates', () => {
+  it('expands project entries and removes duplicates', () => {
     const dashboards = [buildDashboard('perses', 'Demo'), buildDashboard('perses', 'Benchmark')];
     const groups: ImportantDashboardGroupConfig[] = [
       {
@@ -38,11 +38,44 @@ describe('resolveImportantDashboardList', () => {
 
     expect(
       resolveImportantDashboardList(dashboards, groups, false).map((dashboard) => dashboard.metadata.name),
-    ).toEqual(['Demo', 'Benchmark', 'Demo']);
+    ).toEqual(['Demo', 'Benchmark']);
+  });
+
+  it('removes a dashboard configured in several groups', () => {
+    const dashboards = [buildDashboard('perses', 'Demo'), buildDashboard('testing', 'Benchmark')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      { title: 'First', dashboards: [{ project: 'perses', dashboard: 'Demo' }] },
+      {
+        title: 'Second',
+        dashboards: [
+          { project: 'testing', dashboard: 'Benchmark' },
+          { project: 'perses', dashboard: 'Demo' },
+        ],
+      },
+    ];
+
+    expect(
+      resolveImportantDashboardList(dashboards, groups, false).map((dashboard) => dashboard.metadata.name),
+    ).toEqual(['Demo', 'Benchmark']);
+    expect(resolveImportantDashboardGroups(dashboards, groups, false).map((group) => group.entries.length)).toEqual([
+      1, 2,
+    ]);
   });
 });
 
 describe('resolveImportantDashboardGroups', () => {
+  it('skips project entries without any matching dashboard', () => {
+    const dashboards = [buildDashboard('perses', 'Demo')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        dashboards: [{ project: 'unknown' }, { project: 'perses', dashboard: 'Demo' }],
+      },
+    ];
+
+    expect(resolveImportantDashboardGroups(dashboards, groups, false)[0]?.entries).toEqual([
+      { kind: 'dashboard', dashboard: dashboards[0] },
+    ]);
+  });
   it('matches dashboard selectors case-insensitively when resource names are normalized', () => {
     const dashboards = [buildDashboard('Perses', 'Demo')];
     const groups: ImportantDashboardGroupConfig[] = [

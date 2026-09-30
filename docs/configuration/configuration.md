@@ -952,9 +952,17 @@ title: <string> # Optional
 # Optional description displayed below the title
 description: <string> # Optional
 
-# Dashboards or projects displayed in this group
+# Dashboards or projects displayed in this group. At least one entry is required.
 dashboards:
-  - <Dashboard Selector config> # Optional
+  - <Dashboard Selector config>
+```
+
+Important dashboard groups can also be set through environment variables, e.g.:
+
+```bash
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_TITLE="Quick links"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT="perses"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD="Demo"
 ```
 
 #### Dashboard Selector config

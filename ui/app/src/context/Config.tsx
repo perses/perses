@@ -23,12 +23,7 @@ import type { ReactElement } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import type {
-  Banner,
-  ConfigModel,
-  ImportantDashboardGroupConfig,
-  ImportantDashboardSelectorConfig,
-} from '../model/config-client';
+import type { Banner, ConfigModel, ImportantDashboardGroupConfig } from '../model/config-client';
 import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
@@ -179,38 +174,8 @@ export function useShouldNormalizeResourceNames(): boolean {
 
 export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {
   const { config } = useConfigContext();
-  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
-  return useMemo(() => {
-    return (config.frontend.important_dashboards ?? []).map((group) => {
-      const dashboards = (group.dashboards ?? []).map((selector) => {
-        if (!shouldNormalizeResourceNames) {
-          return selector;
-        }
-        const normalizedSelector: ImportantDashboardSelectorConfig = {
-          project: selector.project.toLowerCase(),
-        };
-        if (selector.dashboard !== undefined) {
-          normalizedSelector.dashboard = selector.dashboard.toLowerCase();
-        }
-        return normalizedSelector;
-      });
-
-      return {
-        title: group.title,
-        description: group.description,
-        dashboards,
-      };
-    });
-  }, [config.frontend.important_dashboards, shouldNormalizeResourceNames]);
-}
-
-export function useImportantDashboardSelectors(): ImportantDashboardSelectorConfig[] {
-  const importantDashboardGroups = useImportantDashboardGroups();
-
-  return useMemo(() => {
-    return importantDashboardGroups.flatMap((group) => group.dashboards ?? []);
-  }, [importantDashboardGroups]);
+  return useMemo(() => config.frontend.important_dashboards ?? [], [config.frontend.important_dashboards]);
 }
 
 export function useInformation(): string {

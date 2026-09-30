@@ -66,29 +66,26 @@ test.describe('SearchBar', () => {
     const searchBar = new SearchBar(page);
     await searchBar.open();
 
-    // Match dashboards from both the project-wide testing shortcut and explicit Perses shortcuts.
-    await searchBar.search('e');
+    const testCases = [
+      // configured explicitly
+      { query: 'nodeexporter', project: 'perses', dashboard: 'NodeExporter', fontWeight: '700' },
+      // configured through the project-wide testing selector
+      { query: 'markdownpanel', project: 'testing', dashboard: 'markdownpanel', fontWeight: '700' },
+      { query: 'timeserieschartpanel', project: 'testing', dashboard: 'timeserieschartpanel', fontWeight: '700' },
+      // not configured
+      { query: 'demo', project: 'perses', dashboard: 'Demo', fontWeight: '400' },
+    ];
 
-    // Click "see more..." if present to load additional results
-    await searchBar.clickSeeMoreIfPresent();
+    for (const { query, project, dashboard, fontWeight } of testCases) {
+      await searchBar.search(query);
+      await searchBar.clickSeeMoreIfPresent();
 
-    await expect(searchBar.getDashboardsHeading()).toBeVisible();
+      await expect(searchBar.getDashboardsHeading()).toBeVisible();
 
-    const importantDashboard = searchBar.getDashboardLink('testing', 'markdownpanel');
-    await expect(importantDashboard).toBeVisible();
-    await expect(importantDashboard).toHaveCSS('font-weight', '700');
-
-    const projectImportantDashboard = searchBar.getDashboardLink('testing', 'timeserieschartpanel');
-    await expect(projectImportantDashboard).toBeVisible();
-    await expect(projectImportantDashboard).toHaveCSS('font-weight', '700');
-
-    const explicitlyImportantDashboard = searchBar.getDashboardLink('perses', 'NodeExporter');
-    await expect(explicitlyImportantDashboard).toBeVisible();
-    await expect(explicitlyImportantDashboard).toHaveCSS('font-weight', '700');
-
-    const unconfiguredDashboard = searchBar.getDashboardLink('perses', 'Demo');
-    await expect(unconfiguredDashboard).toBeVisible();
-    await expect(unconfiguredDashboard).toHaveCSS('font-weight', '400');
+      const dashboardLink = searchBar.getDashboardLink(project, dashboard);
+      await expect(dashboardLink).toBeVisible();
+      await expect(dashboardLink).toHaveCSS('font-weight', fontWeight);
+    }
 
     await searchBar.close();
     await expect(searchBar.modal).toBeHidden();

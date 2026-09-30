@@ -20,80 +20,30 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';
-import { useImportantDashboardGroups } from '../../context/Config';
-import type { ImportantDashboardEntryData, ImportantDashboardGroupData } from '../../model/dashboard-client';
+import { useShouldNormalizeResourceNames } from '../../context/Config';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
+import { useProjectList } from '../../model/project-client';
 import { HomeListCard } from './HomeListCard';
 import { HomeListItem } from './HomeListItem';
 
-function buildGroupKey(group: ImportantDashboardGroupData): string {
-  const entryKeys = group.entries.map(buildEntryBaseKey).join('|');
-  return `${group.title ?? ''}-${group.description ?? ''}-${entryKeys}`;
-}
-
-function buildEntryBaseKey(entry: ImportantDashboardEntryData): string {
-  if (entry.kind === 'project') {
-    return `project-${entry.project}`;
-  }
-  return `dashboard-${entry.dashboard.metadata.project}-${entry.dashboard.metadata.name}`;
-}
-
-function useKeyedImportantDashboardGroups(groups: ImportantDashboardGroupData[]): Array<
-  ImportantDashboardGroupData & {
-    key: string;
-    keyedEntries: Array<{
-      key: string;
-      entry: ImportantDashboardEntryData;
-    }>;
-  }
-> {
-  return useMemo(() => {
-    const groupKeyCounts = new Map<string, number>();
-
-    return groups.map((group) => {
-      const groupBaseKey = buildGroupKey(group);
-      const groupDuplicateCount = groupKeyCounts.get(groupBaseKey) ?? 0;
-      groupKeyCounts.set(groupBaseKey, groupDuplicateCount + 1);
-
-      const entryKeyCounts = new Map<string, number>();
-      const keyedEntries = group.entries.map((entry) => {
-        const entryBaseKey = buildEntryBaseKey(entry);
-        const entryDuplicateCount = entryKeyCounts.get(entryBaseKey) ?? 0;
-        entryKeyCounts.set(entryBaseKey, entryDuplicateCount + 1);
-
-        return {
-          key: entryDuplicateCount === 0 ? entryBaseKey : `${entryBaseKey}-${entryDuplicateCount}`,
-          entry,
-        };
-      });
-
-      return {
-        title: group.title,
-        description: group.description,
-        entries: group.entries,
-        key: groupDuplicateCount === 0 ? groupBaseKey : `${groupBaseKey}-${groupDuplicateCount}`,
-        keyedEntries,
-      };
-    });
-  }, [groups]);
-}
-
-export function ImportantDashboards(): ReactElement | null {
-  const configuredImportantDashboardGroups = useImportantDashboardGroups();
+export function ImportantDashboards(): ReactElement {
   const { data: importantDashboardGroups, isLoading } = useImportantDashboardGroupsData();
-  const hasConfiguredImportantDashboards = useMemo(() => {
-    return configuredImportantDashboardGroups.some((group) => (group.dashboards?.length ?? 0) > 0);
-  }, [configuredImportantDashboardGroups]);
+  const { data: projects } = useProjectList();
+  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
   const groups = useMemo(
     () => importantDashboardGroups.filter((group) => group.entries.length > 0),
     [importantDashboardGroups],
   );
-  const keyedGroups = useKeyedImportantDashboardGroups(groups);
 
-  if (!hasConfiguredImportantDashboards && !isLoading) {
-    return null;
-  }
+  const projectDisplayNames = useMemo(() => {
+    return new Map(
+      (projects ?? []).map((project) => [
+        shouldNormalizeResourceNames ? project.metadata.name.toLowerCase() : project.metadata.name,
+        project.spec?.display?.name,
+      ]),
+    );
+  }, [projects, shouldNormalizeResourceNames]);
 
   return (
     <HomeListCard
@@ -115,14 +65,14 @@ export function ImportantDashboards(): ReactElement | null {
           hint="Configure important dashboards in your config file."
         />
       )}
-      {!isLoading && keyedGroups.length > 0 && (
+      {!isLoading && groups.length > 0 && (
         <Box
           data-testid="important-dashboards-mosaic"
           sx={{ display: 'flex', flexDirection: 'column', maxHeight: 360, overflowY: 'auto' }}
         >
-          {keyedGroups.map((group, groupIndex) => {
+          {groups.map((group, groupIndex) => {
             return (
-              <Box key={group.key}>
+              <Box key={groupIndex}>
                 <Stack spacing={0.5} sx={{ mb: group.title !== undefined ? 1 : 0 }}>
                   {group.title !== undefined && (
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -136,20 +86,24 @@ export function ImportantDashboards(): ReactElement | null {
                   )}
                 </Stack>
                 <Box>
-                  {group.keyedEntries.map(({ key, entry }, entryIndex) => {
+                  {group.entries.map((entry, entryIndex) => {
                     if (entry.kind === 'project') {
                       const dashboardCount = entry.dashboards.length;
+                      const projectDisplayName =
+                        projectDisplayNames.get(
+                          shouldNormalizeResourceNames ? entry.project.toLowerCase() : entry.project,
+                        ) ?? entry.project;
                       return (
-                        <Box key={key}>
+                        <Box key={entryIndex}>
                           <HomeListItem
                             to={`/projects/${entry.project}`}
                             ariaLabel={entry.project}
-                            title={entry.project}
+                            title={projectDisplayName}
                             subtitle={`${dashboardCount} ${dashboardCount === 1 ? 'dashboard' : 'dashboards'} in project`}
                             icon={<Archive sx={{ fontSize: 16, color: 'primary.main' }} />}
                             iconVariant="outlined"
                           />
-                          {entryIndex < group.keyedEntries.length - 1 && <Divider />}
+                          {entryIndex < group.entries.length - 1 && <Divider />}
                         </Box>
                       );
                     }
@@ -161,7 +115,7 @@ export function ImportantDashboards(): ReactElement | null {
                     const displayName = entry.dashboard.spec.display?.name ?? entry.dashboard.metadata.name;
 
                     return (
-                      <Box key={key}>
+                      <Box key={entryIndex}>
                         <HomeListItem
                           to={`/projects/${entry.dashboard.metadata.project}/dashboards/${entry.dashboard.metadata.name}`}
                           ariaLabel={`${entry.dashboard.metadata.project} ${entry.dashboard.metadata.name}`}
@@ -170,12 +124,12 @@ export function ImportantDashboards(): ReactElement | null {
                           icon={<ViewDashboardOutline sx={{ fontSize: 16, color: 'primary.contrastText' }} />}
                           subtitleIcon={<Archive sx={{ fontSize: 12, color: 'text.secondary' }} />}
                         />
-                        {entryIndex < group.keyedEntries.length - 1 && <Divider />}
+                        {entryIndex < group.entries.length - 1 && <Divider />}
                       </Box>
                     );
                   })}
                 </Box>
-                {groupIndex < keyedGroups.length - 1 && <Divider sx={{ mb: 2 }} />}
+                {groupIndex < groups.length - 1 && <Divider sx={{ mb: 2 }} />}
               </Box>
             );
           })}

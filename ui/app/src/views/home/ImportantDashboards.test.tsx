@@ -38,17 +38,15 @@ function buildDashboard(project: string, name: string, displayName = name): Dash
 }
 
 vi.mock('../../context/Config', () => ({
-  useImportantDashboardGroups: (): Array<{
-    title: string;
-    description: string;
-    dashboards: Array<{ project: string; dashboard?: string }>;
-  }> => [
-    {
-      title: 'Operations',
-      description: 'Key dashboards and projects',
-      dashboards: [{ project: 'perses', dashboard: 'demo' }, { project: 'testing' }],
-    },
-  ],
+  useShouldNormalizeResourceNames: (): boolean => false,
+}));
+
+vi.mock('../../model/project-client', () => ({
+  useProjectList: (): {
+    data: Array<{ kind: string; metadata: { name: string }; spec: { display: { name: string } } }>;
+  } => ({
+    data: [{ kind: 'Project', metadata: { name: 'testing' }, spec: { display: { name: 'Testing project' } } }],
+  }),
 }));
 
 vi.mock('../../model/dashboard-client', () => ({
@@ -103,6 +101,7 @@ describe('ImportantDashboards', () => {
 
     const projectLink = screen.getByRole('link', { name: 'testing' });
     expect(projectLink.getAttribute('href')).toBe('/projects/testing');
+    expect(screen.queryByText('Testing project')).not.toBeNull();
     expect(screen.queryByText('1 dashboard in project')).not.toBeNull();
   });
 });

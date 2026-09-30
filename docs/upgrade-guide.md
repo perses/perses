@@ -9,6 +9,40 @@ application, as a library, etc.). Therefore, the upgrade process may vary based 
 
 ## Perses application
 
+### Upgrading from v0.54.0 to v0.55.0
+
+#### Important dashboards are now grouped
+
+`frontend.important_dashboards` is now a list of groups, each with an optional `title` and `description`, and a list
+of dashboard selectors. A selector without `dashboard` marks every dashboard of the project as important.
+
+The previous flat list of selectors is deprecated and will be removed in v0.57.0. It is still accepted (and converted
+into a single untitled group), but a deprecation warning is logged at startup. Mixing both formats is rejected.
+
+```yaml
+# Before
+frontend:
+  important_dashboards:
+    - project: "perses"
+      dashboard: "Demo"
+
+# After
+frontend:
+  important_dashboards:
+    - title: "Quick links" # Optional
+      dashboards:
+        - project: "perses"
+          dashboard: "Demo"
+```
+
+If you set important dashboards through environment variables, the variables need to be updated accordingly, as the
+legacy shape is not supported there:
+
+```txt
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_PROJECT   -> PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARD -> PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD
+```
+
 ### Upgrading from v0.53.0 to v0.54.0
 
 #### SQL Database default configuration changes

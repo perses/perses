@@ -81,7 +81,7 @@ export function HomeListItem({
           {icon}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body1" sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Typography variant="body1" noWrap sx={{ fontWeight: 600 }}>
             {title}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>

@@ -89,7 +89,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "explorer": {
       "enable": false
     },
-    "important_dashboards": null,
     "auto_refresh": {}
   },
   "plugin": {
@@ -167,7 +166,6 @@ func TestJSONMarshalConfig(t *testing.T) {
     "explorer": {
       "enable": false
     },
-    "important_dashboards": null,
     "auto_refresh": {
       "options": [
         "0s",
@@ -361,26 +359,23 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: importantDashboards{
-						Groups: []importantDashboardGroup{
-							{
-								Dashboards: []dashboardSelector{
-									{
-										Project:   "perses",
-										Dashboard: "Demo",
-									},
-									{
-										Project:   "testing",
-										Dashboard: "DuplicatePanels",
-									},
-									{
-										Project:   "Unknown",
-										Dashboard: "Dashboard",
-									},
+					ImportantDashboards: ImportantDashboards{
+						{
+							Dashboards: []DashboardSelector{
+								{
+									Project:   "perses",
+									Dashboard: "Demo",
+								},
+								{
+									Project:   "testing",
+									Dashboard: "DuplicatePanels",
+								},
+								{
+									Project:   "Unknown",
+									Dashboard: "Dashboard",
 								},
 							},
 						},
-						usesLegacyFormat: true,
 					},
 					Information: "# Hello World\n## File Database setup",
 					DefaultUserPreferences: &DefaultUserPreferences{
@@ -554,26 +549,23 @@ plugin:
 					},
 				},
 				Frontend: Frontend{
-					ImportantDashboards: importantDashboards{
-						Groups: []importantDashboardGroup{
-							{
-								Dashboards: []dashboardSelector{
-									{
-										Project:   "perses",
-										Dashboard: "Demo",
-									},
-									{
-										Project:   "testing",
-										Dashboard: "DuplicatePanels",
-									},
-									{
-										Project:   "Unknown",
-										Dashboard: "Dashboard",
-									},
+					ImportantDashboards: ImportantDashboards{
+						{
+							Dashboards: []DashboardSelector{
+								{
+									Project:   "perses",
+									Dashboard: "Demo",
+								},
+								{
+									Project:   "testing",
+									Dashboard: "DuplicatePanels",
+								},
+								{
+									Project:   "Unknown",
+									Dashboard: "Dashboard",
 								},
 							},
 						},
-						usesLegacyFormat: true,
 					},
 					Information: "# Hello World\n## File Database setup",
 					DefaultUserPreferences: &DefaultUserPreferences{
@@ -651,19 +643,17 @@ func TestUnmarshalJSONImportantDashboardGroups(t *testing.T) {
   }
 }`), &c))
 
-	assert.Equal(t, importantDashboards{
-		Groups: []importantDashboardGroup{
-			{
-				Title:       "Awesome First List",
-				Description: "a long and useful description about my first list of dashboard",
-				Dashboards: []dashboardSelector{
-					{
-						Project:   "perses",
-						Dashboard: "Demo",
-					},
-					{
-						Project: "perses",
-					},
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title:       "Awesome First List",
+			Description: "a long and useful description about my first list of dashboard",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "perses",
 				},
 			},
 		},
@@ -688,23 +678,110 @@ frontend:
 		Resolve(&c).
 		Verify())
 
-	assert.Equal(t, importantDashboards{
-		Groups: []importantDashboardGroup{
-			{
-				Title:       "Awesome First List",
-				Description: "a long and useful description about my first list of dashboard",
-				Dashboards: []dashboardSelector{
-					{
-						Project:   "perses",
-						Dashboard: "Demo",
-					},
-					{
-						Project: "perses",
-					},
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title:       "Awesome First List",
+			Description: "a long and useful description about my first list of dashboard",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "perses",
 				},
 			},
 		},
 	}, c.Frontend.ImportantDashboards)
+}
+
+func TestResolveEnvImportantDashboardGroups(t *testing.T) {
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_TITLE", "Quick links")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT", "perses")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD", "Demo")
+	t.Setenv("PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_1_PROJECT", "testing")
+
+	c := Config{}
+	assert.NoError(t, config.NewResolver[Config]().
+		SetEnvPrefix("PERSES").
+		Resolve(&c).
+		Verify())
+
+	assert.Equal(t, ImportantDashboards{
+		{
+			Title: "Quick links",
+			Dashboards: []DashboardSelector{
+				{
+					Project:   "perses",
+					Dashboard: "Demo",
+				},
+				{
+					Project: "testing",
+				},
+			},
+		},
+	}, c.Frontend.ImportantDashboards)
+}
+
+func TestImportantDashboardsErrors(t *testing.T) {
+	testSuite := []struct {
+		title      string
+		yamele     string
+		errMessage string
+	}{
+		{
+			title: "mixed legacy and grouped formats",
+			yamele: `
+frontend:
+  important_dashboards:
+    - title: "A"
+      dashboards:
+        - project: "perses"
+    - project: "perses"
+      dashboard: "Demo"
+`,
+			errMessage: "frontend.important_dashboards: cannot mix the legacy selector format and the grouped format",
+		},
+		{
+			title: "group without dashboards",
+			yamele: `
+frontend:
+  important_dashboards:
+    - title: "A"
+`,
+			errMessage: "frontend.important_dashboards[0]: at least one entry is required in 'dashboards'",
+		},
+		{
+			title: "selector without project",
+			yamele: `
+frontend:
+  important_dashboards:
+    - dashboards:
+        - project: "perses"
+        - dashboard: "Demo"
+`,
+			errMessage: "frontend.important_dashboards[0].dashboards[1]: 'project' is required",
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			c := Config{}
+			err := config.NewResolver[Config]().
+				SetConfigData([]byte(test.yamele)).
+				Resolve(&c).
+				Verify()
+			assert.ErrorContains(t, err, test.errMessage)
+		})
+	}
+}
+
+func TestUnmarshalJSONImportantDashboardsMixedFormats(t *testing.T) {
+	c := Config{}
+	err := json.Unmarshal([]byte(`{"frontend": {"important_dashboards": [
+  {"title": "A", "dashboards": [{"project": "perses"}]},
+  {"project": "perses", "dashboard": "Demo"}
+]}}`), &c)
+	assert.ErrorContains(t, err, "cannot mix the legacy selector format and the grouped format")
 }
 
 func TestDefaultUserPreferencesVerify(t *testing.T) {

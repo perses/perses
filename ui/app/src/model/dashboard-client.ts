@@ -116,21 +116,45 @@ function buildDashboardKey(project: string, dashboard: string, shouldNormalizeRe
   return `${normalizeImportantDashboardName(project, shouldNormalizeResourceNames)}/${normalizeImportantDashboardName(dashboard, shouldNormalizeResourceNames)}`;
 }
 
+/**
+ * Resolves configured important dashboard selectors into a flat dashboard list, without duplicates.
+ */
 export function resolveImportantDashboardList(
   dashboards: DashboardResource[],
   importantDashboardGroups: ImportantDashboardGroupConfig[],
   shouldNormalizeResourceNames: boolean,
 ): DashboardResource[] {
-  const result: DashboardResource[] = [];
-  const dashboardsByKey = new Map(
-    dashboards.map((dashboard) => [
-      buildDashboardKey(dashboard.metadata.project, dashboard.metadata.name, shouldNormalizeResourceNames),
-      dashboard,
-    ]),
-  );
+  const seen = new Set<string>();
+  return resolveImportantDashboardGroups(dashboards, importantDashboardGroups, shouldNormalizeResourceNames)
+    .flatMap((group) =>
+      group.entries.flatMap((entry) => (entry.kind === 'project' ? entry.dashboards : [entry.dashboard])),
+    )
+    .filter((dashboard) => {
+      const key = `${dashboard.metadata.project}/${dashboard.metadata.name}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+}
+
+/**
+ * Resolves configured important dashboard selectors while preserving their group and project structure.
+ */
+export function resolveImportantDashboardGroups(
+  dashboards: DashboardResource[],
+  importantDashboardGroups: ImportantDashboardGroupConfig[],
+  shouldNormalizeResourceNames: boolean,
+): ImportantDashboardGroupData[] {
+  const dashboardsByKey = new Map<string, DashboardResource>();
   const dashboardsByProject = new Map<string, DashboardResource[]>();
 
   dashboards.forEach((dashboard) => {
+    dashboardsByKey.set(
+      buildDashboardKey(dashboard.metadata.project, dashboard.metadata.name, shouldNormalizeResourceNames),
+      dashboard,
+    );
     const projectKey = normalizeImportantDashboardName(dashboard.metadata.project, shouldNormalizeResourceNames);
     const projectDashboards = dashboardsByProject.get(projectKey);
     if (projectDashboards) {
@@ -140,59 +164,17 @@ export function resolveImportantDashboardList(
     }
   });
 
-  importantDashboardGroups.forEach((group) => {
-    (group.dashboards ?? []).forEach((selector) => {
-      if (selector.dashboard === undefined) {
-        result.push(
-          ...(dashboardsByProject.get(
-            normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames),
-          ) ?? []),
-        );
-        return;
-      }
-
-      const dashboard = dashboardsByKey.get(
-        buildDashboardKey(selector.project, selector.dashboard, shouldNormalizeResourceNames),
-      );
-      if (dashboard) {
-        result.push(dashboard);
-      }
-    });
-  });
-
-  return result;
-}
-
-export function resolveImportantDashboardGroups(
-  dashboards: DashboardResource[],
-  importantDashboardGroups: ImportantDashboardGroupConfig[],
-  shouldNormalizeResourceNames: boolean,
-): ImportantDashboardGroupData[] {
-  const dashboardsByKey = new Map(
-    dashboards.map((dashboard) => [
-      buildDashboardKey(dashboard.metadata.project, dashboard.metadata.name, shouldNormalizeResourceNames),
-      dashboard,
-    ]),
-  );
-  const dashboardsByProject = new Map<string, DashboardResource[]>();
-
-  dashboards.forEach((dashboard) => {
-    const projectKey = normalizeImportantDashboardName(dashboard.metadata.project, shouldNormalizeResourceNames);
-    dashboardsByProject.set(projectKey, [...(dashboardsByProject.get(projectKey) ?? []), dashboard]);
-  });
-
   return importantDashboardGroups.map((group) => {
     const entries: ImportantDashboardEntryData[] = [];
 
     (group.dashboards ?? []).forEach((selector) => {
       if (selector.dashboard === undefined) {
-        entries.push({
-          kind: 'project',
-          project: selector.project,
-          dashboards:
-            dashboardsByProject.get(normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames)) ??
-            [],
-        });
+        const projectDashboards =
+          dashboardsByProject.get(normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames)) ??
+          [];
+        if (projectDashboards.length > 0) {
+          entries.push({ kind: 'project', project: selector.project, dashboards: projectDashboards });
+        }
         return;
       }
 
@@ -255,7 +237,7 @@ export function useRecentDashboardList(
 }
 
 /**
- * Used to get important dashboards.
+ * Used to get important dashboards for the global search bar.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string): {
@@ -273,6 +255,9 @@ export function useImportantDashboardList(project?: string): {
   return { data: importantDashboards, isLoading: isLoading, error };
 }
 
+/**
+ * Used to get configured important dashboard groups with their matching dashboards for the home page.
+ */
 export function useImportantDashboardGroupsData(project?: string): {
   isLoading: false | true;
   data: ImportantDashboardGroupData[];
