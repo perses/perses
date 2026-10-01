@@ -43,10 +43,13 @@ import (
 
 var pluginPathRegex = regexp.MustCompile(`^/plugins/[^/]+`)
 
-// hashedAssetRegex matches bundler output whose filename embeds a content hash (e.g. main.f55169be.js,
-// 463.85c2cbf6.css, TimeSeriesChart.b9caac04.js). The content of such a file never changes for a given
-// name, so it can be cached by browsers "forever".
-var hashedAssetRegex = regexp.MustCompile(`\.[0-9a-fA-F]{8,}\.(m?js|css)$`)
+// hashedAssetRegex matches bundler output whose filename embeds a content hash, e.g.:
+//   - JS/CSS bundles: main.f55169be.js, 463.85c2cbf6.css, TimeSeriesChart.b9caac04.js
+//   - fonts/images emitted by the plugins (rsbuild): inter-latin-600-normal.ce0f5f43.woff2
+//   - fonts/images emitted by the app (rspack `[hash][ext]`): ef6d3f52c547a6e3.woff2
+//
+// The content of such a file never changes for a given name, so it can be cached by browsers "forever".
+var hashedAssetRegex = regexp.MustCompile(`(^[0-9a-fA-F]{16,}|\.[0-9a-fA-F]{8,})\.(m?js|css|woff2?|ttf|otf|eot|png|jpe?g|gif|svg|webp|avif)$`)
 
 const (
 	prefixPathPlaceholder = "PREFIX_PATH_PLACEHOLDER"
