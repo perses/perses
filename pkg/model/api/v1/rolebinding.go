@@ -17,9 +17,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
+
+// maxSubjectsForLinearDeduplication is the maximum number of subjects of a role binding for which the duplicated
+// subjects are searched by scanning the subjects already kept, instead of using a map. For the common small role
+// bindings, it is cheaper than allocating a map.
+const maxSubjectsForLinearDeduplication = 16
 
 type RoleBindingInterface interface {
 	GetMetadata() modelAPI.Metadata
@@ -119,14 +125,23 @@ func (r *RoleBindingSpec) removeDuplicatedSubjects() {
 	if len(r.Subjects) < 2 {
 		return
 	}
-	seen := make(map[Subject]struct{}, len(r.Subjects))
+	// The subjects kept are written in the same backing array, at an index lower or equal to the one being read.
 	subjects := r.Subjects[:0]
-	for _, subject := range r.Subjects {
-		if _, duplicated := seen[subject]; duplicated {
-			continue
+	if len(r.Subjects) <= maxSubjectsForLinearDeduplication {
+		for _, subject := range r.Subjects {
+			if !slices.Contains(subjects, subject) {
+				subjects = append(subjects, subject)
+			}
 		}
-		seen[subject] = struct{}{}
-		subjects = append(subjects, subject)
+	} else {
+		seen := make(map[Subject]struct{}, len(r.Subjects))
+		for _, subject := range r.Subjects {
+			if _, duplicated := seen[subject]; duplicated {
+				continue
+			}
+			seen[subject] = struct{}{}
+			subjects = append(subjects, subject)
+		}
 	}
 	// The duplicates have been overwritten in the same backing array: clear the remaining elements.
 	clear(r.Subjects[len(subjects):])

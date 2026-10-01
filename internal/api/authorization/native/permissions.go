@@ -79,6 +79,8 @@ func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
 	// This is why the returned slice is only valid until the next call.
 	b.users = b.users[:0]
 	for _, subject := range spec.Subjects {
+		// The unmarshalling of a binding only accepts user subjects for now: this check is kept so that the other
+		// kinds of subjects that could be added later (e.g. teams) are never taken for users.
 		if subject.Kind != v1.KindUser {
 			continue
 		}
@@ -96,6 +98,9 @@ func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
 //   - the permissions of a user (for a given project) are ordered like the bindings granting them.
 //
 // The subjects of a binding are expected to be unique, as guaranteed by the unmarshalling of v1.RoleBindingSpec.
+// A binding built without being unmarshalled could list a user several times: the user would then get the permissions
+// of the role several times, which doesn't change the authorization decisions, but is visible in the permissions
+// returned by GetPermissions.
 // The roles are indexed, and the subjects of each binding are iterated once, so the complexity is linear
 // in the number of users, roles, binding subjects and permissions granted.
 func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role,

@@ -135,7 +135,8 @@ func edgeCaseDataset() *testDataset {
 			// bob is listed twice: the duplicate is removed when the binding is read from the database. ghost is unknown.
 			asReadFromDatabase(testGlobalRoleBinding("auditors", "auditor", userSubjects("bob", "bob", "ghost")...)),
 			testGlobalRoleBinding("unknown-role", "unknown", userSubjects("carol")...), // unknown role
-			testGlobalRoleBinding("empty", "admin"),                                    // no subject
+			// A binding without subject can't come from the database (rejected by the unmarshalling): defensive case.
+			testGlobalRoleBinding("empty", "admin"),
 		},
 		roleBindings: []*v1.RoleBinding{
 			testRoleBinding("p1", "editors", "editor", userSubjects("alice", "carol")...),
@@ -143,7 +144,8 @@ func edgeCaseDataset() *testDataset {
 			asReadFromDatabase(testRoleBinding("p1", "viewers", "viewer", userSubjects("carol", "ghost", "carol")...)),
 			testRoleBinding("p2", "editors", "editor", userSubjects("bob")...), // the role exists only in p1
 			testRoleBinding("p2", "owners", "owner", userSubjects("alice")...),
-			testRoleBinding("p2", "not-a-user", "owner", v1.Subject{Kind: v1.KindProject, Name: "dave"}), // not a user subject
+			// A subject that is not a user can't come from the database (rejected by the unmarshalling): defensive case.
+			testRoleBinding("p2", "not-a-user", "owner", v1.Subject{Kind: v1.KindProject, Name: "dave"}),
 		},
 	}
 }

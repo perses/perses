@@ -15,6 +15,8 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +24,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestUnmarshalRoleBindingRemovesDuplicatedSubjects(t *testing.T) {
+func TestUnmarshalRoleBindingSpecRemovesDuplicatedSubjects(t *testing.T) {
 	testSuite := []struct {
 		title            string
 		jason            string
@@ -65,8 +67,28 @@ func TestUnmarshalRoleBindingRemovesDuplicatedSubjects(t *testing.T) {
 	}
 }
 
+// Above maxSubjectsForLinearDeduplication subjects, the duplicates are found with a map instead of a linear scan.
+func TestUnmarshalRoleBindingSpecRemovesDuplicatedSubjectsFromLargeList(t *testing.T) {
+	uniqueCount := maxSubjectsForLinearDeduplication + 4
+	expectedSubjects := make([]Subject, 0, uniqueCount)
+	jsonSubjects := make([]string, 0, 2*uniqueCount)
+	for i := 0; i < uniqueCount; i++ {
+		expectedSubjects = append(expectedSubjects, Subject{Kind: KindUser, Name: fmt.Sprintf("user%d", i)})
+		jsonSubjects = append(jsonSubjects, fmt.Sprintf(`{"kind": "User", "name": "user%d"}`, i))
+	}
+	// Every user is listed a second time, in the reverse order.
+	for i := uniqueCount - 1; i >= 0; i-- {
+		jsonSubjects = append(jsonSubjects, fmt.Sprintf(`{"kind": "User", "name": "user%d"}`, i))
+	}
+	require.Greater(t, len(jsonSubjects), maxSubjectsForLinearDeduplication)
+
+	spec := RoleBindingSpec{}
+	require.NoError(t, json.Unmarshal([]byte(`{"role": "viewer", "subjects": [`+strings.Join(jsonSubjects, ",")+`]}`), &spec))
+	assert.Equal(t, expectedSubjects, spec.Subjects)
+}
+
 // The spec of a role binding is unmarshalled through its own UnmarshalJSON, so the duplicates are removed too.
-func TestUnmarshalRoleBindingsRemovesDuplicatedSubjects(t *testing.T) {
+func TestUnmarshalRoleBindingAndGlobalRoleBindingRemoveDuplicatedSubjects(t *testing.T) {
 	expectedSubjects := []Subject{{Kind: KindUser, Name: "alice"}, {Kind: KindUser, Name: "bob"}}
 
 	roleBinding := RoleBinding{}
