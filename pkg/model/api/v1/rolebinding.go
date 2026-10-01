@@ -91,6 +91,7 @@ func (r *RoleBindingSpec) UnmarshalJSON(data []byte) error {
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
+	tmp.removeDuplicatedSubjects()
 	*r = tmp
 	return nil
 }
@@ -104,8 +105,32 @@ func (r *RoleBindingSpec) UnmarshalYAML(unmarshal func(any) error) error {
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
+	tmp.removeDuplicatedSubjects()
 	*r = tmp
 	return nil
+}
+
+// removeDuplicatedSubjects removes the subjects listed several times, keeping the first occurrence of each subject
+// and the order of the subjects.
+// As every role binding is unmarshalled when it is created, updated or read from the database, it guarantees that
+// a subject appears only once in a role binding: the authorization relies on it to grant the permissions of the role
+// only once to each subject.
+func (r *RoleBindingSpec) removeDuplicatedSubjects() {
+	if len(r.Subjects) < 2 {
+		return
+	}
+	seen := make(map[Subject]struct{}, len(r.Subjects))
+	subjects := r.Subjects[:0]
+	for _, subject := range r.Subjects {
+		if _, duplicated := seen[subject]; duplicated {
+			continue
+		}
+		seen[subject] = struct{}{}
+		subjects = append(subjects, subject)
+	}
+	// The duplicates have been overwritten in the same backing array: clear the remaining elements.
+	clear(r.Subjects[len(subjects):])
+	r.Subjects = subjects
 }
 
 func (r *RoleBindingSpec) validate() error {

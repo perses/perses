@@ -36,6 +36,15 @@ func (p usersPermissions) addEntry(user string, project string, permission *v1Ro
 	p[user][project] = append(p[user][project], permission)
 }
 
+// addRolePermissions grants the permissions of a role to the given users, for the given project.
+func (p usersPermissions) addRolePermissions(users []string, project string, rolePermissions []v1Role.Permission) {
+	for _, usr := range users {
+		for i := range rolePermissions {
+			p.addEntry(usr, project, &rolePermissions[i])
+		}
+	}
+}
+
 // projectRoleKey identifies a project role.
 type projectRoleKey struct {
 	project string
@@ -44,46 +53,49 @@ type projectRoleKey struct {
 
 // bindingUsers extracts the users that are subjects of the bindings.
 type bindingUsers struct {
-	// lastBinding contains every existing user, associated with the last binding (numbered from 1) in which
-	// it has been found as a subject. It allows to ignore the subjects that are not existing users,
-	// and to ignore a user listed several times in the same binding, without clearing anything between two bindings.
-	lastBinding  map[string]int
-	bindingCount int
-	users        []string
+	// existingUsers contains the name of every existing user, to ignore the subjects that are not existing users.
+	existingUsers map[string]struct{}
+	// users is the buffer returned by "of", containing the users of the binding being processed.
+	// It is reused from one binding to the next to avoid an allocation per binding:
+	// the caller must not keep it after the next call.
+	users []string
 }
 
 func newBindingUsers(users []*v1.User) *bindingUsers {
-	lastBinding := make(map[string]int, len(users))
+	existingUsers := make(map[string]struct{}, len(users))
 	for _, usr := range users {
-		lastBinding[usr.Metadata.Name] = 0
+		existingUsers[usr.Metadata.Name] = struct{}{}
 	}
-	return &bindingUsers{lastBinding: lastBinding}
+	return &bindingUsers{existingUsers: existingUsers}
 }
 
-// of returns the existing users that are subjects of the given binding, without duplicates and in the order of
-// the subjects. The returned slice is only valid until the next call.
+// of returns the existing users that are subjects of the given binding, in the order of the subjects.
+// A user is listed only once in a binding: the duplicated subjects are removed when the binding is unmarshalled
+// (see v1.RoleBindingSpec), which happens when it is read from the database.
+// The returned slice is only valid until the next call.
 func (b *bindingUsers) of(spec v1.RoleBindingSpec) []string {
-	b.bindingCount++
+	// Empty the buffer but keep its capacity: the users of this binding overwrite the ones of the previous binding
+	// in the same backing array, so no new slice is allocated once the buffer is large enough.
+	// This is why the returned slice is only valid until the next call.
 	b.users = b.users[:0]
 	for _, subject := range spec.Subjects {
 		if subject.Kind != v1.KindUser {
 			continue
 		}
-		lastBinding, exists := b.lastBinding[subject.Name]
-		if !exists || lastBinding == b.bindingCount {
+		if _, exists := b.existingUsers[subject.Name]; !exists {
 			continue
 		}
-		b.lastBinding[subject.Name] = b.bindingCount
 		b.users = append(b.users, subject.Name)
 	}
 	return b.users
 }
 
 // buildUsersPermissions computes the permissions of every user from the roles and their bindings:
-//   - only the subjects that are existing users get permissions, a user listed several times in a binding counts once,
+//   - only the subjects that are existing users get permissions,
 //   - a binding referencing a role that doesn't exist is ignored,
 //   - the permissions of a user (for a given project) are ordered like the bindings granting them.
 //
+// The subjects of a binding are expected to be unique, as guaranteed by the unmarshalling of v1.RoleBindingSpec.
 // The roles are indexed, and the subjects of each binding are iterated once, so the complexity is linear
 // in the number of users, roles, binding subjects and permissions granted.
 func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles []*v1.Role,
@@ -105,40 +117,25 @@ func buildUsersPermissions(users []*v1.User, globalRoles []*v1.GlobalRole, roles
 
 	permissions := make(usersPermissions)
 	subjects := newBindingUsers(users)
+	// For each binding, the role is resolved first: if it doesn't exist, the binding is ignored without iterating
+	// over its subjects.
 	for _, globalRoleBinding := range globalRoleBindings {
-		bindingUsers := subjects.of(globalRoleBinding.Spec)
-		if len(bindingUsers) == 0 {
-			continue
-		}
 		globalRole, exists := globalRolesByName[globalRoleBinding.Spec.Role]
 		if !exists {
 			logrus.Warningf("global role %q listed in the global role binding %q does not exist", globalRoleBinding.Spec.Role, globalRoleBinding.Metadata.Name)
 			continue
 		}
-		permissions.addRolePermissions(bindingUsers, v1.WildcardProject, globalRole.Spec.Permissions)
+		permissions.addRolePermissions(subjects.of(globalRoleBinding.Spec), v1.WildcardProject, globalRole.Spec.Permissions)
 	}
 	for _, roleBinding := range roleBindings {
-		bindingUsers := subjects.of(roleBinding.Spec)
-		if len(bindingUsers) == 0 {
-			continue
-		}
 		projectRole, exists := rolesByKey[projectRoleKey{project: roleBinding.Metadata.Project, name: roleBinding.Spec.Role}]
 		if !exists {
 			logrus.Warningf("role %q listed in the role binding %s/%s does not exist", roleBinding.Spec.Role, roleBinding.Metadata.Project, roleBinding.Metadata.Name)
 			continue
 		}
-		permissions.addRolePermissions(bindingUsers, roleBinding.Metadata.Project, projectRole.Spec.Permissions)
+		permissions.addRolePermissions(subjects.of(roleBinding.Spec), roleBinding.Metadata.Project, projectRole.Spec.Permissions)
 	}
 	return permissions
-}
-
-// addRolePermissions grants the permissions of a role to the given users, for the given project.
-func (p usersPermissions) addRolePermissions(users []string, project string, rolePermissions []v1Role.Permission) {
-	for _, usr := range users {
-		for i := range rolePermissions {
-			p.addEntry(usr, project, &rolePermissions[i])
-		}
-	}
 }
 
 type cache struct {

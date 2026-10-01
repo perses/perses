@@ -14,6 +14,7 @@
 package native
 
 import (
+	"encoding/json"
 	"testing"
 
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -84,6 +85,20 @@ func testGlobalRoleBinding(name, role string, subjects ...v1.Subject) *v1.Global
 	return &v1.GlobalRoleBinding{Kind: v1.KindGlobalRoleBinding, Metadata: v1.Metadata{Name: name}, Spec: v1.RoleBindingSpec{Role: role, Subjects: subjects}}
 }
 
+// asReadFromDatabase returns the entity as the native authorization gets it from the database: marshalled, then
+// unmarshalled. In particular, the duplicated subjects of the role bindings are removed by the unmarshalling.
+func asReadFromDatabase[T any](entity *T) *T {
+	data, err := json.Marshal(entity)
+	if err != nil {
+		panic(err)
+	}
+	result := new(T)
+	if err := json.Unmarshal(data, result); err != nil {
+		panic(err)
+	}
+	return result
+}
+
 func testRoleBinding(project, name, role string, subjects ...v1.Subject) *v1.RoleBinding {
 	return &v1.RoleBinding{
 		Kind: v1.KindRoleBinding,
@@ -117,14 +132,16 @@ func edgeCaseDataset() *testDataset {
 		},
 		globalRoleBindings: []*v1.GlobalRoleBinding{
 			testGlobalRoleBinding("admins", "admin", userSubjects("alice")...),
-			testGlobalRoleBinding("auditors", "auditor", userSubjects("bob", "bob", "ghost")...), // duplicate and unknown users
-			testGlobalRoleBinding("unknown-role", "unknown", userSubjects("carol")...),           // unknown role
-			testGlobalRoleBinding("empty", "admin"),                                              // no subject
+			// bob is listed twice: the duplicate is removed when the binding is read from the database. ghost is unknown.
+			asReadFromDatabase(testGlobalRoleBinding("auditors", "auditor", userSubjects("bob", "bob", "ghost")...)),
+			testGlobalRoleBinding("unknown-role", "unknown", userSubjects("carol")...), // unknown role
+			testGlobalRoleBinding("empty", "admin"),                                    // no subject
 		},
 		roleBindings: []*v1.RoleBinding{
 			testRoleBinding("p1", "editors", "editor", userSubjects("alice", "carol")...),
-			testRoleBinding("p1", "viewers", "viewer", userSubjects("carol", "ghost", "carol")...), // duplicate and unknown users
-			testRoleBinding("p2", "editors", "editor", userSubjects("bob")...),                     // the role exists only in p1
+			// carol is listed twice: the duplicate is removed when the binding is read from the database. ghost is unknown.
+			asReadFromDatabase(testRoleBinding("p1", "viewers", "viewer", userSubjects("carol", "ghost", "carol")...)),
+			testRoleBinding("p2", "editors", "editor", userSubjects("bob")...), // the role exists only in p1
 			testRoleBinding("p2", "owners", "owner", userSubjects("alice")...),
 			testRoleBinding("p2", "not-a-user", "owner", v1.Subject{Kind: v1.KindProject, Name: "dave"}), // not a user subject
 		},
