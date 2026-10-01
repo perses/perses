@@ -44,10 +44,45 @@ export interface DashboardTreeTableRow {
   createdAt?: Date;
   updatedAt?: Date;
   tags?: string[];
+  // Space-joined copy of `tags`. The table's global search only considers a column
+  // searchable when its value is a string or number, so this always resolves to a
+  // string (possibly empty) rather than reusing `tags` directly.
+  tagsSearchValue: string;
   version?: number;
   viewedAt?: Date;
   children?: DashboardTreeTableRow[];
 }
+
+// Exported so tests can build a real TanStack table with this exact column config and
+// verify the Tags column stays eligible for (and correctly matches) the table's global
+// search — see dashboardTableUtils.test.ts.
+export const TAGS_COLUMN: TableColumnConfig<DashboardTreeTableRow> = {
+  id: 'tags',
+  accessorKey: 'tagsSearchValue',
+  header: 'Tags',
+  align: 'left',
+  enableSorting: true,
+  cellDescription: (): string => '',
+  cell: ({ row }): ReactNode => {
+    const tags = row.original.tags;
+    return tags ? (
+      <Box
+        sx={{
+          pt: 0.75,
+          mt: -1,
+          overflow: 'inherit',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {tags.map((tag, index) => (
+          <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
+        ))}
+      </Box>
+    ) : (
+      ''
+    );
+  },
+};
 
 export interface DashboardTreeTableProps {
   folderList: FolderResource[];
@@ -139,33 +174,7 @@ function DashboardTreeList({
           />
         ),
       },
-      {
-        id: 'tags',
-        accessorKey: 'tags',
-        header: 'Tags',
-        align: 'left',
-        enableSorting: true,
-        cellDescription: (): string => '',
-        cell: ({ getValue }): ReactNode => {
-          const tags: string[] | undefined = getValue();
-          return tags ? (
-            <Box
-              sx={{
-                pt: 0.75,
-                mt: -1,
-                overflow: 'inherit',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {tags.map((tag, index) => (
-                <Chip key={`${tag}-${index}`} label={tag} size="small" sx={{ mr: index < tags.length - 1 ? 0.5 : 0 }} />
-              ))}
-            </Box>
-          ) : (
-            ''
-          );
-        },
-      },
+      TAGS_COLUMN,
       {
         id: 'version',
         accessorKey: 'version',

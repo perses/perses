@@ -12,10 +12,12 @@
 // limitations under the License.
 
 import type { FolderResource } from '@perses-dev/client';
+import { persesColumnsToTanstackColumns } from '@perses-dev/components';
 import { vi } from 'vitest';
 
 import type { DashboardListRow } from '../components/DashboardList/DashboardList';
 import type { DashboardTreeTableRow } from '../components/DashboardList/DashboardTreeList';
+import { TAGS_COLUMN } from '../components/DashboardList/DashboardTreeList';
 import { buildTableRows, sortDashboardTableStringColumn } from './dashboardTableUtils';
 
 vi.mock('echarts', () => ({
@@ -188,6 +190,49 @@ describe('buildTableRows – no folders', () => {
 
     expect(rows[0]!.tags).toEqual(['tag1', 'tag2']);
     expect(rows[0]!.version).toBe(3);
+    // tagsSearchValue must be the tags joined into a single searchable string —
+    // this is what the table's global search actually reads, not `tags` itself.
+    expect(rows[0]!.tagsSearchValue).toBe('tag1 tag2');
+  });
+
+  it('derives tagsSearchValue as an empty string when there are no tags', () => {
+    const dash: DashboardListRow = {
+      index: 0,
+      project: 'p',
+      name: 'dash-a',
+      displayName: 'dash-a',
+      version: 1,
+      createdAt: '',
+      updatedAt: '',
+      tags: [],
+    };
+    const map = new Map([['p', new Map([['dash-a', dash]])]]);
+
+    const rows = buildTableRows([], map);
+
+    expect(rows[0]!.tagsSearchValue).toBe('');
+  });
+
+  it('joins folder tags into tagsSearchValue', () => {
+    const folder: FolderResource = {
+      kind: 'Folder',
+      metadata: { name: 'my-folder', project: 'p', version: 1, tags: ['alpha', 'beta'] },
+      spec: { items: [] },
+    };
+
+    const rows = buildTableRows([folder], new Map());
+
+    expect(rows[0]!.tagsSearchValue).toBe('alpha beta');
+  });
+
+  it('wires the Tags column to the tagsSearchValue accessor, not the raw tags array', () => {
+    // TanStack Table only considers a column eligible for the table's global search when
+    // its value is a string or number (checked on the first row). `tags` is a string[], so
+    // the column must read from `tagsSearchValue` (always a string) instead, or tag search
+    // silently stops working again with no type error anywhere.
+    const [tanstackTagsColumn] = persesColumnsToTanstackColumns([TAGS_COLUMN]);
+
+    expect(tanstackTagsColumn).toMatchObject({ accessorKey: 'tagsSearchValue' });
   });
 
   it('handles multiple projects independently', () => {
@@ -468,6 +513,10 @@ describe('buildTableRows – nested folders', () => {
     expect(innerRow.name).toBe('inner');
     expect(innerRow.children).toHaveLength(1);
     expect(innerRow.children![0]!.name).toBe('dash-a');
+    // Nested subfolder rows must still carry a string tagsSearchValue (never
+    // undefined), since the table's global search relies on it to consider the
+    // Tags column searchable at all.
+    expect(typeof innerRow.tagsSearchValue).toBe('string');
   });
 
   it('builds the correct path for deeply nested dashboards', () => {
@@ -664,7 +713,7 @@ const row = (
   displayName: string,
   project = 'p',
 ): { original: DashboardTreeTableRow } => ({
-  original: { kind, displayName, project, name: displayName.toLowerCase(), path: [] },
+  original: { kind, displayName, project, name: displayName.toLowerCase(), path: [], tagsSearchValue: '' },
 });
 
 describe('sortDashboardTableStringColumn', () => {
