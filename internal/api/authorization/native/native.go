@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"slices"
 	"sync"
+	"sync/atomic"
 
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -45,8 +46,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	if err != nil {
 		return nil, err
 	}
-	return &native{
-		cache:                &cache{},
+	n := &native{
 		userDAO:              userDAO,
 		roleDAO:              roleDAO,
 		roleBindingDAO:       roleBindingDAO,
@@ -55,7 +55,9 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		guestPermissions:     conf.Security.Authorization.Provider.Native.GuestPermissions,
 		claimMappings:        buildClaimMappings(conf),
 		accessKey:            key,
-	}, err
+	}
+	n.cache.Store(&cache{})
+	return n, nil
 }
 
 // providerKey uniquely identifies an OAuth/OIDC provider by kind and slug_id.
@@ -109,18 +111,25 @@ func buildClaimMappings(conf config.Config) map[providerKey][]claimRoleMapping {
 type native struct {
 	// The key used to sign the JWT token, it is expected to be the same as the one used in the crypto package.
 	accessKey []byte
-	// cache is used to store in memory the permissions of all users and all the roles defined
-	cache                *cache
+	// cache is an in-memory snapshot of the permissions of all users and of all the roles defined.
+	// A snapshot is immutable: it is entirely replaced on every refresh and must never be modified once stored.
+	// That way, it can be read concurrently without any lock. Each request must load it only once,
+	// so that all its permission checks are done against the same consistent snapshot.
+	cache                atomic.Pointer[cache]
 	userDAO              user.DAO
 	roleDAO              role.DAO
 	roleBindingDAO       rolebinding.DAO
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
-	guestPermissions     []*v1Role.Permission
+	// guestPermissions is shared by all requests and must never be modified.
+	guestPermissions []*v1Role.Permission
 	// claimMappings maps provider keys to their claim→role mappings, indexed at startup from config.
 	claimMappings map[providerKey][]claimRoleMapping
-	// mutex is used to protect the cache from concurrent access.
-	mutex sync.RWMutex
+	// refreshSeq is incremented at the start of every refresh, to order them.
+	refreshSeq atomic.Uint64
+	// publishMutex protects publishedSeq, the sequence number of the refresh that published the current cache.
+	publishMutex sync.Mutex
+	publishedSeq uint64
 }
 
 func (n *native) IsEnabled() bool {
@@ -249,15 +258,13 @@ func (n *native) GetUserProjects(ctx echo.Context, requestAction v1Role.Action, 
 	if err != nil {
 		return nil, err
 	}
+	c := n.cache.Load()
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		if claimProjects := projectsWithPermission(n.claimPermissions(claims), requestAction, requestScope); len(claimProjects) > 0 {
+		if claimProjects := projectsWithPermission(n.claimPermissions(c, claims), requestAction, requestScope); len(claimProjects) > 0 {
 			return claimProjects, nil
 		}
 	}
-
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return projectsWithPermission(n.cache.permissions[username], requestAction, requestScope), nil
+	return projectsWithPermission(c.permissions[username], requestAction, requestScope), nil
 }
 
 func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
@@ -291,8 +298,9 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		logrus.WithError(err).Error("unable to retrieve user from context")
 		return false
 	}
+	c := n.cache.Load()
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		claimPerms := n.claimPermissions(claims)
+		claimPerms := n.claimPermissions(c, claims)
 		if listHasPermission(claimPerms[v1.WildcardProject], requestAction, requestScope) {
 			return true
 		}
@@ -301,9 +309,7 @@ func (n *native) HasPermission(ctx echo.Context, requestAction v1Role.Action, re
 		}
 	}
 	// Checking cached permissions
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
-	return n.cache.hasPermission(username, requestAction, requestProject, requestScope)
+	return c.hasPermission(username, requestAction, requestProject, requestScope)
 }
 
 // For native auth, creating a project requires a global permission.
@@ -312,8 +318,6 @@ func (n *native) HasCreateProjectPermission(ctx echo.Context, projectName string
 }
 
 func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permission, error) {
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	username, err := n.GetUsername(ctx)
 	if err != nil {
 		return nil, err
@@ -323,34 +327,52 @@ func (n *native) GetPermissions(ctx echo.Context) (map[string][]*v1Role.Permissi
 		logrus.Error("No username found in the context, this should not happen in a native RBAC implementation")
 		return nil, apiInterface.InternalError
 	}
-	userPermissions := make(map[string][]*v1Role.Permission)
-	userPermissions[v1.WildcardProject] = n.guestPermissions
-	for project, projectPermissions := range n.cache.permissions[username] {
-		userPermissions[project] = append(userPermissions[project], projectPermissions...)
-	}
-	// Merge claim-based permissions
 	usr, err := n.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
+	c := n.cache.Load()
+	userPermissions := make(map[string][]*v1Role.Permission)
+	// The guest permissions are shared by all requests: they must be cloned,
+	// otherwise the appends below could write into their backing array.
+	userPermissions[v1.WildcardProject] = slices.Clone(n.guestPermissions)
+	for project, projectPermissions := range c.permissions[username] {
+		userPermissions[project] = append(userPermissions[project], projectPermissions...)
+	}
+	// Merge claim-based permissions
 	if claims, ok := usr.(*crypto.JWTClaims); ok {
-		for project, perms := range n.claimPermissions(claims) {
+		for project, perms := range n.claimPermissions(c, claims) {
 			userPermissions[project] = append(userPermissions[project], perms...)
 		}
 	}
 	return userPermissions, nil
 }
 
+// RefreshPermissionsAndRoles rebuilds the permission cache from the database and publishes it.
+// It is called synchronously by the API handlers (first login of an OAuth/OIDC user, any change on a RBAC resource, ...),
+// so the refreshes are not serialized: a refresh doesn't have to wait for the other ones in progress.
+// Instead, each refresh gets a sequence number when it starts, and its result is only published if no refresh
+// that started later has already been published. Otherwise, a slow refresh that read the database before a change
+// could overwrite the cache built by a more recent refresh that includes this change.
 func (n *native) RefreshPermissionsAndRoles() error {
+	seq := n.refreshSeq.Add(1)
 	permissions, globalRoles, roles, err := n.loadAllPermissionsAndRoles()
 	if err != nil {
 		return err
 	}
-	n.mutex.Lock()
-	n.cache.permissions = permissions
-	n.cache.globalRoles = globalRoles
-	n.cache.roles = roles
-	n.mutex.Unlock()
+	n.publishMutex.Lock()
+	defer n.publishMutex.Unlock()
+	if seq < n.publishedSeq {
+		// A more recent cache has already been published.
+		return nil
+	}
+	n.publishedSeq = seq
+	// Publish a brand-new snapshot: the requests in progress keep using the previous one.
+	n.cache.Store(&cache{
+		permissions: permissions,
+		globalRoles: globalRoles,
+		roles:       roles,
+	})
 	return nil
 }
 
@@ -414,10 +436,10 @@ func (n *native) loadAllPermissionsAndRoles() (usersPermissions, []*v1.GlobalRol
 }
 
 // claimPermissions resolves the permissions granted by a user's PersistedClaims based on
-// the provider's claim→role mappings defined in the config.
+// the provider's claim→role mappings defined in the config, and on the roles of the given cache snapshot.
 // Returns a map of project → permissions (using v1.WildcardProject for GlobalRole mappings).
 // Returns nil when no matching mappings are found.
-func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role.Permission {
+func (n *native) claimPermissions(c *cache, claims *crypto.JWTClaims) map[string][]*v1Role.Permission {
 	if claims == nil || len(claims.PersistedClaims) == 0 {
 		return nil
 	}
@@ -428,8 +450,6 @@ func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role
 	}
 
 	result := make(map[string][]*v1Role.Permission)
-	n.mutex.RLock()
-	defer n.mutex.RUnlock()
 	for _, m := range mappings {
 		claimValues := claims.PersistedClaims[m.claimName]
 		if !slices.Contains(claimValues, m.claimValue) {
@@ -437,7 +457,7 @@ func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role
 		}
 		if m.project == "" {
 			// GlobalRole mapping
-			grole := findGlobalRole(n.cache.globalRoles, m.roleName)
+			grole := findGlobalRole(c.globalRoles, m.roleName)
 			if grole == nil {
 				logrus.Warningf("claim mapping references unknown GlobalRole %q", m.roleName)
 				continue
@@ -447,7 +467,7 @@ func (n *native) claimPermissions(claims *crypto.JWTClaims) map[string][]*v1Role
 			}
 		} else {
 			// Project-scoped Role mapping
-			prole := findRole(n.cache.roles, m.project, m.roleName)
+			prole := findRole(c.roles, m.project, m.roleName)
 			if prole == nil {
 				logrus.Warningf("claim mapping references unknown Role %q in project %q", m.roleName, m.project)
 				continue
