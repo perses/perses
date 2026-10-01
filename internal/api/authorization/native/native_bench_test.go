@@ -61,12 +61,15 @@ func BenchmarkRefreshPermissionsAndRoles(b *testing.B) {
 	}
 }
 
-// BenchmarkConcurrentRefreshPermissionsAndRoles measures the time needed for several callers triggering a cache refresh
-// at the same time to all be done. The refreshes are triggered synchronously by the API handlers (first login of an
-// OAuth/OIDC user, any change on a RBAC resource, ...), so a refresh should not have to wait for the other ones.
+// BenchmarkConcurrentRefreshPermissionsAndRoles simulates 25 OAuth/OIDC users logging in for the first time at the same
+// time: each first login creates the user, then refreshes the whole permission cache synchronously, before answering.
+// The time per operation is the time until all the refreshes are done, i.e. the wait of the slowest login.
+// A refresh must not wait for the other ones in progress: if the refreshes were serialized, this time would be
+// 25 times the time of a single refresh (see BenchmarkRefreshPermissionsAndRoles).
+// The creation of the 25 users is not simulated: it doesn't change significantly the cost of a refresh.
 func BenchmarkConcurrentRefreshPermissionsAndRoles(b *testing.B) {
 	silenceTestLogs(b)
-	const callers = 10
+	const callers = 25
 	for _, size := range datasetSizes {
 		ds := newTestDataset(size)
 		n := ds.newNative(b, false)
