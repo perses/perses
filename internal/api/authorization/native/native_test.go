@@ -272,10 +272,11 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 // makeNativeWithMappings builds a native struct suitable for unit-testing claim logic
 // without any database dependencies.
 func makeNativeWithMappings(claimMappings map[providerKey][]claimRoleMapping, cacheObj *cache) *native {
-	return &native{
-		cache:         cacheObj,
+	n := &native{
 		claimMappings: claimMappings,
 	}
+	n.cache.Store(cacheObj)
+	return n
 }
 
 func makeJWTClaims(kind, id string, claims map[string][]string) *crypto.JWTClaims {
@@ -380,7 +381,7 @@ func TestClaimPermissions(t *testing.T) {
 	}, testCache)
 
 	t.Run("unknown GlobalRole name returns nil", func(t *testing.T) {
-		result := nWithBadMapping.claimPermissions(makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}))
+		result := nWithBadMapping.claimPermissions(nWithBadMapping.cache.Load(), makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"unknown-role"}}))
 		assert.Nil(t, result)
 	})
 
@@ -390,14 +391,14 @@ func TestClaimPermissions(t *testing.T) {
 				{claimName: "roles", claimValue: "dev", roleName: "nonexistent", project: "platform"},
 			},
 		}, testCache)
-		result := nBadProject.claimPermissions(makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"dev"}}))
+		result := nBadProject.claimPermissions(nBadProject.cache.Load(), makeJWTClaims("oidc", "keycloak", map[string][]string{"roles": {"dev"}}))
 		assert.Nil(t, result)
 	})
 
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
-			result := n.claimPermissions(test.claims)
+			result := n.claimPermissions(n.cache.Load(), test.claims)
 			if test.expectedNil {
 				assert.Nil(t, result)
 				return
