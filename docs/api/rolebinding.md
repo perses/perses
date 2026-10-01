@@ -41,6 +41,7 @@ spec: <RoleBinding specification>
 # Name of the Role or GlobalRole concerned by the role binding (metadata.name)
 role: <string>
 # Subjects that will inherit permissions from the role
+# A subject listed several times is kept only once (its first occurrence).
 subjects: 
   - <Subject specification>
 ```
