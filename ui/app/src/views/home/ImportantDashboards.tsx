@@ -20,7 +20,6 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
 import { EmptyState } from '../../components/EmptyState/EmptyState';
-import { useShouldNormalizeResourceNames } from '../../context/Config';
 import { useImportantDashboardGroupsData } from '../../model/dashboard-client';
 import { useProjectList } from '../../model/project-client';
 import { HomeListCard } from './HomeListCard';
@@ -29,7 +28,6 @@ import { HomeListItem } from './HomeListItem';
 export function ImportantDashboards(): ReactElement {
   const { data: importantDashboardGroups, isLoading } = useImportantDashboardGroupsData();
   const { data: projects } = useProjectList();
-  const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 
   const groups = useMemo(
     () => importantDashboardGroups.filter((group) => group.entries.length > 0),
@@ -37,13 +35,8 @@ export function ImportantDashboards(): ReactElement {
   );
 
   const projectDisplayNames = useMemo(() => {
-    return new Map(
-      (projects ?? []).map((project) => [
-        shouldNormalizeResourceNames ? project.metadata.name.toLowerCase() : project.metadata.name,
-        project.spec?.display?.name,
-      ]),
-    );
-  }, [projects, shouldNormalizeResourceNames]);
+    return new Map((projects ?? []).map((project) => [project.metadata.name, project.spec?.display?.name]));
+  }, [projects]);
 
   return (
     <HomeListCard
@@ -73,7 +66,7 @@ export function ImportantDashboards(): ReactElement {
           {groups.map((group, groupIndex) => {
             return (
               <Box key={groupIndex}>
-                <Stack spacing={0.5} sx={{ mb: group.title !== undefined ? 1 : 0 }}>
+                <Stack spacing={0.5} sx={{ mb: group.title !== undefined || group.description !== undefined ? 1 : 0 }}>
                   {group.title !== undefined && (
                     <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                       {group.title}
@@ -89,10 +82,7 @@ export function ImportantDashboards(): ReactElement {
                   {group.entries.map((entry, entryIndex) => {
                     if (entry.kind === 'project') {
                       const dashboardCount = entry.dashboards.length;
-                      const projectDisplayName =
-                        projectDisplayNames.get(
-                          shouldNormalizeResourceNames ? entry.project.toLowerCase() : entry.project,
-                        ) ?? entry.project;
+                      const projectDisplayName = projectDisplayNames.get(entry.project) ?? entry.project;
                       return (
                         <Box key={entryIndex}>
                           <HomeListItem

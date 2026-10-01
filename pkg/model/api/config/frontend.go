@@ -204,7 +204,6 @@ func (d *ImportantDashboards) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*d = ImportantDashboards{{Dashboards: selectors}}
-	warnLegacyImportantDashboardsFormat()
 	return nil
 }
 

@@ -172,8 +172,9 @@ export function resolveImportantDashboardGroups(
         const projectDashboards =
           dashboardsByProject.get(normalizeImportantDashboardName(selector.project, shouldNormalizeResourceNames)) ??
           [];
-        if (projectDashboards.length > 0) {
-          entries.push({ kind: 'project', project: selector.project, dashboards: projectDashboards });
+        const [firstDashboard] = projectDashboards;
+        if (firstDashboard) {
+          entries.push({ kind: 'project', project: firstDashboard.metadata.project, dashboards: projectDashboards });
         }
         return;
       }
@@ -258,12 +259,12 @@ export function useImportantDashboardList(project?: string): {
 /**
  * Used to get configured important dashboard groups with their matching dashboards for the home page.
  */
-export function useImportantDashboardGroupsData(project?: string): {
+export function useImportantDashboardGroupsData(): {
   isLoading: false | true;
   data: ImportantDashboardGroupData[];
   error: StatusError | null;
 } {
-  const { data: dashboards, isLoading, error } = useDashboardList({ project: project, metadataOnly: true });
+  const { data: dashboards, isLoading, error } = useDashboardList({ metadataOnly: true });
   const importantDashboardGroups = useImportantDashboardGroups();
   const shouldNormalizeResourceNames = useShouldNormalizeResourceNames();
 

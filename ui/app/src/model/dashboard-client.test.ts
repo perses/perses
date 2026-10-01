@@ -90,7 +90,7 @@ describe('resolveImportantDashboardGroups', () => {
     expect(resolvedGroups).toHaveLength(1);
     expect(resolvedGroups[0]?.entries).toEqual([
       { kind: 'dashboard', dashboard: dashboards[0] },
-      { kind: 'project', project: 'perses', dashboards },
+      { kind: 'project', project: 'Perses', dashboards },
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('resolveImportantDashboardGroups', () => {
 
     expect(resolveImportantDashboardList(dashboards, groups, true)).toEqual(dashboards);
     expect(resolveImportantDashboardGroups(dashboards, groups, true)[0]?.entries).toEqual([
-      { kind: 'project', project: 'perses', dashboards },
+      { kind: 'project', project: 'Perses', dashboards },
     ]);
   });
 });

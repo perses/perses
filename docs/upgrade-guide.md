@@ -35,8 +35,8 @@ frontend:
           dashboard: "Demo"
 ```
 
-If you set important dashboards through environment variables, the variables need to be updated accordingly, as the
-legacy shape is not supported there:
+If you set important dashboards through environment variables, the legacy shape is not supported there: Perses will
+fail to start until the variables are updated accordingly:
 
 ```txt
 PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_PROJECT   -> PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT

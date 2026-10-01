@@ -30,16 +30,9 @@ function buildDashboard(project: string, name: string, displayName = name): Dash
       display: {
         name: displayName,
       },
-      panels: {
-        first: {},
-      },
     },
   } as unknown as DashboardResource;
 }
-
-vi.mock('../../context/Config', () => ({
-  useShouldNormalizeResourceNames: (): boolean => false,
-}));
 
 vi.mock('../../model/project-client', () => ({
   useProjectList: (): {
