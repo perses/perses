@@ -13,25 +13,51 @@
 
 package annotation
 
-import "github.com/perses/spec/go/dashboard"
+import (
+	"errors"
+
+	"github.com/perses/spec/go/plugin"
+)
+
+// Name sets the annotation display name.
+func Name(name string) Option {
+	return func(builder *Builder) error {
+		if name == "" {
+			return errors.New("annotation name cannot be empty")
+		}
+		builder.Annotation.Display.Name = name
+		return nil
+	}
+}
 
 // Description sets the annotation description.
-func Description(description string) DisplayOption {
-	return func(annotation *dashboard.AnnotationSpec) {
-		annotation.Display.Description = description
+func Description(description string) Option {
+	return func(builder *Builder) error {
+		builder.Annotation.Display.Description = description
+		return nil
 	}
 }
 
 // Hidden controls whether the annotation is initially hidden.
-func Hidden(hidden bool) DisplayOption {
-	return func(annotation *dashboard.AnnotationSpec) {
-		annotation.Display.Hidden = hidden
+func Hidden(hidden bool) Option {
+	return func(builder *Builder) error {
+		builder.Annotation.Display.Hidden = hidden
+		return nil
 	}
 }
 
 // Color sets the annotation display color.
-func Color(color string) DisplayOption {
-	return func(annotation *dashboard.AnnotationSpec) {
-		annotation.Display.Color = color
+func Color(color string) Option {
+	return func(builder *Builder) error {
+		builder.Annotation.Display.Color = color
+		return nil
+	}
+}
+
+// Plugin sets the annotation plugin configuration.
+func Plugin(plg plugin.Plugin) Option {
+	return func(builder *Builder) error {
+		builder.Annotation.Plugin = plg
+		return nil
 	}
 }

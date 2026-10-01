@@ -24,10 +24,10 @@ import (
 )
 
 func TestAddAnnotation(t *testing.T) {
-	builder, err := panel.New("Panel", panel.AddAnnotation("Deployments", annotation.Option{
-		Kind:   plugin.KindAnnotation,
-		Plugin: plugin.Plugin{Kind: "TestAnnotation"},
-	}, annotation.Hidden(true)))
+	builder, err := panel.New("Panel", panel.AddAnnotation("Deployments",
+		annotation.Plugin(plugin.Plugin{Kind: "TestAnnotation"}),
+		annotation.Hidden(true),
+	))
 
 	require.NoError(t, err)
 	require.Len(t, builder.Spec.Annotations, 1)

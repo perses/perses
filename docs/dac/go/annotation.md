@@ -5,12 +5,25 @@
 ```golang
 import "github.com/perses/perses/go-sdk/annotation"
 
-annotation.New("Deployments", annotationPlugin())
+var options []annotation.Option
+annotation.New("Deployments", options...)
 ```
 
-An annotation requires a display name and configuration from an annotation plugin SDK. Plugin SDKs return an `annotation.Option`; pass it as the second argument to `annotation.New`, `dashboard.AddAnnotation`, or `panel.AddAnnotation`.
+Need to provide the name of the annotation and a list of options.
 
-## Available display options
+## Default options
+
+- [Name()](#name): with the name provided in the constructor.
+
+## Available options
+
+### Name
+
+```golang
+annotation.Name("Deployments")
+```
+
+Sets the annotation display name.
 
 ### Description
 
@@ -35,6 +48,18 @@ annotation.Color("#ff0000")
 ```
 
 Sets the annotation display color.
+
+### Plugin
+
+```golang
+annotation.Plugin(plugin.Plugin{Kind: "PrometheusAnnotation", Spec: spec})
+```
+
+Sets the annotation plugin configuration. An annotation plugin SDK returns an `annotation.Option` that sets this field.
+
+## Annotation Plugin Options
+
+See the related documentation for each annotation plugin.
 
 ## Example
 

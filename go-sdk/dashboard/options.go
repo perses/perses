@@ -259,13 +259,13 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 }
 
 // AddAnnotation adds an annotation to the dashboard.
-func AddAnnotation(name string, option annotation.Option, options ...annotation.DisplayOption) Option {
+func AddAnnotation(name string, options ...annotation.Option) Option {
 	return func(builder *Builder) error {
-		a, err := annotation.New(name, option, options...)
+		a, err := annotation.New(name, options...)
 		if err != nil {
 			return err
 		}
-		builder.Dashboard.Spec.Annotations = append(builder.Dashboard.Spec.Annotations, *a)
+		builder.Dashboard.Spec.Annotations = append(builder.Dashboard.Spec.Annotations, a.Annotation)
 		return nil
 	}
 }

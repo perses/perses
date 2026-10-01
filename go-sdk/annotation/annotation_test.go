@@ -23,49 +23,53 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func validOption() annotation.Option {
-	return annotation.Option{
-		Kind: plugin.KindAnnotation,
-		Plugin: plugin.Plugin{
-			Kind: "TestAnnotation",
-			Spec: map[string]any{"query": "up"},
-		},
-	}
+func validPlugin() annotation.Option {
+	return annotation.Plugin(plugin.Plugin{
+		Kind: "TestAnnotation",
+		Spec: map[string]any{"query": "up"},
+	})
 }
 
 func TestNew(t *testing.T) {
-	a, err := annotation.New("Deployments", validOption())
+	a, err := annotation.New("Deployments", validPlugin())
 
 	require.NoError(t, err)
-	assert.Equal(t, "Deployments", a.Display.Name)
-	assert.Equal(t, "TestAnnotation", a.Plugin.Kind)
+	assert.Equal(t, "Deployments", a.Annotation.Display.Name)
+	assert.Equal(t, "TestAnnotation", a.Annotation.Plugin.Kind)
 }
 
 func TestNewWithDisplayOptions(t *testing.T) {
-	a, err := annotation.New("Deployments", validOption(),
+	a, err := annotation.New("Deployments",
+		validPlugin(),
 		annotation.Description("Production deployments"),
 		annotation.Hidden(true),
 		annotation.Color("#ff0000"),
 	)
 
 	require.NoError(t, err)
-	assert.Equal(t, "Production deployments", a.Display.Description)
-	assert.True(t, a.Display.Hidden)
-	assert.Equal(t, "#ff0000", a.Display.Color)
+	assert.Equal(t, "Production deployments", a.Annotation.Display.Description)
+	assert.True(t, a.Annotation.Display.Hidden)
+	assert.Equal(t, "#ff0000", a.Annotation.Display.Color)
 }
 
-func TestNewRejectsIncorrectPluginKind(t *testing.T) {
-	_, err := annotation.New("Deployments", annotation.Option{Kind: plugin.KindTimeSeriesQuery})
+func TestNewRejectsEmptyName(t *testing.T) {
+	_, err := annotation.New("", validPlugin())
 
-	require.EqualError(t, err, "invalid plugin kind for an annotation: TimeSeriesQuery")
+	require.EqualError(t, err, "annotation name cannot be empty")
 }
 
-func TestNewPropagatesPluginBuilderError(t *testing.T) {
+func TestNewRejectsEmptyPlugin(t *testing.T) {
+	_, err := annotation.New("Deployments")
+
+	require.EqualError(t, err, "annotation plugin cannot be empty")
+}
+
+func TestNewPropagatesOptionError(t *testing.T) {
 	want := errors.New("invalid annotation query")
-	option := validOption()
-	option.Error = want
 
-	_, err := annotation.New("Deployments", option)
+	_, err := annotation.New("Deployments", validPlugin(), func(*annotation.Builder) error {
+		return want
+	})
 
 	require.ErrorIs(t, err, want)
 }

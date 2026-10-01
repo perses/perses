@@ -62,13 +62,13 @@ func AddQuery(options ...query.Option) Option {
 }
 
 // AddAnnotation adds an annotation to the panel.
-func AddAnnotation(name string, option annotation.Option, options ...annotation.DisplayOption) Option {
+func AddAnnotation(name string, options ...annotation.Option) Option {
 	return func(builder *Builder) error {
-		a, err := annotation.New(name, option, options...)
+		a, err := annotation.New(name, options...)
 		if err != nil {
 			return err
 		}
-		builder.Spec.Annotations = append(builder.Spec.Annotations, *a)
+		builder.Spec.Annotations = append(builder.Spec.Annotations, a.Annotation)
 		return nil
 	}
 }

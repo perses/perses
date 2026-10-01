@@ -24,10 +24,10 @@ import (
 )
 
 func TestAddAnnotation(t *testing.T) {
-	builder, err := dashboard.New("dashboard", dashboard.AddAnnotation("Deployments", annotation.Option{
-		Kind:   plugin.KindAnnotation,
-		Plugin: plugin.Plugin{Kind: "TestAnnotation"},
-	}, annotation.Description("Production deployments")))
+	builder, err := dashboard.New("dashboard", dashboard.AddAnnotation("Deployments",
+		annotation.Plugin(plugin.Plugin{Kind: "TestAnnotation"}),
+		annotation.Description("Production deployments"),
+	))
 
 	require.NoError(t, err)
 	require.Len(t, builder.Dashboard.Spec.Annotations, 1)

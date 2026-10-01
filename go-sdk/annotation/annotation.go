@@ -16,40 +16,37 @@ package annotation
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/perses/spec/go/dashboard"
-	"github.com/perses/spec/go/plugin"
 )
 
-// Option is the annotation plugin configuration supplied by a plugin SDK.
-type Option struct {
-	Kind   plugin.Kind
-	Plugin plugin.Plugin
-	Error  error
-}
-
-// DisplayOption configures optional annotation display fields.
-type DisplayOption func(annotation *dashboard.AnnotationSpec)
+// Option configures an annotation builder.
+type Option func(annotation *Builder) error
 
 // New builds an annotation with its required name and plugin configuration.
-func New(name string, option Option, options ...DisplayOption) (*dashboard.AnnotationSpec, error) {
-	if name == "" {
-		return nil, errors.New("annotation name cannot be empty")
-	}
-	if option.Kind != plugin.KindAnnotation {
-		return nil, fmt.Errorf("invalid plugin kind for an annotation: %s", option.Kind)
+func New(name string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		Annotation: dashboard.AnnotationSpec{},
 	}
 
-	annotation := &dashboard.AnnotationSpec{
-		Display: dashboard.AnnotationDisplay{
-			Name: name,
-		},
-		Plugin: option.Plugin,
-	}
-	for _, opt := range options {
-		opt(annotation)
+	defaults := []Option{
+		Name(name),
 	}
 
-	return annotation, option.Error
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	if builder.Annotation.Plugin.Kind == "" {
+		return *builder, errors.New("annotation plugin cannot be empty")
+	}
+
+	return *builder, nil
+}
+
+// Builder constructs a dashboard annotation spec.
+type Builder struct {
+	Annotation dashboard.AnnotationSpec `json:"-" yaml:"-"`
 }
