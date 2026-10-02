@@ -267,7 +267,6 @@ func (ds *testDataset) claimMappings() map[providerKey][]claimRoleMapping {
 func (ds *testDataset) newNative(tb testing.TB, withClaimMappings bool) *native {
 	tb.Helper()
 	n := &native{
-		cache:                &cache{},
 		userDAO:              &fakeUserDAO{items: ds.users},
 		roleDAO:              &fakeRoleDAO{items: ds.roles},
 		roleBindingDAO:       &fakeRoleBindingDAO{items: ds.roleBindings},
