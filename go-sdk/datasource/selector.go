@@ -13,7 +13,34 @@
 
 package datasource
 
+import (
+	"encoding/json"
+	"strings"
+)
+
 type Selector struct {
 	Kind string `json:"kind" yaml:"kind"`
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+}
+
+// MarshalJSON emits a plain JSON string when Name starts with "$" (variable
+// reference), and the standard object form otherwise.
+func (s Selector) MarshalJSON() ([]byte, error) {
+	if strings.HasPrefix(s.Name, "$") {
+		return json.Marshal(s.Name)
+	}
+	type plain Selector
+	return json.Marshal(plain(s))
+}
+
+// UnmarshalJSON handles both the plain-string form ("$myVar") and the
+// structured-object form ({"kind":"…","name":"…"}).
+func (s *Selector) UnmarshalJSON(data []byte) error {
+	var str string
+	if json.Unmarshal(data, &str) == nil {
+		s.Name = str
+		return nil
+	}
+	type plain Selector
+	return json.Unmarshal(data, (*plain)(s))
 }
