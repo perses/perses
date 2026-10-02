@@ -133,12 +133,23 @@ export function useRecentDashboardList(
  * Used to get important dashboards.
  * Will automatically be refreshed when cache is invalidated or history modified
  */
-export function useImportantDashboardList(project?: string): {
+export function useImportantDashboardList(
+  project?: string,
+  options?: Pick<DashboardListOptions, 'enabled'>,
+): {
   isLoading: false | true;
   data: DashboardResource[];
   error: StatusError | null;
 } {
-  const { data: dashboards, isLoading, error } = useDashboardList({ project: project, metadataOnly: true });
+  const {
+    data: dashboards,
+    isLoading,
+    error,
+  } = useDashboardList({
+    project: project,
+    metadataOnly: true,
+    enabled: options?.enabled,
+  });
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {

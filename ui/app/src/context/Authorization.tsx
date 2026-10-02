@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Action, Permission, ProjectResource, Scope } from '@perses-dev/client';
+import type { Action, Permission, ProjectResource, Scope, StatusError } from '@perses-dev/client';
 import type { ReactElement, ReactNode } from 'react';
 import { createContext, useContext, useMemo } from 'react';
 
@@ -23,6 +23,12 @@ import { useIsDelegatedAuthnProviderEnabled, useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
 export const GlobalProject = '*';
+
+const NATIVE_PROJECT_READ_SCOPES: Scope[] = ['Project'];
+// Kubernetes/delegated auth does not emit Project scope entries. Backend project
+// access is derived from read on Dashboard, Datasource, or Secret in a namespace
+// (see internal/api/authorization/k8s/k8s.go checkNamespaceAccess).
+const DELEGATED_PROJECT_READ_SCOPES: Scope[] = ['Project', 'Dashboard', 'Datasource', 'Secret'];
 
 interface AuthorizationContext {
   enabled: boolean;
@@ -104,6 +110,74 @@ export function useHasPermission(action: Action, project: string, scope: Scope):
 
   // Checking project perm
   return permissionListHasPermission(userPermissions[project] ?? [], action, scope);
+}
+
+/*
+ * useHasPermissionInAnyProject is a helper for knowing if a user can perform an action on a scope
+ * in any project, including global (`*`) permissions.
+ * It's only a check client-side, easily bypassable.
+ * It will always return true if the authorization is disabled.
+ */
+export function useHasPermissionInAnyProject(action: Action, scope: Scope): boolean {
+  const { enabled, username, userPermissions } = useAuthorizationContext();
+
+  if (!enabled) {
+    return true;
+  }
+
+  if (!username) {
+    return false;
+  }
+
+  return Object.values(userPermissions).some((permissions) => permissionListHasPermission(permissions, action, scope));
+}
+
+/*
+ * useCanReadAnyProject is true when the user can list at least one project.
+ * Native RBAC grants this via the Project scope. Kubernetes/delegated auth
+ * derives it from Dashboard, Datasource, or Secret read in any namespace.
+ */
+export function useCanReadAnyProject(): boolean {
+  const { enabled, username, userPermissions } = useAuthorizationContext();
+  const isDelegatedAuthnProviderEnabled = useIsDelegatedAuthnProviderEnabled();
+
+  if (!enabled) {
+    return true;
+  }
+
+  if (!username) {
+    return false;
+  }
+
+  const projectReadScopes = isDelegatedAuthnProviderEnabled
+    ? DELEGATED_PROJECT_READ_SCOPES
+    : NATIVE_PROJECT_READ_SCOPES;
+
+  return Object.values(userPermissions).some((permissions) =>
+    projectReadScopes.some((scope) => permissionListHasPermission(permissions, 'read', scope)),
+  );
+}
+
+/*
+ * usePermissionsQueryStatus exposes loading/error for the permissions request
+ * so callers can distinguish "still loading" and "request failed" from an
+ * empty permission map. Kept out of AuthorizationContext, which only holds
+ * resolved permission data.
+ */
+export function usePermissionsQueryStatus(): { isLoading: boolean; error: StatusError | undefined } {
+  const enabled = useIsAuthEnabled();
+  const username = useUsername();
+  const { error, isFetching, isLoading } = useUserPermissions(username);
+
+  return useMemo(() => {
+    const hasUsername = Boolean(username);
+    return {
+      // TanStack Query v4 reports isLoading while a disabled query is idle.
+      // Require isFetching so an empty username is not treated as loading.
+      isLoading: enabled && hasUsername && isLoading && isFetching,
+      error: enabled && hasUsername ? (error ?? undefined) : undefined,
+    };
+  }, [enabled, error, isFetching, isLoading, username]);
 }
 
 function permissionListHasPermission(permissions: Permission[], requestAction: Action, requestScope: Scope): boolean {
