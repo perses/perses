@@ -11,38 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import type { Resource } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
-import Archive from 'mdi-material-ui/Archive';
 import Close from 'mdi-material-ui/Close';
-import DatabaseIcon from 'mdi-material-ui/Database';
 import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import Magnify from 'mdi-material-ui/Magnify';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import type { MouseEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
 import { useProjectList } from '../../../model/project-client';
 import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useIsMobileSize } from '../../../utils/browser-size';
+import type { ResourceListProps, ResourceType } from './model';
+import { SearchDashboardList } from './SearchDashboardList';
 import { SearchList } from './SearchList';
 
 function shortcutDisplay(): string {
   return formatForDisplay('Mod+K');
-}
-
-type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
-
-interface ResourceListProps {
-  query: string;
-  onClick: () => void;
-  isResources?: (type: ResourceType, available: boolean) => void;
 }
 
 function SearchProjectList(props: ResourceListProps): ReactElement | null {
@@ -53,13 +42,7 @@ function SearchProjectList(props: ResourceListProps): ReactElement | null {
     [isResources],
   );
   return (
-    <SearchList
-      list={projectsQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={Archive}
-      isResource={handleIsResource}
-    />
+    <SearchList list={projectsQueryResult.data ?? []} query={query} onClick={onClick} isResource={handleIsResource} />
   );
 }
 
@@ -75,64 +58,7 @@ function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
       list={globalDatasourceQueryResult.data ?? []}
       query={query}
       onClick={onClick}
-      icon={DatabaseIcon}
       buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchDashboardList(props: ResourceListProps): ReactElement | null {
-  const {
-    data: dashboardList,
-    isLoading: dashboardListLoading,
-    error: dashboardListError,
-  } = useDashboardList({
-    metadataOnly: true,
-    refetchOnMount: false,
-  });
-  const {
-    data: importantDashboards,
-    isLoading: importantDashboardsLoading,
-    error: importantDashboardsError,
-  } = useImportantDashboardList();
-
-  const { query, isResources, onClick } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
-    [isResources],
-  );
-
-  const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    const importantDashboardKeys = new Set(
-      importantDashboards.map(
-        (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
-      ),
-    );
-    return (dashboardList ?? []).map((d) => {
-      const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
-      return { ...d, highlight };
-    });
-  }, [importantDashboards, dashboardList]);
-
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
-  return dashboardListLoading || importantDashboardsLoading ? null : (
-    <SearchList
-      list={list}
-      query={query}
-      onClick={onClick}
-      icon={ViewDashboardIcon}
-      chip={true}
       isResource={handleIsResource}
     />
   );
@@ -150,7 +76,6 @@ function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
       list={datasourceQueryResult.data ?? []}
       query={query}
       onClick={onClick}
-      icon={DatabaseIcon}
       chip={true}
       buildRouting={(resource) =>
         `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
@@ -194,8 +119,10 @@ export function SearchBar(): ReactElement {
   const handleOpenMouseDown = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
   }, []);
+
   const handleOpen = useCallback((): void => setOpen(true), []);
   const handleClose = useCallback((): void => setOpen(false), []);
+
   useHandleShortCut(handleOpen);
 
   return (
