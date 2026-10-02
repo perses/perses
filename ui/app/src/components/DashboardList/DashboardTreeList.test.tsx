@@ -64,6 +64,7 @@ function renderDashboardTreeList(): void {
       handleEditFolderButtonClick={noopHandler}
       handleAddFolderButtonClick={noopHandler}
       handleDeleteFolderButtonClick={noopHandler}
+      isDuplicationAllowed={true}
     />,
   );
 }

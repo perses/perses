@@ -26,7 +26,7 @@ import {
 import type { EphemeralDashboardInfo, ProjectResource } from '@perses-dev/client';
 import { Dialog, getResourceDisplayName } from '@perses-dev/components';
 import type { DashboardSelector } from '@perses-dev/spec';
-import type { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
+import type { ChangeEvent, Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { useCallback, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
@@ -41,6 +41,7 @@ import { useDashboardValidationSchema, useEphemeralDashboardValidationSchema } f
 interface CreateDashboardProps {
   open: boolean;
   projects: ProjectResource[];
+  defaultProject?: string;
   hideProjectSelect?: boolean;
   mode?: 'create' | 'duplicate';
   name?: string;
@@ -54,15 +55,28 @@ interface CreateDashboardProps {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.projects The project where the dashboard will be created.
  * If it contains only one element, it will be used as project value and will hide the project selection.
+ * @param props.defaultProject The project selected by default if it belongs to `projects`, otherwise the first one is.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  * @param props.isEphemeralDashboardEnabled Display switch button if ephemeral dashboards are enabled in copy dialog.
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement => {
-  const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess, isEphemeralDashboardEnabled } = props;
+  const {
+    open,
+    projects,
+    defaultProject,
+    hideProjectSelect,
+    mode,
+    name,
+    onClose,
+    onSuccess,
+    isEphemeralDashboardEnabled,
+  } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
   const action = mode === 'duplicate' ? 'Duplicate' : 'Create';
+  const defaultProjectName =
+    (projects.find((project) => project.metadata.name === defaultProject) ?? projects[0])?.metadata.name ?? '';
 
   // Disables closing on click out. This is a quick-win solution to make sure the currently-existing form
   // will be reset by the related child DuplicationForm component before closing.
@@ -91,9 +105,13 @@ export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement
         </Dialog.Content>
       )}
       {isTempCopyChecked ? (
-        <EphemeralDashboardDuplicationForm {...{ projects: projects, hideProjectSelect, onClose, onSuccess }} />
+        <EphemeralDashboardDuplicationForm
+          {...{ projects: projects, defaultProjectName, hideProjectSelect, onClose, onSuccess }}
+        />
       ) : (
-        <DashboardDuplicationForm {...{ projects: projects, hideProjectSelect, onClose, onSuccess }} />
+        <DashboardDuplicationForm
+          {...{ projects: projects, defaultProjectName, hideProjectSelect, onClose, onSuccess }}
+        />
       )}
     </Dialog>
   );
@@ -101,6 +119,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement
 
 interface DuplicationFormProps {
   projects: ProjectResource[];
+  defaultProjectName: string;
   hideProjectSelect?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
@@ -108,16 +127,27 @@ interface DuplicationFormProps {
 
 /* TODO: Why does it receive an array of projects and not a single project?! */
 const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => {
-  const { projects, hideProjectSelect, onClose, onSuccess } = props;
+  const { projects, defaultProjectName, hideProjectSelect, onClose, onSuccess } = props;
 
+  // Mirrors the form value, as the name uniqueness must be checked against the dashboards of the selected project.
+  const [projectName, setProjectName] = useState(defaultProjectName);
   const { schema: dashboardSchemaValidation, isSchemaLoading: isDashboardSchemaValidationLoading } =
-    useDashboardValidationSchema(projects[0]?.metadata.name);
+    useDashboardValidationSchema(projectName);
 
   const dashboardForm = useForm<CreateDashboardInput, unknown, CreateDashboardValidationType>({
     resolver: dashboardSchemaValidation ? zodResolver(dashboardSchemaValidation) : undefined,
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', tags: [] },
+    defaultValues: { dashboardName: '', projectName: defaultProjectName, tags: [] },
   });
+
+  const { setValue } = dashboardForm;
+  const handleProjectChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setValue('projectName', event.target.value);
+      setProjectName(event.target.value);
+    },
+    [setValue],
+  );
 
   const handleProcessDashboardForm = useCallback((): SubmitHandler<CreateDashboardValidationType> => {
     return (data) => {
@@ -162,6 +192,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
                   <TextField
                     select
                     {...field}
+                    onChange={handleProjectChange}
                     required
                     id="project"
                     label="Project name"
@@ -252,14 +283,14 @@ const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => 
 };
 
 const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => {
-  const { projects, hideProjectSelect, onClose, onSuccess } = props;
+  const { projects, defaultProjectName, hideProjectSelect, onClose, onSuccess } = props;
 
   const ephemeralDashboardSchemaValidation = useEphemeralDashboardValidationSchema();
 
   const ephemeralDashboardForm = useForm<CreateEphemeralDashboardValidationType>({
     resolver: zodResolver(ephemeralDashboardSchemaValidation),
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', ttl: '' },
+    defaultValues: { dashboardName: '', projectName: defaultProjectName, ttl: '' },
   });
 
   const processEphemeralDashboardForm: SubmitHandler<CreateEphemeralDashboardValidationType> = (data) => {
