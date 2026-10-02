@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Theme } from '@mui/material';
-import { Box, Button, Chip, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import type { KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { KVSearch } from '@nexucis/kvsearch';
-import type { Resource } from '@perses-dev/client';
+import type { DatasourceResource, GlobalDatasourceResource, ProjectResource, Resource } from '@perses-dev/client';
 import { isProjectMetadata } from '@perses-dev/client';
-import Archive from 'mdi-material-ui/Archive';
-import MiddleAlertIcon from 'mdi-material-ui/StarFourPointsOutline';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ProjectRoute } from '../../../model/route';
+import type { HighlightedDashboardResource, SearchItem, SearchListProps } from './model';
+import { SearchDashboardItem } from './SearchDashboardItem';
+import { SearchDatasourceItem } from './SearchDatasourceItem';
+import { SearchGlobalDatasourceItem } from './SearchGlobalDatasourceItem';
+import { SearchProjectItem } from './SearchProjectItem';
 
 const kvSearchConfig: KVSearchConfiguration = {
   indexedKeys: [
@@ -37,19 +37,7 @@ const kvSearchConfig: KVSearchConfiguration = {
 };
 
 const SIZE_LIST = 10;
-const MAX_VISIBLE_RESOURCE_TAGS = 3;
-const matchedTagChipSx = {
-  backgroundColor: (theme: Theme): string =>
-    theme.palette.mode === 'dark' ? 'rgba(255, 193, 7, 0.18)' : 'rgba(255, 243, 205, 0.9)',
-  borderColor: (theme: Theme): string =>
-    theme.palette.mode === 'dark' ? theme.palette.warning.main : theme.palette.warning.dark,
-  color: (theme: Theme): string =>
-    theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.dark,
-  fontWeight: 600,
-};
 
-type SearchItem = Resource & { highlight?: boolean };
-type SearchMatch = NonNullable<KVSearchResult<SearchItem>['matched']>[number];
 interface PaginationState {
   list: SearchItem[];
   query: string;
@@ -62,79 +50,22 @@ function buildBoxSearchKey(resource: Resource): string {
     : `${resource.kind}-${resource.metadata.name}`;
 }
 
-function buildRouting(resource: Resource): string {
-  return isProjectMetadata(resource.metadata)
-    ? `${ProjectRoute}/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
-    : `/${resource.kind.toLowerCase()}s/${resource.metadata.name}`;
-}
-
-function getHighlightBackgroundColor(theme: Theme, isHighlighted: boolean): string {
-  if (!isHighlighted) {
-    return 'inherit';
-  }
-  return theme.palette.mode === 'dark' ? 'rgba(255, 165, 0, 0.2)' : 'rgba(255, 223, 186, 0.3)';
-}
-
-function getHighlightBorderColor(theme: Theme, isHighlighted: boolean): string {
-  if (!isHighlighted) {
-    return 'inherit';
-  }
-  return theme.palette.mode === 'dark' ? 'orange' : 'darkorange';
-}
-
-function getHighlightTextColor(theme: Theme, isHighlighted: boolean): string {
-  return isHighlighted && theme.palette.mode === 'dark' ? theme.palette.warning.light : 'inherit';
-}
-
-function isTagMatch(match: SearchMatch): match is SearchMatch & { value: string } {
-  return (
-    match.path.length === 2 &&
-    match.path[0] === 'metadata' &&
-    match.path[1] === 'tags' &&
-    typeof match.value === 'string'
-  );
-}
-
-function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched']): string[] {
-  return Array.from(new Set((matched ?? []).filter(isTagMatch).map((match) => match.value)));
-}
-
-function getTagDisplayValues(
-  tags: string[] | undefined,
-  matchingTagValues: string[],
-): {
-  normalizedMatchingTags: Set<string>;
-  visibleTags: string[];
-  hiddenTagsCount: number;
-  hasAnyTags: boolean;
-} {
-  const normalizedMatchingTags = new Set(matchingTagValues.map((tag) => tag.toLowerCase()));
-  const uniqueTags = Array.from(new Set(tags ?? []));
-  const matchedTags = uniqueTags.filter((tag) => normalizedMatchingTags.has(tag.toLowerCase()));
-  const unmatchedTags = uniqueTags.filter((tag) => !normalizedMatchingTags.has(tag.toLowerCase()));
-  const orderedTags = [...matchedTags, ...unmatchedTags];
-
-  return {
-    normalizedMatchingTags,
-    visibleTags: orderedTags.slice(0, MAX_VISIBLE_RESOURCE_TAGS),
-    hiddenTagsCount: Math.max(0, orderedTags.length - MAX_VISIBLE_RESOURCE_TAGS),
-    hasAnyTags: orderedTags.length > 0,
-  };
-}
-
-export interface SearchListProps {
-  list: SearchItem[];
-  query: string;
-  onClick: () => void;
-  icon: typeof Archive;
-  chip?: boolean;
-  buildRouting?: (resource: Resource) => string;
-  isResource?: (isAvailable: boolean) => void;
-}
+const staticSx = {
+  flexColumn: { display: 'flex', flexDirection: 'column', flexShrink: 0, height: 'auto', minHeight: 0, minWidth: 0 },
+  flexRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginTop: 0.5,
+    marginBottom: 1,
+    marginLeft: 0.5,
+  },
+  resourceIcon: { marginRight: 0.5 },
+};
 
 export function SearchList(props: SearchListProps): ReactElement | null {
-  const { list, query, onClick, icon: Icon, chip, buildRouting: customBuildRouting, isResource } = props;
-
+  const { list, query, handleClose, isResource } = props;
   const [pagination, setPagination] = useState<PaginationState>({ list, query, size: SIZE_LIST });
   const currentSizeList = pagination.list === list && pagination.query === query ? pagination.size : SIZE_LIST;
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
@@ -143,112 +74,69 @@ export function SearchList(props: SearchListProps): ReactElement | null {
     return query ? kvSearch.filter(query, list) : [];
   }, [kvSearch, list, query]);
 
+  const originalKind = useMemo(() => {
+    if (!filteredList.length) return undefined;
+    return filteredList[0]?.original.kind;
+  }, [filteredList]);
+
   useEffect(() => {
     isResource?.(!!filteredList.length);
   }, [filteredList.length, isResource]);
 
+  const handleSeeMore = useCallback(() => {
+    setPagination({ list, query, size: currentSizeList + SIZE_LIST });
+  }, [list, query, currentSizeList]);
+
   if (!filteredList.length) return null;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flexShrink: 0, height: 'auto', minHeight: 0, minWidth: 0 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          marginTop: 0.5,
-          marginBottom: 1,
-          marginLeft: 0.5,
-        }}
-      >
-        <Icon sx={{ marginRight: 0.5 }} fontSize="medium" />
-        <Typography variant="h3">{filteredList[0]?.original.kind}s</Typography>
+    <Box sx={staticSx.flexColumn}>
+      <Box sx={staticSx.flexRow}>
+        <Typography variant="h3">{`${filteredList[0]?.original.kind}s (${filteredList.length})`}</Typography>
       </Box>
-      {filteredList.slice(0, currentSizeList).map((search) => {
-        const isHighlighted = Boolean(search.original.highlight);
-        const isDashboard = search.original.kind === 'Dashboard';
-        const matchingTagValues = getMatchingTagValues(search.matched);
-        const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
-          search.original.metadata.tags,
-          matchingTagValues,
-        );
-
-        const projectName = isProjectMetadata(search.original.metadata) ? search.original.metadata.project : undefined;
-        const showInlineProjectName = Boolean(projectName && isDashboard);
-        const showProjectChip = Boolean(projectName && chip && !isDashboard);
-        const showResourceTagChips = hasAnyTags;
-
-        return (
-          <Button
-            variant="outlined"
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: 1,
-              marginLeft: 1,
-              marginRight: 1,
-              backgroundColor: (theme) => getHighlightBackgroundColor(theme, isHighlighted),
-              borderColor: (theme) => getHighlightBorderColor(theme, isHighlighted),
-              fontWeight: isHighlighted ? 'bold' : 'normal',
-              color: (theme) => getHighlightTextColor(theme, isHighlighted),
-            }}
-            component={RouterLink}
-            onClick={onClick}
-            to={`${customBuildRouting ? customBuildRouting(search.original) : buildRouting(search.original)}`}
-            key={`${buildBoxSearchKey(search.original)}`}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', minWidth: 0, gap: 0.5, flex: 1 }}>
-              {isHighlighted && <MiddleAlertIcon sx={{ marginRight: 0.5 }} />}
-              <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0, gap: 0.75 }}>
-                <Box
-                  component="span"
-                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                  dangerouslySetInnerHTML={{
-                    __html: kvSearch.render(search.original, search.matched, {
-                      pre: '<strong style="color:darkorange">',
-                      post: '</strong>',
-                      escapeHTML: true,
-                    }).metadata.name,
-                  }}
-                />
-                {showInlineProjectName && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-                    <Archive sx={{ fontSize: 12, color: 'text.disabled', flexShrink: 0 }} />
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ whiteSpace: 'nowrap', fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis' }}
-                    >
-                      {projectName}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-            {(showResourceTagChips || showProjectChip) && (
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, flexWrap: 'wrap' }}
-              >
-                {visibleTags.map((tag) => (
-                  <Chip
-                    label={tag}
-                    size="small"
-                    variant="outlined"
-                    sx={normalizedMatchingTags.has(tag.toLowerCase()) ? matchedTagChipSx : undefined}
-                    key={`${buildBoxSearchKey(search.original)}-${tag}`}
-                  />
-                ))}
-                {hiddenTagsCount > 0 && <Chip label={`+${hiddenTagsCount}`} size="small" variant="outlined" />}
-                {showProjectChip && <Chip label={projectName} size="small" variant="outlined" />}
-              </Box>
-            )}
-          </Button>
-        );
-      })}
-      {filteredList.length > currentSizeList && (
-        <Button onClick={() => setPagination({ list, query, size: currentSizeList + SIZE_LIST })}> see more...</Button>
-      )}
+      <Stack display="flex" direction="column">
+        {originalKind === 'Dashboard' &&
+          filteredList
+            .slice(0, currentSizeList)
+            .map(({ original }) => (
+              <SearchDashboardItem
+                handleClose={handleClose}
+                key={`${buildBoxSearchKey(original)}`}
+                resource={original as HighlightedDashboardResource}
+              />
+            ))}
+        {originalKind === 'Datasource' &&
+          filteredList
+            .slice(0, currentSizeList)
+            .map(({ original }) => (
+              <SearchDatasourceItem
+                handleClose={handleClose}
+                key={`${buildBoxSearchKey(original)}`}
+                resource={original as DatasourceResource}
+              />
+            ))}
+        {originalKind === 'Project' &&
+          filteredList
+            .slice(0, currentSizeList)
+            .map(({ original }) => (
+              <SearchProjectItem
+                handleClose={handleClose}
+                key={`${buildBoxSearchKey(original)}`}
+                resource={original as ProjectResource}
+              />
+            ))}
+        {originalKind === 'GlobalDatasource' &&
+          filteredList
+            .slice(0, currentSizeList)
+            .map(({ original }) => (
+              <SearchGlobalDatasourceItem
+                handleClose={handleClose}
+                key={`${buildBoxSearchKey(original)}`}
+                resource={original as GlobalDatasourceResource}
+              />
+            ))}
+        {filteredList.length > currentSizeList && <Button onClick={handleSeeMore}>see more...</Button>}
+      </Stack>
     </Box>
   );
 }

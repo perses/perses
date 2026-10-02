@@ -11,153 +11,89 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, InputAdornment, Modal, Paper, Stack, TextField, Typography } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import type { Resource } from '@perses-dev/client';
-import { isProjectMetadata } from '@perses-dev/client';
 import { formatForDisplay, OPEN_SEARCH_EVENT } from '@perses-dev/dashboards';
-import Archive from 'mdi-material-ui/Archive';
 import Close from 'mdi-material-ui/Close';
-import DatabaseIcon from 'mdi-material-ui/Database';
 import EmoticonSadOutline from 'mdi-material-ui/EmoticonSadOutline';
 import Magnify from 'mdi-material-ui/Magnify';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import type { MouseEvent, ReactElement } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ChangeEvent, MouseEvent, ReactElement } from 'react';
 
-import { useDashboardList, useImportantDashboardList } from '../../../model/dashboard-client';
-import { useDatasourceList } from '../../../model/datasource-client';
-import { useGlobalDatasourceList } from '../../../model/global-datasource-client';
-import { useProjectList } from '../../../model/project-client';
-import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useIsMobileSize } from '../../../utils/browser-size';
-import { SearchList } from './SearchList';
+import { ALL_RESOURCE_TYPES } from './model';
+import type { ResourceType } from './model';
+import { SearchBarFilters } from './SearchBarFilters';
+import { SearchDashboardList } from './SearchDashboardList';
+import { SearchDatasourceList } from './SearchDatasourceList';
+import { SearchGlobalDatasource } from './SearchGlobalDatasource';
+import { SearchProjectList } from './SearchProjectList';
 
-function shortcutDisplay(): string {
-  return formatForDisplay('Mod+K');
-}
+const SEARCH_PLACE_HOLDER = 'Search dashboards, projects, datasources...';
 
-type ResourceType = 'dashboards' | 'projects' | 'globalDatasources' | 'datasources';
+export const SEARCH_BAR_DATA_TEST_ID = {
+  searchButton: 'search-button',
+  searchTextfield: 'search-text-field',
+  noRecordContainer: 'no-record-container',
+};
 
-interface ResourceListProps {
-  query: string;
-  onClick: () => void;
-  isResources?: (type: ResourceType, available: boolean) => void;
-}
+export const STATIC_SX = {
+  mainWrapper: { width: '100%', flexShrink: 1 },
+  mainButton: { display: 'flex', justifyContent: 'space-between' },
+  magnifyWrapper: { display: 'flex' },
+  magnify: { marginRight: 0.5 },
+  modal: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    overflowY: 'auto',
+    justifyContent: 'center',
+  },
+  textField: {
+    justifyContent: 'flex-start',
+    '& .MuiOutlinedInput-root': { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 },
+  },
+  noRecords: { padding: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 },
+  modalContent: {
+    width: 'fit-content',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    overflowY: 'auto',
+    height: 'auto',
+    '& .searchFilters, & .searchItemsWrapper, & .noRecordsFoundWrapper': {
+      borderStyle: 'solid',
+      borderWidth: '0 1px 1px',
+      borderColor: 'divider',
+    },
+    '&:has(.MuiOutlinedInput-root:hover) .searchFilters, &:has(.MuiOutlinedInput-root:hover) .searchItemsWrapper, &:has(.MuiOutlinedInput-root:hover) .noRecordsFoundWrapper':
+      {
+        borderColor: 'text.primary',
+      },
+    '&:has(.MuiOutlinedInput-root.Mui-focused) .searchFilters, &:has(.MuiOutlinedInput-root.Mui-focused) .searchItemsWrapper, &:has(.MuiOutlinedInput-root.Mui-focused) .searchFilters, &:has(.MuiOutlinedInput-root.Mui-focused) .noRecordsFoundWrapper':
+      {
+        borderColor: 'primary.main',
+        borderWidth: '0 2px 2px',
+      },
+  },
+  searchItemsWrapper: {
+    overflowY: 'auto',
+    maxHeight: '70vh',
+  },
+  escButton: {
+    minWidth: 0,
+    height: 32,
+    textTransform: 'none',
+    borderRadius: 1,
+  },
+} satisfies Record<string, SxProps<Theme>>;
 
-function SearchProjectList(props: ResourceListProps): ReactElement | null {
-  const projectsQueryResult = useProjectList({ refetchOnMount: false });
-  const { query, onClick, isResources } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('projects', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={projectsQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={Archive}
-      isResource={handleIsResource}
-    />
-  );
-}
+const handleOpenMouseDown = (event: MouseEvent<HTMLButtonElement>): void => {
+  event.preventDefault();
+};
 
-function SearchGlobalDatasource(props: ResourceListProps): ReactElement | null {
-  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
-  const { query, onClick, isResources } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('globalDatasources', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={globalDatasourceQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={DatabaseIcon}
-      buildRouting={() => `${AdminRoute}/datasources`}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchDashboardList(props: ResourceListProps): ReactElement | null {
-  const {
-    data: dashboardList,
-    isLoading: dashboardListLoading,
-    error: dashboardListError,
-  } = useDashboardList({
-    metadataOnly: true,
-    refetchOnMount: false,
-  });
-  const {
-    data: importantDashboards,
-    isLoading: importantDashboardsLoading,
-    error: importantDashboardsError,
-  } = useImportantDashboardList();
-
-  const { query, isResources, onClick } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('dashboards', isAvailable),
-    [isResources],
-  );
-
-  const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    const importantDashboardKeys = new Set(
-      importantDashboards.map(
-        (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
-      ),
-    );
-    return (dashboardList ?? []).map((d) => {
-      const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
-      return { ...d, highlight };
-    });
-  }, [importantDashboards, dashboardList]);
-
-  if (dashboardListError || importantDashboardsError)
-    return (
-      <Box sx={{ margin: 1 }}>
-        <Alert severity="error">
-          <p>Failed to load dashboards! Error:</p>
-          {importantDashboardsError?.message && <p>{importantDashboardsError.message}</p>}
-          {dashboardListError?.message && <p>{dashboardListError.message}</p>}
-        </Alert>
-      </Box>
-    );
-
-  return dashboardListLoading || importantDashboardsLoading ? null : (
-    <SearchList
-      list={list}
-      query={query}
-      onClick={onClick}
-      icon={ViewDashboardIcon}
-      chip={true}
-      isResource={handleIsResource}
-    />
-  );
-}
-
-function SearchDatasourceList(props: ResourceListProps): ReactElement | null {
-  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
-  const { isResources, onClick, query } = props;
-  const handleIsResource = useCallback(
-    (isAvailable: boolean): void => isResources?.('datasources', isAvailable),
-    [isResources],
-  );
-  return (
-    <SearchList
-      list={datasourceQueryResult.data ?? []}
-      query={query}
-      onClick={onClick}
-      icon={DatabaseIcon}
-      chip={true}
-      buildRouting={(resource) =>
-        `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`
-      }
-      isResource={handleIsResource}
-    />
-  );
+function shortcutDisplay(): string[] {
+  return formatForDisplay('Mod+K', { separatorToken: '|' }).split('|');
 }
 
 function useHandleShortCut(handleOpen: () => void): void {
@@ -174,8 +110,13 @@ function useHandleShortCut(handleOpen: () => void): void {
 
 export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<Set<ResourceType>>(() => {
+    return new Set(ALL_RESOURCE_TYPES);
+  });
+
   const [hasResource, setHasResource] = useState<Record<ResourceType, boolean>>({
     dashboards: false,
     projects: false,
@@ -183,97 +124,159 @@ export function SearchBar(): ReactElement {
     datasources: false,
   });
 
+  const handleClose = useCallback((): void => setOpen(false), []);
+
+  const handleTextFieldChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setQuery(e.target.value);
+  }, []);
+
+  const handleClearQuery = useCallback(() => setQuery(''), []);
+
+  const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
+    inputElement?.focus();
+  }, []);
+
   const handleIsResourceAvailable = useCallback((type: ResourceType, available: boolean): void => {
     setHasResource((prev) => (prev[type] === available ? prev : { ...prev, [type]: available }));
   }, []);
 
-  const hasAnyResource = useMemo(() => Object.values(hasResource).some(Boolean), [hasResource]);
-  const handleSearchInputRef = useCallback((inputElement: HTMLInputElement | null): void => {
-    inputElement?.focus();
-  }, []);
-  const handleOpenMouseDown = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
-    event.preventDefault();
-  }, []);
+  const hasAnyResource = Object.values(hasResource).some(Boolean);
   const handleOpen = useCallback((): void => setOpen(true), []);
-  const handleClose = useCallback((): void => setOpen(false), []);
   useHandleShortCut(handleOpen);
 
+  const mainButtonRef = useRef<HTMLButtonElement>(null);
+
+  const [wrapperBounds, setWrapperBounds] = useState({ left: 0, width: 0, top: 0 });
+
+  useEffect(() => {
+    const element = mainButtonRef.current;
+    if (!element) {
+      return;
+    }
+
+    const updateBounds = (): void => {
+      const rect = element.getBoundingClientRect();
+      setWrapperBounds({ left: rect.left, width: rect.width, top: rect.top });
+    };
+
+    updateBounds();
+
+    const observer = new ResizeObserver(updateBounds);
+    observer.observe(element);
+
+    window.addEventListener('resize', updateBounds);
+
+    return (): void => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateBounds);
+    };
+  }, []);
+
   return (
-    <Paper sx={{ width: '100%', flexShrink: 1 }}>
+    <Paper sx={STATIC_SX.mainWrapper}>
       <Button
+        data-testid={SEARCH_BAR_DATA_TEST_ID.searchButton}
+        ref={mainButtonRef}
         size="small"
         fullWidth
-        sx={{ display: 'flex', justifyContent: 'space-between' }}
+        sx={STATIC_SX.mainButton}
         onMouseDown={handleOpenMouseDown}
         onClick={handleOpen}
       >
-        <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
-          <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
-          <Typography>Search...</Typography>
+        <Box sx={STATIC_SX.magnifyWrapper} flexDirection="row" alignItems="center">
+          <Magnify sx={STATIC_SX.magnify} fontSize="medium" />
+          <Typography>{SEARCH_PLACE_HOLDER}</Typography>
         </Box>
-        {!isMobileSize && <Chip label={shortcutDisplay()} size="small" />}
+        {!isMobileSize && (
+          <Stack direction="row" spacing={0.5}>
+            {shortcutDisplay().map((key) => {
+              return <Chip key={key} label={key} size="small" />;
+            })}
+          </Stack>
+        )}
       </Button>
       <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        style={{ display: 'flex', justifyContent: 'center' }}
         disableAutoFocus={true}
-        sx={{ display: 'flex', alignItems: 'flex-start', overflowY: 'auto' }}
+        sx={STATIC_SX.modal}
       >
         <Paper
           elevation={0}
+          // oxlint-disable-next-line react-perf/jsx-no-new-object-as-prop
           sx={{
-            maxHeight: '70vh',
-            width: isMobileSize ? '95%' : '55%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            overflowY: 'auto',
-            height: 'auto',
+            ...STATIC_SX.modalContent,
+            minWidth: wrapperBounds.width,
           }}
-          variant="outlined"
         >
           <TextField
+            data-testid={SEARCH_BAR_DATA_TEST_ID.searchTextfield}
             size="medium"
             /* oxlint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus={true}
             inputRef={handleSearchInputRef}
             variant="outlined"
-            placeholder="What are you looking for?"
+            placeholder={SEARCH_PLACE_HOLDER}
             fullWidth
-            sx={{ justifyContent: 'flex-start', marginBottom: 1 }}
+            sx={STATIC_SX.textField}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  {query && (
-                    <IconButton size="small" onClick={() => setQuery('')}>
-                      <Close fontSize="small" />
-                    </IconButton>
-                  )}
-                  <Chip label="esc" size="small" onClick={handleClose} />
-                </InputAdornment>
-              ),
+            onChange={handleTextFieldChange}
+            // oxlint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Magnify sx={STATIC_SX.magnify} fontSize="medium" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {query && (
+                      <IconButton size="small" onClick={handleClearQuery}>
+                        <Close fontSize="small" />
+                      </IconButton>
+                    )}
+                    <Button variant="outlined" size="small" onClick={handleClose} sx={STATIC_SX.escButton}>
+                      esc
+                    </Button>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
-          {query.length > 0 && !hasAnyResource && (
-            <Box sx={{ margin: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+          {query.trim().length > 0 && !hasAnyResource && (
+            <Box
+              data-testid={SEARCH_BAR_DATA_TEST_ID.noRecordContainer}
+              className="noRecordsFoundWrapper"
+              sx={STATIC_SX.noRecords}
+            >
               <EmoticonSadOutline fontSize="medium" />
               <Typography>No records found for {query}</Typography>
             </Box>
           )}
-          <SearchDashboardList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchProjectList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchGlobalDatasource query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
-          <SearchDatasourceList query={query} onClick={handleClose} isResources={handleIsResourceAvailable} />
+          <SearchBarFilters filters={filters} setFilters={setFilters} />
+          {query.trim().length > 0 && (
+            <Stack className="searchItemsWrapper" direction="column" sx={STATIC_SX.searchItemsWrapper}>
+              {filters.has('dashboards') && (
+                <SearchDashboardList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
+              )}
+              {filters.has('projects') && (
+                <SearchProjectList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
+              )}
+              {filters.has('globalDatasources') && (
+                <SearchGlobalDatasource
+                  query={query}
+                  handleClose={handleClose}
+                  isResources={handleIsResourceAvailable}
+                />
+              )}
+              {filters.has('datasources') && (
+                <SearchDatasourceList query={query} handleClose={handleClose} isResources={handleIsResourceAvailable} />
+              )}
+            </Stack>
+          )}
         </Paper>
       </Modal>
     </Paper>
