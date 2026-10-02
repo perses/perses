@@ -1,0 +1,110 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { DashboardResource } from '@perses-dev/client';
+
+import type { ImportantDashboardGroupConfig } from './config-client';
+import { resolveImportantDashboardGroups, resolveImportantDashboardList } from './dashboard-client';
+
+function buildDashboard(project: string, name: string): DashboardResource {
+  return {
+    kind: 'Dashboard',
+    metadata: {
+      name,
+      project,
+    },
+    spec: {},
+  } as DashboardResource;
+}
+
+describe('resolveImportantDashboardList', () => {
+  it('expands project entries and removes duplicates', () => {
+    const dashboards = [buildDashboard('perses', 'Demo'), buildDashboard('perses', 'Benchmark')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        dashboards: [{ project: 'perses' }, { project: 'perses', dashboard: 'Demo' }],
+      },
+    ];
+
+    expect(
+      resolveImportantDashboardList(dashboards, groups, false).map((dashboard) => dashboard.metadata.name),
+    ).toEqual(['Demo', 'Benchmark']);
+  });
+
+  it('removes a dashboard configured in several groups', () => {
+    const dashboards = [buildDashboard('perses', 'Demo'), buildDashboard('testing', 'Benchmark')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      { title: 'First', dashboards: [{ project: 'perses', dashboard: 'Demo' }] },
+      {
+        title: 'Second',
+        dashboards: [
+          { project: 'testing', dashboard: 'Benchmark' },
+          { project: 'perses', dashboard: 'Demo' },
+        ],
+      },
+    ];
+
+    expect(
+      resolveImportantDashboardList(dashboards, groups, false).map((dashboard) => dashboard.metadata.name),
+    ).toEqual(['Demo', 'Benchmark']);
+    expect(resolveImportantDashboardGroups(dashboards, groups, false).map((group) => group.entries.length)).toEqual([
+      1, 2,
+    ]);
+  });
+});
+
+describe('resolveImportantDashboardGroups', () => {
+  it('skips project entries without any matching dashboard', () => {
+    const dashboards = [buildDashboard('perses', 'Demo')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        dashboards: [{ project: 'unknown' }, { project: 'perses', dashboard: 'Demo' }],
+      },
+    ];
+
+    expect(resolveImportantDashboardGroups(dashboards, groups, false)[0]?.entries).toEqual([
+      { kind: 'dashboard', dashboard: dashboards[0] },
+    ]);
+  });
+  it('matches dashboard selectors case-insensitively when resource names are normalized', () => {
+    const dashboards = [buildDashboard('Perses', 'Demo')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        title: 'Main',
+        dashboards: [{ project: 'perses', dashboard: 'demo' }, { project: 'perses' }],
+      },
+    ];
+
+    const resolvedGroups = resolveImportantDashboardGroups(dashboards, groups, true);
+
+    expect(resolvedGroups).toHaveLength(1);
+    expect(resolvedGroups[0]?.entries).toEqual([
+      { kind: 'dashboard', dashboard: dashboards[0] },
+      { kind: 'project', project: 'Perses', dashboards },
+    ]);
+  });
+
+  it('matches project-wide selectors case-insensitively when resource names are normalized', () => {
+    const dashboards = [buildDashboard('Perses', 'Demo'), buildDashboard('Perses', 'Benchmark')];
+    const groups: ImportantDashboardGroupConfig[] = [
+      {
+        dashboards: [{ project: 'perses' }],
+      },
+    ];
+
+    expect(resolveImportantDashboardList(dashboards, groups, true)).toEqual(dashboards);
+    expect(resolveImportantDashboardGroups(dashboards, groups, true)[0]?.entries).toEqual([
+      { kind: 'project', project: 'Perses', dashboards },
+    ]);
+  });
+});

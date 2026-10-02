@@ -95,11 +95,7 @@ function isTagMatch(match: SearchMatch): match is SearchMatch & { value: string 
   );
 }
 
-function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched'], enabled: boolean): string[] {
-  if (!enabled) {
-    return [];
-  }
-
+function getMatchingTagValues(matched: KVSearchResult<SearchItem>['matched']): string[] {
   return Array.from(new Set((matched ?? []).filter(isTagMatch).map((match) => match.value)));
 }
 
@@ -144,16 +140,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
 
   const filteredList: Array<KVSearchResult<SearchItem>> = useMemo(() => {
-    if (!query && list?.[0]?.kind === 'Dashboard') {
-      return list.map((item, idx) => ({
-        original: item,
-        rendered: item,
-        score: 0,
-        index: idx,
-        matched: [],
-      }));
-    }
-    return kvSearch.filter(query, list);
+    return query ? kvSearch.filter(query, list) : [];
   }, [kvSearch, list, query]);
 
   useEffect(() => {
@@ -181,7 +168,7 @@ export function SearchList(props: SearchListProps): ReactElement | null {
       {filteredList.slice(0, currentSizeList).map((search) => {
         const isHighlighted = Boolean(search.original.highlight);
         const isDashboard = search.original.kind === 'Dashboard';
-        const matchingTagValues = getMatchingTagValues(search.matched, Boolean(query));
+        const matchingTagValues = getMatchingTagValues(search.matched);
         const { normalizedMatchingTags, visibleTags, hiddenTagsCount, hasAnyTags } = getTagDisplayValues(
           search.original.metadata.tags,
           matchingTagValues,

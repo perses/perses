@@ -15,7 +15,7 @@ import { buildRelativeTimeOption } from '@perses-dev/components';
 import type { TimeOption } from '@perses-dev/components';
 import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { parseDurationString } from '@perses-dev/spec';
-import type { DashboardSelector, DurationString } from '@perses-dev/spec';
+import type { DurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
@@ -23,7 +23,7 @@ import type { ReactElement } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 
 import { PersesLoader } from '../components/PersesLoader';
-import type { Banner, ConfigModel } from '../model/config-client';
+import type { Banner, ConfigModel, ImportantDashboardGroupConfig } from '../model/config-client';
 import { useConfig } from '../model/config-client';
 import { UserPreferencesContextProvider } from './UserPreferences';
 
@@ -164,23 +164,18 @@ export function useIsSignUpDisable(): boolean {
 }
 
 export function useHasImportantDashboards(): boolean {
-  const { config } = useConfigContext();
-  return Boolean(config.frontend.important_dashboards?.length);
+  return useImportantDashboardGroups().some((group) => (group.dashboards?.length ?? 0) > 0);
 }
 
-export function useImportantDashboardSelectors(): DashboardSelector[] {
+export function useShouldNormalizeResourceNames(): boolean {
   const { config } = useConfigContext();
-  return useMemo(() => {
-    if (!config.database.file?.case_sensitive || !config.database.sql?.case_sensitive) {
-      return (config.frontend.important_dashboards ?? []).map((selector) => {
-        return {
-          project: selector.project.toLowerCase(),
-          dashboard: selector.dashboard.toLowerCase(),
-        };
-      });
-    }
-    return config.frontend.important_dashboards ?? [];
-  }, [config.database.file?.case_sensitive, config.database.sql?.case_sensitive, config.frontend.important_dashboards]);
+  return config.database.file?.case_sensitive === false || config.database.sql?.case_sensitive === false;
+}
+
+export function useImportantDashboardGroups(): ImportantDashboardGroupConfig[] {
+  const { config } = useConfigContext();
+
+  return useMemo(() => config.frontend.important_dashboards ?? [], [config.frontend.important_dashboards]);
 }
 
 export function useInformation(): string {
