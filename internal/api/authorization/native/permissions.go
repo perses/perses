@@ -14,6 +14,8 @@
 package native
 
 import (
+	"slices"
+
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
@@ -21,6 +23,20 @@ import (
 // usersPermissions contains the mapping of all users and their permission
 // username -> project name or global ("") -> permission list
 type usersPermissions map[string]map[string][]*v1Role.Permission
+
+// mergePermissions returns a new permission map containing the permissions of both base and
+// additional, concatenating the permission lists that share the same project.
+// Neither input map is modified.
+func mergePermissions(base, additional map[string][]*v1Role.Permission) map[string][]*v1Role.Permission {
+	merged := make(map[string][]*v1Role.Permission, len(base)+len(additional))
+	for project, permissions := range base {
+		merged[project] = slices.Clone(permissions)
+	}
+	for project, permissions := range additional {
+		merged[project] = slices.Concat(merged[project], permissions)
+	}
+	return merged
+}
 
 // addEntry is appending a project or global permission to the user list of permissions
 // Empty project equal to Global permission
@@ -42,21 +58,23 @@ type cache struct {
 }
 
 func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
-	usrPermissions, ok := c.permissions[user]
-	if !ok {
+	// The wildcard user ("*") applies to every user, so its permissions are merged with
+	// the user-specific ones.
+	userPermissions := mergePermissions(c.permissions[v1.WildcardUser], c.permissions[user])
+	if len(userPermissions) == 0 {
 		return false
 	}
 
 	// Checking global perm first
 	if requestProject != v1.WildcardProject {
-		if globalPermissions, ok := usrPermissions[v1.WildcardProject]; ok {
+		if globalPermissions, ok := userPermissions[v1.WildcardProject]; ok {
 			if listHasPermission(globalPermissions, requestAction, requestScope) {
 				return true
 			}
 		}
 	}
 
-	projectPermissions, ok := usrPermissions[requestProject]
+	projectPermissions, ok := userPermissions[requestProject]
 	if !ok {
 		return false
 	}
