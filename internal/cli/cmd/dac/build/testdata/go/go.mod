@@ -25,9 +25,9 @@ require (
 	github.com/perses/common v0.31.2 // indirect
 	github.com/prometheus/client_golang v1.24.1 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.71.0 // indirect
+	github.com/prometheus/common v0.72.0 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
-	github.com/zitadel/oidc/v3 v3.51.3 // indirect
+	github.com/zitadel/oidc/v3 v3.51.10 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/net v0.59.0 // indirect
