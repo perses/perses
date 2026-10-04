@@ -701,6 +701,9 @@ disable_local: <boolean> | default = false # Optional
 
 # Configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
 http_proxy: <HTTPProxy config> # Optional
+
+# Configuration of the proxy used to query Amazon CloudWatch for the datasources of kind CloudWatchProxy.
+cloudwatch: <CloudWatch config> # Optional
 ```
 
 #### HTTPProxy config
@@ -738,6 +741,34 @@ default_timeout: <duration> | default = 30s # Optional
 # which can be abused to exhaust the resources of the Perses server.
 # It must be greater than or equal to default_timeout.
 max_timeout: <duration> | default = default_timeout # Optional
+```
+
+#### CloudWatch config
+
+The CloudWatch proxy signs the requests with the AWS identity of the Perses server, so it is disabled by default.
+Every user allowed to create or query a project or global datasource can use the accounts and roles listed here.
+See the [CloudWatch proxy](../concepts/proxy.md#cloudwatch-proxy) documentation.
+
+```yaml
+# Enables the CloudWatch proxy.
+enable: <boolean> | default = false # Optional
+
+# Allows the datasources without roleArn, which use the AWS identity of the server directly.
+allow_default_credentials: <boolean> | default = false # Optional
+
+# The AWS regions the datasources can query.
+allowed_regions:
+  - <string> # Optional
+
+# The 12-digit AWS accounts the datasources can query. The account of the identity used for the requests
+# (the role, or the server identity) is verified with sts:GetCallerIdentity.
+# It is mandatory to query CloudWatch.
+allowed_accounts:
+  - <string> # Optional
+
+# The exact ARNs of the IAM roles the datasources can assume. The account of each role must be in allowed_accounts.
+allowed_roles:
+  - <string> # Optional
 ```
 
 #### GlobalDatasourceDiscovery config

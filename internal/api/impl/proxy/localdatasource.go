@@ -31,6 +31,12 @@ import (
 func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName, transportKey string, spec datasource.Spec, retrieveSecret func(name string) (*v1.SecretSpec, error)) error {
 	path := ctx.Param("*")
 
+	// A dashboard datasource can be written by anyone allowed to edit the dashboard. As a CloudWatch datasource
+	// grants access to the server AWS identity, it must be a project or global datasource, managed with their permissions.
+	if isCloudWatchDatasource(spec) {
+		return apiinterface.HandleForbiddenError("CloudWatch datasources cannot be defined in a dashboard; use a project or global datasource")
+	}
+
 	pr, err := e.newProxy(dtsName, projectName, transportKey, spec, path, retrieveSecret)
 	if err != nil {
 		return err

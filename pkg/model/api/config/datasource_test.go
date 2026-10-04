@@ -14,6 +14,7 @@
 package config
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -131,4 +132,50 @@ func TestHTTPProxyConfig_EffectiveTimeout(t *testing.T) {
 			assert.Equal(t, test.expected, test.cfg.EffectiveTimeout(test.timeout))
 		})
 	}
+}
+
+func TestCloudWatchConfig_Verify(t *testing.T) {
+	valid := CloudWatchConfig{
+		Enable:          true,
+		AllowedRegions:  []string{"us-east-1", "eu-west-3", "us-gov-west-1"},
+		AllowedAccounts: []string{"123456789012"},
+		AllowedRoles:    []string{"arn:aws:iam::123456789012:role/team/perses"},
+	}
+	testSuite := []struct {
+		title      string
+		change     func(*CloudWatchConfig)
+		errMessage string
+	}{
+		{title: "valid", change: func(*CloudWatchConfig) {}},
+		{title: "disabled configs are not verified", change: func(c *CloudWatchConfig) { c.Enable = false; c.AllowedRegions = []string{"nope"} }},
+		{title: "invalid region", change: func(c *CloudWatchConfig) { c.AllowedRegions = []string{"us_east_1"} }, errMessage: "not a valid AWS region"},
+		{title: "invalid account", change: func(c *CloudWatchConfig) { c.AllowedAccounts = []string{"1234"} }, errMessage: "12-digit"},
+		{title: "invalid role", change: func(c *CloudWatchConfig) { c.AllowedRoles = []string{"arn:aws:iam::123456789012:user/bob"} }, errMessage: "not a valid IAM role ARN"},
+		{title: "role account not allowed", change: func(c *CloudWatchConfig) { c.AllowedAccounts = []string{"999999999999"} }, errMessage: "not in allowed_accounts"},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			cfg := valid
+			test.change(&cfg)
+			err := cfg.Verify()
+			if test.errMessage == "" {
+				require.NoError(t, err)
+				return
+			}
+			require.ErrorContains(t, err, test.errMessage)
+		})
+	}
+}
+
+func TestCloudWatchConfig_JSONHidesAllowlists(t *testing.T) {
+	data, err := json.Marshal(CloudWatchConfig{
+		Enable:          true,
+		AllowedRegions:  []string{"us-east-1"},
+		AllowedAccounts: []string{"123456789012"},
+		AllowedRoles:    []string{"arn:aws:iam::123456789012:role/perses"},
+	})
+	require.NoError(t, err)
+	assert.NotContains(t, string(data), "123456789012")
+	assert.NotContains(t, string(data), "allowed_accounts")
+	assert.NotContains(t, string(data), "allowed_roles")
 }

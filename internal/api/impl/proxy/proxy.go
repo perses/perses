@@ -55,6 +55,7 @@ import (
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
+	datasourceCloudWatch "github.com/perses/spec/go/datasource/proxy/cloudwatch"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
 	"github.com/sirupsen/logrus"
@@ -252,6 +253,18 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 	var scrt *v1.SecretSpec
 
 	switch kind {
+	case datasourceCloudWatch.ProxyKindName:
+		cwConfig := cfg.(*datasourceCloudWatch.Config)
+		if policyErr := validateCloudWatchPolicy(e.cfg.CloudWatch, cwConfig); policyErr != nil {
+			return nil, policyErr
+		}
+		if cwConfig.ExternalIDSecret != "" {
+			scrt, err = loadSecret(cwConfig.ExternalIDSecret)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &cloudWatchProxy{config: cwConfig, policy: e.cfg.CloudWatch, secret: scrt, path: path, datasourceName: datasourceName}, nil
 	case datasourceHTTP.ProxyKindName:
 		httpConfig := cfg.(*datasourceHTTP.Config)
 		if len(httpConfig.Secret) > 0 {

@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/perses/spec/go/datasource/proxy/cloudwatch"
 	"github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/perses/spec/go/datasource/proxy/sql"
 )
@@ -44,6 +45,8 @@ func HasSecret(pluginSpec any) (bool, error) {
 	}
 	hasSecret := false
 	switch proxyKind {
+	case cloudwatch.ProxyKindName:
+		hasSecret = proxySpec.(*cloudwatch.Config).ExternalIDSecret != ""
 	case http.ProxyKindName:
 		httpConfig := proxySpec.(*http.Config)
 		if len(httpConfig.Secret) > 0 {
@@ -138,6 +141,9 @@ func (c *configFinder) unmarshalConfig(spec reflect.Value) {
 	}
 
 	switch c.foundKind {
+	case cloudwatch.ProxyKindName:
+		c.config = &cloudwatch.Config{}
+		c.err = json.Unmarshal(data, c.config)
 	case http.ProxyKindName:
 		c.config = &http.Config{}
 		c.err = json.Unmarshal(data, c.config)
@@ -156,7 +162,7 @@ func getKindFromStruct(v reflect.Value) (string, bool) {
 	})
 	if field.IsValid() && field.CanInterface() && field.Kind() == reflect.String {
 		kindValue := strings.ToLower(field.String())
-		if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName {
+		if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName || kindValue == cloudwatch.ProxyKindName {
 			return kindValue, true
 		}
 	}
@@ -171,7 +177,7 @@ func getKindFromMap(v reflect.Value) (string, bool) {
 			value = getNextElem(value)
 			if value.Kind() == reflect.String {
 				kindValue := strings.ToLower(value.String())
-				if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName {
+				if kindValue == http.ProxyKindName || kindValue == sql.ProxyKindName || kindValue == cloudwatch.ProxyKindName {
 					return kindValue, true
 				}
 			}

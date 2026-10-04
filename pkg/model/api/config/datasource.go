@@ -15,6 +15,8 @@ package config
 
 import (
 	"fmt"
+	"regexp"
+	"slices"
 	"time"
 
 	"github.com/perses/spec/go/common"
@@ -182,4 +184,55 @@ type DatasourceConfig struct {
 	// HTTPProxy contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
 	// +optional
 	HTTPProxy HTTPProxyConfig `json:"http_proxy,omitzero" yaml:"http_proxy,omitempty"`
+	// CloudWatch contains the configuration of the proxy used to query Amazon CloudWatch for the datasources of kind CloudWatchProxy.
+	// It is disabled by default because it grants access to the AWS identity of the server.
+	// +optional
+	CloudWatch CloudWatchConfig `json:"cloudwatch,omitzero" yaml:"cloudwatch,omitempty"`
+}
+
+// CloudWatchConfig is an administrator-owned capability allowlist, not a datasource setting.
+// Every user allowed to create/query datasources can use these accounts and roles.
+type CloudWatchConfig struct {
+	// Enable allows the datasources of kind CloudWatchProxy.
+	Enable bool `json:"enable" yaml:"enable"`
+	// AllowDefaultCredentials independently opts in to using the server's ambient identity directly.
+	AllowDefaultCredentials bool     `json:"allow_default_credentials" yaml:"allow_default_credentials"`
+	AllowedRegions          []string `json:"allowed_regions,omitempty" yaml:"allowed_regions,omitempty"`
+	// AllowedAccounts and AllowedRoles are never serialized in JSON, as the configuration is returned by the /api/config endpoint
+	// that is reachable by every user (and often unauthenticated).
+	AllowedAccounts []string `json:"-" yaml:"allowed_accounts,omitempty"`
+	AllowedRoles    []string `json:"-" yaml:"allowed_roles,omitempty"`
+}
+
+var (
+	cloudWatchRegionRegexp  = regexp.MustCompile(`^[a-z]{2}(-[a-z]+)+-[0-9]{1,2}$`)
+	cloudWatchAccountRegexp = regexp.MustCompile(`^[0-9]{12}$`)
+	cloudWatchRoleRegexp    = regexp.MustCompile(`^arn:aws(?:-[a-z]+)*:iam::([0-9]{12}):role/[A-Za-z0-9+=,.@_/-]{1,576}$`)
+)
+
+// Verify fails at startup on a misconfiguration instead of rejecting every request at runtime with a 403.
+func (c *CloudWatchConfig) Verify() error {
+	if !c.Enable {
+		return nil
+	}
+	for _, region := range c.AllowedRegions {
+		if !cloudWatchRegionRegexp.MatchString(region) {
+			return fmt.Errorf("datasource.cloudwatch.allowed_regions: %q is not a valid AWS region", region)
+		}
+	}
+	for _, account := range c.AllowedAccounts {
+		if !cloudWatchAccountRegexp.MatchString(account) {
+			return fmt.Errorf("datasource.cloudwatch.allowed_accounts: %q is not a valid 12-digit AWS account ID", account)
+		}
+	}
+	for _, role := range c.AllowedRoles {
+		match := cloudWatchRoleRegexp.FindStringSubmatch(role)
+		if match == nil {
+			return fmt.Errorf("datasource.cloudwatch.allowed_roles: %q is not a valid IAM role ARN", role)
+		}
+		if !slices.Contains(c.AllowedAccounts, match[1]) {
+			return fmt.Errorf("datasource.cloudwatch.allowed_roles: the account of %q is not in allowed_accounts", role)
+		}
+	}
+	return nil
 }
