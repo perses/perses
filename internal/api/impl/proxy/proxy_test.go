@@ -450,13 +450,18 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 }
 
 func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
+	refresher := func(token string) crypto.TokenRefresher {
+		return func(_ echo.Context) string { return token }
+	}
 	testSuite := []struct {
-		name          string
-		config        *datasourceHTTP.Config
-		oidcCookie    string
-		expectedAuth  string
-		expectError   bool
-		errorContains string
+		name              string
+		config            *datasourceHTTP.Config
+		oidcCookie        string
+		oidcRefreshCookie string
+		tokenRefresher    crypto.TokenRefresher
+		expectedAuth      string
+		expectError       bool
+		errorContains     string
 	}{
 		{
 			name:         "oauthPassThrough forwards oidc token from cookie",
@@ -465,11 +470,41 @@ func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 			expectedAuth: "Bearer original-oidc-token",
 		},
 		{
+			name:              "oauthPassThrough does not refresh the oidc token when it is available",
+			config:            &datasourceHTTP.Config{OauthPassthrough: true},
+			oidcCookie:        "original-oidc-token",
+			oidcRefreshCookie: "oidc-refresh-token",
+			tokenRefresher:    refresher("refreshed-oidc-token"),
+			expectedAuth:      "Bearer original-oidc-token",
+		},
+		{
 			name:          "oauthPassThrough with no oidc cookie returns error",
 			config:        &datasourceHTTP.Config{OauthPassthrough: true},
 			oidcCookie:    "",
 			expectError:   true,
 			errorContains: "OAuthPassThrough",
+		},
+		{
+			name:              "oauthPassThrough forwards the refreshed oidc token when the oidc cookie is missing",
+			config:            &datasourceHTTP.Config{OauthPassthrough: true},
+			oidcRefreshCookie: "oidc-refresh-token",
+			tokenRefresher:    refresher("refreshed-oidc-token"),
+			expectedAuth:      "Bearer refreshed-oidc-token",
+		},
+		{
+			name:              "oauthPassThrough returns error when the oidc token cannot be refreshed",
+			config:            &datasourceHTTP.Config{OauthPassthrough: true},
+			oidcRefreshCookie: "oidc-refresh-token",
+			tokenRefresher:    refresher(""),
+			expectError:       true,
+			errorContains:     "OAuthPassThrough",
+		},
+		{
+			name:           "oauthPassThrough does not try to refresh the oidc token without oidc refresh cookie",
+			config:         &datasourceHTTP.Config{OauthPassthrough: true},
+			tokenRefresher: refresher("refreshed-oidc-token"),
+			expectError:    true,
+			errorContains:  "OAuthPassThrough",
 		},
 		{
 			name:         "oauthPassThrough false does not set auth header",
@@ -489,7 +524,8 @@ func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			test.config.URL = common.MustParseURL("https://datasource.example.com")
 			h := &httpProxy{
-				config: test.config,
+				config:         test.config,
+				tokenRefresher: test.tokenRefresher,
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
 			req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")
@@ -497,6 +533,12 @@ func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 				req.AddCookie(&http.Cookie{ //nolint:gosec
 					Name:  crypto.CookieKeyOIDCToken,
 					Value: test.oidcCookie,
+				})
+			}
+			if test.oidcRefreshCookie != "" {
+				req.AddCookie(&http.Cookie{ //nolint:gosec
+					Name:  crypto.CookieKeyOIDCRefreshToken,
+					Value: test.oidcRefreshCookie,
 				})
 			}
 			rec := httptest.NewRecorder()

@@ -541,16 +541,16 @@ func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clien
 }
 
 // RefreshOIDCToken refreshes the OIDC token using the stored refresh token and updates the cookies.
-// It returns nil if no refresh token is available or if the refresh fails (token may have expired).
-func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) {
+// It returns the new access token, or an empty string if no refresh token is available or if the refresh fails (token may have expired).
+func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) string {
 	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyOIDCRefreshToken)
 	if err != nil {
 		// No OIDC refresh token stored, nothing to refresh
-		return
+		return ""
 	}
 	refreshToken := refreshTokenCookie.Value
 	if refreshToken == "" {
-		return
+		return ""
 	}
 
 	newTokens, err := rp.RefreshTokens[*oidc.IDTokenClaims](ctx.Request().Context(), e.relyingParty, refreshToken, "", "")
@@ -558,7 +558,7 @@ func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) {
 		e.logWithError(err).Warn("Failed to refresh OIDC token; clearing OIDC cookies")
 		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCTokenCookie())
 		ctx.SetCookie(e.tokenManagement.jwt.DeleteOIDCRefreshTokenCookie())
-		return
+		return ""
 	}
 
 	oidcToken := &oauth2.Token{
@@ -573,6 +573,7 @@ func (e *oIDCEndpoint) RefreshOIDCToken(ctx echo.Context) {
 	if newTokens.RefreshToken != "" && newTokens.RefreshToken != refreshToken {
 		ctx.SetCookie(e.tokenManagement.jwt.CreateOIDCRefreshTokenCookie(newTokens.RefreshToken))
 	}
+	return newTokens.AccessToken
 }
 
 // logWithError is a little logrus helper to log with the provider slugID.
