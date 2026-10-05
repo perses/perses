@@ -30,8 +30,8 @@ test.describe('homeView', () => {
     const homePage = new AppHomePage(page);
     await homePage.goto();
 
-    const navigationPromise = page.waitForURL(new RegExp('/projects/perses/dashboards/Demo', 'i'));
-    await homePage.clickImportantDashboardItem('perses', 'Demo');
+    const navigationPromise = page.waitForURL(new RegExp('/projects/perses/dashboards/NodeExporter', 'i'));
+    await homePage.clickImportantDashboardItem('perses', 'NodeExporter');
     await navigationPromise;
   });
 

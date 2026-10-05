@@ -40,12 +40,6 @@ func (e *EphemeralDashboard) Verify() error {
 	return nil
 }
 
-type dashboardSelector struct {
-	// Project is the name of the project (dashboard.metadata.project)
-	Project string `json:"project" yaml:"project"`
-	// Dashboard is the name of the dashboard (dashboard.metadata.name)
-	Dashboard string `json:"dashboard" yaml:"dashboard"`
-}
 type Config struct {
 	// Use it in case you want to prefix the API path.
 	// This can be useful if you are running Perses behind a reverse proxy.

@@ -104,20 +104,16 @@ function SearchDashboardList(props: ResourceListProps): ReactElement | null {
   );
 
   const list: Array<Resource & { highlight: boolean }> = useMemo(() => {
-    if (query.length && dashboardList) {
-      const importantDashboardKeys = new Set(
-        importantDashboards.map(
-          (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
-        ),
-      );
-      return dashboardList.map((d) => {
-        const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
-        return { ...d, highlight };
-      });
-    } else {
-      return importantDashboards.map((imp) => ({ ...imp, highlight: true }));
-    }
-  }, [importantDashboards, dashboardList, query]);
+    const importantDashboardKeys = new Set(
+      importantDashboards.map(
+        (importantDashboard) => `${importantDashboard.metadata.project}/${importantDashboard.metadata.name}`,
+      ),
+    );
+    return (dashboardList ?? []).map((d) => {
+      const highlight = importantDashboardKeys.has(`${d.metadata.project}/${d.metadata.name}`);
+      return { ...d, highlight };
+    });
+  }, [importantDashboards, dashboardList]);
 
   if (dashboardListError || importantDashboardsError)
     return (

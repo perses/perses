@@ -147,8 +147,8 @@ type Security struct {
 	Cookie Cookie `json:"cookie" yaml:"cookie"`
 	// EncryptionKey is the secret key used to encrypt and decrypt sensitive data
 	// stored in the database such as the password of the basic auth for a datasource.
-	// Note that if it is not provided, it will use a default value.
-	// On a production instance, you should set this key.
+	// In case authentication is enabled, it is also used to encrypt the access and refresh token used for authentication.
+	// Therefore, if auth is enabled, and you did not set this key, Perses will not start and will return an error.
 	// Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
 	EncryptionKey secret.Hidden `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
@@ -172,6 +172,9 @@ type Security struct {
 
 func (s *Security) Verify() error {
 	if len(s.EncryptionKey) == 0 && len(s.EncryptionKeyFile) == 0 {
+		if s.EnableAuth {
+			return fmt.Errorf("encryption_key or encryption_key_file must be provided when auth is enabled")
+		}
 		logrus.Warning("encryption_key is not provided and therefore it will use a default one. For production instance you should provide the key.")
 		s.EncryptionKey = defaultEncryptionKey
 	}

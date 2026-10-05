@@ -300,6 +300,7 @@ func BenchmarkClaimPermissions(b *testing.B) {
 	for _, size := range datasetSizes {
 		ds := newTestDataset(size)
 		n := ds.newNative(b, true)
+		c := n.cache.Load()
 		for _, claimCount := range []int{1, 10} {
 			if claimCount > size.projectCount {
 				continue
@@ -311,12 +312,12 @@ func BenchmarkClaimPermissions(b *testing.B) {
 			}
 			claims := makeJWTClaims(testProviderKind, testProviderID, map[string][]string{testClaimName: values})
 			b.Run(fmt.Sprintf("%s,mappings=%d,userClaims=%d", size, size.projectCount+1, claimCount), func(b *testing.B) {
-				if got := n.claimPermissions(claims); len(got) != claimCount {
+				if got := n.claimPermissions(c, claims); len(got) != claimCount {
 					b.Fatalf("unexpected number of projects resolved: got %d, expected %d", len(got), claimCount)
 				}
 				b.ReportAllocs()
 				for b.Loop() {
-					n.claimPermissions(claims)
+					n.claimPermissions(c, claims)
 				}
 			})
 		}

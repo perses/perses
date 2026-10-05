@@ -160,11 +160,12 @@ authorization: <Authorization config> # Optional
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
-# Note that if it is not provided, it will use a default value.
-# On a production instance, you should set this key.
+# In case authentication is enabled, it is also used to encrypt the access and refresh token used for authentication.
+# Therefore, if auth is enabled, and you did not set this key, Perses will not start and will return an error.
 # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
-# One way to generate a valid key could be the following command (using only visible characters):
+# One way to generate a valid key could be one of the following command (using only visible characters):
 # LC_ALL=C tr -dc '[:graph:]' < /dev/urandom | head -c 32
+# openssl rand -base64 24 | head -c 32
 encryption_key: <secret> # Optional
 
 # The path to the file containing the secret key.
@@ -901,9 +902,10 @@ enable_lock_mode: <bool> | default = false # Optional
 # Activating the different kind of explorer supported.
 explorer: <Explorer config>
 
-# A list of dashboards you would like to display in the UI home page
+# Lists of dashboards you would like to display in the UI home page
+# The legacy flat list of dashboard selectors is still supported but deprecated.
 important_dashboards:
-  - <Dashboard Selector config> # Optional
+  - <Important Dashboard Group config> # Optional
 
 # The markdown content to be displayed on the UI home page
 information: <string> # Optional
@@ -958,6 +960,28 @@ disable:  <bool> | default = false # Optional
 options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 ```
 
+#### Important Dashboard Group config
+
+```yaml
+# Optional title displayed above the configured entries
+title: <string> # Optional
+
+# Optional description displayed below the title
+description: <string> # Optional
+
+# Dashboards or projects displayed in this group. At least one entry is required.
+dashboards:
+  - <Dashboard Selector config>
+```
+
+Important dashboard groups can also be set through environment variables, e.g.:
+
+```bash
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_TITLE="Quick links"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_PROJECT="perses"
+PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD="Demo"
+```
+
 #### Dashboard Selector config
 
 ```yaml
@@ -965,7 +989,8 @@ options: <duration[]> | default = [ "0s", "5s", "10s", "15s", "30s", "60s" ]
 project: <string>
 
 # The dashboard name (dashboard.metadata.name)
-dashboard: <string>
+# When omitted, all dashboards from the project are considered important
+dashboard: <string> # Optional
 ```
 
 ### Plugin config
