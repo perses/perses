@@ -20,16 +20,18 @@ import (
 	"testing"
 	"time"
 
+	promDs "dac-test/prometheus/datasource"
+	query "dac-test/prometheus/query"
+	labelNamesVar "dac-test/prometheus/variable/label-names"
+	labelValuesVar "dac-test/prometheus/variable/label-values"
+	promqlVar "dac-test/prometheus/variable/promql"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
-	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
-	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
-	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
-	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
 	staticlist "github.com/perses/plugins/staticlistvariable/sdk/go"
 	dashboardSpec "github.com/perses/spec/go/dashboard"
 	"github.com/stretchr/testify/assert"
@@ -367,4 +369,24 @@ func TestDashboardNewWithInvalidMetadataName(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Equal(t, inputName, builder.Dashboard.Metadata.Name)
+}
+
+func TestVariableDatasourceSelector(t *testing.T) {
+	b, buildErr := dashboard.New("TestDash",
+		dashboard.ProjectName("p"),
+		dashboard.AddPanelGroup("g",
+			panelgroup.AddPanel("panel",
+				panel.AddQuery(
+					query.PromQL("up", query.Datasource("$myDs")),
+				),
+			),
+		),
+	)
+	out, marshErr := json.Marshal(b.Dashboard)
+
+	t.Run("variable datasource serializes as plain string", func(t *testing.T) {
+		require.NoError(t, buildErr)
+		require.NoError(t, marshErr)
+		assert.Contains(t, string(out), `"datasource":"$myDs"`)
+	})
 }

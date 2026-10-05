@@ -11,19 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package query
+package promql
 
 import (
 	"strings"
-	"time"
 
 	promDatasource "dac-test/prometheus/datasource"
-	"github.com/perses/spec/go/common"
 )
 
 func Expr(expr string) Option {
 	return func(builder *Builder) error {
-		builder.Query = expr
+		builder.Expr = expr
+		return nil
+	}
+}
+
+func LabelName(labelName string) Option {
+	return func(builder *Builder) error {
+		builder.LabelName = labelName
 		return nil
 	}
 }
@@ -39,27 +44,6 @@ func Datasource(datasourceName string) Option {
 		} else {
 			builder.Datasource = promDatasource.Selector(datasourceName)
 		}
-		return nil
-	}
-}
-
-func SeriesNameFormat(format string) Option {
-	return func(builder *Builder) error {
-		builder.SeriesNameFormat = format
-		return nil
-	}
-}
-
-func MinStep(step time.Duration) Option {
-	return func(builder *Builder) error {
-		builder.MinStep = common.Duration(step)
-		return nil
-	}
-}
-
-func Resolution(resolution int) Option {
-	return func(builder *Builder) error {
-		builder.Resolution = resolution
 		return nil
 	}
 }
