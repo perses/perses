@@ -508,27 +508,29 @@ func (h *httpProxy) setupAuthentication(req *http.Request, oauthPassthroughToken
 }
 
 // getOAuthPassthroughToken returns the OIDC/OAuth token of the caller, stored in its cookies.
+// If the token is missing (or empty), it tries to refresh it using the OIDC refresh token also stored in the cookies.
 func (h *httpProxy) getOAuthPassthroughToken(c echo.Context) (string, error) {
-	oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
-	if errors.Is(err, http.ErrNoCookie) {
+	var token string
+	if oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken); err == nil {
+		token = oidcCookie.Value
+	}
+	if len(token) == 0 && h.tokenRefresher != nil {
 		// OIDC token cookie is missing. It may have expired while the Perses session
 		// was still valid. Attempt to refresh using the stored OIDC refresh token
 		// before giving up.
-		if h.tokenRefresher != nil {
-			if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
-				h.tokenRefresher(c)
-				// Re-read the OIDC token cookie after the refresh attempt.
-				oidcCookie, err = c.Cookie(crypto.CookieKeyOIDCToken)
-			}
-		}
-		if errors.Is(err, http.ErrNoCookie) {
-			return "", apiinterface.HandleBadRequestError(fmt.Sprintf(
-				"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
-				h.datasourceName,
-			))
+		// The refreshed token is only set in the cookies of the response,
+		// so we must use the token returned by the refresher for the current request.
+		if _, refreshErr := c.Cookie(crypto.CookieKeyOIDCRefreshToken); refreshErr == nil {
+			token = h.tokenRefresher(c)
 		}
 	}
-	return oidcCookie.Value, nil
+	if len(token) == 0 {
+		return "", apiinterface.HandleBadRequestError(fmt.Sprintf(
+			"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
+			h.datasourceName,
+		))
+	}
+	return token, nil
 }
 
 // getToken exchanges the client credentials for an access token,

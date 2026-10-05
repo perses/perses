@@ -98,7 +98,10 @@ type authEndpoint interface {
 	GetAuthKind() string
 	GetSlugID() string
 	GetExtraProviderLogoutHandler() echo.HandlerFunc
-	RefreshOIDCToken(ctx echo.Context)
+	// RefreshOIDCToken refreshes the upstream OIDC/OAuth token using the refresh token stored in the cookies,
+	// and updates the cookies accordingly.
+	// It returns the new access token, or an empty string if the token has not been refreshed.
+	RefreshOIDCToken(ctx echo.Context) string
 }
 
 type endpoint struct {
@@ -235,24 +238,21 @@ func (e *endpoint) logout(ctx echo.Context) error {
 // getTokenRefresher returns a TokenRefresher that can be used by the proxy endpoint
 // to refresh the upstream OIDC/OAuth token when it expires before the Perses session token.
 func (e *endpoint) getTokenRefresher() crypto.TokenRefresher {
-	return func(ctx echo.Context) {
+	return func(ctx echo.Context) string {
 		refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
-		if errors.Is(err, http.ErrNoCookie) {
-			return
-		}
-		if refreshTokenCookie.Value == "" {
-			return
+		if err != nil || refreshTokenCookie.Value == "" {
+			return ""
 		}
 		claims, err := e.jwt.ValidateRefreshToken(refreshTokenCookie.Value)
 		if err != nil {
-			return
+			return ""
 		}
 		for _, ep := range e.endpoints {
 			if ep.GetAuthKind() == claims.ProviderKind && ep.GetSlugID() == claims.ProviderID {
-				ep.RefreshOIDCToken(ctx)
-				return
+				return ep.RefreshOIDCToken(ctx)
 			}
 		}
+		return ""
 	}
 }
 

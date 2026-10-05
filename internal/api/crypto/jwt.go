@@ -27,7 +27,9 @@ import (
 
 // TokenRefresher is a function that attempts to refresh the upstream OIDC/OAuth token
 // using the stored refresh token. It should set new cookies on success or clear them on failure.
-type TokenRefresher func(ctx echo.Context)
+// It returns the new access token, or an empty string if the token has not been refreshed.
+// As the new cookies are only set in the response, the returned token is the only way to use it in the current request.
+type TokenRefresher func(ctx echo.Context) string
 
 const (
 	CookieKeyJWTPayload       = "jwtPayload"
