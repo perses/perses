@@ -30,11 +30,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newGuard creates a guard the same way Perses does: from a configuration that has been verified.
 func newGuard(t *testing.T, cfg config.DatasourceProxyConfig) *Guard {
 	t.Helper()
-	g, err := New(cfg)
-	require.NoError(t, err)
-	return g
+	require.NoError(t, cfg.Verify())
+	require.NoError(t, cfg.HTTP.Verify())
+	return New(cfg)
 }
 
 func TestCheckIP(t *testing.T) {
@@ -346,16 +347,4 @@ func TestCanonicalAddr(t *testing.T) {
 	assert.Equal(t, "proxy:1080", canonicalAddr(&url.URL{Scheme: "socks5", Host: "proxy"}))
 	assert.Equal(t, "proxy:3128", canonicalAddr(&url.URL{Scheme: "http", Host: "proxy:3128"}))
 	assert.Equal(t, "[::1]:3128", canonicalAddr(&url.URL{Scheme: "http", Host: "[::1]:3128"}))
-}
-
-func TestNew_InvalidConfig(t *testing.T) {
-	for _, cfg := range []config.DatasourceProxyConfig{
-		{HTTP: config.HTTPProxyConfig{AllowedSchemes: []string{"file"}}},
-		{AllowedHosts: []string{"http://prometheus"}},
-		{AllowedNetworks: []string{"not-a-network"}},
-		{DeniedNetworks: []string{"10.0.0.0/33"}},
-	} {
-		_, err := New(cfg)
-		assert.Error(t, err)
-	}
 }

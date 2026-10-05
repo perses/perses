@@ -118,10 +118,7 @@ type service struct {
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	secretFileValidator := secretfile.New(conf.Security.SecretFileAllowedDirectories)
-	proxyGuard, err := netguard.New(conf.Datasource.Proxy)
-	if err != nil {
-		return nil, err
-	}
+	proxyGuard := netguard.New(conf.Datasource.Proxy)
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err

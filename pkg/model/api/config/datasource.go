@@ -88,10 +88,12 @@ type HTTPProxyConfig struct {
 }
 
 func (c *HTTPProxyConfig) Verify() error {
-	for _, scheme := range c.AllowedSchemes {
-		if s := strings.ToLower(scheme); s != "http" && s != "https" {
+	for i, scheme := range c.AllowedSchemes {
+		s := strings.ToLower(strings.TrimSpace(scheme))
+		if s != "http" && s != "https" {
 			return fmt.Errorf("datasource.proxy.http.allowed_schemes: %q is not supported, only 'http' and 'https' are accepted", scheme)
 		}
+		c.AllowedSchemes[i] = s
 	}
 	if c.MaxConnsPerHost < 0 {
 		return fmt.Errorf("datasource.proxy.http.max_conns_per_host cannot be negative")
@@ -216,21 +218,33 @@ type DatasourceProxyConfig struct {
 	HTTP HTTPProxyConfig `json:"http,omitzero" yaml:"http,omitempty"`
 }
 
+// Verify validates the configuration and normalizes its values, so they can be used as is afterward:
+// the hosts are normalized (see NormalizeHostPattern) and the networks are converted to their canonical CIDR form (see ParseNetwork).
 func (c *DatasourceProxyConfig) Verify() error {
-	for _, host := range c.AllowedHosts {
-		if _, err := NormalizeHostPattern(host); err != nil {
+	for i, host := range c.AllowedHosts {
+		pattern, err := NormalizeHostPattern(host)
+		if err != nil {
 			return fmt.Errorf("datasource.proxy.allowed_hosts: %w", err)
 		}
+		c.AllowedHosts[i] = pattern
 	}
-	for _, network := range c.AllowedNetworks {
-		if _, err := ParseNetwork(network); err != nil {
-			return fmt.Errorf("datasource.proxy.allowed_networks: %w", err)
-		}
+	if err := normalizeNetworks(c.AllowedNetworks); err != nil {
+		return fmt.Errorf("datasource.proxy.allowed_networks: %w", err)
 	}
-	for _, network := range c.DeniedNetworks {
-		if _, err := ParseNetwork(network); err != nil {
-			return fmt.Errorf("datasource.proxy.denied_networks: %w", err)
+	if err := normalizeNetworks(c.DeniedNetworks); err != nil {
+		return fmt.Errorf("datasource.proxy.denied_networks: %w", err)
+	}
+	return nil
+}
+
+// normalizeNetworks replaces, in place, every network by its canonical CIDR form.
+func normalizeNetworks(networks []string) error {
+	for i, network := range networks {
+		prefix, err := ParseNetwork(network)
+		if err != nil {
+			return err
 		}
+		networks[i] = prefix.String()
 	}
 	return nil
 }

@@ -106,10 +106,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 	if err != nil {
 		logrus.WithError(err).Fatal("error initializing authentication endpoints")
 	}
-	proxyGuard, err := netguard.New(cfg.Datasource.Proxy)
-	if err != nil {
-		logrus.WithError(err).Fatal("invalid datasource proxy configuration")
-	}
+	proxyGuard := netguard.New(cfg.Datasource.Proxy)
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),

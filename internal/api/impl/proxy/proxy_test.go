@@ -44,9 +44,9 @@ var (
 
 // newLoopbackGuard returns a guard allowing the loopback interface, as the test servers are listening on it.
 func newLoopbackGuard(t testing.TB) *netguard.Guard {
-	g, err := netguard.New(config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}})
-	require.NoError(t, err)
-	return g
+	cfg := config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}}
+	require.NoError(t, cfg.Verify())
+	return netguard.New(cfg)
 }
 
 func TestSQLProxy_sqlOpen(t *testing.T) {

@@ -235,19 +235,29 @@ datasource:
 
 func TestDatasourceProxyConfigVerify(t *testing.T) {
 	testSuite := []struct {
-		title string
-		cfg   DatasourceProxyConfig
-		isErr bool
+		title  string
+		cfg    DatasourceProxyConfig
+		result DatasourceProxyConfig
+		isErr  bool
 	}{
 		{title: "empty config", cfg: DatasourceProxyConfig{}},
-		{title: "valid config", cfg: DatasourceProxyConfig{
-			AllowedHosts:    []string{"prometheus.example.com", "*.svc"},
-			AllowedNetworks: []string{"127.0.0.1", "::1/128"},
-			DeniedNetworks:  []string{"10.0.0.0/8"},
-		}},
+		{
+			title: "valid config is normalized",
+			cfg: DatasourceProxyConfig{
+				AllowedHosts:    []string{"Prometheus.Example.com.", "*.svc", "[::ffff:10.0.0.1]"},
+				AllowedNetworks: []string{"127.0.0.1", "::1/128", "::ffff:127.0.0.0/104"},
+				DeniedNetworks:  []string{"10.1.2.3/8"},
+			},
+			result: DatasourceProxyConfig{
+				AllowedHosts:    []string{"prometheus.example.com", "*.svc", "10.0.0.1"},
+				AllowedNetworks: []string{"127.0.0.1/32", "::1/128", "127.0.0.0/8"},
+				DeniedNetworks:  []string{"10.0.0.0/8"},
+			},
+		},
 		{title: "invalid host", cfg: DatasourceProxyConfig{AllowedHosts: []string{"https://prometheus"}}, isErr: true},
 		{title: "invalid allowed network", cfg: DatasourceProxyConfig{AllowedNetworks: []string{"localhost"}}, isErr: true},
 		{title: "invalid denied network", cfg: DatasourceProxyConfig{DeniedNetworks: []string{"300.0.0.0/8"}}, isErr: true},
+		{title: "invalid denied network mask", cfg: DatasourceProxyConfig{DeniedNetworks: []string{"10.0.0.0/33"}}, isErr: true},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -256,6 +266,7 @@ func TestDatasourceProxyConfigVerify(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, test.result, test.cfg)
 			}
 		})
 	}
@@ -264,6 +275,7 @@ func TestDatasourceProxyConfigVerify(t *testing.T) {
 func TestHTTPProxyConfig_Verify_allowedSchemes(t *testing.T) {
 	valid := HTTPProxyConfig{AllowedSchemes: []string{"http", "HTTPS"}}
 	assert.NoError(t, valid.Verify())
+	assert.Equal(t, []string{"http", "https"}, valid.AllowedSchemes)
 	invalid := HTTPProxyConfig{AllowedSchemes: []string{"file"}}
 	assert.EqualError(t, invalid.Verify(), `datasource.proxy.http.allowed_schemes: "file" is not supported, only 'http' and 'https' are accepted`)
 }

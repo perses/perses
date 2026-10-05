@@ -118,7 +118,7 @@ var (
 	ipv4Loopback     = netip.MustParseAddr("127.0.0.1")
 	ipv6Loopback     = netip.IPv6Loopback()
 
-	defaultGuard = mustNew(config.DatasourceProxyConfig{})
+	defaultGuard = New(config.DatasourceProxyConfig{})
 )
 
 // Guard verifies that a destination is allowed according to the datasource proxy configuration.
@@ -132,42 +132,18 @@ type Guard struct {
 }
 
 // New creates a Guard from the datasource proxy configuration.
-func New(cfg config.DatasourceProxyConfig) (*Guard, error) {
+// The configuration is expected to have been verified beforehand (see config.DatasourceProxyConfig.Verify and
+// config.HTTPProxyConfig.Verify), which is the case of the configuration loaded by Perses: its values are valid and normalized.
+func New(cfg config.DatasourceProxyConfig) *Guard {
 	g := &Guard{
-		allowedSchemes: defaultAllowedSchemes,
-		deniedNetworks: slices.Clone(builtinDeniedNetworks),
-		resolver:       net.DefaultResolver,
+		allowedSchemes:  defaultAllowedSchemes,
+		allowedHosts:    slices.Clone(cfg.AllowedHosts),
+		allowedNetworks: mustParseNetworks(cfg.AllowedNetworks...),
+		deniedNetworks:  append(slices.Clone(builtinDeniedNetworks), mustParseNetworks(cfg.DeniedNetworks...)...),
+		resolver:        net.DefaultResolver,
 	}
 	if len(cfg.HTTP.AllowedSchemes) > 0 {
-		g.allowedSchemes = make([]string, 0, len(cfg.HTTP.AllowedSchemes))
-		for _, scheme := range cfg.HTTP.AllowedSchemes {
-			s := strings.ToLower(scheme)
-			if s != schemeHTTP && s != schemeHTTPS {
-				return nil, fmt.Errorf("scheme %q is not supported, only 'http' and 'https' are accepted", scheme)
-			}
-			g.allowedSchemes = append(g.allowedSchemes, s)
-		}
-	}
-	for _, host := range cfg.AllowedHosts {
-		pattern, err := config.NormalizeHostPattern(host)
-		if err != nil {
-			return nil, err
-		}
-		g.allowedHosts = append(g.allowedHosts, pattern)
-	}
-	for _, network := range cfg.AllowedNetworks {
-		prefix, err := config.ParseNetwork(network)
-		if err != nil {
-			return nil, err
-		}
-		g.allowedNetworks = append(g.allowedNetworks, prefix)
-	}
-	for _, network := range cfg.DeniedNetworks {
-		prefix, err := config.ParseNetwork(network)
-		if err != nil {
-			return nil, err
-		}
-		g.deniedNetworks = append(g.deniedNetworks, prefix)
+		g.allowedSchemes = slices.Clone(cfg.HTTP.AllowedSchemes)
 	}
 	if cfg.DenyPrivateNetworks {
 		g.deniedNetworks = append(g.deniedNetworks, privateNetworks...)
@@ -178,17 +154,11 @@ func New(cfg config.DatasourceProxyConfig) (*Guard, error) {
 		k8sAPI = k8sAPI.WithZone("").Unmap()
 		g.deniedNetworks = append(g.deniedNetworks, netip.PrefixFrom(k8sAPI, k8sAPI.BitLen()))
 	}
-	return g, nil
-}
-
-func mustNew(cfg config.DatasourceProxyConfig) *Guard {
-	g, err := New(cfg)
-	if err != nil {
-		panic(err)
-	}
 	return g
 }
 
+// mustParseNetworks converts the networks to prefixes.
+// It panics if a network is invalid, as the networks are either built-in or coming from a verified configuration.
 func mustParseNetworks(networks ...string) []netip.Prefix {
 	result := make([]netip.Prefix, 0, len(networks))
 	for _, network := range networks {
