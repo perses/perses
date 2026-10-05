@@ -413,7 +413,9 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 	// set header according to the configuration
 	if len(h.config.Headers) > 0 {
 		for k, v := range h.config.Headers {
-			if k == echo.HeaderAuthorization {
+			// Header names are case-insensitive, and req.Header.Set canonicalizes them (e.g. "authorization" becomes "Authorization").
+			// The comparison must be case-insensitive as well, otherwise the check could be bypassed.
+			if strings.EqualFold(k, echo.HeaderAuthorization) {
 				// Authorization header cannot be overwritten by the public configuration.
 				// It must be set using the Secret configuration.
 				// It will avoid leaking credentials and user to be able to set them directly in the datasource configuration.

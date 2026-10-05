@@ -565,6 +565,23 @@ func TestHTTPProxy_prepareRequest_removeCallerCredentials(t *testing.T) {
 			expectedCookie: "datasource=value",
 		},
 		{
+			name: "authorization header defined in the datasource configuration is ignored, whatever its case",
+			config: &datasourceHTTP.Config{Headers: map[string]string{
+				"Authorization": "Basic leak",
+				"authorization": "Basic leak",
+				"AUTHORIZATION": "Basic leak",
+				"aUtHoRiZaTiOn": "Basic leak",
+			}},
+		},
+		{
+			name: "delegated authorization: authorization header defined in the datasource configuration does not override the caller one",
+			config: &datasourceHTTP.Config{Headers: map[string]string{
+				"authorization": "Basic leak",
+			}},
+			forwardCallerAuthorization: true,
+			expectedAuth:               "Bearer perses-session-token",
+		},
+		{
 			name:                       "delegated authorization: caller Authorization header is forwarded but not the cookies",
 			config:                     &datasourceHTTP.Config{},
 			forwardCallerAuthorization: true,
