@@ -45,6 +45,15 @@ Then, if a secret is associated with the datasource, Perses will retrieve the se
 inject the secret in the request.
 Finally, Perses will forward the request to the datasource and return the response to the client.
 
+The credentials used by the client to authenticate against Perses are never forwarded to the datasource:
+
+* the `Cookie` header sent by the client is always removed, as it contains the Perses session (and possibly the tokens
+  of the OIDC/OAuth provider). A `Cookie` header explicitly defined in the datasource configuration is still sent.
+* when the Perses native authorization is enabled, the `Authorization` header sent by the client (which contains the
+  Perses token) is always removed. To authenticate against the datasource, use a Secret or the `oauthPassthrough` option.
+
+These headers cannot be forwarded using `allowHeaders`.
+
 The HTTP proxy spec supports two optional request header policies:
 
 * `allowHeaders`: forward only the listed headers.
