@@ -160,11 +160,12 @@ authorization: <Authorization config> # Optional
 enable_auth: <boolean> | default = false # Optional
 
 # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
-# Note that if it is not provided, it will use a default value.
-# On a production instance, you should set this key.
+# In case authentication is enabled, it is also used to encrypt the access and refresh token used for authentication.
+# Therefore, if auth is enabled, and you did not set this key, Perses will not start and will return an error.
 # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
-# One way to generate a valid key could be the following command (using only visible characters):
+# One way to generate a valid key could be one of the following command (using only visible characters):
 # LC_ALL=C tr -dc '[:graph:]' < /dev/urandom | head -c 32
+# openssl rand -base64 24 | head -c 32
 encryption_key: <secret> # Optional
 
 # The path to the file containing the secret key.
