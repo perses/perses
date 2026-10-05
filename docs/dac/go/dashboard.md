@@ -84,6 +84,17 @@ dashboard.AddDatasource("MySuperDatasourceName", datasourceOptions...)
 
 Add a local datasource to the dashboard. More info at [Datasource](./datasource.md).
 
+### AddAnnotation
+
+```golang
+import "github.com/perses/perses/go-sdk/dashboard"
+import "github.com/perses/perses/go-sdk/annotation"
+
+dashboard.AddAnnotation("Deployments", annotationPlugin(), annotation.Color("#ff0000"))
+```
+
+Add an annotation to the dashboard. More info at [Annotation](./annotation.md).
+
 ### AddVariable
 
 ```golang
