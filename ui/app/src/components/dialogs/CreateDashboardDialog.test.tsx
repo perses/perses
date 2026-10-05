@@ -37,9 +37,15 @@ vi.mock('@perses-dev/components', () => ({
   getResourceDisplayName: (resource: ProjectResource): string => resource.metadata.name,
 }));
 
+// Stable references (as react-query returns), otherwise the validation schema is recreated on each render.
+const { targetDashboards, noDashboards } = vi.hoisted(() => ({
+  targetDashboards: [{ metadata: { project: 'target', name: 'Existing' }, displayName: 'Existing' }],
+  noDashboards: [],
+}));
+
 vi.mock('../../model/search-client', () => ({
   useSearchDashboards: (project?: string): { data: SearchProjectResource[]; isLoading: boolean; isError: boolean } => ({
-    data: project === 'target' ? [{ metadata: { project: 'target', name: 'Existing' }, displayName: 'Existing' }] : [],
+    data: project === 'target' ? targetDashboards : noDashboards,
     isLoading: false,
     isError: false,
   }),
@@ -116,8 +122,18 @@ describe('CreateDashboardDialog', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Add' }).hasAttribute('disabled')).toBe(false));
 
     selectProject('target');
-    fireEvent.blur(screen.getByRole('textbox', { name: /Dashboard Name/ }));
 
     expect(await screen.findByText("Dashboard name 'Existing' already exists in 'target' project!")).not.toBeNull();
+  });
+
+  it('warns that project-level resources are not copied only when another project is selected', () => {
+    renderDuplicateDialog('source');
+    const infoText = /Datasources and variables defined in the 'source' project are not copied/;
+
+    expect(screen.queryByText(infoText)).toBeNull();
+
+    selectProject('target');
+
+    expect(screen.queryByText(infoText)).not.toBeNull();
   });
 });

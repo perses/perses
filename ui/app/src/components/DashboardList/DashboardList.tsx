@@ -88,7 +88,14 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
-  const dashboardCreateAllowedProjects = useDashboardCreateAllowedProjects();
+  const { data: dashboardCreateAllowedProjects, isLoading: isDashboardCreateAllowedProjectsLoading } =
+    useDashboardCreateAllowedProjects();
+  let duplicationDisabledReason: string | undefined;
+  if (isDashboardCreateAllowedProjectsLoading) {
+    duplicationDisabledReason = 'Loading projects...';
+  } else if (dashboardCreateAllowedProjects.length === 0) {
+    duplicationDisabledReason = "Missing 'create' permission in any project for 'Dashboard' kind";
+  }
   const navHistory = useNavHistory();
   const dashboardsRows = useMemo(() => {
     const historyMap = new Map(navHistory.map((h) => [`${h.project}/${h.name}`, h.date]));
@@ -248,7 +255,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         handleEditFolderButtonClick={handleEditFolderButtonClick}
         handleAddFolderButtonClick={handleAddFolderButtonClick}
         handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
-        isDuplicationAllowed={dashboardCreateAllowedProjects.length > 0}
+        duplicationDisabledReason={duplicationDisabledReason}
         isLoading={isLoading}
       />
       {activeDialog.type === 'editDashboard' && (
