@@ -676,6 +676,7 @@ func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
 	h := &httpProxy{
 		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 		path:   "/api/v1/query",
+		guard:  newLoopbackGuard(t),
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
 	req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")
