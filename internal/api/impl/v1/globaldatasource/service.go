@@ -49,7 +49,7 @@ func NewService(cfg config.DatasourceConfig, dao globaldatasource.DAO, sch schem
 		dao:      dao,
 		sch:      sch,
 		authz:    authz,
-		proxyCfg: cfg.HTTPProxy,
+		proxyCfg: cfg.Proxy.HTTP,
 		guard:    guard,
 	}
 }

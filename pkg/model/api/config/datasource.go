@@ -54,9 +54,12 @@ const (
 	DefaultHTTPProxyTimeout = common.Duration(30 * time.Second)
 )
 
-// HTTPProxyConfig contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
+// HTTPProxyConfig contains the configuration specific to the proxy used to forward the requests to the datasources of kind HTTPProxy.
 // Each datasource has its own pool of connections, so every limit below applies per datasource.
 type HTTPProxyConfig struct {
+	// AllowedSchemes is the list of URL schemes an HTTP datasource is allowed to use.
+	// Accepted values are "http" and "https". Default: ["http", "https"].
+	AllowedSchemes []string `json:"allowed_schemes,omitempty" yaml:"allowed_schemes,omitempty"`
 	// MaxConnsPerHost limits the total number of connections (in use and idle) that Perses opens,
 	// for a given datasource, to a given host.
 	// Once the limit is reached, the new requests wait until a connection is available,
@@ -85,26 +88,31 @@ type HTTPProxyConfig struct {
 }
 
 func (c *HTTPProxyConfig) Verify() error {
+	for _, scheme := range c.AllowedSchemes {
+		if s := strings.ToLower(scheme); s != "http" && s != "https" {
+			return fmt.Errorf("datasource.proxy.http.allowed_schemes: %q is not supported, only 'http' and 'https' are accepted", scheme)
+		}
+	}
 	if c.MaxConnsPerHost < 0 {
-		return fmt.Errorf("datasource.http_proxy.max_conns_per_host cannot be negative")
+		return fmt.Errorf("datasource.proxy.http.max_conns_per_host cannot be negative")
 	}
 	if c.MaxIdleConns < 0 {
-		return fmt.Errorf("datasource.http_proxy.max_idle_conns cannot be negative")
+		return fmt.Errorf("datasource.proxy.http.max_idle_conns cannot be negative")
 	}
 	if c.MaxIdleConns == 0 {
 		c.MaxIdleConns = DefaultHTTPProxyMaxIdleConns
 	}
 	if c.MaxIdleConnsPerHost < 0 {
-		return fmt.Errorf("datasource.http_proxy.max_idle_conns_per_host cannot be negative")
+		return fmt.Errorf("datasource.proxy.http.max_idle_conns_per_host cannot be negative")
 	}
 	if c.MaxIdleConnsPerHost == 0 {
 		c.MaxIdleConnsPerHost = DefaultHTTPProxyMaxIdleConnsPerHost
 	}
 	if c.DefaultTimeout < 0 {
-		return fmt.Errorf("datasource.http_proxy.default_timeout cannot be negative")
+		return fmt.Errorf("datasource.proxy.http.default_timeout cannot be negative")
 	}
 	if c.MaxTimeout < 0 {
-		return fmt.Errorf("datasource.http_proxy.max_timeout cannot be negative")
+		return fmt.Errorf("datasource.proxy.http.max_timeout cannot be negative")
 	}
 	if c.DefaultTimeout == 0 {
 		// When only max_timeout is set, it can be lower than the default value.
@@ -118,7 +126,7 @@ func (c *HTTPProxyConfig) Verify() error {
 		c.MaxTimeout = c.DefaultTimeout
 	}
 	if c.DefaultTimeout > c.MaxTimeout {
-		return fmt.Errorf("datasource.http_proxy.default_timeout (%s) cannot be greater than datasource.http_proxy.max_timeout (%s)", c.DefaultTimeout, c.MaxTimeout)
+		return fmt.Errorf("datasource.proxy.http.default_timeout (%s) cannot be greater than datasource.proxy.http.max_timeout (%s)", c.DefaultTimeout, c.MaxTimeout)
 	}
 	return nil
 }
@@ -176,7 +184,9 @@ func (c *HTTPProxyConfig) maxTimeout() time.Duration {
 	return time.Duration(c.MaxTimeout)
 }
 
-// DatasourceProxyConfig restricts the destinations the datasource proxy is allowed to reach.
+// DatasourceProxyConfig contains the configuration of the datasource proxy.
+//
+// The root fields restrict the destinations the proxy is allowed to reach, and apply to every kind of proxy (HTTP and SQL).
 // Without restriction, anyone allowed to create a datasource (or to use the unsaved proxy endpoints) could use Perses
 // to reach any service accessible from the Perses server (Server-Side Request Forgery): the Perses API itself through
 // the loopback interface, the cloud metadata endpoints, the Kubernetes API, etc.
@@ -185,10 +195,9 @@ func (c *HTTPProxyConfig) maxTimeout() time.Duration {
 // AllowedNetworks: loopback (127.0.0.0/8, ::1), "this" network (0.0.0.0/8), link-local (169.254.0.0/16, fe80::/10),
 // which includes most cloud metadata endpoints, the other known cloud metadata endpoints (100.100.100.200, fd00:ec2::254),
 // multicast, reserved and deprecated ranges, and the Kubernetes API service IP when Perses is running in a Kubernetes cluster.
+//
+// The configuration specific to a kind of proxy lives in a dedicated struct (e.g. HTTP).
 type DatasourceProxyConfig struct {
-	// AllowedSchemes is the list of URL schemes an HTTP datasource is allowed to use.
-	// Accepted values are "http" and "https". Default: ["http", "https"].
-	AllowedSchemes []string `json:"allowed_schemes,omitempty" yaml:"allowed_schemes,omitempty"`
 	// AllowedHosts, when not empty, is the exhaustive list of hosts the proxy can reach.
 	// An entry is either an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain
 	// (e.g. "*.example.com") or an IP address. The port must not be provided.
@@ -202,14 +211,12 @@ type DatasourceProxyConfig struct {
 	// DenyPrivateNetworks when true denies the private networks as well:
 	// 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, fc00::/7 and fec0::/10.
 	DenyPrivateNetworks bool `json:"deny_private_networks" yaml:"deny_private_networks"`
+	// HTTP contains the configuration specific to the proxy of the datasources of kind HTTPProxy.
+	// +optional
+	HTTP HTTPProxyConfig `json:"http,omitzero" yaml:"http,omitempty"`
 }
 
 func (c *DatasourceProxyConfig) Verify() error {
-	for _, scheme := range c.AllowedSchemes {
-		if s := strings.ToLower(scheme); s != "http" && s != "https" {
-			return fmt.Errorf("datasource.proxy.allowed_schemes: %q is not supported, only 'http' and 'https' are accepted", scheme)
-		}
-	}
 	for _, host := range c.AllowedHosts {
 		if _, err := NormalizeHostPattern(host); err != nil {
 			return fmt.Errorf("datasource.proxy.allowed_hosts: %w", err)
@@ -281,9 +288,7 @@ type DatasourceConfig struct {
 	// DisableLocal when used is preventing the possibility to add a datasource directly in the dashboard spec.
 	// It will also disable the associated proxy.
 	DisableLocal bool `json:"disable_local" yaml:"disable_local"`
-	// HTTPProxy contains the configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
-	// +optional
-	HTTPProxy HTTPProxyConfig `json:"http_proxy,omitzero" yaml:"http_proxy,omitempty"`
-	// Proxy restricts the destinations the datasource proxy is allowed to reach.
+	// Proxy contains the configuration of the datasource proxy: the destinations it is allowed to reach (whatever the kind of proxy),
+	// and the configuration specific to each kind of proxy.
 	Proxy DatasourceProxyConfig `json:"proxy" yaml:"proxy"`
 }

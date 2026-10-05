@@ -302,7 +302,7 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			tokenRefresher:             e.tokenRefresher,
 			transports:                 e.transports,
 			transportKey:               transportKey,
-			proxyConfig:                e.cfg.HTTPProxy,
+			proxyConfig:                e.cfg.Proxy.HTTP,
 			forwardCallerAuthorization: e.forwardCallerAuthorization(),
 		}, nil
 	case datasourceSQL.ProxyKindName:
@@ -338,7 +338,7 @@ type httpProxy struct {
 	transports *transportCache
 	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
 	transportKey string
-	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.http_proxy).
+	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.proxy.http).
 	// Unset values fall back to their defaults.
 	proxyConfig config.HTTPProxyConfig
 	// forwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
@@ -663,7 +663,7 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		h.logWithDefaultEntry().WithError(err).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
-	// The datasource can only lower the timeout set by the server (datasource.http_proxy.default_timeout and max_timeout).
+	// The datasource can only lower the timeout set by the server (datasource.proxy.http.default_timeout and max_timeout).
 	// The timeout is clamped here again, even though it is validated when the datasource is saved,
 	// because the maximum can have been lowered since then, and because unsaved datasources are not validated.
 	connectTimeout := h.proxyConfig.EffectiveTimeout(h.config.Timeout)
@@ -685,10 +685,10 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 	// The transport is reused across requests (see transportCache), and there is one transport per datasource.
 	// A dashboard usually sends many queries in parallel to the same datasource,
 	// so keep more idle connections than the Go default (2 per host) to actually reuse them.
-	// Configured with datasource.http_proxy.max_idle_conns and datasource.http_proxy.max_idle_conns_per_host.
+	// Configured with datasource.proxy.http.max_idle_conns and datasource.proxy.http.max_idle_conns_per_host.
 	transport.MaxIdleConns = h.proxyConfig.MaxIdleConns
 	transport.MaxIdleConnsPerHost = h.proxyConfig.MaxIdleConnsPerHost
-	// Limit the connections opened to the datasource (configured with datasource.http_proxy.max_conns_per_host).
+	// Limit the connections opened to the datasource (configured with datasource.proxy.http.max_conns_per_host).
 	// Once reached, requests wait for a connection to be available. Zero means no limit.
 	transport.MaxConnsPerHost = h.proxyConfig.MaxConnsPerHost
 	return transport, nil

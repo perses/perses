@@ -403,7 +403,7 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 	}
 }
 
-// TestEndpoint_newProxy_connectionLimits ensures the limits set in the config (datasource.http_proxy)
+// TestEndpoint_newProxy_connectionLimits ensures the limits set in the config (datasource.proxy.http)
 // are applied to the transport of the HTTP proxy, and that the unset ones fall back to their defaults.
 func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 	spec := datasourceSpec.Spec{
@@ -441,7 +441,7 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 			proxyConfig := test.proxyConfig
 			require.NoError(t, proxyConfig.Verify())
 			e := &endpoint{
-				cfg:        config.DatasourceConfig{HTTPProxy: proxyConfig},
+				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
 				transports: newTransportCache(),
 				guard:      newLoopbackGuard(t),
 			}
@@ -459,7 +459,7 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 }
 
 // TestEndpoint_newProxy_timeout ensures the connection timeout of the HTTP proxy is the one defined by the datasource,
-// bounded by the server configuration (datasource.http_proxy.default_timeout and max_timeout).
+// bounded by the server configuration (datasource.proxy.http.default_timeout and max_timeout).
 func TestEndpoint_newProxy_timeout(t *testing.T) {
 	newSpec := func(timeout string) datasourceSpec.Spec {
 		proxySpec := map[string]any{"url": "http://localhost:9090"}
@@ -495,7 +495,7 @@ func TestEndpoint_newProxy_timeout(t *testing.T) {
 			proxyConfig := test.proxyConfig
 			require.NoError(t, proxyConfig.Verify())
 			e := &endpoint{
-				cfg:        config.DatasourceConfig{HTTPProxy: proxyConfig},
+				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
 				transports: newTransportCache(),
 				guard:      newLoopbackGuard(t),
 			}

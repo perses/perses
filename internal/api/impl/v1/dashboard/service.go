@@ -63,7 +63,7 @@ func NewService(cfg config.Config, dao dashboard.DAO, globalVarDAO globalvariabl
 		isDatasourceDisable: cfg.Datasource.DisableLocal,
 		isVariableDisable:   cfg.Variable.DisableLocal,
 		customRules:         cfg.Dashboard.CustomLintRules,
-		proxyCfg:            cfg.Datasource.HTTPProxy,
+		proxyCfg:            cfg.Datasource.Proxy.HTTP,
 		index:               indexClient,
 		guard:               guard,
 	}

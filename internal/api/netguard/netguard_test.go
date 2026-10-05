@@ -116,7 +116,7 @@ func TestCheckIP_KubernetesAPIDenied(t *testing.T) {
 
 func TestValidateURL(t *testing.T) {
 	loopbackCfg := config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}}
-	httpsOnlyCfg := config.DatasourceProxyConfig{AllowedSchemes: []string{"HTTPS"}}
+	httpsOnlyCfg := config.DatasourceProxyConfig{HTTP: config.HTTPProxyConfig{AllowedSchemes: []string{"HTTPS"}}}
 	allowedHostsCfg := config.DatasourceProxyConfig{AllowedHosts: []string{"prometheus.example.com", "*.monitoring.svc", "10.0.0.1"}}
 	testSuite := []struct {
 		title   string
@@ -350,7 +350,7 @@ func TestCanonicalAddr(t *testing.T) {
 
 func TestNew_InvalidConfig(t *testing.T) {
 	for _, cfg := range []config.DatasourceProxyConfig{
-		{AllowedSchemes: []string{"file"}},
+		{HTTP: config.HTTPProxyConfig{AllowedSchemes: []string{"file"}}},
 		{AllowedHosts: []string{"http://prometheus"}},
 		{AllowedNetworks: []string{"not-a-network"}},
 		{DeniedNetworks: []string{"10.0.0.0/33"}},

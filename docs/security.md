@@ -41,8 +41,8 @@ properties of this design deserve attention:
 - **Connection timeout of HTTP proxy datasources.** A datasource using the
   HTTP proxy can define the timeout used to connect to its URL, but it can only
   lower the timeout set by the server: it is bounded by
-  `datasource.http_proxy.max_timeout`, which defaults to
-  `datasource.http_proxy.default_timeout` (30s). A long timeout keeps
+  `datasource.proxy.http.max_timeout`, which defaults to
+  `datasource.proxy.http.default_timeout` (30s). A long timeout keeps
   goroutines and sockets busy against unreachable hosts, so only increase
   `max_timeout` if you need to, and keep it as low as possible. These settings
   don't apply to SQL proxy datasources.

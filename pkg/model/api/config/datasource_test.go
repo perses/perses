@@ -33,12 +33,12 @@ func TestHTTPProxyConfig_Verify_rejectsNegativeTimeouts(t *testing.T) {
 		{
 			title:      "negative default_timeout",
 			cfg:        HTTPProxyConfig{DefaultTimeout: common.Duration(-time.Second)},
-			errMessage: "datasource.http_proxy.default_timeout cannot be negative",
+			errMessage: "datasource.proxy.http.default_timeout cannot be negative",
 		},
 		{
 			title:      "negative max_timeout",
 			cfg:        HTTPProxyConfig{MaxTimeout: common.Duration(-time.Second)},
-			errMessage: "datasource.http_proxy.max_timeout cannot be negative",
+			errMessage: "datasource.proxy.http.max_timeout cannot be negative",
 		},
 	}
 	for _, test := range testSuite {
@@ -204,8 +204,6 @@ func TestUnmarshalYAMLDatasourceProxyConfig(t *testing.T) {
 		SetConfigData([]byte(`
 datasource:
   proxy:
-    allowed_schemes:
-      - https
     allowed_hosts:
       - "*.monitoring.svc"
     allowed_networks:
@@ -213,15 +211,25 @@ datasource:
     denied_networks:
       - "10.96.0.0/12"
     deny_private_networks: true
+    http:
+      allowed_schemes:
+        - https
+      max_timeout: 1m
 `)).
 		Resolve(&c).
 		Verify())
 	assert.Equal(t, DatasourceProxyConfig{
-		AllowedSchemes:      []string{"https"},
 		AllowedHosts:        []string{"*.monitoring.svc"},
 		AllowedNetworks:     []string{"127.0.0.1/32"},
 		DeniedNetworks:      []string{"10.96.0.0/12"},
 		DenyPrivateNetworks: true,
+		HTTP: HTTPProxyConfig{
+			AllowedSchemes:      []string{"https"},
+			MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+			MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+			DefaultTimeout:      DefaultHTTPProxyTimeout,
+			MaxTimeout:          common.Duration(time.Minute),
+		},
 	}, c.Datasource.Proxy)
 }
 
@@ -233,12 +241,10 @@ func TestDatasourceProxyConfigVerify(t *testing.T) {
 	}{
 		{title: "empty config", cfg: DatasourceProxyConfig{}},
 		{title: "valid config", cfg: DatasourceProxyConfig{
-			AllowedSchemes:  []string{"http", "HTTPS"},
 			AllowedHosts:    []string{"prometheus.example.com", "*.svc"},
 			AllowedNetworks: []string{"127.0.0.1", "::1/128"},
 			DeniedNetworks:  []string{"10.0.0.0/8"},
 		}},
-		{title: "unsupported scheme", cfg: DatasourceProxyConfig{AllowedSchemes: []string{"file"}}, isErr: true},
 		{title: "invalid host", cfg: DatasourceProxyConfig{AllowedHosts: []string{"https://prometheus"}}, isErr: true},
 		{title: "invalid allowed network", cfg: DatasourceProxyConfig{AllowedNetworks: []string{"localhost"}}, isErr: true},
 		{title: "invalid denied network", cfg: DatasourceProxyConfig{DeniedNetworks: []string{"300.0.0.0/8"}}, isErr: true},
@@ -253,4 +259,11 @@ func TestDatasourceProxyConfigVerify(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHTTPProxyConfig_Verify_allowedSchemes(t *testing.T) {
+	valid := HTTPProxyConfig{AllowedSchemes: []string{"http", "HTTPS"}}
+	assert.NoError(t, valid.Verify())
+	invalid := HTTPProxyConfig{AllowedSchemes: []string{"file"}}
+	assert.EqualError(t, invalid.Verify(), `datasource.proxy.http.allowed_schemes: "file" is not supported, only 'http' and 'https' are accepted`)
 }

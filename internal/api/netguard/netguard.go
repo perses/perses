@@ -138,9 +138,9 @@ func New(cfg config.DatasourceProxyConfig) (*Guard, error) {
 		deniedNetworks: slices.Clone(builtinDeniedNetworks),
 		resolver:       net.DefaultResolver,
 	}
-	if len(cfg.AllowedSchemes) > 0 {
-		g.allowedSchemes = make([]string, 0, len(cfg.AllowedSchemes))
-		for _, scheme := range cfg.AllowedSchemes {
+	if len(cfg.HTTP.AllowedSchemes) > 0 {
+		g.allowedSchemes = make([]string, 0, len(cfg.HTTP.AllowedSchemes))
+		for _, scheme := range cfg.HTTP.AllowedSchemes {
 			s := strings.ToLower(scheme)
 			if s != schemeHTTP && s != schemeHTTPS {
 				return nil, fmt.Errorf("scheme %q is not supported, only 'http' and 'https' are accepted", scheme)

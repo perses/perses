@@ -39,7 +39,7 @@ func New(cfg config.DatasourceConfig, sch schema.Schema, dashboard dashboard.Ser
 	return &endpoint{
 		sch:       sch,
 		dashboard: dashboard,
-		proxyCfg:  cfg.HTTPProxy,
+		proxyCfg:  cfg.Proxy.HTTP,
 	}
 }
 

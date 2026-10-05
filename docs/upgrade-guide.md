@@ -73,6 +73,22 @@ The same applies to the OAuth token URL of the secrets used by the datasources.
 You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
 hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.
 
+Note for the users of `v0.55.0-beta.4`: the configuration of the HTTP proxy introduced in this beta (`datasource.http_proxy`)
+has moved to `datasource.proxy.http`, so the whole configuration of the datasource proxy lives in a single section.
+
+```yaml
+# Before (v0.55.0-beta.4)
+datasource:
+  http_proxy:
+    max_timeout: 30s
+
+# After
+datasource:
+  proxy:
+    http:
+      max_timeout: 30s
+```
+
 
 ### Upgrading from v0.53.0 to v0.54.0
 

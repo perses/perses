@@ -360,11 +360,13 @@ security:
 					Interval: common.Duration(defaultInterval),
 				},
 				Datasource: DatasourceConfig{
-					HTTPProxy: HTTPProxyConfig{
-						MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
-						MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
-						DefaultTimeout:      DefaultHTTPProxyTimeout,
-						MaxTimeout:          DefaultHTTPProxyTimeout,
+					Proxy: DatasourceProxyConfig{
+						HTTP: HTTPProxyConfig{
+							MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+							MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+							DefaultTimeout:      DefaultHTTPProxyTimeout,
+							MaxTimeout:          DefaultHTTPProxyTimeout,
+						},
 					},
 				},
 				Search: Search{

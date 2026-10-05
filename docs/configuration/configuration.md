@@ -700,49 +700,10 @@ project:
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
 
-# Configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
-http_proxy: <HTTPProxy config> # Optional
-
-# Restrict the destinations the datasource proxy is allowed to reach.
+# Configuration of the datasource proxy: the destinations it is allowed to reach, and the configuration specific to each kind of proxy.
 proxy: <DatasourceProxy config> # Optional
 ```
 
-#### HTTPProxy config
-
-Each datasource has its own pool of connections, so every limit below applies per datasource.
-Keeping connections open saves the TCP and TLS handshakes of the next requests, but each idle connection holds a socket and some memory.
-When running Perses with a large number of datasources, you may want to lower the idle connection limits.
-
-```yaml
-# Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
-# Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
-# It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
-# Zero means no limit.
-max_conns_per_host: <int> | default = 0 # Optional
-
-# Limits the number of idle connections kept open, for a given datasource, across all hosts.
-max_idle_conns: <int> | default = 100 # Optional
-
-# Limits the number of idle connections kept open, for a given datasource, to a given host.
-# A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
-max_idle_conns_per_host: <int> | default = 10 # Optional
-
-# The maximum amount of time allowed to establish a connection to a datasource,
-# when the datasource doesn't define its own timeout (or sets it to 0).
-# When not set, it is 30s, or max_timeout if max_timeout is set to a lower value.
-default_timeout: <duration> | default = 30s # Optional
-
-# The highest timeout a datasource can define in its spec (see the `timeout` field of the HTTPProxy spec).
-# A datasource can only lower the timeout: the effective timeout is min(datasource timeout, max_timeout).
-# A datasource defining a timeout greater than max_timeout is rejected when it is saved,
-# and its timeout is clamped to max_timeout when it is used (for example, if max_timeout has been lowered since then).
-# Note: after lowering max_timeout, the datasources that define a greater timeout keep working (with the clamped timeout),
-# but any update of these datasources is rejected until their timeout is lowered or removed.
-# Be careful when increasing it: a long timeout keeps goroutines and sockets busy against unreachable hosts,
-# which can be abused to exhaust the resources of the Perses server.
-# It must be greater than or equal to default_timeout.
-max_timeout: <duration> | default = default_timeout # Optional
-```
 
 #### DatasourceProxy config
 
@@ -773,11 +734,10 @@ Unix sockets are never allowed for the SQL datasources.
 Private networks are allowed by default, as this is where the datasources usually are. Use `deny_private_networks`,
 `denied_networks` or `allowed_hosts` to restrict them.
 
-```yaml
-# The list of URL schemes an HTTP datasource is allowed to use. Only "http" and "https" are supported.
-allowed_schemes: # Optional. Default: ["http", "https"]
-  - <string>
+The fields at the root of this section apply to every kind of proxy (HTTP and SQL). The configuration specific to a kind
+of proxy lives in a dedicated section (e.g. `http`).
 
+```yaml
 # When not empty, it is the exhaustive list of hosts the proxy can reach.
 # An entry is an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain (e.g. "*.monitoring.svc")
 # or an IP address. The port must not be provided.
@@ -798,6 +758,9 @@ denied_networks: # Optional
 # When true, the private networks are denied as well:
 # 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, fc00::/7 and fec0::/10.
 deny_private_networks: <boolean> | default = false # Optional
+
+# Configuration specific to the proxy of the datasources of kind HTTPProxy.
+http: <HTTPProxy config> # Optional
 ```
 
 When Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), the connection is
@@ -814,6 +777,50 @@ datasource:
     allowed_hosts:
       - "*.monitoring.svc"
       - "*.monitoring.svc.cluster.local"
+    http:
+      allowed_schemes:
+        - https
+```
+
+#### HTTPProxy config
+
+Each datasource has its own pool of connections, so every limit below applies per datasource.
+Keeping connections open saves the TCP and TLS handshakes of the next requests, but each idle connection holds a socket and some memory.
+When running Perses with a large number of datasources, you may want to lower the idle connection limits.
+
+```yaml
+# The list of URL schemes an HTTP datasource is allowed to use. Only "http" and "https" are supported.
+allowed_schemes: # Optional. Default: ["http", "https"]
+  - <string>
+
+# Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
+# Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
+# It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.
+# Zero means no limit.
+max_conns_per_host: <int> | default = 0 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, across all hosts.
+max_idle_conns: <int> | default = 100 # Optional
+
+# Limits the number of idle connections kept open, for a given datasource, to a given host.
+# A datasource usually talks to a single host, so it is in practice the number of idle connections kept per datasource.
+max_idle_conns_per_host: <int> | default = 10 # Optional
+
+# The maximum amount of time allowed to establish a connection to a datasource,
+# when the datasource doesn't define its own timeout (or sets it to 0).
+# When not set, it is 30s, or max_timeout if max_timeout is set to a lower value.
+default_timeout: <duration> | default = 30s # Optional
+
+# The highest timeout a datasource can define in its spec (see the `timeout` field of the HTTPProxy spec).
+# A datasource can only lower the timeout: the effective timeout is min(datasource timeout, max_timeout).
+# A datasource defining a timeout greater than max_timeout is rejected when it is saved,
+# and its timeout is clamped to max_timeout when it is used (for example, if max_timeout has been lowered since then).
+# Note: after lowering max_timeout, the datasources that define a greater timeout keep working (with the clamped timeout),
+# but any update of these datasources is rejected until their timeout is lowered or removed.
+# Be careful when increasing it: a long timeout keeps goroutines and sockets busy against unreachable hosts,
+# which can be abused to exhaust the resources of the Perses server.
+# It must be greater than or equal to default_timeout.
+max_timeout: <duration> | default = default_timeout # Optional
 ```
 
 #### GlobalDatasourceDiscovery config

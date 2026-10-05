@@ -53,7 +53,7 @@ func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO glob
 		projectVarDAO: projectVarDAO,
 		sch:           sch,
 		authz:         authz,
-		proxyCfg:      cfg.Datasource.HTTPProxy,
+		proxyCfg:      cfg.Datasource.Proxy.HTTP,
 	}
 }
 
