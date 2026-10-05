@@ -88,6 +88,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
+  // TODO: a temporary copy creates an 'EphemeralDashboard', which has its own 'create' permission.
+  // The projects are currently filtered on the 'Dashboard' permission only; the backend still enforces RBAC.
   const { data: dashboardCreateAllowedProjects, isLoading: isDashboardCreateAllowedProjectsLoading } =
     useDashboardCreateAllowedProjects();
   let duplicationDisabledReason: string | undefined;
