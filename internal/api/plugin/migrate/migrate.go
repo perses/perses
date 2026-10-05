@@ -294,7 +294,9 @@ func (m *completeMigration) Migrate(grafanaDashboard *SimplifiedDashboard, useDe
 			Display: &common.Display{
 				Name: grafanaDashboard.Title,
 			},
-			Duration: "1h",
+			Duration:        migrateDuration(grafanaDashboard.Time),
+			RefreshInterval: migrateRefreshInterval(string(grafanaDashboard.Refresh)),
+			Timezone:        migrateTimezone(string(grafanaDashboard.Timezone)),
 		},
 	}
 

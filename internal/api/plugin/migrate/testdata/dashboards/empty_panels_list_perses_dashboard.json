@@ -11,7 +11,7 @@
     "display": {
       "name": "test dashboard"
     },
-    "duration": "1h",
+    "duration": "6h",
     "layouts": [],
     "panels": {}
   }

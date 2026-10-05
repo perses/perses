@@ -24,6 +24,8 @@ import (
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/spec/go/common"
 	"github.com/perses/spec/go/dashboard"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -159,6 +161,60 @@ func TestMig_MigrateTags(t *testing.T) {
 	persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
 	assert.NoError(t, err)
 	assert.Equal(t, set.New("ops", "prod"), persesDashboard.Metadata.Tags)
+}
+
+func TestMig_MigrateTimeSettings(t *testing.T) {
+	testSuite := []struct {
+		title                   string
+		grafanaDashboard        string
+		expectedDuration        common.DurationString
+		expectedRefreshInterval common.DurationString
+		expectedTimezone        string
+	}{
+		{
+			title:            "dashboard without time settings",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings"}`,
+			expectedDuration: "6h",
+		},
+		{
+			title:                   "time range, refresh interval and timezone are kept",
+			grafanaDashboard:        `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-24h", "to": "now"}, "refresh": "1m", "timezone": "utc"}`,
+			expectedDuration:        "24h",
+			expectedRefreshInterval: "1m",
+			expectedTimezone:        "UTC",
+		},
+		{
+			title:            "years are converted into days and auto-refresh off is kept off",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-1y", "to": "now"}, "refresh": false, "timezone": "Europe/Paris"}`,
+			expectedDuration: "365d",
+			expectedTimezone: "Europe/Paris",
+		},
+		{
+			title:            "time settings that can't be migrated are replaced by the defaults",
+			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-1d/d", "to": "now-1d/d"}, "refresh": "auto", "timezone": "browser"}`,
+			expectedDuration: "1h",
+		},
+	}
+
+	pl := loadDefaultTestPlugins()
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			grafanaDashboard := &migrate.SimplifiedDashboard{}
+			if unmarshallErr := json.Unmarshal([]byte(test.grafanaDashboard), grafanaDashboard); unmarshallErr != nil {
+				t.Fatal(unmarshallErr)
+			}
+			persesDashboard, err := pl.Migration().Migrate(grafanaDashboard, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Equal(t, test.expectedDuration, persesDashboard.Spec.Duration)
+			assert.Equal(t, test.expectedRefreshInterval, persesDashboard.Spec.RefreshInterval)
+			assert.Equal(t, test.expectedTimezone, persesDashboard.Spec.Timezone)
+			// Decoding the migrated dashboard runs the validation of a Perses dashboard.
+			assert.NoError(t, json.Unmarshal(testUtils.JSONMarshalStrict(persesDashboard), &v1.Dashboard{}))
+		})
+	}
 }
 
 func TestMigrateDashboardLinks(t *testing.T) {
