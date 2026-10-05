@@ -45,6 +45,31 @@ Then, if a secret is associated with the datasource, Perses will retrieve the se
 inject the secret in the request.
 Finally, Perses will forward the request to the datasource and return the response to the client.
 
+Before forwarding the request, Perses removes the credentials the client used to authenticate against Perses:
+
+* the `Cookie` header sent by the client is always removed, as it contains the Perses session (and possibly the tokens
+  of the OIDC/OAuth provider). A `Cookie` header explicitly defined in the datasource configuration is sent instead,
+  unless it is removed by the header policy (`allowHeaders` / `dropHeaders`), as the policy is applied after the
+  configured headers are set.
+* when the Perses native authorization is enabled, the `Authorization` header sent by the client (which contains the
+  Perses token) is always removed. To authenticate against the datasource, use a Secret or the `oauthPassthrough` option.
+
+The client's `Cookie` header (and, with the native authorization, the client's `Authorization` header) cannot be
+forwarded using `allowHeaders`.
+
+There are exceptions for the `Authorization` header sent by the client:
+
+* when the authorization is delegated (i.e. Kubernetes), it is **forwarded to the datasource**, even though it is the
+  bearer token used to authenticate the request against Perses. Deployments relying on it to query the datasource
+  keep working. To prevent this, add `Authorization` to `dropHeaders`, or don't add it to `allowHeaders`.
+* when the authentication is disabled, it is not a Perses credential and is forwarded as is.
+
+In every case, the `Authorization` header is overwritten when the datasource uses the `oauthPassthrough` option, or a
+Secret defining `basicAuth`, `authorization` or `oauth`.
+
+An `Authorization` header defined in the `headers` of the datasource configuration is always ignored, whatever its case
+(e.g. `authorization`). Use a Secret to store the credentials of the datasource.
+
 The HTTP proxy spec supports two optional request header policies:
 
 * `allowHeaders`: forward only the listed headers.

@@ -203,6 +203,20 @@ func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope r
 	return nil
 }
 
+// forwardCallerAuthorization returns true if the Authorization header sent by the caller can be forwarded to the datasource.
+// When the native authorization is enabled, the Authorization header contains the Perses session token of the caller
+// (directly set by the client or built from the session cookies). It must never reach the datasource,
+// otherwise anyone controlling or observing the datasource would be able to impersonate the caller.
+// When the authorization is delegated (i.e. Kubernetes), the header contains the token provided by the external
+// authentication layer, and it is kept as is to not break deployments relying on it to query the datasource.
+// When the authentication is disabled, the header is not a Perses credential and is kept as is.
+func (e *endpoint) forwardCallerAuthorization() bool {
+	if e.authz == nil {
+		return false
+	}
+	return !e.authz.IsEnabled() || !e.authz.IsNativeAuthz()
+}
+
 type proxy interface {
 	serve(c echo.Context) error
 }
@@ -261,14 +275,15 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			}
 		}
 		return &httpProxy{
-			config:         httpConfig,
-			datasourceName: datasourceName,
-			path:           path,
-			secret:         scrt,
-			tokenRefresher: e.tokenRefresher,
-			transports:     e.transports,
-			transportKey:   transportKey,
-			proxyConfig:    e.cfg.HTTPProxy,
+			config:                     httpConfig,
+			datasourceName:             datasourceName,
+			path:                       path,
+			secret:                     scrt,
+			tokenRefresher:             e.tokenRefresher,
+			transports:                 e.transports,
+			transportKey:               transportKey,
+			proxyConfig:                e.cfg.HTTPProxy,
+			forwardCallerAuthorization: e.forwardCallerAuthorization(),
 		}, nil
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
@@ -303,6 +318,9 @@ type httpProxy struct {
 	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.http_proxy).
 	// Unset values fall back to their defaults.
 	proxyConfig config.HTTPProxyConfig
+	// forwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
+	// The zero value (false) is the safe default: the header is removed.
+	forwardCallerAuthorization bool
 }
 
 func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
@@ -368,6 +386,17 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
+	// The OAuth passthrough token is stored in the cookies of the caller.
+	// It must be retrieved before the caller's credentials are removed from the request.
+	var oauthPassthroughToken string
+	if h.config.OauthPassthrough {
+		token, err := h.getOAuthPassthroughToken(c)
+		if err != nil {
+			return err
+		}
+		oauthPassthroughToken = token
+	}
+	h.removeCallerCredentials(req.Header)
 	// We have to modify the HOST of the request to match the host of the targetURL
 	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
 	// It has been done to fix an error returned by Openshift itself saying the target doesn't exist.
@@ -384,7 +413,9 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 	// set header according to the configuration
 	if len(h.config.Headers) > 0 {
 		for k, v := range h.config.Headers {
-			if k == echo.HeaderAuthorization {
+			// Header names are case-insensitive, and req.Header.Set canonicalizes them (e.g. "authorization" becomes "Authorization").
+			// The comparison must be case-insensitive as well, otherwise the check could be bypassed.
+			if strings.EqualFold(k, echo.HeaderAuthorization) {
 				// Authorization header cannot be overwritten by the public configuration.
 				// It must be set using the Secret configuration.
 				// It will avoid leaking credentials and user to be able to set them directly in the datasource configuration.
@@ -399,7 +430,21 @@ func (h *httpProxy) prepareRequest(c echo.Context) error {
 		}
 	}
 	h.filterHeaders(req.Header)
-	return h.setupAuthentication(c)
+	return h.setupAuthentication(req, oauthPassthroughToken)
+}
+
+// removeCallerCredentials removes from the request the credentials used by the caller to authenticate against Perses.
+// These credentials must never reach the datasource: anyone controlling or observing the datasource would be able to
+// reuse them to impersonate the caller (e.g. by replaying the refresh token against the Perses API).
+// It must be called before the headers coming from the datasource configuration are set,
+// so a datasource can still explicitly define its own Cookie header.
+func (h *httpProxy) removeCallerCredentials(headers http.Header) {
+	// Cookies sent by the client are scoped to the Perses origin, and so they are never meant for the datasource.
+	// They contain the Perses session (access and refresh tokens) and possibly the tokens of the OIDC/OAuth provider.
+	headers.Del(echo.HeaderCookie)
+	if !h.forwardCallerAuthorization {
+		headers.Del(echo.HeaderAuthorization)
+	}
 }
 
 // filterHeaders applies the policy after configured headers have been set, just before authentication have been added.
@@ -422,16 +467,18 @@ func (h *httpProxy) filterHeaders(headers http.Header) {
 	}
 }
 
-func (h *httpProxy) setupAuthentication(c echo.Context) error {
+// setupAuthentication sets the credentials used to authenticate against the datasource.
+// oauthPassthroughToken is only used when the OAuth passthrough is enabled in the datasource configuration.
+func (h *httpProxy) setupAuthentication(req *http.Request, oauthPassthroughToken string) error {
 	if h.config.OauthPassthrough {
-		return h.setupOAuthPassthrough(c)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oauthPassthroughToken))
+		return nil
 	}
 
 	if h.secret == nil {
 		return nil
 	}
 
-	req := c.Request()
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
 		password, err := basicAuth.GetPassword()
@@ -460,7 +507,8 @@ func (h *httpProxy) setupAuthentication(c echo.Context) error {
 	return nil
 }
 
-func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
+// getOAuthPassthroughToken returns the OIDC/OAuth token of the caller, stored in its cookies.
+func (h *httpProxy) getOAuthPassthroughToken(c echo.Context) (string, error) {
 	oidcCookie, err := c.Cookie(crypto.CookieKeyOIDCToken)
 	if errors.Is(err, http.ErrNoCookie) {
 		// OIDC token cookie is missing. It may have expired while the Perses session
@@ -474,16 +522,13 @@ func (h *httpProxy) setupOAuthPassthrough(c echo.Context) error {
 			}
 		}
 		if errors.Is(err, http.ErrNoCookie) {
-			return apiinterface.HandleBadRequestError(fmt.Sprintf(
+			return "", apiinterface.HandleBadRequestError(fmt.Sprintf(
 				"you are querying datasource %q which is configured to use OAuthPassThrough, but no OAuth token is available in this session; try logging out and logging in again with the correct authentication provider",
 				h.datasourceName,
 			))
 		}
 	}
-
-	req := c.Request()
-	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", oidcCookie.Value))
-	return nil
+	return oidcCookie.Value, nil
 }
 
 // getToken exchanges the client credentials for an access token,

@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
@@ -272,7 +273,6 @@ func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 	defaultHeaders := http.Header{
 		"Accept":            {"application/json", "text/plain"},
 		"Authorization":     {"Bearer datasource-token"},
-		"Cookie":            {"session=client-session"},
 		"Origin":            {"https://configured.example.com"},
 		"Referer":           {"https://perses.example.com/dashboard"},
 		"X-Configured":      {"configured-value"},
@@ -449,7 +449,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 	assert.Equal(t, "secret-token", token.AccessToken)
 }
 
-func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
+func TestHTTPProxy_prepareRequest_OAuthPassThrough(t *testing.T) {
 	testSuite := []struct {
 		name          string
 		config        *datasourceHTTP.Config
@@ -487,10 +487,12 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.name, func(t *testing.T) {
+			test.config.URL = common.MustParseURL("https://datasource.example.com")
 			h := &httpProxy{
 				config: test.config,
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
+			req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")
 			if test.oidcCookie != "" {
 				req.AddCookie(&http.Cookie{ //nolint:gosec
 					Name:  crypto.CookieKeyOIDCToken,
@@ -500,7 +502,7 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := echo.New().NewContext(req, rec)
 
-			err := h.setupAuthentication(c)
+			err := h.prepareRequest(c)
 			if test.expectError {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), test.errorContains)
@@ -511,7 +513,154 @@ func TestHTTPProxy_setupAuthentication_OAuthPassThrough(t *testing.T) {
 				} else {
 					assert.Empty(t, req.Header.Get(echo.HeaderAuthorization))
 				}
+				// The OIDC token must only be forwarded through the Authorization header, never through the cookies.
+				assert.Empty(t, req.Header.Get(echo.HeaderCookie))
 			}
+		})
+	}
+}
+
+// newRequestCookie returns a cookie as sent by a client. The attributes Secure, HttpOnly and SameSite are only
+// meaningful in a response, so they are not set.
+func newRequestCookie(name, value string) *http.Cookie {
+	return &http.Cookie{Name: name, Value: value} //nolint:gosec
+}
+
+// TestHTTPProxy_prepareRequest_removeCallerCredentials ensures the credentials used by the caller to authenticate
+// against Perses (session cookies, Perses token in the Authorization header) are never forwarded to the datasource.
+func TestHTTPProxy_prepareRequest_removeCallerCredentials(t *testing.T) {
+	sessionCookies := []*http.Cookie{
+		newRequestCookie(crypto.CookieKeyJWTPayload, "header.payload"),
+		newRequestCookie(crypto.CookieKeyJWTSignature, "signature"),
+		newRequestCookie(crypto.CookieKeyRefreshToken, "refresh-token"),
+		newRequestCookie(crypto.CookieKeyOIDCToken, "oidc-token"),
+		newRequestCookie(crypto.CookieKeyOIDCRefreshToken, "oidc-refresh-token"),
+		newRequestCookie("other", "other-value"),
+	}
+	for _, test := range []struct {
+		name                       string
+		config                     *datasourceHTTP.Config
+		secret                     *v1.SecretSpec
+		forwardCallerAuthorization bool
+		expectedAuth               string
+		expectedCookie             string
+	}{
+		{
+			name:   "no secret: caller credentials are removed",
+			config: &datasourceHTTP.Config{},
+		},
+		{
+			name:         "secret: caller credentials are replaced by the secret",
+			config:       &datasourceHTTP.Config{},
+			secret:       &v1.SecretSpec{Authorization: secretModel.NewBearerToken("datasource-token")},
+			expectedAuth: "Bearer datasource-token",
+		},
+		{
+			name:   "allow headers cannot forward the caller credentials",
+			config: &datasourceHTTP.Config{AllowHeaders: []string{"Cookie", "Authorization"}},
+		},
+		{
+			name:           "cookie defined in the datasource configuration is kept",
+			config:         &datasourceHTTP.Config{Headers: map[string]string{"Cookie": "datasource=value"}},
+			expectedCookie: "datasource=value",
+		},
+		{
+			name: "authorization header defined in the datasource configuration is ignored, whatever its case",
+			config: &datasourceHTTP.Config{Headers: map[string]string{
+				"Authorization": "Basic leak",
+				"authorization": "Basic leak",
+				"AUTHORIZATION": "Basic leak",
+				"aUtHoRiZaTiOn": "Basic leak",
+			}},
+		},
+		{
+			name: "delegated authorization: authorization header defined in the datasource configuration does not override the caller one",
+			config: &datasourceHTTP.Config{Headers: map[string]string{
+				"authorization": "Basic leak",
+			}},
+			forwardCallerAuthorization: true,
+			expectedAuth:               "Bearer perses-session-token",
+		},
+		{
+			name:                       "delegated authorization: caller Authorization header is forwarded but not the cookies",
+			config:                     &datasourceHTTP.Config{},
+			forwardCallerAuthorization: true,
+			expectedAuth:               "Bearer perses-session-token",
+		},
+		{
+			name:         "oauth passthrough: only the OIDC token is forwarded",
+			config:       &datasourceHTTP.Config{OauthPassthrough: true},
+			expectedAuth: "Bearer oidc-token",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			test.config.URL = common.MustParseURL("https://datasource.example.com")
+			h := &httpProxy{
+				config:                     test.config,
+				secret:                     test.secret,
+				forwardCallerAuthorization: test.forwardCallerAuthorization,
+			}
+			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource", nil)
+			req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")
+			for _, cookie := range sessionCookies {
+				req.AddCookie(cookie)
+			}
+			require.NoError(t, h.prepareRequest(echo.New().NewContext(req, httptest.NewRecorder())))
+			assert.Equal(t, test.expectedAuth, req.Header.Get(echo.HeaderAuthorization))
+			assert.Equal(t, test.expectedCookie, req.Header.Get(echo.HeaderCookie))
+		})
+	}
+}
+
+// TestHTTPProxy_serve_removeCallerCredentials ensures the datasource never receives the caller's Perses credentials.
+func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(r.Header)
+	}))
+	defer server.Close()
+
+	h := &httpProxy{
+		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+		path:   "/api/v1/query",
+	}
+	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")
+	req.AddCookie(newRequestCookie(crypto.CookieKeyJWTPayload, "header.payload"))
+	req.AddCookie(newRequestCookie(crypto.CookieKeyJWTSignature, "signature"))
+	req.AddCookie(newRequestCookie(crypto.CookieKeyRefreshToken, "refresh-token"))
+	rec := httptest.NewRecorder()
+	require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+	require.Equal(t, http.StatusOK, rec.Code)
+	var headers http.Header
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &headers))
+	assert.NotContains(t, headers, echo.HeaderCookie)
+	assert.NotContains(t, headers, echo.HeaderAuthorization)
+}
+
+type fakeAuthorization struct {
+	authorization.Authorization
+	enabled bool
+	native  bool
+}
+
+func (f *fakeAuthorization) IsEnabled() bool     { return f.enabled }
+func (f *fakeAuthorization) IsNativeAuthz() bool { return f.native }
+
+func TestEndpoint_forwardCallerAuthorization(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		authz    authorization.Authorization
+		expected bool
+	}{
+		{name: "no authorization: safe default", authz: nil, expected: false},
+		{name: "native authorization: the header contains the Perses token", authz: &fakeAuthorization{enabled: true, native: true}, expected: false},
+		{name: "delegated authorization", authz: &fakeAuthorization{enabled: true, native: false}, expected: true},
+		{name: "authorization disabled", authz: &fakeAuthorization{enabled: false, native: true}, expected: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			e := &endpoint{authz: test.authz}
+			assert.Equal(t, test.expected, e.forwardCallerAuthorization())
 		})
 	}
 }
