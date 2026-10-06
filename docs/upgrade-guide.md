@@ -70,10 +70,20 @@ datasource:
 ```
 
 The same applies to the OAuth token URL of the secrets used by the datasources. Saving a secret whose OAuth token URL
-is not allowed is refused with a `400 Bad Request` error.
+is not allowed is refused with a `400 Bad Request` error, and the requests to a datasource using such a secret are
+refused with a `403 Forbidden` error. If you restrict the destinations with `allowed_hosts`, this list must also contain
+the host of the OAuth token URL.
 
-When an IP address is part of both an allowed and a denied network, the most specific network wins. For example,
-allowing `10.0.0.0/8` doesn't allow the Kubernetes API service IP: it has to be allowed explicitly.
+When an IP address is part of both an allowed and a denied network, the most specific network wins (on equal prefix
+lengths, the allowed network wins). Allowing a large network therefore doesn't allow a more specific denied network,
+which has to be allowed explicitly. For example:
+
+- allowing `127.0.0.0/8` allows the loopback interface;
+- allowing `10.0.0.0/8` (e.g. with `deny_private_networks: true`) doesn't allow the Kubernetes API service IP;
+- allowing `169.254.0.0/16` doesn't allow the cloud metadata endpoint `169.254.169.254`.
+
+If Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), a datasource can no
+longer target the address of this proxy directly (for example when the proxy is bypassed with `NO_PROXY`).
 
 You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
 hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.

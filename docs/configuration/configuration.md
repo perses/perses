@@ -797,6 +797,91 @@ datasource:
         - https
 ```
 
+Example of a strict configuration when the datasources are authenticated with OAuth (client credentials) through a
+secret. The host of the OAuth token URL defined in the secrets (here `auth.example.com`) must be allowed as well,
+otherwise saving the secret is refused, and the requests to the datasources using it are refused:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      # The datasources
+      - "prometheus.example.com"
+      - "*.thanos.example.com"
+      # The OAuth token URL of the secrets, e.g. https://auth.example.com/oauth2/token
+      - "auth.example.com"
+    http:
+      allowed_schemes:
+        - https
+```
+
+Example denying the private networks, while still allowing the network where the datasources are running.
+As the most specific network wins, the Kubernetes API service IP and the cloud metadata endpoints remain denied even if
+they are part of the allowed network:
+
+```yaml
+datasource:
+  proxy:
+    deny_private_networks: true
+    allowed_networks:
+      - "10.20.0.0/16"
+```
+
+Example allowing the datasources running on the same host as Perses (e.g. `http://localhost:9090`):
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"
+```
+
+Example keeping the proxy opened, i.e. allowing every destination like before the verification was introduced.
+As the most specific network wins, allowing `0.0.0.0/0` and `::/0` is not enough: every built-in denied network has to
+be allowed explicitly, with the same (or a more specific) prefix.
+
+!!! warning
+    This configuration lets anyone allowed to create a datasource (or to use the unsaved proxy endpoints) reach any
+    service accessible from the Perses server, including the cloud metadata endpoints (and so the credentials of the
+    machine) and the Kubernetes API. Only use it if every user able to create a datasource is fully trusted, and never
+    with `security.enable_auth` set to `false`.
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      # loopback and "this" network
+      - "127.0.0.0/8"
+      - "0.0.0.0/8"
+      # link-local
+      - "169.254.0.0/16"
+      - "fe80::/10"
+      # cloud metadata and credentials endpoints
+      - "169.254.169.254/32"
+      - "169.254.170.2/32"
+      - "169.254.170.23/32"
+      - "100.100.100.200/32"
+      - "168.63.129.16/32"
+      - "192.0.0.192/32"
+      - "fd00:ec2::254/128"
+      - "fd00:ec2::23/128"
+      # multicast, reserved and broadcast
+      - "224.0.0.0/4"
+      - "240.0.0.0/4"
+      - "ff00::/8"
+      # unspecified, IPv6 loopback, deprecated IPv4-compatible addresses, Teredo and local-use NAT64
+      - "::/96"
+      - "2001::/32"
+      - "64:ff9b:1::/48"
+      # when Perses is running in a Kubernetes cluster: the IP of the Kubernetes API service (KUBERNETES_SERVICE_HOST)
+      - "10.96.0.1/32"
+```
+
+Even with this configuration, the URLs containing credentials, the schemes other than `http` and `https`, the Unix
+sockets of the SQL datasources, and the direct requests to the HTTP proxy configured through the environment remain
+refused.
+
 #### HTTPProxy config
 
 Each datasource has its own pool of connections, so every limit below applies per datasource.
