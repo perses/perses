@@ -19,11 +19,13 @@
 // the Kubernetes API, etc. As the proxy reflects the response, it would be a full read channel on these services.
 //
 // The Guard provides two levels of verification:
-//   - A static verification of the URL / host (ValidateURL, ValidateSQLHost, ValidateDatasourceSpec), done when a
-//     datasource is saved and before a request is proxied. It provides an early and clear error message.
-//   - A verification at connection time (DialContext, HTTPTransport), done on every IP address the destination resolves
-//     to, including the ones reached through a redirection. This is the actual protection, as it cannot be bypassed with a
-//     DNS name pointing to a forbidden IP address (including DNS rebinding) or with an alternative IP notation.
+//   - A static verification of the URL / host (ValidateURL, ValidateSQLHost, ValidateDatasourceSpec, ValidateOAuth),
+//     done when a datasource (or a secret) is saved and before a request is proxied. It provides an early and clear
+//     error message.
+//   - A verification at connection time (DialContext, DialResolvedContext, HTTPTransport), done on every IP address the
+//     destination resolves to, including the ones reached through a redirection. This is the actual protection, as it
+//     cannot be bypassed with a DNS name pointing to a forbidden IP address (including DNS rebinding) or with an
+//     alternative IP notation.
 package netguard
 
 import (
@@ -38,15 +40,18 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
+	"unicode/utf8"
 
 	"github.com/perses/perses/pkg/model/api/config"
 	datasourcev1 "github.com/perses/perses/pkg/model/api/v1/datasource"
+	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"golang.org/x/net/http/httpproxy"
+	"golang.org/x/net/idna"
 )
 
 const (
@@ -84,19 +89,29 @@ func IsDenied(err error) bool {
 
 var (
 	defaultAllowedSchemes = []string{schemeHTTP, schemeHTTPS}
-	// builtinDeniedNetworks are the networks that are always denied, unless explicitly listed in allowed_networks.
+	// builtinDeniedNetworks are the networks that are always denied, unless an allowed network at least as specific
+	// covers the IP address (see Guard.CheckIP).
 	// No datasource is expected to be there, while they give access to sensitive services.
+	//
+	// The metadata endpoints that are part of a larger denied network are listed individually as well, so they remain
+	// denied when the larger network is allowed (e.g. allowing 169.254.0.0/16 doesn't allow 169.254.169.254).
 	builtinDeniedNetworks = mustParseNetworks(
 		"0.0.0.0/8",          // "this" network. On most systems, 0.0.0.0 reaches the local host.
 		"127.0.0.0/8",        // loopback
-		"169.254.0.0/16",     // link-local, including the metadata endpoint of AWS, GCP, Azure, OpenStack, Oracle, DigitalOcean...
+		"169.254.0.0/16",     // link-local
+		"169.254.169.254/32", // metadata endpoint of AWS, GCP, Azure, OpenStack, Oracle, DigitalOcean...
+		"169.254.170.2/32",   // AWS ECS task metadata and credentials endpoint
+		"169.254.170.23/32",  // AWS EKS Pod Identity credentials endpoint
 		"100.100.100.200/32", // Alibaba Cloud metadata endpoint
+		"168.63.129.16/32",   // Azure WireServer
+		"192.0.0.192/32",     // Oracle Cloud (legacy) metadata endpoint
 		"224.0.0.0/4",        // multicast
 		"240.0.0.0/4",        // reserved, including the broadcast address
 		"::/96",              // unspecified, loopback and deprecated IPv4-compatible addresses
 		"fe80::/10",          // link-local
 		"ff00::/8",           // multicast
 		"fd00:ec2::254/128",  // AWS metadata endpoint (IPv6)
+		"fd00:ec2::23/128",   // AWS EKS Pod Identity credentials endpoint (IPv6)
 		"2001::/32",          // Teredo, embedding an obfuscated IPv4 address
 		"64:ff9b:1::/48",     // local-use NAT64, embedding an IPv4 address at a position depending on the local configuration
 	)
@@ -117,12 +132,10 @@ var (
 	sixToFourNetwork = netip.MustParsePrefix("2002::/16")
 	ipv4Loopback     = netip.MustParseAddr("127.0.0.1")
 	ipv6Loopback     = netip.IPv6Loopback()
-
-	defaultGuard = New(config.DatasourceProxyConfig{})
 )
 
 // Guard verifies that a destination is allowed according to the datasource proxy configuration.
-// A nil *Guard is valid and applies the default policy.
+// Use New to create it: the zero value (and a nil *Guard) is not valid.
 type Guard struct {
 	allowedSchemes  []string
 	allowedHosts    []string
@@ -171,13 +184,6 @@ func mustParseNetworks(networks ...string) []netip.Prefix {
 	return result
 }
 
-func (g *Guard) orDefault() *Guard {
-	if g == nil {
-		return defaultGuard
-	}
-	return g
-}
-
 // ValidateDatasourceSpec statically verifies the destination of the proxy defined in the datasource spec, if any.
 // It doesn't resolve any DNS name; the resolved IP addresses are verified at connection time.
 func (g *Guard) ValidateDatasourceSpec(spec datasourceSpec.Spec) error {
@@ -185,6 +191,12 @@ func (g *Guard) ValidateDatasourceSpec(spec datasourceSpec.Spec) error {
 	if err != nil {
 		return err
 	}
+	return g.ValidateProxyConfig(cfg, kind)
+}
+
+// ValidateProxyConfig is the same as ValidateDatasourceSpec, for a proxy config already extracted from the datasource
+// spec (see datasourcev1.ValidateAndExtract).
+func (g *Guard) ValidateProxyConfig(cfg any, kind string) error {
 	switch kind {
 	case datasourceHTTP.ProxyKindName:
 		httpConfig, ok := cfg.(*datasourceHTTP.Config)
@@ -206,7 +218,6 @@ func (g *Guard) ValidateDatasourceSpec(spec datasourceSpec.Spec) error {
 
 // ValidateURL statically verifies that the URL of an HTTP datasource is allowed.
 func (g *Guard) ValidateURL(u *url.URL) error {
-	g = g.orDefault()
 	if u == nil {
 		return deny("the url is empty")
 	}
@@ -216,13 +227,33 @@ func (g *Guard) ValidateURL(u *url.URL) error {
 	if len(u.Hostname()) == 0 {
 		return deny("the url %q doesn't have any host", u.Redacted())
 	}
+	if u.User != nil {
+		// The credentials must be stored in a secret. Besides, "http://allowed.host@evil.host" is a common way to trick
+		// a reader (or a naive verification) into believing the URL targets another host.
+		return deny("the url %q must not contain credentials (userinfo), use a secret instead", u.Redacted())
+	}
 	return g.validateHost(u.Hostname())
+}
+
+// ValidateOAuth statically verifies that the token URL of the OAuth configuration (of a secret) is allowed.
+// A nil configuration is valid.
+func (g *Guard) ValidateOAuth(oauth *secretModel.OAuth) error {
+	if oauth == nil {
+		return nil
+	}
+	u, err := url.Parse(oauth.TokenURL)
+	if err != nil {
+		return deny("the OAuth token url is invalid")
+	}
+	if validateErr := g.ValidateURL(u); validateErr != nil {
+		return fmt.Errorf("invalid OAuth token url: %w", validateErr)
+	}
+	return nil
 }
 
 // ValidateSQLHost statically verifies that the host (or the comma-separated list of hosts) of a SQL datasource is allowed.
 // A host can contain a port. Unix sockets are not allowed.
 func (g *Guard) ValidateSQLHost(hosts string) error {
-	g = g.orDefault()
 	if len(strings.TrimSpace(hosts)) == 0 {
 		return deny("the host is empty")
 	}
@@ -244,39 +275,81 @@ func (g *Guard) ValidateSQLHost(hosts string) error {
 }
 
 // CheckIP verifies that the IP address is allowed.
+//
+// When the IP address is part of both an allowed and a denied network, the most specific network (the longest prefix)
+// wins; on equal prefix lengths, the allowed network wins. For example, allowing 10.0.0.0/8 doesn't allow the Kubernetes
+// API service IP (denied as a single IP address), while allowing this IP address explicitly does.
+//
+// When the IP address is not part of any allowed or denied network, the IPv4 address it embeds (NAT64, 6to4), if any,
+// is verified the same way.
 func (g *Guard) CheckIP(ip netip.Addr) error {
-	g = g.orDefault()
 	if !ip.IsValid() {
 		return deny("invalid IP address")
 	}
 	ip = ip.WithZone("").Unmap()
-	if g.isInAllowedNetworks(ip) {
+	switch g.verdict(ip) {
+	case verdictAllowed:
 		return nil
-	}
-	if g.isInDeniedNetworks(ip) {
+	case verdictDenied:
 		return deny("the IP address %s is part of a denied network", ip)
+	default:
 	}
-	if embedded, ok := embeddedIPv4(ip); ok {
-		if g.isInAllowedNetworks(embedded) {
-			return nil
-		}
-		if g.isInDeniedNetworks(embedded) {
-			return deny("the IP address %s embeds the IPv4 address %s which is part of a denied network", ip, embedded)
-		}
+	if embedded, ok := embeddedIPv4(ip); ok && g.verdict(embedded) == verdictDenied {
+		return deny("the IP address %s embeds the IPv4 address %s which is part of a denied network", ip, embedded)
 	}
 	return nil
 }
 
-// DialContext establishes a TCP connection after having verified the destination.
-// The verification is done on each IP address the destination resolves to, just before connecting to it.
-// It can be used as a dial function for the SQL drivers.
-func (g *Guard) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	return g.dialContext(ctx, network, address, dialTimeout)
+type verdict int
+
+const (
+	verdictNoMatch verdict = iota
+	verdictAllowed
+	verdictDenied
+)
+
+// verdict returns the decision of the most specific network (allowed or denied) containing the IP address.
+func (g *Guard) verdict(ip netip.Addr) verdict {
+	allowedBits := longestMatch(g.allowedNetworks, ip)
+	deniedBits := longestMatch(g.deniedNetworks, ip)
+	switch {
+	case allowedBits < 0 && deniedBits < 0:
+		return verdictNoMatch
+	case allowedBits >= deniedBits:
+		return verdictAllowed
+	default:
+		return verdictDenied
+	}
 }
 
-// dialContext is the same as DialContext, with a custom timeout to establish the connection.
-func (g *Guard) dialContext(ctx context.Context, network, address string, timeout time.Duration) (net.Conn, error) {
-	g = g.orDefault()
+// DialContext establishes a TCP connection after having verified the destination.
+// The host must be part of the allowed hosts (if configured), and the verification is done on each IP address the
+// destination resolves to, just before connecting to it.
+// It can be used as a dial function for the SQL drivers dialing the hostname (e.g. MySQL).
+func (g *Guard) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
+	return g.dialContext(ctx, network, address, dialTimeout, true)
+}
+
+// LookupHost verifies that the host is allowed (like ValidateSQLHost does) and resolves it.
+// It is meant for the drivers resolving the hostname themselves and dialing the resolved IP addresses (e.g. pgx).
+// Use it with DialResolvedContext.
+func (g *Guard) LookupHost(ctx context.Context, host string) ([]string, error) {
+	if err := g.validateHost(host); err != nil {
+		return nil, err
+	}
+	return g.resolver.LookupHost(ctx, host)
+}
+
+// DialResolvedContext establishes a TCP connection after having verified the IP address of the destination.
+// Unlike DialContext, the host is not verified against the allowed hosts: the address is expected to come from
+// LookupHost (where the hostname has been verified) or from an existing connection (e.g. a cancel request).
+func (g *Guard) DialResolvedContext(ctx context.Context, network, address string) (net.Conn, error) {
+	return g.dialContext(ctx, network, address, dialTimeout, false)
+}
+
+// dialContext establishes a TCP connection after having verified the destination, with a custom timeout.
+// checkHost defines if the host must be verified against the allowed hosts.
+func (g *Guard) dialContext(ctx context.Context, network, address string, timeout time.Duration, checkHost bool) (net.Conn, error) {
 	switch network {
 	case "tcp", "tcp4", "tcp6":
 	default:
@@ -286,7 +359,7 @@ func (g *Guard) dialContext(ctx context.Context, network, address string, timeou
 	if err != nil {
 		return nil, err
 	}
-	if !g.isHostAllowed(normalizeHost(host)) {
+	if checkHost && !g.isHostAllowed(normalizeHost(host)) {
 		return nil, deny("the host %q is not part of the allowed hosts", host)
 	}
 	dialer := &net.Dialer{
@@ -310,38 +383,90 @@ func (g *Guard) dialContext(ctx context.Context, network, address string, timeou
 // The HTTP proxy configured through the environment (HTTP_PROXY, HTTPS_PROXY, NO_PROXY) is honored, and considered
 // as trusted since it's configured by the administrator of the Perses server. As the proxy resolves the final
 // destination, the destination is verified upfront instead.
+// A request reaching the address of the proxy directly (i.e. without going through it) is denied, as the connections
+// to the proxy are not verified.
 //
 // connectTimeout is the maximum amount of time allowed to establish a connection. When zero or negative, a default of 30s is used.
 func (g *Guard) HTTPTransport(tlsConfig *tls.Config, connectTimeout time.Duration) *http.Transport {
-	g = g.orDefault()
 	if connectTimeout <= 0 {
 		connectTimeout = dialTimeout
 	}
-	var proxyAddresses sync.Map
+	proxyEnv := loadEnvProxy()
 	directDialer := &net.Dialer{Timeout: connectTimeout, KeepAlive: dialKeepAlive}
 	return &http.Transport{
 		Proxy: func(req *http.Request) (*url.URL, error) {
-			proxyURL, err := http.ProxyFromEnvironment(req)
-			if err != nil || proxyURL == nil {
-				return proxyURL, err
+			proxyURL, err := proxyEnv.proxyFunc(req.URL)
+			if err != nil {
+				return nil, err
+			}
+			if proxyURL == nil {
+				// Direct connection. The connections to the address of the proxy are not verified (see DialContext below),
+				// so the destination must not be the proxy itself.
+				if proxyEnv.isProxyAddress(canonicalAddr(req.URL)) {
+					return nil, deny("the destination %q is the HTTP proxy of the Perses server", req.URL.Host)
+				}
+				return nil, nil
 			}
 			if checkErr := g.checkProxiedDestination(req.Context(), req.URL); checkErr != nil {
 				return nil, checkErr
 			}
-			proxyAddresses.Store(canonicalAddr(proxyURL), struct{}{})
 			return proxyURL, nil
 		},
 		DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
-			if _, isProxy := proxyAddresses.Load(address); isProxy {
+			// The address of the proxy is only dialed for the requests going through the proxy,
+			// as the direct requests to this address are denied by the Proxy function above.
+			if proxyEnv.isProxyAddress(address) {
 				return directDialer.DialContext(ctx, network, address)
 			}
-			return g.dialContext(ctx, network, address, connectTimeout)
+			return g.dialContext(ctx, network, address, connectTimeout, true)
 		},
 		TLSHandshakeTimeout: 10 * time.Second,
 		IdleConnTimeout:     90 * time.Second,
 		ForceAttemptHTTP2:   true,
 		TLSClientConfig:     tlsConfig,
 	}
+}
+
+// envProxy is the HTTP proxy configuration read from the environment (HTTP_PROXY, HTTPS_PROXY, NO_PROXY).
+type envProxy struct {
+	proxyFunc func(*url.URL) (*url.URL, error)
+	// addresses are the normalized addresses (see normalizeAddr) used to connect to the proxies.
+	addresses map[string]struct{}
+}
+
+func loadEnvProxy() envProxy {
+	cfg := httpproxy.FromEnvironment()
+	addresses := make(map[string]struct{})
+	for _, rawProxy := range []string{cfg.HTTPProxy, cfg.HTTPSProxy} {
+		if proxyURL := parseProxyURL(rawProxy); proxyURL != nil {
+			addresses[normalizeAddr(canonicalAddr(proxyURL))] = struct{}{}
+		}
+	}
+	return envProxy{proxyFunc: cfg.ProxyFunc(), addresses: addresses}
+}
+
+func (e envProxy) isProxyAddress(address string) bool {
+	if len(e.addresses) == 0 {
+		return false
+	}
+	_, ok := e.addresses[normalizeAddr(address)]
+	return ok
+}
+
+// parseProxyURL parses the proxy URL the same way httpproxy does.
+// If the result were to differ, the connections to the proxy would be verified like any other connection (safe side).
+func parseProxyURL(rawProxy string) *url.URL {
+	if len(rawProxy) == 0 {
+		return nil
+	}
+	proxyURL, err := url.Parse(rawProxy)
+	if err != nil || len(proxyURL.Scheme) == 0 || len(proxyURL.Host) == 0 {
+		// Like httpproxy, try again with the http scheme (e.g. "proxy:3128").
+		if proxyURL, err = url.Parse("http://" + rawProxy); err != nil {
+			return nil
+		}
+	}
+	return proxyURL
 }
 
 // checkProxiedDestination verifies a destination that will be reached through an HTTP proxy.
@@ -405,21 +530,19 @@ func (g *Guard) isHostAllowed(host string) bool {
 	return false
 }
 
-func (g *Guard) isInAllowedNetworks(ip netip.Addr) bool {
-	return containsIP(g.allowedNetworks, ip)
-}
-
-func (g *Guard) isInDeniedNetworks(ip netip.Addr) bool {
-	return containsIP(g.deniedNetworks, ip)
+// longestMatch returns the length of the longest prefix containing the IP address, or -1 if none contains it.
+func longestMatch(networks []netip.Prefix, ip netip.Addr) int {
+	longest := -1
+	for _, network := range networks {
+		if network.Bits() > longest && network.Contains(ip) {
+			longest = network.Bits()
+		}
+	}
+	return longest
 }
 
 func containsIP(networks []netip.Prefix, ip netip.Addr) bool {
-	for _, network := range networks {
-		if network.Contains(ip) {
-			return true
-		}
-	}
-	return false
+	return longestMatch(networks, ip) >= 0
 }
 
 // embeddedIPv4 returns the IPv4 address embedded in an IPv6 address that is translated to IPv4 by the network.
@@ -445,7 +568,7 @@ func normalizeHost(host string) string {
 	return host
 }
 
-// canonicalAddr returns the address (host:port) used by the HTTP transport to connect to a proxy.
+// canonicalAddr returns the address (host:port) used by the HTTP transport to connect to the URL (or to the proxy).
 func canonicalAddr(u *url.URL) string {
 	port := u.Port()
 	if len(port) == 0 {
@@ -459,4 +582,29 @@ func canonicalAddr(u *url.URL) string {
 		}
 	}
 	return net.JoinHostPort(u.Hostname(), port)
+}
+
+// normalizeAddr normalizes an address (host:port), so the different notations of the same address are equal
+// (case, trailing dot, internationalized domain name, IP notation).
+func normalizeAddr(address string) string {
+	host, port, err := net.SplitHostPort(address)
+	if err != nil {
+		return strings.ToLower(address)
+	}
+	host = normalizeHost(host)
+	if !isASCII(host) {
+		if asciiHost, idnaErr := idna.Lookup.ToASCII(host); idnaErr == nil {
+			host = asciiHost
+		}
+	}
+	return net.JoinHostPort(host, port)
+}
+
+func isASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] >= utf8.RuneSelf {
+			return false
+		}
+	}
+	return true
 }

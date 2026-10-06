@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -27,7 +28,9 @@ import (
 	"github.com/labstack/echo/v4"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/netguard"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
@@ -76,7 +79,7 @@ func TestNewProxy_deniedDestination(t *testing.T) {
 				t.Fatal("the secret must not be loaded for a denied destination")
 				return nil, nil
 			}
-			_, err := (&endpoint{}).newProxy("unsaved-datasource", "p1", "", spec, "/api/v1/projects", retrieveSecret)
+			_, err := (&endpoint{guard: newDefaultGuard(t)}).newProxy("unsaved-datasource", "p1", "", spec, "/api/v1/projects", retrieveSecret)
 			requireHTTPError(t, err, http.StatusForbidden)
 		})
 	}
@@ -85,7 +88,7 @@ func TestNewProxy_deniedDestination(t *testing.T) {
 func TestNewProxy_allowedDestination(t *testing.T) {
 	var spec datasourceSpec.Spec
 	require.NoError(t, json.Unmarshal([]byte(`{"plugin":{"kind":"PrometheusDatasource","spec":{"proxy":{"kind":"HTTPProxy","spec":{"url":"http://prometheus:9090"}}}}}`), &spec))
-	pr, err := (&endpoint{}).newProxy("prometheus", "p1", "", spec, "api/v1/query", nil)
+	pr, err := (&endpoint{guard: newDefaultGuard(t)}).newProxy("prometheus", "p1", "", spec, "api/v1/query", nil)
 	require.NoError(t, err)
 	h, ok := pr.(*httpProxy)
 	require.True(t, ok)
@@ -115,6 +118,7 @@ func TestHTTPProxy_serve_deniedAtConnectionTime(t *testing.T) {
 		h := &httpProxy{
 			config: &datasourceHTTP.Config{URL: common.MustParseURL(target)},
 			path:   "/api/v1/projects",
+			guard:  newDefaultGuard(t),
 		}
 		req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/unsaved/projects/p1/datasources/api/v1/projects", nil)
 		rec := httptest.NewRecorder()
@@ -125,11 +129,13 @@ func TestHTTPProxy_serve_deniedAtConnectionTime(t *testing.T) {
 	assert.False(t, called, "the internal server must never be reached")
 }
 
-func TestHTTPProxy_serve_sanitizeRedirection(t *testing.T) {
+func TestHTTPProxy_serve_sanitizeLocationHeaders(t *testing.T) {
 	var location string
+	var status int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Location", location)
-		w.WriteHeader(http.StatusFound)
+		w.Header().Set("Content-Location", location)
+		w.WriteHeader(status)
 	}))
 	defer server.Close()
 	serverURL, err := url.Parse(server.URL)
@@ -143,31 +149,128 @@ func TestHTTPProxy_serve_sanitizeRedirection(t *testing.T) {
 		{location: "graph", kept: true},
 		{location: server.URL + "/graph", kept: true},
 		{location: "//" + serverURL.Host + "/graph", kept: true},
+		{location: "HTTP://" + strings.ToUpper(serverURL.Host) + "/graph", kept: true},
 		{location: "https://evil.example.com/login"},
 		{location: "//evil.example.com/login"},
 		{location: "///evil.example.com/login"},
 		{location: "/\\evil.example.com/login"},
 		{location: " \t//evil.example.com"},
 		{location: "https://" + serverURL.Host + "/graph"},
+		{location: "http://" + serverURL.Hostname() + ":1/graph"},
 	} {
-		t.Run(test.location, func(t *testing.T) {
-			location = test.location
-			h := &httpProxy{
-				config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-				path:   "/",
-				guard:  newLoopbackGuard(t),
-			}
-			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prom/", nil)
-			rec := httptest.NewRecorder()
-			require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
-			assert.Equal(t, http.StatusFound, rec.Code)
-			if test.kept {
-				assert.Equal(t, test.location, rec.Header().Get("Location"))
-			} else {
-				assert.Empty(t, rec.Header().Get("Location"))
-			}
+		// The headers are sanitized whatever the status code: Location is also used with 201 Created,
+		// and Content-Location can be returned with any status.
+		for _, code := range []int{http.StatusFound, http.StatusCreated, http.StatusOK} {
+			t.Run(fmt.Sprintf("%d %s", code, test.location), func(t *testing.T) {
+				location = test.location
+				status = code
+				h := &httpProxy{
+					config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+					path:   "/",
+					guard:  newLoopbackGuard(t),
+				}
+				req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prom/", nil)
+				rec := httptest.NewRecorder()
+				require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+				assert.Equal(t, code, rec.Code)
+				for _, header := range []string{"Location", "Content-Location"} {
+					if test.kept {
+						assert.Equal(t, test.location, rec.Header().Get(header), header)
+					} else {
+						assert.Empty(t, rec.Header().Get(header), header)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestIsSameOriginLocation_defaultPort(t *testing.T) {
+	for _, test := range []struct {
+		target   string
+		location string
+		same     bool
+	}{
+		{target: "http://prometheus:80", location: "http://prometheus/graph", same: true},
+		{target: "http://prometheus", location: "http://prometheus:80/graph", same: true},
+		{target: "https://prometheus", location: "https://prometheus:443/graph", same: true},
+		{target: "https://prometheus", location: "//prometheus:443/graph", same: true},
+		{target: "http://prometheus:9090", location: "http://prometheus/graph"},
+		{target: "http://prometheus", location: "https://prometheus/graph"},
+		{target: "http://prometheus", location: "http://prometheus.evil.example.com/graph"},
+	} {
+		t.Run(test.target+" "+test.location, func(t *testing.T) {
+			target, err := url.Parse(test.target)
+			require.NoError(t, err)
+			assert.Equal(t, test.same, isSameOriginLocation(test.location, target))
 		})
 	}
+}
+
+// TestHTTPProxy_getToken_deniedTokenURL ensures the OAuth token URL of the secret is verified before requesting a token.
+func TestHTTPProxy_getToken_deniedTokenURL(t *testing.T) {
+	h := &httpProxy{
+		config: &datasourceHTTP.Config{URL: common.MustParseURL("http://prometheus:9090")},
+		path:   "/",
+		guard:  newDefaultGuard(t),
+	}
+	_, err := h.getToken(context.Background(), &secretModel.OAuth{ //nolint:gosec // G101: test value, not a real credential
+		ClientID:     "client",
+		ClientSecret: "secret",
+		TokenURL:     "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+	})
+	assert.True(t, netguard.IsDenied(err), "expected a denied error, got %v", err)
+}
+
+// TestSQLProxy_postgres_allowedHosts ensures the allowed hosts work with Postgres: pgx resolves the hostname itself and
+// dials the resolved IP addresses, so the allowed hosts must be verified on the hostname and not on the IP addresses.
+func TestSQLProxy_postgres_allowedHosts(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	defer func() { _ = listener.Close() }()
+	accepted := make(chan struct{}, 10)
+	go func() {
+		for {
+			conn, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			accepted <- struct{}{}
+			_ = conn.Close()
+		}
+	}()
+	_, port, err := net.SplitHostPort(listener.Addr().String())
+	require.NoError(t, err)
+
+	newGuard := func(allowedHosts ...string) *netguard.Guard {
+		cfg := config.DatasourceProxyConfig{AllowedHosts: allowedHosts, AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}}
+		require.NoError(t, cfg.Verify())
+		return netguard.New(cfg)
+	}
+	ping := func(guard *netguard.Guard) error {
+		s := &sqlProxy{
+			config: &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "localhost:" + port, Database: "perses",
+				Postgres: &datasourceSQL.PostgresConfig{SSLMode: datasourceSQL.SSLModeDisable}},
+			guard: guard,
+		}
+		db, openErr := s.sqlOpen(nil)
+		require.NoError(t, openErr)
+		defer func() { _ = db.Close() }()
+		return db.PingContext(context.Background())
+	}
+
+	// The fake server closes the connection: the ping fails, but the connection has been established.
+	err = ping(newGuard("localhost"))
+	assert.Error(t, err)
+	assert.False(t, netguard.IsDenied(err), "expected the connection to be allowed, got %v", err)
+	select {
+	case <-accepted:
+	default:
+		t.Fatal("the connection to the database should have been established")
+	}
+
+	err = ping(newGuard("db.example.com"))
+	assert.True(t, netguard.IsDenied(err), "expected a denied error, got %v", err)
 }
 
 func TestSQLProxy_deniedDestination(t *testing.T) {
@@ -177,15 +280,15 @@ func TestSQLProxy_deniedDestination(t *testing.T) {
 	}{
 		{
 			title: "postgres",
-			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "127.0.0.1:5432", Database: "perses"}},
+			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "127.0.0.1:5432", Database: "perses"}, guard: newDefaultGuard(t)},
 		},
 		{
 			title: "postgres through a hostname",
-			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "localhost:5432", Database: "perses"}},
+			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "localhost:5432", Database: "perses"}, guard: newDefaultGuard(t)},
 		},
 		{
 			title: "mysql",
-			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "127.0.0.1:3306", Database: "perses"}},
+			proxy: &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "127.0.0.1:3306", Database: "perses"}, guard: newDefaultGuard(t)},
 		},
 	} {
 		t.Run(test.title, func(t *testing.T) {
@@ -201,7 +304,7 @@ func TestSQLProxy_deniedDestination(t *testing.T) {
 // TestSQLProxy_buildMySQLConfig_dialThroughGuard ensures every connection to the database goes through the guard.
 // The Postgres equivalent is covered by TestSQLProxy_deniedDestination.
 func TestSQLProxy_buildMySQLConfig_dialThroughGuard(t *testing.T) {
-	s := &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "mysql:3306", Database: "perses"}}
+	s := &sqlProxy{config: &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "mysql:3306", Database: "perses"}, guard: newDefaultGuard(t)}
 	cfg, err := s.buildMySQLConfig(nil)
 	require.NoError(t, err)
 	assert.NotNil(t, cfg.DialFunc)

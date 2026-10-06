@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/perses/perses/pkg/model/api/config"
+	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -91,6 +92,19 @@ func TestCheckIP(t *testing.T) {
 		{title: "denied network", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"8.8.8.0/24"}}, ip: "8.8.8.8"},
 		{title: "strict allow-list with networks", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"0.0.0.0/0", "::/0"}, AllowedNetworks: []string{"10.0.0.0/8"}}, ip: "8.8.8.8"},
 		{title: "strict allow-list with networks: allowed", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"0.0.0.0/0", "::/0"}, AllowedNetworks: []string{"10.0.0.0/8"}}, ip: "10.0.0.1", allowed: true},
+		// additional cloud metadata / credentials endpoints
+		{title: "aws ecs credentials", cfg: defaultCfg, ip: "169.254.170.2"},
+		{title: "aws eks pod identity", cfg: defaultCfg, ip: "169.254.170.23"},
+		{title: "aws eks pod identity ipv6", cfg: defaultCfg, ip: "fd00:ec2::23"},
+		{title: "azure wireserver", cfg: defaultCfg, ip: "168.63.129.16"},
+		{title: "oracle legacy metadata", cfg: defaultCfg, ip: "192.0.0.192"},
+		// the most specific network wins
+		{title: "allowing link-local doesn't allow the metadata endpoint", cfg: config.DatasourceProxyConfig{AllowedNetworks: []string{"169.254.0.0/16"}}, ip: "169.254.169.254"},
+		{title: "allowing link-local allows the rest of link-local", cfg: config.DatasourceProxyConfig{AllowedNetworks: []string{"169.254.0.0/16"}}, ip: "169.254.1.1", allowed: true},
+		{title: "metadata endpoint allowed explicitly", cfg: config.DatasourceProxyConfig{AllowedNetworks: []string{"169.254.169.254"}}, ip: "169.254.169.254", allowed: true},
+		{title: "more specific denied network wins over a larger allowed network", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"10.1.0.0/16"}, AllowedNetworks: []string{"10.0.0.0/8"}}, ip: "10.1.2.3"},
+		{title: "larger allowed network still allows outside the denied network", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"10.1.0.0/16"}, AllowedNetworks: []string{"10.0.0.0/8"}}, ip: "10.2.0.1", allowed: true},
+		{title: "equal prefix lengths: the allowed network wins", cfg: config.DatasourceProxyConfig{DeniedNetworks: []string{"10.1.0.0/16"}, AllowedNetworks: []string{"10.1.0.0/16"}}, ip: "10.1.2.3", allowed: true},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -113,6 +127,11 @@ func TestCheckIP_KubernetesAPIDenied(t *testing.T) {
 
 	g = newGuard(t, config.DatasourceProxyConfig{AllowedNetworks: []string{"10.96.0.1"}})
 	assert.NoError(t, g.CheckIP(netip.MustParseAddr("10.96.0.1")))
+
+	// Allowing a larger network (e.g. with deny_private_networks) doesn't allow the Kubernetes API.
+	g = newGuard(t, config.DatasourceProxyConfig{DenyPrivateNetworks: true, AllowedNetworks: []string{"10.0.0.0/8"}})
+	assert.True(t, IsDenied(g.CheckIP(netip.MustParseAddr("10.96.0.1"))))
+	assert.NoError(t, g.CheckIP(netip.MustParseAddr("10.96.0.2")))
 }
 
 func TestValidateURL(t *testing.T) {
@@ -155,6 +174,10 @@ func TestValidateURL(t *testing.T) {
 		{title: "allowed ip host", cfg: allowedHostsCfg, url: "http://10.0.0.1:9090", allowed: true},
 		{title: "host not allowed", cfg: allowedHostsCfg, url: "http://evil.example.com"},
 		{title: "ip not in the allowed hosts", cfg: allowedHostsCfg, url: "http://10.0.0.2"},
+		{title: "userinfo", url: "http://user:password@prometheus:9090"}, //nolint:gosec // G101: test value, not a real credential
+		{title: "userinfo without password", url: "http://user@prometheus:9090"},
+		{title: "userinfo used to disguise the host", cfg: allowedHostsCfg, url: "http://prometheus.example.com@evil.example.com"},
+		{title: "userinfo on an allowed host", cfg: allowedHostsCfg, url: "http://user:password@prometheus.example.com"}, //nolint:gosec // G101: test value, not a real credential
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -253,13 +276,6 @@ func TestValidateDatasourceSpec(t *testing.T) {
 	}
 }
 
-func TestNilGuardAppliesDefaultPolicy(t *testing.T) {
-	var g *Guard
-	assert.True(t, IsDenied(g.ValidateURL(&url.URL{Scheme: "http", Host: "127.0.0.1:8080"})))
-	assert.NoError(t, g.ValidateURL(&url.URL{Scheme: "http", Host: "prometheus:9090"}))
-	assert.True(t, IsDenied(g.CheckIP(netip.MustParseAddr("169.254.169.254"))))
-}
-
 func TestDialContext(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
@@ -347,4 +363,106 @@ func TestCanonicalAddr(t *testing.T) {
 	assert.Equal(t, "proxy:1080", canonicalAddr(&url.URL{Scheme: "socks5", Host: "proxy"}))
 	assert.Equal(t, "proxy:3128", canonicalAddr(&url.URL{Scheme: "http", Host: "proxy:3128"}))
 	assert.Equal(t, "[::1]:3128", canonicalAddr(&url.URL{Scheme: "http", Host: "[::1]:3128"}))
+}
+
+func TestNormalizeAddr(t *testing.T) {
+	assert.Equal(t, "proxy.example.com:3128", normalizeAddr("PROXY.example.com.:3128"))
+	assert.Equal(t, "127.0.0.1:3128", normalizeAddr("[::ffff:127.0.0.1]:3128"))
+	assert.Equal(t, "xn--bcher-kva.example:3128", normalizeAddr("bücher.example:3128"))
+}
+
+func TestValidateOAuth(t *testing.T) {
+	g := newGuard(t, config.DatasourceProxyConfig{AllowedHosts: []string{"auth.example.com", "prometheus.example.com"}})
+	assert.NoError(t, g.ValidateOAuth(nil))
+	assert.NoError(t, g.ValidateOAuth(&secretModel.OAuth{TokenURL: "https://auth.example.com/token"})) //nolint:gosec // G101: test value, not a real credential
+	for _, tokenURL := range []string{
+		"http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+		"http://localhost:8080/api/auth/providers/native/login",
+		"https://evil.example.com/token",
+		"file:///etc/passwd",
+		"https://user:password@auth.example.com/token",
+		"",
+	} {
+		t.Run(tokenURL, func(t *testing.T) {
+			err := g.ValidateOAuth(&secretModel.OAuth{TokenURL: tokenURL})
+			assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+		})
+	}
+}
+
+// TestLookupHost_DialResolvedContext reproduces how pgx connects: it resolves the hostname itself (LookupFunc)
+// and dials the resolved IP addresses (DialFunc). The allowed hosts must be verified on the hostname, not on the IP.
+func TestLookupHost_DialResolvedContext(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	defer func() { _ = listener.Close() }()
+	go func() {
+		for {
+			conn, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			_ = conn.Close()
+		}
+	}()
+	_, port, err := net.SplitHostPort(listener.Addr().String())
+	require.NoError(t, err)
+	ctx := context.Background()
+
+	g := newGuard(t, config.DatasourceProxyConfig{AllowedHosts: []string{"localhost"}, AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}})
+	ips, err := g.LookupHost(ctx, "localhost")
+	require.NoError(t, err)
+	require.NotEmpty(t, ips)
+	assert.Contains(t, ips, "127.0.0.1")
+	conn, err := g.DialResolvedContext(ctx, "tcp", net.JoinHostPort("127.0.0.1", port))
+	require.NoError(t, err)
+	_ = conn.Close()
+
+	// The host is verified when it is resolved.
+	_, err = g.LookupHost(ctx, "db.example.com")
+	assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+
+	// The IP address is still verified when it is dialed.
+	defaultGuard := newGuard(t, config.DatasourceProxyConfig{})
+	_, err = defaultGuard.DialResolvedContext(ctx, "tcp", net.JoinHostPort("127.0.0.1", port))
+	assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+	_, err = defaultGuard.LookupHost(ctx, "localhost")
+	assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+
+	// Unix sockets are still denied.
+	_, err = g.DialResolvedContext(ctx, "unix", "/var/run/postgresql/.s.PGSQL.5432")
+	assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+}
+
+// TestHTTPTransport_directRequestToProxyDenied ensures the HTTP proxy configured in the environment cannot be reached
+// directly (bypassing the guard) by a request that doesn't go through it.
+func TestHTTPTransport_directRequestToProxyDenied(t *testing.T) {
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		called = true
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer server.Close()
+
+	// The proxy is the test server. As the requests to a loopback address never go through the proxy,
+	// the request to the test server is a direct request to the address of the proxy.
+	t.Setenv("HTTP_PROXY", server.URL)
+	t.Setenv("http_proxy", server.URL)
+	t.Setenv("NO_PROXY", "")
+	t.Setenv("no_proxy", "")
+
+	g := newGuard(t, config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.0/8"}})
+	client := &http.Client{Transport: g.HTTPTransport(nil, 0)}
+	_, err := client.Get(server.URL)
+	assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+	assert.False(t, called)
+
+	// Without proxy, the same request is allowed by the configuration.
+	t.Setenv("HTTP_PROXY", "")
+	t.Setenv("http_proxy", "")
+	client = &http.Client{Transport: g.HTTPTransport(nil, 0)}
+	resp, err := client.Get(server.URL)
+	require.NoError(t, err)
+	_ = resp.Body.Close()
+	assert.True(t, called)
 }

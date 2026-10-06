@@ -193,10 +193,11 @@ func (c *HTTPProxyConfig) maxTimeout() time.Duration {
 // to reach any service accessible from the Perses server (Server-Side Request Forgery): the Perses API itself through
 // the loopback interface, the cloud metadata endpoints, the Kubernetes API, etc.
 //
-// Regardless of this configuration, the following networks are always denied, unless they are explicitly listed in
-// AllowedNetworks: loopback (127.0.0.0/8, ::1), "this" network (0.0.0.0/8), link-local (169.254.0.0/16, fe80::/10),
-// which includes most cloud metadata endpoints, the other known cloud metadata endpoints (100.100.100.200, fd00:ec2::254),
-// multicast, reserved and deprecated ranges, and the Kubernetes API service IP when Perses is running in a Kubernetes cluster.
+// Regardless of this configuration, the following networks are always denied, unless an allowed network at least as
+// specific covers the IP address (see AllowedNetworks): loopback (127.0.0.0/8, ::1), "this" network (0.0.0.0/8),
+// link-local (169.254.0.0/16, fe80::/10), the known cloud metadata endpoints (169.254.169.254, 169.254.170.2,
+// 169.254.170.23, 100.100.100.200, 168.63.129.16, 192.0.0.192, fd00:ec2::254, fd00:ec2::23), multicast, reserved and
+// deprecated ranges, and the Kubernetes API service IP when Perses is running in a Kubernetes cluster.
 //
 // The configuration specific to a kind of proxy lives in a dedicated struct (e.g. HTTP).
 type DatasourceProxyConfig struct {
@@ -204,9 +205,12 @@ type DatasourceProxyConfig struct {
 	// An entry is either an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain
 	// (e.g. "*.example.com") or an IP address. The port must not be provided.
 	AllowedHosts []string `json:"allowed_hosts,omitempty" yaml:"allowed_hosts,omitempty"`
-	// AllowedNetworks is a list of IP addresses or CIDRs that are always allowed.
-	// It takes precedence over the denied networks (the built-in ones, DeniedNetworks and DenyPrivateNetworks).
-	// For example, use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
+	// AllowedNetworks is a list of IP addresses or CIDRs that are allowed.
+	// When an IP address is part of both an allowed and a denied network (the built-in ones, DeniedNetworks and
+	// DenyPrivateNetworks), the most specific network wins (on equal prefix lengths, the allowed network wins).
+	// For example, allowing 10.0.0.0/8 doesn't allow the Kubernetes API service IP, and allowing 169.254.0.0/16 doesn't
+	// allow 169.254.169.254 (both denied as single IP addresses), while allowing these IP addresses explicitly does.
+	// Use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
 	AllowedNetworks []string `json:"allowed_networks,omitempty" yaml:"allowed_networks,omitempty"`
 	// DeniedNetworks is a list of IP addresses or CIDRs that are denied, in addition to the built-in ones.
 	DeniedNetworks []string `json:"denied_networks,omitempty" yaml:"denied_networks,omitempty"`

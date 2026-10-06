@@ -712,19 +712,32 @@ is provided by the users. Without restriction, anyone allowed to create a dataso
 endpoints, could use Perses to reach any service accessible from the Perses server and read its response
 (Server-Side Request Forgery): the Perses API itself, the cloud metadata endpoints, the Kubernetes API, etc.
 
-The destination is verified when a datasource is saved and before a request is proxied. More importantly, it is verified
-at connection time on every IP address the destination resolves to (including the redirections followed to get an
-OAuth token), so it cannot be bypassed with a DNS name pointing to a forbidden IP address.
+The destination is verified when a datasource (or a secret defining an OAuth token URL) is saved and before a request is
+proxied. More importantly, it is verified at connection time on every IP address the destination resolves to (including
+the redirections followed to get an OAuth token), so it cannot be bypassed with a DNS name pointing to a forbidden IP
+address. A URL containing credentials (`http://user:password@host`) is refused: use a secret instead.
 
-The following networks are **always denied**, unless they are explicitly listed in `allowed_networks`:
+The following networks are **denied by default**:
 
 - loopback: `127.0.0.0/8`, `::1`
 - "this" network (`0.0.0.0/8`) and unspecified addresses (`::`)
-- link-local: `169.254.0.0/16`, `fe80::/10`. It includes the metadata endpoint of most cloud providers (`169.254.169.254`)
-- other cloud metadata endpoints: `100.100.100.200` (Alibaba Cloud), `fd00:ec2::254` (AWS IPv6)
+- link-local: `169.254.0.0/16`, `fe80::/10`
+- cloud metadata and credentials endpoints: `169.254.169.254` (AWS, GCP, Azure, OpenStack, Oracle, DigitalOcean...),
+  `169.254.170.2` (AWS ECS), `169.254.170.23` and `fd00:ec2::23` (AWS EKS Pod Identity), `fd00:ec2::254` (AWS IPv6),
+  `100.100.100.200` (Alibaba Cloud), `168.63.129.16` (Azure WireServer), `192.0.0.192` (Oracle Cloud, legacy)
 - multicast, reserved and broadcast addresses: `224.0.0.0/4`, `240.0.0.0/4`, `ff00::/8`
 - deprecated IPv4-compatible addresses (`::/96`), Teredo (`2001::/32`) and local-use NAT64 (`64:ff9b:1::/48`)
 - when Perses is running in a Kubernetes cluster, the IP of the Kubernetes API service (`KUBERNETES_SERVICE_HOST`)
+
+When an IP address is part of both an allowed network (`allowed_networks`) and a denied network (the built-in ones,
+`denied_networks` and `deny_private_networks`), **the most specific network wins** (the longest prefix). On equal
+prefix lengths, the allowed network wins. For example:
+
+- allowing `127.0.0.0/8` allows the loopback interface (same prefix as the built-in denied network);
+- allowing `10.0.0.0/8` doesn't allow the Kubernetes API service IP (denied as a single IP address), you have to allow
+  this IP address explicitly;
+- allowing `169.254.0.0/16` doesn't allow `169.254.169.254` (denied as a single IP address);
+- denying `10.1.0.0/16` while allowing `10.0.0.0/8` denies `10.1.0.0/16`.
 
 IPv4-mapped IPv6 addresses (`::ffff:127.0.0.1`), NAT64 (`64:ff9b::/96`) and 6to4 (`2002::/16`) addresses are verified
 against the IPv4 address they embed.
@@ -742,11 +755,12 @@ of proxy lives in a dedicated section (e.g. `http`).
 # An entry is an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain (e.g. "*.monitoring.svc")
 # or an IP address. The port must not be provided.
 # Note: the denied networks still apply to the IP addresses these hosts resolve to.
+# Note: the host of the OAuth token URL defined in the secrets must be part of this list as well.
 allowed_hosts: # Optional
   - <string>
 
-# A list of IP addresses or CIDRs that are always allowed.
-# It takes precedence over the denied networks (the built-in ones, `denied_networks` and `deny_private_networks`).
+# A list of IP addresses or CIDRs that are allowed.
+# When an IP address is part of both an allowed and a denied network, the most specific network wins (see above).
 # For example, use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
 allowed_networks: # Optional
   - <string>
@@ -767,6 +781,7 @@ When Perses is using an HTTP proxy configured through the environment (`HTTP_PRO
 made to this proxy, which is trusted. The final destination is then verified upfront by resolving its name from the
 Perses server. If the name can only be resolved by the proxy, only the static verification applies: use `allowed_hosts`
 (or the proxy's own access control) to strictly restrict the destinations in this situation.
+A datasource cannot target the address of this proxy directly (i.e. when the proxy is bypassed with `NO_PROXY`).
 
 Example of a strict configuration, only allowing the datasources running in the `monitoring` namespace of a Kubernetes
 cluster:

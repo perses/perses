@@ -49,6 +49,13 @@ func newLoopbackGuard(t testing.TB) *netguard.Guard {
 	return netguard.New(cfg)
 }
 
+// newDefaultGuard returns a guard applying the default policy (e.g. the loopback interface is denied).
+func newDefaultGuard(t testing.TB) *netguard.Guard {
+	cfg := config.DatasourceProxyConfig{}
+	require.NoError(t, cfg.Verify())
+	return netguard.New(cfg)
+}
+
 func TestSQLProxy_sqlOpen(t *testing.T) {
 	testSuite := []struct {
 		name          string

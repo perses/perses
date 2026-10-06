@@ -49,10 +49,11 @@ To prevent the datasource proxy from being used to reach services that are not d
 Forgery), the destinations of the proxy are now verified. By default, the proxy refuses to reach:
 
 - the loopback interface (`127.0.0.0/8`, `::1`, `localhost`)
-- the link-local addresses (`169.254.0.0/16`, `fe80::/10`), which include the cloud metadata endpoints
-- the other known cloud metadata endpoints, the multicast, reserved and unspecified addresses
+- the link-local addresses (`169.254.0.0/16`, `fe80::/10`) and the known cloud metadata / credentials endpoints
+- the multicast, reserved and unspecified addresses
 - the Kubernetes API service when Perses is running in a Kubernetes cluster
-- any URL scheme other than `http` and `https`, and the Unix sockets for the SQL datasources
+- any URL scheme other than `http` and `https`, the URLs containing credentials (`http://user:password@host`), and the
+  Unix sockets for the SQL datasources
 
 The private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, ...) remain allowed by default.
 
@@ -68,7 +69,11 @@ datasource:
       - "::1/128"
 ```
 
-The same applies to the OAuth token URL of the secrets used by the datasources.
+The same applies to the OAuth token URL of the secrets used by the datasources. Saving a secret whose OAuth token URL
+is not allowed is refused with a `400 Bad Request` error.
+
+When an IP address is part of both an allowed and a denied network, the most specific network wins. For example,
+allowing `10.0.0.0/8` doesn't allow the Kubernetes API service IP: it has to be allowed explicitly.
 
 You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
 hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.

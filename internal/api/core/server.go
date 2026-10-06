@@ -43,7 +43,6 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/impl/v1/view"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
-	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
@@ -106,7 +105,6 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 	if err != nil {
 		logrus.WithError(err).Fatal("error initializing authentication endpoints")
 	}
-	proxyGuard := netguard.New(cfg.Datasource.Proxy)
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
@@ -118,7 +116,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
 			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
-			secretfile.New(cfg.Security.SecretFileAllowedDirectories), proxyGuard, serviceManager.GetAuthorization(),
+			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetProxyGuard(), serviceManager.GetAuthorization(),
 			tokenRefresher),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth

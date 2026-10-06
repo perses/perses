@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin/schema"
 	"github.com/perses/perses/internal/api/validate"
 	"github.com/perses/perses/pkg/model/api"
@@ -44,9 +45,11 @@ type service struct {
 	authz         authorization.Authorization
 	// proxyCfg is used to validate the proxy of the local datasources (e.g. its timeout) against the server configuration.
 	proxyCfg config.HTTPProxyConfig
+	// guard verifies the destinations of the local datasources are allowed.
+	guard *netguard.Guard
 }
 
-func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization) ephemeraldashboard.Service {
+func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schema.Schema, authz authorization.Authorization, guard *netguard.Guard) ephemeraldashboard.Service {
 	return &service{
 		dao:           dao,
 		globalVarDAO:  globalVarDAO,
@@ -54,6 +57,7 @@ func NewService(cfg config.Config, dao ephemeraldashboard.DAO, globalVarDAO glob
 		sch:           sch,
 		authz:         authz,
 		proxyCfg:      cfg.Datasource.Proxy.HTTP,
+		guard:         guard,
 	}
 }
 
@@ -160,6 +164,14 @@ func (s *service) Validate(entity *v1.EphemeralDashboard) error {
 
 	if err := validate.DashboardSpecWithVars(entity.Spec.Spec, s.sch, &s.proxyCfg, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	for name, dts := range entity.Spec.Datasources {
+		if dts == nil {
+			continue
+		}
+		if err := s.guard.ValidateDatasourceSpec(*dts); err != nil {
+			return apiInterface.HandleBadRequestError(fmt.Sprintf("invalid local datasource %q: %s", name, err))
+		}
 	}
 	return nil
 }
