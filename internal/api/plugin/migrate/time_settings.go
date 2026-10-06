@@ -50,19 +50,28 @@ func migrateDuration(timeRange *GrafanaTimeRange) common.DurationString {
 	if to := removeWhitespace(timeRange.To); to != "now" {
 		// The default time range of a Perses dashboard always ends at now: a range that ends before now (e.g.
 		// "now-5m", to wait for late data, like Grafana's nowDelay setting) keeps its start.
-		delay, ok := strings.CutPrefix(to, "now-")
-		if !ok || migrateGrafanaDuration(delay) == "" {
+		if migratePastDuration(to) == "" {
 			return defaultDuration
 		}
 	}
-	pastDuration, ok := strings.CutPrefix(removeWhitespace(timeRange.From), "now-")
-	if !ok {
-		return defaultDuration
-	}
-	if duration := migrateGrafanaDuration(pastDuration); duration != "" {
+	if duration := migratePastDuration(timeRange.From); duration != "" {
 		return duration
 	}
 	return defaultDuration
+}
+
+// migratePastDuration converts a Grafana relative time "now-<duration>", such as "now-6h", into its duration. It
+// returns an empty string for any other relative time, or when the duration can't be converted or is zero.
+func migratePastDuration(relativeTime string) common.DurationString {
+	duration, ok := strings.CutPrefix(removeWhitespace(relativeTime), "now-")
+	if !ok {
+		return ""
+	}
+	// Grafana reads a missing count as 1, e.g. "now-d" means "now-1d".
+	if len(duration) == 1 {
+		duration = "1" + duration
+	}
+	return migrateGrafanaDuration(duration)
 }
 
 // removeWhitespace removes all the whitespace of a Grafana relative time. Grafana ignores the whitespace in the
@@ -74,22 +83,31 @@ func removeWhitespace(relativeTime string) string {
 // migrateRefreshInterval converts the auto-refresh interval of a Grafana dashboard. An empty result means no
 // auto-refresh (e.g. for the Grafana values "", "auto" or "LIVE").
 func migrateRefreshInterval(refresh string) common.DurationString {
-	return migrateGrafanaDuration(strings.TrimSpace(refresh))
+	refresh = strings.TrimSpace(refresh)
+	// Unlike a time range, a refresh interval can be in milliseconds, e.g. "500ms".
+	if count, ok := strings.CutSuffix(refresh, "ms"); ok {
+		return convertDuration(count, "ms")
+	}
+	return migrateGrafanaDuration(refresh)
 }
 
-// migrateGrafanaDuration converts a Grafana duration made of one count and one unit, such as "6h" or "6M", into a
-// Perses duration that only uses the units s, m, h, d and w. It returns an empty string when the duration can't be
-// converted or is zero.
+// migrateGrafanaDuration converts a Grafana duration made of one count and a one-letter unit, such as "6h" or "6M",
+// into a Perses duration. It returns an empty string when the duration can't be converted or is zero.
 func migrateGrafanaDuration(duration string) common.DurationString {
 	if len(duration) < 2 {
 		return ""
 	}
+	return convertDuration(duration[:len(duration)-1], duration[len(duration)-1:])
+}
+
+// convertDuration converts the count and the unit of a Grafana duration into a Perses duration that only uses the
+// units ms, s, m, h, d and w. It returns an empty string when the duration can't be converted or is zero.
+func convertDuration(rawCount, unit string) common.DurationString {
 	// A 32-bit count can't overflow once converted into days.
-	count, err := strconv.ParseUint(duration[:len(duration)-1], 10, 32)
+	count, err := strconv.ParseUint(rawCount, 10, 32)
 	if err != nil {
 		return ""
 	}
-	unit := duration[len(duration)-1:]
 	if days, ok := grafanaUnitInDays[unit]; ok {
 		count, unit = count*days, "d"
 	}

@@ -190,6 +190,12 @@ func TestMig_MigrateTimeSettings(t *testing.T) {
 			expectedTimezone: "Europe/Paris",
 		},
 		{
+			title:                   "implicit count in the time range and refresh interval in milliseconds",
+			grafanaDashboard:        `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-d", "to": "now"}, "refresh": "500ms"}`,
+			expectedDuration:        "1d",
+			expectedRefreshInterval: "500ms",
+		},
+		{
 			title:            "time settings that can't be migrated are replaced by the defaults",
 			grafanaDashboard: `{"uid": "time-settings", "title": "Time settings", "time": {"from": "now-1d/d", "to": "now-1d/d"}, "refresh": "auto", "timezone": "browser"}`,
 			expectedDuration: "1h",

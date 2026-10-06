@@ -98,27 +98,6 @@ Note: In case you would like to have the result as a K8s CustomResource, you can
 percli apply -f perses-dashboard.json --project my-project
 ```
 
-## What is migrated
-
-Besides the dashboard name, tags, links and layout, and the panels, queries and variables (see
-[How it works](#how-it-works)), the migration keeps the following settings of the Grafana dashboard.
-
-### Time settings
-
-- **Time range**: a time range relative to now, from `now-<duration>` to `now`, becomes the default duration of the
-  Perses dashboard (e.g. `now-6h` → `6h`). Perses has no month or quarter unit, so a month counts as 30 days and a
-  quarter as 90 days (e.g. `now-6M` → `180d`). Years are converted into days too (e.g. `now-1y` → `365d`), because a
-  PersesDashboard Kubernetes resource doesn't accept the `y` unit. The default time range of a Perses dashboard always
-  ends at now, so a range that ends before now, such as `now-6h` to `now-5m` (a delay for late data), keeps its start
-  (`6h`). A dashboard without a time range gets `6h`, like in Grafana. Any other time range, such as absolute dates, a
-  rounded range like `now-1d/d`, or a range that ends in the future, is replaced by `1h`.
-- **Auto-refresh**: the refresh interval is kept (e.g. `1m`). When auto-refresh is off, or set to a value that isn't a
-  duration (e.g. `auto`), the Perses dashboard has no auto-refresh.
-- **Timezone**: `utc` becomes `UTC`, and an IANA timezone (e.g. `Europe/Paris`) is kept. Any other value, such as
-  `browser` or the empty (default) value, is not migrated: the Perses dashboard then follows the
-  [timezone resolution hierarchy](./concepts/timezone.md#resolution-hierarchy) (user preference, server default, then
-  browser).
-
 ## To go further
 
 ### How it works
