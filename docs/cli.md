@@ -297,7 +297,8 @@ metadata:
 spec:
   display:
     name: Node Exporter Full
-  duration: 1h
+  duration: 24h
+  refreshInterval: 1m
   variables:
   - kind: ListVariable
     spec:
