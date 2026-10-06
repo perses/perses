@@ -11,55 +11,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package query
+package datasource
 
 import (
-	"strings"
-	"time"
-
-	promDatasource "dac-test/prometheus/datasource"
-	"github.com/perses/spec/go/common"
+	"github.com/perses/perses/go-sdk/http"
 )
 
-func Expr(expr string) Option {
+func DirectURL(url string) Option {
 	return func(builder *Builder) error {
-		builder.Query = expr
+		builder.DirectURL = url
 		return nil
 	}
 }
 
-func Datasource(datasourceName string) Option {
+func HTTPProxy(url string, options ...http.Option) Option {
 	return func(builder *Builder) error {
-		if strings.HasPrefix(datasourceName, "$") {
-			sel, err := promDatasource.VariableSelector(datasourceName)
-			if err != nil {
-				return err
-			}
-			builder.Datasource = sel
-		} else {
-			builder.Datasource = promDatasource.Selector(datasourceName)
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
 		}
+		builder.Proxy = &p.Proxy
 		return nil
 	}
 }
 
-func SeriesNameFormat(format string) Option {
+func QueryParams(params map[string]string) Option {
 	return func(builder *Builder) error {
-		builder.SeriesNameFormat = format
+		builder.QueryParams = params
 		return nil
 	}
 }
 
-func MinStep(step time.Duration) Option {
+func QueryParam(key, value string) Option {
 	return func(builder *Builder) error {
-		builder.MinStep = common.Duration(step)
+		if builder.QueryParams == nil {
+			builder.QueryParams = make(map[string]string)
+		}
+		builder.QueryParams[key] = value
 		return nil
 	}
 }
 
-func Resolution(resolution int) Option {
+// EnableExemplars enables exemplar support on the datasource: the Prometheus query plugin
+// will also query the /api/v1/query_exemplars endpoint when running range queries.
+func EnableExemplars() Option {
 	return func(builder *Builder) error {
-		builder.Resolution = resolution
+		builder.Exemplars = &Exemplars{Enable: true}
 		return nil
 	}
 }

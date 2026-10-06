@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package query
+package labelvalues
 
 import (
 	"strings"
-	"time"
 
 	promDatasource "dac-test/prometheus/datasource"
-	"github.com/perses/spec/go/common"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-func Expr(expr string) Option {
+func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
-		builder.Query = expr
+		builder.LabelName = labelName
 		return nil
 	}
 }
@@ -43,23 +42,23 @@ func Datasource(datasourceName string) Option {
 	}
 }
 
-func SeriesNameFormat(format string) Option {
+func Matchers(matchers ...string) Option {
 	return func(builder *Builder) error {
-		builder.SeriesNameFormat = format
+		builder.Matchers = matchers
 		return nil
 	}
 }
 
-func MinStep(step time.Duration) Option {
+func AddMatchers(matcher string) Option {
 	return func(builder *Builder) error {
-		builder.MinStep = common.Duration(step)
+		builder.Matchers = append(builder.Matchers, matcher)
 		return nil
 	}
 }
 
-func Resolution(resolution int) Option {
+func Filter(variables ...v1.Variable) Option {
 	return func(builder *Builder) error {
-		builder.Resolution = resolution
+		builder.Filters = variables
 		return nil
 	}
 }

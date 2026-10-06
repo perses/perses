@@ -17,18 +17,17 @@ import (
 	"flag"
 	"time"
 
-	"dac/prometheus/query"
-
+	promDs "dac/prometheus/datasource"
+	query "dac/prometheus/query"
+	labelNamesVar "dac/prometheus/variable/label-names"
+	labelValuesVar "dac/prometheus/variable/label-values"
+	promqlVar "dac/prometheus/variable/promql"
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/panel-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
-	promDs "github.com/perses/plugins/prometheus/sdk/go/datasource"
-	labelNamesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-names"
-	labelValuesVar "github.com/perses/plugins/prometheus/sdk/go/variable/label-values"
-	promqlVar "github.com/perses/plugins/prometheus/sdk/go/variable/promql"
 	timeSeriesPanel "github.com/perses/plugins/timeserieschart/sdk/go"
 )
 
