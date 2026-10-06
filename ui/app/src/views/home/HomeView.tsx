@@ -31,7 +31,7 @@ function HomeView(): ReactElement {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
-  const userProjects = useDashboardCreateAllowedProjects();
+  const { data: userProjects } = useDashboardCreateAllowedProjects();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const hasImportantDashboards = useHasImportantDashboards();
 
