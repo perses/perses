@@ -36,6 +36,8 @@ func serveThroughProxy(t *testing.T, serverURL string, callerHeaders http.Header
 	h := &httpProxy{
 		config: &datasourceHTTP.Config{URL: common.MustParseURL(serverURL)},
 		path:   "/page",
+		// The test servers are listening on the loopback interface.
+		guard: newLoopbackGuard(t),
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/projects/p1/datasources/evil/page", nil)
 	rec := httptest.NewRecorder()

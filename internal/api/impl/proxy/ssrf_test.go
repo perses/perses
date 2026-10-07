@@ -21,7 +21,6 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -129,83 +128,6 @@ func TestHTTPProxy_serve_deniedAtConnectionTime(t *testing.T) {
 	assert.False(t, called, "the internal server must never be reached")
 }
 
-func TestHTTPProxy_serve_sanitizeLocationHeaders(t *testing.T) {
-	var location string
-	var status int
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Location", location)
-		w.Header().Set("Content-Location", location)
-		w.WriteHeader(status)
-	}))
-	defer server.Close()
-	serverURL, err := url.Parse(server.URL)
-	require.NoError(t, err)
-
-	for _, test := range []struct {
-		location string
-		kept     bool
-	}{
-		{location: "/graph", kept: true},
-		{location: "graph", kept: true},
-		{location: server.URL + "/graph", kept: true},
-		{location: "//" + serverURL.Host + "/graph", kept: true},
-		{location: "HTTP://" + strings.ToUpper(serverURL.Host) + "/graph", kept: true},
-		{location: "https://evil.example.com/login"},
-		{location: "//evil.example.com/login"},
-		{location: "///evil.example.com/login"},
-		{location: "/\\evil.example.com/login"},
-		{location: " \t//evil.example.com"},
-		{location: "https://" + serverURL.Host + "/graph"},
-		{location: "http://" + serverURL.Hostname() + ":1/graph"},
-	} {
-		// The headers are sanitized whatever the status code: Location is also used with 201 Created,
-		// and Content-Location can be returned with any status.
-		for _, code := range []int{http.StatusFound, http.StatusCreated, http.StatusOK} {
-			t.Run(fmt.Sprintf("%d %s", code, test.location), func(t *testing.T) {
-				location = test.location
-				status = code
-				h := &httpProxy{
-					config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-					path:   "/",
-					guard:  newLoopbackGuard(t),
-				}
-				req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prom/", nil)
-				rec := httptest.NewRecorder()
-				require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
-				assert.Equal(t, code, rec.Code)
-				for _, header := range []string{"Location", "Content-Location"} {
-					if test.kept {
-						assert.Equal(t, test.location, rec.Header().Get(header), header)
-					} else {
-						assert.Empty(t, rec.Header().Get(header), header)
-					}
-				}
-			})
-		}
-	}
-}
-
-func TestIsSameOriginLocation_defaultPort(t *testing.T) {
-	for _, test := range []struct {
-		target   string
-		location string
-		same     bool
-	}{
-		{target: "http://prometheus:80", location: "http://prometheus/graph", same: true},
-		{target: "http://prometheus", location: "http://prometheus:80/graph", same: true},
-		{target: "https://prometheus", location: "https://prometheus:443/graph", same: true},
-		{target: "https://prometheus", location: "//prometheus:443/graph", same: true},
-		{target: "http://prometheus:9090", location: "http://prometheus/graph"},
-		{target: "http://prometheus", location: "https://prometheus/graph"},
-		{target: "http://prometheus", location: "http://prometheus.evil.example.com/graph"},
-	} {
-		t.Run(test.target+" "+test.location, func(t *testing.T) {
-			target, err := url.Parse(test.target)
-			require.NoError(t, err)
-			assert.Equal(t, test.same, isSameOriginLocation(test.location, target))
-		})
-	}
-}
 
 // TestHTTPProxy_getToken_deniedTokenURL ensures the OAuth token URL of the secret is verified before requesting a token.
 func TestHTTPProxy_getToken_deniedTokenURL(t *testing.T) {

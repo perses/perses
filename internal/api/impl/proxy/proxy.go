@@ -364,7 +364,7 @@ func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
 	})
 }
 
-// logPolicyEvent logs an event caused by the datasource (a destination not allowed, a response header dropped...)
+// logPolicyEvent logs an event caused by the datasource (e.g. a destination not allowed)
 // that is expected to be fixed by the administrator for a saved datasource.
 // For an unsaved datasource, the spec comes from the request body: the event is logged at debug level to avoid
 // letting any user flood the logs.
@@ -443,6 +443,8 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 	return nil
 }
+
+const deniedDestinationMsg = "the datasource destination is not allowed by the Perses server configuration ('datasource.proxy')"
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
