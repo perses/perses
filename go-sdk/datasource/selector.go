@@ -56,6 +56,17 @@ func NewStaticSelector(kind, name string) *Selector {
 	return &Selector{Static: &StaticSelector{Kind: kind, Name: name}}
 }
 
+// NewSelector returns a Selector for name, automatically detecting whether
+// name is a variable reference (starts with "$" or "${...}"). kind is only
+// used for static selectors. Returns an error if name is a variable reference
+// with an invalid name.
+func NewSelector(kind, name string) (*Selector, error) {
+	if strings.HasPrefix(name, "$") {
+		return NewVariableSelector(name)
+	}
+	return NewStaticSelector(kind, name), nil
+}
+
 // NewVariableSelector returns a Selector for a Perses variable reference.
 // name may be "foo", "$foo", or "${foo}"; Variable.Name stores the bare name without "$".
 // Returns an error if the name is not a valid Perses variable name.
