@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package httpproxy
 
 import (
 	"crypto/ecdsa"
@@ -36,13 +36,12 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
-	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
-	"github.com/perses/spec/go/plugin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -59,9 +58,9 @@ func (f *fakeClock) advance(d time.Duration) {
 	f.current = f.current.Add(d)
 }
 
-func newTestTransportCache() (*transportCache, *fakeClock) {
+func newTestTransportCache() (*TransportCache, *fakeClock) {
 	clock := &fakeClock{current: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)}
-	c := newTransportCache()
+	c := NewTransportCache()
 	c.now = clock.now
 	return c, clock
 }
@@ -145,9 +144,9 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("do not share the transport between datasources", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get(projectTransportKey("p", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
+		t1, err := c.get("project/p/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get(dashboardTransportKey("p", "d", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
+		t2, err := c.get("dashboard/p/d/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -375,24 +374,24 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 		transportKey  string
 		expectedConns int32
 	}{
-		{name: "saved datasource", transportKey: globalTransportKey("prometheus"), expectedConns: 1},
+		{name: "saved datasource", transportKey: "global/prometheus", expectedConns: 1},
 		{name: "unsaved datasource", transportKey: "", expectedConns: nbRequests},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			newConns.Store(0)
-			cache := newTransportCache()
+			cache := NewTransportCache()
 			for range nbRequests {
-				// A new httpProxy is created for each request, like newProxy does.
-				h := &httpProxy{
-					config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-					path:         "/api/v1/query",
-					transports:   cache,
-					guard:        newLoopbackGuard(t),
-					transportKey: test.transportKey,
+				// A new Proxy is created for each request, like newProxy does.
+				h := &Proxy{
+					Config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+					Path:         "/api/v1/query",
+					Transports:   cache,
+					Guard:        proxytest.NewLoopbackGuard(t),
+					TransportKey: test.transportKey,
 				}
 				req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 				rec := httptest.NewRecorder()
-				require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+				require.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
 				require.Equal(t, http.StatusOK, rec.Code)
 			}
 			assert.Equal(t, test.expectedConns, newConns.Load())
@@ -403,20 +402,10 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 	}
 }
 
-// TestEndpoint_newProxy_connectionLimits ensures the limits set in the config (datasource.proxy.http)
-// are applied to the transport of the HTTP proxy, and that the unset ones fall back to their defaults.
-func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
-	spec := datasourceSpec.Spec{
-		Plugin: plugin.Plugin{
-			Kind: "PrometheusDatasource",
-			Spec: map[string]any{
-				"proxy": map[string]any{
-					"kind": "HTTPProxy",
-					"spec": map[string]any{"url": "http://localhost:9090"},
-				},
-			},
-		},
-	}
+// TestHTTPProxy_getTransport_connectionLimits ensures the limits set in the config (datasource.proxy.http)
+// are applied to the transport, and that the unset ones fall back to their defaults.
+// Passing the config from the endpoint to the proxy is covered by TestEndpoint_newProxy_connectionLimits (proxy package).
+func TestHTTPProxy_getTransport_connectionLimits(t *testing.T) {
 	custom := config.HTTPProxyConfig{MaxConnsPerHost: 3, MaxIdleConns: 20, MaxIdleConnsPerHost: 2}
 	for _, test := range []struct {
 		name         string
@@ -426,29 +415,28 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 	}{
 		{
 			name:         "defaults",
-			transportKey: globalTransportKey("prometheus"),
+			transportKey: "global/prometheus",
 			expected: config.HTTPProxyConfig{
 				MaxConnsPerHost:     0,
 				MaxIdleConns:        config.DefaultHTTPProxyMaxIdleConns,
 				MaxIdleConnsPerHost: config.DefaultHTTPProxyMaxIdleConnsPerHost,
 			},
 		},
-		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: globalTransportKey("prometheus"), expected: custom},
+		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: "global/prometheus", expected: custom},
 		{name: "limits applied to an unsaved datasource", proxyConfig: custom, transportKey: "", expected: custom},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			// The config is verified when Perses loads it, which also sets the default values.
 			proxyConfig := test.proxyConfig
 			require.NoError(t, proxyConfig.Verify())
-			e := &endpoint{
-				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
-				transports: newTransportCache(),
-				guard:      newLoopbackGuard(t),
+			h := &Proxy{
+				Config:       &datasourceHTTP.Config{URL: common.MustParseURL("http://localhost:9090")},
+				Path:         "/api/v1/query",
+				Transports:   NewTransportCache(),
+				Guard:        proxytest.NewLoopbackGuard(t),
+				TransportKey: test.transportKey,
+				ProxyConfig:  proxyConfig,
 			}
-			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
-			require.NoError(t, err)
-			h, ok := pr.(*httpProxy)
-			require.True(t, ok)
 			transport, err := h.getTransport()
 			require.NoError(t, err)
 			assert.Equal(t, test.expected.MaxConnsPerHost, transport.MaxConnsPerHost)
@@ -458,68 +446,18 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 	}
 }
 
-// TestEndpoint_newProxy_timeout ensures the connection timeout of the HTTP proxy is the one defined by the datasource,
-// bounded by the server configuration (datasource.proxy.http.default_timeout and max_timeout).
-func TestEndpoint_newProxy_timeout(t *testing.T) {
-	newSpec := func(timeout string) datasourceSpec.Spec {
-		proxySpec := map[string]any{"url": "http://localhost:9090"}
-		if len(timeout) > 0 {
-			proxySpec["timeout"] = timeout
-		}
-		return datasourceSpec.Spec{
-			Plugin: plugin.Plugin{
-				Kind: "PrometheusDatasource",
-				Spec: map[string]any{
-					"proxy": map[string]any{"kind": "HTTPProxy", "spec": proxySpec},
-				},
-			},
-		}
-	}
-	serverCfg := config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)}
-	for _, test := range []struct {
-		name        string
-		proxyConfig config.HTTPProxyConfig
-		timeout     string
-		expected    time.Duration
-	}{
-		{name: "server defaults", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
-		{name: "server defaults: the datasource cannot increase the timeout", timeout: "5m", expected: time.Duration(config.DefaultHTTPProxyTimeout)},
-		{name: "server defaults: the datasource can lower the timeout", timeout: "5s", expected: 5 * time.Second},
-		{name: "no timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, expected: 10 * time.Second},
-		{name: "zero timeout in the datasource: default timeout of the server", proxyConfig: serverCfg, timeout: "0s", expected: 10 * time.Second},
-		{name: "timeout of the datasource", proxyConfig: serverCfg, timeout: "45s", expected: 45 * time.Second},
-		{name: "timeout of the datasource clamped to the maximum of the server", proxyConfig: serverCfg, timeout: "10m", expected: time.Minute},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			// The config is verified when Perses loads it, which also sets the default values.
-			proxyConfig := test.proxyConfig
-			require.NoError(t, proxyConfig.Verify())
-			e := &endpoint{
-				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
-				transports: newTransportCache(),
-				guard:      newLoopbackGuard(t),
-			}
-			pr, err := e.newProxy("prometheus", "", globalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
-			require.NoError(t, err)
-			h, ok := pr.(*httpProxy)
-			require.True(t, ok)
-			assert.Equal(t, test.expected, h.proxyConfig.EffectiveTimeout(h.config.Timeout))
-		})
-	}
-}
-
 // TestHTTPProxy_getTransport_timeoutChange ensures the cached transport of a saved datasource is rebuilt when its
 // effective timeout changes, so the new timeout applies right away instead of once the cached transport expires.
 func TestHTTPProxy_getTransport_timeoutChange(t *testing.T) {
-	cache := newTransportCache()
-	newHTTPProxy := func(timeout common.DurationString) *httpProxy {
-		return &httpProxy{
-			config:       &datasourceHTTP.Config{URL: common.MustParseURL("http://localhost:9090"), Timeout: timeout},
-			path:         "/api/v1/query",
-			transports:   cache,
-			guard:        newLoopbackGuard(t),
-			transportKey: globalTransportKey("prometheus"),
-			proxyConfig:  config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)},
+	cache := NewTransportCache()
+	newHTTPProxy := func(timeout common.DurationString) *Proxy {
+		return &Proxy{
+			Config:       &datasourceHTTP.Config{URL: common.MustParseURL("http://localhost:9090"), Timeout: timeout},
+			Path:         "/api/v1/query",
+			Transports:   cache,
+			Guard:        proxytest.NewLoopbackGuard(t),
+			TransportKey: "global/prometheus",
+			ProxyConfig:  config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)},
 		}
 	}
 	t1, err := newHTTPProxy("20s").getTransport()
@@ -569,21 +507,21 @@ func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
 	defer server.Close()
 
 	const nbRequests = 5
-	cache := newTransportCache()
+	cache := NewTransportCache()
 	var wg sync.WaitGroup
 	for range nbRequests {
 		wg.Go(func() {
-			h := &httpProxy{
-				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-				path:         "/api/v1/query",
-				transports:   cache,
-				guard:        newLoopbackGuard(t),
-				transportKey: globalTransportKey("prometheus"),
-				proxyConfig:  config.HTTPProxyConfig{MaxConnsPerHost: 1},
+			h := &Proxy{
+				Config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				Path:         "/api/v1/query",
+				Transports:   cache,
+				Guard:        proxytest.NewLoopbackGuard(t),
+				TransportKey: "global/prometheus",
+				ProxyConfig:  config.HTTPProxyConfig{MaxConnsPerHost: 1},
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 			rec := httptest.NewRecorder()
-			assert.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+			assert.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
 			assert.Equal(t, http.StatusOK, rec.Code)
 		})
 	}
@@ -630,21 +568,21 @@ func TestHTTPProxy_serve_maxIdleConnsPerHost(t *testing.T) {
 	server.Start()
 	defer server.Close()
 
-	cache := newTransportCache()
+	cache := NewTransportCache()
 	var wg sync.WaitGroup
 	for range nbRequests {
 		wg.Go(func() {
-			h := &httpProxy{
-				config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-				path:         "/api/v1/query",
-				transports:   cache,
-				guard:        newLoopbackGuard(t),
-				transportKey: globalTransportKey("prometheus"),
-				proxyConfig:  config.HTTPProxyConfig{MaxIdleConnsPerHost: 1},
+			h := &Proxy{
+				Config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+				Path:         "/api/v1/query",
+				Transports:   cache,
+				Guard:        proxytest.NewLoopbackGuard(t),
+				TransportKey: "global/prometheus",
+				ProxyConfig:  config.HTTPProxyConfig{MaxIdleConnsPerHost: 1},
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 			rec := httptest.NewRecorder()
-			assert.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+			assert.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
 			assert.Equal(t, http.StatusOK, rec.Code)
 		})
 	}
@@ -699,20 +637,20 @@ func TestHTTPProxy_serve_caFileRotation(t *testing.T) {
 
 	caFile := filepath.Join(t.TempDir(), "ca.crt")
 	require.NoError(t, os.WriteFile(caFile, oldCAPEM, 0o600))
-	cache := newTransportCache()
+	cache := NewTransportCache()
 	defer closeCachedTransports(cache)
 	serve := func() (int, error) {
-		h := &httpProxy{
-			config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-			path:         "/api/v1/query",
-			secret:       &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{CAFile: caFile, MinVersion: "TLS12"}},
-			transports:   cache,
-			guard:        newLoopbackGuard(t),
-			transportKey: globalTransportKey("prometheus"),
+		h := &Proxy{
+			Config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+			Path:         "/api/v1/query",
+			Secret:       &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{CAFile: caFile, MinVersion: "TLS12"}},
+			Transports:   cache,
+			Guard:        proxytest.NewLoopbackGuard(t),
+			TransportKey: "global/prometheus",
 		}
 		req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 		rec := httptest.NewRecorder()
-		err := h.serve(echo.New().NewContext(req, rec))
+		err := h.Serve(echo.New().NewContext(req, rec))
 		return rec.Code, err
 	}
 

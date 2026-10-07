@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package httpproxy
 
 import (
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -41,26 +40,6 @@ const (
 	// transportRebuildRetryInterval is the minimum delay between two attempts to rebuild a transport after a failure.
 	transportRebuildRetryInterval = 5 * time.Second
 )
-
-// transportKey builds the identity of a saved datasource used as a key in the transport cache.
-// Each part is joined with a separator that is not allowed in Perses resource names (nor in a path parameter).
-// Note: even in case of a key collision, a transport is only reused if it has been built from the same settings (see transportSettings),
-// meaning both transports would be strictly equivalent.
-func transportKey(parts ...string) string {
-	return strings.Join(parts, "/")
-}
-
-func globalTransportKey(datasourceName string) string {
-	return transportKey("global", datasourceName)
-}
-
-func projectTransportKey(projectName, datasourceName string) string {
-	return transportKey("project", projectName, datasourceName)
-}
-
-func dashboardTransportKey(projectName, dashboardName, datasourceName string) string {
-	return transportKey("dashboard", projectName, dashboardName, datasourceName)
-}
 
 // fileFingerprint identifies a version of a file on disk without reading it.
 type fileFingerprint struct {
@@ -98,7 +77,7 @@ type transportEntry struct {
 	retryAt time.Time
 }
 
-// transportCache keeps one *http.Transport per saved datasource, so connections (TCP + TLS) to the datasource
+// TransportCache keeps one *http.Transport per saved datasource, so connections (TCP + TLS) to the datasource
 // are reused across requests instead of being re-established for every proxied request.
 //
 // An entry is identified by the datasource identity. The transport is rebuilt when:
@@ -106,7 +85,7 @@ type transportEntry struct {
 //     (detected with a hash of the settings. Only the hash is kept in memory, never the TLS config itself),
 //   - the CA file referenced by the TLS config changes on disk (detected with its modification time and size),
 //   - the transport expires (see transportMaxLifetime).
-type transportCache struct {
+type TransportCache struct {
 	mutex     sync.Mutex
 	entries   map[string]*transportEntry
 	lifetime  time.Duration
@@ -115,8 +94,10 @@ type transportCache struct {
 	now func() time.Time
 }
 
-func newTransportCache() *transportCache {
-	return &transportCache{
+// NewTransportCache returns an empty TransportCache.
+// It is meant to be shared by all the proxies for the lifetime of the server, so the transports are reused across requests.
+func NewTransportCache() *TransportCache {
+	return &TransportCache{
 		entries:  make(map[string]*transportEntry),
 		lifetime: transportMaxLifetime,
 		now:      time.Now,
@@ -144,7 +125,7 @@ func hashSettings(settings transportSettings) ([sha256.Size]byte, error) {
 
 // get returns the transport cached for the given key if it is still up to date.
 // Otherwise, it builds a new one with the given function, caches it and returns it.
-func (c *transportCache) get(key string, settings transportSettings, build func() (*http.Transport, error)) (*http.Transport, error) {
+func (c *TransportCache) get(key string, settings transportSettings, build func() (*http.Transport, error)) (*http.Transport, error) {
 	configHash, err := hashSettings(settings)
 	if err != nil {
 		return nil, err
@@ -170,7 +151,7 @@ func (c *transportCache) get(key string, settings transportSettings, build func(
 }
 
 // lookup returns the cached transport to use, or nil if a new transport must be built.
-func (c *transportCache) lookup(key string, configHash [sha256.Size]byte, caFile fileFingerprint, caFileKnown bool) *http.Transport {
+func (c *TransportCache) lookup(key string, configHash [sha256.Size]byte, caFile fileFingerprint, caFileKnown bool) *http.Transport {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	now := c.now()
@@ -208,7 +189,7 @@ func (c *transportCache) lookup(key string, configHash [sha256.Size]byte, caFile
 //   - the first failure happened less than transportRebuildGracePeriod ago.
 //
 // It avoids failing the requests while the CA file is being rewritten, without trusting forever a CA that cannot be read anymore.
-func (c *transportCache) fallback(key string, configHash [sha256.Size]byte) *http.Transport {
+func (c *TransportCache) fallback(key string, configHash [sha256.Size]byte) *http.Transport {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	now := c.now()
@@ -233,7 +214,7 @@ func (c *transportCache) fallback(key string, configHash [sha256.Size]byte) *htt
 	return e.transport
 }
 
-func (c *transportCache) store(key string, configHash [sha256.Size]byte, caFile fileFingerprint, t *http.Transport) *http.Transport {
+func (c *TransportCache) store(key string, configHash [sha256.Size]byte, caFile fileFingerprint, t *http.Transport) *http.Transport {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	now := c.now()
@@ -260,7 +241,7 @@ func (c *transportCache) store(key string, configHash [sha256.Size]byte, caFile 
 // Sweeping lazily (while serving a request) avoids managing a background goroutine.
 // Transports of datasources that are no longer queried stay in memory until the next sweep,
 // but their idle connections are closed anyway by the transport itself after IdleConnTimeout.
-func (c *transportCache) sweepLocked(now time.Time) {
+func (c *TransportCache) sweepLocked(now time.Time) {
 	if now.Sub(c.lastSweep) < transportSweepInterval {
 		return
 	}

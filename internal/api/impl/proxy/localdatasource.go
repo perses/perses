@@ -35,7 +35,7 @@ func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsNa
 	if err != nil {
 		return err
 	}
-	return pr.serve(ctx)
+	return pr.Serve(ctx)
 }
 
 func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {

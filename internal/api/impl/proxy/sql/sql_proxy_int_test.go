@@ -13,7 +13,7 @@
 
 //go:build integration
 
-package proxy
+package sqlproxy
 
 import (
 	"fmt"
@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
@@ -42,16 +43,16 @@ func envOrDefault(key, defaultValue string) string {
 }
 
 // serveSQLQuery sends the query to the SQL proxy, like the frontend does.
-func serveSQLQuery(t *testing.T, s *sqlProxy, query string) (*httptest.ResponseRecorder, error) {
+func serveSQLQuery(t *testing.T, s *Proxy, query string) (*httptest.ResponseRecorder, error) {
 	t.Helper()
 	body := fmt.Sprintf(`{"query": %q}`, query)
 	req := httptest.NewRequest(http.MethodPost, "http://perses.example.com/proxy", strings.NewReader(body))
 	rec := httptest.NewRecorder()
-	return rec, s.serve(echo.New().NewContext(req, rec))
+	return rec, s.Serve(echo.New().NewContext(req, rec))
 }
 
 // countRows counts the rows of the table, without going through the SQL proxy.
-func countRows(t *testing.T, s *sqlProxy, table string) int {
+func countRows(t *testing.T, s *Proxy, table string) int {
 	t.Helper()
 	require.NoError(t, s.setupAuthentication())
 	db, err := s.sqlOpen(nil)
@@ -67,21 +68,21 @@ func newTestTableName() string {
 }
 
 func TestSQLProxy_Postgres(t *testing.T) {
-	newPostgresProxy := func(postgresConfig *datasourceSQL.PostgresConfig) *sqlProxy {
-		return &sqlProxy{
+	newPostgresProxy := func(postgresConfig *datasourceSQL.PostgresConfig) *Proxy {
+		return &Proxy{
 			// The test database is running on the loopback interface, denied by default.
-			guard: newLoopbackGuard(t),
-			config: &datasourceSQL.Config{
+			Guard: proxytest.NewLoopbackGuard(t),
+			Config: &datasourceSQL.Config{
 				Driver:   datasourceSQL.DriverPostgreSQL,
 				Host:     envOrDefault("PERSES_TEST_POSTGRES_ADDR", "localhost:5432"),
 				Database: envOrDefault("PERSES_TEST_POSTGRES_DATABASE", "perses"),
 				Postgres: postgresConfig,
 			},
-			secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{
+			Secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{
 				Username: envOrDefault("PERSES_TEST_POSTGRES_USER", "user"),
 				Password: envOrDefault("PERSES_TEST_POSTGRES_PASSWORD", "password"),
 			}},
-			name: "postgres",
+			Name: "postgres",
 		}
 	}
 
@@ -140,7 +141,7 @@ func TestSQLProxy_Postgres(t *testing.T) {
 	t.Run("connection error not reported as a read-only transaction error", func(t *testing.T) {
 		// The connection is established when the query is executed: the error happens before starting the transaction.
 		s := newPostgresProxy(nil)
-		s.config.Database = "perses_database_not_existing"
+		s.Config.Database = "perses_database_not_existing"
 		_, err := serveSQLQuery(t, s, "SELECT 1 AS one")
 		require.Error(t, err)
 		assert.NotContains(t, err.Error(), "read-only transaction")
@@ -151,26 +152,26 @@ func TestSQLProxy_MariaDB(t *testing.T) {
 	if os.Getenv("PERSES_TEST_USE_SQL") != "true" {
 		t.Skip("MariaDB is only available when PERSES_TEST_USE_SQL is true")
 	}
-	newMariaDBProxy := func(params map[string]string) *sqlProxy {
+	newMariaDBProxy := func(params map[string]string) *Proxy {
 		// The params always disable TLS, as the certificate of the test server is not trusted.
 		allParams := map[string]string{"tls": "false"}
 		for k, v := range params {
 			allParams[k] = v
 		}
-		return &sqlProxy{
+		return &Proxy{
 			// The test database is running on the loopback interface, denied by default.
-			guard: newLoopbackGuard(t),
-			config: &datasourceSQL.Config{
+			Guard: proxytest.NewLoopbackGuard(t),
+			Config: &datasourceSQL.Config{
 				Driver:   datasourceSQL.DriverMariaDB,
 				Host:     envOrDefault("PERSES_TEST_MARIADB_ADDR", "localhost:3306"),
 				Database: envOrDefault("PERSES_TEST_MARIADB_DATABASE", "perses"),
 				MariaDB:  &datasourceSQL.MySQLConfig{Params: allParams},
 			},
-			secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{
+			Secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{
 				Username: envOrDefault("PERSES_TEST_MARIADB_USER", "root"),
 				Password: envOrDefault("PERSES_TEST_MARIADB_PASSWORD", "root"),
 			}},
-			name: "mariadb",
+			Name: "mariadb",
 		}
 	}
 

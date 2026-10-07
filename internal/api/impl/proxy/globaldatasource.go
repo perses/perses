@@ -35,7 +35,7 @@ func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName, trans
 	if err != nil {
 		return err
 	}
-	return pr.serve(ctx)
+	return pr.Serve(ctx)
 }
 
 func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {

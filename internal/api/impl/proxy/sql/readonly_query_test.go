@@ -11,44 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package sqlproxy
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestProjectForLog(t *testing.T) {
-	tests := []struct {
-		name     string
-		project  string
-		expected string
-	}{
-		{
-			name:     "empty project returns global marker",
-			project:  "",
-			expected: "<global>",
-		},
-		{
-			name:     "non-empty project returns project name",
-			project:  "my-project",
-			expected: "my-project",
-		},
-		{
-			name:     "whitespace-only project is not treated as empty",
-			project:  "  ",
-			expected: "  ",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := projectForLog(tt.project)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
-}
 
 func TestSanitizeAndValidateQuery(t *testing.T) {
 	tests := []struct {

@@ -34,7 +34,7 @@ func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName
 	if err != nil {
 		return err
 	}
-	return pr.serve(ctx)
+	return pr.Serve(ctx)
 }
 
 func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
