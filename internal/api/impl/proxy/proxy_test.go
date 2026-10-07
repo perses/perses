@@ -25,6 +25,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/netguard"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
@@ -39,6 +41,20 @@ var (
 	mariaDBAddress  = "localhost:3307"
 	postgresAddress = "localhost:5432"
 )
+
+// newLoopbackGuard returns a guard allowing the loopback interface, as the test servers are listening on it.
+func newLoopbackGuard(t testing.TB) *netguard.Guard {
+	cfg := config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.0/8", "::1/128"}}
+	require.NoError(t, cfg.Verify())
+	return netguard.New(cfg)
+}
+
+// newDefaultGuard returns a guard applying the default policy (e.g. the loopback interface is denied).
+func newDefaultGuard(t testing.TB) *netguard.Guard {
+	cfg := config.DatasourceProxyConfig{}
+	require.NoError(t, cfg.Verify())
+	return netguard.New(cfg)
+}
 
 func TestSQLProxy_sqlOpen(t *testing.T) {
 	testSuite := []struct {
@@ -390,7 +406,8 @@ func TestHTTPProxy_serve_headerPolicies(t *testing.T) {
 					AllowHeaders: test.allow,
 					DropHeaders:  test.drop,
 				},
-				path: "/query",
+				path:  "/query",
+				guard: newLoopbackGuard(t),
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/query", nil)
 			req.RemoteAddr = "192.0.2.1:1234"
@@ -435,6 +452,7 @@ func TestHTTPProxy_getToken_honorsTLSConfig(t *testing.T) {
 				MaxVersion: "TLS13",
 			},
 		},
+		guard: newLoopbackGuard(t),
 	}
 
 	oauth := &secretModel.OAuth{
@@ -665,6 +683,7 @@ func TestHTTPProxy_serve_removeCallerCredentials(t *testing.T) {
 	h := &httpProxy{
 		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
 		path:   "/api/v1/query",
+		guard:  newLoopbackGuard(t),
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/datasource/api/v1/query", nil)
 	req.Header.Set(echo.HeaderAuthorization, "Bearer perses-session-token")

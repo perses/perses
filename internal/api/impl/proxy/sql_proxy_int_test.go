@@ -69,6 +69,8 @@ func newTestTableName() string {
 func TestSQLProxy_Postgres(t *testing.T) {
 	newPostgresProxy := func(postgresConfig *datasourceSQL.PostgresConfig) *sqlProxy {
 		return &sqlProxy{
+			// The test database is running on the loopback interface, denied by default.
+			guard: newLoopbackGuard(t),
 			config: &datasourceSQL.Config{
 				Driver:   datasourceSQL.DriverPostgreSQL,
 				Host:     envOrDefault("PERSES_TEST_POSTGRES_ADDR", "localhost:5432"),
@@ -156,6 +158,8 @@ func TestSQLProxy_MariaDB(t *testing.T) {
 			allParams[k] = v
 		}
 		return &sqlProxy{
+			// The test database is running on the loopback interface, denied by default.
+			guard: newLoopbackGuard(t),
 			config: &datasourceSQL.Config{
 				Driver:   datasourceSQL.DriverMariaDB,
 				Host:     envOrDefault("PERSES_TEST_MARIADB_ADDR", "localhost:3306"),

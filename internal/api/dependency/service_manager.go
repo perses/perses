@@ -53,6 +53,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/plugin/migrate"
 	"github.com/perses/perses/internal/api/plugin/schema"
@@ -78,6 +79,9 @@ type ServiceManager interface {
 	GetMigration() migrate.Migration
 	GetPlugin() plugin.Plugin
 	GetProject() project.Service
+	// GetProxyGuard returns the guard restricting the destinations of the datasource proxy.
+	// It is shared by the services validating the datasources / secrets and by the proxy itself.
+	GetProxyGuard() *netguard.Guard
 	GetSchema() schema.Schema
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
@@ -106,6 +110,7 @@ type service struct {
 	migrate            migrate.Migration
 	plugin             plugin.Plugin
 	project            project.Service
+	proxyGuard         *netguard.Guard
 	schema             schema.Schema
 	role               role.Service
 	roleBinding        rolebinding.Service
@@ -117,6 +122,7 @@ type service struct {
 
 func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
 	secretFileValidator := secretfile.New(conf.Security.SecretFileAllowedDirectories)
+	proxyGuard := netguard.New(conf.Datasource.Proxy)
 	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
@@ -129,21 +135,21 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	pluginService := plugin.New(conf.Plugin)
 	schemaService := pluginService.Schema()
 	migrateService := pluginService.Migration()
-	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService)
-	datasourceService := datasourceImpl.NewService(conf.Datasource, dao.GetDatasource(), schemaService, authzService)
-	ephemeralDashboardService := ephemeralDashboardImpl.NewService(conf, dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService)
+	dashboardService := dashboardImpl.NewService(conf, dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, indexService, proxyGuard)
+	datasourceService := datasourceImpl.NewService(conf.Datasource, dao.GetDatasource(), schemaService, authzService, proxyGuard)
+	ephemeralDashboardService := ephemeralDashboardImpl.NewService(conf, dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemaService, authzService, proxyGuard)
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemaService)
-	globalDatasourceService := globalDatasourceImpl.NewService(conf.Datasource, dao.GetGlobalDatasource(), schemaService, authzService)
+	globalDatasourceService := globalDatasourceImpl.NewService(conf.Datasource, dao.GetGlobalDatasource(), schemaService, authzService, proxyGuard)
 	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), authzService, schemaService)
 	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), dao.GetGlobalRole(), dao.GetUser(), authzService, schemaService)
-	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, secretFileValidator)
+	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, secretFileValidator, proxyGuard)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemaService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), authzService)
 	roleService := roleImpl.NewService(dao.GetRole(), authzService, schemaService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), authzService, schemaService)
-	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService, secretFileValidator)
+	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService, secretFileValidator, proxyGuard)
 	userService := userImpl.NewService(dao.GetUser(), authzService)
 	viewService := viewImpl.NewMetricsViewService()
 
@@ -165,6 +171,7 @@ func newServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		migrate:            migrateService,
 		plugin:             pluginService,
 		project:            projectService,
+		proxyGuard:         proxyGuard,
 		role:               roleService,
 		roleBinding:        roleBindingService,
 		schema:             schemaService,
@@ -242,6 +249,10 @@ func (s *service) GetPlugin() plugin.Plugin {
 
 func (s *service) GetProject() project.Service {
 	return s.project
+}
+
+func (s *service) GetProxyGuard() *netguard.Guard {
+	return s.proxyGuard
 }
 
 func (s *service) GetSchema() schema.Schema {

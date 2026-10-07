@@ -108,7 +108,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
-		validateendpoint.New(cfg.Datasource, serviceManager.GetSchema(), serviceManager.GetDashboard()),
+		validateendpoint.New(cfg.Datasource, serviceManager.GetSchema(), serviceManager.GetDashboard(), serviceManager.GetProxyGuard()),
 		authEndpoint,
 	}
 	return &api{
@@ -116,7 +116,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 		apiEndpoints:   apiEndpoints,
 		proxyEndpoint: proxy.New(cfg.Datasource, persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(),
 			persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(),
-			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetAuthorization(),
+			secretfile.New(cfg.Security.SecretFileAllowedDirectories), serviceManager.GetProxyGuard(), serviceManager.GetAuthorization(),
 			tokenRefresher),
 		authorizationMiddlware: serviceManager.GetAuthorization().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth

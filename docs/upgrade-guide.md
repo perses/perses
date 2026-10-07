@@ -43,6 +43,70 @@ PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_PROJECT   -> PERSES_FRONTEND_IMPORTANT_DA
 PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARD -> PERSES_FRONTEND_IMPORTANT_DASHBOARDS_0_DASHBOARDS_0_DASHBOARD
 ```
 
+#### The datasource proxy restricts the destinations it can reach
+
+To prevent the datasource proxy from being used to reach services that are not datasources (Server-Side Request
+Forgery), the destinations of the proxy are now verified. By default, the proxy refuses to reach:
+
+- the loopback interface (`127.0.0.0/8`, `::1`, `localhost`)
+- the link-local addresses (`169.254.0.0/16`, `fe80::/10`) and the known cloud metadata / credentials endpoints
+- the multicast, reserved and unspecified addresses
+- the Kubernetes API service when Perses is running in a Kubernetes cluster
+- any URL scheme other than `http` and `https`, the URLs containing credentials (`http://user:password@host`), and the
+  Unix sockets for the SQL datasources
+- the IPv4 addresses not written in the dotted-decimal notation (e.g. `2130706433`, `0x7f000001` or `127.1`)
+
+The private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, ...) remain allowed by default.
+
+**If one of your datasources is running on the same host as Perses** (e.g. `http://localhost:9090`), the requests to
+this datasource are now refused with a `403 Forbidden` error, and saving such a datasource is refused with a
+`400 Bad Request` error. You have to explicitly allow the loopback interface:
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"
+```
+
+The same applies to the OAuth token URL of the secrets used by the datasources. Saving a secret whose OAuth token URL
+is not allowed is refused with a `400 Bad Request` error, and the requests to a datasource using such a secret are
+refused with a `403 Forbidden` error. If you restrict the destinations with `allowed_hosts`, this list must also contain
+the host of the OAuth token URL.
+
+When an IP address is part of both an allowed and a denied network, the most specific network wins (on equal prefix
+lengths, the allowed network wins). Allowing a large network therefore doesn't allow a more specific denied network,
+which has to be allowed explicitly. For example:
+
+- allowing `127.0.0.0/8` allows the loopback interface;
+- allowing `10.0.0.0/8` (e.g. with `deny_private_networks: true`) doesn't allow the Kubernetes API service IP;
+- allowing `169.254.0.0/16` doesn't allow the cloud metadata endpoint `169.254.169.254`.
+
+If Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), a datasource can no
+longer target the address of this proxy, neither directly (for example when the proxy is bypassed with `NO_PROXY`) nor
+through the proxy itself.
+
+You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
+hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.
+
+Note for the users of `v0.55.0-beta.4`: the configuration of the HTTP proxy introduced in this beta (`datasource.http_proxy`)
+has moved to `datasource.proxy.http`, so the whole configuration of the datasource proxy lives in a single section.
+
+```yaml
+# Before (v0.55.0-beta.4)
+datasource:
+  http_proxy:
+    max_timeout: 30s
+
+# After
+datasource:
+  proxy:
+    http:
+      max_timeout: 30s
+```
+
+
 ### Upgrading from v0.53.0 to v0.54.0
 
 #### SQL Database default configuration changes

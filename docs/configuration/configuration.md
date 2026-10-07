@@ -700,9 +700,191 @@ project:
 # It will also disable the associated proxy.
 disable_local: <boolean> | default = false # Optional
 
-# Configuration of the proxy used to forward the requests to the datasources of kind HTTPProxy.
-http_proxy: <HTTPProxy config> # Optional
+# Configuration of the datasource proxy: the destinations it is allowed to reach, and the configuration specific to each kind of proxy.
+proxy: <DatasourceProxy config> # Optional
 ```
+
+
+#### DatasourceProxy config
+
+The datasource proxy forwards the requests to the URL (or connects to the SQL host) defined in the datasource spec, which
+is provided by the users. Without restriction, anyone allowed to create a datasource, or to use the unsaved proxy
+endpoints, could use Perses to reach any service accessible from the Perses server and read its response
+(Server-Side Request Forgery): the Perses API itself, the cloud metadata endpoints, the Kubernetes API, etc.
+
+The destination is verified when a datasource (or a secret defining an OAuth token URL) is saved and before a request is
+proxied. More importantly, it is verified at connection time on every IP address the destination resolves to (including
+the redirections followed to get an OAuth token), so it cannot be bypassed with a DNS name pointing to a forbidden IP
+address. A URL containing credentials (`http://user:password@host`) is refused: use a secret instead.
+
+The following networks are **denied by default**:
+
+- loopback: `127.0.0.0/8`, `::1`
+- "this" network (`0.0.0.0/8`) and unspecified addresses (`::`)
+- link-local: `169.254.0.0/16`, `fe80::/10`
+- cloud metadata and credentials endpoints: `169.254.169.254` (AWS, GCP, Azure, OpenStack, Oracle, DigitalOcean...),
+  `169.254.170.2` (AWS ECS), `169.254.170.23` and `fd00:ec2::23` (AWS EKS Pod Identity), `fd00:ec2::254` (AWS IPv6),
+  `100.100.100.200` (Alibaba Cloud), `168.63.129.16` (Azure WireServer), `192.0.0.192` (Oracle Cloud, legacy)
+- multicast, reserved and broadcast addresses: `224.0.0.0/4`, `240.0.0.0/4`, `ff00::/8`
+- deprecated IPv4-compatible addresses (`::/96`), Teredo (`2001::/32`) and local-use NAT64 (`64:ff9b:1::/48`)
+- when Perses is running in a Kubernetes cluster, the IP of the Kubernetes API service (`KUBERNETES_SERVICE_HOST`)
+
+When an IP address is part of both an allowed network (`allowed_networks`) and a denied network (the built-in ones,
+`denied_networks` and `deny_private_networks`), **the most specific network wins** (the longest prefix). On equal
+prefix lengths, the allowed network wins. For example:
+
+- allowing `127.0.0.0/8` allows the loopback interface (same prefix as the built-in denied network);
+- allowing `10.0.0.0/8` doesn't allow the Kubernetes API service IP (denied as a single IP address), you have to allow
+  this IP address explicitly;
+- allowing `169.254.0.0/16` doesn't allow `169.254.169.254` (denied as a single IP address);
+- denying `10.1.0.0/16` while allowing `10.0.0.0/8` denies `10.1.0.0/16`.
+
+IPv4-mapped IPv6 addresses (`::ffff:127.0.0.1`), NAT64 (`64:ff9b::/96`) and 6to4 (`2002::/16`) addresses are verified
+against the IPv4 address they embed.
+
+Unix sockets are never allowed for the SQL datasources.
+
+IPv4 addresses must be written in the dotted-decimal notation (e.g. `10.0.0.1`). The other notations (e.g. `2130706433`,
+`0x7f000001`, `127.1` or `0177.0.0.1`) are refused, as they are not interpreted the same way by every resolver.
+
+Private networks are allowed by default, as this is where the datasources usually are. Use `deny_private_networks`,
+`denied_networks` or `allowed_hosts` to restrict them.
+
+The fields at the root of this section apply to every kind of proxy (HTTP and SQL). The configuration specific to a kind
+of proxy lives in a dedicated section (e.g. `http`).
+
+```yaml
+# When not empty, it is the exhaustive list of hosts the proxy can reach.
+# An entry is an exact hostname (e.g. "prometheus.example.com"), a wildcard matching any subdomain (e.g. "*.monitoring.svc")
+# or an IP address. The port must not be provided.
+# Note: the denied networks still apply to the IP addresses these hosts resolve to.
+# Note: the host of the OAuth token URL defined in the secrets must be part of this list as well.
+allowed_hosts: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are allowed.
+# When an IP address is part of both an allowed and a denied network, the most specific network wins (see above).
+# For example, use ["127.0.0.0/8", "::1/128"] if your datasources are running on the same host as Perses.
+allowed_networks: # Optional
+  - <string>
+
+# A list of IP addresses or CIDRs that are denied, in addition to the built-in ones.
+denied_networks: # Optional
+  - <string>
+
+# When true, the private networks are denied as well:
+# 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, fc00::/7 and fec0::/10.
+deny_private_networks: <boolean> | default = false # Optional
+
+# Configuration specific to the proxy of the datasources of kind HTTPProxy.
+http: <HTTPProxy config> # Optional
+```
+
+When Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), the connection is
+made to this proxy, which is trusted. The final destination is then verified upfront by resolving its name from the
+Perses server. If the name can only be resolved by the proxy, only the static verification applies: use `allowed_hosts`
+(or the proxy's own access control) to strictly restrict the destinations in this situation.
+A datasource cannot target the address of this proxy, neither directly (i.e. when the proxy is bypassed with `NO_PROXY`)
+nor through the proxy itself.
+
+Example of a strict configuration, only allowing the datasources running in the `monitoring` namespace of a Kubernetes
+cluster:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      - "*.monitoring.svc"
+      - "*.monitoring.svc.cluster.local"
+    http:
+      allowed_schemes:
+        - https
+```
+
+Example of a strict configuration when the datasources are authenticated with OAuth (client credentials) through a
+secret. The host of the OAuth token URL defined in the secrets (here `auth.example.com`) must be allowed as well,
+otherwise saving the secret is refused, and the requests to the datasources using it are refused:
+
+```yaml
+datasource:
+  proxy:
+    allowed_hosts:
+      # The datasources
+      - "prometheus.example.com"
+      - "*.thanos.example.com"
+      # The OAuth token URL of the secrets, e.g. https://auth.example.com/oauth2/token
+      - "auth.example.com"
+    http:
+      allowed_schemes:
+        - https
+```
+
+Example denying the private networks, while still allowing the network where the datasources are running.
+As the most specific network wins, the Kubernetes API service IP and the cloud metadata endpoints remain denied even if
+they are part of the allowed network:
+
+```yaml
+datasource:
+  proxy:
+    deny_private_networks: true
+    allowed_networks:
+      - "10.20.0.0/16"
+```
+
+Example allowing the datasources running on the same host as Perses (e.g. `http://localhost:9090`):
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      - "127.0.0.0/8"
+      - "::1/128"
+```
+
+Example keeping the proxy opened, i.e. allowing every destination like before the verification was introduced.
+As the most specific network wins, allowing `0.0.0.0/0` and `::/0` is not enough: every built-in denied network has to
+be allowed explicitly, with the same (or a more specific) prefix.
+
+!!! warning
+    This configuration lets anyone allowed to create a datasource (or to use the unsaved proxy endpoints) reach any
+    service accessible from the Perses server, including the cloud metadata endpoints (and so the credentials of the
+    machine) and the Kubernetes API. Only use it if every user able to create a datasource is fully trusted, and never
+    with `security.enable_auth` set to `false`.
+
+```yaml
+datasource:
+  proxy:
+    allowed_networks:
+      # loopback and "this" network
+      - "127.0.0.0/8"
+      - "0.0.0.0/8"
+      # link-local
+      - "169.254.0.0/16"
+      - "fe80::/10"
+      # cloud metadata and credentials endpoints
+      - "169.254.169.254/32"
+      - "169.254.170.2/32"
+      - "169.254.170.23/32"
+      - "100.100.100.200/32"
+      - "168.63.129.16/32"
+      - "192.0.0.192/32"
+      - "fd00:ec2::254/128"
+      - "fd00:ec2::23/128"
+      # multicast, reserved and broadcast
+      - "224.0.0.0/4"
+      - "240.0.0.0/4"
+      - "ff00::/8"
+      # unspecified, IPv6 loopback, deprecated IPv4-compatible addresses, Teredo and local-use NAT64
+      - "::/96"
+      - "2001::/32"
+      - "64:ff9b:1::/48"
+      # when Perses is running in a Kubernetes cluster: the IP of the Kubernetes API service (KUBERNETES_SERVICE_HOST)
+      - "10.96.0.1/32"
+```
+
+Even with this configuration, the URLs containing credentials, the schemes other than `http` and `https`, the Unix
+sockets of the SQL datasources, and the direct requests to the HTTP proxy configured through the environment remain
+refused.
 
 #### HTTPProxy config
 
@@ -711,6 +893,10 @@ Keeping connections open saves the TCP and TLS handshakes of the next requests, 
 When running Perses with a large number of datasources, you may want to lower the idle connection limits.
 
 ```yaml
+# The list of URL schemes an HTTP datasource is allowed to use. Only "http" and "https" are supported.
+allowed_schemes: # Optional. Default: ["http", "https"]
+  - <string>
+
 # Limits the total number of connections (in use and idle) that Perses opens, for a given datasource, to a given host.
 # Once the limit is reached, the new requests wait until a connection is available, or until they are canceled.
 # It can be used to protect Perses (file descriptors) and the datasources from a burst of queries.

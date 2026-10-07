@@ -69,7 +69,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "project": {
       "disable": false
     },
-    "disable_local": false
+    "disable_local": false,
+    "proxy": {
+      "deny_private_networks": false
+    }
   },
   "variable": {
     "global": {
@@ -143,11 +146,14 @@ func TestJSONMarshalConfig(t *testing.T) {
       "disable": false
     },
     "disable_local": false,
-    "http_proxy": {
-      "max_idle_conns": 100,
-      "max_idle_conns_per_host": 10,
-      "default_timeout": "30s",
-      "max_timeout": "30s"
+    "proxy": {
+      "deny_private_networks": false,
+      "http": {
+        "max_idle_conns": 100,
+        "max_idle_conns_per_host": 10,
+        "default_timeout": "30s",
+        "max_timeout": "30s"
+      }
     }
   },
   "variable": {
@@ -591,11 +597,13 @@ plugin:
 					Interval: common.Duration(defaultInterval),
 				},
 				Datasource: DatasourceConfig{
-					HTTPProxy: HTTPProxyConfig{
-						MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
-						MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
-						DefaultTimeout:      DefaultHTTPProxyTimeout,
-						MaxTimeout:          DefaultHTTPProxyTimeout,
+					Proxy: DatasourceProxyConfig{
+						HTTP: HTTPProxyConfig{
+							MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
+							MaxIdleConnsPerHost: DefaultHTTPProxyMaxIdleConnsPerHost,
+							DefaultTimeout:      DefaultHTTPProxyTimeout,
+							MaxTimeout:          DefaultHTTPProxyTimeout,
+						},
 					},
 				},
 				EphemeralDashboard: EphemeralDashboard{
@@ -920,8 +928,9 @@ func TestResolveDatasourceHTTPProxy(t *testing.T) {
 			name: "resolves max_conns_per_host",
 			configData: `
 datasource:
-  http_proxy:
-    max_conns_per_host: 50
+  proxy:
+    http:
+      max_conns_per_host: 50
 `,
 			expected: HTTPProxyConfig{
 				MaxConnsPerHost:     50,
@@ -935,9 +944,10 @@ datasource:
 			name: "resolves idle connection limits",
 			configData: `
 datasource:
-  http_proxy:
-    max_idle_conns: 20
-    max_idle_conns_per_host: 2
+  proxy:
+    http:
+      max_idle_conns: 20
+      max_idle_conns_per_host: 2
 `,
 			expected: HTTPProxyConfig{
 				MaxIdleConns:        20,
@@ -950,9 +960,10 @@ datasource:
 			name: "resolves timeouts",
 			configData: `
 datasource:
-  http_proxy:
-    default_timeout: 10s
-    max_timeout: 1m
+  proxy:
+    http:
+      default_timeout: 10s
+      max_timeout: 1m
 `,
 			expected: HTTPProxyConfig{
 				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
@@ -965,8 +976,9 @@ datasource:
 			name: "max_timeout defaults to default_timeout",
 			configData: `
 datasource:
-  http_proxy:
-    default_timeout: 1m
+  proxy:
+    http:
+      default_timeout: 1m
 `,
 			expected: HTTPProxyConfig{
 				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
@@ -979,8 +991,9 @@ datasource:
 			name: "only max_timeout is set",
 			configData: `
 datasource:
-  http_proxy:
-    max_timeout: 2m
+  proxy:
+    http:
+      max_timeout: 2m
 `,
 			expected: HTTPProxyConfig{
 				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
@@ -993,18 +1006,20 @@ datasource:
 			name: "rejects default_timeout greater than max_timeout",
 			configData: `
 datasource:
-  http_proxy:
-    default_timeout: 1m
-    max_timeout: 10s
+  proxy:
+    http:
+      default_timeout: 1m
+      max_timeout: 10s
 `,
-			errMessage: "datasource.http_proxy.default_timeout (1m) cannot be greater than datasource.http_proxy.max_timeout (10s)",
+			errMessage: "datasource.proxy.http.default_timeout (1m) cannot be greater than datasource.proxy.http.max_timeout (10s)",
 		},
 		{
 			name: "default_timeout follows max_timeout when only max_timeout is set lower than the default value",
 			configData: `
 datasource:
-  http_proxy:
-    max_timeout: 10s
+  proxy:
+    http:
+      max_timeout: 10s
 `,
 			expected: HTTPProxyConfig{
 				MaxIdleConns:        DefaultHTTPProxyMaxIdleConns,
@@ -1017,38 +1032,42 @@ datasource:
 			name: "rejects default_timeout explicitly set greater than max_timeout",
 			configData: `
 datasource:
-  http_proxy:
-    default_timeout: 30s
-    max_timeout: 10s
+  proxy:
+    http:
+      default_timeout: 30s
+      max_timeout: 10s
 `,
-			errMessage: "datasource.http_proxy.default_timeout (30s) cannot be greater than datasource.http_proxy.max_timeout (10s)",
+			errMessage: "datasource.proxy.http.default_timeout (30s) cannot be greater than datasource.proxy.http.max_timeout (10s)",
 		},
 		{
 			name: "rejects negative max_conns_per_host",
 			configData: `
 datasource:
-  http_proxy:
-    max_conns_per_host: -1
+  proxy:
+    http:
+      max_conns_per_host: -1
 `,
-			errMessage: "datasource.http_proxy.max_conns_per_host cannot be negative",
+			errMessage: "datasource.proxy.http.max_conns_per_host cannot be negative",
 		},
 		{
 			name: "rejects negative max_idle_conns",
 			configData: `
 datasource:
-  http_proxy:
-    max_idle_conns: -1
+  proxy:
+    http:
+      max_idle_conns: -1
 `,
-			errMessage: "datasource.http_proxy.max_idle_conns cannot be negative",
+			errMessage: "datasource.proxy.http.max_idle_conns cannot be negative",
 		},
 		{
 			name: "rejects negative max_idle_conns_per_host",
 			configData: `
 datasource:
-  http_proxy:
-    max_idle_conns_per_host: -1
+  proxy:
+    http:
+      max_idle_conns_per_host: -1
 `,
-			errMessage: "datasource.http_proxy.max_idle_conns_per_host cannot be negative",
+			errMessage: "datasource.proxy.http.max_idle_conns_per_host cannot be negative",
 		},
 	}
 
@@ -1065,7 +1084,7 @@ datasource:
 				return
 			}
 			assert.NoError(t, err)
-			assert.Equal(t, test.expected, resolvedConfig.Datasource.HTTPProxy)
+			assert.Equal(t, test.expected, resolvedConfig.Datasource.Proxy.HTTP)
 		})
 	}
 }

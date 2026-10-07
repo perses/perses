@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -30,6 +29,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -45,6 +45,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/secretfile"
 	"github.com/perses/perses/internal/api/utils"
@@ -137,6 +138,7 @@ type endpoint struct {
 	globalDTS      globaldatasource.DAO
 	crypto         crypto.Crypto
 	fileValidator  *secretfile.Validator
+	guard          *netguard.Guard
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
 	transports     *transportCache
@@ -144,7 +146,12 @@ type endpoint struct {
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
 	dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, fileValidator *secretfile.Validator,
-	authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	guard *netguard.Guard, authz authorization.Authorization, tokenRefresher crypto.TokenRefresher) route.Endpoint {
+	if !authz.IsEnabled() {
+		logrus.Warning("'security.enable_auth' is false: anyone able to reach Perses can create a datasource and use the datasource proxy, " +
+			"including the unsaved proxy endpoints ('/proxy/unsaved/...') that accept any datasource spec in the request body without saving it. " +
+			"The destinations of the proxy are then only restricted by the 'datasource.proxy' configuration")
+	}
 	return &endpoint{
 		cfg:            cfg,
 		dashboard:      dashboardDAO,
@@ -154,6 +161,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		globalDTS:      globalDtsDAO,
 		crypto:         crypto,
 		fileValidator:  fileValidator,
+		guard:          guard,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
 		transports:     newTransportCache(),
@@ -235,6 +243,28 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable to build or find the config")
 	}
 
+	// The destination is verified before anything else, in particular before decrypting the secret.
+	// It covers the saved datasources (that could have been stored before the policy was enforced or changed)
+	// as well as the unsaved ones coming from the request body.
+	if validateErr := e.guard.ValidateProxyConfig(cfg, kind); validateErr != nil {
+		entry := logrus.WithError(validateErr).WithFields(map[string]interface{}{
+			datasourceFieldLog: datasourceName,
+			projectFieldLog:    projectForLog(projectName),
+		})
+		const msg = "the datasource destination is not allowed"
+		if len(transportKey) == 0 {
+			// Unsaved datasource: the spec comes from the request body.
+			// Logging at debug level avoids letting any user flood the logs.
+			entry.Debug(msg)
+		} else {
+			entry.Warning(msg)
+		}
+		if netguard.IsDenied(validateErr) {
+			return nil, apiinterface.HandleForbiddenError(validateErr.Error())
+		}
+		return nil, apiinterface.HandleBadRequestError(validateErr.Error())
+	}
+
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
@@ -279,10 +309,11 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			datasourceName:             datasourceName,
 			path:                       path,
 			secret:                     scrt,
+			guard:                      e.guard,
 			tokenRefresher:             e.tokenRefresher,
 			transports:                 e.transports,
 			transportKey:               transportKey,
-			proxyConfig:                e.cfg.HTTPProxy,
+			proxyConfig:                e.cfg.Proxy.HTTP,
 			forwardCallerAuthorization: e.forwardCallerAuthorization(),
 		}, nil
 	case datasourceSQL.ProxyKindName:
@@ -299,6 +330,7 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			project: projectName,
 			path:    path,
 			secret:  scrt,
+			guard:   e.guard,
 		}, nil
 	default:
 		return nil, errors.New("no proxy kind found")
@@ -310,12 +342,14 @@ type httpProxy struct {
 	secret         *v1.SecretSpec
 	datasourceName string
 	path           string
+	// guard verifies every connection made by the proxy. It must not be nil.
+	guard          *netguard.Guard
 	tokenRefresher crypto.TokenRefresher
 	// transports caches the HTTP transports of the saved datasources. It can be nil.
 	transports *transportCache
 	// transportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
 	transportKey string
-	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.http_proxy).
+	// proxyConfig contains the connection limits and timeouts applied to the transport (datasource.proxy.http).
 	// Unset values fall back to their defaults.
 	proxyConfig config.HTTPProxyConfig
 	// forwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
@@ -328,6 +362,18 @@ func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
 		datasourceFieldLog: h.datasourceName,
 		"url":              h.config.URL.String(),
 	})
+}
+
+// logPolicyEvent logs an event caused by the datasource (e.g. a destination not allowed)
+// that is expected to be fixed by the administrator for a saved datasource.
+// For an unsaved datasource, the spec comes from the request body: the event is logged at debug level to avoid
+// letting any user flood the logs.
+func (h *httpProxy) logPolicyEvent(entry *logrus.Entry, msg string) {
+	if len(h.transportKey) == 0 {
+		entry.Debug(msg)
+	} else {
+		entry.Warning(msg)
+	}
 }
 
 func (h *httpProxy) serve(c echo.Context) error {
@@ -347,6 +393,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 
 	if err := h.prepareRequest(c); err != nil {
+		if netguard.IsDenied(err) {
+			h.logPolicyEvent(h.logWithDefaultEntry().WithError(err), "unable to prepare the HTTP request, the destination is not allowed")
+			return apiinterface.HandleForbiddenError(deniedDestinationMsg)
+		}
 		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
 		return err
 	}
@@ -359,7 +409,11 @@ func (h *httpProxy) serve(c echo.Context) error {
 	var proxyErr error
 	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL.URL)
 	reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
-		h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
+		if netguard.IsDenied(err) {
+			h.logPolicyEvent(h.logWithDefaultEntry().WithError(err), "error proxying, the destination is not allowed")
+		} else {
+			h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
+		}
 		proxyErr = err
 	}
 	// The response is served under the Perses origin: the headers that would apply to it are removed or overridden.
@@ -374,6 +428,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 	reverseProxy.ServeHTTP(res, req)
 	// Return any error handled during proxying request.
 	if proxyErr != nil {
+		if netguard.IsDenied(proxyErr) {
+			// The details (like the resolved IP address) are only logged, to not leak information about the internal network.
+			return apiinterface.HandleForbiddenError(deniedDestinationMsg)
+		}
 		// we need to wrap the error with an Echo Error,
 		// otherwise the error will be hidden by the middleware "middleware.HandleError".
 		status := res.Status
@@ -385,6 +443,8 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 	return nil
 }
+
+const deniedDestinationMsg = "the datasource destination is not allowed by the Perses server configuration ('datasource.proxy')"
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
@@ -538,13 +598,21 @@ func (h *httpProxy) getOAuthPassthroughToken(c echo.Context) (string, error) {
 // getToken exchanges the client credentials for an access token,
 // from the OAuth 2.0 provider.
 func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oauth2.Token, error) {
+	// The token URL comes from the secret, which could have been stored before the policy was enforced or changed.
+	// The connection is verified by the transport anyway, this provides an early and clear error.
+	if err := h.guard.ValidateOAuth(oauth); err != nil {
+		return nil, err
+	}
 	transport, err := h.getTransport()
 	if err != nil {
 		return nil, err
 	}
 
+	// The recorder keeps the error of a connection denied by the guard, as golang.org/x/oauth2 doesn't wrap it
+	// (see deniedErrorRecorder).
+	recorder := &deniedErrorRecorder{next: transport}
 	httpClient := &http.Client{
-		Transport: transport,
+		Transport: recorder,
 	}
 
 	// add our http client with tls config
@@ -568,6 +636,9 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	// Use the Token method to retrieve the token
 	token, err := conf.Token(newCtx)
 	if err != nil {
+		if deniedErr := recorder.deniedError(); deniedErr != nil {
+			return nil, fmt.Errorf("failed to get token: %w", deniedErr)
+		}
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
@@ -577,6 +648,52 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	}
 
 	return token, err
+}
+
+// deniedErrorRecorder is an http.RoundTripper recording the last error due to a destination denied by the guard
+// (see netguard.IsDenied).
+//
+// It is used by the HTTP client given to golang.org/x/oauth2 to request a token (see httpProxy.getToken).
+// The connection to the token URL is verified by the guard when it's established: a token URL resolving to a denied
+// IP address (or redirecting to one) fails with an error matching netguard.IsDenied. This error is kept until the
+// HTTP client returns it, but golang.org/x/oauth2 doesn't wrap it: the error of the HTTP client is formatted with %v
+// (see "oauth2: cannot fetch token" in golang.org/x/oauth2/internal/token.go), which keeps the message and loses the
+// error itself. The denial couldn't be told apart from any other error anymore, and the request would end with a
+// 500 Internal Server Error instead of the 403 Forbidden returned for any other denied destination.
+//
+// The recorder catches the error before golang.org/x/oauth2 does, so getToken can return it as is when the token
+// request fails. The other errors are not recorded, and the error of golang.org/x/oauth2 is returned as before.
+// The alternatives don't work: matching the error message is fragile, oauth2.RetrieveError only covers the error
+// responses of the token endpoint (not the connection errors), and resolving the token URL upfront misses the
+// redirections and is subject to DNS rebinding.
+//
+// This type can be removed if golang.org/x/oauth2 starts wrapping the error of the HTTP client (%w).
+type deniedErrorRecorder struct {
+	// next is the transport actually sending the requests, verified by the guard (see netguard.Guard.HTTPTransport).
+	next http.RoundTripper
+	// mutex protects denied. In practice, the token requests (including the redirections and the retry with
+	// another authentication style) are sent one after the other, but an http.RoundTripper must be safe for
+	// concurrent use.
+	mutex sync.Mutex
+	// denied is the last error due to a denied destination, nil if there is none.
+	denied error
+}
+
+func (r *deniedErrorRecorder) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := r.next.RoundTrip(req)
+	if err != nil && netguard.IsDenied(err) {
+		r.mutex.Lock()
+		r.denied = err
+		r.mutex.Unlock()
+	}
+	return resp, err
+}
+
+// deniedError returns the last error due to a destination denied by the guard, if any.
+func (r *deniedErrorRecorder) deniedError() error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	return r.denied
 }
 
 // getTransport returns the transport to reach the datasource.
@@ -599,7 +716,7 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 		h.logWithDefaultEntry().WithError(err).Error("unable to build the tls config")
 		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
 	}
-	// The datasource can only lower the timeout set by the server (datasource.http_proxy.default_timeout and max_timeout).
+	// The datasource can only lower the timeout set by the server (datasource.proxy.http.default_timeout and max_timeout).
 	// The timeout is clamped here again, even though it is validated when the datasource is saved,
 	// because the maximum can have been lowered since then, and because unsaved datasources are not validated.
 	connectTimeout := h.proxyConfig.EffectiveTimeout(h.config.Timeout)
@@ -616,26 +733,18 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 			entry.Warningf(msg, connectTimeout)
 		}
 	}
-	return &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   connectTimeout,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
-		IdleConnTimeout:     90 * time.Second,
-		// The transport is reused across requests (see transportCache), and there is one transport per datasource.
-		// A dashboard usually sends many queries in parallel to the same datasource,
-		// so keep more idle connections than the Go default (2 per host) to actually reuse them.
-		// Configured with datasource.http_proxy.max_idle_conns and datasource.http_proxy.max_idle_conns_per_host.
-		MaxIdleConns:        h.proxyConfig.MaxIdleConns,
-		MaxIdleConnsPerHost: h.proxyConfig.MaxIdleConnsPerHost,
-		// Limit the connections opened to the datasource (configured with datasource.http_proxy.max_conns_per_host).
-		// Once reached, requests wait for a connection to be available. Zero means no limit.
-		MaxConnsPerHost:   h.proxyConfig.MaxConnsPerHost,
-		ForceAttemptHTTP2: true,
-		TLSClientConfig:   tlsConfig,
-	}, nil
+	// Every connection (including the ones to the OAuth token endpoint and the redirections it follows) is verified by the guard.
+	transport := h.guard.HTTPTransport(tlsConfig, connectTimeout)
+	// The transport is reused across requests (see transportCache), and there is one transport per datasource.
+	// A dashboard usually sends many queries in parallel to the same datasource,
+	// so keep more idle connections than the Go default (2 per host) to actually reuse them.
+	// Configured with datasource.proxy.http.max_idle_conns and datasource.proxy.http.max_idle_conns_per_host.
+	transport.MaxIdleConns = h.proxyConfig.MaxIdleConns
+	transport.MaxIdleConnsPerHost = h.proxyConfig.MaxIdleConnsPerHost
+	// Limit the connections opened to the datasource (configured with datasource.proxy.http.max_conns_per_host).
+	// Once reached, requests wait for a connection to be available. Zero means no limit.
+	transport.MaxConnsPerHost = h.proxyConfig.MaxConnsPerHost
+	return transport, nil
 }
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
@@ -678,6 +787,8 @@ type sqlProxy struct {
 	path     string
 	username string
 	password string
+	// guard verifies every connection made to the database. It must not be nil.
+	guard *netguard.Guard
 }
 
 func (s *sqlProxy) logWithDefaultEntry() *logrus.Entry {
@@ -871,6 +982,9 @@ func (s *sqlProxy) buildMySQLConfig(tlsConfig *tls.Config) (*mysql.Config, error
 		return nil, fmt.Errorf("invalid MySQL configuration: %w", err)
 	}
 
+	// Every connection goes through the guard, so the SQL proxy cannot be used to reach a forbidden destination.
+	// The driver bounds the dial with the configured timeout (if any) through the context.
+	mysqlConfig.DialFunc = s.guard.DialContext
 	// Never allow multiple statements in a query, whatever the params say.
 	// Otherwise, a query like "SELECT 1; COMMIT; DELETE FROM ..." would end the read-only transaction the query is executed in.
 	mysqlConfig.MultiStatements = false
@@ -977,6 +1091,13 @@ func (s *sqlProxy) buildPostgresConfig(tlsConfig *tls.Config) (*pgx.ConnConfig, 
 		}
 		applyPostgresTLSConfig(connConfig, tlsConfig)
 	}
+
+	// Every connection (including the fallbacks) goes through the guard,
+	// so the SQL proxy cannot be used to reach a forbidden destination.
+	// pgx resolves the hostname itself and dials the resolved IP addresses: the hostname is verified (allowed hosts,
+	// denied networks) when it is resolved, and each IP address is verified when it is dialed.
+	connConfig.LookupFunc = s.guard.LookupHost
+	connConfig.DialFunc = s.guard.DialResolvedContext
 
 	return connConfig, nil
 }

@@ -37,7 +37,7 @@ http.Timeout("10s")
 
 Define the maximum amount of time allowed to establish a connection to the datasource. It must be greater than zero.
 When not set, the default timeout of the Perses server is used.
-Note that the Perses server rejects a timeout greater than the maximum it allows (`datasource.http_proxy.max_timeout`).
+Note that the Perses server rejects a timeout greater than the maximum it allows (`datasource.proxy.http.max_timeout`).
 
 ### AllowedEndpoints
 

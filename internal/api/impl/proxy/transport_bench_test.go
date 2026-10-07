@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
@@ -84,7 +85,7 @@ var benchProxyConfig = func() config.HTTPProxyConfig {
 	return c
 }()
 
-func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec, cache *transportCache, transportKey string) error {
+func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec, cache *transportCache, guard *netguard.Guard, transportKey string) error {
 	// A new httpProxy is created for each request, like newProxy does.
 	h := &httpProxy{
 		config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
@@ -92,6 +93,7 @@ func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec
 		secret:       secret,
 		transports:   cache,
 		proxyConfig:  benchProxyConfig,
+		guard:        guard,
 		transportKey: transportKey,
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
@@ -141,10 +143,12 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 				cache := newTransportCache()
 				defer closeCachedTransports(cache)
 				e := echo.New()
+				// The fake datasource runs on the loopback interface, denied by default.
+				guard := newLoopbackGuard(b)
 				iterations := 0
 				b.ReportAllocs()
 				for b.Loop() {
-					if err := benchServeOnce(e, server, secret, cache, mode.transportKey); err != nil {
+					if err := benchServeOnce(e, server, secret, cache, guard, mode.transportKey); err != nil {
 						b.Fatal(err)
 					}
 					iterations++
@@ -159,11 +163,13 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 				cache := newTransportCache()
 				defer closeCachedTransports(cache)
 				e := echo.New()
+				// The fake datasource runs on the loopback interface, denied by default.
+				guard := newLoopbackGuard(b)
 				var iterations atomic.Int64
 				b.ReportAllocs()
 				b.RunParallel(func(pb *testing.PB) {
 					for pb.Next() {
-						if err := benchServeOnce(e, server, secret, cache, mode.transportKey); err != nil {
+						if err := benchServeOnce(e, server, secret, cache, guard, mode.transportKey); err != nil {
 							b.Error(err)
 							return
 						}
