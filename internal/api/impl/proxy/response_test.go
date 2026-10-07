@@ -168,4 +168,3 @@ func TestIsRelativeLocation(t *testing.T) {
 		assert.False(t, isRelativeLocation(location), location)
 	}
 }
-

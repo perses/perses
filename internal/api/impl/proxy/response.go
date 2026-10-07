@@ -45,7 +45,7 @@ const (
 // removedResponseHeaders are the headers of the datasource response that would apply to the Perses origin (or domain),
 // and are therefore never forwarded to the client.
 var removedResponseHeaders = []string{
-	"Set-Cookie",                          // cookies of Perses, including the session
+	"Set-Cookie",                          // the browser would store the cookies of the datasource for the Perses origin, overriding the Perses ones (e.g. the session)
 	"Set-Cookie2",                         // obsolete, but still removed
 	"Clear-Site-Data",                     // would clear the cookies (session) and the storage of Perses
 	"Refresh",                             // redirection, like Location
@@ -105,4 +105,3 @@ func isRelativeLocation(location string) bool {
 	}
 	return len(u.Scheme) == 0 && len(u.Host) == 0 && u.User == nil
 }
-
