@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+// Package httpproxy implements the proxy forwarding the requests to the datasources reachable over HTTP
+// (datasource proxy kind "HTTPProxy").
+package httpproxy
 
 import (
 	"context"
@@ -84,17 +86,31 @@ func (r *deniedErrorRecorder) deniedError() error {
 	return r.denied
 }
 
+// Proxy forwards a request to a datasource reachable over HTTP (datasource proxy kind "HTTPProxy").
+// It must be built with New, once per request to forward.
+//
+// Before forwarding the request, the proxy removes the credentials the caller uses to authenticate against Perses,
+// applies the header policies of the datasource and sets up the authentication defined by its secret.
+// Every connection it makes (to the datasource, but also to the OAuth token endpoint) is verified by the Guard.
 type Proxy struct {
-	Config         *datasourceHTTP.Config
-	Secret         *v1.SecretSpec
+	// Config is the HTTP proxy configuration of the datasource (URL, allowed endpoints, headers...). It is required.
+	Config *datasourceHTTP.Config
+	// Secret contains the credentials and the TLS config used to reach the datasource. It must already be decrypted.
+	// It can be nil.
+	Secret *v1.SecretSpec
+	// DatasourceName is the name of the datasource, used in the logs and in the error messages.
 	DatasourceName string
-	Path           string
-	// Guard verifies every connection made by the proxy. It must not be nil.
-	Guard          *netguard.Guard
+	// Path is the path of the request on the datasource side. It must start with a '/'.
+	Path string
+	// Guard verifies every connection made by the proxy. It is required.
+	Guard *netguard.Guard
+	// TokenRefresher refreshes the OIDC token of the caller when it is missing,
+	// for the datasources using the OAuth passthrough. It can be nil.
 	TokenRefresher crypto.TokenRefresher
 	// Transports caches the HTTP transports of the saved datasources. It can be nil.
 	Transports *TransportCache
-	// TransportKey identifies the datasource in the transport cache. Empty for unsaved datasources.
+	// TransportKey identifies the datasource in the transport cache. It is opaque to the proxy.
+	// Empty for unsaved datasources: their transport is not cached, and the events they cause are logged at debug level.
 	TransportKey string
 	// ProxyConfig contains the connection limits and timeouts applied to the transport (datasource.proxy.http).
 	// Unset values fall back to their defaults.
@@ -102,6 +118,18 @@ type Proxy struct {
 	// ForwardCallerAuthorization defines if the Authorization header sent by the caller can be forwarded to the datasource.
 	// The zero value (false) is the safe default: the header is removed.
 	ForwardCallerAuthorization bool
+}
+
+// New returns the Proxy described by p, once verified it holds the settings required to serve requests safely:
+// the config of the datasource (with its URL) and the Guard.
+func New(p Proxy) (*Proxy, error) {
+	if p.Config == nil || p.Config.URL == nil || p.Config.URL.URL == nil {
+		return nil, errors.New("the URL of the datasource is missing")
+	}
+	if p.Guard == nil {
+		return nil, errors.New("the guard verifying the connections of the proxy is missing")
+	}
+	return &p, nil
 }
 
 func (h *Proxy) logWithDefaultEntry() *logrus.Entry {
@@ -123,6 +151,9 @@ func (h *Proxy) logPolicyEvent(entry *logrus.Entry, msg string) {
 	}
 }
 
+// Serve forwards the request of c to the datasource, and writes the response of the datasource to c.
+// The response is served under the Perses origin, so the headers that would apply to it are removed or overridden
+// (see secureResponse).
 func (h *Proxy) Serve(c echo.Context) error {
 	req := c.Request()
 	res := c.Response()
@@ -430,13 +461,13 @@ func (h *Proxy) prepareTransport() (*http.Transport, error) {
 			entry.Debugf(msg, connectTimeout)
 		} else {
 			// Saved datasource: the maximum has been lowered after the datasource has been saved.
-			// It is logged once per transport build (see transportCache).
+			// It is logged once per transport build (see TransportCache).
 			entry.Warningf(msg, connectTimeout)
 		}
 	}
 	// Every connection (including the ones to the OAuth token endpoint and the redirections it follows) is verified by the guard.
 	transport := h.Guard.HTTPTransport(tlsConfig, connectTimeout)
-	// The transport is reused across requests (see transportCache), and there is one transport per datasource.
+	// The transport is reused across requests (see TransportCache), and there is one transport per datasource.
 	// A dashboard usually sends many queries in parallel to the same datasource,
 	// so keep more idle connections than the Go default (2 per host) to actually reuse them.
 	// Configured with datasource.proxy.http.max_idle_conns and datasource.proxy.http.max_idle_conns_per_host.

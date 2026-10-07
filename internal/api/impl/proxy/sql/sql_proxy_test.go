@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sql
+package sqlproxy
 
 import (
 	"context"
@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/spec/go/common"
@@ -36,6 +37,31 @@ var (
 	mariaDBAddress  = "localhost:3307"
 	postgresAddress = "localhost:5432"
 )
+
+func TestNew(t *testing.T) {
+	cfg := &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: postgresAddress, Database: "perses"}
+	guard := proxytest.NewDefaultGuard(t)
+	for _, test := range []struct {
+		name          string
+		proxy         Proxy
+		errorContains string
+	}{
+		{name: "valid", proxy: Proxy{Config: cfg, Guard: guard, Name: "postgres", Project: "p1", Path: "/"}},
+		{name: "missing config", proxy: Proxy{Guard: guard}, errorContains: "the SQL config of the datasource is missing"},
+		{name: "missing guard", proxy: Proxy{Config: cfg}, errorContains: "the guard verifying the connections of the proxy is missing"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			p, err := New(test.proxy)
+			if len(test.errorContains) > 0 {
+				assert.ErrorContains(t, err, test.errorContains)
+				assert.Nil(t, p)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.proxy, *p)
+		})
+	}
+}
 
 func TestSQLProxy_sqlOpen(t *testing.T) {
 	testSuite := []struct {

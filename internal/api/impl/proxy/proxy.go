@@ -25,7 +25,7 @@ import (
 	"github.com/perses/perses/internal/api/authorization"
 	"github.com/perses/perses/internal/api/crypto"
 	"github.com/perses/perses/internal/api/impl/proxy/common"
-	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
+	"github.com/perses/perses/internal/api/impl/proxy/http"
 	"github.com/perses/perses/internal/api/impl/proxy/sql"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -111,7 +111,7 @@ type endpoint struct {
 	guard          *netguard.Guard
 	authz          authorization.Authorization
 	tokenRefresher crypto.TokenRefresher
-	transports     *httpProxy.TransportCache
+	transports     *httpproxy.TransportCache
 }
 
 func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO,
@@ -134,7 +134,7 @@ func New(cfg config.DatasourceConfig, dashboardDAO dashboard.DAO, secretDAO secr
 		guard:          guard,
 		authz:          authz,
 		tokenRefresher: tokenRefresher,
-		transports:     httpProxy.NewTransportCache(),
+		transports:     httpproxy.NewTransportCache(),
 	}
 }
 
@@ -195,6 +195,8 @@ func (e *endpoint) forwardCallerAuthorization() bool {
 	return !e.authz.IsEnabled() || !e.authz.IsNativeAuthz()
 }
 
+// proxy serves a request to a datasource. There is one implementation per kind of datasource proxy
+// (see the httpproxy and sqlproxy packages).
 type proxy interface {
 	Serve(c echo.Context) error
 }
@@ -264,6 +266,8 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 	}
 
 	var scrt *v1.SecretSpec
+	var pr proxy
+	var buildErr error
 
 	switch kind {
 	case datasourceHTTP.ProxyKindName:
@@ -274,7 +278,7 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 				return nil, err
 			}
 		}
-		return &httpProxy.Proxy{
+		pr, buildErr = httpproxy.New(httpproxy.Proxy{
 			Config:                     httpConfig,
 			DatasourceName:             datasourceName,
 			Path:                       path,
@@ -285,7 +289,7 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 			TransportKey:               transportKey,
 			ProxyConfig:                e.cfg.Proxy.HTTP,
 			ForwardCallerAuthorization: e.forwardCallerAuthorization(),
-		}, nil
+		})
 	case datasourceSQL.ProxyKindName:
 		sqlConfig := cfg.(*datasourceSQL.Config)
 		if len(sqlConfig.Secret) > 0 {
@@ -294,15 +298,23 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 				return nil, err
 			}
 		}
-		return &sql.Proxy{
+		pr, buildErr = sqlproxy.New(sqlproxy.Proxy{
 			Config:  sqlConfig,
 			Name:    datasourceName,
 			Project: projectName,
 			Path:    path,
 			Secret:  scrt,
 			Guard:   e.guard,
-		}, nil
+		})
 	default:
 		return nil, errors.New("no proxy kind found")
 	}
+	if buildErr != nil {
+		logrus.WithError(buildErr).WithFields(map[string]interface{}{
+			common.DatasourceFieldLog: datasourceName,
+			common.ProjectFieldLog:    common.ProjectForLog(projectName),
+		}).Error("unable to build the datasource proxy")
+		return nil, apiinterface.InternalError
+	}
+	return pr, nil
 }

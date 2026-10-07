@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"testing"
 
-	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
+	"github.com/perses/perses/internal/api/impl/proxy/http"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceSpec "github.com/perses/spec/go/datasource"
@@ -68,7 +68,7 @@ func TestNewProxy_allowedDestination(t *testing.T) {
 	require.NoError(t, json.Unmarshal([]byte(`{"plugin":{"kind":"PrometheusDatasource","spec":{"proxy":{"kind":"HTTPProxy","spec":{"url":"http://prometheus:9090"}}}}}`), &spec))
 	pr, err := (&endpoint{guard: proxytest.NewDefaultGuard(t)}).newProxy("prometheus", "p1", "", spec, "api/v1/query", nil)
 	require.NoError(t, err)
-	h, ok := pr.(*httpProxy.Proxy)
+	h, ok := pr.(*httpproxy.Proxy)
 	require.True(t, ok)
 	assert.Equal(t, "/api/v1/query", h.Path)
 }

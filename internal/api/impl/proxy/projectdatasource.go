@@ -18,7 +18,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
-	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -76,7 +75,7 @@ func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyProjectDatasource(ctx, projectName, dtsName, httpProxy.ProjectTransportKey(projectName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, projectTransportKey(projectName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 }

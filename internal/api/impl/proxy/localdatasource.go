@@ -18,7 +18,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
-	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -79,7 +78,7 @@ func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyDashboardDatasource(ctx, projectName, dtsName, httpProxy.DashboardTransportKey(projectName, dashboardName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dashboardTransportKey(projectName, dashboardName, dtsName), dts, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 }

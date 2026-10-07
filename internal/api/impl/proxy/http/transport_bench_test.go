@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package httpproxy
 
 import (
 	"encoding/pem"
@@ -115,7 +115,7 @@ func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec
 // The fake datasource runs on the loopback interface, so the network round trips saved by reusing the connections
 // (TCP handshake + TLS handshake) are close to zero here. On a real network, the gain per request is higher.
 //
-//	go test ./internal/api/impl/proxy/http/ -run '^$' -bench BenchmarkHTTPProxy_serve
+//	go test ./internal/api/impl/proxy/httpproxy/ -run '^$' -bench BenchmarkHTTPProxy_serve
 func BenchmarkHTTPProxy_serve(b *testing.B) {
 	for _, scheme := range []struct {
 		name string
@@ -129,7 +129,7 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 			transportKey string
 		}{
 			{name: "new-transport-per-request", transportKey: ""},
-			{name: "cached-transport", transportKey: GlobalTransportKey("prometheus")},
+			{name: "cached-transport", transportKey: "global/prometheus"},
 		} {
 			// When a new transport is created for each request, the connection is never reused.
 			// Without keep-alive, the server closes it after the response.

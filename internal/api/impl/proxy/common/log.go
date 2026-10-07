@@ -15,8 +15,10 @@
 package common
 
 const (
+	// DatasourceFieldLog is the log field holding the name of the datasource.
 	DatasourceFieldLog = "datasource"
-	ProjectFieldLog    = "project"
+	// ProjectFieldLog is the log field holding the project of the datasource (see ProjectForLog).
+	ProjectFieldLog = "project"
 )
 
 // ProjectForLog returns a meaningful log value for the project field.

@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/perses/perses/internal/api/authorization"
-	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
+	"github.com/perses/perses/internal/api/impl/proxy/http"
 	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/spec/go/common"
@@ -79,14 +79,14 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 	}{
 		{
 			name:         "defaults",
-			transportKey: httpProxy.GlobalTransportKey("prometheus"),
+			transportKey: globalTransportKey("prometheus"),
 			expected: config.HTTPProxyConfig{
 				MaxConnsPerHost:     0,
 				MaxIdleConns:        config.DefaultHTTPProxyMaxIdleConns,
 				MaxIdleConnsPerHost: config.DefaultHTTPProxyMaxIdleConnsPerHost,
 			},
 		},
-		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: httpProxy.GlobalTransportKey("prometheus"), expected: custom},
+		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: globalTransportKey("prometheus"), expected: custom},
 		{name: "limits applied to an unsaved datasource", proxyConfig: custom, transportKey: "", expected: custom},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -95,12 +95,12 @@ func TestEndpoint_newProxy_connectionLimits(t *testing.T) {
 			require.NoError(t, proxyConfig.Verify())
 			e := &endpoint{
 				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
-				transports: httpProxy.NewTransportCache(),
+				transports: httpproxy.NewTransportCache(),
 				guard:      proxytest.NewLoopbackGuard(t),
 			}
 			pr, err := e.newProxy("prometheus", "", test.transportKey, spec, "/api/v1/query", nil)
 			require.NoError(t, err)
-			h, ok := pr.(*httpProxy.Proxy)
+			h, ok := pr.(*httpproxy.Proxy)
 			require.True(t, ok)
 			assert.Same(t, e.transports, h.Transports)
 			assert.Equal(t, test.transportKey, h.TransportKey)
@@ -149,12 +149,12 @@ func TestEndpoint_newProxy_timeout(t *testing.T) {
 			require.NoError(t, proxyConfig.Verify())
 			e := &endpoint{
 				cfg:        config.DatasourceConfig{Proxy: config.DatasourceProxyConfig{HTTP: proxyConfig}},
-				transports: httpProxy.NewTransportCache(),
+				transports: httpproxy.NewTransportCache(),
 				guard:      proxytest.NewLoopbackGuard(t),
 			}
-			pr, err := e.newProxy("prometheus", "", httpProxy.GlobalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
+			pr, err := e.newProxy("prometheus", "", globalTransportKey("prometheus"), newSpec(test.timeout), "/api/v1/query", nil)
 			require.NoError(t, err)
-			h, ok := pr.(*httpProxy.Proxy)
+			h, ok := pr.(*httpproxy.Proxy)
 			require.True(t, ok)
 			assert.Equal(t, test.expected, h.ProxyConfig.EffectiveTimeout(h.Config.Timeout))
 		})

@@ -13,7 +13,7 @@
 
 //go:build integration
 
-package sql
+package sqlproxy
 
 import (
 	"fmt"

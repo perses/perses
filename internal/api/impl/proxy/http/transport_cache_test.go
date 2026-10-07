@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package httpproxy
 
 import (
 	"crypto/ecdsa"
@@ -144,9 +144,9 @@ func TestTransportCache_get(t *testing.T) {
 	t.Run("do not share the transport between datasources", func(t *testing.T) {
 		c, _ := newTestTransportCache()
 		builds := 0
-		t1, err := c.get(ProjectTransportKey("p", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
+		t1, err := c.get("project/p/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
-		t2, err := c.get(DashboardTransportKey("p", "d", "a"), transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
+		t2, err := c.get("dashboard/p/d/a", transportSettings{TLSConfig: tlsA}, countingBuilder(&builds))
 		require.NoError(t, err)
 		assert.NotSame(t, t1, t2)
 		assert.Equal(t, 2, builds)
@@ -374,7 +374,7 @@ func TestHTTPProxy_serve_reusesConnections(t *testing.T) {
 		transportKey  string
 		expectedConns int32
 	}{
-		{name: "saved datasource", transportKey: GlobalTransportKey("prometheus"), expectedConns: 1},
+		{name: "saved datasource", transportKey: "global/prometheus", expectedConns: 1},
 		{name: "unsaved datasource", transportKey: "", expectedConns: nbRequests},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -415,14 +415,14 @@ func TestHTTPProxy_getTransport_connectionLimits(t *testing.T) {
 	}{
 		{
 			name:         "defaults",
-			transportKey: GlobalTransportKey("prometheus"),
+			transportKey: "global/prometheus",
 			expected: config.HTTPProxyConfig{
 				MaxConnsPerHost:     0,
 				MaxIdleConns:        config.DefaultHTTPProxyMaxIdleConns,
 				MaxIdleConnsPerHost: config.DefaultHTTPProxyMaxIdleConnsPerHost,
 			},
 		},
-		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: GlobalTransportKey("prometheus"), expected: custom},
+		{name: "limits applied to a saved datasource", proxyConfig: custom, transportKey: "global/prometheus", expected: custom},
 		{name: "limits applied to an unsaved datasource", proxyConfig: custom, transportKey: "", expected: custom},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -456,7 +456,7 @@ func TestHTTPProxy_getTransport_timeoutChange(t *testing.T) {
 			Path:         "/api/v1/query",
 			Transports:   cache,
 			Guard:        proxytest.NewLoopbackGuard(t),
-			TransportKey: GlobalTransportKey("prometheus"),
+			TransportKey: "global/prometheus",
 			ProxyConfig:  config.HTTPProxyConfig{DefaultTimeout: common.Duration(10 * time.Second), MaxTimeout: common.Duration(time.Minute)},
 		}
 	}
@@ -516,7 +516,7 @@ func TestHTTPProxy_serve_maxConnsPerHost(t *testing.T) {
 				Path:         "/api/v1/query",
 				Transports:   cache,
 				Guard:        proxytest.NewLoopbackGuard(t),
-				TransportKey: GlobalTransportKey("prometheus"),
+				TransportKey: "global/prometheus",
 				ProxyConfig:  config.HTTPProxyConfig{MaxConnsPerHost: 1},
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
@@ -577,7 +577,7 @@ func TestHTTPProxy_serve_maxIdleConnsPerHost(t *testing.T) {
 				Path:         "/api/v1/query",
 				Transports:   cache,
 				Guard:        proxytest.NewLoopbackGuard(t),
-				TransportKey: GlobalTransportKey("prometheus"),
+				TransportKey: "global/prometheus",
 				ProxyConfig:  config.HTTPProxyConfig{MaxIdleConnsPerHost: 1},
 			}
 			req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
@@ -646,7 +646,7 @@ func TestHTTPProxy_serve_caFileRotation(t *testing.T) {
 			Secret:       &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{CAFile: caFile, MinVersion: "TLS12"}},
 			Transports:   cache,
 			Guard:        proxytest.NewLoopbackGuard(t),
-			TransportKey: GlobalTransportKey("prometheus"),
+			TransportKey: "global/prometheus",
 		}
 		req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 		rec := httptest.NewRecorder()

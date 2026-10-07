@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package httpproxy
 
 import (
 	"context"
@@ -31,6 +31,32 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNew(t *testing.T) {
+	cfg := &datasourceHTTP.Config{URL: common.MustParseURL("http://prometheus:9090")}
+	guard := proxytest.NewDefaultGuard(t)
+	for _, test := range []struct {
+		name          string
+		proxy         Proxy
+		errorContains string
+	}{
+		{name: "valid", proxy: Proxy{Config: cfg, Guard: guard, DatasourceName: "prometheus", Path: "/api/v1/query"}},
+		{name: "missing config", proxy: Proxy{Guard: guard}, errorContains: "the URL of the datasource is missing"},
+		{name: "missing URL", proxy: Proxy{Config: &datasourceHTTP.Config{}, Guard: guard}, errorContains: "the URL of the datasource is missing"},
+		{name: "missing guard", proxy: Proxy{Config: cfg}, errorContains: "the guard verifying the connections of the proxy is missing"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			p, err := New(test.proxy)
+			if len(test.errorContains) > 0 {
+				assert.ErrorContains(t, err, test.errorContains)
+				assert.Nil(t, p)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.proxy, *p)
+		})
+	}
+}
 
 func TestHTTPProxy_prepareRequest_headerPolicies(t *testing.T) {
 	defaultHeaders := http.Header{

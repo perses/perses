@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sql
+// Package sqlproxy implements the proxy executing read-only queries against the SQL datasources
+// (datasource proxy kind "SQLProxy").
+package sqlproxy
 
 import (
 	"context"
@@ -43,6 +45,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// sqlQuery is the body of a request to the SQL proxy.
 type sqlQuery struct {
 	Query string `json:"query"`
 }
@@ -68,16 +71,40 @@ func beginReadOnlyTx(ctx context.Context, db *sql.DB) (*sql.Conn, *sql.Tx, error
 	return conn, tx, nil
 }
 
+// Proxy executes a read-only SQL query against a datasource (datasource proxy kind "SQLProxy").
+// It must be built with New, once per request to serve.
+//
+// The query is checked to start with a read statement, then executed in a read-only transaction.
+// Every connection to the database is verified by the Guard.
 type Proxy struct {
-	Config   *datasourceSQL.Config
-	Secret   *v1.SecretSpec
-	Name     string
-	Project  string
-	Path     string
+	// Config is the SQL proxy configuration of the datasource (driver, host, database...). It is required.
+	Config *datasourceSQL.Config
+	// Secret contains the credentials and the TLS config used to reach the database. It must already be decrypted.
+	// It can be nil.
+	Secret *v1.SecretSpec
+	// Name is the name of the datasource, used in the logs.
+	Name string
+	// Project is the project of the datasource, used in the logs. Empty for a global datasource.
+	Project string
+	// Path is the path of the request, only used in the error messages.
+	Path string
+	// Guard verifies every connection made to the database. It is required.
+	Guard *netguard.Guard
+	// username and password are extracted from the Secret when serving a request (see setupAuthentication).
 	username string
 	password string
-	// Guard verifies every connection made to the database. It must not be nil.
-	Guard *netguard.Guard
+}
+
+// New returns the Proxy described by p, once verified it holds the settings required to serve requests safely:
+// the config of the datasource and the Guard.
+func New(p Proxy) (*Proxy, error) {
+	if p.Config == nil {
+		return nil, errors.New("the SQL config of the datasource is missing")
+	}
+	if p.Guard == nil {
+		return nil, errors.New("the guard verifying the connections of the proxy is missing")
+	}
+	return &p, nil
 }
 
 func (s *Proxy) logWithDefaultEntry() *logrus.Entry {
@@ -87,6 +114,8 @@ func (s *Proxy) logWithDefaultEntry() *logrus.Entry {
 	})
 }
 
+// Serve executes the SQL query sent in the body of the request of c (a POST request, see sqlQuery),
+// and writes its result to c as JSON (see SQLResponse).
 func (s *Proxy) Serve(c echo.Context) error {
 	r := c.Request()
 

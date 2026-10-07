@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package httpproxy
 
 import (
 	"crypto/sha256"
 	"encoding/json"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -41,29 +40,6 @@ const (
 	// transportRebuildRetryInterval is the minimum delay between two attempts to rebuild a transport after a failure.
 	transportRebuildRetryInterval = 5 * time.Second
 )
-
-// transportKey builds the identity of a saved datasource used as a key in the transport cache.
-// Each part is joined with a separator that is not allowed in Perses resource names (nor in a path parameter).
-// Note: even in case of a key collision, a transport is only reused if it has been built from the same settings (see transportSettings),
-// meaning both transports would be strictly equivalent.
-func transportKey(parts ...string) string {
-	return strings.Join(parts, "/")
-}
-
-// GlobalTransportKey returns the key identifying a global datasource in the transport cache.
-func GlobalTransportKey(datasourceName string) string {
-	return transportKey("global", datasourceName)
-}
-
-// ProjectTransportKey returns the key identifying a project datasource in the transport cache.
-func ProjectTransportKey(projectName, datasourceName string) string {
-	return transportKey("project", projectName, datasourceName)
-}
-
-// DashboardTransportKey returns the key identifying a datasource local to a dashboard in the transport cache.
-func DashboardTransportKey(projectName, dashboardName, datasourceName string) string {
-	return transportKey("dashboard", projectName, dashboardName, datasourceName)
-}
 
 // fileFingerprint identifies a version of a file on disk without reading it.
 type fileFingerprint struct {
@@ -118,6 +94,8 @@ type TransportCache struct {
 	now func() time.Time
 }
 
+// NewTransportCache returns an empty TransportCache.
+// It is meant to be shared by all the proxies for the lifetime of the server, so the transports are reused across requests.
 func NewTransportCache() *TransportCache {
 	return &TransportCache{
 		entries:  make(map[string]*transportEntry),
