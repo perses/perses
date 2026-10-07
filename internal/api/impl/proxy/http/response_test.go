@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package http
 
 import (
 	"fmt"
@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/spec/go/common"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	"github.com/stretchr/testify/assert"
@@ -33,18 +34,18 @@ const maliciousPage = `<html><body><script>fetch("/api/v1/secrets").then(r => r.
 // The callerHeaders are set on the response before proxying, like a middleware of Perses (e.g. CORS) would do.
 func serveThroughProxy(t *testing.T, serverURL string, callerHeaders http.Header) *httptest.ResponseRecorder {
 	t.Helper()
-	h := &httpProxy{
-		config: &datasourceHTTP.Config{URL: common.MustParseURL(serverURL)},
-		path:   "/page",
+	h := &Proxy{
+		Config: &datasourceHTTP.Config{URL: common.MustParseURL(serverURL)},
+		Path:   "/page",
 		// The test servers are listening on the loopback interface.
-		guard: newLoopbackGuard(t),
+		Guard: proxytest.NewLoopbackGuard(t),
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/projects/p1/datasources/evil/page", nil)
 	rec := httptest.NewRecorder()
 	for name, values := range callerHeaders {
 		rec.Header()[name] = values
 	}
-	require.NoError(t, h.serve(echo.New().NewContext(req, rec)))
+	require.NoError(t, h.Serve(echo.New().NewContext(req, rec)))
 	return rec
 }
 

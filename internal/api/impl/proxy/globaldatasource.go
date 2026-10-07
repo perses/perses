@@ -18,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
+	httpProxy "github.com/perses/perses/internal/api/impl/proxy/http"
 	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -35,7 +36,7 @@ func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName, trans
 	if err != nil {
 		return err
 	}
-	return pr.serve(ctx)
+	return pr.Serve(ctx)
 }
 
 func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
@@ -74,7 +75,7 @@ func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyGlobalDatasource(ctx, dts.Metadata.Name, globalTransportKey(dts.Metadata.Name), dts.Spec, func(name string) (*v1.SecretSpec, error) {
+	return e.proxyGlobalDatasource(ctx, dts.Metadata.Name, httpProxy.GlobalTransportKey(dts.Metadata.Name), dts.Spec, func(name string) (*v1.SecretSpec, error) {
 		return e.getGlobalSecret(dtsName, name)
 	})
 }

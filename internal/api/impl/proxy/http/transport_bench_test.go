@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package http
 
 import (
 	"encoding/pem"
@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/impl/proxy/proxytest"
 	"github.com/perses/perses/internal/api/netguard"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -62,7 +63,7 @@ func newBenchServer(tlsEnabled, keepAlive bool) (*httptest.Server, *atomic.Int64
 	return server, newConns
 }
 
-func closeCachedTransports(cache *transportCache) {
+func closeCachedTransports(cache *TransportCache) {
 	for _, e := range cache.entries {
 		e.transport.CloseIdleConnections()
 	}
@@ -85,20 +86,20 @@ var benchProxyConfig = func() config.HTTPProxyConfig {
 	return c
 }()
 
-func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec, cache *transportCache, guard *netguard.Guard, transportKey string) error {
-	// A new httpProxy is created for each request, like newProxy does.
-	h := &httpProxy{
-		config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
-		path:         "/api/v1/query",
-		secret:       secret,
-		transports:   cache,
-		proxyConfig:  benchProxyConfig,
-		guard:        guard,
-		transportKey: transportKey,
+func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec, cache *TransportCache, guard *netguard.Guard, transportKey string) error {
+	// A new Proxy is created for each request, like newProxy does.
+	h := &Proxy{
+		Config:       &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+		Path:         "/api/v1/query",
+		Secret:       secret,
+		Transports:   cache,
+		ProxyConfig:  benchProxyConfig,
+		Guard:        guard,
+		TransportKey: transportKey,
 	}
 	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prometheus/api/v1/query", nil)
 	rec := httptest.NewRecorder()
-	if err := h.serve(e.NewContext(req, rec)); err != nil {
+	if err := h.Serve(e.NewContext(req, rec)); err != nil {
 		return err
 	}
 	if rec.Code != http.StatusOK {
@@ -114,7 +115,7 @@ func benchServeOnce(e *echo.Echo, server *httptest.Server, secret *v1.SecretSpec
 // The fake datasource runs on the loopback interface, so the network round trips saved by reusing the connections
 // (TCP handshake + TLS handshake) are close to zero here. On a real network, the gain per request is higher.
 //
-//	go test ./internal/api/impl/proxy/ -run '^$' -bench BenchmarkHTTPProxy_serve
+//	go test ./internal/api/impl/proxy/http/ -run '^$' -bench BenchmarkHTTPProxy_serve
 func BenchmarkHTTPProxy_serve(b *testing.B) {
 	for _, scheme := range []struct {
 		name string
@@ -128,7 +129,7 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 			transportKey string
 		}{
 			{name: "new-transport-per-request", transportKey: ""},
-			{name: "cached-transport", transportKey: globalTransportKey("prometheus")},
+			{name: "cached-transport", transportKey: GlobalTransportKey("prometheus")},
 		} {
 			// When a new transport is created for each request, the connection is never reused.
 			// Without keep-alive, the server closes it after the response.
@@ -140,11 +141,11 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 				server, newConns := newBenchServer(scheme.tls, keepAlive)
 				defer server.Close()
 				secret := newBenchSecret(server, scheme.tls)
-				cache := newTransportCache()
+				cache := NewTransportCache()
 				defer closeCachedTransports(cache)
 				e := echo.New()
 				// The fake datasource runs on the loopback interface, denied by default.
-				guard := newLoopbackGuard(b)
+				guard := proxytest.NewLoopbackGuard(b)
 				iterations := 0
 				b.ReportAllocs()
 				for b.Loop() {
@@ -160,11 +161,11 @@ func BenchmarkHTTPProxy_serve(b *testing.B) {
 				server, newConns := newBenchServer(scheme.tls, keepAlive)
 				defer server.Close()
 				secret := newBenchSecret(server, scheme.tls)
-				cache := newTransportCache()
+				cache := NewTransportCache()
 				defer closeCachedTransports(cache)
 				e := echo.New()
 				// The fake datasource runs on the loopback interface, denied by default.
-				guard := newLoopbackGuard(b)
+				guard := proxytest.NewLoopbackGuard(b)
 				var iterations atomic.Int64
 				b.ReportAllocs()
 				b.RunParallel(func(pb *testing.PB) {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proxy
+package sql
 
 import (
 	"context"
@@ -31,20 +31,255 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	mySQLAddress    = "localhost:3306"
+	mariaDBAddress  = "localhost:3307"
+	postgresAddress = "localhost:5432"
+)
+
+func TestSQLProxy_sqlOpen(t *testing.T) {
+	testSuite := []struct {
+		name          string
+		proxy         *Proxy
+		tlsConfig     *tls.Config
+		expectError   bool
+		errorContains string
+	}{
+		{
+			name: "unsupported driver",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver: "unsupported",
+					Host:   mySQLAddress,
+				},
+			},
+			expectError:   true,
+			errorContains: "unsupported database driver",
+		},
+		{
+			name: "postgres with tls and sslmode disable",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "perses",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: "disable",
+					},
+				},
+			},
+			tlsConfig:     &tls.Config{MinVersion: tls.VersionTLS12},
+			expectError:   true,
+			errorContains: "the sslMode is not set or set to disable",
+		},
+		{
+			name: "mysql success",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMySQL,
+					Host:     mySQLAddress,
+					Database: "testdb",
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mysql with username",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMySQL,
+					Host:     mySQLAddress,
+					Database: "testdb",
+				},
+				username: "testuser",
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mysql with custom config",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMySQL,
+					Host:     mySQLAddress,
+					Database: "testdb",
+					MySQL: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset":   "utf8mb4",
+							"parseTime": "true",
+						},
+						MaxAllowedPacket: 67108864,
+					},
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb success",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with username and password",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+				},
+				username: "mariauser",
+				password: "mariapass",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with custom config",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+					MariaDB: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset":   "utf8mb4",
+							"collation": "utf8mb4_unicode_ci",
+						},
+						MaxAllowedPacket: 33554432,
+					},
+				},
+				username: "mariauser",
+				password: "mariapass",
+			},
+			expectError: false,
+		},
+		{
+			name: "mariadb with tls",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverMariaDB,
+					Host:     mariaDBAddress,
+					Database: "testdb",
+					MariaDB: &datasourceSQL.MySQLConfig{
+						Params: map[string]string{
+							"charset": "utf8mb4",
+						},
+					},
+				},
+				Name:     "mariadb-ds",
+				Project:  "testproject",
+				username: "mariauser",
+				password: "mariapass",
+			},
+			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
+			expectError: false,
+		},
+		{
+			name: "postgres success",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+				},
+				password: "password",
+			},
+			expectError: false,
+		},
+		{
+			name: "postgres with username",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModeDisable,
+					},
+				},
+				username: "pguser",
+				password: "pgpass",
+			},
+			expectError: false,
+		},
+		{
+			name: "postgres no password",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver: datasourceSQL.DriverPostgreSQL,
+					Host:   postgresAddress,
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "postgres with all ssl modes - prefer",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModePreferable,
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name: "postgres with ssl mode require and tls",
+			proxy: &Proxy{
+				Config: &datasourceSQL.Config{
+					Driver:   datasourceSQL.DriverPostgreSQL,
+					Host:     postgresAddress,
+					Database: "testdb",
+					Postgres: &datasourceSQL.PostgresConfig{
+						SSLMode: datasourceSQL.SSLModeRequire,
+					},
+				},
+			},
+			tlsConfig:   &tls.Config{MinVersion: tls.VersionTLS12},
+			expectError: false,
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.name, func(t *testing.T) {
+			db, err := test.proxy.sqlOpen(test.tlsConfig)
+			if test.expectError {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), test.errorContains)
+			} else {
+				assert.NoError(t, err)
+				require.NotNil(t, db)
+				_ = db.Close()
+			}
+		})
+	}
+}
+
 func TestSQLProxy_prepareTLSConfig(t *testing.T) {
 	t.Run("no secret", func(t *testing.T) {
-		tlsConfig, err := (&sqlProxy{}).prepareTLSConfig()
+		tlsConfig, err := (&Proxy{}).prepareTLSConfig()
 		require.NoError(t, err)
 		assert.Nil(t, tlsConfig)
 	})
 	t.Run("secret without TLS config", func(t *testing.T) {
-		s := &sqlProxy{secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{Username: "user", Password: "password"}}}
+		s := &Proxy{Secret: &v1.SecretSpec{BasicAuth: &secretModel.BasicAuth{Username: "user", Password: "password"}}}
 		tlsConfig, err := s.prepareTLSConfig()
 		require.NoError(t, err)
 		assert.Nil(t, tlsConfig)
 	})
 	t.Run("secret with TLS config", func(t *testing.T) {
-		s := &sqlProxy{secret: &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{InsecureSkipVerify: true}}}
+		s := &Proxy{Secret: &v1.SecretSpec{TLSConfig: &secretModel.TLSConfig{InsecureSkipVerify: true}}}
 		tlsConfig, err := s.prepareTLSConfig()
 		require.NoError(t, err)
 		require.NotNil(t, tlsConfig)
@@ -53,9 +288,9 @@ func TestSQLProxy_prepareTLSConfig(t *testing.T) {
 }
 
 func TestSQLProxy_buildMySQLConfig(t *testing.T) {
-	newProxy := func(driverConfig *datasourceSQL.MySQLConfig) *sqlProxy {
-		return &sqlProxy{
-			config:   &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "localhost:3306", Database: "perses", MySQL: driverConfig},
+	newProxy := func(driverConfig *datasourceSQL.MySQLConfig) *Proxy {
+		return &Proxy{
+			Config:   &datasourceSQL.Config{Driver: datasourceSQL.DriverMySQL, Host: "localhost:3306", Database: "perses", MySQL: driverConfig},
 			username: "user",
 			password: "password",
 		}
@@ -123,10 +358,10 @@ func TestSQLProxy_buildMySQLConfig(t *testing.T) {
 
 		for _, driver := range []datasourceSQL.Driver{datasourceSQL.DriverMySQL, datasourceSQL.DriverMariaDB} {
 			p := newProxy(&datasourceSQL.MySQLConfig{Params: params})
-			p.config.Driver = driver
+			p.Config.Driver = driver
 			if driver == datasourceSQL.DriverMariaDB {
-				p.config.MySQL = nil
-				p.config.MariaDB = &datasourceSQL.MySQLConfig{Params: params}
+				p.Config.MySQL = nil
+				p.Config.MariaDB = &datasourceSQL.MySQLConfig{Params: params}
 			}
 			cfg, err := p.buildMySQLConfig(nil)
 			require.NoError(t, err, driver)
@@ -138,8 +373,8 @@ func TestSQLProxy_buildMySQLConfig(t *testing.T) {
 
 	t.Run("MariaDB config used for MariaDB", func(t *testing.T) {
 		p := newProxy(nil)
-		p.config.Driver = datasourceSQL.DriverMariaDB
-		p.config.MariaDB = &datasourceSQL.MySQLConfig{Params: map[string]string{"tls": "false"}}
+		p.Config.Driver = datasourceSQL.DriverMariaDB
+		p.Config.MariaDB = &datasourceSQL.MySQLConfig{Params: map[string]string{"tls": "false"}}
 		cfg, err := p.buildMySQLConfig(nil)
 		require.NoError(t, err)
 		assert.Nil(t, cfg.TLS)
@@ -147,9 +382,9 @@ func TestSQLProxy_buildMySQLConfig(t *testing.T) {
 }
 
 func TestSQLProxy_buildPostgresConfig(t *testing.T) {
-	newProxy := func(postgresConfig *datasourceSQL.PostgresConfig) *sqlProxy {
-		return &sqlProxy{
-			config:   &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "localhost:5432", Database: "perses", Postgres: postgresConfig},
+	newProxy := func(postgresConfig *datasourceSQL.PostgresConfig) *Proxy {
+		return &Proxy{
+			Config:   &datasourceSQL.Config{Driver: datasourceSQL.DriverPostgreSQL, Host: "localhost:5432", Database: "perses", Postgres: postgresConfig},
 			username: "user",
 			password: "password",
 		}
@@ -244,7 +479,7 @@ func TestSQLProxy_buildPostgresConfig(t *testing.T) {
 }
 
 func TestSQLProxy_openPostgres_maxConns(t *testing.T) {
-	s := &sqlProxy{config: &datasourceSQL.Config{
+	s := &Proxy{Config: &datasourceSQL.Config{
 		Driver:   datasourceSQL.DriverPostgreSQL,
 		Host:     "localhost:5432",
 		Database: "perses",
