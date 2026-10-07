@@ -180,6 +180,69 @@ max_version -> maxVersion
 
 ## Plugin developer
 
+### Upgrading from v0.54.0 to v0.55.0
+
+#### Go SDK: `datasource.Selector` is now a union type
+
+`datasource.Selector` has been restructured as a union type to make the distinction between a
+concrete datasource reference and a variable reference explicit. The flat struct (with public `Kind`
+and `Name` fields) no longer exists.
+
+**Before:**
+
+```go
+// Concrete datasource — struct literal
+sel := &datasource.Selector{Kind: "PrometheusDatasource", Name: "myPrometheus"}
+
+// Reading fields
+fmt.Println(sel.Kind, sel.Name)
+```
+
+**After:**
+
+```go
+// Concrete datasource — use the constructor
+sel := datasource.NewStaticSelector("PrometheusDatasource", "myPrometheus")
+
+// Variable reference — new in this release; name may be "foo", "$foo", or "${foo}"
+sel, err := datasource.NewVariableSelector("myDatasource")
+
+// Reading fields — check which variant is set first
+if sel.Static != nil {
+    fmt.Println(sel.Static.Kind, sel.Static.Name)
+}
+if sel.Variable != nil {
+    fmt.Println(sel.Variable.Name) // bare name without "$"
+}
+```
+
+If you maintain a datasource plugin with a `Selector` helper, update it to call the constructors:
+
+```go
+// Before
+func Selector(datasourceName string) *datasource.Selector {
+    return &datasource.Selector{
+        Kind: PluginKind,
+        Name: datasourceName,
+    }
+}
+
+// After
+func Selector(datasourceName string) *datasource.Selector {
+    return datasource.NewStaticSelector(PluginKind, datasourceName)
+}
+
+func VariableSelector(datasourceName string) (*datasource.Selector, error) {
+    return datasource.NewVariableSelector(datasourceName)
+}
+```
+
+A static selector continues to serialize as `{"kind":"...","name":"..."}` (unchanged from previous
+versions). A variable selector now serializes as the plain JSON/YAML string `"$myVar"` — this is a
+new addition in this release; previously there was no way to express a variable reference in the
+datasource selector wire format. Note that marshaling a zero-value `Selector` (neither `Static` nor
+`Variable` set) or one with both fields set returns an error.
+
 ### Upgrading from v0.53.0 to v0.54.0
 
 #### Core package deprecated

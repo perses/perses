@@ -14,9 +14,10 @@
 package query
 
 import (
+	"strings"
 	"time"
 
-	promDatasource "github.com/perses/plugins/prometheus/sdk/go/datasource"
+	promDatasource "dac-test/prometheus/datasource"
 	"github.com/perses/spec/go/common"
 )
 
@@ -29,7 +30,15 @@ func Expr(expr string) Option {
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = promDatasource.Selector(datasourceName)
+		if strings.HasPrefix(datasourceName, "$") {
+			sel, err := promDatasource.VariableSelector(datasourceName)
+			if err != nil {
+				return err
+			}
+			builder.Datasource = sel
+		} else {
+			builder.Datasource = promDatasource.Selector(datasourceName)
+		}
 		return nil
 	}
 }

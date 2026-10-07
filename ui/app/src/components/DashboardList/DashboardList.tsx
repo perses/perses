@@ -19,6 +19,7 @@ import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
 import { useNavHistory } from '../../context/DashboardNavHistory';
 import type { PartialDashboardResource } from '../../model/dashboard-client';
 import { getDashboard, useDeleteDashboardMutation } from '../../model/dashboard-client';
@@ -87,6 +88,16 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
   const { dashboardList, folderList, isLoading, isEphemeralDashboardEnabled } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
+  // TODO: a temporary copy creates an 'EphemeralDashboard', which has its own 'create' permission.
+  // The projects are currently filtered on the 'Dashboard' permission only; the backend still enforces RBAC.
+  const { data: dashboardCreateAllowedProjects, isLoading: isDashboardCreateAllowedProjectsLoading } =
+    useDashboardCreateAllowedProjects();
+  let duplicationDisabledReason: string | undefined;
+  if (isDashboardCreateAllowedProjectsLoading) {
+    duplicationDisabledReason = 'Loading projects...';
+  } else if (dashboardCreateAllowedProjects.length === 0) {
+    duplicationDisabledReason = "Missing 'create' permission in any project for 'Dashboard' kind";
+  }
   const navHistory = useNavHistory();
   const dashboardsRows = useMemo(() => {
     const historyMap = new Map(navHistory.map((h) => [`${h.project}/${h.name}`, h.date]));
@@ -190,7 +201,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       getDashboard(project, name)
         .then((dashboard) => {
           if ('ttl' in dashboardInfo) {
-            navigate(`/projects/${project}/ephemeraldashboard/new`, {
+            navigate(`/projects/${dashboardInfo.project}/ephemeraldashboard/new`, {
               state: {
                 name: dashboardInfo.dashboard,
                 spec: {
@@ -201,7 +212,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
               },
             });
           } else {
-            navigate(`/projects/${project}/dashboard/new`, {
+            navigate(`/projects/${dashboardInfo.project}/dashboard/new`, {
               state: {
                 name: dashboardInfo.dashboard,
                 spec: {
@@ -246,6 +257,7 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
         handleEditFolderButtonClick={handleEditFolderButtonClick}
         handleAddFolderButtonClick={handleAddFolderButtonClick}
         handleDeleteFolderButtonClick={handleDeleteFolderButtonClick}
+        duplicationDisabledReason={duplicationDisabledReason}
         isLoading={isLoading}
       />
       {activeDialog.type === 'editDashboard' && (
@@ -259,8 +271,8 @@ export function DashboardList(props: DashboardListProperties): ReactElement {
       {activeDialog.type === 'duplicateDashboard' && (
         <CreateDashboardDialog
           open={activeDialog.type === 'duplicateDashboard'}
-          projects={[{ kind: 'Project', metadata: { name: activeDialog.target.metadata.project }, spec: {} }]}
-          hideProjectSelect={true}
+          projects={dashboardCreateAllowedProjects}
+          defaultProject={activeDialog.target.metadata.project}
           mode="duplicate"
           name={activeDialog.target.displayName}
           onSuccess={handleDashboardDuplication}

@@ -46,6 +46,20 @@ properties of this design deserve attention:
   goroutines and sockets busy against unreachable hosts, so only increase
   `max_timeout` if you need to, and keep it as low as possible. These settings
   don't apply to SQL proxy datasources.
+- **Responses are served under the Perses origin.** The proxy returns the
+  response of the datasource from the Perses server, so the browser would
+  apply it to the Perses origin. To prevent a datasource from running scripts
+  with the session of a user opening a link to it, setting cookies, or
+  redirecting to another website, every proxied response gets the
+  `Content-Security-Policy: sandbox; default-src 'none'; frame-ancestors 'none'`
+  and `X-Content-Type-Options: nosniff` headers. The headers that would apply
+  to the Perses origin are also removed: `Set-Cookie`, `Clear-Site-Data`,
+  `Refresh`, `Strict-Transport-Security`, `Alt-Svc`, `Service-Worker-Allowed`,
+  the CORS headers (`Access-Control-*`, defined by `security.cors` instead),
+  and the `Location` / `Content-Location` headers that are not relative. The
+  Perses UI queries the proxy with `fetch`, so this has no impact on it, but
+  the UI of a datasource (for example the Prometheus UI) can no longer be
+  browsed through the proxy.
 
 ## Secrets at rest
 

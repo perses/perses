@@ -63,18 +63,21 @@ export function useAuthorizationContext(): AuthorizationContext {
   return ctx;
 }
 
-export function useDashboardCreateAllowedProjects(): ProjectResource[] {
+export function useDashboardCreateAllowedProjects(): { data: ProjectResource[]; isLoading: boolean } {
   const { enabled, userPermissions } = useAuthorizationContext();
-  const { data } = useProjectList();
+  const { data, isLoading } = useProjectList();
   if (!enabled) {
-    return data ?? [];
+    return { data: data ?? [], isLoading };
   }
 
-  return (data ?? []).filter(
-    (project) =>
-      permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
-      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
-  );
+  return {
+    data: (data ?? []).filter(
+      (project) =>
+        permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
+        permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard'),
+    ),
+    isLoading,
+  };
 }
 
 /*

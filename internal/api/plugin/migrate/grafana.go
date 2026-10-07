@@ -190,6 +190,35 @@ func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
 	return v.Current.Value
 }
 
+// LenientString is a string field of a Grafana dashboard that is decoded best-effort: a JSON value that is not a
+// string (e.g. `"refresh": false`, written by older Grafana versions when auto-refresh is off) is decoded as an empty
+// string, instead of making the whole migration fail.
+type LenientString string
+
+func (s *LenientString) UnmarshalJSON(data []byte) error {
+	var value string
+	_ = json.Unmarshal(data, &value)
+	*s = LenientString(value)
+	return nil
+}
+
+// GrafanaTimeRange is the default time range of a Grafana dashboard, e.g. {"from": "now-6h", "to": "now"}.
+type GrafanaTimeRange struct {
+	From string `json:"from"`
+	To   string `json:"to"`
+}
+
+// UnmarshalJSON decodes the time range best-effort: a value that is not an object of strings leaves the time range
+// empty (the migration then uses the default duration of Perses), instead of making the whole migration fail.
+func (t *GrafanaTimeRange) UnmarshalJSON(data []byte) error {
+	type plain GrafanaTimeRange
+	var tmp plain
+	if json.Unmarshal(data, &tmp) == nil {
+		*t = GrafanaTimeRange(tmp)
+	}
+	return nil
+}
+
 type SimplifiedDashboard struct {
 	UID        string        `json:"uid,omitempty"`
 	Title      string        `json:"title"`
@@ -199,6 +228,12 @@ type SimplifiedDashboard struct {
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`
+	// Time is the default time range of the dashboard. It is nil when the dashboard has none.
+	Time *GrafanaTimeRange `json:"time"`
+	// Refresh is the default auto-refresh interval of the dashboard, e.g. "1m". It is empty when auto-refresh is off.
+	Refresh LenientString `json:"refresh"`
+	// Timezone is the timezone of the dashboard: "browser", "utc", an IANA timezone name, or empty.
+	Timezone LenientString `json:"timezone"`
 }
 
 func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {

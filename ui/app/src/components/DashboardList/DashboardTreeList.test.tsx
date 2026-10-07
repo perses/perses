@@ -12,27 +12,37 @@
 // limitations under the License.
 
 import type { FolderResource } from '@perses-dev/client';
-import { fireEvent, render, screen } from '@testing-library/react';
-import type { ReactElement } from 'react';
+import type { TableColumnConfig } from '@perses-dev/components';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import type { ReactElement, ReactNode } from 'react';
 import { useCallback } from 'react';
 import { vi } from 'vitest';
 
 import type { DashboardListRow } from './DashboardList';
+import type { DashboardTreeTableRow } from './DashboardTreeList';
 import DashboardTreeList from './DashboardTreeList';
 
 interface MockTableProps {
+  data: DashboardTreeTableRow[];
+  columns: Array<TableColumnConfig<DashboardTreeTableRow>>;
   pagination: { pageIndex: number; pageSize: number };
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
-function MockTable({ pagination, onPaginationChange }: MockTableProps): ReactElement {
+// Only renders the actions cell of each row.
+function MockTable({ data, columns, pagination, onPaginationChange }: MockTableProps): ReactElement {
   const showTenRows = useCallback((): void => onPaginationChange({ pageIndex: 0, pageSize: 10 }), [onPaginationChange]);
+  const renderActionsCell = columns.find((column) => column.id === 'actions')?.cell;
   return (
     <>
       <span>Rows per page: {pagination.pageSize}</span>
       <button type="button" onClick={showTenRows}>
         Show 10 rows
       </button>
+      {typeof renderActionsCell === 'function' &&
+        data.map((row) => (
+          <div key={row.name}>{renderActionsCell({ row: { original: row } } as never) as ReactNode}</div>
+        ))}
     </>
   );
 }
@@ -43,6 +53,12 @@ vi.mock('@perses-dev/components', () => ({
 
 vi.mock('../../context/Config', () => ({
   useDefaultRowsPerPage: (): number => 50,
+  useIsReadonly: (): boolean => false,
+}));
+
+vi.mock('../../context/Authorization', () => ({
+  GlobalProject: '*',
+  useHasPermission: (): boolean => true,
 }));
 
 vi.mock('../../utils/browser-size', () => ({
@@ -52,18 +68,42 @@ vi.mock('../../utils/browser-size', () => ({
 const noopHandler = (): (() => void) => () => undefined;
 const emptyFolderList: FolderResource[] = [];
 const emptyDashboardsMap = new Map<string, Map<string, DashboardListRow>>();
+const dashboardsMap = new Map([
+  [
+    'myproject',
+    new Map<string, DashboardListRow>([
+      [
+        'mydashboard',
+        {
+          index: 0,
+          project: 'myproject',
+          name: 'mydashboard',
+          displayName: 'My Dashboard',
+          version: 1,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-06-01T00:00:00Z',
+          tags: [],
+        },
+      ],
+    ]),
+  ],
+]);
 
-function renderDashboardTreeList(): void {
+function renderDashboardTreeList(
+  map: Map<string, Map<string, DashboardListRow>> = emptyDashboardsMap,
+  duplicationDisabledReason?: string,
+): void {
   render(
     <DashboardTreeList
       folderList={emptyFolderList}
-      dashboardsMap={emptyDashboardsMap}
+      dashboardsMap={map}
       handleRenameButtonClick={noopHandler}
       handleDuplicateButtonClick={noopHandler}
       handleDeleteButtonClick={noopHandler}
       handleEditFolderButtonClick={noopHandler}
       handleAddFolderButtonClick={noopHandler}
       handleDeleteFolderButtonClick={noopHandler}
+      duplicationDisabledReason={duplicationDisabledReason}
     />,
   );
 }
@@ -81,5 +121,19 @@ describe('DashboardTreeList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show 10 rows' }));
 
     expect(screen.queryByText('Rows per page: 10')).not.toBeNull();
+  });
+
+  it('enables the duplicate button when no disabled reason is given', () => {
+    renderDashboardTreeList(dashboardsMap);
+
+    expect(within(screen.getByLabelText('Duplicate')).getByRole('button').hasAttribute('disabled')).toBe(false);
+  });
+
+  it('disables the duplicate button and explains why in its tooltip', () => {
+    const reason = "Missing 'create' permission in any project for 'Dashboard' kind";
+    renderDashboardTreeList(dashboardsMap, reason);
+
+    expect(screen.queryByLabelText('Duplicate')).toBeNull();
+    expect(within(screen.getByLabelText(reason)).getByRole('button').hasAttribute('disabled')).toBe(true);
   });
 });

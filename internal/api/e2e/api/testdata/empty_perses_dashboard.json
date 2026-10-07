@@ -13,6 +13,7 @@
     },
     "panels": {},
     "layouts": [],
-    "duration": "1h"
+    "duration": "6h",
+    "timezone": "UTC"
   }
 }

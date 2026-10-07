@@ -416,7 +416,8 @@ func (h *httpProxy) serve(c echo.Context) error {
 		}
 		proxyErr = err
 	}
-	reverseProxy.ModifyResponse = h.sanitizeLocationHeaders
+	// The response is served under the Perses origin: the headers that would apply to it are removed or overridden.
+	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
 	reverseProxy.Transport, transportErr = h.getTransport()
@@ -441,71 +442,6 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(status, proxyErr.Error())
 	}
 	return nil
-}
-
-const deniedDestinationMsg = "the datasource destination is not allowed by the Perses server configuration ('datasource.proxy')"
-
-// locationHeaders are the response headers containing a URL the browser can follow or use to resolve other URLs:
-// "Location" for the redirections (and the created resources), "Content-Location" for the location of the returned content.
-var locationHeaders = []string{"Location", "Content-Location"}
-
-// sanitizeLocationHeaders removes the location headers (see locationHeaders) pointing to another origin than the datasource.
-// The proxy never follows the redirections itself, but the browser does. Without this, the proxy could be used as an
-// open redirect from the Perses domain to any website.
-func (h *httpProxy) sanitizeLocationHeaders(resp *http.Response) error {
-	for _, header := range locationHeaders {
-		values := resp.Header.Values(header)
-		if len(values) == 0 {
-			continue
-		}
-		for _, value := range values {
-			if !isSameOriginLocation(value, h.config.URL.URL) {
-				h.logPolicyEvent(h.logWithDefaultEntry().WithField(strings.ToLower(header), value), fmt.Sprintf("dropping the %s header pointing to another origin", header))
-				resp.Header.Del(header)
-				break
-			}
-		}
-	}
-	return nil
-}
-
-// isSameOriginLocation returns true if the location (absolute or relative) stays on the origin (scheme, host and port)
-// of the target.
-func isSameOriginLocation(location string, target *url.URL) bool {
-	// Browsers ignore tabs and newlines in a URL, and consider backslashes as slashes ("/\evil.com" is "//evil.com").
-	normalized := strings.NewReplacer("\t", "", "\r", "", "\n", "", "\\", "/").Replace(strings.TrimSpace(location))
-	u, err := url.Parse(normalized)
-	if err != nil {
-		return false
-	}
-	if len(u.Scheme) == 0 && len(u.Host) == 0 {
-		// Relative location. Browsers consider "///evil.com" as "//evil.com".
-		return !strings.HasPrefix(normalized, "//")
-	}
-	scheme := strings.ToLower(u.Scheme)
-	if len(scheme) == 0 {
-		// Scheme-relative location ("//host/path").
-		scheme = strings.ToLower(target.Scheme)
-	}
-	if scheme != strings.ToLower(target.Scheme) {
-		return false
-	}
-	return strings.EqualFold(u.Hostname(), target.Hostname()) && effectivePort(scheme, u) == effectivePort(scheme, target)
-}
-
-// effectivePort returns the port of the URL, or the default port of the scheme when the URL doesn't define any.
-func effectivePort(scheme string, u *url.URL) string {
-	if port := u.Port(); len(port) > 0 {
-		return port
-	}
-	switch scheme {
-	case config.SchemeHTTP:
-		return "80"
-	case config.SchemeHTTPS:
-		return "443"
-	default:
-		return ""
-	}
 }
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {

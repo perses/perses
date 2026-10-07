@@ -398,41 +398,7 @@ func (n *native) loadAllPermissionsAndRoles() (usersPermissions, []*v1.GlobalRol
 	if err != nil {
 		return nil, nil, nil, err
 	}
-
-	// Build cache
-	permissionBuild := make(usersPermissions)
-	for _, usr := range users {
-		for _, globalRoleBinding := range globalRoleBindings {
-			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				globalRole := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role)
-				if globalRole == nil {
-					logrus.Warningf("global role %q listed in the global role binding %q does not exist", globalRoleBinding.Spec.Role, globalRoleBinding.Metadata.Name)
-					continue
-				}
-				globalRolePermissions := globalRole.Spec.Permissions
-				for i := range globalRolePermissions {
-					permissionBuild.addEntry(usr.Metadata.Name, v1.WildcardProject, &globalRolePermissions[i])
-				}
-			}
-		}
-	}
-
-	for _, usr := range users {
-		for _, roleBinding := range roleBindings {
-			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				projectRole := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role)
-				if projectRole == nil {
-					logrus.Warningf("role %q listed in the role binding %s/%s does not exist", roleBinding.Spec.Role, roleBinding.Metadata.Project, roleBinding.Metadata.Name)
-					continue
-				}
-				rolePermissions := projectRole.Spec.Permissions
-				for i := range rolePermissions {
-					permissionBuild.addEntry(usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
-				}
-			}
-		}
-	}
-	return permissionBuild, globalRoles, roles, nil
+	return buildUsersPermissions(users, globalRoles, roles, globalRoleBindings, roleBindings), globalRoles, roles, nil
 }
 
 // claimPermissions resolves the permissions granted by a user's PersistedClaims based on
