@@ -54,6 +54,7 @@ Forgery), the destinations of the proxy are now verified. By default, the proxy 
 - the Kubernetes API service when Perses is running in a Kubernetes cluster
 - any URL scheme other than `http` and `https`, the URLs containing credentials (`http://user:password@host`), and the
   Unix sockets for the SQL datasources
+- the IPv4 addresses not written in the dotted-decimal notation (e.g. `2130706433`, `0x7f000001` or `127.1`)
 
 The private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, ...) remain allowed by default.
 
@@ -83,7 +84,8 @@ which has to be allowed explicitly. For example:
 - allowing `169.254.0.0/16` doesn't allow the cloud metadata endpoint `169.254.169.254`.
 
 If Perses is using an HTTP proxy configured through the environment (`HTTP_PROXY`, `HTTPS_PROXY`), a datasource can no
-longer target the address of this proxy directly (for example when the proxy is bypassed with `NO_PROXY`).
+longer target the address of this proxy, neither directly (for example when the proxy is bypassed with `NO_PROXY`) nor
+through the proxy itself.
 
 You can also further restrict the destinations, for example to deny the private networks or to only allow a list of
 hosts. See the [DatasourceProxy config](./configuration/configuration.md#datasourceproxy-config) for more details.

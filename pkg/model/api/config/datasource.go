@@ -48,6 +48,10 @@ type ProjectDatasourceConfig struct {
 }
 
 const (
+	// SchemeHTTP and SchemeHTTPS are the URL schemes supported by the proxy of the datasources of kind HTTPProxy.
+	SchemeHTTP  = "http"
+	SchemeHTTPS = "https"
+
 	DefaultHTTPProxyMaxIdleConns        = 100
 	DefaultHTTPProxyMaxIdleConnsPerHost = 10
 	// DefaultHTTPProxyTimeout is the default maximum amount of time allowed to establish a connection to a datasource.
@@ -90,8 +94,8 @@ type HTTPProxyConfig struct {
 func (c *HTTPProxyConfig) Verify() error {
 	for i, scheme := range c.AllowedSchemes {
 		s := strings.ToLower(strings.TrimSpace(scheme))
-		if s != "http" && s != "https" {
-			return fmt.Errorf("datasource.proxy.http.allowed_schemes: %q is not supported, only 'http' and 'https' are accepted", scheme)
+		if s != SchemeHTTP && s != SchemeHTTPS {
+			return fmt.Errorf("datasource.proxy.http.allowed_schemes: %q is not supported, only '%s' and '%s' are accepted", scheme, SchemeHTTP, SchemeHTTPS)
 		}
 		c.AllowedSchemes[i] = s
 	}

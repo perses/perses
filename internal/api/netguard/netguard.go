@@ -50,13 +50,12 @@ import (
 	datasourceSpec "github.com/perses/spec/go/datasource"
 	datasourceHTTP "github.com/perses/spec/go/datasource/proxy/http"
 	datasourceSQL "github.com/perses/spec/go/datasource/proxy/sql"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/http/httpproxy"
 	"golang.org/x/net/idna"
 )
 
 const (
-	schemeHTTP    = "http"
-	schemeHTTPS   = "https"
 	dialTimeout   = 30 * time.Second
 	dialKeepAlive = 30 * time.Second
 	configHint    = "if this destination is legitimate, ask your administrator to review the 'datasource.proxy' section of the Perses configuration"
@@ -88,7 +87,7 @@ func IsDenied(err error) bool {
 }
 
 var (
-	defaultAllowedSchemes = []string{schemeHTTP, schemeHTTPS}
+	defaultAllowedSchemes = []string{config.SchemeHTTP, config.SchemeHTTPS}
 	// builtinDeniedNetworks are the networks that are always denied, unless an allowed network at least as specific
 	// covers the IP address (see Guard.CheckIP).
 	// No datasource is expected to be there, while they give access to sensitive services.
@@ -383,8 +382,8 @@ func (g *Guard) dialContext(ctx context.Context, network, address string, timeou
 // The HTTP proxy configured through the environment (HTTP_PROXY, HTTPS_PROXY, NO_PROXY) is honored, and considered
 // as trusted since it's configured by the administrator of the Perses server. As the proxy resolves the final
 // destination, the destination is verified upfront instead.
-// A request reaching the address of the proxy directly (i.e. without going through it) is denied, as the connections
-// to the proxy are not verified.
+// A request targeting the address of the proxy (directly or through it) is denied, as the connections to the proxy
+// are not verified.
 //
 // connectTimeout is the maximum amount of time allowed to establish a connection. When zero or negative, a default of 30s is used.
 func (g *Guard) HTTPTransport(tlsConfig *tls.Config, connectTimeout time.Duration) *http.Transport {
@@ -395,16 +394,18 @@ func (g *Guard) HTTPTransport(tlsConfig *tls.Config, connectTimeout time.Duratio
 	directDialer := &net.Dialer{Timeout: connectTimeout, KeepAlive: dialKeepAlive}
 	return &http.Transport{
 		Proxy: func(req *http.Request) (*url.URL, error) {
+			// The connections to the address of the proxy are not verified (see DialContext below), and the proxy is
+			// never a legitimate datasource: reaching it directly would bypass the verification, and reaching it through
+			// itself would give access to its own endpoints (e.g. its cache manager).
+			if proxyEnv.isProxyAddress(canonicalAddr(req.URL)) {
+				return nil, deny("the destination %q is the HTTP proxy of the Perses server", req.URL.Host)
+			}
 			proxyURL, err := proxyEnv.proxyFunc(req.URL)
 			if err != nil {
 				return nil, err
 			}
 			if proxyURL == nil {
-				// Direct connection. The connections to the address of the proxy are not verified (see DialContext below),
-				// so the destination must not be the proxy itself.
-				if proxyEnv.isProxyAddress(canonicalAddr(req.URL)) {
-					return nil, deny("the destination %q is the HTTP proxy of the Perses server", req.URL.Host)
-				}
+				// Direct connection, verified at connection time.
 				return nil, nil
 			}
 			if checkErr := g.checkProxiedDestination(req.Context(), req.URL); checkErr != nil {
@@ -471,6 +472,10 @@ func parseProxyURL(rawProxy string) *url.URL {
 
 // checkProxiedDestination verifies a destination that will be reached through an HTTP proxy.
 // The connection is established with the proxy, so the final destination cannot be verified at connection time.
+//
+// The verification is best effort: the proxy resolves the name on its own and could get a different result.
+// The allowed_hosts configuration, or a policy enforced by the proxy itself, is the way to strictly restrict the
+// destinations in this situation.
 func (g *Guard) checkProxiedDestination(ctx context.Context, u *url.URL) error {
 	if err := g.ValidateURL(u); err != nil {
 		return err
@@ -482,8 +487,10 @@ func (g *Guard) checkProxiedDestination(ctx context.Context, u *url.URL) error {
 	}
 	ips, err := g.resolver.LookupNetIP(ctx, "ip", host)
 	if err != nil {
-		// The name might only be resolvable by the proxy (split DNS). The static verification passed, so let the proxy
-		// handle it. The allowed_hosts configuration is the way to strictly restrict the destinations in this situation.
+		// The name might only be resolvable by the proxy (split DNS). The static verification passed (in particular,
+		// the host is not an IPv4 address in a non-canonical notation that the proxy would translate on its own, see
+		// endsInNumber), so let the proxy handle it.
+		logrus.WithError(err).WithField("host", host).Debug("unable to resolve the destination before sending the request to the HTTP proxy, the proxy will resolve it")
 		return nil
 	}
 	for _, ip := range ips {
@@ -504,6 +511,9 @@ func (g *Guard) validateHost(host string) error {
 	}
 	if ip, err := netip.ParseAddr(host); err == nil {
 		return g.CheckIP(ip)
+	}
+	if endsInNumber(host) {
+		return deny("the host %q is an IPv4 address in a non-canonical notation, use the dotted-decimal notation instead (e.g. 10.0.0.1)", host)
 	}
 	// RFC 6761: "localhost" and its subdomains always resolve to the loopback interface.
 	if host == "localhost" || strings.HasSuffix(host, ".localhost") {
@@ -560,6 +570,51 @@ func embeddedIPv4(ip netip.Addr) (netip.Addr, bool) {
 	return netip.Addr{}, false
 }
 
+// endsInNumber returns true if the last label of the (normalized) host is a number, in decimal or in hexadecimal
+// with the "0x" prefix (see the "ends in a number checker" of the WHATWG URL standard).
+//
+// Such a host is not a valid DNS name, as no top-level domain is numeric: it's an IPv4 address in a non-canonical
+// notation (e.g. "2130706433", "0x7f000001", "127.1" or "0177.0.0.1" for 127.0.0.1). These notations are rejected by
+// netip.ParseAddr and by the Go resolver, but translated to an IP address by inet_aton / getaddrinfo, and so by
+// most HTTP proxies and browsers. They would bypass the verification of the destinations resolved by an HTTP proxy.
+func endsInNumber(host string) bool {
+	labels := strings.Split(host, ".")
+	last := labels[len(labels)-1]
+	if len(last) == 0 && len(labels) > 1 {
+		last = labels[len(labels)-2]
+	}
+	if len(last) == 0 {
+		return false
+	}
+	if isDigits(last) {
+		return true
+	}
+	if hexDigits, ok := strings.CutPrefix(last, "0x"); ok {
+		return isHexDigits(hexDigits)
+	}
+	return false
+}
+
+func isDigits(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] < '0' || s[i] > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+// isHexDigits returns true if s only contains hexadecimal digits (lowercase, as the host is normalized).
+// An empty string is accepted, as "0x" alone is the number zero for inet_aton.
+func isHexDigits(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if (s[i] < '0' || s[i] > '9') && (s[i] < 'a' || s[i] > 'f') {
+			return false
+		}
+	}
+	return true
+}
+
 func normalizeHost(host string) string {
 	host = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(host), "."))
 	if ip, err := netip.ParseAddr(strings.TrimSuffix(strings.TrimPrefix(host, "["), "]")); err == nil {
@@ -573,9 +628,9 @@ func canonicalAddr(u *url.URL) string {
 	port := u.Port()
 	if len(port) == 0 {
 		switch u.Scheme {
-		case schemeHTTP:
+		case config.SchemeHTTP:
 			port = "80"
-		case schemeHTTPS:
+		case config.SchemeHTTPS:
 			port = "443"
 		case "socks5", "socks5h":
 			port = "1080"

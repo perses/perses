@@ -16,6 +16,7 @@ package netguard
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -178,6 +179,18 @@ func TestValidateURL(t *testing.T) {
 		{title: "userinfo without password", url: "http://user@prometheus:9090"},
 		{title: "userinfo used to disguise the host", cfg: allowedHostsCfg, url: "http://prometheus.example.com@evil.example.com"},
 		{title: "userinfo on an allowed host", cfg: allowedHostsCfg, url: "http://user:password@prometheus.example.com"}, //nolint:gosec // G101: test value, not a real credential
+		{title: "ipv4 as a decimal number", url: "http://2130706433:8080"},
+		{title: "ipv4 as an hexadecimal number", url: "http://0x7f000001:8080"},
+		{title: "ipv4 as an uppercase hexadecimal number", url: "http://0X7F000001:8080"},
+		{title: "shortened ipv4", url: "http://127.1:8080"},
+		{title: "ipv4 with octal parts", url: "http://0177.0.0.1:8080"},
+		{title: "ipv4 with hexadecimal parts", url: "http://0x7f.0x0.0x0.0x1:8080"},
+		{title: "non-canonical ipv4 with trailing dot", url: "http://127.1.:8080"},
+		{title: "non-canonical ipv4 of an allowed network", cfg: loopbackCfg, url: "http://127.1:8080"},
+		{title: "non-canonical ipv4 of a private network", url: "http://10.1:9090"},
+		{title: "domain starting with digits", url: "http://123.example.com:9090", allowed: true},
+		{title: "label starting with 0x", url: "http://0xcafe.example.com:9090", allowed: true},
+		{title: "top-level domain starting with 0x", url: "http://prometheus.0xyz:9090", allowed: true},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
@@ -208,6 +221,7 @@ func TestValidateSQLHost(t *testing.T) {
 		{title: "abstract unix socket", host: "@mysql"},
 		{title: "empty", host: " "},
 		{title: "one of the hosts denied", host: "db1:5432,127.0.0.1:5432"},
+		{title: "non-canonical ipv4", host: "2130706433:5432"},
 		{title: "service name", host: "db:5432", allowed: true},
 		{title: "private ip", host: "10.0.0.1:3306", allowed: true},
 		{title: "multiple hosts", host: "db1:5432, db2:5432", allowed: true},
@@ -465,4 +479,99 @@ func TestHTTPTransport_directRequestToProxyDenied(t *testing.T) {
 	require.NoError(t, err)
 	_ = resp.Body.Close()
 	assert.True(t, called)
+}
+
+// setHTTPProxyEnv configures the HTTP proxy of the environment, for the plain HTTP requests only.
+func setHTTPProxyEnv(t *testing.T, proxyURL string) {
+	t.Helper()
+	for _, name := range []string{"HTTP_PROXY", "http_proxy"} {
+		t.Setenv(name, proxyURL)
+	}
+	for _, name := range []string{"HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy", "REQUEST_METHOD"} {
+		t.Setenv(name, "")
+	}
+}
+
+// TestHTTPTransport_throughProxy ensures the destinations reached through the HTTP proxy of the environment are
+// verified before the request is sent to the proxy, as the proxy resolves and connects to the destination itself.
+func TestHTTPTransport_throughProxy(t *testing.T) {
+	var proxiedURLs []string
+	fakeProxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// A request sent to a proxy contains the absolute URL of the destination.
+		proxiedURLs = append(proxiedURLs, r.URL.String())
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer fakeProxy.Close()
+	setHTTPProxyEnv(t, fakeProxy.URL)
+
+	g := newGuard(t, config.DatasourceProxyConfig{})
+	// Simulate names that the Perses server cannot resolve, while the proxy could (split DNS).
+	g.resolver = &net.Resolver{
+		PreferGo: true,
+		Dial: func(_ context.Context, _, _ string) (net.Conn, error) {
+			return nil, errors.New("no DNS server available")
+		},
+	}
+	client := &http.Client{Transport: g.HTTPTransport(nil, 0)}
+
+	for _, test := range []struct {
+		url     string
+		allowed bool
+	}{
+		{url: "http://169.254.169.254/latest/meta-data/"},
+		// Not resolvable by the Perses server (and so not verified at connection time), but translated to 127.0.0.1
+		// by most proxies.
+		{url: "http://2130706433:8080/"},
+		{url: "http://0x7f000001:8080/"},
+		{url: "http://127.1:8080/"},
+		{url: "http://10.0.0.1:9090/api/v1/query", allowed: true},
+		// Names the Perses server cannot resolve are let through: the proxy resolves them.
+		{url: "http://prometheus.internal.example.com:9090/api/v1/query", allowed: true},
+	} {
+		t.Run(test.url, func(t *testing.T) {
+			proxiedURLs = nil
+			resp, err := client.Get(test.url)
+			if !test.allowed {
+				assert.True(t, IsDenied(err), "expected a denied error, got %v", err)
+				assert.Empty(t, proxiedURLs, "the request must not reach the proxy")
+				return
+			}
+			require.NoError(t, err)
+			_ = resp.Body.Close()
+			assert.Equal(t, http.StatusOK, resp.StatusCode)
+			assert.Equal(t, []string{test.url}, proxiedURLs)
+		})
+	}
+}
+
+// TestHTTPTransport_proxyThroughItselfDenied ensures the HTTP proxy of the environment cannot be targeted through
+// itself either, as it would give access to its own endpoints (e.g. its cache manager).
+func TestHTTPTransport_proxyThroughItselfDenied(t *testing.T) {
+	// The proxy is not on a loopback address, so the requests to it are sent through the proxy (unless NO_PROXY matches).
+	setHTTPProxyEnv(t, "http://proxy.corp.example.com:3128")
+	transport := newGuard(t, config.DatasourceProxyConfig{}).HTTPTransport(nil, 0)
+
+	for _, target := range []string{
+		"http://proxy.corp.example.com:3128/squid-internal-mgr/menu",
+		"http://PROXY.corp.example.com.:3128/",
+	} {
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		_, err := transport.Proxy(req)
+		assert.True(t, IsDenied(err), "expected a denied error for %s, got %v", target, err)
+	}
+
+	// Another port of the same host is not the proxy.
+	req := httptest.NewRequest(http.MethodGet, "http://proxy.corp.example.com:8080/", nil)
+	proxyURL, err := transport.Proxy(req)
+	require.NoError(t, err)
+	assert.Equal(t, "proxy.corp.example.com:3128", proxyURL.Host)
+}
+
+func TestEndsInNumber(t *testing.T) {
+	for _, host := range []string{"2130706433", "0x7f000001", "0x", "127.1", "0177.0.0.1", "1.2.3.4.5", "example.com.0x1f", "example.123", "127.1."} {
+		assert.True(t, endsInNumber(host), host)
+	}
+	for _, host := range []string{"", ".", "prometheus", "123.example.com", "0xcafe.example.com", "example.0xyz", "example.1a", "prometheus-1"} {
+		assert.False(t, endsInNumber(host), host)
+	}
 }

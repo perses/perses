@@ -29,6 +29,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -246,10 +247,18 @@ func (e *endpoint) newProxy(datasourceName, projectName, transportKey string, sp
 	// It covers the saved datasources (that could have been stored before the policy was enforced or changed)
 	// as well as the unsaved ones coming from the request body.
 	if validateErr := e.guard.ValidateProxyConfig(cfg, kind); validateErr != nil {
-		logrus.WithError(validateErr).WithFields(map[string]interface{}{
+		entry := logrus.WithError(validateErr).WithFields(map[string]interface{}{
 			datasourceFieldLog: datasourceName,
 			projectFieldLog:    projectForLog(projectName),
-		}).Warning("the datasource destination is not allowed")
+		})
+		const msg = "the datasource destination is not allowed"
+		if len(transportKey) == 0 {
+			// Unsaved datasource: the spec comes from the request body.
+			// Logging at debug level avoids letting any user flood the logs.
+			entry.Debug(msg)
+		} else {
+			entry.Warning(msg)
+		}
 		if netguard.IsDenied(validateErr) {
 			return nil, apiinterface.HandleForbiddenError(validateErr.Error())
 		}
@@ -355,6 +364,18 @@ func (h *httpProxy) logWithDefaultEntry() *logrus.Entry {
 	})
 }
 
+// logPolicyEvent logs an event caused by the datasource (a destination not allowed, a response header dropped...)
+// that is expected to be fixed by the administrator for a saved datasource.
+// For an unsaved datasource, the spec comes from the request body: the event is logged at debug level to avoid
+// letting any user flood the logs.
+func (h *httpProxy) logPolicyEvent(entry *logrus.Entry, msg string) {
+	if len(h.transportKey) == 0 {
+		entry.Debug(msg)
+	} else {
+		entry.Warning(msg)
+	}
+}
+
 func (h *httpProxy) serve(c echo.Context) error {
 	req := c.Request()
 	res := c.Response()
@@ -372,10 +393,11 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 
 	if err := h.prepareRequest(c); err != nil {
-		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
 		if netguard.IsDenied(err) {
+			h.logPolicyEvent(h.logWithDefaultEntry().WithError(err), "unable to prepare the HTTP request, the destination is not allowed")
 			return apiinterface.HandleForbiddenError(deniedDestinationMsg)
 		}
+		h.logWithDefaultEntry().WithError(err).Error("unable to prepare the HTTP request")
 		return err
 	}
 
@@ -387,7 +409,11 @@ func (h *httpProxy) serve(c echo.Context) error {
 	var proxyErr error
 	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL.URL)
 	reverseProxy.ErrorHandler = func(_ http.ResponseWriter, _ *http.Request, err error) {
-		h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
+		if netguard.IsDenied(err) {
+			h.logPolicyEvent(h.logWithDefaultEntry().WithError(err), "error proxying, the destination is not allowed")
+		} else {
+			h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
+		}
 		proxyErr = err
 	}
 	reverseProxy.ModifyResponse = h.sanitizeLocationHeaders
@@ -434,7 +460,7 @@ func (h *httpProxy) sanitizeLocationHeaders(resp *http.Response) error {
 		}
 		for _, value := range values {
 			if !isSameOriginLocation(value, h.config.URL.URL) {
-				h.logWithDefaultEntry().WithField(strings.ToLower(header), value).Warningf("dropping the %s header pointing to another origin", header)
+				h.logPolicyEvent(h.logWithDefaultEntry().WithField(strings.ToLower(header), value), fmt.Sprintf("dropping the %s header pointing to another origin", header))
 				resp.Header.Del(header)
 				break
 			}
@@ -473,9 +499,9 @@ func effectivePort(scheme string, u *url.URL) string {
 		return port
 	}
 	switch scheme {
-	case "http":
+	case config.SchemeHTTP:
 		return "80"
-	case "https":
+	case config.SchemeHTTPS:
 		return "443"
 	default:
 		return ""
@@ -644,8 +670,12 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 		return nil, err
 	}
 
+	// golang.org/x/oauth2 doesn't wrap the error returned by the HTTP client (it's formatted with %v), so a connection
+	// denied by the guard (e.g. a token URL resolving to a denied IP address, or a redirection to one) couldn't be
+	// told apart from any other error. The transport records it, so it can be returned as is.
+	recorder := &deniedErrorRecorder{next: transport}
 	httpClient := &http.Client{
-		Transport: transport,
+		Transport: recorder,
 	}
 
 	// add our http client with tls config
@@ -669,6 +699,9 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	// Use the Token method to retrieve the token
 	token, err := conf.Token(newCtx)
 	if err != nil {
+		if deniedErr := recorder.deniedError(); deniedErr != nil {
+			return nil, fmt.Errorf("failed to get token: %w", deniedErr)
+		}
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
@@ -678,6 +711,31 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 	}
 
 	return token, err
+}
+
+// deniedErrorRecorder is an http.RoundTripper recording the last error due to a destination denied by the guard
+// (see netguard.IsDenied).
+type deniedErrorRecorder struct {
+	next   http.RoundTripper
+	mutex  sync.Mutex
+	denied error
+}
+
+func (r *deniedErrorRecorder) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := r.next.RoundTrip(req)
+	if err != nil && netguard.IsDenied(err) {
+		r.mutex.Lock()
+		r.denied = err
+		r.mutex.Unlock()
+	}
+	return resp, err
+}
+
+// deniedError returns the last error due to a destination denied by the guard, if any.
+func (r *deniedErrorRecorder) deniedError() error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	return r.denied
 }
 
 // getTransport returns the transport to reach the datasource.

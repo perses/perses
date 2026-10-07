@@ -744,6 +744,9 @@ against the IPv4 address they embed.
 
 Unix sockets are never allowed for the SQL datasources.
 
+IPv4 addresses must be written in the dotted-decimal notation (e.g. `10.0.0.1`). The other notations (e.g. `2130706433`,
+`0x7f000001`, `127.1` or `0177.0.0.1`) are refused, as they are not interpreted the same way by every resolver.
+
 Private networks are allowed by default, as this is where the datasources usually are. Use `deny_private_networks`,
 `denied_networks` or `allowed_hosts` to restrict them.
 
@@ -781,7 +784,8 @@ When Perses is using an HTTP proxy configured through the environment (`HTTP_PRO
 made to this proxy, which is trusted. The final destination is then verified upfront by resolving its name from the
 Perses server. If the name can only be resolved by the proxy, only the static verification applies: use `allowed_hosts`
 (or the proxy's own access control) to strictly restrict the destinations in this situation.
-A datasource cannot target the address of this proxy directly (i.e. when the proxy is bypassed with `NO_PROXY`).
+A datasource cannot target the address of this proxy, neither directly (i.e. when the proxy is bypassed with `NO_PROXY`)
+nor through the proxy itself.
 
 Example of a strict configuration, only allowing the datasources running in the `monitoring` namespace of a Kubernetes
 cluster:

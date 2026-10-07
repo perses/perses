@@ -222,6 +222,49 @@ func TestHTTPProxy_getToken_deniedTokenURL(t *testing.T) {
 	assert.True(t, netguard.IsDenied(err), "expected a denied error, got %v", err)
 }
 
+// TestHTTPProxy_serve_tokenURLDeniedAtConnectionTime ensures a connection to the OAuth token URL denied at connection
+// time (here, through a redirection) is reported as a denied destination, even though golang.org/x/oauth2 doesn't
+// wrap the error of the HTTP client.
+func TestHTTPProxy_serve_tokenURLDeniedAtConnectionTime(t *testing.T) {
+	datasourceCalled := false
+	var redirectTarget string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/token" {
+			http.Redirect(w, r, redirectTarget, http.StatusFound)
+			return
+		}
+		datasourceCalled = true
+		_, _ = w.Write([]byte("ok"))
+	}))
+	defer server.Close()
+	_, port, err := net.SplitHostPort(server.Listener.Addr().String())
+	require.NoError(t, err)
+	// 127.0.0.2 is denied: only the address of the test server is allowed.
+	redirectTarget = fmt.Sprintf("http://127.0.0.2:%s/token", port)
+
+	cfg := config.DatasourceProxyConfig{AllowedNetworks: []string{"127.0.0.1/32"}}
+	require.NoError(t, cfg.Verify())
+	h := &httpProxy{
+		config: &datasourceHTTP.Config{URL: common.MustParseURL(server.URL)},
+		path:   "/api/v1/query",
+		guard:  netguard.New(cfg),
+		secret: &v1.SecretSpec{OAuth: &secretModel.OAuth{ //nolint:gosec // G101: test value, not a real credential
+			ClientID:     "client",
+			ClientSecret: "secret",
+			TokenURL:     server.URL + "/token",
+		}},
+	}
+
+	_, err = h.getToken(context.Background(), h.secret.OAuth)
+	assert.True(t, netguard.IsDenied(err), "expected a denied error, got %v", err)
+
+	req := httptest.NewRequest(http.MethodGet, "http://perses.example.com/proxy/globaldatasources/prom/api/v1/query", nil)
+	rec := httptest.NewRecorder()
+	err = h.serve(echo.New().NewContext(req, rec))
+	requireHTTPError(t, err, http.StatusForbidden)
+	assert.False(t, datasourceCalled, "the datasource must not be queried without a token")
+}
+
 // TestSQLProxy_postgres_allowedHosts ensures the allowed hosts work with Postgres: pgx resolves the hostname itself and
 // dials the resolved IP addresses, so the allowed hosts must be verified on the hostname and not on the IP addresses.
 func TestSQLProxy_postgres_allowedHosts(t *testing.T) {

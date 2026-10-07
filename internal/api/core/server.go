@@ -108,7 +108,7 @@ func NewPersesAPI(dependencyManager dependency.Manager, cfg config.Config) echoU
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
-		validateendpoint.New(cfg.Datasource, serviceManager.GetSchema(), serviceManager.GetDashboard()),
+		validateendpoint.New(cfg.Datasource, serviceManager.GetSchema(), serviceManager.GetDashboard(), serviceManager.GetProxyGuard()),
 		authEndpoint,
 	}
 	return &api{
