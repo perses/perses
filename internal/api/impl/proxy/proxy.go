@@ -362,6 +362,8 @@ func (h *httpProxy) serve(c echo.Context) error {
 		h.logWithDefaultEntry().WithError(err).Errorf("error proxying, remote unreachable: err=%v", err)
 		proxyErr = err
 	}
+	// The response is served under the Perses origin: the headers that would apply to it are removed or overridden.
+	reverseProxy.ModifyResponse = secureResponse
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
 	var transportErr error
 	reverseProxy.Transport, transportErr = h.getTransport()
