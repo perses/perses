@@ -128,7 +128,6 @@ func TestHTTPProxy_serve_deniedAtConnectionTime(t *testing.T) {
 	assert.False(t, called, "the internal server must never be reached")
 }
 
-
 // TestHTTPProxy_getToken_deniedTokenURL ensures the OAuth token URL of the secret is verified before requesting a token.
 func TestHTTPProxy_getToken_deniedTokenURL(t *testing.T) {
 	h := &httpProxy{

@@ -608,9 +608,8 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 		return nil, err
 	}
 
-	// golang.org/x/oauth2 doesn't wrap the error returned by the HTTP client (it's formatted with %v), so a connection
-	// denied by the guard (e.g. a token URL resolving to a denied IP address, or a redirection to one) couldn't be
-	// told apart from any other error. The transport records it, so it can be returned as is.
+	// The recorder keeps the error of a connection denied by the guard, as golang.org/x/oauth2 doesn't wrap it
+	// (see deniedErrorRecorder).
 	recorder := &deniedErrorRecorder{next: transport}
 	httpClient := &http.Client{
 		Transport: recorder,
@@ -653,9 +652,30 @@ func (h *httpProxy) getToken(ctx context.Context, oauth *secretModel.OAuth) (*oa
 
 // deniedErrorRecorder is an http.RoundTripper recording the last error due to a destination denied by the guard
 // (see netguard.IsDenied).
+//
+// It is used by the HTTP client given to golang.org/x/oauth2 to request a token (see httpProxy.getToken).
+// The connection to the token URL is verified by the guard when it's established: a token URL resolving to a denied
+// IP address (or redirecting to one) fails with an error matching netguard.IsDenied. This error is kept until the
+// HTTP client returns it, but golang.org/x/oauth2 doesn't wrap it: the error of the HTTP client is formatted with %v
+// (see "oauth2: cannot fetch token" in golang.org/x/oauth2/internal/token.go), which keeps the message and loses the
+// error itself. The denial couldn't be told apart from any other error anymore, and the request would end with a
+// 500 Internal Server Error instead of the 403 Forbidden returned for any other denied destination.
+//
+// The recorder catches the error before golang.org/x/oauth2 does, so getToken can return it as is when the token
+// request fails. The other errors are not recorded, and the error of golang.org/x/oauth2 is returned as before.
+// The alternatives don't work: matching the error message is fragile, oauth2.RetrieveError only covers the error
+// responses of the token endpoint (not the connection errors), and resolving the token URL upfront misses the
+// redirections and is subject to DNS rebinding.
+//
+// This type can be removed if golang.org/x/oauth2 starts wrapping the error of the HTTP client (%w).
 type deniedErrorRecorder struct {
-	next   http.RoundTripper
-	mutex  sync.Mutex
+	// next is the transport actually sending the requests, verified by the guard (see netguard.Guard.HTTPTransport).
+	next http.RoundTripper
+	// mutex protects denied. In practice, the token requests (including the redirections and the retry with
+	// another authentication style) are sent one after the other, but an http.RoundTripper must be safe for
+	// concurrent use.
+	mutex sync.Mutex
+	// denied is the last error due to a denied destination, nil if there is none.
 	denied error
 }
 
