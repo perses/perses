@@ -138,6 +138,35 @@ The implementation is mostly similar across all plugin types.
 - To enable Grafana migration, create a `schemas/panels/<plugin-name>/migrate` folder and define the migration logic as a CUE schema file. This schema must belong to the `migrate` package.
 - Implement your panel as a React component located in the `src/panels/<plugin-name>` folder.
 
+##### Displaying annotations
+
+To render annotations, set `supportsAnnotations: true` in your panel plugin definition. This exposes the Annotations tab
+of the panel editor. Then, call `usePanelAnnotationsWithData` from `@perses-dev/dashboards` in your panel component:
+
+```tsx
+const annotations = usePanelAnnotationsWithData(props.definition?.spec.annotations);
+```
+
+Here, `props` are the `PanelProps` of your panel component. The hook combines the dashboard annotations with the
+annotations defined on the panel. Each returned item contains the complete annotation spec in `definition` (including
+its display options and plugin configuration) and its events in `data`:
+
+- Hidden annotations (`display.hidden`) are skipped and never fetched.
+- Annotations without data yet are omitted, while successful empty results are kept.
+- Without an `AnnotationProvider` (outside a dashboard), only the panel annotations are returned.
+
+For the specs alone, use `useAnnotationSpecs()` from `@perses-dev/dashboards` for the dashboard annotations, and
+`props.definition?.spec.annotations` for the panel annotations. For loading, error, or refetch controls, pass the specs
+to `useAnnotations(specs)` or `useAnnotationData(spec)` from `@perses-dev/plugin-system`. These hooks also work outside
+dashboards when the query client, plugin registry, time range, datasource, and variable providers are present.
+
+Annotation data lives in the TanStack Query cache. Panels and annotation previews share the requests and results for the
+same annotation spec, absolute time range, and dependent variable values, and mounting another consumer does not refetch
+cached data. Queries wait for the annotation plugin and the variables they depend on, and fetch updated data when these
+inputs change or when the dashboard is refreshed. Annotation queries use the
+`['annotation', spec, absoluteTimeRange, variablesValueKey]` key: invalidate `['annotation', spec]` to refetch a single
+annotation, or `['annotation']` to refetch all of them, as the dashboard refresh does.
+
 #### Explore plugin
 
 - _There's no CUE part in the case of Explore plugins._
